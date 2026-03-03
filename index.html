@@ -21,29 +21,57 @@
         const arctext = new ArcText(arc);
         arctext.arc(200);
 
-        const links = [document.querySelector('.floating-text'), document.querySelector('.floating-text-2')];
-        const centerX = window.innerWidth / 2;
-        const centerY = window.innerHeight / 2;
-        const avoidanceRadius = 200; // Adjust as needed
+        window.addEventListener('load', function() {
+            const links = Array.from(document.querySelectorAll('.floating-text, .floating-text-2'));
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const avoidanceRadius = 200; // Adjust as needed
+            const placedLinks = [];
 
-        function isOverlapping(x, y) {
-            const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
-            return distance < avoidanceRadius;
-        }
+            function isOverlapping(x, y, width, height) {
+                // Check for overlap with the central avoidance zone
+                const distance = Math.sqrt(Math.pow(x + width/2 - centerX, 2) + Math.pow(y + height/2 - centerY, 2));
+                if (distance < (avoidanceRadius + Math.max(width, height)/2)) {
+                    return true;
+                }
 
-        function setRandomPosition(element) {
-            let x, y;
-            do {
-                x = Math.random() * window.innerWidth;
-                y = Math.random() * window.innerHeight;
-            } while (isOverlapping(x, y));
+                // Check for overlap with other links
+                for (const placed of placedLinks) {
+                    if (x < placed.x + placed.width &&
+                        x + width > placed.x &&
+                        y < placed.y + placed.height &&
+                        y + height > placed.y) {
+                        return true;
+                    }
+                }
 
-            element.style.left = `${x}px`;
-            element.style.top = `${y}px`;
-        }
+                return false;
+            }
 
-        links.forEach(link => {
-            setRandomPosition(link);
+            function setRandomPosition(element) {
+                let x, y;
+                const linkWidth = element.offsetWidth;
+                const linkHeight = element.offsetHeight;
+                let tries = 0; // prevent infinite loop
+
+                do {
+                    x = Math.random() * (window.innerWidth - linkWidth);
+                    y = Math.random() * (window.innerHeight - linkHeight);
+                    tries++;
+                    if(tries > 100) { // If we can't find a position after 100 tries, just break.
+                        console.log("Could not find non-overlapping position for a link.");
+                        break;
+                    }
+                } while (isOverlapping(x, y, linkWidth, linkHeight));
+
+                element.style.left = `${x}px`;
+                element.style.top = `${y}px`;
+                placedLinks.push({x: x, y: y, width: linkWidth, height: linkHeight});
+            }
+
+            links.forEach(link => {
+                setRandomPosition(link);
+            });
         });
     </script>
 </body>

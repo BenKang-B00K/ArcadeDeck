@@ -1,16 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap');
 
 body {
-    background-image: url('https://images.pexels.com/photos/163036/mario-luigi-yoschi-figures-163036.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1');
+    background-image: url('https://cdn.pixabay.com/photo/2017/08/06/12/52/controller-2618897_1280.jpg');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
-    color: white;
-    text-shadow: 2px 2px 4px #000000;
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    flex-direction: column; /* Arrange items vertically */
+    justify-content: center; /* Center items vertically */
 }
 
-.center {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+h1 {
+    width: 100%;
+    padding: 30px 0;
+    margin: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 5vw;
+    color: #FFD700; /* Gold color */
+    text-shadow: 2px 2px 4px #000000, 0 0 10px #FFD700; /* Black shadow and gold glow */
+}
+
+.floating-text {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    text-align: center;
+    animation: float 3s ease-in-out infinite;
+}
+
+.floating-text a {
+    font-family: 'Cinzel', serif;
+    font-size: 2vw;
+    color: #FFD700;
+    text-decoration: none;
+    text-shadow: 1px 1px 2px #000000, 0 0 5px #FFD700;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+    100% {
+        transform: translateY(0px);
+    }
 }

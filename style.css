@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap');
 
 body {
-    background-image: url('https://cdn.pixabay.com/photo/2017/08/06/12/52/controller-2618897_1280.jpg');
+    background-image: url('https://images.unsplash.com/photo-1550745165-9bc0b252726a?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -26,15 +26,23 @@ h1 {
     text-shadow: 2px 2px 4px #000000, 0 0 10px #FFD700; /* Black shadow and gold glow */
 }
 
-.floating-text {
+.floating-text, .floating-text-2 {
     position: absolute;
-    bottom: 20px;
     width: 100%;
     text-align: center;
     animation: float 3s ease-in-out infinite;
 }
 
-.floating-text a {
+.floating-text {
+    bottom: 40px;
+}
+
+.floating-text-2 {
+    bottom: 100px;
+    animation-delay: 1.5s;
+}
+
+.floating-text a, .floating-text-2 a {
     font-family: 'Cinzel', serif;
     font-size: 2vw;
     color: #FFD700;

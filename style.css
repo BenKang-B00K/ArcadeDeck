@@ -4,25 +4,21 @@ body {
     font-family: sans-serif;
     text-align: center;
     margin: 0;
-    overflow: hidden;
+    overflow: auto;
 }
 
 .arc {
-    position: absolute;
-    top: 10%;
-    left: 50%;
-    transform: translateX(-50%);
+    margin-top: 2rem;
+    margin-bottom: 2rem;
 }
 
 .grid-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     width: 80%;
+    margin: 0 auto;
+    max-width: 1200px;
 }
 
 .grid-item {
@@ -47,4 +43,11 @@ a {
 
 a:hover {
     color: #ccc;
+}
+
+@media (max-width: 768px) {
+    .grid-container {
+        grid-template-columns: 1fr;
+        width: 90%;
+    }
 }

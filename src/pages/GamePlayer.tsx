@@ -418,6 +418,9 @@ const GamePlayer: React.FC = () => {
             <h1>{lang === 'ko' ? game.titleKo : game.title}</h1>
             <div className="badge-row">
               <span className="genre-label">{game.genres[0]}</span>
+              {game.features?.includes('Web & Mobile Friendly') && (
+                <span className="mobile-badge">📱 Mobile Ready</span>
+              )}
               {lastSave && <span className="save-badge">{t.last}: {lastSave}</span>}
             </div>
           </div>

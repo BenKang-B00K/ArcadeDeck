@@ -3,29 +3,36 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Navbar from '../components/Navbar';
 import GameGrid from '../components/GameGrid';
+import GameCard from '../components/GameCard';
 import AdBanner from '../components/AdBanner';
 import GlobalLeaderboard from '../components/GlobalLeaderboard';
 import { games } from '../data/games';
 import { db } from '../firebase';
 import { collection, query, where, getDocs, limit } from "firebase/firestore";
+import { BANNED_WORDS } from '../constants/gameConstants';
 import './Home.css';
 
-// List of inappropriate words (English & Korean)
-const BANNED_WORDS = [
-  'badword1', 'badword2', 'f***', 's***', 'a**', 'bitch', 'admin', 'moderator',
-  '시발', '씨발', '병신', '개새끼', '느금마', '일베', '메갈', '운영자', '관리자'
-];
-
-const RECOMMENDED_TAGS = ['Action', 'Clicker', 'RPG'];
-
 const Home: React.FC = () => {
-  const [nickname, setNickname] = React.useState<string>(localStorage.getItem('player_nickname') || 'Explorer');
+  const [nickname, setNickname] = React.useState<string>(() => {
+    const saved = localStorage.getItem('player_nickname');
+    if (saved) return saved;
+    const randomId = Math.floor(1000 + Math.random() * 9000);
+    const initialName = `Player#${randomId}`;
+    localStorage.setItem('player_nickname', initialName);
+    return initialName;
+  });
   const [isEditing, setIsEditing] = React.useState(false);
   const [tempName, setTempName] = React.useState(nickname);
   const [selectedGenre, setSelectedGenre] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [recentlyPlayedIds, setRecentlyPlayedIds] = useState<string[]>([]);
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
+
+  React.useEffect(() => {
+    const saved = localStorage.getItem('recently_played');
+    if (saved) {
+      setRecentlyPlayedIds(JSON.parse(saved));
+    }
+  }, []);
 
   const showNotification = (message: string, type: 'success' | 'info' | 'error' = 'info') => {
     setNotification({ message, type });
@@ -34,10 +41,6 @@ const Home: React.FC = () => {
 
   // Extract all unique genres from data
   const allGenres = ['All', ...new Set(games.flatMap(g => g.genres))];
-
-  const scrollToGames = () => {
-    document.getElementById('games-grid')?.scrollIntoView({ behavior: 'smooth' });
-  };
 
   const handleSaveName = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,11 +87,12 @@ const Home: React.FC = () => {
     alert('Link copied to clipboard!');
   };
 
-  const handleTagClick = (tag: string) => {
-    setSearchQuery(tag);
-    setIsSearchFocused(false);
-    scrollToGames();
-  };
+  const recentlyPlayedGames = games.filter(g => recentlyPlayedIds.includes(g.id))
+    .sort((a, b) => recentlyPlayedIds.indexOf(a.id) - recentlyPlayedIds.indexOf(b.id));
+
+  const neverPlayedGames = games.filter(g => !recentlyPlayedIds.includes(g.id))
+    .sort(() => Math.random() - 0.5) // Shuffle for variety
+    .slice(0, 3); // Minimalist: only show top 3 recommendations
 
   return (
     <div className="home-page">
@@ -131,7 +135,7 @@ const Home: React.FC = () => {
               </form>
             ) : (
               <div className="home-nickname-display" onClick={() => { setTempName(nickname.split('#')[0]); setIsEditing(true); }}>
-                <span className="player-label">CURRENT OPERATOR</span>
+                <span className="player-label">CURRENT GAMER</span>
                 <span className="player-name">{nickname}</span>
                 <span className="edit-hint">[Click to Change]</span>
               </div>
@@ -143,33 +147,6 @@ const Home: React.FC = () => {
             <button className="share-btn facebook" onClick={handleShareFacebook}>f Share</button>
             <button className="share-btn copy" onClick={handleCopyLink}>🔗 Copy Link</button>
           </div>
-
-          <div className="search-container">
-            <span className="search-icon">🔍</span>
-            <input 
-              type="text" 
-              className="search-input" 
-              placeholder="Search for your favorite games..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setIsSearchFocused(true)}
-              onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)} // Small delay to allow clicking tags
-            />
-            {isSearchFocused && (
-              <div className="search-recommendations">
-                <p className="recommend-title">Recommended Tags:</p>
-                <div className="recommend-tags">
-                  {RECOMMENDED_TAGS.map(tag => (
-                    <button key={tag} className="recommend-tag-btn" onClick={() => handleTagClick(tag)}>
-                      #{tag}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <button className="cta-btn" onClick={scrollToGames}>Explore Now</button>
         </div>
       </header>
       
@@ -177,17 +154,45 @@ const Home: React.FC = () => {
         <div className="ad-banner-wrapper">
           <AdBanner />
         </div>
+
+        {recentlyPlayedGames.length > 0 && selectedGenre === 'All' && (
+          <section className="recently-played-section">
+            <div className="container">
+              <h2 className="section-title-small" style={{ textAlign: 'left', marginBottom: '20px' }}>Jump <span>Back In</span></h2>
+              <div className="game-grid small-grid">
+                {recentlyPlayedGames.map(game => (
+                  <GameCard 
+                    key={`recent-${game.id}`} 
+                    game={game} 
+                    onProductionClick={() => showNotification('PLEASE COME BACK LATER 🚧', 'info')} 
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {neverPlayedGames.length > 0 && recentlyPlayedIds.length > 0 && selectedGenre === 'All' && (
+          <section className="never-played-section-minimal">
+            <h2 className="section-title-small">Why not <span>Try These?</span></h2>
+            <div className="minimal-game-grid">
+              {neverPlayedGames.map(game => (
+                <Link key={`never-${game.id}`} to={`/play/${game.id}`} className="minimal-game-card">
+                  <div className="minimal-thumb">
+                    <img src={`${import.meta.env.BASE_URL}${game.thumbnail}`} alt={game.title} />
+                  </div>
+                  <div className="minimal-info">
+                    <h4>{game.title}</h4>
+                    <p>{game.genres[0]}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
         
         <div className="home-global-leaderboard-container">
           <GlobalLeaderboard />
-        </div>
-
-        <div className="home-hof-link-container">
-          <p className="hof-teaser-text">Are you the next legend?</p>
-          <Link to="/hall-of-fame" className="goto-hof-btn">
-            <span className="icon">🏆</span>
-            View Archive
-          </Link>
         </div>
       </div>
 
@@ -199,7 +204,6 @@ const Home: React.FC = () => {
                 key={genre}
                 onClick={() => {
                   setSelectedGenre(genre);
-                  setSearchQuery(''); // Clear search when genre is selected for better UX
                 }}
                 className={`genre-btn ${selectedGenre === genre ? 'active' : ''}`}
               >
@@ -210,7 +214,6 @@ const Home: React.FC = () => {
         </div>
         <GameGrid 
           selectedGenre={selectedGenre} 
-          searchQuery={searchQuery} 
           onProductionClick={() => showNotification('PLEASE COME BACK LATER 🚧', 'info')}
         />
       </div>

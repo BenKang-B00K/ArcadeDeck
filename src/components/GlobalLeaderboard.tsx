@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { db } from '../firebase';
 import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
 import { games } from '../data/games';
@@ -133,6 +134,9 @@ const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({ onDataLoaded }) =
       </div>
       
       <div className="hall-of-fame-footer">
+        <Link to="/hall-of-fame" className="hof-link-btn">
+          <span className="icon">🏆</span> Hall of Fame
+        </Link>
         <div className="point-info">
           * 1st: 3pts | 2nd: 2pts | 3rd: 1pt
         </div>
@@ -145,3 +149,4 @@ const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({ onDataLoaded }) =
 };
 
 export default GlobalLeaderboard;
+

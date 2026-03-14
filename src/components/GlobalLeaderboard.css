@@ -1,18 +1,18 @@
 .global-leaderboard-section {
   width: 95%;
-  max-width: 1000px;
-  margin: 40px auto;
-  padding: 30px 20px;
+  max-width: 800px;
+  margin: 30px auto;
+  padding: 20px 15px;
   background: linear-gradient(145deg, rgba(15, 15, 20, 0.8), rgba(5, 5, 10, 0.9));
   border-radius: 40px;
   border: 1px solid rgba(0, 242, 255, 0.1);
   text-align: center;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(10px);
 }
 
 .section-title {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   color: #fff;
   margin-bottom: 5px;
   text-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
@@ -20,8 +20,8 @@
 
 .section-subtitle {
   color: #666;
-  margin-bottom: 30px;
-  font-size: 0.9rem;
+  margin-bottom: 20px;
+  font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -32,15 +32,15 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  gap: 10px;
-  margin-bottom: 30px;
-  padding-top: 40px;
-  min-height: 250px;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding-top: 30px;
+  min-height: 200px;
 }
 
 .podium-card {
   flex: 1;
-  max-width: 150px;
+  max-width: 120px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -53,27 +53,27 @@
 }
 
 .podium-crown {
-  font-size: 1.5rem;
-  height: 25px;
+  font-size: 1.3rem;
+  height: 20px;
   margin-bottom: 5px;
 }
 
 .podium-rank-badge {
-  width: 30px;
-  height: 30px;
+  width: 25px;
+  height: 25px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 900;
-  font-size: 0.9rem;
-  margin-bottom: 10px;
+  font-size: 0.8rem;
+  margin-bottom: 8px;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .podium-name {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 800;
   color: #fff;
   white-space: nowrap;
@@ -84,7 +84,7 @@
 }
 
 .points-num {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   font-weight: 950;
   color: #00f2ff;
   display: block;
@@ -98,26 +98,26 @@
 
 .podium-base {
   width: 100%;
-  border-radius: 12px 12px 4px 4px;
-  margin-top: 15px;
+  border-radius: 10px 10px 4px 4px;
+  margin-top: 10px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0.05), transparent);
 }
 
 /* Rank-specific Podium Heights & Colors */
-.rank-1 .podium-base { height: 120px; background: linear-gradient(to bottom, #ffd70033, #ffd7000a); border-color: #ffd7004d; box-shadow: 0 0 20px #ffd7001a; }
+.rank-1 .podium-base { height: 100px; background: linear-gradient(to bottom, #ffd70033, #ffd7000a); border-color: #ffd7004d; box-shadow: 0 0 20px #ffd7001a; }
 .rank-1 .podium-rank-badge { background: #ffd700; color: #000; border: none; box-shadow: 0 0 15px #ffd70066; }
-.rank-1 .podium-name { font-size: 1.1rem; color: #ffd700; }
-.rank-1 .points-num { font-size: 1.8rem; text-shadow: 0 0 10px #ffd7004d; }
+.rank-1 .podium-name { font-size: 1rem; color: #ffd700; }
+.rank-1 .points-num { font-size: 1.5rem; text-shadow: 0 0 10px #ffd7004d; }
 
-.rank-2 .podium-base { height: 90px; background: linear-gradient(to bottom, #c0c0c033, #c0c0c00a); border-color: #c0c0c04d; }
+.rank-2 .podium-base { height: 75px; background: linear-gradient(to bottom, #c0c0c033, #c0c0c00a); border-color: #c0c0c04d; }
 .rank-2 .podium-rank-badge { background: #c0c0c0; color: #000; border: none; }
 
-.rank-3 .podium-base { height: 70px; background: linear-gradient(to bottom, #cd7f3233, #cd7f320a); border-color: #cd7f324d; }
+.rank-3 .podium-base { height: 55px; background: linear-gradient(to bottom, #cd7f3233, #cd7f320a); border-color: #cd7f324d; }
 .rank-3 .podium-rank-badge { background: #cd7f32; color: #000; border: none; }
 
-.rank-4 .podium-base { height: 50px; }
-.rank-5 .podium-base { height: 40px; }
+.rank-4 .podium-base { height: 40px; }
+.rank-5 .podium-base { height: 30px; }
 
 .point-info {
   font-size: 0.75rem;
@@ -161,7 +161,33 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 15px;
+}
+
+.hof-link-btn {
+  display: inline-flex;
+  align-items: center;
   gap: 10px;
+  background: linear-gradient(90deg, #ffd700, #ff8c00);
+  color: #000;
+  padding: 10px 30px;
+  border-radius: 50px;
+  font-weight: 900;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 5px 15px rgba(255, 215, 0, 0.2);
+  margin-bottom: 5px;
+}
+
+.hof-link-btn:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 10px 20px rgba(255, 215, 0, 0.4);
+  filter: brightness(1.1);
+}
+
+.hof-link-btn .icon {
+  font-size: 1.2rem;
 }
 
 .refresh-btn {

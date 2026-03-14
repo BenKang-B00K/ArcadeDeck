@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import './Home.css'; // Reuse common styles
 
@@ -16,9 +17,14 @@ const About: React.FC = () => {
           <p>We believe that gaming should be accessible to everyone, anywhere. No downloads, no complicated setups—just pure fun directly in your browser.</p>
         </div>
       </div>
-      <footer className="footer" style={{ marginTop: 'auto' }}>
-        <div className="container">
+      <footer className="footer">
+        <div className="container footer-container">
           <p>&copy; 2026 ArcadeDeck. All rights reserved.</p>
+          <div className="footer-links">
+            <Link to="/about" className="footer-link">About Us</Link>
+            <Link to="/privacy" className="footer-link">Privacy Policy</Link>
+            <Link to="/contact" className="footer-link">Contact</Link>
+          </div>
         </div>
       </footer>
     </div>

@@ -56,11 +56,11 @@ const GamePlayer: React.FC = () => {
     fullscreen: lang === 'en' ? 'Fullscreen' : '전체화면',
     load: lang === 'en' ? 'Load' : '불러오기',
     share: lang === 'en' ? 'Share' : '공유',
-    overview: lang === 'en' ? '📖 Game Overview' : '📖 게임 개요',
-    howToPlay: lang === 'en' ? '🎮 Controls & How to Play' : '🎮 조작 방법 및 플레이 방법',
-    tips: lang === 'en' ? '💡 Tips for Playing' : '💡 플레이 팁',
-    lore: lang === 'en' ? '📜 Game Lore' : '📜 게임 세계관',
-    features: lang === 'en' ? '✨ Special Features' : '✨ 주요 특징',
+    overview: lang === 'en' ? '📖 Overview' : '📖 게임 개요',
+    howToPlay: lang === 'en' ? '🕹️ Controls' : '🕹️ 조작 방법',
+    tips: lang === 'en' ? '💡 Pro Tips' : '💡 플레이 팁',
+    lore: lang === 'en' ? '📜 World Lore' : '📜 게임 세계관',
+    features: lang === 'en' ? '✨ Key Features' : '✨ 주요 특징',
     original: lang === 'en' ? 'Original Content' : '오리지널 콘텐츠',
     last: lang === 'en' ? 'Last' : '최근',
     bestScore: lang === 'en' ? 'New Personal Best!' : '새로운 개인 최고 기록!',
@@ -70,7 +70,7 @@ const GamePlayer: React.FC = () => {
   };
 
   const fetchLeaderboard = async () => {
-    if (!id) return;
+    if (!id) return [];
     try {
       let q;
       if (['2', '7', '8', '9', '10', '11'].includes(id)) {
@@ -102,6 +102,7 @@ const GamePlayer: React.FC = () => {
       }) as LeaderboardEntry[];
 
       setLeaderboard(entries);
+      return entries;
     } catch (error) {
       console.error("Error fetching leaderboard: ", error);
       try {
@@ -121,8 +122,10 @@ const GamePlayer: React.FC = () => {
           };
         }) as LeaderboardEntry[];
         setLeaderboard(simpleEntries);
+        return simpleEntries;
       } catch (e) {
         console.error("Critical leaderboard error:", e);
+        return [];
       }
     }
   };
@@ -133,6 +136,11 @@ const GamePlayer: React.FC = () => {
       setGame(foundGame);
       const savedTime = localStorage.getItem(`game_save_${foundGame.id}`);
       if (savedTime) setLastSave(savedTime);
+
+      // Recently Played Logic
+      const recentlyPlayed = JSON.parse(localStorage.getItem('recently_played') || '[]');
+      const updatedList = [foundGame.id, ...recentlyPlayed.filter((gid: string) => gid !== foundGame.id)].slice(0, 4);
+      localStorage.setItem('recently_played', JSON.stringify(updatedList));
     }
     fetchLeaderboard();
     window.scrollTo(0, 0);
@@ -271,8 +279,12 @@ const GamePlayer: React.FC = () => {
         }
       }
       
-      fetchLeaderboard();
-      setShowLeaderboard(true);
+      const updatedEntries = await fetchLeaderboard();
+      const myRank = updatedEntries.findIndex(e => e.name === nickname) + 1;
+      
+      if (myRank > 0 && myRank <= 3) {
+        setShowLeaderboard(true);
+      }
     } catch (error) {
       console.error("Error submitting score: ", error);
     }
@@ -318,26 +330,37 @@ const GamePlayer: React.FC = () => {
 
     if (ratio === '16/9') {
       return { 
-        width: `min(80vw, calc(85vh * ${rNum}))`, 
-        maxWidth: '1800px', 
-        aspectRatio: '16/9'
+        width: `min(95vw, calc(85vh * ${rNum}))`, 
+        maxWidth: '1200px', 
+        aspectRatio: '16/9',
+        margin: '0 auto 50px auto',
+        display: 'block'
       };
     } else if (ratio === '1/1' || ratio === '16/16') {
       return { 
-        width: `min(80vw, 85vh, 800px)`, 
-        aspectRatio: '1/1'
+        width: `min(95vw, 85vh, 800px)`, 
+        maxWidth: '100%',
+        aspectRatio: '1/1',
+        margin: '0 auto 50px auto',
+        display: 'block'
       };
     } else if (ratio === '9/16') {
       return { 
-        width: `min(80vw, calc(85vh * ${rNum}), 700px)`, 
-        aspectRatio: '9/16'
+        width: `min(95vw, calc(85vh * ${rNum}), 700px)`, 
+        maxWidth: '100%',
+        aspectRatio: '9/16',
+        margin: '0 auto 50px auto',
+        display: 'block'
       };
     }
     
     // Default fallback
     return { 
-      width: `min(80vw, calc(85vh * ${rNum}), 1200px)`, 
-      aspectRatio: ratio 
+      width: `min(95vw, calc(85vh * ${rNum}), 1200px)`, 
+      maxWidth: '100%',
+      aspectRatio: ratio,
+      margin: '0 auto 50px auto',
+      display: 'block'
     };
   };
 
@@ -434,50 +457,57 @@ const GamePlayer: React.FC = () => {
           <AdBanner style={{ margin: '0' }} />
         </div>
 
-        <div className="game-details">
-          <div className="game-description-long">
-            <h2 style={{ color: '#00d2ff', fontSize: '1.5rem', marginBottom: '15px' }}>{t.overview}</h2>
-            <p style={{ lineHeight: '1.8', color: '#ccc', whiteSpace: 'pre-wrap', marginBottom: '30px' }}>
+        <div className="game-details-modern">
+          <section className="detail-card overview-card">
+            <h2 className="detail-title">{t.overview}</h2>
+            <div className="detail-content">
               {lang === 'ko' ? game.fullDescriptionKo : game.fullDescription}
-            </p>
-
-            {(game.lore || game.loreKo) && (
-              <>
-                <h2 style={{ color: '#00d2ff', fontSize: '1.5rem', marginBottom: '15px' }}>{t.lore}</h2>
-                <p style={{ lineHeight: '1.8', color: '#aaa', fontStyle: 'italic', marginBottom: '30px' }}>
-                  {lang === 'ko' ? game.loreKo : game.lore}
-                </p>
-              </>
-            )}
-
-            <h2 style={{ color: '#00d2ff', fontSize: '1.5rem', marginBottom: '15px' }}>{t.howToPlay}</h2>
-            <div style={{ background: 'rgba(0,210,255,0.05)', padding: '20px', borderRadius: '10px', color: '#fff', marginBottom: '30px' }}>
-              {lang === 'ko' ? game.controlsKo : game.controls}
             </div>
+          </section>
+
+          <div className="detail-grid">
+            <section className="detail-card control-card">
+              <h2 className="detail-title">{t.howToPlay}</h2>
+              <div className="detail-content highlight">
+                {lang === 'ko' ? game.controlsKo : game.controls}
+              </div>
+            </section>
 
             {(game.tips || game.tipsKo) && (
-              <>
-                <h2 style={{ color: '#00d2ff', fontSize: '1.5rem', marginBottom: '15px' }}>{t.tips}</h2>
-                <div style={{ background: 'rgba(255,230,0,0.05)', borderLeft: '4px solid #ffe600', padding: '15px 20px', borderRadius: '0 10px 10px 0', color: '#eee', marginBottom: '30px' }}>
+              <section className="detail-card tips-card">
+                <h2 className="detail-title">{t.tips}</h2>
+                <div className="detail-content tip-highlight">
                   {lang === 'ko' ? game.tipsKo : game.tips}
                 </div>
-              </>
+              </section>
+            )}
+          </div>
+
+          <div className="detail-grid-secondary">
+            {(game.lore || game.loreKo) && (
+              <section className="detail-card lore-card">
+                <h2 className="detail-title">{t.lore}</h2>
+                <div className="detail-content italic">
+                  {lang === 'ko' ? game.loreKo : game.lore}
+                </div>
+              </section>
             )}
 
             {((game.features && game.features.length > 0) || (game.featuresKo && game.featuresKo.length > 0)) && (
-              <>
-                <h2 style={{ color: '#00d2ff', fontSize: '1.5rem', marginBottom: '15px' }}>{t.features}</h2>
-                <ul className="special-features-list" style={{ listStyle: 'none', padding: '0', display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '30px' }}>
-                  {(lang === 'ko' ? game.featuresKo : game.features)?.map((feat, idx) => (
-                    <li key={idx} style={{ background: 'rgba(0,210,255,0.1)', padding: '8px 15px', borderRadius: '20px', color: '#00d2ff', fontSize: '0.9rem', border: '1px solid rgba(0,210,255,0.3)' }}>
-                      #{feat}
-                    </li>
-                  ))}
-                </ul>
-              </>
+              <section className="detail-card features-card">
+                <h2 className="detail-title">{t.features}</h2>
+                <div className="detail-content">
+                  <ul className="feature-tags">
+                    {(lang === 'ko' ? game.featuresKo : game.features)?.map((feat, idx) => (
+                      <li key={idx} className="feature-tag-item">#{feat}</li>
+                    ))}
+                  </ul>
+                </div>
+              </section>
             )}
           </div>
         </div>
+
         <Leaderboard entries={leaderboard} gameId={game.id} currentNickname={nickname} />
         <CommentSection gameId={game.id} currentNickname={nickname} />
       </div>

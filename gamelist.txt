@@ -1,0 +1,52 @@
+ArcadeDeck Official Game List (by ID)
+=====================================
+
+ID #1. Gate of Hell: Rise of Demons
+   - Genres: Tower Defense
+   - Mobile: ✅ Supported
+   - URL: https://gate-of-hell.pages.dev/
+
+ID #2. Galaxy Launch: Infinite Fleet
+   - Genres: Clicker
+   - Mobile: ❌ Not Specified
+   - URL: https://galaxylaunch.onrender.com/
+
+ID #3. Idle Avatar RPG
+   - Genres: Idle
+   - Status: IN PRODUCTION (Coming Soon)
+   - URL: https://idleavatar.onrender.com/
+
+ID #5. GEM MERGE
+   - Genres: Puzzle
+   - Mobile: ❌ Not Specified
+   - URL: https://mergegame.pages.dev/
+
+ID #6. Trade Tycoon - Civilization
+   - Genres: Tycoon
+   - Status: IN PRODUCTION (Coming Soon)
+   - URL: https://citytraders.pages.dev
+
+ID #7. 15s Click Challenge
+   - Genres: Clicker
+   - Mobile: ❌ Not Specified
+   - URL: https://clickthetarget.pages.dev/
+
+ID #8. OMOK
+   - Genres: Board Game
+   - Mobile: ✅ Supported
+   - URL: https://omok-96n.pages.dev/
+
+ID #9. 40th Century: Void Survivor
+   - Genres: Survival
+   - Mobile: ❌ Not Specified
+   - URL: https://neuralsurvivorbk.pages.dev/
+
+ID #10. Endless War: Holy vs Hell
+   - Genres: Simulation
+   - Mobile: ❌ Not Specified
+   - URL: https://16bed324.endlesswarbk.pages.dev/
+
+ID #11. Dicefall Chronicles
+    - Genres: Roguelike
+    - Mobile: ✅ Supported
+    - URL: https://dicefall-chronicles-mobile-bk.pages.dev/

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import './Home.css';
 
@@ -26,9 +27,14 @@ const Privacy: React.FC = () => {
           <p>If you have any questions about this Privacy Policy, please contact us at help@arcadedeck.net.</p>
         </div>
       </div>
-      <footer className="footer" style={{ marginTop: 'auto' }}>
-        <div className="container">
+      <footer className="footer">
+        <div className="container footer-container">
           <p>&copy; 2026 ArcadeDeck. All rights reserved.</p>
+          <div className="footer-links">
+            <Link to="/about" className="footer-link">About Us</Link>
+            <Link to="/privacy" className="footer-link">Privacy Policy</Link>
+            <Link to="/contact" className="footer-link">Contact</Link>
+          </div>
         </div>
       </footer>
     </div>

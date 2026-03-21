@@ -9,7 +9,6 @@ interface AdBannerProps {
 
 const AdBanner: React.FC<AdBannerProps> = ({ slot, style, format = 'auto', placeholderText = "ADVERTISEMENT SPACE" }) => {
   const adPushed = useRef(false);
-  const scriptLoaded = useRef(false);
 
   useEffect(() => {
     // Only proceed if a slot is provided

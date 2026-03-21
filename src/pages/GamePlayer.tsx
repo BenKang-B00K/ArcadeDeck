@@ -463,7 +463,7 @@ const GamePlayer: React.FC = () => {
         </div>
         
         <div className="player-ad-container">
-          <AdBanner style={{ margin: '0' }} />
+          {!iframeLoading && <AdBanner slot="7742187652" style={{ margin: '0' }} />}
         </div>
 
         <div className="game-details-modern">

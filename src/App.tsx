@@ -8,6 +8,7 @@ import Privacy from './pages/Privacy';
 import Contact from './pages/Contact';
 import HallOfFame from './pages/HallOfFame';
 import MyGames from './pages/MyGames';
+import NotFound from './pages/NotFound';
 
 function App() {
   useEffect(() => {
@@ -31,6 +32,7 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/hall-of-fame" element={<HallOfFame />} />
           <Route path="/my-games" element={<MyGames />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </HelmetProvider>

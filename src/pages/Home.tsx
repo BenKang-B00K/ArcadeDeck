@@ -153,7 +153,7 @@ const Home: React.FC = () => {
       
       <div className="container">
         <div className="ad-banner-wrapper">
-          <AdBanner />
+          <AdBanner slot="8237419283" />
         </div>
 
         {recentlyPlayedGames.length > 0 && selectedGenre === 'All' && (
@@ -223,7 +223,7 @@ const Home: React.FC = () => {
       <section className="bottom-ad-section">
         <div className="container">
           <p className="ad-thanks-msg">Thank you for your Contribution</p>
-          <AdBanner placeholderText="Enjoy ArcadeDeck" style={{ margin: '0' }} />
+          <AdBanner slot="1293847560" placeholderText="Enjoy ArcadeDeck" style={{ margin: '0' }} />
         </div>
       </section>
 

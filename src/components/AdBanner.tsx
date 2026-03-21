@@ -9,26 +9,38 @@ interface AdBannerProps {
 
 const AdBanner: React.FC<AdBannerProps> = ({ slot, style, format = 'auto', placeholderText = "ADVERTISEMENT SPACE" }) => {
   const adPushed = useRef(false);
+  const scriptLoaded = useRef(false);
 
   useEffect(() => {
-    // React StrictMode runs useEffect twice in dev. 
-    // We only want to push once per component instance.
-    if (adPushed.current) return;
+    // Only proceed if a slot is provided
+    if (!slot) return;
 
-    try {
-      // @ts-ignore
-      const adsbygoogle = window.adsbygoogle || [];
-      adsbygoogle.push({});
-      adPushed.current = true;
-    } catch (e) {
-      console.error("AdSense error:", e);
+    // Load AdSense script dynamically if not already present
+    if (!(window as any).adsense_initialized && !document.querySelector('script[src*="adsbygoogle.js"]')) {
+      (window as any).adsense_initialized = true;
+      const script = document.createElement('script');
+      script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6365186183616155";
+      script.async = true;
+      script.crossOrigin = "anonymous";
+      document.head.appendChild(script);
     }
-  }, []);
+
+    // Push the ad
+    if (!adPushed.current) {
+      try {
+        // @ts-ignore
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+        adPushed.current = true;
+      } catch (e) {
+        console.error("AdSense error:", e);
+      }
+    }
+  }, [slot]);
 
   // Filter out margin from style for the placeholder to avoid double margin
   const { margin, marginTop, marginBottom, marginLeft, marginRight, ...otherStyles } = style || {};
 
-  // Placeholder style before approval
+  // Placeholder style
   const placeholderStyle: React.CSSProperties = {
     background: 'rgba(255, 255, 255, 0.05)',
     border: '1px dashed rgba(255, 255, 255, 0.2)',
@@ -59,24 +71,25 @@ const AdBanner: React.FC<AdBannerProps> = ({ slot, style, format = 'auto', place
       marginRight,
       minHeight: '120px'
     }}>
-      {/* Actual AdSense code */}
-      <ins className="adsbygoogle"
-           style={{ 
-             display: 'block', 
-             width: '100%',
-             height: 'auto',
-             minHeight: '120px',
-             textDecoration: 'none'
-           }}
-           data-ad-client="ca-pub-6365186183616155"
-           data-ad-slot={slot || "XXXXXXXXXX"}
-           data-ad-format={format}
-           data-full-width-responsive="true">
-        {/* Placeholder text before approval */}
+      {slot ? (
+        <ins className="adsbygoogle"
+             style={{ 
+               display: 'block', 
+               width: '100%',
+               height: 'auto',
+               minHeight: '120px',
+               textDecoration: 'none'
+             }}
+             data-ad-client="ca-pub-6365186183616155"
+             data-ad-slot={slot}
+             data-ad-format={format}
+             data-full-width-responsive="true">
+        </ins>
+      ) : (
         <div style={placeholderStyle}>
            {placeholderText}
         </div>
-      </ins>
+      )}
     </div>
   );
 };

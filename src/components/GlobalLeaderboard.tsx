@@ -28,7 +28,7 @@ const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({ onDataLoaded }) =
     try {
       const promises = games.map(async (game) => {
         let q;
-        if (['2', '7', '8', '9', '10', '13'].includes(game.id)) {
+        if (['2', '7', '8', '9', '10', '11', '12', '13'].includes(game.id)) {
           q = query(
             collection(db, "leaderboards"),
             where("gameId", "==", game.id),

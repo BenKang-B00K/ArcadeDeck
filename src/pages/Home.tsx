@@ -191,32 +191,43 @@ const Home: React.FC = () => {
             </div>
           </section>
         )}
-        
-        <div className="home-global-leaderboard-container">
-          <GlobalLeaderboard />
+      </div>
+
+      <div id="games-grid" className="games-grid-main-wrapper">
+        <div className="container games-grid-section">
+          <div className="section-header-modern">
+            <h2 className="section-title-main">🎮 Discover <span>Your Next Adventure</span></h2>
+            <p className="section-subtitle-main">Filter by genre and find the perfect game for your current mood</p>
+          </div>
+          <div className="genre-filters-container">
+            <div className="genre-filters">
+              {allGenres.map((genre) => (
+                <button
+                  key={genre}
+                  onClick={() => {
+                    setSelectedGenre(genre);
+                  }}
+                  className={`genre-btn ${selectedGenre === genre ? 'active' : ''}`}
+                >
+                  <span className="btn-text">{genre}</span>
+                  {selectedGenre === genre && <span className="active-dot"></span>}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="container grid-content-wrapper">
+          <GameGrid 
+            selectedGenre={selectedGenre} 
+            onProductionClick={() => showNotification('PLEASE COME BACK LATER 🚧', 'info')}
+          />
         </div>
       </div>
 
-      <div id="games-grid">
-        <div className="container games-grid-section">
-          <div className="genre-filters">
-            {allGenres.map((genre) => (
-              <button
-                key={genre}
-                onClick={() => {
-                  setSelectedGenre(genre);
-                }}
-                className={`genre-btn ${selectedGenre === genre ? 'active' : ''}`}
-              >
-                {genre}
-              </button>
-            ))}
-          </div>
+      <div className="container">
+        <div className="home-global-leaderboard-container">
+          <GlobalLeaderboard />
         </div>
-        <GameGrid 
-          selectedGenre={selectedGenre} 
-          onProductionClick={() => showNotification('PLEASE COME BACK LATER 🚧', 'info')}
-        />
       </div>
 
       {/* Bottom Ad Section */}

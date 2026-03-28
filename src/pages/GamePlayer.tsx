@@ -178,11 +178,13 @@ const GamePlayer: React.FC = () => {
           } else if (id === '7') {
             showNotification(`${t.bestScore} 🔥 ${score} level (Clicks: ${currentSubScore})`, 'success');
           } else if (id === '8') {
-            showNotification(`${t.bestScore} 🔥 ${score}% (Wins: ${currentSubScore})`, 'success');
+            showNotification(`${t.bestScore} 🔥 ${score}% Win Rate (Total Wins: ${currentSubScore})`, 'success');
           } else if (id === '9') {
             showNotification(`${t.bestScore} 🔥 Stage ${score} (Artifacts: ${currentSubScore})`, 'success');
           } else if (id === '10') {
             showNotification(`${t.bestScore} 🔥 ${score} Waves (Battles: ${currentSubScore})`, 'success');
+          } else if (id === '11') {
+            showNotification(`${t.bestScore} 🔥 ${score} Chapters (Stages: ${currentSubScore})`, 'success');
           } else if (id === '12') {
             showNotification(`${t.bestScore} 🔥 ${score} Heroes (Monsters: ${currentSubScore})`, 'success');
           } else if (id === '13') {
@@ -204,6 +206,8 @@ const GamePlayer: React.FC = () => {
             showNotification(`${t.gameOver} Stage ${score} (Artifacts: ${currentSubScore}) (Best: Stage ${prevScore})`, 'info');
           } else if (id === '10') {
             showNotification(`${t.gameOver} ${score} Waves (Battles: ${currentSubScore}) (Best: ${prevScore} Waves)`, 'info');
+          } else if (id === '11') {
+            showNotification(`${t.gameOver} ${score} Chapters (Stages: ${currentSubScore}) (Best: ${prevScore} Chapters)`, 'info');
           } else if (id === '12') {
             showNotification(`${t.gameOver} ${score} Heroes (Monsters: ${currentSubScore}) (Best: ${prevScore} Heroes)`, 'info');
           } else if (id === '13') {
@@ -234,6 +238,8 @@ const GamePlayer: React.FC = () => {
           showNotification(`${t.scoreSubmitted} 🏆 Stage ${score} (Artifacts: ${currentSubScore})`, 'success');
         } else if (id === '10') {
           showNotification(`${t.scoreSubmitted} 🏆 ${score} Waves (Battles: ${currentSubScore})`, 'success');
+        } else if (id === '11') {
+          showNotification(`${t.scoreSubmitted} 🏆 ${score} Chapters (Stages: ${currentSubScore})`, 'success');
         } else if (id === '12') {
           showNotification(`${t.scoreSubmitted} 🏆 ${score} Heroes (Monsters: ${currentSubScore})`, 'success');
         } else if (id === '13') {

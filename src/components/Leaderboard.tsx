@@ -48,11 +48,11 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, gameId, currentNickn
     subUnit = '';
     title = 'Fastest Clicker Leaderboard';
   } else if (gameId === '8') {
-    label = 'Winrate';
+    label = 'Win Rate';
     unit = '%';
-    subLabel = 'Wins';
+    subLabel = 'Total Wins';
     subUnit = '';
-    title = 'Omok Master Leaderboard';
+    title = 'Omok Grandmaster Leaderboard';
   } else if (gameId === '9') {
     label = 'Stage';
     unit = '';

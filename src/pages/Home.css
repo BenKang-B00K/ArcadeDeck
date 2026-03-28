@@ -10,7 +10,7 @@
   align-items: center;
   position: relative;
   overflow: hidden;
-  padding: 60px 0;
+  padding: 150px 0;
   background: linear-gradient(rgba(5, 5, 7, 0.6), rgba(5, 5, 7, 0.8)), 
               url('/images/ArcadeDeck Banner.png');
   background-size: cover;
@@ -247,47 +247,108 @@
   border-color: rgba(0, 242, 255, 0.2);
 }
 
-/* Enhanced Genre Filters */
-.games-grid-section {
-  padding-top: 40px;
+/* Enhanced Games Grid Section */
+.games-grid-main-wrapper {
+  padding: 50px 0;
+  position: relative;
+  background: radial-gradient(circle at 50% 0%, rgba(0, 242, 255, 0.05) 0%, transparent 70%);
+}
+
+.section-header-modern {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.section-title-main {
+  font-size: 2.8rem;
+  font-weight: 950;
+  color: #fff;
+  margin-bottom: 15px;
+  letter-spacing: -1px;
+}
+
+.section-title-main span {
+  background: linear-gradient(90deg, #00f2ff, #7000ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 30px rgba(0, 242, 255, 0.3);
+}
+
+.section-subtitle-main {
+  font-size: 1.1rem;
+  color: #888;
+  font-weight: 500;
+}
+
+.genre-filters-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 60px;
+  position: sticky;
+  top: 80px;
+  z-index: 100;
+  padding: 15px;
+  background: rgba(5, 5, 7, 0.6);
+  backdrop-filter: blur(15px);
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  max-width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
 
 .genre-filters {
   display: flex;
-  justify-content: center;
+  gap: 10px;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 40px;
-  padding: 10px;
+  justify-content: center;
 }
 
 .genre-btn {
-  padding: 10px 24px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #aaa;
-  border-radius: 30px;
-  font-size: 0.9rem;
-  font-weight: 700;
+  padding: 12px 28px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #777;
+  border-radius: 50px;
+  font-size: 0.95rem;
+  font-weight: 800;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  letter-spacing: 0.5px;
-  backdrop-filter: blur(5px);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .genre-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
   color: #fff;
-  border-color: rgba(0, 242, 255, 0.5);
-  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .genre-btn.active {
-  background: linear-gradient(90deg, #00f2ff, #7000ff);
-  color: #000;
-  border-color: transparent;
-  box-shadow: 0 0 20px rgba(0, 242, 255, 0.4), 0 0 40px rgba(112, 0, 255, 0.2);
-  transform: scale(1.05);
+  background: rgba(0, 242, 255, 0.1);
+  color: #00f2ff;
+  border-color: rgba(0, 242, 255, 0.3);
+  box-shadow: 0 0 20px rgba(0, 242, 255, 0.1);
+}
+
+.active-dot {
+  width: 6px;
+  height: 6px;
+  background: #00f2ff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #00f2ff;
+  display: inline-block;
+}
+
+.grid-content-wrapper {
+  margin-top: 20px;
+}
+
+/* Enhanced Genre Filters (Old ones to be removed if redundant) */
+.games-grid-section {
+  padding-top: 0;
 }
 
 /* Footer Adjustment */

@@ -479,5 +479,42 @@
     "aspectRatio": "9/16",
     "status": "PLAYABLE",
     "isOriginal": true
+  },
+  {
+    "id": "14",
+    "title": "Fruit Frenzy",
+    "titleKo": "프루트 프렌지",
+    "description": "A juicy and addictive arcade game where you collect fruits to complete your encyclopedia!",
+    "descriptionKo": "과일을 수집하여 도감을 완성하는 상큼하고 중독성 있는 아케이드 게임입니다!",
+    "fullDescription": "In Fruit Frenzy, your goal is to collect as many fruits as possible to unlock all entries in the legendary Encyclopedia. Each fruit you collect brings you closer to becoming the ultimate Fruit Master. Watch out for special frenzy modes and aim for the highest score!",
+    "fullDescriptionKo": "프루트 프렌지의 목표는 최대한 많은 과일을 수집하여 전설적인 도감의 모든 항목을 해금하는 것입니다. 과일을 수집할 때마다 진정한 과일 마스터에 가까워집니다. 특별한 프렌지 모드를 활용하여 최고 점수를 노려보세요!",
+    "controls": "Mouse/Touch: Click or tap to collect fruits.",
+    "controlsKo": "마우스/터치: 클릭하거나 터치하여 과일을 수집합니다.",
+    "tips": "Unlock new fruits in the encyclopedia to boost your score multiplier. During frenzy mode, all fruit values are doubled!",
+    "tipsKo": "도감에서 새로운 과일을 해금하여 점수 배율을 높이세요. 프렌지 모드 중에는 모든 과일의 가치가 두 배가 됩니다!",
+    "lore": "The Orchard of Abundance has overflowed with magic, causing the fruits to take on a life of their own. As the chosen Harvester, you must document every variety and maintain the balance of the orchard.",
+    "loreKo": "풍요의 과수원에 마법이 넘쳐흐르면서 과일들이 스스로 살아 움직이기 시작했습니다. 선택받은 수확자로서 당신은 모든 종류를 기록하고 과수원의 균형을 유지해야 합니다.",
+    "features": [
+      "50+ Unique Fruits to Unlock",
+      "Challenging Encyclopedia System",
+      "Dynamic Frenzy Mode",
+      "Global Leaderboard: Encyclopedia Count & Best Score",
+      "Optimized for Mobile & Web"
+    ],
+    "featuresKo": [
+      "50종 이상의 유니크한 과일 해금",
+      "도전적인 도감 시스템",
+      "역동적인 프렌지 모드",
+      "글로벌 리더보드: 도감 수 & 최고 점수",
+      "모바일 및 웹 최적화"
+    ],
+    "thumbnail": "images/fruit_frenzy_banner.webp",
+    "genres": [
+      "Arcade"
+    ],
+    "gameUrl": "https://fruit-frenzy-bk.pages.dev/",
+    "aspectRatio": "9/16",
+    "status": "PLAYABLE",
+    "isOriginal": true
   }
 ]

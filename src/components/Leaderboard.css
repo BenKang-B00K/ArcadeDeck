@@ -199,6 +199,14 @@
   font-weight: 800;
 }
 
+.cheer-text {
+  display: block;
+  font-size: 0.72rem;
+  color: #f0a500;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
 .no-data-box {
   text-align: center;
   padding: 40px;

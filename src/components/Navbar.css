@@ -83,6 +83,22 @@
   text-shadow: 0 0 8px rgba(0, 242, 255, 0.5);
 }
 
+.nav-links li a.nav-active {
+  color: #00d2ff;
+  text-shadow: 0 0 8px rgba(0, 210, 255, 0.4);
+}
+
+.nav-links li a.nav-active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #00d2ff;
+  border-radius: 2px;
+}
+
 /* Mobile Menu Toggle (Hamburger) */
 .menu-toggle {
   display: none;

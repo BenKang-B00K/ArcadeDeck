@@ -7,9 +7,10 @@ interface GameCardProps {
   game: Game;
   onProductionClick?: () => void;
   isRecentlyPlayed?: boolean;
+  onGenreClick?: (genre: string) => void;
 }
 
-const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecentlyPlayed = false }) => {
+const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecentlyPlayed = false, onGenreClick }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const thumbnailUrl = game.thumbnail.startsWith('http')
@@ -70,7 +71,11 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
       <div className="card-info">
         <div className="genres-list">
           {game.genres.map((genre, idx) => (
-            <span key={idx} className="genre-tag">{genre}</span>
+            <span
+              key={idx}
+              className={`genre-tag${onGenreClick ? ' clickable-genre' : ''}`}
+              onClick={onGenreClick ? (e) => { e.preventDefault(); e.stopPropagation(); onGenreClick(genre); } : undefined}
+            >{genre}</span>
           ))}
         </div>
         <h3>{game.title}</h3>

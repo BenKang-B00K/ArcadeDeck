@@ -23,7 +23,10 @@ const Home: React.FC = () => {
   });
   const [isEditing, setIsEditing] = React.useState(false);
   const [tempName, setTempName] = React.useState(nickname);
-  const [selectedGenre, setSelectedGenre] = useState('All');
+  const [selectedGenre, setSelectedGenre] = useState<string>(() =>
+    sessionStorage.getItem('selected_genre') || 'All'
+  );
+  const [searchQuery, setSearchQuery] = useState('');
   const [recentlyPlayedIds, setRecentlyPlayedIds] = useState<string[]>([]);
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
   const [recommendedGames, setRecommendedGames] = useState<any[]>([]);
@@ -33,8 +36,14 @@ const Home: React.FC = () => {
     const recentlyPlayed = saved ? JSON.parse(saved) : [];
     setRecentlyPlayedIds(recentlyPlayed);
 
-    const neverPlayed = games.filter(g => !recentlyPlayed.includes(g.id))
-      .sort(() => Math.random() - 0.5)
+    // Genre-based recommendations: prefer games matching the user's played genres
+    const playedGames = games.filter(g => recentlyPlayed.includes(g.id));
+    const playedGenres = new Set(playedGames.flatMap(g => g.genres));
+    const neverPlayed = games
+      .filter(g => !recentlyPlayed.includes(g.id) && g.status !== 'IN PRODUCTION')
+      .map(g => ({ game: g, score: g.genres.filter(genre => playedGenres.has(genre)).length }))
+      .sort((a, b) => b.score - a.score || Math.random() - 0.5)
+      .map(({ game }) => game)
       .slice(0, 3);
     setRecommendedGames(neverPlayed);
   }, []);
@@ -198,7 +207,7 @@ const Home: React.FC = () => {
           <AdBanner slot="8237419283" />
         </div>
 
-        {recentlyPlayedGames.length > 0 && selectedGenre === 'All' && (
+        {recentlyPlayedGames.length > 0 && (
           <section className="recently-played-section">
             <div className="container">
               <h2 className="section-title-small" style={{ textAlign: 'left', marginBottom: '20px' }}>Jump <span>Back In</span></h2>
@@ -216,7 +225,7 @@ const Home: React.FC = () => {
           </section>
         )}
 
-        {recommendedGames.length > 0 && recentlyPlayedIds.length > 0 && selectedGenre === 'All' && (
+        {recommendedGames.length > 0 && recentlyPlayedIds.length > 0 && (
           <section className="never-played-section-minimal">
             <h2 className="section-title-small">Why not <span>Try These?</span></h2>
             <div className="minimal-game-grid">
@@ -242,6 +251,20 @@ const Home: React.FC = () => {
             <h2 className="section-title-main">🎮 Discover <span>Your Next Adventure</span></h2>
             <p className="section-subtitle-main">Filter by genre and find the perfect game for your current mood</p>
           </div>
+          <div className="game-search-wrapper">
+            <span className="search-icon">🔍</span>
+            <input
+              type="text"
+              className="game-search-input"
+              placeholder="Search games..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button className="search-clear-btn" onClick={() => setSearchQuery('')}>✕</button>
+            )}
+          </div>
+
           <div className="genre-filters-container">
             <div className="genre-filters">
               {allGenres.map((genre) => (
@@ -249,6 +272,7 @@ const Home: React.FC = () => {
                   key={genre}
                   onClick={() => {
                     setSelectedGenre(genre);
+                    sessionStorage.setItem('selected_genre', genre);
                   }}
                   className={`genre-btn ${selectedGenre === genre ? 'active' : ''}`}
                 >
@@ -260,9 +284,15 @@ const Home: React.FC = () => {
           </div>
         </div>
         <div className="container grid-content-wrapper">
-          <GameGrid 
-            selectedGenre={selectedGenre} 
+          <GameGrid
+            selectedGenre={selectedGenre}
+            searchQuery={searchQuery}
             onProductionClick={() => showNotification('PLEASE COME BACK LATER 🚧', 'info')}
+            onGenreClick={(genre) => {
+              setSelectedGenre(genre);
+              sessionStorage.setItem('selected_genre', genre);
+              document.getElementById('games-grid')?.scrollIntoView({ behavior: 'smooth' });
+            }}
           />
         </div>
       </div>

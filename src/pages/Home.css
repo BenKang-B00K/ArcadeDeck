@@ -300,6 +300,56 @@
   font-weight: 500;
 }
 
+/* ── Game Search ── */
+.game-search-wrapper {
+  position: relative;
+  max-width: 480px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  font-size: 1rem;
+  pointer-events: none;
+}
+
+.game-search-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 11px 42px 11px 40px;
+  color: white;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.game-search-input::placeholder { color: #666; }
+
+.game-search-input:focus {
+  border-color: rgba(0, 210, 255, 0.4);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.search-clear-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 4px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.search-clear-btn:hover { color: #ccc; }
+
 .genre-filters-container {
   display: flex;
   justify-content: center;

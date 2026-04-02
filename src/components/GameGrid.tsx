@@ -6,21 +6,30 @@ import './GameGrid.css';
 
 interface GameGridProps {
   selectedGenre?: string;
+  searchQuery?: string;
   onProductionClick?: () => void;
+  onGenreClick?: (genre: string) => void;
 }
 
-const GameGrid: React.FC<GameGridProps> = ({ selectedGenre = 'All', onProductionClick }) => {
+const GameGrid: React.FC<GameGridProps> = ({ selectedGenre = 'All', searchQuery = '', onProductionClick, onGenreClick }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Consolidated and Optimized: Filter and Sort in one go
   const processedGames = useMemo(() => {
-    const filtered = selectedGenre === 'All' 
-      ? games 
-      : games.filter(g => g.genres.includes(selectedGenre));
-    
-    // Always sort by newest (ID descending)
+    const q = searchQuery.trim().toLowerCase();
+    const filtered = games.filter(g => {
+      const matchesGenre = selectedGenre === 'All' || g.genres.includes(selectedGenre);
+      const matchesSearch = !q ||
+        g.title.toLowerCase().includes(q) ||
+        (g.titleKo ?? '').toLowerCase().includes(q) ||
+        g.description.toLowerCase().includes(q) ||
+        g.genres.some(genre => genre.toLowerCase().includes(q));
+      return matchesGenre && matchesSearch;
+    });
     return [...filtered].sort((a, b) => parseInt(b.id) - parseInt(a.id));
-  }, [selectedGenre]);
+  }, [selectedGenre, searchQuery]);
+
+  // Reset page when filter/search changes
+  React.useEffect(() => { setCurrentIndex(0); }, [selectedGenre, searchQuery]);
 
   const handleNext = () => {
     if (currentIndex + ITEMS_PER_PAGE < processedGames.length) {
@@ -34,8 +43,10 @@ const GameGrid: React.FC<GameGridProps> = ({ selectedGenre = 'All', onProduction
     }
   };
 
-  // If genre is selected, show a single unified grid
-  if (selectedGenre !== 'All') {
+  const isFiltered = selectedGenre !== 'All' || searchQuery.trim() !== '';
+
+  // If search or genre is active, show a single unified grid
+  if (isFiltered) {
     return (
       <section className="game-grid-section">
         <div className="container">
@@ -44,12 +55,12 @@ const GameGrid: React.FC<GameGridProps> = ({ selectedGenre = 'All', onProduction
           </h2>
           <div className="game-grid">
             {processedGames.length > 0 ? (
-              processedGames.map((game) => <GameCard key={game.id} game={game} onProductionClick={onProductionClick} />)
+              processedGames.map((game) => <GameCard key={game.id} game={game} onProductionClick={onProductionClick} onGenreClick={onGenreClick} />)
             ) : (
               <div className="empty-state">
-                <div className="empty-state-icon">🎮</div>
-                <h3 className="empty-state-title">No {selectedGenre} games yet</h3>
-                <p className="empty-state-desc">More games in this genre are coming soon. Check back later!</p>
+                <div className="empty-state-icon">🔍</div>
+                <h3 className="empty-state-title">No results found</h3>
+                <p className="empty-state-desc">Try a different keyword or genre.</p>
               </div>
             )}
           </div>
@@ -66,15 +77,15 @@ const GameGrid: React.FC<GameGridProps> = ({ selectedGenre = 'All', onProduction
           <div className="section-header">
             <h2 className="section-title">All <span>Games</span> <span className="game-count">({processedGames.length})</span></h2>
             <div className="grid-nav-buttons">
-              <button 
-                className={`nav-btn prev ${currentIndex === 0 ? 'disabled' : ''}`} 
+              <button
+                className={`nav-btn prev ${currentIndex === 0 ? 'disabled' : ''}`}
                 onClick={handlePrev}
                 disabled={currentIndex === 0}
               >
                 ←
               </button>
-              <button 
-                className={`nav-btn next ${currentIndex + ITEMS_PER_PAGE >= processedGames.length ? 'disabled' : ''}`} 
+              <button
+                className={`nav-btn next ${currentIndex + ITEMS_PER_PAGE >= processedGames.length ? 'disabled' : ''}`}
                 onClick={handleNext}
                 disabled={currentIndex + ITEMS_PER_PAGE >= processedGames.length}
               >
@@ -84,7 +95,7 @@ const GameGrid: React.FC<GameGridProps> = ({ selectedGenre = 'All', onProduction
           </div>
           <div className="game-grid all-games-grid">
             {processedGames.slice(currentIndex, currentIndex + ITEMS_PER_PAGE).map((game) => (
-              <GameCard key={game.id} game={game} onProductionClick={onProductionClick} />
+              <GameCard key={game.id} game={game} onProductionClick={onProductionClick} onGenreClick={onGenreClick} />
             ))}
           </div>
         </div>

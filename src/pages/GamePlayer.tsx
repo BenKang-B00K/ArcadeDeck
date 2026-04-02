@@ -7,6 +7,9 @@ import Navbar from '../components/Navbar';
 import Leaderboard from '../components/Leaderboard';
 import AdBanner from '../components/AdBanner';
 import CommentSection from '../components/CommentSection';
+import ShareModal from '../components/ShareModal';
+import GameResultModal from '../components/GameResultModal';
+import GameCard from '../components/GameCard';
 import { db } from '../firebase';
 import { 
   collection, 
@@ -37,13 +40,25 @@ const GamePlayer: React.FC = () => {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [nickname] = useState<string>(localStorage.getItem('player_nickname') || 'Explorer');
   const [lastSave, setLastSave] = useState<string | null>(null);
-  const [isLiked, setIsLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState<boolean>(() =>
+    localStorage.getItem(`liked_${id}`) === 'true'
+  );
   const [isPseudoFullscreen, setIsPseudoFullscreen] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [iframeLoading, setIframeLoading] = useState(true);
   const [lang, setLang] = useState<'en' | 'ko'>('en');
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
+  const [gameResult, setGameResult] = useState<{
+    score: number; unit: string;
+    resultType: 'personal-best' | 'first-score' | 'game-over';
+    rank: number | null;
+  } | null>(null);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [showStickyBar, setShowStickyBar] = useState(false);
+  const [iframeKey, setIframeKey] = useState(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const gameWrapperRef = useRef<HTMLDivElement>(null);
 
   const showNotification = (message: string, type: 'success' | 'info' | 'error' = 'info') => {
     setNotification({ message, type });
@@ -159,10 +174,10 @@ const GamePlayer: React.FC = () => {
             subScore: currentSubScore,
             createdAt: serverTimestamp()
           });
-          showNotification(
-            `${t.bestScore} 🔥 ${score.toLocaleString()}${primaryUnit}${buildSubPart(currentSubScore)}`,
-            'success'
-          );
+          const updatedEntries = await fetchLeaderboard();
+          const myRank = updatedEntries.findIndex(e => e.name === nickname) + 1;
+          setGameResult({ score, unit: primaryUnit, resultType: 'personal-best', rank: myRank > 0 ? myRank : null });
+          return;
         } else {
           showNotification(
             `${t.gameOver} ${score.toLocaleString()}${primaryUnit}${buildSubPart(currentSubScore)} (Best: ${prevScore.toLocaleString()}${primaryUnit})`,
@@ -177,15 +192,15 @@ const GamePlayer: React.FC = () => {
           subScore: currentSubScore,
           createdAt: serverTimestamp()
         });
-        showNotification(
-          `${t.scoreSubmitted} 🏆 ${score.toLocaleString()}${primaryUnit}${buildSubPart(currentSubScore)}`,
-          'success'
-        );
+        const updatedEntries = await fetchLeaderboard();
+        const myRank = updatedEntries.findIndex(e => e.name === nickname) + 1;
+        setGameResult({ score, unit: primaryUnit, resultType: 'first-score', rank: myRank > 0 ? myRank : null });
+        return;
       }
-      
+
       const updatedEntries = await fetchLeaderboard();
       const myRank = updatedEntries.findIndex(e => e.name === nickname) + 1;
-      
+
       if (myRank > 0 && myRank <= 3) {
         setShowLeaderboard(true);
       }
@@ -257,6 +272,17 @@ const GamePlayer: React.FC = () => {
     };
   }, [isPseudoFullscreen]);
 
+  useEffect(() => {
+    const el = gameWrapperRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyBar(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [game]);
+
   const handleFullscreen = () => {
     const element = iframeRef.current as any;
     if (!element) return;
@@ -282,8 +308,7 @@ const GamePlayer: React.FC = () => {
   };
 
   const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
-    showNotification(lang === 'en' ? 'Link copied to clipboard! 🔗' : '링크가 클립보드에 복사되었습니다! 🔗', 'success');
+    setShowShareModal(true);
   };
 
   if (!game) return <div className="not-found"><h2>Not found</h2><Link to="/">Home</Link></div>;
@@ -407,16 +432,16 @@ const GamePlayer: React.FC = () => {
             <button className="control-btn primary fullscreen-btn" onClick={handleFullscreen}>
               <span className="icon">⛶</span> {t.fullscreen}
             </button>
-            <button className={`control-btn like-btn ${isLiked ? 'active' : ''}`} onClick={() => setIsLiked(!isLiked)}>
+            <button className={`control-btn like-btn ${isLiked ? 'active' : ''}`} onClick={() => { const n = !isLiked; setIsLiked(n); localStorage.setItem(`liked_${id}`, String(n)); }}>
               {isLiked ? '❤️' : '🤍'}
             </button>
-            <button className="control-btn share-btn" onClick={handleShare}>
+            <button className="control-btn share-btn" onClick={() => handleShare()}>
               <span className="icon">🔗</span> {t.share}
             </button>
           </div>
         </div>
 
-        <div className={`game-screen-wrapper ${isPseudoFullscreen ? 'pseudo-fullscreen' : ''} ambient-glow`} style={wrapperStyle}>
+        <div ref={gameWrapperRef} className={`game-screen-wrapper ${isPseudoFullscreen ? 'pseudo-fullscreen' : ''} ambient-glow`} style={wrapperStyle}>
           {isPseudoFullscreen && (
             <button className="exit-pseudo-btn" onClick={() => setIsPseudoFullscreen(false)}>
               ✕ {lang === 'en' ? 'Close Fullscreen' : '전체화면 닫기'}
@@ -428,12 +453,13 @@ const GamePlayer: React.FC = () => {
               <p>{lang === 'en' ? 'Loading game...' : '게임을 불러오는 중...'}</p>
             </div>
           )}
-          <iframe 
-            ref={iframeRef} 
-            src={game.gameUrl} 
-            title={game.title} 
-            frameBorder="0" 
-            allowFullScreen 
+          <iframe
+            key={iframeKey}
+            ref={iframeRef}
+            src={game.gameUrl}
+            title={game.title}
+            frameBorder="0"
+            allowFullScreen
             allow="fullscreen; autoplay; gamepad; clipboard-write"
             className="game-iframe"
             onLoad={() => setIframeLoading(false)}
@@ -444,60 +470,101 @@ const GamePlayer: React.FC = () => {
           {!iframeLoading && <AdBanner slot="7742187652" style={{ margin: '0' }} />}
         </div>
 
-        <div className="game-details-modern">
-          <section className="detail-card overview-card">
-            <h2 className="detail-title">{t.overview}</h2>
-            <div className="detail-content">
-              {lang === 'ko' ? game.fullDescriptionKo : game.fullDescription}
-            </div>
-          </section>
-
-          <div className="detail-grid">
-            <section className="detail-card control-card">
-              <h2 className="detail-title">{t.howToPlay}</h2>
-              <div className="detail-content highlight">
-                {lang === 'ko' ? game.controlsKo : game.controls}
-              </div>
-            </section>
-
+        {/* ── Info Tabs ── */}
+        <div className="game-info-tabs">
+          <div className="tab-nav" role="tablist">
+            <button role="tab" className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
+              {lang === 'ko' ? '📖 개요' : '📖 Overview'}
+            </button>
+            <button role="tab" className={`tab-btn ${activeTab === 'controls' ? 'active' : ''}`} onClick={() => setActiveTab('controls')}>
+              {lang === 'ko' ? '🕹️ 조작법' : '🕹️ Controls'}
+            </button>
             {(game.tips || game.tipsKo) && (
-              <section className="detail-card tips-card">
-                <h2 className="detail-title">{t.tips}</h2>
-                <div className="detail-content tip-highlight">
-                  {lang === 'ko' ? game.tipsKo : game.tips}
-                </div>
-              </section>
+              <button role="tab" className={`tab-btn ${activeTab === 'tips' ? 'active' : ''}`} onClick={() => setActiveTab('tips')}>
+                {lang === 'ko' ? '💡 팁' : '💡 Tips'}
+              </button>
+            )}
+            {(game.lore || game.loreKo) && (
+              <button role="tab" className={`tab-btn ${activeTab === 'lore' ? 'active' : ''}`} onClick={() => setActiveTab('lore')}>
+                {lang === 'ko' ? '📜 세계관' : '📜 Lore'}
+              </button>
+            )}
+            {((game.features?.length ?? 0) > 0) && (
+              <button role="tab" className={`tab-btn ${activeTab === 'features' ? 'active' : ''}`} onClick={() => setActiveTab('features')}>
+                {lang === 'ko' ? '✨ 특징' : '✨ Features'}
+              </button>
             )}
           </div>
 
-          <div className="detail-grid-secondary">
-            {(game.lore || game.loreKo) && (
-              <section className="detail-card lore-card">
-                <h2 className="detail-title">{t.lore}</h2>
-                <div className="detail-content italic">
-                  {lang === 'ko' ? game.loreKo : game.lore}
-                </div>
-              </section>
+          <div className="tab-panel detail-card" role="tabpanel">
+            {activeTab === 'overview' && (
+              <div className="detail-content">
+                {lang === 'ko' ? game.fullDescriptionKo : game.fullDescription}
+              </div>
             )}
-
-            {((game.features && game.features.length > 0) || (game.featuresKo && game.featuresKo.length > 0)) && (
-              <section className="detail-card features-card">
-                <h2 className="detail-title">{t.features}</h2>
-                <div className="detail-content">
-                  <ul className="feature-tags">
-                    {(lang === 'ko' ? game.featuresKo : game.features)?.map((feat, idx) => (
-                      <li key={idx} className="feature-tag-item">#{feat}</li>
-                    ))}
-                  </ul>
-                </div>
-              </section>
+            {activeTab === 'controls' && (
+              <div className="detail-content highlight">
+                {lang === 'ko' ? game.controlsKo : game.controls}
+              </div>
+            )}
+            {activeTab === 'tips' && (
+              <div className="detail-content tip-highlight">
+                {lang === 'ko' ? game.tipsKo : game.tips}
+              </div>
+            )}
+            {activeTab === 'lore' && (
+              <div className="detail-content italic">
+                {lang === 'ko' ? game.loreKo : game.lore}
+              </div>
+            )}
+            {activeTab === 'features' && (
+              <ul className="feature-tags">
+                {(lang === 'ko' ? game.featuresKo : game.features)?.map((feat, idx) => (
+                  <li key={idx} className="feature-tag-item">#{feat}</li>
+                ))}
+              </ul>
             )}
           </div>
         </div>
 
         <Leaderboard entries={leaderboard} gameId={game.id} currentNickname={nickname} />
         <CommentSection gameId={game.id} currentNickname={nickname} />
+
+        {/* ── Related Games ── */}
+        {(() => {
+          const related = games.filter(
+            g => g.id !== game.id &&
+                 g.status !== 'IN PRODUCTION' &&
+                 g.genres.some(genre => game.genres.includes(genre))
+          ).slice(0, 3);
+          if (related.length === 0) return null;
+          return (
+            <div className="related-games-section">
+              <h3 className="related-games-title">
+                {lang === 'ko' ? '🎮 비슷한 게임' : '🎮 You Might Also Like'}
+              </h3>
+              <div className="related-games-grid">
+                {related.map(g => <GameCard key={g.id} game={g} />)}
+              </div>
+            </div>
+          );
+        })()}
       </div>
+
+      {/* ── Sticky Controls Bar ── */}
+      {showStickyBar && !isPseudoFullscreen && (
+        <div className="sticky-controls-bar">
+          <button className="sticky-btn sticky-fullscreen" onClick={handleFullscreen}>
+            <span>⛶</span> {lang === 'ko' ? '전체화면' : 'Fullscreen'}
+          </button>
+          <button className={`sticky-btn sticky-like ${isLiked ? 'liked' : ''}`} onClick={() => { const n = !isLiked; setIsLiked(n); localStorage.setItem(`liked_${id}`, String(n)); }}>
+            {isLiked ? '❤️' : '🤍'}
+          </button>
+          <button className="sticky-btn sticky-share" onClick={handleShare}>
+            <span>🔗</span> {lang === 'ko' ? '공유' : 'Share'}
+          </button>
+        </div>
+      )}
 
       {showLeaderboard && (
         <div className="leaderboard-modal-overlay" onClick={() => setShowLeaderboard(false)}>
@@ -509,6 +576,27 @@ const GamePlayer: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        gameTitle={lang === 'ko' ? (game.titleKo ?? game.title) : game.title}
+        gameUrl={`https://arcadedeck.net/play/${game.slug}`}
+        lang={lang}
+      />
+
+      <GameResultModal
+        isOpen={gameResult !== null}
+        onClose={() => setGameResult(null)}
+        gameTitle={lang === 'ko' ? (game.titleKo ?? game.title) : game.title}
+        gameSlug={game.slug}
+        score={gameResult?.score ?? 0}
+        scoreUnit={gameResult?.unit ?? ''}
+        resultType={gameResult?.resultType ?? 'game-over'}
+        rank={gameResult?.rank ?? null}
+        lang={lang}
+        onPlayAgain={() => { setIframeKey(k => k + 1); setIframeLoading(true); }}
+      />
     </div>
   );
 };

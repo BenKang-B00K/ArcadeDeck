@@ -338,16 +338,146 @@
   to { transform: translateX(0); opacity: 1; }
 }
 
-/* Responsive Layout */
+/* ── Game Info Tabs ── */
+.game-info-tabs {
+  margin-top: 50px;
+}
+
+.tab-nav {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 0;
+}
+
+.tab-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: none;
+  color: #aaa;
+  padding: 10px 20px;
+  border-radius: 10px 10px 0 0;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+
+.tab-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ddd;
+}
+
+.tab-btn.active {
+  background: rgba(20, 20, 25, 0.9);
+  border-color: rgba(0, 210, 255, 0.3);
+  border-bottom-color: rgba(20, 20, 25, 0.9);
+  color: #00d2ff;
+}
+
+.tab-panel {
+  border-radius: 0 12px 12px 12px;
+  min-height: 120px;
+  animation: tab-fade-in 0.2s ease;
+}
+
+@keyframes tab-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Related Games ── */
+.related-games-section {
+  margin-top: 60px;
+}
+
+.related-games-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+.related-games-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* ── Sticky Controls Bar ── */
+.sticky-controls-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(10, 10, 15, 0.92);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(0, 210, 255, 0.15);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  animation: slide-up-bar 0.25s ease;
+}
+
+@keyframes slide-up-bar {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.sticky-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ccc;
+  padding: 9px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: background 0.2s, transform 0.15s;
+  white-space: nowrap;
+}
+
+.sticky-btn:hover {
+  background: rgba(255, 255, 255, 0.13);
+  transform: translateY(-1px);
+}
+
+.sticky-fullscreen {
+  background: rgba(0, 210, 255, 0.12);
+  border-color: rgba(0, 210, 255, 0.3);
+  color: #00d2ff;
+}
+
+.sticky-like.liked {
+  color: #ff6b6b;
+  border-color: rgba(255, 107, 107, 0.3);
+}
+
+/* ── Error toast (missing style) ── */
+.notification-toast.error {
+  background: rgba(255, 80, 80, 0.15);
+  border: 1px solid rgba(255, 80, 80, 0.4);
+  color: #ff5050;
+}
+
+/* ── Responsive Layout ── */
 @media (max-width: 1024px) {
-  .detail-grid, .detail-grid-secondary {
-    grid-template-columns: 1fr;
+  .related-games-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 768px) {
   .centered-header h1 {
     font-size: 2rem;
+    word-break: keep-all;
   }
   .player-header-flex {
     flex-direction: column;
@@ -355,5 +485,20 @@
   }
   .detail-card {
     padding: 20px;
+  }
+  .tab-btn {
+    padding: 8px 14px;
+    font-size: 0.82rem;
+  }
+  .related-games-grid {
+    grid-template-columns: 1fr;
+  }
+  .sticky-controls-bar {
+    gap: 8px;
+    padding: 8px 12px;
+  }
+  .sticky-btn {
+    padding: 8px 12px;
+    font-size: 0.8rem;
   }
 }

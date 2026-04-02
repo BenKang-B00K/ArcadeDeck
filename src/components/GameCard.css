@@ -220,6 +220,17 @@
   border-color: rgba(0, 242, 255, 0.55);
 }
 
+.genre-tag.clickable-genre {
+  cursor: pointer;
+}
+
+.genre-tag.clickable-genre:hover {
+  background: rgba(0, 242, 255, 0.3);
+  border-color: rgba(0, 242, 255, 0.8);
+  color: #fff;
+  transform: scale(1.05);
+}
+
 .play-btn {
   background: var(--secondary-color);
   color: white;

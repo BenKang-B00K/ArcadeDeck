@@ -16,6 +16,20 @@ import {
 import './CommentSection.css';
 
 const PAGE_SIZE = 20;
+const COMMENT_MAX = 300;
+const SUBMIT_COOLDOWN_MS = 10_000;
+
+const timeAgo = (date: Date): string => {
+  const sec = Math.floor((Date.now() - date.getTime()) / 1000);
+  if (sec < 60)  return 'Just now';
+  const min = Math.floor(sec / 60);
+  if (min < 60)  return `${min}m ago`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24)   return `${hr}h ago`;
+  const day = Math.floor(hr / 24);
+  if (day < 7)   return `${day}d ago`;
+  return date.toLocaleDateString();
+};
 
 interface Comment {
   id: string;
@@ -38,6 +52,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const lastDocRef = useRef<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const lastSubmitRef = useRef<number>(0);
+
+  const charCount = newComment.length;
+  const charNearLimit = charCount >= COMMENT_MAX - 30;
+  const charAtLimit = charCount >= COMMENT_MAX;
 
   const fetchComments = useCallback(async (reset: boolean) => {
     const q = reset || !lastDocRef.current
@@ -83,8 +102,15 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim() || isSubmitting) return;
+    const now = Date.now();
+    if (now - lastSubmitRef.current < SUBMIT_COOLDOWN_MS) {
+      setSubmitError(`Please wait ${Math.ceil((SUBMIT_COOLDOWN_MS - (now - lastSubmitRef.current)) / 1000)}s before posting again.`);
+      setTimeout(() => setSubmitError(null), 3000);
+      return;
+    }
 
     setIsSubmitting(true);
+    lastSubmitRef.current = Date.now();
     try {
       await addDoc(collection(db, "comments"), {
         gameId,
@@ -118,15 +144,20 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
       <h3>Community <span>Comments</span> ({countLabel})</h3>
 
       <form onSubmit={handleSubmit} className="comment-form">
-        <textarea
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          placeholder="Share your thoughts about this game..."
-          maxLength={300}
-        />
+        <div className="textarea-wrapper">
+          <textarea
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            placeholder="Share your thoughts about this game..."
+            maxLength={COMMENT_MAX}
+          />
+          <span className={`char-count ${charAtLimit ? 'at-limit' : charNearLimit ? 'near-limit' : ''}`}>
+            {charCount}/{COMMENT_MAX}
+          </span>
+        </div>
         <div className="form-footer">
           <span>Posting as: <strong>{currentNickname}</strong></span>
-          <button type="submit" disabled={isSubmitting}>
+          <button type="submit" disabled={isSubmitting || charCount === 0}>
             {isSubmitting ? 'Posting...' : 'Post Comment'}
           </button>
         </div>
@@ -140,8 +171,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
               <div key={comment.id} className="comment-item">
                 <div className="comment-header">
                   <span className="comment-author">{comment.nickname}</span>
-                  <span className="comment-date">
-                    {comment.createdAt?.toDate ? comment.createdAt.toDate().toLocaleDateString() : 'Just now'}
+                  <span className="comment-date" title={comment.createdAt?.toDate ? comment.createdAt.toDate().toLocaleString() : ''}>
+                    {comment.createdAt?.toDate ? timeAgo(comment.createdAt.toDate()) : 'Just now'}
                   </span>
                 </div>
                 <p className="comment-text">{comment.text}</p>

@@ -21,6 +21,23 @@
   margin-bottom: 40px;
 }
 
+.textarea-wrapper {
+  position: relative;
+}
+
+.char-count {
+  position: absolute;
+  bottom: 10px;
+  right: 12px;
+  font-size: 0.75rem;
+  color: #666;
+  pointer-events: none;
+  transition: color 0.2s;
+}
+
+.char-count.near-limit { color: #f0a500; }
+.char-count.at-limit   { color: #ff5050; font-weight: 700; }
+
 .comment-form textarea {
   width: 100%;
   min-height: 100px;

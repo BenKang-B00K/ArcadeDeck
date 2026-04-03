@@ -424,6 +424,9 @@ const GamePlayer: React.FC = () => {
               {game.features?.includes('Web & Mobile Friendly') && (
                 <span className="mobile-badge">📱 Mobile Ready</span>
               )}
+              {game.features?.includes('PC Only') && (
+                <span className="mobile-badge pc-only">🖥️ PC Only</span>
+              )}
               {lastSave && <span className="save-badge">{t.last}: {lastSave}</span>}
             </div>
           </div>

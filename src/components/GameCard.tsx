@@ -33,6 +33,7 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
       case '2': return 'EN'; // Galaxy Launch
       case '1': return 'KO'; // Gate of Hell
       case '14': return 'KO/EN'; // Fruit Frenzy
+      case '15': return 'KO'; // Kingdom's Last Stand
       default: return null;
     }
   };
@@ -52,6 +53,9 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
         )}
         {game.features?.includes('Web & Mobile Friendly') && (
           <div className="mobile-friendly-badge">📱 Mobile Ready</div>
+        )}
+        {game.features?.includes('PC Only') && (
+          <div className="pc-only-badge">🖥️ PC Only</div>
         )}
         {languageBadge && (
           <div className="language-badge">{languageBadge}</div>

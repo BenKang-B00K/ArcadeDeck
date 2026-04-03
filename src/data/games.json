@@ -630,5 +630,59 @@
       "dualSort": true,
       "subSortAsc": false
     }
+  },
+  {
+    "id": "15",
+    "slug": "kingdoms-last-stand",
+    "title": "Kingdom's Last Stand",
+    "titleKo": "왕국의 최후의 저항",
+    "description": "A strategic auto-battler roguelike where you build your army, manage formations, and defend your kingdom against endless waves of enemies.",
+    "descriptionKo": "군대를 편성하고 진형을 관리하며 끝없는 적의 파도로부터 왕국을 방어하는 전략 오토배틀 로그라이크 게임입니다.",
+    "fullDescription": "\n      The kingdom is on the brink of collapse. As the last commander, you must assemble a ragtag army and hold the line against relentless enemy forces pouring through the breach.\n      Kingdom's Last Stand is a deep auto-battler roguelike that combines tactical positioning with elemental strategy. Place your units across three rows — front, middle, and back — and watch as they fight automatically based on their abilities and formation.\n      Manage your gold economy wisely between rounds. Recruit powerful heroes, upgrade your forces, and exploit elemental interactions between Fire, Nature, Lightning, and Ice to turn the tide of battle.\n      Each stage brings tougher foes and new challenges. How far can you push before the kingdom falls?\n    ",
+    "fullDescriptionKo": "\n      왕국이 멸망의 위기에 처했습니다. 마지막 사령관으로서 당신은 군대를 모아 끝없이 밀려오는 적군으로부터 방어선을 사수해야 합니다.\n      Kingdom's Last Stand는 전술적 배치와 원소 전략을 결합한 오토배틀 로그라이크 게임입니다. 아군을 전열, 중열, 후열 세 줄에 배치하면 능력과 진형에 따라 자동으로 전투가 진행됩니다.\n      라운드 사이에 골드 경제를 현명하게 관리하세요. 강력한 영웅을 영입하고 전력을 강화하며, 불·자연·번개·얼음 원소 간의 상호작용을 활용해 전투의 흐름을 뒤바꾸세요.\n      스테이지가 올라갈수록 더 강한 적과 새로운 도전이 기다립니다. 왕국이 무너지기 전에 얼마나 멀리 갈 수 있을까요?\n    ",
+    "controls": "Mouse Click: Select and place units / Drag: Rearrange formation / UI Buttons: Buy, upgrade, start battle",
+    "controlsKo": "마우스 클릭: 유닛 선택 및 배치 / 드래그: 진형 재배치 / UI 버튼: 구매, 강화, 전투 시작",
+    "tips": "Balance your gold between recruiting new units and upgrading existing ones. Position tanky units in the front row to protect your fragile damage dealers in the back. Pay attention to elemental interactions — Fire beats Nature, Nature beats Lightning, Lightning beats Ice, and Ice beats Fire. Don't rush through rounds; take time to optimize your formation.",
+    "tipsKo": "새 유닛 영입과 기존 유닛 강화 사이에서 골드를 균형 있게 사용하세요. 전열에 탱커를 배치해 후열의 딜러를 보호하세요. 원소 상성에 주의하세요 — 불은 자연에 강하고, 자연은 번개에 강하고, 번개는 얼음에 강하고, 얼음은 불에 강합니다. 라운드를 급하게 넘기지 말고 진형을 최적화할 시간을 가지세요.",
+    "lore": "\n      For a thousand years, the Kingdom of Aethermoor stood as a bastion against the darkness beyond the Veil. Its arcane wards, powered by the four Elemental Crystals, kept the realm safe.\n      But treachery struck from within. The Court Mage shattered the Crystals, and the Veil tore open. Now hordes of corrupted beasts and fallen warriors pour through, each wave stronger than the last.\n      You are the Shield-Captain, chosen by the dying king with his last breath. With nothing but a handful of loyal soldiers and the scattered shards of the Crystals, you must hold the line.\n      Rally the remnants. Harness the elements. This is the kingdom's last stand.\n    ",
+    "loreKo": "\n      천 년 동안 에테르무어 왕국은 장막 너머의 어둠에 맞선 보루로 존재했습니다. 네 개의 원소 수정으로 구동되는 마법 결계가 왕국을 안전하게 지켜왔습니다.\n      그러나 내부에서 배신이 일어났습니다. 궁정 마법사가 수정을 파괴했고, 장막이 찢어졌습니다. 이제 타락한 야수와 몰락한 전사들의 무리가 쏟아져 나오며, 매 파도가 이전보다 더 강해집니다.\n      당신은 임종하는 왕이 마지막 숨으로 선택한 방패 대장입니다. 한 줌의 충성스러운 병사들과 흩어진 수정 파편만으로 방어선을 사수해야 합니다.\n      잔존 세력을 규합하세요. 원소를 다스리세요. 이것이 왕국의 최후의 저항입니다.\n    ",
+    "features": [
+      "Deep Auto-Battler Combat System",
+      "3-Row Tactical Formation (Front/Mid/Back)",
+      "4 Elements: Fire, Nature, Lightning, Ice",
+      "Gold Economy & Unit Upgrade System",
+      "Roguelike Stage Progression",
+      "Dual Damage Types: Physical & Magical",
+      "Global Leaderboard",
+      "PC Only"
+    ],
+    "featuresKo": [
+      "심도 깊은 오토배틀 전투 시스템",
+      "3열 전술 진형 (전열/중열/후열)",
+      "4원소 상성: 불, 자연, 번개, 얼음",
+      "골드 경제 & 유닛 강화 시스템",
+      "로그라이크 스테이지 진행",
+      "이중 피해 유형: 물리 & 마법",
+      "글로벌 리더보드",
+      "PC 전용"
+    ],
+    "thumbnail": "images/KLS_banner.webp",
+    "genres": [
+      "Auto Battler",
+      "Roguelike"
+    ],
+    "gameUrl": "https://kingond-s-last-stand-bk.pages.dev/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "isOriginal": true,
+    "leaderboard": {
+      "title": "Kingdom's Last Stand Leaderboard",
+      "primaryLabel": "Stage",
+      "primaryUnit": "",
+      "secondaryLabel": "Round",
+      "secondaryUnit": "",
+      "dualSort": true,
+      "subSortAsc": false
+    }
   }
 ]

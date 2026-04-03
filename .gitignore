@@ -21,6 +21,10 @@ dist-ssr
 *-firebase-adminsdk-*.json
 service-account*.json
 
+# Local reference files
+leaderboard.txt
+new-game-template.txt
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

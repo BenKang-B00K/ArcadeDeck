@@ -37,7 +37,7 @@ export default defineConfig({
       }
     })
   ],
-  base: './',
+  base: '/',
   build: {
     target: 'es2015', // Increase compatibility for older browsers like Firefox
     cssTarget: 'chrome61', // Better CSS compatibility

@@ -2,6 +2,7 @@
   {
     "id": "1",
     "slug": "gate-of-hell",
+    "language": "KO",
     "title": "Gate of Hell: Rise of Demons",
     "titleKo": "지옥의 문: 악마의 부활",
     "description": "An intense action survival game where you must hold back the tides of hell.",
@@ -53,6 +54,7 @@
   {
     "id": "2",
     "slug": "galaxy-launch",
+    "language": "EN",
     "title": "Galaxy Launch: Infinite Fleet",
     "titleKo": "갤럭시 런칭: 인피니트 플릿",
     "description": "An addictive clicker game where you expand your fleet and conquer the galaxy.",
@@ -337,6 +339,7 @@
   {
     "id": "9",
     "slug": "40th-century-void-survivor",
+    "language": "KO/EN",
     "title": "40th Century: Void Survivor",
     "titleKo": "40세기: 보이드 서바이버",
     "description": "Survive in the void of the 40th century. Battle cosmic horrors and collect ancient artifacts.",
@@ -388,6 +391,7 @@
   {
     "id": "10",
     "slug": "endless-war",
+    "language": "EN",
     "title": "Endless War: Holy vs Hell",
     "titleKo": "엔들리스 워: 홀리 vs 헬",
     "description": "An epic simulation of the eternal conflict between heaven and hell.",
@@ -437,6 +441,7 @@
   {
     "id": "11",
     "slug": "dicefall-chronicles",
+    "language": "EN",
     "title": "Dicefall Chronicles",
     "titleKo": "다이스폴 크로니클",
     "description": "A strategic dice-building roguelike adventure.",
@@ -536,6 +541,7 @@
   {
     "id": "13",
     "slug": "timing-chef",
+    "language": "KO",
     "title": "Timing Chef",
     "titleKo": "타이밍 쉐프",
     "description": "Master the art of perfect timing in the kitchen!",
@@ -585,6 +591,7 @@
   {
     "id": "14",
     "slug": "fruit-frenzy",
+    "language": "KO/EN",
     "title": "Fruit Frenzy",
     "titleKo": "프루트 프렌지",
     "description": "A juicy and addictive arcade game where you collect fruits to complete your encyclopedia!",
@@ -634,6 +641,7 @@
   {
     "id": "15",
     "slug": "kingdoms-last-stand",
+    "language": "KO",
     "title": "Kingdom's Last Stand",
     "titleKo": "왕국의 최후의 저항",
     "description": "A strategic auto-battler roguelike where you build your army, manage formations, and defend your kingdom against endless waves of enemies.",
@@ -654,7 +662,7 @@
       "Roguelike Stage Progression",
       "Dual Damage Types: Physical & Magical",
       "Global Leaderboard",
-      "PC Only"
+      "Web & Mobile Friendly"
     ],
     "featuresKo": [
       "심도 깊은 오토배틀 전투 시스템",
@@ -664,7 +672,7 @@
       "로그라이크 스테이지 진행",
       "이중 피해 유형: 물리 & 마법",
       "글로벌 리더보드",
-      "PC 전용"
+      "웹 & 모바일 지원"
     ],
     "thumbnail": "images/KLS_banner.webp",
     "genres": [

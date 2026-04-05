@@ -33,6 +33,7 @@ export interface Game {
   aspectRatio?: string; 
   status?: string;
   isOriginal?: boolean;
+  language?: string;
   leaderboard?: LeaderboardConfig;
 }
 

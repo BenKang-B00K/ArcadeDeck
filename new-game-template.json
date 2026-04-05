@@ -1,0 +1,44 @@
+{
+  "id": "NEXT_ID",
+  "slug": "my-game-name",
+  "language": "KO/EN",
+  "title": "My Game Name",
+  "titleKo": "내 게임 이름",
+  "description": "A short 1-2 sentence description in English.",
+  "descriptionKo": "한국어 한줄 설명, 1~2문장.",
+  "fullDescription": "\n      Paragraph 1: What is this game?\n      Paragraph 2: Core gameplay mechanics.\n      Paragraph 3: What makes it unique?\n      Paragraph 4: Challenge / call to action.\n    ",
+  "fullDescriptionKo": "\n      1단락: 이 게임은 무엇인가?\n      2단락: 핵심 게임플레이 메커니즘.\n      3단락: 무엇이 이 게임을 특별하게 만드는가?\n      4단락: 도전 / 행동 촉구.\n    ",
+  "controls": "Mouse Click: Action / WASD: Move / Space: Jump",
+  "controlsKo": "마우스 클릭: 행동 / WASD: 이동 / 스페이스: 점프",
+  "tips": "Pro tip 1. Pro tip 2. Pro tip 3.",
+  "tipsKo": "팁 1. 팁 2. 팁 3.",
+  "lore": "\n      Background story paragraph 1.\n      Background story paragraph 2.\n    ",
+  "loreKo": "\n      배경 스토리 1단락.\n      배경 스토리 2단락.\n    ",
+  "features": [
+    "Feature 1",
+    "Feature 2",
+    "Global Leaderboard",
+    "Web & Mobile Friendly"
+  ],
+  "featuresKo": [
+    "기능 1",
+    "기능 2",
+    "글로벌 리더보드",
+    "웹 & 모바일 지원"
+  ],
+  "thumbnail": "images/my-game-banner.webp",
+  "genres": ["Action"],
+  "gameUrl": "https://my-game.pages.dev/",
+  "aspectRatio": "16/9",
+  "status": "PLAYABLE",
+  "isOriginal": true,
+  "leaderboard": {
+    "title": "My Game Leaderboard",
+    "primaryLabel": "Score",
+    "primaryUnit": "",
+    "secondaryLabel": "",
+    "secondaryUnit": "",
+    "dualSort": false,
+    "subSortAsc": false
+  }
+}

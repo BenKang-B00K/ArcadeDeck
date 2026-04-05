@@ -353,12 +353,12 @@ const GamePlayer: React.FC = () => {
         <meta property="og:type" content="website" />
         <meta property="og:title" content={`${lang === 'ko' ? game.titleKo : game.title} - ArcadeDeck`} />
         <meta property="og:description" content={lang === 'ko' ? game.descriptionKo : game.description} />
-        <meta property="og:image" content={`https://arcadedeck.net/${game.thumbnail}`} />
+        <meta property="og:image" content={`https://arcadedeck.net/${encodeURI(game.thumbnail)}`} />
         <meta property="og:url" content={`https://arcadedeck.net/play/${game.slug}`} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={`${lang === 'ko' ? game.titleKo : game.title} - ArcadeDeck`} />
         <meta name="twitter:description" content={lang === 'ko' ? game.descriptionKo : game.description} />
-        <meta name="twitter:image" content={`https://arcadedeck.net/${game.thumbnail}`} />
+        <meta name="twitter:image" content={`https://arcadedeck.net/${encodeURI(game.thumbnail)}`} />
 
         {/* JSON-LD Structured Data — VideoGame schema */}
         <script type="application/ld+json">
@@ -372,7 +372,7 @@ const GamePlayer: React.FC = () => {
             "applicationCategory": "GameApplication",
             "operatingSystem": "Web Browser",
             "inLanguage": ["en", "ko"],
-            "image": `https://arcadedeck.net/${game.thumbnail}`,
+            "image": `https://arcadedeck.net/${encodeURI(game.thumbnail)}`,
             "url": `https://arcadedeck.net/play/${game.slug}`,
             "author": {
               "@type": "Organization",

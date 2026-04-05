@@ -24,21 +24,7 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
     }
   };
 
-  const getLanguageBadge = () => {
-    switch (game.id) {
-      case '13': return 'KO'; // Timing Chef
-      case '11': return 'EN'; // Dicefall Chronicles
-      case '10': return 'EN'; // Endless War
-      case '9': return 'KO/EN'; // 40th Century
-      case '2': return 'EN'; // Galaxy Launch
-      case '1': return 'KO'; // Gate of Hell
-      case '14': return 'KO/EN'; // Fruit Frenzy
-      case '15': return 'KO'; // Kingdom's Last Stand
-      default: return null;
-    }
-  };
-
-  const languageBadge = getLanguageBadge();
+  const languageBadge = game.language || null;
 
   return (
     <Link to={`/play/${game.slug}`} className="game-card" onClick={handleClick}>
@@ -46,6 +32,8 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
         <img
           src={thumbnailUrl}
           alt={game.title}
+          loading="lazy"
+          decoding="async"
           onLoad={() => setImageLoaded(true)}
         />
         {game.isOriginal && (

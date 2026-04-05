@@ -503,23 +503,34 @@
 }
 
 @media (max-width: 768px) {
+  .game-player-page { padding-bottom: 60px; }
+  .player-container { padding-top: 20px; }
   .centered-header h1 {
-    font-size: 2rem;
+    font-size: 1.6rem;
     word-break: keep-all;
+    margin-bottom: 10px;
   }
   .player-header-flex {
     flex-direction: column;
-    gap: 20px;
+    gap: 12px;
+    margin-bottom: 15px;
   }
-  .detail-card {
-    padding: 20px;
-  }
+  .badge-row { gap: 8px; margin-bottom: 15px; }
+  .genre-label, .save-badge { font-size: 0.8rem; padding: 3px 10px; }
+  .game-header-section { margin-bottom: 20px; }
+  .game-info-tabs { margin-top: 25px; }
+  .detail-card { padding: 16px; }
+  .detail-content { font-size: 0.95rem; line-height: 1.7; }
+  .detail-title { font-size: 1.2rem; margin-bottom: 14px; }
   .tab-btn {
-    padding: 8px 14px;
-    font-size: 0.82rem;
+    padding: 7px 12px;
+    font-size: 0.8rem;
   }
+  .related-games-section { margin-top: 30px; }
+  .related-games-title { font-size: 1.2rem; }
   .related-games-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
   .sticky-controls-bar {
     gap: 8px;
@@ -529,4 +540,28 @@
     padding: 8px 12px;
     font-size: 0.8rem;
   }
+  .notification-toast { min-width: unset; }
+}
+
+/* ── Landscape phones ── */
+@media (orientation: landscape) and (max-height: 600px) {
+  .game-player-page { padding-bottom: 40px; }
+  .player-container { padding-top: 15px; }
+  .centered-header h1 { font-size: 1.5rem; margin-bottom: 8px; }
+  .badge-row { gap: 8px; margin-bottom: 12px; }
+  .genre-label, .save-badge, .mobile-badge.pc-only { font-size: 0.75rem; padding: 2px 8px; }
+  .game-header-section { margin-bottom: 15px; }
+  .game-info-tabs { margin-top: 20px; }
+  .tab-btn { padding: 6px 12px; font-size: 0.78rem; }
+  .detail-card { padding: 15px; }
+  .detail-content { font-size: 0.9rem; line-height: 1.6; }
+  .detail-title { font-size: 1.1rem; margin-bottom: 12px; }
+  .feature-tag-item { font-size: 0.78rem; padding: 4px 10px; }
+  .related-games-section { margin-top: 25px; }
+  .related-games-title { font-size: 1.1rem; margin-bottom: 12px; }
+  .sticky-controls-bar {
+    padding: 6px 10px;
+    padding-bottom: calc(6px + env(safe-area-inset-bottom));
+  }
+  .sticky-btn { padding: 6px 10px; font-size: 0.75rem; }
 }

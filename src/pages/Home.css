@@ -574,18 +574,27 @@
 }
 
 @media (max-width: 768px) {
-  .hero { min-height: 40vh; padding: 40px 0; }
-  .hero h1 { font-size: 2.2rem; }
-  .hero p { font-size: 1rem; }
-  .home-nickname-wrapper { width: auto; }
+  .hero { min-height: auto; padding: 30px 0 20px; }
+  .hero h1 { font-size: 1.8rem; margin-bottom: 8px; }
+  .hero p { font-size: 0.9rem; margin-bottom: 15px; }
+  .home-nickname-wrapper { width: auto; padding: 10px 18px; margin-bottom: 12px; }
+  .home-nickname-display { padding: 10px 25px; }
+  .player-name { font-size: 1.3rem; }
+  .edit-hint { margin-top: 2px; }
   .home-nickname-form { flex-direction: column; }
-  .social-share-container { position: static; margin-top: 20px; }
+  .home-nickname-form input { padding: 8px 14px; }
+  .home-nickname-form button { padding: 8px 16px; font-size: 0.85rem; }
+  .social-share-container { position: static; margin-top: 12px; gap: 8px; }
+  .section-title-main { font-size: 1.8rem; margin-bottom: 10px; }
+  .recently-played-section { padding: 12px 16px; margin: 12px 0; }
+  .section-title-small { font-size: 1rem; margin-bottom: 10px; }
 
   /* Genre filters: switch from wrapping to horizontal scroll on mobile */
   .genre-filters-container {
     max-width: calc(100vw - 40px);
     border-radius: 20px;
-    padding: 10px 12px;
+    padding: 8px 10px;
+    margin-bottom: 25px;
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
@@ -605,4 +614,31 @@
     white-space: nowrap;
     flex-shrink: 0;
   }
+}
+
+/* ── Landscape phones ── */
+@media (orientation: landscape) and (max-height: 600px) {
+  .hero {
+    min-height: auto;
+    padding: 30px 0;
+  }
+  .hero h1 { font-size: 1.6rem; margin-bottom: 6px; }
+  .hero p { font-size: 0.85rem; margin-bottom: 12px; }
+  .hero-content { animation: none; }
+  .home-nickname-wrapper {
+    padding: 8px 16px;
+    margin-bottom: 10px;
+  }
+  .home-nickname-form { flex-direction: row; }
+  .home-nickname-form input { width: 150px; padding: 6px 12px; }
+  .home-nickname-form button { padding: 6px 14px; font-size: 0.8rem; }
+  .player-name { font-size: 1.1rem; }
+  .nickname-guide p { font-size: 0.65rem; letter-spacing: 1px; }
+  .section-title-main { font-size: 1.6rem; margin-bottom: 10px; }
+  .genre-filters-container {
+    padding: 6px 10px;
+    margin-bottom: 20px;
+    top: calc(50px + env(safe-area-inset-top));
+  }
+  .genre-btn { padding: 6px 12px; font-size: 0.75rem; }
 }

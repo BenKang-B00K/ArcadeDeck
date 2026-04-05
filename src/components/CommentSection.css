@@ -170,3 +170,12 @@
   border-color: rgba(255, 255, 255, 0.1);
   cursor: not-allowed;
 }
+
+@media (max-width: 768px) {
+  .comment-section { padding: 20px 16px; margin-top: 25px; }
+  .comment-section h3 { font-size: 1.3rem; margin-bottom: 18px; }
+  .comment-form textarea { min-height: 70px; padding: 12px; }
+  .comment-form button { padding: 8px 18px; }
+  .comment-item { padding: 14px; }
+  .comment-text { font-size: 0.9rem; }
+}

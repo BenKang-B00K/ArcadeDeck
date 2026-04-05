@@ -281,3 +281,21 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* ── Portrait phones ── */
+@media (max-width: 768px) {
+  .card-info { padding: 14px 16px; }
+  .card-info h3 { font-size: 1rem; margin-bottom: 5px; }
+  .card-info p { font-size: 0.8rem; -webkit-line-clamp: 2; }
+  .genres-list { gap: 6px; margin-bottom: 8px; }
+  .genre-tag { font-size: 0.65rem; padding: 2px 8px; }
+}
+
+/* ── Landscape phones ─�� */
+@media (orientation: landscape) and (max-height: 600px) {
+  .card-info { padding: 12px 14px; }
+  .card-info h3 { font-size: 0.95rem; margin-bottom: 4px; }
+  .card-info p { font-size: 0.75rem; -webkit-line-clamp: 1; }
+  .genres-list { gap: 5px; margin-bottom: 6px; }
+  .genre-tag { font-size: 0.6rem; padding: 2px 7px; }
+}

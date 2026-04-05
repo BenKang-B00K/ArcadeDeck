@@ -1,6 +1,7 @@
 .global-leaderboard-section {
   width: 100%;
   max-width: 900px;
+  box-sizing: border-box;
   margin: 60px auto;
   padding: 40px;
   background: rgba(15, 15, 20, 0.4);
@@ -277,12 +278,51 @@
 
 /* Mobile Tweaks */
 @media (max-width: 768px) {
-  .global-leaderboard-section { padding: 30px 20px; }
-  .section-title { font-size: 1.6rem; }
-  .hall-of-fame-podium { gap: 10px; }
-  .podium-crown { font-size: 2rem; }
-  .podium-name { font-size: 0.9rem; }
-  .rank-1 .podium-name { font-size: 1.1rem; }
-  .points-num { font-size: 1.4rem; }
-  .rank-1 .points-num { font-size: 1.8rem; }
+  .global-leaderboard-section {
+    padding: 25px 15px;
+    margin: 30px 10px;
+    border-radius: 24px;
+    box-sizing: border-box;
+    max-width: calc(100vw - 20px);
+  }
+  .section-title { font-size: 1.3rem; }
+  .section-subtitle { letter-spacing: 1px; font-size: 0.75rem; margin-bottom: 20px; }
+  .hall-of-fame-podium { gap: 8px; padding-top: 30px; }
+  .podium-card { max-width: none; }
+  .podium-crown { font-size: 1.6rem; height: 30px; }
+  .podium-name { font-size: 0.8rem; }
+  .rank-1 .podium-name { font-size: 0.95rem; }
+  .points-num { font-size: 1.2rem; }
+  .rank-1 .points-num { font-size: 1.5rem; }
+  .medal { padding: 3px 6px; font-size: 0.65rem; }
+  .medal-case { gap: 4px; }
+  .hof-link-btn { padding: 12px 30px; font-size: 0.95rem; }
+  .rank-1 .podium-base { height: 140px; }
+  .rank-2 .podium-base { height: 100px; }
+  .rank-3 .podium-base { height: 75px; }
+}
+
+/* ── Landscape phones ── */
+@media (orientation: landscape) and (max-height: 600px) {
+  .global-leaderboard-section {
+    margin: 25px auto;
+    padding: 20px 15px;
+    border-radius: 20px;
+  }
+  .section-title { font-size: 1.3rem; }
+  .section-subtitle { font-size: 0.7rem; margin-bottom: 15px; }
+  .hall-of-fame-podium { margin: 15px 0; padding-top: 20px; gap: 10px; }
+  .podium-crown { font-size: 1.4rem; height: 24px; margin-bottom: 5px; }
+  .podium-rank-badge { width: 24px; height: 24px; font-size: 0.8rem; margin-bottom: 8px; }
+  .podium-name { font-size: 0.75rem; }
+  .rank-1 .podium-name { font-size: 0.9rem; }
+  .points-num { font-size: 1rem; }
+  .rank-1 .points-num { font-size: 1.3rem; }
+  .rank-1 .podium-base { height: 100px; }
+  .rank-2 .podium-base { height: 70px; }
+  .rank-3 .podium-base { height: 50px; }
+  .medal { padding: 2px 5px; font-size: 0.6rem; }
+  .hof-link-btn { padding: 10px 24px; font-size: 0.85rem; }
+  .hall-of-fame-footer { margin-top: 20px; }
+  .point-info { font-size: 0.7rem; margin-top: 10px; }
 }

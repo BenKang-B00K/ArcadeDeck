@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "validate": "node scripts/validate-games.js",
-    "build": "node scripts/validate-games.js && node scripts/generate-sitemap.js && tsc -b && vite build && cp dist/index.html dist/404.html",
+    "build": "node scripts/validate-games.js && node scripts/generate-sitemap.js && tsc -b && vite build && node scripts/prerender-pages.js && cp dist/index.html dist/404.html",
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",

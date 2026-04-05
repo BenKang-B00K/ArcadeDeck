@@ -355,7 +355,7 @@
   justify-content: center;
   margin-bottom: 60px;
   position: sticky;
-  top: 80px;
+  top: calc(80px + env(safe-area-inset-top));
   z-index: 100;
   padding: 15px;
   background: rgba(5, 5, 7, 0.6);

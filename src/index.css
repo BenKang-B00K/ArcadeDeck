@@ -32,6 +32,7 @@ html, body {
   padding: 0;
   box-sizing: border-box;
   overflow-x: hidden;
+  overscroll-behavior: none;
   width: 100%;
   position: relative;
   background-color: var(--bg-color);
@@ -44,18 +45,19 @@ html, body {
 }
 
 body {
-  padding-top: 60px;
+  padding-top: calc(60px + env(safe-area-inset-top));
 }
 
 * {
   box-sizing: inherit;
 }
 
-input, textarea {
+input, textarea, select {
   user-select: text;
   -webkit-user-select: text;
   -moz-user-select: text;
   -ms-user-select: text;
+  font-size: 16px; /* Prevent iOS auto-zoom on focus */
 }
 
 /* Global Neon Utilities */
@@ -93,6 +95,10 @@ input, textarea {
   padding: 0 20px;
 }
 
+button, a, .game-card, .clickable-genre, .tab-btn, .sticky-btn, .grm-btn, .grm-share-btn {
+  touch-action: manipulation;
+}
+
 button {
   cursor: pointer;
   border: none;
@@ -117,7 +123,7 @@ select:focus-visible {
 /* Global Notification Toast */
 .notification-toast {
   position: fixed;
-  top: 100px;
+  top: calc(100px + env(safe-area-inset-top));
   left: 50%;
   transform: translateX(-50%);
   padding: 16px 32px;
@@ -168,6 +174,6 @@ select:focus-visible {
   .notification-toast {
     width: 90%;
     min-width: unset;
-    top: 80px;
+    top: calc(80px + env(safe-area-inset-top));
   }
 }

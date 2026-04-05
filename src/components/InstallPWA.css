@@ -16,7 +16,7 @@
 }
 
 .pwa-install-banner.show {
-  bottom: 25px;
+  bottom: calc(25px + env(safe-area-inset-bottom));
 }
 
 .pwa-content {

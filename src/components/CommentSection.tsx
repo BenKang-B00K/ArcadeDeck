@@ -119,6 +119,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
         createdAt: serverTimestamp()
       });
       setNewComment('');
+      // Dismiss keyboard on mobile
+      (document.activeElement as HTMLElement)?.blur();
       // Re-fetch from the top so the new comment appears immediately
       lastDocRef.current = null;
       await fetchComments(true);

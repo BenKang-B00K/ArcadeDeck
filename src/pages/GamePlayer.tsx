@@ -57,6 +57,7 @@ const GamePlayer: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [showStickyBar, setShowStickyBar] = useState(false);
   const [iframeKey, setIframeKey] = useState(0);
+  const [, setOrientationTick] = useState(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const gameWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -272,6 +273,17 @@ const GamePlayer: React.FC = () => {
     };
   }, [isPseudoFullscreen]);
 
+  // Re-render on orientation change to recalculate game wrapper size
+  useEffect(() => {
+    const handleResize = () => setOrientationTick(t => t + 1);
+    window.addEventListener('orientationchange', handleResize);
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('orientationchange', handleResize);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   useEffect(() => {
     const el = gameWrapperRef.current;
     if (!el) return;
@@ -323,7 +335,7 @@ const GamePlayer: React.FC = () => {
     // We want the game to be as large as possible but fit within the viewport
     // max-height should be around 80-85vh to leave room for UI
     return { 
-      width: `min(100%, calc(85vh * ${rNum}))`,
+      width: `min(100%, calc(85dvh * ${rNum}))`,
       maxWidth: ratio === '9/16' ? '500px' : '1200px',
       aspectRatio: ratio.replace('/', ' / '),
       margin: '0 auto 50px auto',
@@ -499,35 +511,40 @@ const GamePlayer: React.FC = () => {
             )}
           </div>
 
-          <div className="tab-panel detail-card" role="tabpanel">
-            {activeTab === 'overview' && (
-              <div className="detail-content">
-                {lang === 'ko' ? game.fullDescriptionKo : game.fullDescription}
-              </div>
-            )}
-            {activeTab === 'controls' && (
-              <div className="detail-content highlight">
-                {lang === 'ko' ? game.controlsKo : game.controls}
-              </div>
-            )}
-            {activeTab === 'tips' && (
+          {/* All tab panels always rendered for SEO — only active one is visible */}
+          <div className={`tab-panel detail-card${activeTab === 'overview' ? '' : ' tab-hidden'}`} role="tabpanel">
+            <div className="detail-content">
+              {lang === 'ko' ? game.fullDescriptionKo : game.fullDescription}
+            </div>
+          </div>
+          <div className={`tab-panel detail-card${activeTab === 'controls' ? '' : ' tab-hidden'}`} role="tabpanel">
+            <div className="detail-content highlight">
+              {lang === 'ko' ? game.controlsKo : game.controls}
+            </div>
+          </div>
+          {(game.tips || game.tipsKo) && (
+            <div className={`tab-panel detail-card${activeTab === 'tips' ? '' : ' tab-hidden'}`} role="tabpanel">
               <div className="detail-content tip-highlight">
                 {lang === 'ko' ? game.tipsKo : game.tips}
               </div>
-            )}
-            {activeTab === 'lore' && (
+            </div>
+          )}
+          {(game.lore || game.loreKo) && (
+            <div className={`tab-panel detail-card${activeTab === 'lore' ? '' : ' tab-hidden'}`} role="tabpanel">
               <div className="detail-content italic">
                 {lang === 'ko' ? game.loreKo : game.lore}
               </div>
-            )}
-            {activeTab === 'features' && (
+            </div>
+          )}
+          {((game.features?.length ?? 0) > 0) && (
+            <div className={`tab-panel detail-card${activeTab === 'features' ? '' : ' tab-hidden'}`} role="tabpanel">
               <ul className="feature-tags">
                 {(lang === 'ko' ? game.featuresKo : game.features)?.map((feat, idx) => (
                   <li key={idx} className="feature-tag-item">#{feat}</li>
                 ))}
               </ul>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         <Leaderboard entries={leaderboard} gameId={game.id} currentNickname={nickname} />

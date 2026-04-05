@@ -10,17 +10,25 @@ interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
 }
 
+const isIOSSafari = (): boolean => {
+  const ua = navigator.userAgent;
+  const isIOS = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream;
+  const isStandalone = (navigator as any).standalone === true;
+  return isIOS && !isStandalone;
+};
+
 const InstallPWA: React.FC = () => {
   const [supportsPWA, setSupportsPWA] = useState(false);
   const [promptInstall, setPromptInstall] = useState<BeforeInstallPromptEvent | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
     const handler = (e: Event) => {
       e.preventDefault();
       setSupportsPWA(true);
       setPromptInstall(e as BeforeInstallPromptEvent);
-      
+
       // Show with a slight delay after load
       setTimeout(() => {
         setIsVisible(true);
@@ -34,6 +42,14 @@ const InstallPWA: React.FC = () => {
       setSupportsPWA(false);
       setIsVisible(false);
     });
+
+    // iOS Safari detection — show manual install guide
+    if (isIOSSafari()) {
+      setIsIOS(true);
+      setTimeout(() => {
+        setIsVisible(true);
+      }, 3000);
+    }
 
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
@@ -59,7 +75,7 @@ const InstallPWA: React.FC = () => {
     sessionStorage.setItem('pwa_banner_dismissed', 'true');
   };
 
-  if (!supportsPWA || sessionStorage.getItem('pwa_banner_dismissed')) {
+  if ((!supportsPWA && !isIOS) || sessionStorage.getItem('pwa_banner_dismissed')) {
     return null;
   }
 
@@ -69,10 +85,14 @@ const InstallPWA: React.FC = () => {
         <div className="pwa-icon">🎮</div>
         <div className="pwa-text">
           <h3>Install ArcadeDeck</h3>
-          <p>Get the best gaming experience on your home screen!</p>
+          {isIOS ? (
+            <p>Tap <strong>Share</strong> ↗ then <strong>Add to Home Screen</strong></p>
+          ) : (
+            <p>Get the best gaming experience on your home screen!</p>
+          )}
         </div>
         <div className="pwa-actions">
-          <button className="install-btn" onClick={onClick}>Install</button>
+          {!isIOS && <button className="install-btn" onClick={onClick}>Install</button>}
           <button className="close-btn" onClick={closeBanner}>✕</button>
         </div>
       </div>

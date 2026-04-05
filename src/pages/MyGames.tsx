@@ -6,6 +6,8 @@ import { games } from '../data/games';
 import type { Game } from '../data/games';
 import { db } from '../firebase';
 import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { compareLeaderboardEntries } from '../utils/leaderboardUtils';
+import { LEADERBOARD_FETCH_LIMIT } from '../constants/gameConstants';
 import './MyGames.css';
 
 interface GameWithRank extends Game {
@@ -27,81 +29,53 @@ const MyGames = () => {
       const noRank: GameWithRank[] = [];
 
       try {
-        const promises = games.map(async (game) => {
-          // To find rank, we need to fetch the leaderboard and find the user's position
-          // Or we can fetch the user's score first
-          const userQuery = query(
+        // Step 1: Fetch all user scores in one query
+        const userScoresSnap = await getDocs(
+          query(collection(db, "leaderboards"), where("name", "==", nickname))
+        );
+        const userScoresByGame = new Map<string, { score: number; subScore: number }>();
+        userScoresSnap.docs.forEach(doc => {
+          const d = doc.data();
+          userScoresByGame.set(d.gameId, { score: d.score, subScore: d.subScore || 0 });
+        });
+
+        // Step 2: Only fetch leaderboards for games the user has played
+        const playedGames = games.filter(g => userScoresByGame.has(g.id));
+        const unplayedGames = games.filter(g => !userScoresByGame.has(g.id));
+        noRank.push(...unplayedGames);
+
+        const promises = playedGames.map(async (game) => {
+          const userData = userScoresByGame.get(game.id)!;
+          const subSortAsc = game.leaderboard?.subSortAsc ?? false;
+
+          const lbQuery = query(
             collection(db, "leaderboards"),
             where("gameId", "==", game.id),
-            where("name", "==", nickname),
-            limit(1)
+            orderBy("score", "desc"),
+            limit(LEADERBOARD_FETCH_LIMIT)
           );
-          const userSnap = await getDocs(userQuery);
+          const lbSnap = await getDocs(lbQuery);
+          const docs = lbSnap.docs.map(d => d.data());
 
-          if (userSnap.empty) {
-            noRank.push(game);
-            return;
-          }
+          docs.sort((a, b) => compareLeaderboardEntries(
+            { score: a.score ?? 0, subScore: a.subScore ?? 0 },
+            { score: b.score ?? 0, subScore: b.subScore ?? 0 },
+            subSortAsc
+          ));
 
-          const userData = userSnap.docs[0].data();
-          const userScore = userData.score;
-          const userSubScore = userData.subScore || 0;
+          const index = docs.findIndex(d => d.name === nickname);
+          const rank = index !== -1 ? index + 1 : 101;
 
-          // Now find how many people have a better score
-          // This logic depends on the game's sorting (e.g., ID 5 is different)
-          if (game.id === '5') {
-            // Lower subScore is better for same score
-            // Rank = count(score > userScore) + count(score == userScore && subScore < userSubScore) + 1
-            // But Firestore doesn't support complex OR counts easily without multiple queries
-            // For simplicity, let's fetch the top leaderboard (up to 100) and find the index
-            const lbQuery = query(
-              collection(db, "leaderboards"),
-              where("gameId", "==", game.id),
-              orderBy("score", "desc"),
-              limit(100)
-            );
-            const lbSnap = await getDocs(lbQuery);
-            const docs = lbSnap.docs.map(d => d.data());
-            // Sort manually for ID 5
-            docs.sort((a, b) => {
-              if (b.score !== a.score) return b.score - a.score;
-              return (a.subScore || 0) - (b.subScore || 0);
-            });
-            const index = docs.findIndex(d => d.name === nickname);
-            const rank = index !== -1 ? index + 1 : 101; // > 100 if not in top 100
-
-            if (rank >= 1 && rank <= 3) {
-              ranked.push({ ...game, rank, score: userScore, subScore: userSubScore });
-            } else {
-              noRank.push(game);
-            }
+          if (rank >= 1 && rank <= 3) {
+            ranked.push({ ...game, rank, score: userData.score, subScore: userData.subScore });
           } else {
-            // Default: Higher score, then higher subScore is better
-            const lbQuery = query(
-              collection(db, "leaderboards"),
-              where("gameId", "==", game.id),
-              orderBy("score", "desc"),
-              orderBy("subScore", "desc"),
-              limit(100)
-            );
-            const lbSnap = await getDocs(lbQuery);
-            const docs = lbSnap.docs.map(d => d.data());
-            const index = docs.findIndex(d => d.name === nickname);
-            const rank = index !== -1 ? index + 1 : 101;
-
-            if (rank >= 1 && rank <= 3) {
-              ranked.push({ ...game, rank, score: userScore, subScore: userSubScore });
-            } else {
-              noRank.push(game);
-            }
+            noRank.push(game);
           }
         });
 
         await Promise.all(promises);
-
-        // Sort ranked games by rank (1st, then 2nd, then 3rd)
         ranked.sort((a, b) => (a.rank || 0) - (b.rank || 0));
-        
+
         setRankedGames(ranked);
         setNoRankGames(noRank);
       } catch (error) {

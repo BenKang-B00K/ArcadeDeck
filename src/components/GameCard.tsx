@@ -62,9 +62,9 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
       </div>
       <div className="card-info">
         <div className="genres-list">
-          {game.genres.map((genre, idx) => (
+          {game.genres.map((genre) => (
             <span
-              key={idx}
+              key={`${game.id}-${genre}`}
               className={`genre-tag${onGenreClick ? ' clickable-genre' : ''}`}
               onClick={onGenreClick ? (e) => { e.preventDefault(); e.stopPropagation(); onGenreClick(genre); } : undefined}
             >{genre}</span>
@@ -77,4 +77,4 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
   );
 };
 
-export default GameCard;
+export default React.memo(GameCard);

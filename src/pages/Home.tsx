@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Navbar from '../components/Navbar';
@@ -9,14 +9,14 @@ import GlobalLeaderboard from '../components/GlobalLeaderboard';
 import { games } from '../data/games';
 import { db } from '../firebase';
 import { collection, query, where, getDocs, limit } from "firebase/firestore";
-import { BANNED_WORDS } from '../constants/gameConstants';
+import { BANNED_WORDS, RANDOM_ID_MIN, RANDOM_ID_MAX, AD_SLOTS } from '../constants/gameConstants';
 import './Home.css';
 
 const Home: React.FC = () => {
   const [nickname, setNickname] = React.useState<string>(() => {
     const saved = localStorage.getItem('player_nickname');
     if (saved) return saved;
-    const randomId = Math.floor(1000 + Math.random() * 9000);
+    const randomId = Math.floor(RANDOM_ID_MIN + Math.random() * (RANDOM_ID_MAX - RANDOM_ID_MIN + 1));
     const initialName = `Player#${randomId}`;
     localStorage.setItem('player_nickname', initialName);
     return initialName;
@@ -53,8 +53,8 @@ const Home: React.FC = () => {
     setTimeout(() => setNotification(null), 3000);
   };
 
-  // Extract all unique genres from data
-  const allGenres = ['All', ...new Set(games.flatMap(g => g.genres))];
+  // Extract all unique genres from data (memoized — games array is static)
+  const allGenres = useMemo(() => ['All', ...new Set(games.flatMap(g => g.genres))], []);
 
   const handleSaveName = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,13 +71,18 @@ const Home: React.FC = () => {
     }
 
     // Check for nickname duplication
-    const q = query(collection(db, "leaderboards"), where("name", "==", finalName), limit(1));
-    const querySnapshot = await getDocs(q);
+    try {
+      const q = query(collection(db, "leaderboards"), where("name", "==", finalName), limit(1));
+      const querySnapshot = await getDocs(q);
 
-    if (!querySnapshot.empty && finalName !== nickname) {
-      const uniqueId = Math.floor(1000 + Math.random() * 9000);
-      finalName = `${finalName}#${uniqueId}`;
-      showNotification(`Name taken — assigned unique tag: ${finalName}`, 'info');
+      if (!querySnapshot.empty && finalName !== nickname) {
+        const uniqueId = Math.floor(RANDOM_ID_MIN + Math.random() * (RANDOM_ID_MAX - RANDOM_ID_MIN + 1));
+        finalName = `${finalName}#${uniqueId}`;
+        showNotification(`Name taken — assigned unique tag: ${finalName}`, 'info');
+      }
+    } catch (error) {
+      console.error("Error checking nickname:", error);
+      showNotification("Could not verify name. Saving anyway.", 'info');
     }
 
     setNickname(finalName);
@@ -186,7 +191,14 @@ const Home: React.FC = () => {
                 <p className="nickname-info-msg">* If the name exists, a unique #ID will be added automatically.</p>
               </form>
             ) : (
-              <div className="home-nickname-display" onClick={() => { setTempName(nickname.split('#')[0]); setIsEditing(true); }}>
+              <div
+                className="home-nickname-display"
+                role="button"
+                tabIndex={0}
+                aria-label="Change your gamer ID"
+                onClick={() => { setTempName(nickname.split('#')[0]); setIsEditing(true); }}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setTempName(nickname.split('#')[0]); setIsEditing(true); } }}
+              >
                 <span className="player-label">CURRENT GAMER</span>
                 <span className="player-name">{nickname}</span>
                 <span className="edit-hint">[Click to Change]</span>
@@ -195,16 +207,16 @@ const Home: React.FC = () => {
           </div>
 
           <div className="social-share-container">
-            <button className="share-btn twitter" onClick={handleShareTwitter}>𝕏 Share</button>
-            <button className="share-btn facebook" onClick={handleShareFacebook}>f Share</button>
-            <button className="share-btn copy" onClick={handleCopyLink}>🔗 Copy Link</button>
+            <button className="share-btn twitter" onClick={handleShareTwitter} aria-label="Share on X (Twitter)">𝕏 Share</button>
+            <button className="share-btn facebook" onClick={handleShareFacebook} aria-label="Share on Facebook">f Share</button>
+            <button className="share-btn copy" onClick={handleCopyLink} aria-label="Copy link to clipboard">🔗 Copy Link</button>
           </div>
         </div>
       </header>
       
       <div className="container">
         <div className="ad-banner-wrapper">
-          <AdBanner slot="8237419283" />
+          <AdBanner slot={AD_SLOTS.HOME_TOP} />
         </div>
 
         {recentlyPlayedGames.length > 0 && (
@@ -307,7 +319,7 @@ const Home: React.FC = () => {
       <section className="bottom-ad-section">
         <div className="container">
           <p className="ad-thanks-msg">Thank you for your Contribution</p>
-          <AdBanner slot="1293847560" placeholderText="Enjoy ArcadeDeck" style={{ margin: '0' }} />
+          <AdBanner slot={AD_SLOTS.HOME_BOTTOM} placeholderText="Enjoy ArcadeDeck" style={{ margin: '0' }} />
         </div>
       </section>
 

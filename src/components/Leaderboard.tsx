@@ -1,5 +1,6 @@
 import React from 'react';
 import { games } from '../data/games';
+import { compareLeaderboardEntries } from '../utils/leaderboardUtils';
 import './Leaderboard.css';
 
 interface LeaderboardEntry {
@@ -25,13 +26,9 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, gameId, currentNickn
   const title      = lb?.title          ?? 'Global Leaderboard';
   const subSortAsc = lb?.subSortAsc     ?? false;
 
-  const top10 = [...entries].sort((a, b) => {
-    if (b.score !== a.score) return b.score - a.score;
-    // subSortAsc=true: fewer is better (e.g. Gem Merge — fewer merges for same score)
-    return subSortAsc
-      ? (a.subScore || 0) - (b.subScore || 0)
-      : (b.subScore || 0) - (a.subScore || 0);
-  }).slice(0, 10);
+  const top10 = [...entries]
+    .sort((a, b) => compareLeaderboardEntries(a, b, subSortAsc))
+    .slice(0, 10);
 
   const getRankIcon = (rank: number) => {
     if (rank === 1) return '👑';

@@ -16,16 +16,34 @@ interface GlobalLeaderboardProps {
   onDataLoaded?: (players: GlobalRank[]) => void;
 }
 
-// Module-level cache: persists across component unmount/remount (e.g. navigating away and back)
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
-let rankCache: { sorted: GlobalRank[]; expiresAt: number } | null = null;
+const CACHE_KEY = 'arcadedeck_rank_cache';
+
+function getCachedRanks(): GlobalRank[] | null {
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const { sorted, expiresAt } = JSON.parse(raw);
+    if (Date.now() < expiresAt) return sorted;
+    sessionStorage.removeItem(CACHE_KEY);
+  } catch { /* ignore corrupt cache */ }
+  return null;
+}
+
+function setCachedRanks(sorted: GlobalRank[]): void {
+  try {
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ sorted, expiresAt: Date.now() + CACHE_TTL_MS }));
+  } catch { /* storage full — ignore */ }
+}
 
 const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({ onDataLoaded }) => {
   const [podiumPlayers, setPodiumPlayers] = useState<GlobalRank[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   const isInitialMount = useRef(true);
+  const isFetchingRef = useRef(false);
 
   const buildPodium = (sorted: GlobalRank[]) => {
     // Podium Order: 2nd - 1st - 3rd
@@ -41,11 +59,16 @@ const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({ onDataLoaded }) =
   }, [onDataLoaded]);
 
   const calculateGlobalRanking = useCallback(async () => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
     setLoading(true);
+    setError(null);
 
     // Return cached result if still fresh
-    if (rankCache && Date.now() < rankCache.expiresAt) {
-      applyResult(rankCache.sorted);
+    const cached = getCachedRanks();
+    if (cached) {
+      applyResult(cached);
+      isFetchingRef.current = false;
       return;
     }
 
@@ -97,18 +120,20 @@ const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({ onDataLoaded }) =
         .sort((a, b) => b.totalPoints - a.totalPoints)
         .slice(0, 3);
 
-      // Store in cache
-      rankCache = { sorted, expiresAt: Date.now() + CACHE_TTL_MS };
+      setCachedRanks(sorted);
 
       applyResult(sorted);
-    } catch (error) {
-      console.error("Error calculating global ranking:", error);
+    } catch (err) {
+      console.error("Error calculating global ranking:", err);
+      setError("Failed to load rankings.");
       setLoading(false);
+    } finally {
+      isFetchingRef.current = false;
     }
   }, [applyResult]);
 
   const handleRefresh = useCallback(async () => {
-    rankCache = null;
+    sessionStorage.removeItem(CACHE_KEY);
     setIsSyncing(true);
     await calculateGlobalRanking();
     setIsSyncing(false);
@@ -122,6 +147,7 @@ const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({ onDataLoaded }) =
   }, [calculateGlobalRanking]);
 
   if (loading) return <div className="global-loader">Loading Hall of Fame...</div>;
+  if (error) return <div className="global-loader" style={{ color: '#ff6b6b' }}>{error}</div>;
   if (podiumPlayers.length === 0) return null;
 
   return (

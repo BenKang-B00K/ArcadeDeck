@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './InstallPWA.css';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -10,10 +10,16 @@ interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
 }
 
+declare global {
+  interface Navigator {
+    standalone?: boolean;
+  }
+}
+
 const isIOSSafari = (): boolean => {
   const ua = navigator.userAgent;
-  const isIOS = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream;
-  const isStandalone = (navigator as any).standalone === true;
+  const isIOS = /iPad|iPhone|iPod/.test(ua);
+  const isStandalone = navigator.standalone === true;
   return isIOS && !isStandalone;
 };
 
@@ -22,36 +28,35 @@ const InstallPWA: React.FC = () => {
   const [promptInstall, setPromptInstall] = useState<BeforeInstallPromptEvent | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     const handler = (e: Event) => {
       e.preventDefault();
       setSupportsPWA(true);
       setPromptInstall(e as BeforeInstallPromptEvent);
+      timerRef.current = setTimeout(() => setIsVisible(true), 3000);
+    };
 
-      // Show with a slight delay after load
-      setTimeout(() => {
-        setIsVisible(true);
-      }, 3000);
+    const installedHandler = () => {
+      setSupportsPWA(false);
+      setIsVisible(false);
     };
 
     window.addEventListener('beforeinstallprompt', handler);
-
-    // Hide if already installed
-    window.addEventListener('appinstalled', () => {
-      setSupportsPWA(false);
-      setIsVisible(false);
-    });
+    window.addEventListener('appinstalled', installedHandler);
 
     // iOS Safari detection — show manual install guide
     if (isIOSSafari()) {
       setIsIOS(true);
-      setTimeout(() => {
-        setIsVisible(true);
-      }, 3000);
+      timerRef.current = setTimeout(() => setIsVisible(true), 3000);
     }
 
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+    return () => {
+      clearTimeout(timerRef.current);
+      window.removeEventListener('beforeinstallprompt', handler);
+      window.removeEventListener('appinstalled', installedHandler);
+    };
   }, []);
 
   const onClick = (e: React.MouseEvent) => {
@@ -61,10 +66,7 @@ const InstallPWA: React.FC = () => {
     promptInstall.prompt();
     promptInstall.userChoice.then((choiceResult) => {
       if (choiceResult.outcome === 'accepted') {
-        console.log('User accepted the PWA install');
         setIsVisible(false);
-      } else {
-        console.log('User dismissed the PWA install');
       }
     });
   };

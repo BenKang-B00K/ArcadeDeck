@@ -39,7 +39,7 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
 
   if (!isOpen) return null;
 
-  const pageUrl = `https://arcadedeck.net/play/${gameSlug}`;
+  const pageUrl = `${window.location.origin}/play/${gameSlug}`;
 
   const shareText =
     lang === 'ko'

@@ -31,12 +31,16 @@ const timeAgo = (date: Date): string => {
   return date.toLocaleDateString();
 };
 
+interface FirestoreTimestamp {
+  toDate(): Date;
+}
+
 interface Comment {
   id: string;
   gameId: string;
   nickname: string;
   text: string;
-  createdAt: any;
+  createdAt: FirestoreTimestamp | null;
 }
 
 interface CommentSectionProps {
@@ -112,10 +116,12 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
     setIsSubmitting(true);
     lastSubmitRef.current = Date.now();
     try {
+      // Strip HTML tags as defense-in-depth (React escapes by default, but Firestore data is shared)
+      const sanitizedText = newComment.trim().replace(/<[^>]*>/g, '');
       await addDoc(collection(db, "comments"), {
         gameId,
         nickname: currentNickname,
-        text: newComment.trim(),
+        text: sanitizedText,
         createdAt: serverTimestamp()
       });
       setNewComment('');

@@ -10,6 +10,8 @@ import CommentSection from '../components/CommentSection';
 import ShareModal from '../components/ShareModal';
 import GameResultModal from '../components/GameResultModal';
 import GameCard from '../components/GameCard';
+import { isNewPersonalBest } from '../utils/leaderboardUtils';
+import { MAX_SCORE, AD_SLOTS } from '../constants/gameConstants';
 import { db } from '../firebase';
 import { 
   collection, 
@@ -130,6 +132,7 @@ const GamePlayer: React.FC = () => {
         return simpleEntries;
       } catch (e) {
         console.error("Critical leaderboard error:", e);
+        showNotification(lang === 'ko' ? '리더보드를 불러올 수 없습니다.' : 'Failed to load leaderboard.', 'error');
         return [];
       }
     }
@@ -165,9 +168,7 @@ const GamePlayer: React.FC = () => {
         const prevScore    = Number(prevData.score)    || 0;
         const prevSubScore = Number(prevData.subScore) || 0;
 
-        const isNewBest = subSortAsc
-          ? (score > prevScore || (score === prevScore && currentSubScore < prevSubScore))
-          : (score > prevScore || (score === prevScore && currentSubScore > prevSubScore));
+        const isNewBest = isNewPersonalBest(score, currentSubScore, prevScore, prevSubScore, subSortAsc);
 
         if (isNewBest) {
           await updateDoc(doc(db, "leaderboards", docSnap.id), {
@@ -237,7 +238,7 @@ const GamePlayer: React.FC = () => {
 
     const handleMessage = (event: MessageEvent) => {
       // Block messages from any origin other than the game's own domain
-      if (allowedOrigin && event.origin !== allowedOrigin) return;
+      if (!allowedOrigin || event.origin !== allowedOrigin) return;
 
       const types = ['GAME_SCORE', 'SCORE_UPDATE', 'gameOver', 'GAME_OVER'];
       if (event.data && types.includes(event.data.type)) {
@@ -248,9 +249,9 @@ const GamePlayer: React.FC = () => {
         const subScore = typeof rawSubScore === 'number' ? rawSubScore : (rawSubScore !== undefined ? Number(rawSubScore) : undefined);
 
         // Validate score is a safe, non-negative finite number within a sane ceiling
-        if (rawScore === undefined || isNaN(score) || !isFinite(score) || score < 0 || score > 10_000_000) return;
+        if (rawScore === undefined || isNaN(score) || !isFinite(score) || score < 0 || score > MAX_SCORE) return;
 
-        const safeSubScore = (subScore !== undefined && isFinite(subScore) && subScore >= 0)
+        const safeSubScore = (subScore !== undefined && !isNaN(subScore) && isFinite(subScore) && subScore >= 0 && subScore <= MAX_SCORE)
           ? subScore
           : undefined;
 
@@ -273,12 +274,17 @@ const GamePlayer: React.FC = () => {
     };
   }, [isPseudoFullscreen]);
 
-  // Re-render on orientation change to recalculate game wrapper size
+  // Re-render on orientation change to recalculate game wrapper size (debounced)
   useEffect(() => {
-    const handleResize = () => setOrientationTick(t => t + 1);
+    let timeoutId: ReturnType<typeof setTimeout>;
+    const handleResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => setOrientationTick(t => t + 1), 150);
+    };
     window.addEventListener('orientationchange', handleResize);
     window.addEventListener('resize', handleResize);
     return () => {
+      clearTimeout(timeoutId);
       window.removeEventListener('orientationchange', handleResize);
       window.removeEventListener('resize', handleResize);
     };
@@ -296,18 +302,23 @@ const GamePlayer: React.FC = () => {
   }, [game]);
 
   const handleFullscreen = () => {
-    const element = iframeRef.current as any;
+    const element = iframeRef.current;
     if (!element) return;
 
     try {
-      if (element.requestFullscreen) {
-        element.requestFullscreen();
-      } else if (element.webkitRequestFullscreen) {
-        element.webkitRequestFullscreen();
-      } else if (element.mozRequestFullScreen) {
-        element.mozRequestFullScreen();
-      } else if (element.msRequestFullscreen) {
-        element.msRequestFullscreen();
+      const el = element as HTMLIFrameElement & {
+        webkitRequestFullscreen?: () => void;
+        mozRequestFullScreen?: () => void;
+        msRequestFullscreen?: () => void;
+      };
+      if (el.requestFullscreen) {
+        el.requestFullscreen();
+      } else if (el.webkitRequestFullscreen) {
+        el.webkitRequestFullscreen();
+      } else if (el.mozRequestFullScreen) {
+        el.mozRequestFullScreen();
+      } else if (el.msRequestFullscreen) {
+        el.msRequestFullscreen();
       } else {
         // Pseudo-fullscreen for iOS iPhone
         setIsPseudoFullscreen(true);
@@ -482,7 +493,7 @@ const GamePlayer: React.FC = () => {
         </div>
         
         <div className="player-ad-container">
-          {!iframeLoading && <AdBanner slot="7742187652" style={{ margin: '0' }} />}
+          {!iframeLoading && <AdBanner slot={AD_SLOTS.GAME_PLAYER} style={{ margin: '0' }} />}
         </div>
 
         {/* ── Info Tabs ── */}
@@ -577,7 +588,7 @@ const GamePlayer: React.FC = () => {
           <button className="sticky-btn sticky-fullscreen" onClick={handleFullscreen}>
             <span>⛶</span> {lang === 'ko' ? '전체화면' : 'Fullscreen'}
           </button>
-          <button className={`sticky-btn sticky-like ${isLiked ? 'liked' : ''}`} onClick={() => { const n = !isLiked; setIsLiked(n); localStorage.setItem(`liked_${id}`, String(n)); }}>
+          <button className={`sticky-btn sticky-like ${isLiked ? 'liked' : ''}`} aria-label={isLiked ? 'Unlike this game' : 'Like this game'} onClick={() => { const n = !isLiked; setIsLiked(n); localStorage.setItem(`liked_${id}`, String(n)); }}>
             {isLiked ? '❤️' : '🤍'}
           </button>
           <button className="sticky-btn sticky-share" onClick={handleShare}>

@@ -1,9 +1,0 @@
-// ArcadeDeck 통합 전송 규격
-window.parent.postMessage({
-type: 'GAME_OVER', // 또는 'GAME_SCORE'
-score: currentMainPoints,   // 주 점수 (score 필드 필수)
-subScore: currentExtraStats // 보조 점수 (subScore 필드 권장)
-}, '*');
-
-Score = XXX
-SubScore = YYY

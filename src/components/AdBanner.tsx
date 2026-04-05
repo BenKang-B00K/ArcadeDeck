@@ -3,9 +3,10 @@ import React, { useEffect, useRef } from 'react';
 declare global {
   interface Window {
     adsbygoogle: unknown[];
-    adsense_initialized?: boolean;
   }
 }
+
+const AD_CLIENT_ID = "ca-pub-6365186183616155";
 
 interface AdBannerProps {
   slot?: string;
@@ -22,10 +23,9 @@ const AdBanner: React.FC<AdBannerProps> = ({ slot, style, format = 'auto', place
     if (!slot) return;
 
     // Load AdSense script dynamically if not already present
-    if (!window.adsense_initialized && !document.querySelector('script[src*="adsbygoogle.js"]')) {
-      window.adsense_initialized = true;
+    if (!document.querySelector('script[src*="adsbygoogle.js"]')) {
       const script = document.createElement('script');
-      script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6365186183616155";
+      script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${AD_CLIENT_ID}`;
       script.async = true;
       script.crossOrigin = "anonymous";
       document.head.appendChild(script);
@@ -85,7 +85,7 @@ const AdBanner: React.FC<AdBannerProps> = ({ slot, style, format = 'auto', place
                minHeight: '120px',
                textDecoration: 'none'
              }}
-             data-ad-client="ca-pub-6365186183616155"
+             data-ad-client={AD_CLIENT_ID}
              data-ad-slot={slot}
              data-ad-format={format}
              data-full-width-responsive="true">

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import './ShareModal.css';
 
 interface ShareModalProps {
@@ -43,16 +43,23 @@ const ShareModal: React.FC<ShareModalProps> = ({
   const encodedUrl = encodeURIComponent(pageUrl);
 
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`;
+  const copyBtnRef = useRef<HTMLButtonElement>(null);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
   const handleCopyLink = () => {
     navigator.clipboard.writeText(pageUrl);
-    const btn = document.getElementById('share-copy-btn');
-    if (btn) {
-      btn.textContent = lang === 'ko' ? '✅ 복사됨!' : '✅ Copied!';
-      setTimeout(() => {
-        if (btn) btn.textContent = lang === 'ko' ? '🔗 링크 복사' : '🔗 Copy Link';
+    if (copyBtnRef.current) {
+      copyBtnRef.current.textContent = lang === 'ko' ? '✅ 복사됨!' : '✅ Copied!';
+      clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => {
+        if (copyBtnRef.current) copyBtnRef.current.textContent = lang === 'ko' ? '🔗 링크 복사' : '🔗 Copy Link';
       }, 2000);
     }
   };
+
+  useEffect(() => {
+    return () => clearTimeout(copyTimerRef.current);
+  }, []);
 
   const handleNativeShare = () => {
     navigator.share({
@@ -130,7 +137,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
           </button>
 
           <button
-            id="share-copy-btn"
+            ref={copyBtnRef}
             className="share-btn share-btn-copy"
             onClick={handleCopyLink}
           >

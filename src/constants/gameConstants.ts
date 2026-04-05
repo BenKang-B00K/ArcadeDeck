@@ -4,3 +4,13 @@ export const BANNED_WORDS = [
 ];
 
 export const ITEMS_PER_PAGE = 8;
+export const MAX_SCORE = 10_000_000;
+export const LEADERBOARD_FETCH_LIMIT = 100;
+export const RANDOM_ID_MIN = 1000;
+export const RANDOM_ID_MAX = 9999;
+
+export const AD_SLOTS = {
+  HOME_TOP: '8237419283',
+  HOME_BOTTOM: '1293847560',
+  GAME_PLAYER: '7742187652',
+} as const;

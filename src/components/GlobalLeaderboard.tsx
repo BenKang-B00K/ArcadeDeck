@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { Trophy, Crown, Medal, RefreshCw, Loader } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
 import { games } from '../data/games';
@@ -14,6 +15,7 @@ interface GlobalRank {
 
 interface GlobalLeaderboardProps {
   onDataLoaded?: (players: GlobalRank[]) => void;
+  variant?: 'full' | 'compact';
 }
 
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
@@ -36,7 +38,7 @@ function setCachedRanks(sorted: GlobalRank[]): void {
   } catch { /* storage full — ignore */ }
 }
 
-const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({ onDataLoaded }) => {
+const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({ onDataLoaded, variant = 'full' }) => {
   const [podiumPlayers, setPodiumPlayers] = useState<GlobalRank[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -146,27 +148,51 @@ const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({ onDataLoaded }) =
     }
   }, [calculateGlobalRanking]);
 
-  if (loading) return <div className="global-loader">Loading Hall of Fame...</div>;
-  if (error) return <div className="global-loader" style={{ color: '#ff6b6b' }}>{error}</div>;
+  if (loading) return variant === 'compact' ? null : <div className="global-loader">Loading Hall of Fame...</div>;
+  if (error) return variant === 'compact' ? null : <div className="global-loader" style={{ color: '#ff6b6b' }}>{error}</div>;
   if (podiumPlayers.length === 0) return null;
+
+  // Sort back to 1st, 2nd, 3rd order for compact view
+  const sortedPlayers = [...podiumPlayers].sort((a, b) => (a.originalRank ?? 0) - (b.originalRank ?? 0));
+
+  if (variant === 'compact') {
+    return (
+      <Link to="/hall-of-fame" className="global-ranking-bar">
+        <div className="ranking-bar-header">
+          <Trophy size={14} className="ranking-bar-icon" aria-hidden="true" />
+          <span className="ranking-bar-label">Top Players</span>
+          <Trophy size={14} className="ranking-bar-icon" aria-hidden="true" />
+        </div>
+        <div className="ranking-bar-players">
+          {sortedPlayers.map((player) => (
+            <span key={player.name} className={`ranking-bar-player rank-${player.originalRank}`}>
+              <span className="ranking-bar-pos">#{player.originalRank}</span>
+              <span className="ranking-bar-name">{player.name}</span>
+              <span className="ranking-bar-pts">{player.totalPoints}pt</span>
+            </span>
+          ))}
+        </div>
+      </Link>
+    );
+  }
 
   return (
     <div className="global-leaderboard-section">
-      <h2 className="section-title">🏆 Global Ranking</h2>
+      <h2 className="section-title"><Trophy size={22} aria-hidden="true" /> Global Ranking</h2>
       <p className="section-subtitle">The Best Players of ArcadeDeck</p>
 
       <div className="hall-of-fame-podium">
         {podiumPlayers.map((player) => (
           <div key={player.name} className={`podium-card rank-${player.originalRank}`}>
-            <div className="podium-crown">{player.originalRank === 1 ? '👑' : ''}</div>
+            <div className="podium-crown">{player.originalRank === 1 ? <Crown size={20} aria-hidden="true" /> : ''}</div>
             <div className="podium-rank-badge">{player.originalRank}</div>
             <div className="podium-info">
               <div className="podium-name">{player.name}</div>
 
               <div className="medal-case">
-                {player.medals.gold > 0 && <span className="medal gold">🥇{player.medals.gold}</span>}
-                {player.medals.silver > 0 && <span className="medal silver">🥈{player.medals.silver}</span>}
-                {player.medals.bronze > 0 && <span className="medal bronze">🥉{player.medals.bronze}</span>}
+                {player.medals.gold > 0 && <span className="medal gold"><Medal size={14} aria-hidden="true" />{player.medals.gold}</span>}
+                {player.medals.silver > 0 && <span className="medal silver"><Medal size={14} aria-hidden="true" />{player.medals.silver}</span>}
+                {player.medals.bronze > 0 && <span className="medal bronze"><Medal size={14} aria-hidden="true" />{player.medals.bronze}</span>}
               </div>
 
               <div className="podium-points">
@@ -181,7 +207,7 @@ const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({ onDataLoaded }) =
 
       <div className="hall-of-fame-footer">
         <Link to="/hall-of-fame" className="hof-link-btn">
-          <span className="icon">🏆</span> Hall of Fame
+          <Trophy size={16} aria-hidden="true" /> Hall of Fame
         </Link>
         <div className="point-info">
           * 1st: 3pts | 2nd: 2pts | 3rd: 1pt
@@ -191,7 +217,7 @@ const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({ onDataLoaded }) =
             <span className="last-updated-label">Updated {lastUpdated}</span>
           )}
           <button className="refresh-btn" onClick={handleRefresh} disabled={isSyncing}>
-            {isSyncing ? '⏳ Syncing...' : '🔄 Sync Stats'}
+            {isSyncing ? <><Loader size={14} className="spin-icon" aria-hidden="true" /> Syncing...</> : <><RefreshCw size={14} aria-hidden="true" /> Sync Stats</>}
           </button>
         </div>
       </div>

@@ -3,7 +3,7 @@
   background: rgba(255, 255, 255, 0.03);
   padding: 40px;
   border-radius: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   width: 100%;
 }
@@ -15,7 +15,7 @@
 
 .leaderboard-header-section h3 {
   font-size: 2rem;
-  color: #00d2ff;
+  color: var(--secondary-accent);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -64,9 +64,9 @@
   position: relative;
 }
 
-.podium-item.rank-1 .podium-avatar { border-color: #ffd700; width: 90px; height: 90px; }
-.podium-item.rank-2 .podium-avatar { border-color: #c0c0c0; }
-.podium-item.rank-3 .podium-avatar { border-color: #cd7f32; }
+.podium-item.rank-1 .podium-avatar { border-color: var(--rank-gold); width: 90px; height: 90px; }
+.podium-item.rank-2 .podium-avatar { border-color: var(--rank-silver); }
+.podium-item.rank-3 .podium-avatar { border-color: var(--rank-bronze); }
 
 .rank-badge {
   font-size: 1.5rem;
@@ -100,13 +100,13 @@
 .podium-item .player-score {
   display: block;
   font-size: 0.95rem;
-  color: #00d2ff;
+  color: var(--secondary-accent);
   font-weight: 700;
 }
 
 .player-subscore {
   font-size: 0.75rem;
-  color: #888;
+  color: var(--text-muted);
   font-weight: 600;
 }
 
@@ -114,7 +114,7 @@
   width: 100%;
   border-radius: 10px 10px 0 0;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-default);
   border-bottom: none;
 }
 
@@ -127,7 +127,7 @@
 }
 
 .podium-item.is-me .player-name {
-  color: #00d2ff;
+  color: var(--secondary-accent);
 }
 
 /* List Styles */
@@ -140,7 +140,7 @@
 .leaderboard-table th {
   text-align: left;
   padding: 10px 20px;
-  color: #888;
+  color: var(--text-muted);
   font-size: 0.85rem;
   text-transform: uppercase;
   font-weight: 600;
@@ -172,14 +172,14 @@
 }
 
 .score-cell {
-  color: #00d2ff;
+  color: var(--secondary-accent);
   font-weight: 700;
   text-align: right;
 }
 
 .subscore-cell {
   border-radius: 0 12px 12px 0;
-  color: #aaa;
+  color: var(--text-secondary);
   text-align: right;
   font-size: 0.9rem;
 }
@@ -191,7 +191,7 @@
 
 .me-badge {
   margin-left: 10px;
-  background: #00d2ff;
+  background: var(--secondary-accent);
   color: #000;
   font-size: 0.7rem;
   padding: 2px 6px;
@@ -210,7 +210,7 @@
 .no-data-box {
   text-align: center;
   padding: 40px;
-  color: #888;
+  color: var(--text-muted);
   font-style: italic;
 }
 

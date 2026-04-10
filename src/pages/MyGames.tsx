@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { Trophy, Rocket, Medal } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { games } from '../data/games';
 import type { Game } from '../data/games';
@@ -113,14 +114,14 @@ const MyGames = () => {
         ) : (
           <div className="my-games-content">
             <section className="ranked-section">
-              <h2 className="section-title">🏆 Top 3 Achievements</h2>
+              <h2 className="section-title"><Trophy size={20} aria-hidden="true" /> Top 3 Achievements</h2>
               {rankedGames.length > 0 ? (
                 <div className="my-games-grid">
                   {rankedGames.map(game => (
                     <div key={game.id} className={`my-game-card rank-${game.rank}`}>
                       <div className="rank-badge-large">
-                        {game.rank === 1 ? '🥇' : game.rank === 2 ? '🥈' : '🥉'}
-                        <span className="rank-num">{game.rank}st</span>
+                        <Medal size={24} className={`rank-medal rank-${game.rank}`} aria-hidden="true" />
+                        <span className="rank-num">{game.rank === 1 ? '1st' : game.rank === 2 ? '2nd' : '3rd'}</span>
                       </div>
                       <img src={game.thumbnail} alt={game.title} className="card-thumb" />
                       <div className="card-info">
@@ -142,7 +143,7 @@ const MyGames = () => {
             </section>
 
             <section className="no-rank-section">
-              <h2 className="section-title">🚀 Missions for You</h2>
+              <h2 className="section-title"><Rocket size={20} aria-hidden="true" /> Missions for You</h2>
               <p className="section-desc">Games where you haven't secured a top rank yet.</p>
               <div className="my-games-list">
                 {noRankGames.map(game => (

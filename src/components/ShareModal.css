@@ -5,7 +5,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  z-index: var(--z-overlay);
   padding: 16px;
   animation: fadeInOverlay 0.2s ease;
 }
@@ -40,8 +40,8 @@
   border: none;
   color: #aaa;
   font-size: 1rem;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   cursor: pointer;
   display: flex;

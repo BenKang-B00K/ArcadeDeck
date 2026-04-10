@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { Maximize, Heart, Link as LinkIcon, Home, Globe, Gamepad2, BookOpen, Joystick, Lightbulb, ScrollText, Sparkles, X } from 'lucide-react';
 import { games } from '../data/games';
 import type { Game } from '../data/games';
 import Navbar from '../components/Navbar';
@@ -13,12 +14,12 @@ import GameCard from '../components/GameCard';
 import { isNewPersonalBest } from '../utils/leaderboardUtils';
 import { MAX_SCORE, AD_SLOTS } from '../constants/gameConstants';
 import { db } from '../firebase';
-import { 
-  collection, 
-  query, 
-  where, 
-  orderBy, 
-  getDocs, 
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  getDocs,
   limit,
   addDoc,
   serverTimestamp,
@@ -41,7 +42,6 @@ const GamePlayer: React.FC = () => {
   const [game, setGame] = useState<Game | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [nickname] = useState<string>(localStorage.getItem('player_nickname') || 'Explorer');
-  const [lastSave, setLastSave] = useState<string | null>(null);
   const [isLiked, setIsLiked] = useState<boolean>(() =>
     localStorage.getItem(`liked_${id}`) === 'true'
   );
@@ -76,11 +76,11 @@ const GamePlayer: React.FC = () => {
     fullscreen: lang === 'en' ? 'Fullscreen' : '전체화면',
     load: lang === 'en' ? 'Load' : '불러오기',
     share: lang === 'en' ? 'Share' : '공유',
-    overview: lang === 'en' ? '📖 Overview' : '📖 게임 개요',
-    howToPlay: lang === 'en' ? '🕹️ Controls' : '🕹️ 조작 방법',
-    tips: lang === 'en' ? '💡 Pro Tips' : '💡 플레이 팁',
-    lore: lang === 'en' ? '📜 World Lore' : '📜 게임 세계관',
-    features: lang === 'en' ? '✨ Key Features' : '✨ 주요 특징',
+    overview: lang === 'en' ? 'Overview' : '게임 개요',
+    howToPlay: lang === 'en' ? 'Controls' : '조작 방법',
+    tips: lang === 'en' ? 'Pro Tips' : '플레이 팁',
+    lore: lang === 'en' ? 'World Lore' : '게임 세계관',
+    features: lang === 'en' ? 'Key Features' : '주요 특징',
     original: lang === 'en' ? 'Original Content' : '오리지널 콘텐츠',
     last: lang === 'en' ? 'Last' : '최근',
     bestScore: lang === 'en' ? 'New Personal Best!' : '새로운 개인 최고 기록!',
@@ -215,8 +215,6 @@ const GamePlayer: React.FC = () => {
     const foundGame = games.find(g => g.id === id);
     if (foundGame) {
       setGame(foundGame);
-      const savedTime = localStorage.getItem(`game_save_${foundGame.id}`);
-      if (savedTime) setLastSave(savedTime);
 
       // Recently Played Logic
       const recentlyPlayed = JSON.parse(localStorage.getItem('recently_played') || '[]');
@@ -420,52 +418,39 @@ const GamePlayer: React.FC = () => {
 
       <Navbar />
       <div className="container player-container">
+        {/* ── Compact top bar: back + player + lang ── */}
         <div className="player-header-flex">
+          <Link to="/" className="back-button-modern">
+            <Home size={16} aria-hidden="true" /> {t.back}
+          </Link>
           <div className="player-info-container">
-            <div className="nickname-display-static">
-              <span className="player-label">{t.player}:</span>
-              <span className="player-name-val">{nickname}</span>
-            </div>
-            <button 
-              className="lang-toggle-btn-modern" 
+            <span className="player-name-val">{nickname}</span>
+            <button
+              className="lang-toggle-btn-modern"
               onClick={() => setLang(lang === 'en' ? 'ko' : 'en')}
+              aria-label="Toggle language"
             >
-              <span className="icon">🌐</span> {lang === 'en' ? '한국어' : 'English'}
+              <Globe size={14} aria-hidden="true" /> {lang === 'en' ? 'KO' : 'EN'}
             </button>
           </div>
-          <Link to="/" className="back-button-modern">
-            <span className="icon">🏡</span> {t.back}
-          </Link>
         </div>
 
+        {/* ── Game title + controls in one row ── */}
         <div className="game-header-section">
           <div className="details-header centered-header">
-            {game.isOriginal && <div className="original-badge-player">{t.original}</div>}
             <h1>{lang === 'ko' ? game.titleKo : game.title}</h1>
-            <div className="badge-row">
-              <span className="genre-label">{game.genres[0]}</span>
-              {game.features?.includes('Web & Mobile Friendly') && (
-                <span className="mobile-badge">📱 Mobile Ready</span>
-              )}
-              {game.features?.includes('PC Only') && (
-                <span className="mobile-badge pc-only">🖥️ PC Only</span>
-              )}
-              {game.features?.some(f => f.startsWith('Local Co-op')) && (
-                <span className="mobile-badge coop">🎮 Local Co-op</span>
-              )}
-              {lastSave && <span className="save-badge">{t.last}: {lastSave}</span>}
-            </div>
+            <span className="genre-label">{game.genres[0]}</span>
           </div>
 
           <div className="game-controls">
             <button className="control-btn primary fullscreen-btn" onClick={handleFullscreen}>
-              <span className="icon">⛶</span> {t.fullscreen}
+              <Maximize size={16} aria-hidden="true" /> {t.fullscreen}
             </button>
             <button className={`control-btn like-btn ${isLiked ? 'active' : ''}`} onClick={() => { const n = !isLiked; setIsLiked(n); localStorage.setItem(`liked_${id}`, String(n)); }}>
-              {isLiked ? '❤️' : '🤍'}
+              <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} aria-hidden="true" />
             </button>
             <button className="control-btn share-btn" onClick={() => handleShare()}>
-              <span className="icon">🔗</span> {t.share}
+              <LinkIcon size={16} aria-hidden="true" /> {t.share}
             </button>
           </div>
         </div>
@@ -473,7 +458,7 @@ const GamePlayer: React.FC = () => {
         <div ref={gameWrapperRef} className={`game-screen-wrapper ${isPseudoFullscreen ? 'pseudo-fullscreen' : ''} ambient-glow`} style={wrapperStyle}>
           {isPseudoFullscreen && (
             <button className="exit-pseudo-btn" onClick={() => setIsPseudoFullscreen(false)}>
-              ✕ {lang === 'en' ? 'Close Fullscreen' : '전체화면 닫기'}
+              <X size={16} aria-hidden="true" /> {lang === 'en' ? 'Close Fullscreen' : '전체화면 닫기'}
             </button>
           )}
           {iframeLoading && (
@@ -503,24 +488,24 @@ const GamePlayer: React.FC = () => {
         <div className="game-info-tabs">
           <div className="tab-nav" role="tablist">
             <button role="tab" className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
-              {lang === 'ko' ? '📖 개요' : '📖 Overview'}
+              <BookOpen size={14} aria-hidden="true" /> {lang === 'ko' ? '개요' : 'Overview'}
             </button>
             <button role="tab" className={`tab-btn ${activeTab === 'controls' ? 'active' : ''}`} onClick={() => setActiveTab('controls')}>
-              {lang === 'ko' ? '🕹️ 조작법' : '🕹️ Controls'}
+              <Joystick size={14} aria-hidden="true" /> {lang === 'ko' ? '조작법' : 'Controls'}
             </button>
             {(game.tips || game.tipsKo) && (
               <button role="tab" className={`tab-btn ${activeTab === 'tips' ? 'active' : ''}`} onClick={() => setActiveTab('tips')}>
-                {lang === 'ko' ? '💡 팁' : '💡 Tips'}
+                <Lightbulb size={14} aria-hidden="true" /> {lang === 'ko' ? '팁' : 'Tips'}
               </button>
             )}
             {(game.lore || game.loreKo) && (
               <button role="tab" className={`tab-btn ${activeTab === 'lore' ? 'active' : ''}`} onClick={() => setActiveTab('lore')}>
-                {lang === 'ko' ? '📜 세계관' : '📜 Lore'}
+                <ScrollText size={14} aria-hidden="true" /> {lang === 'ko' ? '세계관' : 'Lore'}
               </button>
             )}
             {((game.features?.length ?? 0) > 0) && (
               <button role="tab" className={`tab-btn ${activeTab === 'features' ? 'active' : ''}`} onClick={() => setActiveTab('features')}>
-                {lang === 'ko' ? '✨ 특징' : '✨ Features'}
+                <Sparkles size={14} aria-hidden="true" /> {lang === 'ko' ? '특징' : 'Features'}
               </button>
             )}
           </div>
@@ -575,7 +560,7 @@ const GamePlayer: React.FC = () => {
           return (
             <div className="related-games-section">
               <h3 className="related-games-title">
-                {lang === 'ko' ? '🎮 비슷한 게임' : '🎮 You Might Also Like'}
+                <Gamepad2 size={18} aria-hidden="true" /> {lang === 'ko' ? '비슷한 게임' : 'You Might Also Like'}
               </h3>
               <div className="related-games-grid">
                 {related.map(g => <GameCard key={g.id} game={g} />)}
@@ -589,13 +574,13 @@ const GamePlayer: React.FC = () => {
       {showStickyBar && !isPseudoFullscreen && (
         <div className="sticky-controls-bar">
           <button className="sticky-btn sticky-fullscreen" onClick={handleFullscreen}>
-            <span>⛶</span> {lang === 'ko' ? '전체화면' : 'Fullscreen'}
+            <Maximize size={16} aria-hidden="true" /> {lang === 'ko' ? '전체화면' : 'Fullscreen'}
           </button>
           <button className={`sticky-btn sticky-like ${isLiked ? 'liked' : ''}`} aria-label={isLiked ? 'Unlike this game' : 'Like this game'} onClick={() => { const n = !isLiked; setIsLiked(n); localStorage.setItem(`liked_${id}`, String(n)); }}>
-            {isLiked ? '❤️' : '🤍'}
+            <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} aria-hidden="true" />
           </button>
           <button className="sticky-btn sticky-share" onClick={handleShare}>
-            <span>🔗</span> {lang === 'ko' ? '공유' : 'Share'}
+            <LinkIcon size={16} aria-hidden="true" /> {lang === 'ko' ? '공유' : 'Share'}
           </button>
         </div>
       )}
@@ -603,7 +588,7 @@ const GamePlayer: React.FC = () => {
       {showLeaderboard && (
         <div className="leaderboard-modal-overlay" onClick={() => setShowLeaderboard(false)}>
           <div className="leaderboard-modal-content" onClick={e => e.stopPropagation()}>
-            <button className="close-modal-btn" onClick={() => setShowLeaderboard(false)}>✕</button>
+            <button className="close-modal-btn" onClick={() => setShowLeaderboard(false)} aria-label="Close leaderboard"><X size={18} aria-hidden="true" /></button>
             <div className="modal-inner-scroll">
               <Leaderboard entries={leaderboard} gameId={game.id} currentNickname={nickname} />
             </div>

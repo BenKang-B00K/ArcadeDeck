@@ -1,5 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import { Landmark, Sparkles, FolderOpen, Medal } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import GlobalLeaderboard from '../components/GlobalLeaderboard';
 import './HallOfFame.css';
@@ -41,17 +42,17 @@ const HallOfFame: React.FC = () => {
       <Navbar />
       <div className="container hof-container">
         <header className="hof-header">
-          <h1>🏛️ Hall of Fame Archive</h1>
+          <h1><Landmark size={28} aria-hidden="true" /> Hall of Fame Archive</h1>
           <p>The Eternal Records of ArcadeDeck Legends</p>
         </header>
 
         <section className="archive-section">
-          <h2 className="archive-title">✨ Current Leaders ({currentMonth})</h2>
+          <h2 className="archive-title"><Sparkles size={20} aria-hidden="true" /> Current Leaders ({currentMonth})</h2>
           <GlobalLeaderboard />
         </section>
 
         <section className="historical-archive">
-          <h2 className="archive-title">📂 Monthly Records</h2>
+          <h2 className="archive-title"><FolderOpen size={20} aria-hidden="true" /> Monthly Records</h2>
           {archiveData.length > 0 ? (
             <div className="archive-grid">
               {archiveData.map((data, idx) => (
@@ -60,7 +61,7 @@ const HallOfFame: React.FC = () => {
                   <ul className="winner-list">
                     {data.winners.map((w) => (
                       <li key={w.rank} className={`winner-item rank-${w.rank}`}>
-                        <span className="rank-symbol">{w.rank === 1 ? '🥇' : w.rank === 2 ? '🥈' : '🥉'}</span>
+                        <span className="rank-symbol"><Medal size={16} className={`rank-medal rank-${w.rank}`} aria-hidden="true" /></span>
                         <span className="winner-name">{w.name}</span>
                         <span className="winner-score">{w.score}</span>
                       </li>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Trophy, Crown, Flame } from 'lucide-react';
 import { games } from '../data/games';
 import { compareLeaderboardEntries } from '../utils/leaderboardUtils';
 import './Leaderboard.css';
@@ -30,11 +31,11 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, gameId, currentNickn
     .sort((a, b) => compareLeaderboardEntries(a, b, subSortAsc))
     .slice(0, 10);
 
-  const getRankIcon = (rank: number) => {
-    if (rank === 1) return '👑';
-    if (rank === 2) return '🥈';
-    if (rank === 3) return '🥉';
-    if (rank >= 4 && rank <= 8) return '🔥';
+  const getRankIcon = (rank: number): React.ReactNode => {
+    if (rank === 1) return <Crown size={18} className="rank-icon gold" aria-hidden="true" />;
+    if (rank === 2) return <Crown size={16} className="rank-icon silver" aria-hidden="true" />;
+    if (rank === 3) return <Crown size={16} className="rank-icon bronze" aria-hidden="true" />;
+    if (rank >= 4 && rank <= 8) return <Flame size={16} className="rank-icon fire" aria-hidden="true" />;
     return rank;
   };
 
@@ -50,7 +51,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, gameId, currentNickn
   return (
     <div className="leaderboard-container">
       <div className="leaderboard-header-section">
-        <h3>🏆 {title}</h3>
+        <h3><Trophy size={20} aria-hidden="true" /> {title}</h3>
       </div>
 
       {top10.length > 0 ? (
@@ -62,7 +63,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, gameId, currentNickn
 
               return (
                 <div key={index} className={`podium-item rank-${originalRank} ${isMe ? 'is-me' : ''}`}>
-                  <div className="podium-crown">{originalRank === 1 ? '👑' : ''}</div>
+                  <div className="podium-crown">{originalRank === 1 ? <Crown size={20} className="rank-icon gold" aria-hidden="true" /> : ''}</div>
                   <div className="podium-avatar">
                     <span className="rank-badge">{getRankIcon(originalRank)}</span>
                   </div>

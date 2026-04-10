@@ -6,7 +6,7 @@
   padding: 40px;
   background: rgba(15, 15, 20, 0.4);
   border-radius: 40px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -37,10 +37,10 @@
 }
 
 .section-title span {
-  background: linear-gradient(90deg, #ffd700, #ff8c00);
+  background: var(--gold-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3));
+  filter: drop-shadow(0 0 10px var(--gold-glow));
 }
 
 .section-subtitle {
@@ -84,7 +84,7 @@
   font-size: 2.5rem;
   height: 40px;
   margin-bottom: 10px;
-  filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.5));
+  filter: drop-shadow(0 0 15px var(--gold-glow));
   animation: float 4s ease-in-out infinite;
 }
 
@@ -146,25 +146,25 @@
   border: 1px solid rgba(255, 215, 0, 0.3);
   box-shadow: 0 0 40px rgba(255, 215, 0, 0.1);
 }
-.rank-1 .podium-rank-badge { background: #ffd700; color: #000; }
-.rank-1 .podium-name { color: #ffd700; font-size: 1.4rem; }
-.rank-1 .points-num { color: #ffd700; text-shadow: 0 0 20px rgba(255, 215, 0, 0.4); }
+.rank-1 .podium-rank-badge { background: var(--rank-gold); color: #000; }
+.rank-1 .podium-name { color: var(--rank-gold); font-size: 1.4rem; }
+.rank-1 .points-num { color: var(--rank-gold); text-shadow: 0 0 20px rgba(255, 215, 0, 0.4); }
 
 .rank-2 .podium-base { 
   height: 130px; 
   background: linear-gradient(180deg, rgba(192, 192, 192, 0.2) 0%, rgba(192, 192, 192, 0.05) 100%);
   border: 1px solid rgba(192, 192, 192, 0.3);
 }
-.rank-2 .podium-rank-badge { background: #c0c0c0; color: #000; }
-.rank-2 .points-num { color: #c0c0c0; }
+.rank-2 .podium-rank-badge { background: var(--rank-silver); color: #000; }
+.rank-2 .points-num { color: var(--rank-silver); }
 
 .rank-3 .podium-base { 
   height: 100px; 
   background: linear-gradient(180deg, rgba(205, 127, 50, 0.2) 0%, rgba(205, 127, 50, 0.05) 100%);
   border: 1px solid rgba(205, 127, 50, 0.3);
 }
-.rank-3 .podium-rank-badge { background: #cd7f32; color: #000; }
-.rank-3 .points-num { color: #cd7f32; }
+.rank-3 .podium-rank-badge { background: var(--rank-bronze); color: #000; }
+.rank-3 .points-num { color: var(--rank-bronze); }
 
 /* Medals Case */
 .medal-case {
@@ -180,15 +180,15 @@
   font-size: 0.75rem;
   font-weight: 900;
   background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   gap: 4px;
 }
 
-.medal.gold { border-color: rgba(255, 215, 0, 0.4); color: #ffd700; }
-.medal.silver { border-color: rgba(192, 192, 192, 0.4); color: #c0c0c0; }
-.medal.bronze { border-color: rgba(205, 127, 50, 0.4); color: #cd7f32; }
+.medal.gold { border-color: rgba(255, 215, 0, 0.4); color: var(--rank-gold); }
+.medal.silver { border-color: rgba(192, 192, 192, 0.4); color: var(--rank-silver); }
+.medal.bronze { border-color: rgba(205, 127, 50, 0.4); color: var(--rank-bronze); }
 
 /* Footer & Buttons */
 .hall-of-fame-footer {
@@ -198,7 +198,7 @@
 }
 
 .hof-link-btn {
-  background: linear-gradient(90deg, #ffd700, #ff8c00);
+  background: var(--gold-gradient);
   color: #000;
   padding: 15px 45px;
   border-radius: 100px;
@@ -230,7 +230,7 @@
 .refresh-btn {
   margin-top: 20px;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-default);
   color: rgba(255, 255, 255, 0.4);
   padding: 8px 20px;
   border-radius: 50px;
@@ -243,7 +243,7 @@
 .refresh-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.05);
   color: #fff;
-  border-color: rgba(0, 242, 255, 0.3);
+  border-color: var(--border-accent);
 }
 
 .refresh-btn:disabled {
@@ -270,7 +270,7 @@
   padding: 80px;
   font-size: 1.2rem;
   font-weight: 900;
-  color: #00f2ff;
+  color: var(--primary-color);
   letter-spacing: 4px;
   text-transform: uppercase;
   animation: pulse-glow 2s infinite;
@@ -325,4 +325,147 @@
   .hof-link-btn { padding: 10px 24px; font-size: 0.85rem; }
   .hall-of-fame-footer { margin-top: 20px; }
   .point-info { font-size: 0.7rem; margin-top: 10px; }
+}
+
+/* ══════════════════════════════════
+   Compact Ranking Bar (header variant)
+   ══════════════════════════════════ */
+.global-ranking-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  margin: var(--space-4) 0;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.global-ranking-bar:hover {
+  border-color: var(--border-accent);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ranking-bar-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.ranking-bar-icon {
+  color: var(--rank-gold);
+  flex-shrink: 0;
+}
+
+.ranking-bar-label {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.ranking-bar-players {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-5);
+}
+
+.ranking-bar-player {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  transition: background 0.2s;
+}
+
+/* ── 1st Place — Gold, largest ── */
+.ranking-bar-player.rank-1 {
+  background: rgba(245, 197, 66, 0.08);
+  border: 1px solid rgba(245, 197, 66, 0.2);
+}
+
+.ranking-bar-player.rank-1 .ranking-bar-pos {
+  color: var(--rank-gold);
+  font-size: var(--text-lg);
+  font-weight: 900;
+  font-family: var(--font-display);
+  text-shadow: 0 0 8px rgba(245, 197, 66, 0.4);
+}
+
+.ranking-bar-player.rank-1 .ranking-bar-name {
+  color: var(--rank-gold);
+  font-size: var(--text-base);
+  font-weight: 700;
+  font-family: var(--font-display);
+}
+
+.ranking-bar-player.rank-1 .ranking-bar-pts {
+  color: rgba(245, 197, 66, 0.6);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+/* ── 2nd Place — Silver, medium ── */
+.ranking-bar-player.rank-2 {
+  background: rgba(176, 184, 200, 0.06);
+  border: 1px solid rgba(176, 184, 200, 0.15);
+}
+
+.ranking-bar-player.rank-2 .ranking-bar-pos {
+  color: var(--rank-silver);
+  font-size: var(--text-base);
+  font-weight: 800;
+}
+
+.ranking-bar-player.rank-2 .ranking-bar-name {
+  color: var(--rank-silver);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.ranking-bar-player.rank-2 .ranking-bar-pts {
+  color: rgba(176, 184, 200, 0.5);
+  font-size: var(--text-xs);
+}
+
+/* ── 3rd Place — Bronze, smallest ── */
+.ranking-bar-player.rank-3 {
+  background: rgba(205, 127, 50, 0.06);
+  border: 1px solid rgba(205, 127, 50, 0.15);
+}
+
+.ranking-bar-player.rank-3 .ranking-bar-pos {
+  color: var(--rank-bronze);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.ranking-bar-player.rank-3 .ranking-bar-name {
+  color: var(--rank-bronze);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.ranking-bar-player.rank-3 .ranking-bar-pts {
+  color: rgba(205, 127, 50, 0.5);
+  font-size: var(--text-xs);
+}
+
+@media (max-width: 768px) {
+  .global-ranking-bar {
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    overflow-x: auto;
+    scrollbar-width: none;
+    justify-content: flex-start;
+  }
+  .global-ranking-bar::-webkit-scrollbar { display: none; }
+  .ranking-bar-label { display: none; }
+  .ranking-bar-players { gap: var(--space-3); }
+  .ranking-bar-player { font-size: var(--text-xs); }
 }

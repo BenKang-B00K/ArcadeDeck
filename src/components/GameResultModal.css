@@ -5,7 +5,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  z-index: var(--z-overlay);
   padding: 16px;
   animation: grm-fade-in 0.2s ease;
 }
@@ -85,8 +85,8 @@
   background: rgba(255,255,255,0.08);
   border: none;
   color: #aaa;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   cursor: pointer;
   font-size: 0.9rem;
@@ -170,55 +170,6 @@
 .grm-rank-text { color: #ccc; font-size: 0.95rem; }
 .grm-rank-text strong { color: white; }
 
-/* ── Divider ── */
-.grm-divider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
-  color: #555;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-.grm-divider::before,
-.grm-divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: rgba(255,255,255,0.08);
-}
-
-/* ── Share buttons ── */
-.grm-share-row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.grm-share-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 9px 14px;
-  border-radius: 10px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  text-decoration: none;
-  transition: transform 0.15s ease, filter 0.15s ease;
-  white-space: nowrap;
-}
-.grm-share-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
-
-.grm-twitter { background: #000; color: #fff; border: 1px solid rgba(255,255,255,0.15); }
-.grm-kakao   { background: #fee500; color: #3c1e1e; }
-.grm-copy    { background: rgba(0,210,255,0.12); color: #00d2ff; border: 1px solid rgba(0,210,255,0.3); }
-.grm-native  { background: rgba(255,255,255,0.06); color: #ccc; border: 1px solid rgba(255,255,255,0.1); }
-
 /* ── CTA buttons ── */
 .grm-cta-row {
   display: grid;
@@ -250,6 +201,4 @@
 @media (max-width: 480px) {
   .grm-modal { padding: 28px 16px 20px; }
   .grm-score-num { font-size: 2.2rem; }
-  .grm-share-row { gap: 6px; }
-  .grm-share-btn { padding: 8px 10px; font-size: 0.78rem; }
 }

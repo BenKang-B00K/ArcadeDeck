@@ -35,7 +35,10 @@
     ],
     "thumbnail": "images/Gate of Hell Image.webp",
     "genres": [
-      "Tower Defense"
+      "Tower Defense",
+      "Action",
+      "Survival",
+      "Strategy"
     ],
     "gameUrl": "https://gate-of-hell.pages.dev/",
     "aspectRatio": "9/16",
@@ -87,7 +90,10 @@
     ],
     "thumbnail": "images/GL_Image.webp",
     "genres": [
-      "Clicker"
+      "Clicker",
+      "Idle",
+      "Sci-Fi",
+      "Incremental"
     ],
     "gameUrl": "https://galaxylaunch.onrender.com/",
     "aspectRatio": "16/9",
@@ -136,7 +142,10 @@
     ],
     "thumbnail": "images/IA RPG.webp",
     "genres": [
-      "Idle"
+      "Idle",
+      "RPG",
+      "Fantasy",
+      "Incremental"
     ],
     "gameUrl": "https://idleavatar.onrender.com/",
     "aspectRatio": "16/9",
@@ -178,7 +187,10 @@
     ],
     "thumbnail": "images/Gem Merge.webp",
     "genres": [
-      "Puzzle"
+      "Puzzle",
+      "Casual",
+      "Strategy",
+      "Match"
     ],
     "gameUrl": "https://mergegame.pages.dev/",
     "aspectRatio": "16/16",
@@ -192,7 +204,8 @@
       "secondaryUnit": "",
       "dualSort": false,
       "subSortAsc": true
-    }
+    },
+    "badge": "CAN'T STOP"
   },
   {
     "id": "6",
@@ -227,7 +240,10 @@
     ],
     "thumbnail": "images/Trade Tycoon Image.webp",
     "genres": [
-      "Tycoon"
+      "Tycoon",
+      "Simulation",
+      "Strategy",
+      "Economy"
     ],
     "gameUrl": "https://citytraders.pages.dev",
     "aspectRatio": "16/9",
@@ -269,7 +285,10 @@
     ],
     "thumbnail": "images/15s Clicker.webp",
     "genres": [
-      "Clicker"
+      "Clicker",
+      "Casual",
+      "Challenge",
+      "Arcade"
     ],
     "gameUrl": "https://clickthetarget.pages.dev/",
     "aspectRatio": "1/1",
@@ -305,7 +324,7 @@
       "Sleek and Responsive User Interface",
       "Replay System to Analyze your Previous Games",
       "Customizable Board Skins and Stone Styles",
-      "Local Two-player Mode for Fun with Friends",
+      "Local Co-op (Two-player Mode)",
       "Leaderboard for Win Rates and Elo Rating",
       "Web & Mobile Friendly"
     ],
@@ -314,13 +333,16 @@
       "세련되고 반응이 빠른 사용자 인터페이스",
       "이전 대국을 분석할 수 있는 기보 다시보기 시스템",
       "커스터마이징 가능한 바둑판 스킨 및 돌 스타일",
-      "친구와 함께 즐길 수 있는 로컬 2인용 모드",
+      "Local Co-op (2인용 모드)",
       "승률 및 엘로(Elo) 평점을 위한 리더보드",
       "웹 & 모바일 친화적"
     ],
     "thumbnail": "images/Omok.webp",
     "genres": [
-      "Board Game"
+      "Board Game",
+      "Local Co-op",
+      "Strategy",
+      "Classic"
     ],
     "gameUrl": "https://omok-96n.pages.dev/",
     "aspectRatio": "1/1",
@@ -372,7 +394,10 @@
     ],
     "thumbnail": "images/40th Century Void Survivor.webp",
     "genres": [
-      "Survival"
+      "Survival",
+      "Action",
+      "Sci-Fi",
+      "Roguelike"
     ],
     "gameUrl": "https://neuralsurvivorbk.pages.dev/",
     "aspectRatio": "16/9",
@@ -386,7 +411,8 @@
       "secondaryUnit": "",
       "dualSort": true,
       "subSortAsc": false
-    }
+    },
+    "badge": "POPULAR"
   },
   {
     "id": "10",
@@ -422,7 +448,10 @@
     ],
     "thumbnail": "images/endlesswar.webp",
     "genres": [
-      "Simulation"
+      "Simulation",
+      "Strategy",
+      "War",
+      "Idle"
     ],
     "gameUrl": "https://16bed324.endlesswarbk.pages.dev/",
     "aspectRatio": "16/9",
@@ -472,7 +501,10 @@
     ],
     "thumbnail": "images/Dicefall Chronicles.webp",
     "genres": [
-      "Roguelike"
+      "Roguelike",
+      "RPG",
+      "Dice",
+      "Adventure"
     ],
     "gameUrl": "https://dicefall-chronicles-mobile-bk.pages.dev/",
     "aspectRatio": "16/9",
@@ -522,7 +554,9 @@
     "thumbnail": "images/Heroes of the Last Nexus.webp",
     "genres": [
       "RPG",
-      "Strategy"
+      "Strategy",
+      "Fantasy",
+      "Auto Battler"
     ],
     "gameUrl": "https://heroes-of-the-last-nexus-bk.pages.dev/",
     "aspectRatio": "16/9",
@@ -572,7 +606,10 @@
     ],
     "thumbnail": "images/timing_chef.webp",
     "genres": [
-      "Casual"
+      "Casual",
+      "Arcade",
+      "Timing",
+      "Cooking"
     ],
     "gameUrl": "https://timing-chef-bk.pages.dev/",
     "aspectRatio": "9/16",
@@ -622,7 +659,10 @@
     ],
     "thumbnail": "images/fruit_frenzy_banner.webp",
     "genres": [
-      "Arcade"
+      "Arcade",
+      "Casual",
+      "Action",
+      "Reflex"
     ],
     "gameUrl": "https://fruit-frenzy-bk.pages.dev/",
     "aspectRatio": "9/16",
@@ -636,7 +676,8 @@
       "secondaryUnit": "",
       "dualSort": true,
       "subSortAsc": false
-    }
+    },
+    "badge": "CAN'T STOP"
   },
   {
     "id": "15",
@@ -677,7 +718,9 @@
     "thumbnail": "images/KLS_banner.webp",
     "genres": [
       "Auto Battler",
-      "Roguelike"
+      "Roguelike",
+      "Strategy",
+      "Fantasy"
     ],
     "gameUrl": "https://kingond-s-last-stand-bk.pages.dev/",
     "aspectRatio": "16/9",
@@ -691,7 +734,8 @@
       "secondaryUnit": "",
       "dualSort": true,
       "subSortAsc": false
-    }
+    },
+    "badge": "POPULAR"
   },
   {
     "id": "16",
@@ -728,11 +772,14 @@
     "thumbnail": "images/make_triangle.webp",
     "genres": [
       "Arcade",
-      "Local Co-op"
+      "Local Co-op",
+      "Action",
+      "PvP"
     ],
     "gameUrl": "https://make-triangle-bk.pages.dev/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
-    "isOriginal": true
+    "isOriginal": true,
+    "badge": "CAN'T STOP"
   }
 ]

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { Link as LinkIcon, Share2, X } from 'lucide-react';
 import './ShareModal.css';
 
 interface ShareModalProps {
@@ -90,17 +91,17 @@ const ShareModal: React.FC<ShareModalProps> = ({
     score: lang === 'ko' ? '내 점수' : 'My Score',
     twitter: lang === 'ko' ? 'X(트위터)에 공유' : 'Share on X',
     kakao: lang === 'ko' ? '카카오톡 공유' : 'Share via KakaoTalk',
-    copy: lang === 'ko' ? '🔗 링크 복사' : '🔗 Copy Link',
-    native: lang === 'ko' ? '📤 더 보기...' : '📤 More options...',
+    copy: lang === 'ko' ? '링크 복사' : 'Copy Link',
+    native: lang === 'ko' ? '더 보기...' : 'More options...',
     close: lang === 'ko' ? '닫기' : 'Close',
   };
 
   return (
     <div className="share-modal-overlay" onClick={onClose}>
       <div className="share-modal" onClick={e => e.stopPropagation()}>
-        <button className="share-modal-close" onClick={onClose} aria-label="Close">✕</button>
+        <button className="share-modal-close" onClick={onClose} aria-label="Close"><X size={16} aria-hidden="true" /></button>
 
-        <h3 className="share-modal-title">📢 {t.title}</h3>
+        <h3 className="share-modal-title"><Share2 size={20} aria-hidden="true" /> {t.title}</h3>
 
         {score != null && (
           <div className="share-score-display">
@@ -141,7 +142,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
             className="share-btn share-btn-copy"
             onClick={handleCopyLink}
           >
-            {t.copy}
+            <LinkIcon size={14} aria-hidden="true" /> {t.copy}
           </button>
 
           {typeof navigator !== 'undefined' && 'share' in navigator && (
@@ -149,7 +150,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
               className="share-btn share-btn-native"
               onClick={handleNativeShare}
             >
-              {t.native}
+              <Share2 size={14} aria-hidden="true" /> {t.native}
             </button>
           )}
         </div>

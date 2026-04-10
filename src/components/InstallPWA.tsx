@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Gamepad2, X } from 'lucide-react';
 import './InstallPWA.css';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -84,7 +85,7 @@ const InstallPWA: React.FC = () => {
   return (
     <div className={`pwa-install-banner ${isVisible ? 'show' : ''}`}>
       <div className="pwa-content">
-        <div className="pwa-icon">🎮</div>
+        <div className="pwa-icon"><Gamepad2 size={24} aria-hidden="true" /></div>
         <div className="pwa-text">
           <h3>Install ArcadeDeck</h3>
           {isIOS ? (
@@ -95,7 +96,7 @@ const InstallPWA: React.FC = () => {
         </div>
         <div className="pwa-actions">
           {!isIOS && <button className="install-btn" onClick={onClick}>Install</button>}
-          <button className="close-btn" onClick={closeBanner}>✕</button>
+          <button className="close-btn" onClick={closeBanner} aria-label="Close install banner"><X size={18} aria-hidden="true" /></button>
         </div>
       </div>
     </div>

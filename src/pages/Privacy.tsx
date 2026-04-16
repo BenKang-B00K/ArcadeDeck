@@ -9,95 +9,90 @@ const Privacy: React.FC = () => {
     <div className="privacy-page" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Helmet>
         <title>Privacy Policy | ArcadeDeck</title>
-        <meta name="description" content="Read our privacy policy to understand how we protect your data and how we use cookies and Google AdSense on ArcadeDeck." />
+        <meta name="description" content="Read our privacy policy to understand how ArcadeDeck collects, uses, and protects your data, including cookies, Google AdSense, Google Analytics, and Firebase services." />
         <meta property="og:title" content="Privacy Policy | ArcadeDeck" />
         <meta property="og:url" content="https://arcadedeck.net/privacy" />
       </Helmet>
       <Navbar />
       <div className="container" style={{ paddingTop: '120px', flex: 1, color: '#fff', paddingBottom: '60px' }}>
-        <h1 style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>Privacy <span style={{ color: '#00d2ff' }}>Policy</span></h1>
+        <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Privacy <span style={{ color: '#00d2ff' }}>Policy</span></h1>
+        <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '2rem' }}>Last Updated: April 16, 2026</p>
         <div style={{ lineHeight: '1.8', fontSize: '1rem', maxWidth: '900px', background: 'rgba(255,255,255,0.05)', padding: '40px', borderRadius: '15px' }}>
           <h2>1. Introduction</h2>
-          <p>At ArcadeDeck, we value your privacy. This policy explains how we collect and use information when you visit our website.</p>
-          
-          <h2 style={{ marginTop: '20px' }}>2. Google AdSense & Cookies</h2>
-          <p>We use Google AdSense to serve ads. Google, as a third-party vendor, uses cookies to serve ads on our site. Google's use of advertising cookies enables it and its partners to serve ads to our users based on their visit to our site and/or other sites on the Internet.</p>
-          <p>Users may opt out of personalized advertising by visiting <a href="https://www.google.com/settings/ads" target="_blank" style={{ color: '#00d2ff' }}>Google Ads Settings</a>.</p>
+          <p>ArcadeDeck ("we," "us," or "our") operates the website <strong>arcadedeck.net</strong> (the "Service"). This Privacy Policy explains what information we collect when you use ArcadeDeck, how we use it, who we share it with, and the choices you have. By accessing or using the Service, you agree to the practices described below.</p>
 
-          <h2 style={{ marginTop: '20px' }}>3. Data Collection</h2>
-          <p>We do not collect personally identifiable information unless voluntarily provided by the user (e.g., setting a Gamer ID). Game scores and leaderboards are stored to enhance the competitive experience.</p>
+          <h2 style={{ marginTop: '24px' }}>2. Information We Collect</h2>
+          <p>We collect only the minimum information needed to operate the Service.</p>
+          <h3 style={{ marginTop: '16px', color: '#00d2ff' }}>2.1 Information You Provide</h3>
+          <ul>
+            <li><strong>Gamer ID (nickname):</strong> A self-chosen display name shown on leaderboards and comments. We never ask for your real name.</li>
+            <li><strong>Game scores:</strong> Scores submitted from the games you play, associated with your Gamer ID.</li>
+            <li><strong>Comments:</strong> Any text you voluntarily post in a game's comment section.</li>
+          </ul>
+          <h3 style={{ marginTop: '16px', color: '#00d2ff' }}>2.2 Information Collected Automatically</h3>
+          <ul>
+            <li><strong>Browser & device data:</strong> User-agent, screen size, language, and approximate location derived from IP address — collected by Google Analytics for traffic measurement.</li>
+            <li><strong>Cookies and local storage:</strong> Small data files stored in your browser to remember your Gamer ID, recently played games, language preference, and like state. See Section 4 for details.</li>
+            <li><strong>Advertising identifiers:</strong> Google AdSense and its partners may set cookies to deliver and measure ads. See Section 5.</li>
+          </ul>
 
-          <h2 style={{ marginTop: '20px' }}>4. Security</h2>
-          <p>We implement security measures to protect your data, but please remember that no method of transmission over the internet is 100% secure.</p>
+          <h2 style={{ marginTop: '24px' }}>3. How We Use Your Information</h2>
+          <ul>
+            <li>Operate the Service (display leaderboards, save preferences, render comments).</li>
+            <li>Maintain and improve the Service (debug errors, measure usage trends).</li>
+            <li>Serve relevant advertisements through Google AdSense.</li>
+            <li>Detect, prevent, and address abuse, spam, or unauthorized use.</li>
+            <li>Comply with applicable legal obligations.</li>
+          </ul>
+          <p>We do <strong>not</strong> sell your personal information.</p>
 
-          <h2 style={{ marginTop: '20px' }}>5. Contact Us</h2>
-          <p>If you have any questions about this Privacy Policy, please contact us at help@arcadedeck.net.</p>
+          <h2 style={{ marginTop: '24px' }}>4. Cookies and Local Storage</h2>
+          <p>We use the following categories of client-side storage:</p>
+          <ul>
+            <li><strong>Strictly necessary (localStorage):</strong> Stores your Gamer ID, language toggle, recently played games, and "liked" games. Cannot be disabled without breaking core features.</li>
+            <li><strong>Analytics (cookies set by Google Analytics):</strong> Helps us understand aggregate traffic. See <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer" style={{ color: '#00d2ff' }}>How Google uses data</a>.</li>
+            <li><strong>Advertising (cookies set by Google AdSense and ad partners):</strong> Used to serve and measure ads, and may be used for personalization where permitted.</li>
+          </ul>
+          <p>You can clear cookies and localStorage at any time through your browser's settings. Doing so will reset your Gamer ID and game preferences.</p>
 
-          <div style={{ marginTop: '3rem', borderTop: '1px solid rgba(255, 255, 255, 0.2)', paddingTop: '2rem' }}>
-            <h2 style={{ fontSize: '2rem', marginBottom: '1.5rem', color: '#00d2ff' }}>Color Spin Rush Game Privacy Policy</h2>
-            <p style={{ fontSize: '0.9rem', color: 'rgba(255, 255, 255, 0.7)', marginBottom: '1rem' }}>
-              Last Updated: March 26, 2024<br />
-              Effective Date: Immediately
-            </p>
-            <p>Welcome to "Color Spin Rush" mobile game (the "App"). This Privacy Policy explains how your information is collected, used, and shared in connection with the App, provided by Developer_BenjaminK ("we," us, or "our"). We are committed to protecting your privacy.</p>
+          <h2 style={{ marginTop: '24px' }}>5. Third-Party Services</h2>
+          <p>We rely on the following third-party services. Each has its own privacy policy that governs the data they collect.</p>
+          <ul>
+            <li><strong>Google AdSense</strong> — serves ads on the Service. Google, as a third-party vendor, uses cookies to serve ads based on your visit to this and other sites on the Internet. You may opt out of personalized advertising by visiting <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" style={{ color: '#00d2ff' }}>Google Ads Settings</a>, or use <a href="https://www.aboutads.info/" target="_blank" rel="noopener noreferrer" style={{ color: '#00d2ff' }}>aboutads.info</a> to opt out of third-party vendor cookies.</li>
+            <li><strong>Google Analytics</strong> — measures site traffic and engagement. Data is processed per the <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style={{ color: '#00d2ff' }}>Google Privacy Policy</a>.</li>
+            <li><strong>Google Firebase (Firestore)</strong> — stores leaderboard scores and comments. Hosted by Google; subject to the <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener noreferrer" style={{ color: '#00d2ff' }}>Firebase Privacy Notice</a>.</li>
+            <li><strong>Google Fonts</strong> — serves typography assets used on the Service.</li>
+          </ul>
 
-            <h3 style={{ marginTop: '1.5rem', color: '#00d2ff' }}>1. Information We Collect</h3>
-            <p>We may collect the following types of information from and about you when you use the App:</p>
-            <ul>
-              <li><strong>Gameplay Data:</strong> Information related to your gameplay, such as your scores, progress, combos, lives, and achieved levels. This data is used to track your performance, update leaderboards (if applicable), and improve your gaming experience.</li>
-              <li><strong>Technical Information:</strong> When you use the App, we may automatically collect certain technical information, including:
-                <ul>
-                  <li>Your device's Internet Protocol (IP) address.</li>
-                  <li>Device type, model, operating system version.</li>
-                  <li>Device identifiers (e.g., Advertising ID, if you grant permission, for ad personalization and measurement purposes).</li>
-                  <li>App usage data (e.g., features used, time spent in the App).</li>
-                </ul>
-              </li>
-              <li><strong>Information Provided by You:</strong> If you choose to interact with certain features (e.g., if future updates introduce account creation or support features), you may voluntarily provide us with information such as your email address or a display name.</li>
-            </ul>
+          <h2 style={{ marginTop: '24px' }}>6. Children's Privacy</h2>
+          <p>The Service is not directed at children under the age of 13 (or the equivalent minimum age in your jurisdiction). We do not knowingly collect personal information from children. If you believe a child has provided us with personal information, please contact us at <a href="mailto:help@arcadedeck.net" style={{ color: '#00d2ff' }}>help@arcadedeck.net</a> and we will take steps to remove it.</p>
 
-            <h3 style={{ marginTop: '1.5rem', color: '#00d2ff' }}>2. How We Use Your Information</h3>
-            <p>We use the information we collect for the following purposes:</p>
-            <ul>
-              <li><strong>To Provide and Maintain the App:</strong> To operate the game, track scores, manage progression, and ensure its functionality.</li>
-              <li><strong>To Improve the App:</strong> To analyze how users interact with the App, identify bugs, and enhance features and gameplay based on usage patterns.</li>
-              <li><strong>To Personalize Your Experience:</strong> To tailor the content and ads you see within the App.</li>
-              <li><strong>For Advertising:</strong> To serve you ads. We work with advertising partners who may use your information to provide more relevant advertising.</li>
-              <li><strong>To Communicate with You:</strong> If you provide contact information, we may use it to respond to your inquiries or send you updates about the App.</li>
-            </ul>
+          <h2 style={{ marginTop: '24px' }}>7. Your Rights (GDPR / CCPA)</h2>
+          <p>Depending on where you live, you may have the right to:</p>
+          <ul>
+            <li>Request access to the personal data we hold about you.</li>
+            <li>Request correction or deletion of your data.</li>
+            <li>Object to or restrict certain processing.</li>
+            <li>Withdraw consent for personalized advertising at any time.</li>
+            <li>Lodge a complaint with your local data protection authority.</li>
+          </ul>
+          <p>To exercise any of these rights, email us at <a href="mailto:help@arcadedeck.net" style={{ color: '#00d2ff' }}>help@arcadedeck.net</a>. Because we identify users only by self-chosen Gamer IDs, please include your Gamer ID and the affected game(s) so we can locate the relevant records.</p>
 
-            <h3 style={{ marginTop: '1.5rem', color: '#00d2ff' }}>3. Sharing Your Information with Third Parties</h3>
-            <p>We may share your information in the following circumstances:</p>
-            <ul>
-              <li><strong>With Advertising Partners:</strong> We use Google AdMob to serve advertisements within the App. AdMob may collect and use data (including device identifiers and usage data) to provide personalized ads, measure ad performance, and for other purposes outlined in their privacy policy.
-                <ul>
-                  <li>Google AdMob Privacy Policy: <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">https://policies.google.com/privacy</a></li>
-                </ul>
-              </li>
-              <li><strong>With Analytics Providers:</strong> We may use third-party analytics services (e.g., Google Analytics) to help us measure traffic and usage trends for the App. These services collect and process aggregated data.</li>
-              <li><strong>For Legal Reasons:</strong> We may disclose your information if required by law, to comply with a legal process, or to protect our rights, property, or safety, or that of our users.</li>
-            </ul>
+          <h2 style={{ marginTop: '24px' }}>8. Data Retention</h2>
+          <p>Leaderboard scores and comments are retained indefinitely so the competitive history of the Service remains intact. You may request deletion of records associated with your Gamer ID at any time (see Section 7).</p>
 
-            <h3 style={{ marginTop: '1.5rem', color: '#00d2ff' }}>4. Children's Privacy</h3>
-            <p>The App is not intended for children under the age of 13 (or the applicable age of digital consent in your region). We do not knowingly collect personal information from children under this age. If you are a parent or guardian and believe your child has provided us with personal information, please contact us immediately so we can take steps to remove that information.</p>
+          <h2 style={{ marginTop: '24px' }}>9. Data Security</h2>
+          <p>We use industry-standard security measures provided by Google Cloud / Firebase to protect data in transit and at rest. However, no method of transmission over the internet is 100% secure, and we cannot guarantee absolute security.</p>
 
-            <h3 style={{ marginTop: '1.5rem', color: '#00d2ff' }}>5. Data Security</h3>
-            <p>We take reasonable measures to protect the information we collect from unauthorized access, use, or disclosure. However, no method of transmission over the internet or electronic storage is 100% secure.</p>
+          <h2 style={{ marginTop: '24px' }}>10. International Transfers</h2>
+          <p>Our infrastructure is hosted by Google. Data may be processed in countries outside your country of residence, including the United States. By using the Service, you consent to such transfers.</p>
 
-            <h3 style={{ marginTop: '1.5rem', color: '#00d2ff' }}>6. Your Choices and Controls</h3>
-            <ul>
-              <li><strong>Local Data:</strong> Most gameplay data is stored locally on your device.</li>
-              <li><strong>Advertising Preferences:</strong> You may be able to limit ad tracking or reset your device's advertising ID through your device's operating system settings. You can also review Google's Privacy Policy for more information on how they use data.</li>
-              <li><strong>Opt-Out:</strong> If we implement future features requiring more extensive data collection, we will provide clear opt-out mechanisms.</li>
-            </ul>
+          <h2 style={{ marginTop: '24px' }}>11. Changes to This Policy</h2>
+          <p>We may update this Privacy Policy from time to time. The "Last Updated" date at the top reflects the most recent revision. Material changes will be highlighted on the homepage when reasonably possible. Continued use of the Service after changes take effect constitutes acceptance of the revised policy.</p>
 
-            <h3 style={{ marginTop: '1.5rem', color: '#00d2ff' }}>7. Changes to This Privacy Policy</h3>
-            <p>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy within the App or on our website. Your continued use of the App after any changes constitutes your acceptance of the new Privacy Policy.</p>
-
-            <h3 style={{ marginTop: '1.5rem', color: '#00d2ff' }}>8. Contact Us</h3>
-            <p>If you have any questions about this Privacy Policy, please contact us at:</p>
-            <p style={{ fontSize: '1.2rem', color: '#00d2ff' }}>help@arcadedeck.net</p>
-          </div>
+          <h2 style={{ marginTop: '24px' }}>12. Contact</h2>
+          <p>For any questions about this Privacy Policy or our data practices, contact us at:</p>
+          <p style={{ fontSize: '1.2rem', color: '#00d2ff' }}>help@arcadedeck.net</p>
         </div>
       </div>
       <footer className="footer">

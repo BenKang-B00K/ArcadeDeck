@@ -362,16 +362,17 @@ const GamePlayer: React.FC = () => {
       backgroundImage: `linear-gradient(rgba(5, 5, 7, 0.8), rgba(5, 5, 7, 0.9)), url(${thumbnailUrl})` 
     }}>
       <Helmet>
+        <html lang={lang === 'ko' ? 'ko' : 'en'} />
         <title>{lang === 'ko' ? game.titleKo : game.title} - Play Free on ArcadeDeck</title>
         <meta name="description" content={lang === 'ko' ? `${game.titleKo}: ${game.descriptionKo} ArcadeDeck에서 무료로 즐기세요!` : `Play ${game.title}: ${game.description} Free online browser game on ArcadeDeck.`} />
         <meta name="keywords" content={`${game.title}, ${game.genres.join(', ')}, free online game, browser game, arcadedeck`} />
         <link rel="canonical" href={`https://arcadedeck.net/play/${game.slug}`} />
-        <link rel="alternate" hrefLang="en" href={`https://arcadedeck.net/play/${game.slug}`} />
-        <link rel="alternate" hrefLang="ko" href={`https://arcadedeck.net/play/${game.slug}`} />
-        <link rel="alternate" hrefLang="x-default" href={`https://arcadedeck.net/play/${game.slug}`} />
 
         {/* Open Graph & Twitter Card */}
         <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="ArcadeDeck" />
+        <meta property="og:locale" content={lang === 'ko' ? 'ko_KR' : 'en_US'} />
+        <meta property="og:locale:alternate" content={lang === 'ko' ? 'en_US' : 'ko_KR'} />
         <meta property="og:title" content={`${lang === 'ko' ? game.titleKo : game.title} - ArcadeDeck`} />
         <meta property="og:description" content={lang === 'ko' ? game.descriptionKo : game.description} />
         <meta property="og:image" content={`https://arcadedeck.net/${encodeURI(game.thumbnail)}`} />
@@ -484,65 +485,61 @@ const GamePlayer: React.FC = () => {
           {!iframeLoading && <AdBanner slot={AD_SLOTS.GAME_PLAYER} style={{ margin: '0' }} />}
         </div>
 
-        {/* ── Info Tabs ── */}
+        {/* ── Info Sections (all visible for SEO + AdSense content depth) ── */}
         <div className="game-info-tabs">
-          <div className="tab-nav" role="tablist">
-            <button role="tab" className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
+          <nav className="tab-nav" aria-label={lang === 'ko' ? '게임 정보 바로가기' : 'Jump to game info'}>
+            <a href="#section-overview" className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
               <BookOpen size={14} aria-hidden="true" /> {lang === 'ko' ? '개요' : 'Overview'}
-            </button>
-            <button role="tab" className={`tab-btn ${activeTab === 'controls' ? 'active' : ''}`} onClick={() => setActiveTab('controls')}>
+            </a>
+            <a href="#section-controls" className={`tab-btn ${activeTab === 'controls' ? 'active' : ''}`} onClick={() => setActiveTab('controls')}>
               <Joystick size={14} aria-hidden="true" /> {lang === 'ko' ? '조작법' : 'Controls'}
-            </button>
+            </a>
             {(game.tips || game.tipsKo) && (
-              <button role="tab" className={`tab-btn ${activeTab === 'tips' ? 'active' : ''}`} onClick={() => setActiveTab('tips')}>
+              <a href="#section-tips" className={`tab-btn ${activeTab === 'tips' ? 'active' : ''}`} onClick={() => setActiveTab('tips')}>
                 <Lightbulb size={14} aria-hidden="true" /> {lang === 'ko' ? '팁' : 'Tips'}
-              </button>
+              </a>
             )}
             {(game.lore || game.loreKo) && (
-              <button role="tab" className={`tab-btn ${activeTab === 'lore' ? 'active' : ''}`} onClick={() => setActiveTab('lore')}>
+              <a href="#section-lore" className={`tab-btn ${activeTab === 'lore' ? 'active' : ''}`} onClick={() => setActiveTab('lore')}>
                 <ScrollText size={14} aria-hidden="true" /> {lang === 'ko' ? '세계관' : 'Lore'}
-              </button>
+              </a>
             )}
             {((game.features?.length ?? 0) > 0) && (
-              <button role="tab" className={`tab-btn ${activeTab === 'features' ? 'active' : ''}`} onClick={() => setActiveTab('features')}>
+              <a href="#section-features" className={`tab-btn ${activeTab === 'features' ? 'active' : ''}`} onClick={() => setActiveTab('features')}>
                 <Sparkles size={14} aria-hidden="true" /> {lang === 'ko' ? '특징' : 'Features'}
-              </button>
+              </a>
             )}
-          </div>
+          </nav>
 
-          {/* All tab panels always rendered for SEO — only active one is visible */}
-          <div className={`tab-panel detail-card${activeTab === 'overview' ? '' : ' tab-hidden'}`} role="tabpanel">
-            <div className="detail-content">
-              {lang === 'ko' ? game.fullDescriptionKo : game.fullDescription}
-            </div>
-          </div>
-          <div className={`tab-panel detail-card${activeTab === 'controls' ? '' : ' tab-hidden'}`} role="tabpanel">
-            <div className="detail-content highlight">
-              {lang === 'ko' ? game.controlsKo : game.controls}
-            </div>
-          </div>
+          <section id="section-overview" className="info-section detail-card">
+            <h2 className="info-section-title"><BookOpen size={18} aria-hidden="true" /> {lang === 'ko' ? '개요' : 'Overview'}</h2>
+            <div className="detail-content">{lang === 'ko' ? game.fullDescriptionKo : game.fullDescription}</div>
+          </section>
+          <section id="section-controls" className="info-section detail-card">
+            <h2 className="info-section-title"><Joystick size={18} aria-hidden="true" /> {lang === 'ko' ? '조작법' : 'Controls'}</h2>
+            <div className="detail-content highlight">{lang === 'ko' ? game.controlsKo : game.controls}</div>
+          </section>
           {(game.tips || game.tipsKo) && (
-            <div className={`tab-panel detail-card${activeTab === 'tips' ? '' : ' tab-hidden'}`} role="tabpanel">
-              <div className="detail-content tip-highlight">
-                {lang === 'ko' ? game.tipsKo : game.tips}
-              </div>
-            </div>
+            <section id="section-tips" className="info-section detail-card">
+              <h2 className="info-section-title"><Lightbulb size={18} aria-hidden="true" /> {lang === 'ko' ? '팁' : 'Pro Tips'}</h2>
+              <div className="detail-content tip-highlight">{lang === 'ko' ? game.tipsKo : game.tips}</div>
+            </section>
           )}
           {(game.lore || game.loreKo) && (
-            <div className={`tab-panel detail-card${activeTab === 'lore' ? '' : ' tab-hidden'}`} role="tabpanel">
-              <div className="detail-content italic">
-                {lang === 'ko' ? game.loreKo : game.lore}
-              </div>
-            </div>
+            <section id="section-lore" className="info-section detail-card">
+              <h2 className="info-section-title"><ScrollText size={18} aria-hidden="true" /> {lang === 'ko' ? '세계관' : 'World Lore'}</h2>
+              <div className="detail-content italic">{lang === 'ko' ? game.loreKo : game.lore}</div>
+            </section>
           )}
           {((game.features?.length ?? 0) > 0) && (
-            <div className={`tab-panel detail-card${activeTab === 'features' ? '' : ' tab-hidden'}`} role="tabpanel">
+            <section id="section-features" className="info-section detail-card">
+              <h2 className="info-section-title"><Sparkles size={18} aria-hidden="true" /> {lang === 'ko' ? '특징' : 'Key Features'}</h2>
               <ul className="feature-tags">
                 {(lang === 'ko' ? game.featuresKo : game.features)?.map((feat, idx) => (
                   <li key={idx} className="feature-tag-item">#{feat}</li>
                 ))}
               </ul>
-            </div>
+            </section>
           )}
         </div>
 

@@ -4,18 +4,17 @@ const games = JSON.parse(readFileSync('src/data/games.json', 'utf-8'));
 const today = new Date().toISOString().split('T')[0];
 
 const staticPages = [
-  { path: '/', changefreq: 'daily', priority: '1.0' },
-  { path: '/hall-of-fame', changefreq: 'monthly', priority: '0.8' },
-  { path: '/about', changefreq: 'yearly', priority: '0.6' },
-  { path: '/contact', changefreq: 'yearly', priority: '0.5' },
-  { path: '/privacy', changefreq: 'yearly', priority: '0.4' },
+  { path: '/', priority: '1.0' },
+  { path: '/hall-of-fame', priority: '0.8' },
+  { path: '/about', priority: '0.6' },
+  { path: '/contact', priority: '0.5' },
+  { path: '/privacy', priority: '0.4' },
 ];
 
 const gamePages = games
   .filter(g => g.status !== 'IN PRODUCTION')
   .map(g => ({
     path: `/play/${g.slug}`,
-    changefreq: 'weekly',
     priority: '0.9',
   }));
 
@@ -28,7 +27,6 @@ ${allPages
     p => `  <url>
     <loc>https://arcadedeck.net${p.path}</loc>
     <lastmod>${today}</lastmod>
-    <changefreq>${p.changefreq}</changefreq>
     <priority>${p.priority}</priority>
   </url>`
   )

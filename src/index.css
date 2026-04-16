@@ -121,6 +121,10 @@ html, body {
   -webkit-user-select: none;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   overscroll-behavior-x: none;
   padding-top: calc(60px + env(safe-area-inset-top));

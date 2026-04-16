@@ -54,7 +54,6 @@ for (const game of playableGames) {
   });
 
   const featuresHtml = (game.features || []).map(f => `<li>${f}</li>`).join('');
-  const featuresKoHtml = (game.featuresKo || []).map(f => `<li>${f}</li>`).join('');
 
   const html = `<!doctype html>
 <html lang="en">
@@ -72,6 +71,9 @@ for (const game of playableGames) {
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="canonical" href="${pageUrl}" />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ArcadeDeck" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="ko_KR" />
     <meta property="og:title" content="${game.title} - ArcadeDeck" />
     <meta property="og:description" content="${game.description}" />
     <meta property="og:image" content="${thumbUrl}" />
@@ -85,32 +87,37 @@ for (const game of playableGames) {
     ${modulePreloads}
   </head>
   <body>
-    <div id="root"></div>
-    <!-- Static content for SEO crawlers -->
-    <div id="seo-content" style="position:absolute;left:-9999px;top:-9999px;">
-      <h1>${game.title}</h1>
-      ${game.titleKo ? `<h2>${game.titleKo}</h2>` : ''}
-      <p>${game.description}</p>
-      ${game.descriptionKo ? `<p>${game.descriptionKo}</p>` : ''}
+    <div id="root">
+      <!--
+        Visible pre-rendered content for crawlers and users on slow connections.
+        React replaces this entire subtree on mount, so JS-enabled users never
+        see it. Do not hide with display:none or off-screen tricks — that
+        triggers cloaking penalties (AdSense, Google webspam).
+      -->
+      <main style="max-width:900px;margin:0 auto;padding:40px 20px;font-family:system-ui,sans-serif;color:#fff;background:#050507;min-height:100vh;">
+        <h1 style="font-size:2rem;margin-bottom:8px;">${game.title}</h1>
+        ${game.titleKo ? `<p style="color:#9aa;margin:0 0 20px;font-size:1.1rem;">${game.titleKo}</p>` : ''}
+        <p style="font-size:1.1rem;line-height:1.6;">${game.description}</p>
+        ${game.descriptionKo ? `<p style="color:#bbb;line-height:1.6;">${game.descriptionKo}</p>` : ''}
 
-      <h2>About This Game</h2>
-      <div>${(game.fullDescription || '').replace(/\n/g, '<br>')}</div>
-      ${game.fullDescriptionKo ? `<div>${game.fullDescriptionKo.replace(/\n/g, '<br>')}</div>` : ''}
+        <h2 style="margin-top:32px;font-size:1.3rem;">About This Game</h2>
+        <div style="line-height:1.7;">${(game.fullDescription || '').replace(/\n/g, '<br>')}</div>
+        ${game.fullDescriptionKo ? `<div style="margin-top:12px;color:#bbb;line-height:1.7;">${game.fullDescriptionKo.replace(/\n/g, '<br>')}</div>` : ''}
 
-      ${game.controls ? `<h2>How to Play</h2><p>${game.controls}</p>` : ''}
-      ${game.controlsKo ? `<p>${game.controlsKo}</p>` : ''}
+        ${game.controls ? `<h2 style="margin-top:32px;font-size:1.3rem;">How to Play</h2><p style="line-height:1.6;">${game.controls}</p>` : ''}
+        ${game.controlsKo ? `<p style="color:#bbb;line-height:1.6;">${game.controlsKo}</p>` : ''}
 
-      ${game.tips ? `<h2>Pro Tips</h2><p>${game.tips}</p>` : ''}
-      ${game.tipsKo ? `<p>${game.tipsKo}</p>` : ''}
+        ${game.tips ? `<h2 style="margin-top:32px;font-size:1.3rem;">Pro Tips</h2><p style="line-height:1.6;">${game.tips}</p>` : ''}
+        ${game.tipsKo ? `<p style="color:#bbb;line-height:1.6;">${game.tipsKo}</p>` : ''}
 
-      ${game.lore ? `<h2>World Lore</h2><div>${game.lore.replace(/\n/g, '<br>')}</div>` : ''}
-      ${game.loreKo ? `<div>${game.loreKo.replace(/\n/g, '<br>')}</div>` : ''}
+        ${game.lore ? `<h2 style="margin-top:32px;font-size:1.3rem;">World Lore</h2><div style="line-height:1.7;font-style:italic;">${game.lore.replace(/\n/g, '<br>')}</div>` : ''}
+        ${game.loreKo ? `<div style="margin-top:12px;color:#bbb;line-height:1.7;font-style:italic;">${game.loreKo.replace(/\n/g, '<br>')}</div>` : ''}
 
-      ${featuresHtml ? `<h2>Key Features</h2><ul>${featuresHtml}</ul>` : ''}
-      ${featuresKoHtml ? `<ul>${featuresKoHtml}</ul>` : ''}
+        ${featuresHtml ? `<h2 style="margin-top:32px;font-size:1.3rem;">Key Features</h2><ul style="line-height:1.8;">${featuresHtml}</ul>` : ''}
 
-      <p>Genres: ${game.genres.join(', ')}</p>
-      <p>Play free at <a href="${pageUrl}">${pageUrl}</a></p>
+        <p style="margin-top:32px;color:#9aa;">Genres: ${game.genres.join(', ')}</p>
+        <p style="color:#9aa;">Loading interactive game… If it doesn't load, <a href="${pageUrl}" style="color:#00d2ff;">visit ${pageUrl}</a>.</p>
+      </main>
     </div>
     ${scriptTags}
   </body>
@@ -119,13 +126,25 @@ for (const game of playableGames) {
   writeFileSync(`${dir}/index.html`, html);
 }
 
+// Rewrite the home noscript with the current playable games list so
+// non-JS crawlers always see an up-to-date catalogue.
+const noscriptItems = playableGames
+  .map(g => `          <li><a href="/play/${g.slug}">${g.title}</a> — ${g.description}</li>`)
+  .join('\n');
+
+const homeHtml = indexHtml.replace(
+  /(<h2>Our Games<\/h2>\s*<ul>)[\s\S]*?(<\/ul>)/,
+  `$1\n${noscriptItems}\n        $2`
+);
+
+writeFileSync('dist/index.html', homeHtml);
+
 // Also generate static pages for other routes
 const staticRoutes = ['about', 'privacy', 'contact', 'hall-of-fame', 'my-games'];
 for (const route of staticRoutes) {
   const dir = `dist/${route}`;
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-  // Copy the SPA index.html so these routes also work on refresh
-  writeFileSync(`${dir}/index.html`, indexHtml);
+  writeFileSync(`${dir}/index.html`, homeHtml);
 }
 
-console.log(`Pre-rendered ${playableGames.length} game pages + ${staticRoutes.length} static routes.`);
+console.log(`Pre-rendered ${playableGames.length} game pages + ${staticRoutes.length} static routes (noscript synced).`);

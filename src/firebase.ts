@@ -13,9 +13,10 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// Auto-detect long polling: WebChannel fails behind some proxies/networks
-// (corp firewalls, Cloudflare in some regions) → ERR_TIMED_OUT in console.
-// SDK probes the connection and falls back to long polling when needed.
+// Force long polling. AutoDetect still probes WebChannel first, leaving
+// ERR_TIMED_OUT entries in the console (Lighthouse best-practices regression).
+// Force-LP skips the probe entirely. Slight latency cost on networks where
+// WebChannel would have worked, but eliminates the console noise.
 export const db = initializeFirestore(app, {
-  experimentalAutoDetectLongPolling: true,
+  experimentalForceLongPolling: true,
 });

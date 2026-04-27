@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Maximize, Heart, Link as LinkIcon, Home, Globe, Gamepad2, BookOpen, Joystick, Lightbulb, ScrollText, Sparkles, X } from 'lucide-react';
-import { games } from '../data/games';
+import { games, loadGameDetails } from '../data/games';
 import type { Game } from '../data/games';
 import Navbar from '../components/Navbar';
 import Leaderboard from '../components/Leaderboard';
@@ -25,7 +25,7 @@ import {
   serverTimestamp,
   updateDoc,
   doc
-} from "firebase/firestore";
+} from "firebase/firestore/lite";
 import './GamePlayer.css';
 
 interface LeaderboardEntry {
@@ -214,23 +214,34 @@ const GamePlayer: React.FC = () => {
   };
 
   useEffect(() => {
-    const foundGame = games.find(g => g.id === id);
-    if (foundGame) {
-      setGame(foundGame);
+    const lightGame = games.find(g => g.id === id);
+    if (!lightGame) return;
 
-      // Recently Played Logic
-      const recentlyPlayed = JSON.parse(localStorage.getItem('recently_played') || '[]');
-      const updatedList = [foundGame.id, ...recentlyPlayed.filter((gid: string) => gid !== foundGame.id)].slice(0, 4);
-      localStorage.setItem('recently_played', JSON.stringify(updatedList));
-    }
+    // Render immediately with light data; detail-only sections (lore/tips/etc.)
+    // gate on their own fields and stay hidden until hydration completes.
+    setGame(lightGame);
+
+    const recentlyPlayed = JSON.parse(localStorage.getItem('recently_played') || '[]');
+    const updatedList = [lightGame.id, ...recentlyPlayed.filter((gid: string) => gid !== lightGame.id)].slice(0, 4);
+    localStorage.setItem('recently_played', JSON.stringify(updatedList));
+
+    let cancelled = false;
+    loadGameDetails(g => g.id === id).then(full => {
+      if (!cancelled && full) setGame(full);
+    });
+    return () => { cancelled = true; };
+  }, [id]);
+
+  useEffect(() => {
     fetchLeaderboard();
     window.scrollTo(0, 0);
 
     // Derive the allowed origin from the game's iframe URL
+    const lightGame = games.find(g => g.id === id);
     let allowedOrigin: string | null = null;
-    if (foundGame?.gameUrl) {
+    if (lightGame?.gameUrl) {
       try {
-        allowedOrigin = new URL(foundGame.gameUrl).origin;
+        allowedOrigin = new URL(lightGame.gameUrl).origin;
       } catch {
         allowedOrigin = null;
       }
@@ -365,8 +376,8 @@ const GamePlayer: React.FC = () => {
     }}>
       <Helmet>
         <html lang={lang === 'ko' ? 'ko' : 'en'} />
-        <title>{lang === 'ko' ? game.titleKo : game.title} - Play Free on ArcadeDeck</title>
-        <meta name="description" content={lang === 'ko' ? `${game.titleKo}: ${game.descriptionKo} ArcadeDeck에서 무료로 즐기세요!` : `Play ${game.title}: ${game.description} Free online browser game on ArcadeDeck.`} />
+        <title>{lang === 'ko' ? (game.titleKo ?? game.title) : game.title} - Play Free on ArcadeDeck</title>
+        <meta name="description" content={lang === 'ko' ? `${game.titleKo ?? game.title}: ${game.descriptionKo ?? game.description} ArcadeDeck에서 무료로 즐기세요!` : `Play ${game.title}: ${game.description} Free online browser game on ArcadeDeck.`} />
         <meta name="keywords" content={`${game.title}, ${game.genres.join(', ')}, free online game, browser game, arcadedeck`} />
         <link rel="canonical" href={`https://arcadedeck.net/play/${game.slug}`} />
 
@@ -375,13 +386,13 @@ const GamePlayer: React.FC = () => {
         <meta property="og:site_name" content="ArcadeDeck" />
         <meta property="og:locale" content={lang === 'ko' ? 'ko_KR' : 'en_US'} />
         <meta property="og:locale:alternate" content={lang === 'ko' ? 'en_US' : 'ko_KR'} />
-        <meta property="og:title" content={`${lang === 'ko' ? game.titleKo : game.title} - ArcadeDeck`} />
-        <meta property="og:description" content={lang === 'ko' ? game.descriptionKo : game.description} />
+        <meta property="og:title" content={`${lang === 'ko' ? (game.titleKo ?? game.title) : game.title} - ArcadeDeck`} />
+        <meta property="og:description" content={lang === 'ko' ? (game.descriptionKo ?? game.description) : game.description} />
         <meta property="og:image" content={`https://arcadedeck.net/${encodeURI(game.thumbnail)}`} />
         <meta property="og:url" content={`https://arcadedeck.net/play/${game.slug}`} />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${lang === 'ko' ? game.titleKo : game.title} - ArcadeDeck`} />
-        <meta name="twitter:description" content={lang === 'ko' ? game.descriptionKo : game.description} />
+        <meta name="twitter:title" content={`${lang === 'ko' ? (game.titleKo ?? game.title) : game.title} - ArcadeDeck`} />
+        <meta name="twitter:description" content={lang === 'ko' ? (game.descriptionKo ?? game.description) : game.description} />
         <meta name="twitter:image" content={`https://arcadedeck.net/${encodeURI(game.thumbnail)}`} />
 
         {/* JSON-LD Structured Data — VideoGame schema */}

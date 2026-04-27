@@ -6,7 +6,7 @@ import Navbar from '../components/Navbar';
 import { games } from '../data/games';
 import type { Game } from '../data/games';
 import { db } from '../firebase';
-import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore/lite';
 import { compareLeaderboardEntries } from '../utils/leaderboardUtils';
 import { LEADERBOARD_FETCH_LIMIT } from '../constants/gameConstants';
 import './MyGames.css';

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Trophy, Crown, Medal, RefreshCw, Loader } from 'lucide-react';
 import { db } from '../firebase';
-import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
+import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore/lite';
 import { games } from '../data/games';
 import './GlobalLeaderboard.css';
 

@@ -1,0 +1,633 @@
+[
+  {
+    "id": "1",
+    "slug": "gate-of-hell",
+    "language": "KO",
+    "title": "Gate of Hell: Rise of Demons",
+    "titleKo": "지옥의 문: 악마의 부활",
+    "description": "An intense action survival game where you must hold back the tides of hell.",
+    "features": [
+      "Infinite Waves of Increasing Difficulty",
+      "Strategic Tower Upgrades and Synergies",
+      "Epic Boss Battles Every 10 Levels",
+      "Environmental Hazards and Interactive Maps",
+      "Deep Tech Tree for Permanent Power-ups",
+      "Global Leaderboard for Survival Times",
+      "Web & Mobile Friendly"
+    ],
+    "thumbnail": "images/Gate of Hell Image.webp",
+    "genres": [
+      "Tower Defense",
+      "Action",
+      "Survival",
+      "Strategy"
+    ],
+    "gameUrl": "https://gate-of-hell.pages.dev/",
+    "aspectRatio": "9/16",
+    "status": "PLAYABLE",
+    "isOriginal": true,
+    "leaderboard": {
+      "title": "Survivor Leaderboard",
+      "primaryLabel": "Depth",
+      "primaryUnit": " Depth",
+      "secondaryLabel": "",
+      "secondaryUnit": "",
+      "dualSort": false,
+      "subSortAsc": false
+    }
+  },
+  {
+    "id": "2",
+    "slug": "galaxy-launch",
+    "language": "EN",
+    "title": "Galaxy Launch: Infinite Fleet",
+    "titleKo": "갤럭시 런칭: 인피니트 플릿",
+    "description": "An addictive clicker game where you expand your fleet and conquer the galaxy.",
+    "features": [
+      "Infinite Incremental Gameplay Loop",
+      "Over 50 Unique Ship Types to Unlock",
+      "Deep Technology Research Tree",
+      "Dynamic Pirate Raid Events",
+      "Prestige System: \"Galaxy Jump\" for Permanent Multipliers",
+      "Visual Upgrades for your Space Station",
+      "Web & Mobile Friendly"
+    ],
+    "thumbnail": "images/GL_Image.webp",
+    "genres": [
+      "Clicker",
+      "Idle",
+      "Sci-Fi",
+      "Incremental"
+    ],
+    "gameUrl": "https://galaxylaunch.onrender.com/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "isOriginal": true,
+    "leaderboard": {
+      "title": "Ultimate Conqueror",
+      "primaryLabel": "Conquests",
+      "primaryUnit": "",
+      "secondaryLabel": "Max Planet Level",
+      "secondaryUnit": "Lv.",
+      "dualSort": true,
+      "subSortAsc": false
+    }
+  },
+  {
+    "id": "3",
+    "slug": "idle-avatar-rpg",
+    "title": "Idle Avatar RPG",
+    "titleKo": "방치형 아바타 RPG",
+    "description": "Develop your own avatar and explore a mysterious world that grows automatically.",
+    "features": [
+      "True Offline Progress: Gains while App is Closed",
+      "Complex Class Tree with over 20 Specializations",
+      "Rune-based Skill Customization",
+      "Global Raid Bosses with Massive Rewards",
+      "Player-driven Economy and Trading",
+      "Pet System: Tame Monsters to Fight Alongside You"
+    ],
+    "thumbnail": "images/IA RPG.webp",
+    "genres": [
+      "Idle",
+      "RPG",
+      "Fantasy",
+      "Incremental"
+    ],
+    "gameUrl": "https://idleavatar.onrender.com/",
+    "aspectRatio": "16/9",
+    "status": "IN PRODUCTION",
+    "isOriginal": true
+  },
+  {
+    "id": "5",
+    "slug": "gem-merge",
+    "title": "GEM MERGE",
+    "titleKo": "젬 머지",
+    "description": "A strategic puzzle game where you merge colorful gems to create bigger ones.",
+    "features": [
+      "Hyper-realistic Physics Engine",
+      "Dynamic Chain Reaction System",
+      "Multiple Game Modes: Classic, Speed, and Zen",
+      "Stunning Visual Effects and Particle Systems",
+      "Adaptive Soundscape that Changes with your Score",
+      "Global Monthly Tournaments",
+      "Web & Mobile Friendly"
+    ],
+    "thumbnail": "images/Gem Merge.webp",
+    "genres": [
+      "Puzzle",
+      "Casual",
+      "Strategy",
+      "Match"
+    ],
+    "gameUrl": "https://mergegame.pages.dev/",
+    "aspectRatio": "16/16",
+    "status": "PLAYABLE",
+    "isOriginal": true,
+    "leaderboard": {
+      "title": "Master Merger Leaderboard",
+      "primaryLabel": "Total Score",
+      "primaryUnit": " pts",
+      "secondaryLabel": "Merges",
+      "secondaryUnit": "",
+      "dualSort": false,
+      "subSortAsc": true
+    },
+    "badge": "CAN'T STOP"
+  },
+  {
+    "id": "6",
+    "slug": "trade-tycoon",
+    "title": "Trade Tycoon - Civilization",
+    "titleKo": "트레이드 타이쿤 - 문명",
+    "description": "Build your empire, trade resources, and lead your civilization to prosperity.",
+    "features": [
+      "Deep Economic Market Simulation",
+      "Multiple Tech Eras from Bronze to Space",
+      "Complex Diplomacy and War Mechanics",
+      "Procedural World Maps with Unique Resources",
+      "Customizable City Layouts for Optimized Production",
+      "Leaderboard for the Wealthiest Empires"
+    ],
+    "thumbnail": "images/Trade Tycoon Image.webp",
+    "genres": [
+      "Tycoon",
+      "Simulation",
+      "Strategy",
+      "Economy"
+    ],
+    "gameUrl": "https://citytraders.pages.dev",
+    "aspectRatio": "16/9",
+    "status": "IN PRODUCTION",
+    "isOriginal": true
+  },
+  {
+    "id": "7",
+    "slug": "15s-click-challenge",
+    "title": "15s Click Challenge",
+    "titleKo": "15초 클릭 챌린지",
+    "description": "Test your clicking speed in this intense 15-second challenge!",
+    "features": [
+      "Precision Click Detection (to 1ms)",
+      "Real-time CPS (Clicks Per Second) Tracker",
+      "End-game Performance Analytics and Graphs",
+      "High-score Leaderboard with Anti-cheat Verification",
+      "Minimalist, Distraction-free Interface",
+      "Adrenaline-pumping Final Phase Visuals",
+      "Web & Mobile Friendly"
+    ],
+    "thumbnail": "images/15s Clicker.webp",
+    "genres": [
+      "Clicker",
+      "Casual",
+      "Challenge",
+      "Arcade"
+    ],
+    "gameUrl": "https://clickthetarget.pages.dev/",
+    "aspectRatio": "1/1",
+    "status": "PLAYABLE",
+    "isOriginal": true,
+    "leaderboard": {
+      "title": "Fastest Clicker Leaderboard",
+      "primaryLabel": "Level",
+      "primaryUnit": " level",
+      "secondaryLabel": "Clicks",
+      "secondaryUnit": "",
+      "dualSort": true,
+      "subSortAsc": false
+    }
+  },
+  {
+    "id": "8",
+    "slug": "omok",
+    "title": "OMOK",
+    "titleKo": "오목",
+    "description": "A masterpiece of strategy and intuition. Master the ancient art of Five-in-a-Row.",
+    "features": [
+      "Advanced AI with Multiple Difficulty Levels",
+      "Sleek and Responsive User Interface",
+      "Replay System to Analyze your Previous Games",
+      "Customizable Board Skins and Stone Styles",
+      "Local Co-op (Two-player Mode)",
+      "Leaderboard for Win Rates and Elo Rating",
+      "Web & Mobile Friendly"
+    ],
+    "thumbnail": "images/Omok.webp",
+    "genres": [
+      "Board Game",
+      "Local Co-op",
+      "Strategy",
+      "Classic"
+    ],
+    "gameUrl": "https://omok-96n.pages.dev/",
+    "aspectRatio": "1/1",
+    "status": "PLAYABLE",
+    "isOriginal": true
+  },
+  {
+    "id": "9",
+    "slug": "40th-century-void-survivor",
+    "language": "KO/EN",
+    "title": "40th Century: Void Survivor",
+    "titleKo": "40세기: 보이드 서바이버",
+    "description": "Survive in the void of the 40th century. Battle cosmic horrors and collect ancient artifacts.",
+    "features": [
+      "Intense Roguelike Survival Gameplay",
+      "Over 100 Unique Artifacts and Weapons",
+      "Procedurally Generated Waves and Enemy Patterns",
+      "Unlockable Ships with Different Base Stats",
+      "Atmospheric Synth-wave Soundtrack",
+      "Daily Challenges with Exclusive Rewards",
+      "Web & Mobile Friendly"
+    ],
+    "thumbnail": "images/40th Century Void Survivor.webp",
+    "genres": [
+      "Survival",
+      "Action",
+      "Sci-Fi",
+      "Roguelike"
+    ],
+    "gameUrl": "https://neuralsurvivorbk.pages.dev/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "isOriginal": true,
+    "leaderboard": {
+      "title": "Void Survivor Leaderboard",
+      "primaryLabel": "Stage",
+      "primaryUnit": "",
+      "secondaryLabel": "Artifacts",
+      "secondaryUnit": "",
+      "dualSort": true,
+      "subSortAsc": false
+    },
+    "badge": "POPULAR"
+  },
+  {
+    "id": "10",
+    "slug": "endless-war",
+    "language": "EN",
+    "title": "Endless War: Holy vs Hell",
+    "titleKo": "엔들리스 워: 홀리 vs 헬",
+    "description": "An epic simulation of the eternal conflict between heaven and hell.",
+    "features": [
+      "Massive-scale Unit Battle Simulation",
+      "Complex Morality and Karma System",
+      "Over 30 Divine and Infernal Unit Types",
+      "Dynamic Battlefield Events: Solar Flares and Abyssal Rifts",
+      "Deep Tactical Formations and Orders",
+      "Persistent Global War Progress Tracker"
+    ],
+    "thumbnail": "images/endlesswar.webp",
+    "genres": [
+      "Simulation",
+      "Strategy",
+      "War",
+      "Idle"
+    ],
+    "gameUrl": "https://16bed324.endlesswarbk.pages.dev/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "isOriginal": true,
+    "leaderboard": {
+      "title": "Eternal War Leaderboard",
+      "primaryLabel": "Waves",
+      "primaryUnit": " waves",
+      "secondaryLabel": "Battles",
+      "secondaryUnit": "",
+      "dualSort": true,
+      "subSortAsc": false
+    }
+  },
+  {
+    "id": "11",
+    "slug": "dicefall-chronicles",
+    "language": "EN",
+    "title": "Dicefall Chronicles",
+    "titleKo": "다이스폴 크로니클",
+    "description": "A strategic dice-building roguelike adventure.",
+    "features": [
+      "Roguelike Deckbuilding",
+      "Procedural Dungeons",
+      "Turn-based Combat",
+      "Unlockables",
+      "Boss Battles",
+      "Web & Mobile Friendly"
+    ],
+    "thumbnail": "images/Dicefall Chronicles.webp",
+    "genres": [
+      "Roguelike",
+      "RPG",
+      "Dice",
+      "Adventure"
+    ],
+    "gameUrl": "https://dicefall-chronicles-mobile-bk.pages.dev/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "isOriginal": true,
+    "leaderboard": {
+      "title": "Dicefall Chronicles Leaderboard",
+      "primaryLabel": "Chapters",
+      "primaryUnit": " Chapters",
+      "secondaryLabel": "Stages",
+      "secondaryUnit": "",
+      "dualSort": true,
+      "subSortAsc": false
+    }
+  },
+  {
+    "id": "12",
+    "slug": "heroes-of-the-last-nexus",
+    "title": "Heroes of the Last Nexus",
+    "titleKo": "히어로즈 오브 더 라스트 넥서스",
+    "description": "A strategic hero collection RPG where you must gather heroes to defend the Last Nexus.",
+    "features": [
+      "Over 50 Unique Heroes to Collect",
+      "Strategic Team Formations and Synergies",
+      "Epic Boss Battles and Infinite Monster Waves",
+      "Deep Hero Progression and Skill Trees",
+      "Global Leaderboard for Most Heroes Collected",
+      "Web & Mobile Friendly"
+    ],
+    "thumbnail": "images/Heroes of the Last Nexus.webp",
+    "genres": [
+      "RPG",
+      "Strategy",
+      "Fantasy",
+      "Auto Battler"
+    ],
+    "gameUrl": "https://heroes-of-the-last-nexus-bk.pages.dev/",
+    "aspectRatio": "16/9",
+    "status": "IN PRODUCTION",
+    "isOriginal": true,
+    "leaderboard": {
+      "title": "Heroes of the Last Nexus Leaderboard",
+      "primaryLabel": "Heroes",
+      "primaryUnit": " heroes",
+      "secondaryLabel": "Monsters",
+      "secondaryUnit": "",
+      "dualSort": true,
+      "subSortAsc": false
+    }
+  },
+  {
+    "id": "13",
+    "slug": "timing-chef",
+    "language": "KO",
+    "title": "Timing Chef",
+    "titleKo": "타이밍 쉐프",
+    "description": "Master the art of perfect timing in the kitchen!",
+    "features": [
+      "Precision-based Rhythm Cooking Gameplay",
+      "Variety of Unlockable Recipes and Cuisines",
+      "Kitchen Upgrade System for Faster Cooking",
+      "Challenging 'Rush Hour' Mode",
+      "Aesthetic Pixel Art and Satisfying Sound Effects",
+      "Web & Mobile Friendly"
+    ],
+    "thumbnail": "images/timing_chef.webp",
+    "genres": [
+      "Casual",
+      "Arcade",
+      "Timing",
+      "Cooking"
+    ],
+    "gameUrl": "https://timing-chef-bk.pages.dev/",
+    "aspectRatio": "9/16",
+    "status": "PLAYABLE",
+    "isOriginal": true,
+    "leaderboard": {
+      "title": "Timing Chef Master Leaderboard",
+      "primaryLabel": "Total Stars",
+      "primaryUnit": " Stars",
+      "secondaryLabel": "Receipts",
+      "secondaryUnit": "",
+      "dualSort": true,
+      "subSortAsc": false
+    }
+  },
+  {
+    "id": "14",
+    "slug": "fruit-frenzy",
+    "language": "KO/EN",
+    "title": "Fruit Frenzy",
+    "titleKo": "프루트 프렌지",
+    "description": "A juicy and addictive arcade game where you collect fruits to complete your encyclopedia!",
+    "features": [
+      "50+ Unique Fruits to Unlock",
+      "Challenging Encyclopedia System",
+      "Dynamic Frenzy Mode",
+      "Global Leaderboard: Encyclopedia Count & Best Score",
+      "Optimized for Mobile & Web",
+      "Web & Mobile Friendly"
+    ],
+    "thumbnail": "images/fruit_frenzy_banner.webp",
+    "genres": [
+      "Arcade",
+      "Casual",
+      "Action",
+      "Reflex"
+    ],
+    "gameUrl": "https://fruit-frenzy-bk.pages.dev/",
+    "aspectRatio": "9/16",
+    "status": "PLAYABLE",
+    "isOriginal": true,
+    "leaderboard": {
+      "title": "Fruit Frenzy Leaderboard",
+      "primaryLabel": "Score",
+      "primaryUnit": "",
+      "secondaryLabel": "Fruits",
+      "secondaryUnit": "",
+      "dualSort": true,
+      "subSortAsc": false
+    },
+    "badge": "CAN'T STOP"
+  },
+  {
+    "id": "15",
+    "slug": "kingdoms-last-stand",
+    "language": "KO",
+    "title": "Kingdom's Last Stand",
+    "titleKo": "왕국의 최후의 저항",
+    "description": "A strategic auto-battler roguelike where you build your army, manage formations, and defend your kingdom against endless waves of enemies.",
+    "features": [
+      "Deep Auto-Battler Combat System",
+      "3-Row Tactical Formation (Front/Mid/Back)",
+      "4 Elements: Fire, Nature, Lightning, Ice",
+      "Gold Economy & Unit Upgrade System",
+      "Roguelike Stage Progression",
+      "Dual Damage Types: Physical & Magical",
+      "Global Leaderboard",
+      "Web & Mobile Friendly"
+    ],
+    "thumbnail": "images/KLS_banner.webp",
+    "genres": [
+      "Auto Battler",
+      "Roguelike",
+      "Strategy",
+      "Fantasy"
+    ],
+    "gameUrl": "https://kingond-s-last-stand-bk.pages.dev/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "isOriginal": true,
+    "leaderboard": {
+      "title": "Kingdom's Last Stand Leaderboard",
+      "primaryLabel": "Stage",
+      "primaryUnit": "",
+      "secondaryLabel": "Round",
+      "secondaryUnit": "",
+      "dualSort": true,
+      "subSortAsc": false
+    },
+    "badge": "POPULAR"
+  },
+  {
+    "id": "16",
+    "slug": "triangle-battle",
+    "language": "KO/EN",
+    "title": "Triangle Battle!",
+    "titleKo": "트라이앵글 배틀!",
+    "description": "A fast-paced local multiplayer arcade game where 1-4 players compete to form triangles and outsmart each other.",
+    "features": [
+      "Local Co-op 1~4 Players",
+      "Fast-Paced Arcade Gameplay",
+      "Keyboard & Touch Support",
+      "Colorful Neon Visuals",
+      "Quick Rounds & High Replayability",
+      "Web & Mobile Friendly"
+    ],
+    "thumbnail": "images/make_triangle.webp",
+    "genres": [
+      "Arcade",
+      "Local Co-op",
+      "Action",
+      "PvP"
+    ],
+    "gameUrl": "https://make-triangle-bk.pages.dev/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "isOriginal": true,
+    "badge": "CAN'T STOP"
+  },
+  {
+    "id": "17",
+    "slug": "tank-battle-1v1",
+    "language": "KO/EN",
+    "title": "Tank Battle: 1v1",
+    "titleKo": "탱크 배틀: 1v1",
+    "description": "Battle against a friend in this intense 1v1 local multiplayer tank arena!",
+    "features": [
+      "Local 1v1 PvP Action",
+      "Fast-paced Gameplay",
+      "Strategic Cover Mechanics",
+      "PC Optimized",
+      "Clean Minimalist Design"
+    ],
+    "thumbnail": "images/tank_battle.webp",
+    "genres": [
+      "Action",
+      "PvP",
+      "Local Co-op",
+      "Tanks"
+    ],
+    "gameUrl": "https://tank-battle-bk.pages.dev/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "isOriginal": true
+  },
+  {
+    "id": "19",
+    "slug": "spirit-duel",
+    "language": "KO/EN",
+    "title": "Spirit Duel",
+    "titleKo": "스피릿 듀얼",
+    "description": "A tactical 1v1 card-spirit battle game — challenge a friend locally or test your wits against the AI!",
+    "features": [
+      "Local 1v1 PvP Mode",
+      "Single Player vs AI",
+      "Unique Spirit Roster with Distinct Abilities",
+      "Deep Tactical Decision-Making",
+      "Fast Rounds & High Replayability",
+      "Web & Mobile Friendly"
+    ],
+    "thumbnail": "images/spirit_duel.webp",
+    "genres": [
+      "Tactical Battle",
+      "PvP",
+      "Strategy",
+      "Local Co-op"
+    ],
+    "gameUrl": "https://spirit-duel-bk.pages.dev/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "isOriginal": true
+  },
+  {
+    "id": "18",
+    "slug": "skyfall",
+    "language": "KO/EN",
+    "title": "Skyfall",
+    "titleKo": "스카이폴",
+    "description": "Dodge the falling obstacles and survive as long as you can in this fast-paced arcade game!",
+    "features": [
+      "Fast-paced Arcade Action",
+      "Increasing Difficulty Over Time",
+      "Responsive Keyboard & Touch Controls",
+      "Clean Visuals and Effects",
+      "Addictive High-Score Gameplay"
+    ],
+    "thumbnail": "images/SkyFall_Banner.webp",
+    "genres": [
+      "Survival",
+      "Reflex",
+      "Arcade"
+    ],
+    "gameUrl": "https://skyfall-bk.pages.dev/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "isOriginal": true,
+    "leaderboard": {
+      "title": "Skyfall Survival Leaderboard",
+      "primaryLabel": "Survival Time",
+      "primaryUnit": "s",
+      "secondaryLabel": "",
+      "secondaryUnit": "",
+      "dualSort": false,
+      "subSortAsc": false
+    }
+  },
+  {
+    "id": "20",
+    "slug": "polygon-invasion-td",
+    "language": "EN",
+    "title": "Polygon Invasion TD",
+    "description": "A fast-paced tower defense game where you defend against waves of geometric invaders.",
+    "features": [
+      "Strategic Tower Placement",
+      "Multiple Tower Types and Upgrades",
+      "Endless Waves of Geometric Enemies",
+      "Peak Wave & Kill Count Leaderboard",
+      "Fast-paced Tactical Gameplay",
+      "Web & Mobile Friendly"
+    ],
+    "thumbnail": "images/ploygon_invasion_TD.webp",
+    "genres": [
+      "Tower Defense",
+      "Strategy"
+    ],
+    "gameUrl": "https://polygon-invasion-td-bk.pages.dev/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "isOriginal": true,
+    "leaderboard": {
+      "title": "Polygon Invasion Leaderboard",
+      "primaryLabel": "Peak Wave",
+      "primaryUnit": "",
+      "secondaryLabel": "Kills",
+      "secondaryUnit": "",
+      "dualSort": true,
+      "subSortAsc": false
+    }
+  }
+]

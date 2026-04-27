@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Monitor, Gamepad2, Play, Trophy } from 'lucide-react';
-import type { Game } from '../data/games';
+import type { GameLight } from '../data/games';
 import './GameCard.css';
 
 interface GameCardProps {
-  game: Game;
+  game: GameLight;
   onProductionClick?: () => void;
   isRecentlyPlayed?: boolean;
   onGenreClick?: (genre: string) => void;

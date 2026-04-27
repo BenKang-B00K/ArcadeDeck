@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { initializeFirestore } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore/lite";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDFwB-Yt7ARcMZoPD6-1vI892PXyLEvdcU",
@@ -13,10 +13,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// Force long polling. AutoDetect still probes WebChannel first, leaving
-// ERR_TIMED_OUT entries in the console (Lighthouse best-practices regression).
-// Force-LP skips the probe entirely. Slight latency cost on networks where
-// WebChannel would have worked, but eliminates the console noise.
-export const db = initializeFirestore(app, {
-  experimentalForceLongPolling: true,
-});
+// firestore/lite: REST-only client. Drops WebChannel + long-polling +
+// IndexedDB persistence, ~⅔ smaller than the full SDK. We never use
+// onSnapshot/persistence/transactions, so feature parity is met.
+export const db = getFirestore(app);

@@ -42,7 +42,7 @@ const Home: React.FC = () => {
       try {
         const [{ db }, { collection, query, where, getDocs, orderBy, limit }] = await Promise.all([
           import('../firebase'),
-          import('firebase/firestore'),
+          import('firebase/firestore/lite'),
         ]);
         const userScoresSnap = await getDocs(
           query(collection(db, "leaderboards"), where("name", "==", nickname))

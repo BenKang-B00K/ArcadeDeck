@@ -12,7 +12,7 @@ import {
   serverTimestamp,
   QueryDocumentSnapshot,
   type DocumentData,
-} from "firebase/firestore";
+} from "firebase/firestore/lite";
 import './CommentSection.css';
 
 const PAGE_SIZE = 20;

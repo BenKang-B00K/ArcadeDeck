@@ -38,8 +38,12 @@
 
     <meta name="google-adsense-account" content="ca-pub-2461804849200179">
     <meta name="msvalidate.01" content="FCB46D8CE61A5D785931A8B24BF10879" />
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2461804849200179"
-         crossorigin="anonymous"></script>
+    <!-- adsbygoogle.js injected on demand by src/components/AdBanner.tsx once
+         ADSENSE_APPROVED flips true. Loading unconditionally costs ~280ms CPU
+         + pulls in FundingChoices (~285ms) while placeholders render. -->
+
+    <!-- LCP: hero background. Preload + fetchpriority=high so it lands before CSS parses. -->
+    <link rel="preload" as="image" href="/images/bg.webp" type="image/webp" fetchpriority="high">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

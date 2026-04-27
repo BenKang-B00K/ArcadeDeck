@@ -21,8 +21,18 @@ const baseHead = headMatch ? headMatch[1] : '';
 const scriptMatches = indexHtml.match(/<script[\s\S]*?<\/script>/g) || [];
 const scriptTags = scriptMatches.join('\n    ');
 
-// Also grab link tags for CSS from head
-const cssLinks = (baseHead.match(/<link[^>]*rel="stylesheet"[^>]*>/g) || []).join('\n    ');
+// Inline CSS: replace render-blocking <link rel="stylesheet"> with <style> tag.
+// Vite's hashed CSS is ~8 KiB; inlining cuts a ~490ms render-blocking request
+// off the LCP critical path. The original link is dropped from every built HTML.
+const cssLinkRegex = /<link[^>]*rel="stylesheet"[^>]*href="([^"]+)"[^>]*>/g;
+const cssHrefs = [...baseHead.matchAll(cssLinkRegex)].map(m => m[1]);
+const inlinedCss = cssHrefs
+  .map(href => {
+    const path = href.startsWith('/') ? `dist${href}` : `dist/${href}`;
+    return readFileSync(path, 'utf-8');
+  })
+  .join('\n');
+const inlinedStyle = inlinedCss ? `<style>${inlinedCss}</style>` : '';
 const modulePreloads = (baseHead.match(/<link[^>]*rel="modulepreload"[^>]*>/g) || []).join('\n    ');
 
 const playableGames = games.filter(g => g.status !== 'IN PRODUCTION');
@@ -83,7 +93,7 @@ for (const game of playableGames) {
     <meta name="twitter:description" content="${game.description}" />
     <meta name="twitter:image" content="${thumbUrl}" />
     <script type="application/ld+json">${jsonLd}</script>
-    ${cssLinks}
+    ${inlinedStyle}
     ${modulePreloads}
   </head>
   <body>
@@ -132,10 +142,19 @@ const noscriptItems = playableGames
   .map(g => `          <li><a href="/play/${g.slug}">${g.title}</a> — ${g.description}</li>`)
   .join('\n');
 
-const homeHtml = indexHtml.replace(
-  /(<h2>Our Games<\/h2>\s*<ul>)[\s\S]*?(<\/ul>)/,
-  `$1\n${noscriptItems}\n        $2`
-);
+const homeHtml = indexHtml
+  .replace(
+    /(<h2>Our Games<\/h2>\s*<ul>)[\s\S]*?(<\/ul>)/,
+    `$1\n${noscriptItems}\n        $2`
+  )
+  .replace(cssLinkRegex, (() => {
+    let first = true;
+    return () => {
+      if (!first) return '';
+      first = false;
+      return inlinedStyle;
+    };
+  })());
 
 writeFileSync('dist/index.html', homeHtml);
 

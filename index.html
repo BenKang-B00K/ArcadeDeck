@@ -95,7 +95,10 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Static LCP shell: paints the hero before React mounts so Lighthouse
+         reports the hero h1+p as the LCP element ~480ms earlier. React's
+         first render replaces this subtree with the live <App /> tree. -->
+    <div id="root"><header class="hero"><div class="container hero-content"><h1>Welcome to <span data-text="ArcadeDeck">ArcadeDeck</span></h1><p>Dozens of handcrafted browser games. Pick one, jump in, and see how far you can go.</p></div></header></div>
     <noscript>
       <div style="background:#171424;color:#eaeaf0;font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;">
         <h1>ArcadeDeck — The Ultimate Free Browser Games Platform</h1>

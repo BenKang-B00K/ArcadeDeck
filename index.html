@@ -50,18 +50,35 @@
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" onload="this.rel='stylesheet'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
 
-    <!-- Google tag (gtag.js) — deferred until after load to free up main thread for FCP/LCP -->
+    <!-- Google tag (gtag.js) — deferred until first user interaction or 5s idle.
+         GTM is 172KB (68KB unused) — keeping it off the critical path keeps
+         LCP/FCP clean and shaves ~70KB from the early-load budget. -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'G-TZYVTF4100');
-      window.addEventListener('load', function () {
-        var s = document.createElement('script');
-        s.async = true;
-        s.src = 'https://www.googletagmanager.com/gtag/js?id=G-TZYVTF4100';
-        document.head.appendChild(s);
-      });
+      (function () {
+        var loaded = false;
+        function loadGtag() {
+          if (loaded) return;
+          loaded = true;
+          var s = document.createElement('script');
+          s.async = true;
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-TZYVTF4100';
+          document.head.appendChild(s);
+        }
+        var events = ['pointerdown', 'keydown', 'scroll', 'touchstart'];
+        function trigger() {
+          events.forEach(function (e) { window.removeEventListener(e, trigger, { passive: true }); });
+          loadGtag();
+        }
+        events.forEach(function (e) { window.addEventListener(e, trigger, { passive: true, once: true }); });
+        // Fallback: load after 5s idle so non-interacting visits still report.
+        var ric = window.requestIdleCallback;
+        if (ric) ric(loadGtag, { timeout: 5000 });
+        else setTimeout(loadGtag, 5000);
+      })();
     </script>
 
     <!-- Theme boot — set data-theme before paint to avoid FOUC (default: dark) -->

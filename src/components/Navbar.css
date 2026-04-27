@@ -35,10 +35,8 @@
 .logo span {
   position: relative;
   background: linear-gradient(135deg, #f5c542 0%, #ff8c00 40%, #e040fb 70%, #00e5ff 100%);
-  background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: gradientShift 6s ease-in-out infinite alternate;
   filter: drop-shadow(0 0 4px rgba(245, 197, 66, 0.4)) drop-shadow(0 0 12px rgba(224, 64, 251, 0.2));
   margin-left: 1px;
 }
@@ -48,18 +46,22 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, #f5c542, #ff8c00, #e040fb, #00e5ff);
-  background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: gradientShift 6s ease-in-out infinite alternate;
   filter: blur(10px);
   opacity: 0.4;
   z-index: -1;
+  will-change: opacity;
+  animation: logoGlowPulse 6s ease-in-out infinite alternate;
 }
 
-@keyframes gradientShift {
-  0%   { background-position: 0% 50%; }
-  100% { background-position: 100% 50%; }
+@keyframes logoGlowPulse {
+  0%   { opacity: 0.25; }
+  100% { opacity: 0.55; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo span::before { animation: none; }
 }
 
 .logo-icon {

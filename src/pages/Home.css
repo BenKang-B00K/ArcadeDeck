@@ -59,10 +59,8 @@
   display: inline-block;
   position: relative;
   background: linear-gradient(135deg, #f5c542 0%, #ff8c00 40%, #e040fb 70%, #00e5ff 100%);
-  background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: gradientShift 6s ease-in-out infinite alternate;
   filter: drop-shadow(0 0 8px rgba(245, 197, 66, 0.5)) drop-shadow(0 0 24px rgba(224, 64, 251, 0.3));
   font-weight: 400;
 }
@@ -72,18 +70,22 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, #f5c542, #ff8c00, #e040fb, #00e5ff);
-  background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: gradientShift 6s ease-in-out infinite alternate;
   filter: blur(16px);
   opacity: 0.5;
   z-index: -1;
+  will-change: opacity;
+  animation: glowPulse 6s ease-in-out infinite alternate;
 }
 
-@keyframes gradientShift {
-  0%   { background-position: 0% 50%; }
-  100% { background-position: 100% 50%; }
+@keyframes glowPulse {
+  0%   { opacity: 0.35; }
+  100% { opacity: 0.65; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero h1 span::before { animation: none; }
 }
 
 .hero p {

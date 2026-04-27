@@ -1,6 +1,6 @@
 import React, { useState, useMemo, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+
 import { Search, X, Edit3 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import GameGrid from '../components/GameGrid';
@@ -139,7 +139,7 @@ const Home: React.FC = () => {
 
   return (
     <div className="home-page">
-      <Helmet>
+      <>
         <title>ArcadeDeck | Play the Best Online Browser Games</title>
         <meta name="description" content="Discover and play the highest quality free online browser games on ArcadeDeck. Join our community, compete on global leaderboards, and find your next favorite game!" />
         <meta name="keywords" content="free browser games, online games, play free games, arcadedeck, action games, rpg games, idle games, browser arcade" />
@@ -180,7 +180,7 @@ const Home: React.FC = () => {
             }
           })}
         </script>
-      </Helmet>
+      </>
 
       {notification && (
         <div className={`notification-toast ${notification.type} animate-in`}>

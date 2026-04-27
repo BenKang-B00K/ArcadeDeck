@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+
 import { Maximize, Heart, Link as LinkIcon, Home, Globe, Gamepad2, BookOpen, Joystick, Lightbulb, ScrollText, Sparkles, X } from 'lucide-react';
 import { games, loadGameDetails } from '../data/games';
 import type { Game } from '../data/games';
@@ -374,7 +374,7 @@ const GamePlayer: React.FC = () => {
     <div className="game-player-page" style={{ 
       backgroundImage: `linear-gradient(rgba(5, 5, 7, 0.8), rgba(5, 5, 7, 0.9)), url(${thumbnailUrl})` 
     }}>
-      <Helmet>
+      <>
         <html lang={lang === 'ko' ? 'ko' : 'en'} />
         <title>{lang === 'ko' ? (game.titleKo ?? game.title) : game.title} - Play Free on ArcadeDeck</title>
         <meta name="description" content={lang === 'ko' ? `${game.titleKo ?? game.title}: ${game.descriptionKo ?? game.description} ArcadeDeck에서 무료로 즐기세요!` : `Play ${game.title}: ${game.description} Free online browser game on ArcadeDeck.`} />
@@ -422,7 +422,7 @@ const GamePlayer: React.FC = () => {
             }
           })}
         </script>
-      </Helmet>
+      </>
       
       {notification && (
         <div className={`notification-toast ${notification.type} animate-in`}>

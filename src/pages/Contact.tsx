@@ -1,18 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+
 import Navbar from '../components/Navbar';
 import './Home.css';
 
 const Contact: React.FC = () => {
   return (
     <div className="contact-page" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Helmet>
+      <>
         <title>Contact Us | ArcadeDeck Support & Feedback</title>
         <meta name="description" content="Get in touch with the ArcadeDeck team for support, feedback, or game submissions. We'd love to hear from you!" />
         <meta property="og:title" content="Contact Us | ArcadeDeck" />
         <meta property="og:url" content="https://arcadedeck.net/contact" />
-      </Helmet>
+      </>
       <Navbar />
       <main className="container" style={{ paddingTop: '120px', flex: 1, color: 'var(--text-primary)' }}>
         <h1 style={{ fontSize: '3rem', marginBottom: '2rem' }}>Contact <span style={{ color: '#00d2ff' }}>Us</span></h1>

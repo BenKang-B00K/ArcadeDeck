@@ -1,16 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+
 import Navbar from '../components/Navbar';
 import './Home.css';
 
 const NotFound: React.FC = () => {
   return (
     <div className="not-found-page" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Helmet>
+      <>
         <title>404 - Universe Not Found | ArcadeDeck</title>
         <meta name="robots" content="noindex, follow" />
-      </Helmet>
+      </>
       <Navbar />
       <main className="container" style={{ paddingTop: '150px', textAlign: 'center', flex: 1 }}>
         <h1 style={{ fontSize: '5rem', color: '#00d2ff', marginBottom: '1rem' }}>404</h1>

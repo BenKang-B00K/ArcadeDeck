@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+
 import { Trophy, Rocket, Medal } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { games } from '../data/games';
@@ -91,13 +91,13 @@ const MyGames = () => {
 
   return (
     <div className="my-games-page">
-      <Helmet>
+      <>
         <title>My Gaming Stats & Ranks | ArcadeDeck</title>
         <meta name="description" content="Check your personal ranking, achievements, and game progress on ArcadeDeck. Track your performance across all universes!" />
         <meta property="og:title" content="My Gaming Stats & Ranks | ArcadeDeck" />
         <meta property="og:url" content="https://arcadedeck.net/my-games" />
         <meta name="robots" content="noindex, follow" />
-      </Helmet>
+      </>
       <Navbar />
       <main className="container">
         <header className="my-games-header">

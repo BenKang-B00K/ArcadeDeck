@@ -1,19 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+
 import Navbar from '../components/Navbar';
 import './Home.css'; // Reuse common styles
 
 const About: React.FC = () => {
   return (
     <div className="about-page" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Helmet>
+      <>
         <title>About ArcadeDeck | Our Mission & Vision</title>
         <meta name="description" content="Learn more about ArcadeDeck, the ultimate destination for free high-quality browser games. Our mission is to make gaming accessible to everyone, anywhere." />
         <meta property="og:title" content="About ArcadeDeck | Our Mission & Vision" />
         <meta property="og:description" content="Learn about the team behind ArcadeDeck and our goal to provide the best free online gaming experience." />
         <meta property="og:url" content="https://arcadedeck.net/about" />
-      </Helmet>
+      </>
       <Navbar />
       <main className="container" style={{ paddingTop: '120px', flex: 1, color: '#fff' }}>
         <h1 style={{ fontSize: '3rem', marginBottom: '2rem' }}>About <span style={{ color: '#00d2ff' }}>ArcadeDeck</span></h1>

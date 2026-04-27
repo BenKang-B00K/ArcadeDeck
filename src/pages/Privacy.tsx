@@ -1,18 +1,18 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+
 import Navbar from '../components/Navbar';
 import './Home.css';
 
 const Privacy: React.FC = () => {
   return (
     <div className="privacy-page" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Helmet>
+      <>
         <title>Privacy Policy | ArcadeDeck</title>
         <meta name="description" content="Read our privacy policy to understand how ArcadeDeck collects, uses, and protects your data, including cookies, Google AdSense, Google Analytics, and Firebase services." />
         <meta property="og:title" content="Privacy Policy | ArcadeDeck" />
         <meta property="og:url" content="https://arcadedeck.net/privacy" />
-      </Helmet>
+      </>
       <Navbar />
       <main className="container" style={{ paddingTop: '120px', flex: 1, color: 'var(--text-primary)', paddingBottom: '60px' }}>
         <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Privacy <span style={{ color: '#00d2ff' }}>Policy</span></h1>

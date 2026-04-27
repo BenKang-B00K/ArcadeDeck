@@ -84,9 +84,10 @@
   text-shadow: 0 0 6px rgba(224, 64, 251, 0.4);
 }
 
+/* opacity-only — box-shadow keyframes aren't composited and burn main-thread cycles. */
 @keyframes badgePulse {
   0%, 100% { opacity: 0.85; }
-  50%      { opacity: 1; box-shadow: 0 0 10px rgba(255, 107, 53, 0.15); }
+  50%      { opacity: 1; }
 }
 
 /* ── My Rank Badge ── */
@@ -146,20 +147,25 @@
   transform: scale(1.06);
 }
 
-/* Skeleton shimmer */
+/* Skeleton shimmer — translateX of a wider gradient layer so the animation
+   stays on the compositor (transform is GPU-accelerated; background-position
+   is not). */
 .card-image.img-loading::after {
   content: '';
   position: absolute;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  left: -100%;
+  width: 300%;
   background: linear-gradient(90deg, var(--bg-elevated) 25%, var(--bg-surface) 50%, var(--bg-elevated) 75%);
-  background-size: 200% 100%;
   animation: card-shimmer 1.4s ease-in-out infinite;
+  will-change: transform;
   z-index: 1;
 }
 
 @keyframes card-shimmer {
-  0%   { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(33.333%, 0, 0); }
 }
 
 /* Overlay */

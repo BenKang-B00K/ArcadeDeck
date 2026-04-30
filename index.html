@@ -18,6 +18,7 @@
     
     <!-- Canonical URL -->
     <link rel="canonical" href="https://arcadedeck.net/" />
+    <link rel="alternate" type="application/rss+xml" title="ArcadeDeck Blog" href="https://arcadedeck.net/rss.xml" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -38,9 +39,35 @@
 
     <meta name="google-adsense-account" content="ca-pub-2461804849200179">
     <meta name="msvalidate.01" content="FCB46D8CE61A5D785931A8B24BF10879" />
-    <!-- adsbygoogle.js injected on demand by src/components/AdBanner.tsx once
-         ADSENSE_APPROVED flips true. Loading unconditionally costs ~280ms CPU
-         + pulls in FundingChoices (~285ms) while placeholders render. -->
+
+    <!-- AdSense verification + crawler hint. Deferred until first user
+         interaction or 5s idle so it never blocks LCP. Script presence
+         is what unsticks "Getting ready" → "Ready" during site review.
+         AdBanner.tsx still gates adsbygoogle.push() behind ADSENSE_APPROVED
+         so no <ins> slots render and we get no 400s during review. -->
+    <script>
+      (function () {
+        var loaded = false;
+        function loadAdsense() {
+          if (loaded) return;
+          loaded = true;
+          var s = document.createElement('script');
+          s.async = true;
+          s.crossOrigin = 'anonymous';
+          s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2461804849200179';
+          document.head.appendChild(s);
+        }
+        var events = ['pointerdown', 'keydown', 'scroll', 'touchstart'];
+        function trigger() {
+          events.forEach(function (e) { window.removeEventListener(e, trigger, { passive: true }); });
+          loadAdsense();
+        }
+        events.forEach(function (e) { window.addEventListener(e, trigger, { passive: true, once: true }); });
+        var ric = window.requestIdleCallback;
+        if (ric) ric(loadAdsense, { timeout: 5000 });
+        else setTimeout(loadAdsense, 5000);
+      })();
+    </script>
 
     <!-- LCP: hero background. Preload + fetchpriority=high so it lands before CSS parses. -->
     <link rel="preload" as="image" href="/images/bg.webp" type="image/webp" fetchpriority="high">

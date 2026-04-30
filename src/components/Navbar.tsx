@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { User, Trophy, Gamepad2, Sun, Moon, Heart } from 'lucide-react';
+import { User, Trophy, Gamepad2, Sun, Moon, Heart, BookOpen } from 'lucide-react';
+import LanguageSwitcher from './LanguageSwitcher';
 import './Navbar.css';
 
 type Theme = 'light' | 'dark';
@@ -18,8 +19,9 @@ const Navbar: React.FC = () => {
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const location = useLocation();
 
-  // Auto-close menu on route change
+  // Auto-close menu on route change. Sync from external system (router) → local UI state.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMenuOpen(false);
   }, [location.pathname]);
 
@@ -52,8 +54,9 @@ const Navbar: React.FC = () => {
           Arcade<span data-text="Deck">Deck</span>
         </Link>
 
-        {/* Right cluster: theme toggle + hamburger */}
+        {/* Right cluster: language + theme toggle + hamburger */}
         <div className="navbar-actions">
+          <LanguageSwitcher />
           <button
             className="theme-toggle"
             onClick={toggleTheme}
@@ -82,6 +85,7 @@ const Navbar: React.FC = () => {
           <li><Link to="/"           className={isActive('/')           ? 'nav-active' : ''} onClick={closeMenu}>Games</Link></li>
           <li><Link to="/my-games"   className={isActive('/my-games')   ? 'nav-active' : ''} onClick={closeMenu}><User size={16} aria-hidden="true" /> My Rank</Link></li>
           <li><Link to="/hall-of-fame" className={isActive('/hall-of-fame') ? 'nav-active' : ''} onClick={closeMenu}><Trophy size={16} aria-hidden="true" /> Hall of Fame</Link></li>
+          <li><Link to="/blog" className={isActive('/blog') ? 'nav-active' : ''} onClick={closeMenu}><BookOpen size={16} aria-hidden="true" /> Blog</Link></li>
           <li><a href="https://ko-fi.com/developer_benjamink" target="_blank" rel="noopener noreferrer" className="nav-support" onClick={closeMenu}><Heart size={16} aria-hidden="true" /> Support</a></li>
         </ul>
       </div>

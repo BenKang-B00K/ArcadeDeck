@@ -1,31 +1,9 @@
 import React from 'react';
 
-import { Landmark, Sparkles, FolderOpen, Medal } from 'lucide-react';
+import { Landmark, Sparkles } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import GlobalLeaderboard from '../components/GlobalLeaderboard';
 import './HallOfFame.css';
-
-interface MonthlyWinner {
-  rank: number;
-  name: string;
-  score: string | number;
-}
-
-interface MonthlyArchive {
-  month: string;
-  winners: MonthlyWinner[];
-}
-
-const archiveData: MonthlyArchive[] = [
-  {
-    month: 'March 2026',
-    winners: [
-      { rank: 1, name: 'Playerkt', score: '12 pts' },
-      { rank: 2, name: 'GG',       score: '10 pts' },
-      { rank: 3, name: 'BEN',      score: '7 pts'  },
-    ],
-  },
-];
 
 const HallOfFame: React.FC = () => {
   const currentMonth = new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' });
@@ -49,32 +27,6 @@ const HallOfFame: React.FC = () => {
         <section className="archive-section">
           <h2 className="archive-title"><Sparkles size={20} aria-hidden="true" /> Current Leaders ({currentMonth})</h2>
           <GlobalLeaderboard />
-        </section>
-
-        <section className="historical-archive">
-          <h2 className="archive-title"><FolderOpen size={20} aria-hidden="true" /> Monthly Records</h2>
-          {archiveData.length > 0 ? (
-            <div className="archive-grid">
-              {archiveData.map((data, idx) => (
-                <div key={idx} className="archive-card">
-                  <h3>{data.month}</h3>
-                  <ul className="winner-list">
-                    {data.winners.map((w) => (
-                      <li key={w.rank} className={`winner-item rank-${w.rank}`}>
-                        <span className="rank-symbol"><Medal size={16} className={`rank-medal rank-${w.rank}`} aria-hidden="true" /></span>
-                        <span className="winner-name">{w.name}</span>
-                        <span className="winner-score">{w.score}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="empty-archive-msg">
-              <p>No historical records yet. The legends of {currentMonth} will be archived soon!</p>
-            </div>
-          )}
         </section>
       </main>
     </div>

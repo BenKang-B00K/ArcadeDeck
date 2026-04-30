@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Monitor, Gamepad2, Play, Trophy } from 'lucide-react';
 import type { GameLight } from '../data/games';
+import { useLocale, getLocalizedString } from '../i18n';
 import './GameCard.css';
 
 interface GameCardProps {
@@ -15,6 +16,8 @@ interface GameCardProps {
 
 const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecentlyPlayed = false, onGenreClick, myRank, maxTags }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const { lang, overlay } = useLocale();
+  const title = getLocalizedString(game, 'title', lang, overlay);
 
   const thumbnailUrl = game.thumbnail.startsWith('http')
     ? game.thumbnail
@@ -40,7 +43,7 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
     <Link to={`/play/${game.slug}`} className={`game-card${isInProduction ? ' card-coming-soon' : ''}`} onClick={handleClick}>
       {/* Row 1: Title + Badge + Rank */}
       <div className="card-title-row">
-        <h3>{game.title}</h3>
+        <h3>{title}</h3>
         {game.isOriginal && <span className="original-dot" title="Original" />}
         {game.badge && (
           <span className={`game-badge badge-${game.badge === 'POPULAR' ? 'popular' : 'cantstop'}`}>
@@ -59,7 +62,7 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
       <div className={`card-image${imageLoaded ? '' : ' img-loading'}`}>
         <img
           src={thumbnailUrl}
-          alt={game.title}
+          alt={title}
           width="640"
           height="360"
           loading="lazy"

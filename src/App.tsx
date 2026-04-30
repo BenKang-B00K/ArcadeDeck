@@ -14,6 +14,9 @@ const Privacy     = lazy(() => import('./pages/Privacy'));
 const Contact     = lazy(() => import('./pages/Contact'));
 const HallOfFame  = lazy(() => import('./pages/HallOfFame'));
 const MyGames     = lazy(() => import('./pages/MyGames'));
+const Blog        = lazy(() => import('./pages/Blog'));
+const BlogPost    = lazy(() => import('./pages/BlogPost'));
+const BlogTag     = lazy(() => import('./pages/BlogTag'));
 const NotFound    = lazy(() => import('./pages/NotFound'));
 
 function App() {
@@ -41,6 +44,9 @@ function App() {
             <Route path="/contact"      element={<Contact />} />
             <Route path="/hall-of-fame" element={<HallOfFame />} />
             <Route path="/my-games"     element={<MyGames />} />
+            <Route path="/blog"             element={<Blog />} />
+            <Route path="/blog/tag/:tag"    element={<BlogTag />} />
+            <Route path="/blog/:slug"       element={<BlogPost />} />
             <Route path="*"             element={<NotFound />} />
           </Routes>
         </Suspense>

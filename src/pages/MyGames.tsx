@@ -6,8 +6,10 @@ import Navbar from '../components/Navbar';
 import { games } from '../data/games';
 import type { Game } from '../data/games';
 import { db } from '../firebase';
-import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore/lite';
-import { compareLeaderboardEntries } from '../utils/leaderboardUtils';
+import { collection, query, where, getDocs } from 'firebase/firestore/lite';
+import { compareLeaderboardEntries, formatScore } from '../utils/leaderboardUtils';
+import { buildLeaderboardQuery } from '../utils/leaderboardQuery';
+import { useNickname } from '../hooks/useNickname';
 import { LEADERBOARD_FETCH_LIMIT } from '../constants/gameConstants';
 import './MyGames.css';
 
@@ -21,7 +23,7 @@ const MyGames = () => {
   const [rankedGames, setRankedGames] = useState<GameWithRank[]>([]);
   const [noRankGames, setNoRankGames] = useState<GameWithRank[]>([]);
   const [loading, setLoading] = useState(true);
-  const nickname = localStorage.getItem('player_nickname') || 'Explorer';
+  const nickname = useNickname();
 
   useEffect(() => {
     const fetchMyRanks = async () => {
@@ -49,12 +51,7 @@ const MyGames = () => {
           const userData = userScoresByGame.get(game.id)!;
           const subSortAsc = game.leaderboard?.subSortAsc ?? false;
 
-          const lbQuery = query(
-            collection(db, "leaderboards"),
-            where("gameId", "==", game.id),
-            orderBy("score", "desc"),
-            limit(LEADERBOARD_FETCH_LIMIT)
-          );
+          const lbQuery = buildLeaderboardQuery(db, game.id, { limit: LEADERBOARD_FETCH_LIMIT });
           const lbSnap = await getDocs(lbQuery);
           const docs = lbSnap.docs.map(d => d.data());
 
@@ -127,7 +124,7 @@ const MyGames = () => {
                       <div className="card-info">
                         <h3>{game.title}</h3>
                         <div className="score-info">
-                          <span className="score-val">{game.score?.toLocaleString()}</span>
+                          <span className="score-val">{formatScore(game.score ?? 0)}</span>
                           <span className="score-label">Score</span>
                         </div>
                         <Link to={`/play/${game.id}`} className="play-again-btn">Play Again</Link>

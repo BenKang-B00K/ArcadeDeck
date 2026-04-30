@@ -3,3 +3,6 @@ Allow: /
 
 # Sitemap Location
 Sitemap: https://arcadedeck.net/sitemap.xml
+
+# RSS Feed
+# https://arcadedeck.net/rss.xml

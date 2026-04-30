@@ -37,7 +37,7 @@ const Contact: React.FC = () => {
           <p>We typically respond within 24–48 hours on business days. Replies may take longer on weekends and public holidays. If your message is time-sensitive (e.g., an inappropriate comment or leaderboard entry that needs moderation), please mention "urgent" in the subject line.</p>
 
           <h2 style={{ marginTop: '40px', color: '#00d2ff' }}>Frequently Asked Questions</h2>
-          <p><strong>Are the games really free?</strong> Yes. Every game on ArcadeDeck is free to play with no downloads, sign-ups, or paywalls. The site is supported by ads.</p>
+          <p><strong>Are the games really free?</strong> Yes. Every game on ArcadeDeck is free to play with no downloads, sign-ups, or paywalls. ArcadeDeck is supported by ads.</p>
           <p><strong>Why can't I see my score on the leaderboard?</strong> Scores are submitted automatically when a game ends. If yours doesn't appear, try refreshing the page. If the issue persists, email us with your Gamer ID and the game name.</p>
           <p><strong>How do I change my Gamer ID?</strong> Click the edit icon next to your name on the homepage. Past leaderboard entries keep the name they were submitted under.</p>
           <p><strong>Can I submit my own game?</strong> Yes — see the Business &amp; Game Submissions email above. Include a playable build link, a short description, and your contact info.</p>

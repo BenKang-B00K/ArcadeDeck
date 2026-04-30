@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Link as LinkIcon, Share2, X } from 'lucide-react';
+import { useEscapeKey } from '../hooks/useEscapeKey';
 import './ShareModal.css';
 
 interface ShareModalProps {
@@ -21,12 +22,13 @@ const ShareModal: React.FC<ShareModalProps> = ({
   scoreUnit = '',
   lang,
 }) => {
+  useEscapeKey(onClose, isOpen);
+  const copyBtnRef = useRef<HTMLButtonElement>(null);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
   useEffect(() => {
-    if (!isOpen) return;
-    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [isOpen, onClose]);
+    return () => clearTimeout(copyTimerRef.current);
+  }, []);
 
   if (!isOpen) return null;
 
@@ -44,8 +46,6 @@ const ShareModal: React.FC<ShareModalProps> = ({
   const encodedUrl = encodeURIComponent(pageUrl);
 
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`;
-  const copyBtnRef = useRef<HTMLButtonElement>(null);
-  const copyTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(pageUrl);
@@ -57,10 +57,6 @@ const ShareModal: React.FC<ShareModalProps> = ({
       }, 2000);
     }
   };
-
-  useEffect(() => {
-    return () => clearTimeout(copyTimerRef.current);
-  }, []);
 
   const handleNativeShare = () => {
     navigator.share({

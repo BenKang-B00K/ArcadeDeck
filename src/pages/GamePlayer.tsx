@@ -1,24 +1,29 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
-import { Maximize, Heart, Link as LinkIcon, Home, Globe, Gamepad2, BookOpen, Joystick, Lightbulb, ScrollText, Sparkles, X } from 'lucide-react';
+import { Maximize, Heart, Link as LinkIcon, Home, Globe, X } from 'lucide-react';
 import { games, loadGameDetails } from '../data/games';
-import type { Game } from '../data/games';
+import type { Game, LeaderboardEntry } from '../data/games';
 import Navbar from '../components/Navbar';
 import Leaderboard from '../components/Leaderboard';
 import AdBanner from '../components/AdBanner';
 import CommentSection from '../components/CommentSection';
 import ShareModal from '../components/ShareModal';
 import GameResultModal from '../components/GameResultModal';
-import GameCard from '../components/GameCard';
-import { isNewPersonalBest } from '../utils/leaderboardUtils';
-import { MAX_SCORE, AD_SLOTS } from '../constants/gameConstants';
+import GameHeadMeta from '../components/gameplayer/GameHeadMeta';
+import GameInfoTabs from '../components/gameplayer/GameInfoTabs';
+import RelatedGames from '../components/gameplayer/RelatedGames';
+import RelatedPosts from '../components/gameplayer/RelatedPosts';
+import { isNewPersonalBest, compareLeaderboardEntries, formatScore } from '../utils/leaderboardUtils';
+import { buildLeaderboardQuery } from '../utils/leaderboardQuery';
+import { useNickname } from '../hooks/useNickname';
+import { useNotification } from '../hooks/useNotification';
+import { MAX_SCORE, AD_SLOTS, LEADERBOARD_FETCH_LIMIT } from '../constants/gameConstants';
 import { db } from '../firebase';
 import {
   collection,
   query,
   where,
-  orderBy,
   getDocs,
   limit,
   addDoc,
@@ -28,20 +33,15 @@ import {
 } from "firebase/firestore/lite";
 import './GamePlayer.css';
 
-interface LeaderboardEntry {
-  name: string;
-  score: number;
-  subScore?: number;
-  date: string;
-}
-
 const GamePlayer: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   // Support both slug-based (/play/gate-of-hell) and legacy id-based (/play/1) URLs
   const id = games.find(g => g.slug === slug)?.id ?? slug;
-  const [game, setGame] = useState<Game | null>(null);
+  const lightGame = useMemo<Game | null>(() => games.find(g => g.id === id) ?? null, [id]);
+  const [fullGame, setFullGame] = useState<{ id: string; game: Game } | null>(null);
+  const game: Game | null = (fullGame && fullGame.id === id ? fullGame.game : null) ?? lightGame;
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [nickname] = useState<string>(localStorage.getItem('player_nickname') || 'Explorer');
+  const nickname = useNickname();
   const [isLiked, setIsLiked] = useState<boolean>(() =>
     localStorage.getItem(`liked_${id}`) === 'true'
   );
@@ -50,7 +50,7 @@ const GamePlayer: React.FC = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [iframeLoading, setIframeLoading] = useState(true);
   const [lang, setLang] = useState<'en' | 'ko'>('en');
-  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
+  const { notification, showNotification } = useNotification(4000);
   const [gameResult, setGameResult] = useState<{
     score: number; unit: string;
     resultType: 'personal-best' | 'first-score' | 'game-over';
@@ -59,17 +59,13 @@ const GamePlayer: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [showStickyBar, setShowStickyBar] = useState(false);
   const [iframeKey, setIframeKey] = useState(0);
+  // Forces re-render so getWrapperStyle() recomputes after viewport rotation/resize.
   const [, setOrientationTick] = useState(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const gameWrapperRef = useRef<HTMLDivElement>(null);
 
-  const showNotification = (message: string, type: 'success' | 'info' | 'error' = 'info') => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 4000);
-  };
-
   const t = {
-    back: lang === 'en' ? 'Arcade Deck' : '아케이드 홈',
+    back: lang === 'en' ? 'ArcadeDeck' : '아케이드덱',
     player: lang === 'en' ? 'Player' : '플레이어',
     edit: lang === 'en' ? 'Edit' : '편집',
     save: lang === 'en' ? 'Save' : '저장',
@@ -89,66 +85,60 @@ const GamePlayer: React.FC = () => {
     currentProgress: lang === 'en' ? 'Current Progress:' : '현재 진행 상황:',
   };
 
-  const fetchLeaderboard = async () => {
+  const fetchLeaderboard = useCallback(async (): Promise<LeaderboardEntry[]> => {
     if (!id) return [];
-    if (!games.find(g => g.id === id)?.leaderboard) return [];
-    try {
-      const dualSort = games.find(g => g.id === id)?.leaderboard?.dualSort ?? false;
-      const q = dualSort
-        ? query(collection(db, "leaderboards"), where("gameId", "==", id), orderBy("score", "desc"), orderBy("subScore", "desc"), limit(100))
-        : query(collection(db, "leaderboards"), where("gameId", "==", id), orderBy("score", "desc"), limit(100));
-      
-      const querySnapshot = await getDocs(q);
-      const entries = querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          name: data.name,
-          score: data.score,
-          subScore: Number(data.subScore) || 0,
-          date: data.createdAt?.toDate ? data.createdAt.toDate().toLocaleDateString() : 'Unknown'
-        };
-      }) as LeaderboardEntry[];
+    const lb = games.find(g => g.id === id)?.leaderboard;
+    if (!lb) return [];
+    const subSortAsc = lb.subSortAsc ?? false;
+    const dualSort = lb.dualSort ?? false;
 
-      setLeaderboard(entries);
-      return entries;
+    const mapDoc = (doc: { data: () => Record<string, unknown> }): LeaderboardEntry => {
+      const data = doc.data() as { name: string; score: number; subScore?: number; createdAt?: { toDate?: () => Date } };
+      return {
+        name: data.name,
+        score: data.score,
+        subScore: Number(data.subScore) || 0,
+        date: data.createdAt?.toDate ? data.createdAt.toDate().toLocaleDateString() : 'Unknown'
+      };
+    };
+
+    const finalize = (entries: LeaderboardEntry[]) => {
+      const sorted = [...entries].sort((a, b) => compareLeaderboardEntries(a, b, subSortAsc));
+      setLeaderboard(sorted);
+      return sorted;
+    };
+
+    try {
+      const q = buildLeaderboardQuery(db, id, { dualSort, subSortAsc, limit: LEADERBOARD_FETCH_LIMIT });
+      const querySnapshot = await getDocs(q);
+      return finalize(querySnapshot.docs.map(mapDoc));
     } catch (error) {
       console.error("Error fetching leaderboard: ", error);
       try {
         const qSimple = query(
           collection(db, "leaderboards"),
           where("gameId", "==", id),
-          limit(100)
+          limit(LEADERBOARD_FETCH_LIMIT)
         );
         const snapSimple = await getDocs(qSimple);
-        const simpleEntries = snapSimple.docs.map(doc => {
-          const data = doc.data();
-          return {
-            name: data.name,
-            score: data.score,
-            subScore: Number(data.subScore) || 0,
-            date: data.createdAt?.toDate ? data.createdAt.toDate().toLocaleDateString() : 'Unknown'
-          };
-        }) as LeaderboardEntry[];
-        setLeaderboard(simpleEntries);
-        return simpleEntries;
+        return finalize(snapSimple.docs.map(mapDoc));
       } catch (e) {
         console.error("Critical leaderboard error:", e);
         showNotification(lang === 'ko' ? '리더보드를 불러올 수 없습니다.' : 'Failed to load leaderboard.', 'error');
         return [];
       }
     }
-  };
+  }, [id, lang, showNotification]);
 
-  const handleGameComplete = async (score: number, subScore?: number) => {
+  const handleGameComplete = useCallback(async (score: number, subScore?: number) => {
     if (!id) return;
-    if (!games.find(g => g.id === id)?.leaderboard) return;
-
-    // Resolve leaderboard display config from games data (no hardcoded IDs)
     const lb = games.find(g => g.id === id)?.leaderboard;
-    const primaryUnit    = lb?.primaryUnit    ?? '';
-    const secondaryLabel = lb?.secondaryLabel ?? '';
-    const secondaryUnit  = lb?.secondaryUnit  ?? '';
-    const subSortAsc     = lb?.subSortAsc     ?? false;
+    if (!lb) return;
+
+    const primaryUnit    = lb.primaryUnit    ?? '';
+    const secondaryLabel = lb.secondaryLabel ?? '';
+    const secondaryUnit  = lb.secondaryUnit  ?? '';
+    const subSortAsc     = lb.subSortAsc     ?? false;
 
     const buildSubPart = (sub: number) =>
       secondaryLabel ? ` (${secondaryLabel}: ${secondaryUnit}${sub})` : '';
@@ -184,7 +174,7 @@ const GamePlayer: React.FC = () => {
           return;
         } else {
           showNotification(
-            `${t.gameOver} ${score.toLocaleString()}${primaryUnit}${buildSubPart(currentSubScore)} (Best: ${prevScore.toLocaleString()}${primaryUnit})`,
+            `${t.gameOver} ${formatScore(score, primaryUnit)}${buildSubPart(currentSubScore)} (Best: ${formatScore(prevScore, primaryUnit)})`,
             'info'
           );
         }
@@ -210,38 +200,35 @@ const GamePlayer: React.FC = () => {
       }
     } catch (error) {
       console.error("Error submitting score: ", error);
+      showNotification(lang === 'ko' ? '점수 등록 실패. 잠시 후 다시 시도해 주세요.' : 'Failed to submit score. Please try again.', 'error');
     }
-  };
+  }, [id, nickname, lang, t.gameOver, fetchLeaderboard, showNotification]);
 
   useEffect(() => {
-    const lightGame = games.find(g => g.id === id);
-    if (!lightGame) return;
-
-    // Render immediately with light data; detail-only sections (lore/tips/etc.)
-    // gate on their own fields and stay hidden until hydration completes.
-    setGame(lightGame);
+    if (!lightGame || !id) return;
+    const currentId = id;
 
     const recentlyPlayed = JSON.parse(localStorage.getItem('recently_played') || '[]');
     const updatedList = [lightGame.id, ...recentlyPlayed.filter((gid: string) => gid !== lightGame.id)].slice(0, 4);
     localStorage.setItem('recently_played', JSON.stringify(updatedList));
 
     let cancelled = false;
-    loadGameDetails(g => g.id === id).then(full => {
-      if (!cancelled && full) setGame(full);
+    loadGameDetails(g => g.id === currentId).then(full => {
+      if (!cancelled && full) setFullGame({ id: currentId, game: full });
     });
     return () => { cancelled = true; };
-  }, [id]);
+  }, [id, lightGame]);
 
   useEffect(() => {
-    fetchLeaderboard();
+    void fetchLeaderboard();
     window.scrollTo(0, 0);
 
     // Derive the allowed origin from the game's iframe URL
-    const lightGame = games.find(g => g.id === id);
+    const lg = games.find(g => g.id === id);
     let allowedOrigin: string | null = null;
-    if (lightGame?.gameUrl) {
+    if (lg?.gameUrl) {
       try {
-        allowedOrigin = new URL(lightGame.gameUrl).origin;
+        allowedOrigin = new URL(lg.gameUrl).origin;
       } catch {
         allowedOrigin = null;
       }
@@ -266,13 +253,13 @@ const GamePlayer: React.FC = () => {
           ? subScore
           : undefined;
 
-        handleGameComplete(score, safeSubScore);
+        void handleGameComplete(score, safeSubScore);
       }
     };
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [id, nickname]);
+  }, [id, fetchLeaderboard, handleGameComplete]);
 
   useEffect(() => {
     if (isPseudoFullscreen) {
@@ -374,55 +361,7 @@ const GamePlayer: React.FC = () => {
     <div className="game-player-page" style={{ 
       backgroundImage: `linear-gradient(rgba(5, 5, 7, 0.8), rgba(5, 5, 7, 0.9)), url(${thumbnailUrl})` 
     }}>
-      <>
-        <html lang={lang === 'ko' ? 'ko' : 'en'} />
-        <title>{lang === 'ko' ? (game.titleKo ?? game.title) : game.title} - Play Free on ArcadeDeck</title>
-        <meta name="description" content={lang === 'ko' ? `${game.titleKo ?? game.title}: ${game.descriptionKo ?? game.description} ArcadeDeck에서 무료로 즐기세요!` : `Play ${game.title}: ${game.description} Free online browser game on ArcadeDeck.`} />
-        <meta name="keywords" content={`${game.title}, ${game.genres.join(', ')}, free online game, browser game, arcadedeck`} />
-        <link rel="canonical" href={`https://arcadedeck.net/play/${game.slug}`} />
-
-        {/* Open Graph & Twitter Card */}
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="ArcadeDeck" />
-        <meta property="og:locale" content={lang === 'ko' ? 'ko_KR' : 'en_US'} />
-        <meta property="og:locale:alternate" content={lang === 'ko' ? 'en_US' : 'ko_KR'} />
-        <meta property="og:title" content={`${lang === 'ko' ? (game.titleKo ?? game.title) : game.title} - ArcadeDeck`} />
-        <meta property="og:description" content={lang === 'ko' ? (game.descriptionKo ?? game.description) : game.description} />
-        <meta property="og:image" content={`https://arcadedeck.net/${encodeURI(game.thumbnail)}`} />
-        <meta property="og:url" content={`https://arcadedeck.net/play/${game.slug}`} />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${lang === 'ko' ? (game.titleKo ?? game.title) : game.title} - ArcadeDeck`} />
-        <meta name="twitter:description" content={lang === 'ko' ? (game.descriptionKo ?? game.description) : game.description} />
-        <meta name="twitter:image" content={`https://arcadedeck.net/${encodeURI(game.thumbnail)}`} />
-
-        {/* JSON-LD Structured Data — VideoGame schema */}
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "VideoGame",
-            "name": game.title,
-            "alternateName": game.titleKo,
-            "description": game.description,
-            "genre": game.genres,
-            "applicationCategory": "GameApplication",
-            "operatingSystem": "Web Browser",
-            "inLanguage": ["en", "ko"],
-            "image": `https://arcadedeck.net/${encodeURI(game.thumbnail)}`,
-            "url": `https://arcadedeck.net/play/${game.slug}`,
-            "author": {
-              "@type": "Organization",
-              "name": "ArcadeDeck",
-              "url": "https://arcadedeck.net"
-            },
-            "offers": {
-              "@type": "Offer",
-              "price": "0",
-              "priceCurrency": "USD",
-              "availability": "https://schema.org/InStock"
-            }
-          })}
-        </script>
-      </>
+      <GameHeadMeta game={game} lang={lang} />
       
       {notification && (
         <div className={`notification-toast ${notification.type} animate-in`}>
@@ -448,6 +387,12 @@ const GamePlayer: React.FC = () => {
             </button>
           </div>
         </div>
+
+        <nav className="breadcrumbs game-breadcrumbs" aria-label="Breadcrumb">
+          <Link to="/">Home</Link>
+          <span aria-hidden="true">›</span>
+          <span className="breadcrumb-current">{lang === 'ko' ? (game.titleKo ?? game.title) : game.title}</span>
+        </nav>
 
         {/* ── Game title + controls in one row ── */}
         <div className="game-header-section">
@@ -498,86 +443,13 @@ const GamePlayer: React.FC = () => {
           {!iframeLoading && <AdBanner slot={AD_SLOTS.GAME_PLAYER} style={{ margin: '0' }} />}
         </div>
 
-        {/* ── Info Sections (all visible for SEO + AdSense content depth) ── */}
-        <div className="game-info-tabs">
-          <nav className="tab-nav" aria-label={lang === 'ko' ? '게임 정보 바로가기' : 'Jump to game info'}>
-            <a href="#section-overview" className={`tab-btn ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
-              <BookOpen size={14} aria-hidden="true" /> {lang === 'ko' ? '개요' : 'Overview'}
-            </a>
-            <a href="#section-controls" className={`tab-btn ${activeTab === 'controls' ? 'active' : ''}`} onClick={() => setActiveTab('controls')}>
-              <Joystick size={14} aria-hidden="true" /> {lang === 'ko' ? '조작법' : 'Controls'}
-            </a>
-            {(game.tips || game.tipsKo) && (
-              <a href="#section-tips" className={`tab-btn ${activeTab === 'tips' ? 'active' : ''}`} onClick={() => setActiveTab('tips')}>
-                <Lightbulb size={14} aria-hidden="true" /> {lang === 'ko' ? '팁' : 'Tips'}
-              </a>
-            )}
-            {(game.lore || game.loreKo) && (
-              <a href="#section-lore" className={`tab-btn ${activeTab === 'lore' ? 'active' : ''}`} onClick={() => setActiveTab('lore')}>
-                <ScrollText size={14} aria-hidden="true" /> {lang === 'ko' ? '세계관' : 'Lore'}
-              </a>
-            )}
-            {((game.features?.length ?? 0) > 0) && (
-              <a href="#section-features" className={`tab-btn ${activeTab === 'features' ? 'active' : ''}`} onClick={() => setActiveTab('features')}>
-                <Sparkles size={14} aria-hidden="true" /> {lang === 'ko' ? '특징' : 'Features'}
-              </a>
-            )}
-          </nav>
-
-          <section id="section-overview" className="info-section detail-card">
-            <h2 className="info-section-title"><BookOpen size={18} aria-hidden="true" /> {lang === 'ko' ? '개요' : 'Overview'}</h2>
-            <div className="detail-content">{lang === 'ko' ? game.fullDescriptionKo : game.fullDescription}</div>
-          </section>
-          <section id="section-controls" className="info-section detail-card">
-            <h2 className="info-section-title"><Joystick size={18} aria-hidden="true" /> {lang === 'ko' ? '조작법' : 'Controls'}</h2>
-            <div className="detail-content highlight">{lang === 'ko' ? game.controlsKo : game.controls}</div>
-          </section>
-          {(game.tips || game.tipsKo) && (
-            <section id="section-tips" className="info-section detail-card">
-              <h2 className="info-section-title"><Lightbulb size={18} aria-hidden="true" /> {lang === 'ko' ? '팁' : 'Pro Tips'}</h2>
-              <div className="detail-content tip-highlight">{lang === 'ko' ? game.tipsKo : game.tips}</div>
-            </section>
-          )}
-          {(game.lore || game.loreKo) && (
-            <section id="section-lore" className="info-section detail-card">
-              <h2 className="info-section-title"><ScrollText size={18} aria-hidden="true" /> {lang === 'ko' ? '세계관' : 'World Lore'}</h2>
-              <div className="detail-content italic">{lang === 'ko' ? game.loreKo : game.lore}</div>
-            </section>
-          )}
-          {((game.features?.length ?? 0) > 0) && (
-            <section id="section-features" className="info-section detail-card">
-              <h2 className="info-section-title"><Sparkles size={18} aria-hidden="true" /> {lang === 'ko' ? '특징' : 'Key Features'}</h2>
-              <ul className="feature-tags">
-                {(lang === 'ko' ? game.featuresKo : game.features)?.map((feat, idx) => (
-                  <li key={idx} className="feature-tag-item">#{feat}</li>
-                ))}
-              </ul>
-            </section>
-          )}
-        </div>
+        <GameInfoTabs game={game} lang={lang} activeTab={activeTab} setActiveTab={setActiveTab} />
 
         {game.leaderboard && <Leaderboard entries={leaderboard} gameId={game.id} currentNickname={nickname} />}
         <CommentSection gameId={game.id} currentNickname={nickname} />
 
-        {/* ── Related Games ── */}
-        {(() => {
-          const related = games.filter(
-            g => g.id !== game.id &&
-                 g.status !== 'IN PRODUCTION' &&
-                 g.genres.some(genre => game.genres.includes(genre))
-          ).slice(0, 3);
-          if (related.length === 0) return null;
-          return (
-            <div className="related-games-section">
-              <h3 className="related-games-title">
-                <Gamepad2 size={18} aria-hidden="true" /> {lang === 'ko' ? '비슷한 게임' : 'You Might Also Like'}
-              </h3>
-              <div className="related-games-grid">
-                {related.map(g => <GameCard key={g.id} game={g} />)}
-              </div>
-            </div>
-          );
-        })()}
+        <RelatedPosts gameSlug={game.slug} lang={lang} />
+        <RelatedGames current={game} lang={lang} />
       </main>
 
       {/* ── Sticky Controls Bar ── */}

@@ -36,7 +36,6 @@
     "thumbnail": "images/gate-of-hell.webp",
     "genres": [
       "Tower Defense",
-      "Action",
       "Survival",
       "Strategy"
     ],
@@ -90,10 +89,7 @@
     ],
     "thumbnail": "images/galaxy-launch.webp",
     "genres": [
-      "Clicker",
-      "Idle",
-      "Sci-Fi",
-      "Incremental"
+      "Idle"
     ],
     "gameUrl": "https://galaxylaunch.onrender.com/",
     "aspectRatio": "16/9",
@@ -143,9 +139,7 @@
     "thumbnail": "images/idle-avatar-rpg.webp",
     "genres": [
       "Idle",
-      "RPG",
-      "Fantasy",
-      "Incremental"
+      "RPG"
     ],
     "gameUrl": "https://idleavatar.onrender.com/",
     "aspectRatio": "16/9",
@@ -187,10 +181,8 @@
     ],
     "thumbnail": "images/gem-merge.webp",
     "genres": [
-      "Puzzle",
       "Casual",
-      "Strategy",
-      "Match"
+      "Strategy"
     ],
     "gameUrl": "https://mergegame.pages.dev/",
     "aspectRatio": "16/16",
@@ -240,10 +232,8 @@
     ],
     "thumbnail": "images/trade-tycoon.webp",
     "genres": [
-      "Tycoon",
-      "Simulation",
       "Strategy",
-      "Economy"
+      "Idle"
     ],
     "gameUrl": "https://citytraders.pages.dev",
     "aspectRatio": "16/9",
@@ -285,10 +275,8 @@
     ],
     "thumbnail": "images/15s-click-challenge.webp",
     "genres": [
-      "Clicker",
-      "Casual",
-      "Challenge",
-      "Arcade"
+      "Arcade",
+      "Casual"
     ],
     "gameUrl": "https://clickthetarget.pages.dev/",
     "aspectRatio": "1/1",
@@ -339,10 +327,8 @@
     ],
     "thumbnail": "images/omok.webp",
     "genres": [
-      "Board Game",
-      "Local Co-op",
       "Strategy",
-      "Classic"
+      "Local Co-op"
     ],
     "gameUrl": "https://omok-96n.pages.dev/",
     "aspectRatio": "1/1",
@@ -387,7 +373,6 @@
     "genres": [
       "Survival",
       "Action",
-      "Sci-Fi",
       "Roguelike"
     ],
     "gameUrl": "https://neuralsurvivorbk.pages.dev/",
@@ -439,9 +424,7 @@
     ],
     "thumbnail": "images/endless-war.webp",
     "genres": [
-      "Simulation",
       "Strategy",
-      "War",
       "Idle"
     ],
     "gameUrl": "https://16bed324.endlesswarbk.pages.dev/",
@@ -493,9 +476,7 @@
     "thumbnail": "images/dicefall-chronicles.webp",
     "genres": [
       "Roguelike",
-      "RPG",
-      "Dice",
-      "Adventure"
+      "RPG"
     ],
     "gameUrl": "https://dicefall-chronicles-mobile-bk.pages.dev/",
     "aspectRatio": "16/9",
@@ -545,9 +526,7 @@
     "thumbnail": "images/heroes-of-the-last-nexus.webp",
     "genres": [
       "RPG",
-      "Strategy",
-      "Fantasy",
-      "Auto Battler"
+      "Strategy"
     ],
     "gameUrl": "https://heroes-of-the-last-nexus-bk.pages.dev/",
     "aspectRatio": "16/9",
@@ -597,10 +576,8 @@
     ],
     "thumbnail": "images/timing-chef.webp",
     "genres": [
-      "Casual",
       "Arcade",
-      "Timing",
-      "Cooking"
+      "Casual"
     ],
     "gameUrl": "https://timing-chef-bk.pages.dev/",
     "aspectRatio": "9/16",
@@ -651,9 +628,7 @@
     "thumbnail": "images/fruit-frenzy.webp",
     "genres": [
       "Arcade",
-      "Casual",
-      "Action",
-      "Reflex"
+      "Action"
     ],
     "gameUrl": "https://fruit-frenzy-bk.pages.dev/",
     "aspectRatio": "9/16",
@@ -708,10 +683,8 @@
     ],
     "thumbnail": "images/kingdoms-last-stand.webp",
     "genres": [
-      "Auto Battler",
-      "Roguelike",
       "Strategy",
-      "Fantasy"
+      "Roguelike"
     ],
     "gameUrl": "https://kingond-s-last-stand-bk.pages.dev/",
     "aspectRatio": "16/9",
@@ -763,9 +736,8 @@
     "thumbnail": "images/triangle-battle.webp",
     "genres": [
       "Arcade",
-      "Local Co-op",
-      "Action",
-      "PvP"
+      "PvP",
+      "Local Co-op"
     ],
     "gameUrl": "https://make-triangle-bk.pages.dev/",
     "aspectRatio": "16/9",
@@ -807,8 +779,7 @@
     "genres": [
       "Action",
       "PvP",
-      "Local Co-op",
-      "Tanks"
+      "Local Co-op"
     ],
     "gameUrl": "https://tank-battle-bk.pages.dev/",
     "aspectRatio": "16/9",
@@ -849,9 +820,8 @@
     ],
     "thumbnail": "images/spirit-duel.webp",
     "genres": [
-      "Tactical Battle",
-      "PvP",
       "Strategy",
+      "PvP",
       "Local Co-op"
     ],
     "gameUrl": "https://spirit-duel-bk.pages.dev/",
@@ -889,9 +859,8 @@
     ],
     "thumbnail": "images/skyfall.webp",
     "genres": [
-      "Survival",
-      "Reflex",
-      "Arcade"
+      "Arcade",
+      "Survival"
     ],
     "gameUrl": "https://skyfall-bk.pages.dev/",
     "aspectRatio": "16/9",

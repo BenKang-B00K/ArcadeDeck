@@ -10,6 +10,13 @@ export interface LeaderboardConfig {
   subSortAsc: boolean;
 }
 
+export interface LeaderboardEntry {
+  name: string;
+  score: number;
+  subScore?: number;
+  date: string;
+}
+
 // Light fields: bundled with the main chunk so the Home grid, search, and
 // leaderboard code render without a network round-trip.
 export interface GameLight {

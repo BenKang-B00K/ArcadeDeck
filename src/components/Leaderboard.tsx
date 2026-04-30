@@ -1,15 +1,10 @@
 import React from 'react';
-import { Trophy, Crown, Flame } from 'lucide-react';
+import { Trophy, Crown } from 'lucide-react';
 import { games } from '../data/games';
-import { compareLeaderboardEntries } from '../utils/leaderboardUtils';
+import type { LeaderboardEntry } from '../data/games';
+import { compareLeaderboardEntries, formatScore } from '../utils/leaderboardUtils';
+import { getRankIcon } from '../utils/leaderboardIcons';
 import './Leaderboard.css';
-
-interface LeaderboardEntry {
-  name: string;
-  score: number;
-  subScore?: number;
-  date: string;
-}
 
 interface LeaderboardProps {
   entries: LeaderboardEntry[];
@@ -31,13 +26,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, gameId, currentNickn
     .sort((a, b) => compareLeaderboardEntries(a, b, subSortAsc))
     .slice(0, 10);
 
-  const getRankIcon = (rank: number): React.ReactNode => {
-    if (rank === 1) return <Crown size={18} className="rank-icon gold" aria-hidden="true" />;
-    if (rank === 2) return <Crown size={16} className="rank-icon silver" aria-hidden="true" />;
-    if (rank === 3) return <Crown size={16} className="rank-icon bronze" aria-hidden="true" />;
-    if (rank >= 4 && rank <= 8) return <Flame size={16} className="rank-icon fire" aria-hidden="true" />;
-    return rank;
-  };
+  const renderRankIcon = (rank: number) => getRankIcon(rank, { flameRange: [4, 8] });
 
   const getEncouragement = (rank: number) => {
     if (rank >= 4 && rank <= 6) return "Almost There!";
@@ -65,13 +54,13 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, gameId, currentNickn
                 <div key={index} className={`podium-item rank-${originalRank} ${isMe ? 'is-me' : ''}`}>
                   <div className="podium-crown">{originalRank === 1 ? <Crown size={20} className="rank-icon gold" aria-hidden="true" /> : ''}</div>
                   <div className="podium-avatar">
-                    <span className="rank-badge">{getRankIcon(originalRank)}</span>
+                    <span className="rank-badge">{renderRankIcon(originalRank)}</span>
                   </div>
                   <div className="podium-info">
                     <span className="player-name">{entry.name}</span>
                     <div className="player-score-group">
                       <span className="player-score">
-                        {entry.score.toLocaleString()}{unit}
+                        {formatScore(entry.score, unit)}
                       </span>
                       {subLabel && (
                         <span className="player-subscore">
@@ -106,7 +95,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, gameId, currentNickn
                     return (
                       <tr key={index} className={`rank-row rank-other ${isMe ? 'is-me' : ''}`}>
                         <td className="rank-cell">
-                          <span className="rank-number">{getRankIcon(rank)}</span>
+                          <span className="rank-number">{renderRankIcon(rank)}</span>
                         </td>
                         <td className="player-cell">
                           <div className="player-info">
@@ -115,7 +104,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, gameId, currentNickn
                             {encouragement && <span className="cheer-text">{encouragement}</span>}
                           </div>
                         </td>
-                        <td className="score-cell">{entry.score.toLocaleString()}{unit}</td>
+                        <td className="score-cell">{formatScore(entry.score, unit)}</td>
                         {subLabel && <td className="subscore-cell">{subUnit}{entry.subScore || 0}</td>}
                       </tr>
                     );
@@ -132,4 +121,4 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, gameId, currentNickn
   );
 };
 
-export default Leaderboard;
+export default React.memo(Leaderboard);

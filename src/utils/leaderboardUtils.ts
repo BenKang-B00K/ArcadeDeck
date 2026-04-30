@@ -1,3 +1,7 @@
+export function formatScore(score: number, unit: string = ''): string {
+  return `${score.toLocaleString()}${unit}`;
+}
+
 /**
  * Compare two leaderboard entries for sorting.
  * Primary: higher score first.

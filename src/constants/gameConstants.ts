@@ -6,6 +6,7 @@ export const BANNED_WORDS = [
 export const ITEMS_PER_PAGE = 8;
 export const MAX_SCORE = 10_000_000;
 export const LEADERBOARD_FETCH_LIMIT = 100;
+export const COMMENT_PAGE_SIZE = 20;
 export const RANDOM_ID_MIN = 1000;
 export const RANDOM_ID_MAX = 9999;
 

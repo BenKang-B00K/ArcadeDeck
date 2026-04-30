@@ -1,5 +1,7 @@
-import React, { useEffect } from 'react';
-import { Trophy, Sparkles, RefreshCw, Home, X, Crown, Flame } from 'lucide-react';
+import React from 'react';
+import { Trophy, Sparkles, RefreshCw, Home, X } from 'lucide-react';
+import { useEscapeKey } from '../hooks/useEscapeKey';
+import { getRankIcon } from '../utils/leaderboardIcons';
 import './GameResultModal.css';
 
 interface GameResultModalProps {
@@ -15,13 +17,6 @@ interface GameResultModalProps {
   onPlayAgain: () => void;
 }
 
-const getRankIcon = (r: number): React.ReactNode => {
-  if (r === 1) return <Crown size={18} className="rank-icon gold" aria-hidden="true" />;
-  if (r === 2) return <Crown size={16} className="rank-icon silver" aria-hidden="true" />;
-  if (r === 3) return <Crown size={16} className="rank-icon bronze" aria-hidden="true" />;
-  return <Flame size={16} className="rank-icon fire" aria-hidden="true" />;
-};
-
 const GameResultModal: React.FC<GameResultModalProps> = ({
   isOpen,
   onClose,
@@ -33,12 +28,7 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
   lang,
   onPlayAgain,
 }) => {
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [isOpen, onClose]);
+  useEscapeKey(onClose, isOpen);
 
   if (!isOpen) return null;
 

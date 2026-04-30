@@ -2,7 +2,8 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Trophy, Crown, Medal, RefreshCw, Loader } from 'lucide-react';
 import { db } from '../firebase';
-import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore/lite';
+import { getDocs } from 'firebase/firestore/lite';
+import { buildLeaderboardQuery } from '../utils/leaderboardQuery';
 import { games } from '../data/games';
 import './GlobalLeaderboard.css';
 
@@ -78,21 +79,11 @@ const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({ onDataLoaded, var
 
     try {
       const promises = games.map(async (game) => {
-        const dualSort = game.leaderboard?.dualSort ?? false;
-        const q = dualSort
-          ? query(
-              collection(db, "leaderboards"),
-              where("gameId", "==", game.id),
-              orderBy("score", "desc"),
-              orderBy("subScore", "desc"),
-              limit(3)
-            )
-          : query(
-              collection(db, "leaderboards"),
-              where("gameId", "==", game.id),
-              orderBy("score", "desc"),
-              limit(3)
-            );
+        const q = buildLeaderboardQuery(db, game.id, {
+          dualSort: game.leaderboard?.dualSort ?? false,
+          subSortAsc: game.leaderboard?.subSortAsc ?? false,
+          limit: 3,
+        });
 
         const snapshot = await getDocs(q);
         snapshot.docs.forEach((doc, index) => {

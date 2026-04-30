@@ -11,10 +11,10 @@ React 19 + TypeScript + Vite 7. Firebase Firestore for leaderboards/comments. De
 ```bash
 npm run dev          # Vite dev server
 npm run validate     # Lint games.json (warnings only)
-npm run build        # validate → sitemap → tsc -b → vite build → prerender → cp 404.html
+npm run build        # validate → split-games → sitemap → tsc -b → vite build → prerender → cp 404.html
 npm run lint         # ESLint flat config
 npm run preview      # Preview production build
-npm run deploy       # Build + gh-pages publish
+npm run deploy       # Build + Firebase Hosting publish
 ```
 
 Firestore rules deploy (separate from app deploy):
@@ -39,7 +39,7 @@ There are no tests in this repo.
 **Leaderboard config is data-driven:** `games.json` `leaderboard.{primaryLabel, primaryUnit, secondaryLabel, secondaryUnit, dualSort, subSortAsc}` controls Firestore sort order and UI labels. `dualSort=true` adds `orderBy("subScore")`; `subSortAsc=true` means lower subScore wins ties (Gem Merge style). Score-display strings must come from this config.
 
 **Caching:**
-- `GlobalLeaderboard` caches Firestore results in a 5-minute TTL module variable. Manual refresh button is the only invalidator. Parallelize with `Promise.all` — never serialize.
+- `GlobalLeaderboard` caches Firestore results in `sessionStorage` (key `arcadedeck_rank_cache`) with a 5-minute TTL. Manual refresh button is the only invalidator. Parallelize with `Promise.all` — never serialize.
 - `CommentSection` loads latest 20 with cursor pagination (`startAfter`). Do not switch to `onSnapshot` (cost/perf).
 
 ## Conventions (from RULES.md)
@@ -55,5 +55,4 @@ There are no tests in this repo.
 
 - `index.html` head: `msvalidate.01` (Bing) and `google-adsense-account` meta tags.
 - `public/BingSiteAuth.xml` — Bing Webmaster verification file.
-- `dist/CNAME` — custom domain for gh-pages deploy.
 - Domain DNS verification for Bing requires a DNS-only (un-proxied) CNAME on Cloudflare.

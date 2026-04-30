@@ -13,9 +13,9 @@ import {
   QueryDocumentSnapshot,
   type DocumentData,
 } from "firebase/firestore/lite";
+import { COMMENT_PAGE_SIZE as PAGE_SIZE } from '../constants/gameConstants';
 import './CommentSection.css';
 
-const PAGE_SIZE = 20;
 const COMMENT_MAX = 300;
 const SUBMIT_COOLDOWN_MS = 10_000;
 

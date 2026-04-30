@@ -11,6 +11,28 @@ const UpdateNotification: React.FC = () => {
     onRegisterError(error) {
       console.error('SW registration error', error);
     },
+    onRegisteredSW(swUrl, r) {
+      if (!r) return;
+      const checkForUpdate = async () => {
+        if (r.installing || !navigator) return;
+        if ('connection' in navigator && !navigator.onLine) return;
+        try {
+          const resp = await fetch(swUrl, {
+            cache: 'no-store',
+            headers: { 'cache-control': 'no-cache' },
+          });
+          if (resp?.status === 200) await r.update();
+        } catch {
+          // network error — ignore, retry next tick
+        }
+      };
+      // Check every 30 minutes
+      setInterval(checkForUpdate, 30 * 60 * 1000);
+      // Check when tab regains focus
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') checkForUpdate();
+      });
+    },
   });
 
   const close = () => {

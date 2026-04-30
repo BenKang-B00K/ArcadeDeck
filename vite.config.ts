@@ -32,12 +32,20 @@ export default defineConfig({
       registerType: 'prompt',
       includeAssets: ['favicon.ico', 'images/favicon.webp', 'images/arcadedeck-banner.webp'],
       manifest: {
+        id: '/',
         name: 'ArcadeDeck | The Ultimate Free Browser Games Platform',
         short_name: 'ArcadeDeck',
         description: 'Play the best free online browser games on ArcadeDeck. High-quality Action, RPG, Strategy, and Idle games.',
+        start_url: '/',
+        scope: '/',
+        lang: 'en',
+        dir: 'ltr',
         theme_color: '#050507',
         background_color: '#050507',
         display: 'standalone',
+        display_override: ['window-controls-overlay', 'standalone', 'minimal-ui'],
+        orientation: 'any',
+        categories: ['games', 'entertainment'],
         icons: [
           {
             src: 'images/icon-192x192.webp',
@@ -54,6 +62,22 @@ export default defineConfig({
             sizes: '512x512',
             type: 'image/webp',
             purpose: 'maskable'
+          }
+        ],
+        shortcuts: [
+          {
+            name: 'Hall of Fame',
+            short_name: 'Leaders',
+            description: 'View global leaderboards',
+            url: '/hall-of-fame',
+            icons: [{ src: 'images/icon-192x192.webp', sizes: '192x192', type: 'image/webp' }]
+          },
+          {
+            name: 'My Games',
+            short_name: 'Library',
+            description: 'Your saved games',
+            url: '/my-games',
+            icons: [{ src: 'images/icon-192x192.webp', sizes: '192x192', type: 'image/webp' }]
           }
         ]
       }

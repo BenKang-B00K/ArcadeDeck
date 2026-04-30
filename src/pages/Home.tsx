@@ -7,11 +7,16 @@ import GameCard from '../components/GameCard';
 import AdBanner from '../components/AdBanner';
 import { games } from '../data/games';
 import { compareLeaderboardEntries } from '../utils/leaderboardUtils';
+import { useNotification } from '../hooks/useNotification';
 import { BANNED_WORDS, RANDOM_ID_MIN, RANDOM_ID_MAX, AD_SLOTS, LEADERBOARD_FETCH_LIMIT } from '../constants/gameConstants';
 import './Home.css';
 
 const GlobalLeaderboard = lazy(() => import('../components/GlobalLeaderboard'));
 const GameGrid = lazy(() => import('../components/GameGrid'));
+
+const safeSetSession = (key: string, value: string): void => {
+  try { sessionStorage.setItem(key, value); } catch { /* quota / private mode */ }
+};
 
 const Home: React.FC = () => {
   const [nickname, setNickname] = React.useState<string>(() => {
@@ -34,16 +39,17 @@ const Home: React.FC = () => {
       return [];
     }
   });
-  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
+  const { notification, showNotification } = useNotification(3000);
   const [userRanks, setUserRanks] = useState<Record<string, number>>({});
 
   // Fetch user's rank for each game they've played
   React.useEffect(() => {
     const fetchUserRanks = async () => {
       try {
-        const [{ db }, { collection, query, where, getDocs, orderBy, limit }] = await Promise.all([
+        const [{ db }, { collection, query, where, getDocs }, { buildLeaderboardQuery }] = await Promise.all([
           import('../firebase'),
           import('firebase/firestore/lite'),
+          import('../utils/leaderboardQuery'),
         ]);
         const userScoresSnap = await getDocs(
           query(collection(db, "leaderboards"), where("name", "==", nickname))
@@ -59,7 +65,7 @@ const Home: React.FC = () => {
           if (!game) return;
           const subSortAsc = game.leaderboard?.subSortAsc ?? false;
           const lbSnap = await getDocs(
-            query(collection(db, "leaderboards"), where("gameId", "==", gameId), orderBy("score", "desc"), limit(LEADERBOARD_FETCH_LIMIT))
+            buildLeaderboardQuery(db, gameId, { limit: LEADERBOARD_FETCH_LIMIT })
           );
           const docs = lbSnap.docs.map(d => d.data());
           docs.sort((a, b) => compareLeaderboardEntries(
@@ -81,11 +87,6 @@ const Home: React.FC = () => {
     if (ric) ric(() => fetchUserRanks());
     else setTimeout(fetchUserRanks, 1500);
   }, [nickname]);
-
-  const showNotification = (message: string, type: 'success' | 'info' | 'error' = 'info') => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
-  };
 
   // Extract all unique genres from data (memoized — games array is static)
   const allGenres = useMemo(() => ['All', ...new Set(games.flatMap(g => g.genres))], []);
@@ -274,7 +275,7 @@ const Home: React.FC = () => {
                     key={genre}
                     onClick={() => {
                       setSelectedGenre(genre);
-                      sessionStorage.setItem('selected_genre', genre);
+                      safeSetSession('selected_genre', genre);
                     }}
                     className={`genre-btn ${selectedGenre === genre ? 'active' : ''}`}
                   >
@@ -342,7 +343,7 @@ const Home: React.FC = () => {
               onProductionClick={() => showNotification('This game is coming soon!', 'info')}
               onGenreClick={(genre) => {
                 setSelectedGenre(genre);
-                sessionStorage.setItem('selected_genre', genre);
+                safeSetSession('selected_genre', genre);
                 document.getElementById('games-grid')?.scrollIntoView({ behavior: 'smooth' });
               }}
             />

@@ -1,0 +1,40 @@
+rules_version = '2';
+
+// EXAMPLE: post-flip rules. Replace `firestore.rules` with this file
+// AFTER `firebase deploy --only functions` succeeds and the GamePlayer
+// client has been updated to call `submitScore` instead of writing
+// `leaderboards` directly. Until then, keep using the existing
+// `firestore.rules`.
+//
+// Differences from the existing rules:
+//   - leaderboards: client writes (create/update/delete) all denied.
+//     Only the Cloud Function (admin SDK) can mutate leaderboard entries.
+//     Reads remain public.
+//   - comments: unchanged.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /leaderboards/{document} {
+      allow read: if true;
+      // Anti-cheat: writes go through the `submitScore` Cloud Function only.
+      allow create, update, delete: if false;
+    }
+
+    match /comments/{document} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasAll(['gameId', 'nickname', 'text', 'createdAt'])
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 300
+        && request.resource.data.nickname is string
+        && request.resource.data.nickname.size() > 0
+        && request.resource.data.nickname.size() <= 30
+        && request.resource.data.gameId is string;
+      allow update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

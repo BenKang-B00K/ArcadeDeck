@@ -1,22 +1,19 @@
-// Locale registry. Built-in languages live in code: 'en' uses the base game
-// fields (title, description, ...), 'ko' uses the *Ko-suffixed siblings on
-// each games.json entry.
+// Locale registry. Every language is an overlay file under src/i18n/locales/{lang}.json.
+// English is the canonical source of truth and ships with the main bundle so
+// it is always available as a fallback. Other locales lazy-load on demand.
 //
-// To add another language (e.g. 'ja'):
+// Adding a new language:
 //   1. Drop a JSON file at src/i18n/locales/{lang}.json.
 //      Shape: { "label": "日本語", "ui": { ... }, "games": { "<id>": { ... } } }
 //      (see src/i18n/locales/_template.json for the full shape.)
 //   2. Done. The build's import.meta.glob picks it up automatically and the
 //      LanguageSwitcher will list it.
-//
-// No code changes required — overlays are loaded lazily on demand and cached.
+
+import enOverlayRaw from './locales/en.json';
 
 const overlayModules = import.meta.glob('./locales/*.json', { eager: false });
 
-const BUILTIN: Record<string, string> = {
-  en: 'English',
-  ko: '한국어',
-};
+export const EN_OVERLAY: LocaleOverlay = enOverlayRaw as LocaleOverlay;
 
 const DISCOVERED_OVERLAY_LANGS: string[] = Object.keys(overlayModules)
   .map(p => {
@@ -25,22 +22,72 @@ const DISCOVERED_OVERLAY_LANGS: string[] = Object.keys(overlayModules)
   })
   .filter((l): l is string => !!l && !l.startsWith('_'));
 
-// Built-in first, then any drop-in overlays.
-export const SUPPORTED_LOCALES: string[] = [
-  ...Object.keys(BUILTIN),
-  ...DISCOVERED_OVERLAY_LANGS.filter(l => !(l in BUILTIN)),
-];
+// English first; everything else alpha-sorted.
+export const SUPPORTED_LOCALES: string[] = (() => {
+  const rest = DISCOVERED_OVERLAY_LANGS.filter(l => l !== 'en').sort();
+  return ['en', ...rest];
+})();
 
-export function isBuiltinLocale(lang: string): boolean {
-  return lang in BUILTIN;
+// English (default locale) lives at the root; other locales sit under a
+// lower-cased path prefix (e.g. /de, /es-la). These helpers keep the
+// canonical form ↔ URL form mapping in one place.
+export function localeToUrlPrefix(lang: string): string {
+  if (!lang || lang === 'en') return '';
+  return '/' + lang.toLowerCase();
 }
 
-export function hasOverlay(lang: string): boolean {
-  return `./locales/${lang}.json` in overlayModules;
+export function matchLocaleSlug(slug: string | undefined | null): string | null {
+  if (!slug) return null;
+  const lower = slug.toLowerCase();
+  return SUPPORTED_LOCALES.find(l => l.toLowerCase() === lower) ?? null;
 }
 
-// Load overlay JSON on demand. Returns null for built-in or unknown languages.
+// Strip a leading locale segment from a path. Returns the canonical
+// English-equivalent path (always starts with "/").
+export function stripLocalePrefix(pathname: string): { lang: string; rest: string } {
+  const seg = pathname.split('/')[1] ?? '';
+  const matched = matchLocaleSlug(seg);
+  if (matched && matched !== 'en') {
+    const rest = pathname.slice(seg.length + 1) || '/';
+    return { lang: matched, rest: rest.startsWith('/') ? rest : '/' + rest };
+  }
+  return { lang: 'en', rest: pathname || '/' };
+}
+
+// BCP-47 codes for og:locale + hreflang. Keep aligned with locale codes
+// surfaced to crawlers.
+export const LOCALE_BCP47: Record<string, string> = {
+  en: 'en_US',
+  de: 'de_DE',
+  es: 'es_ES',
+  'es-LA': 'es_419',
+  fr: 'fr_FR',
+  ja: 'ja_JP',
+  ko: 'ko_KR',
+  pt: 'pt_BR',
+  ru: 'ru_RU',
+  vi: 'vi_VN',
+  zh: 'zh_CN',
+};
+
+// hreflang attribute values (BCP-47 with hyphens).
+export const LOCALE_HREFLANG: Record<string, string> = {
+  en: 'en',
+  de: 'de',
+  es: 'es',
+  'es-LA': 'es-419',
+  fr: 'fr',
+  ja: 'ja',
+  ko: 'ko',
+  pt: 'pt',
+  ru: 'ru',
+  vi: 'vi',
+  zh: 'zh',
+};
+
+// Load overlay JSON on demand. English is bundled eagerly and returned synchronously-wrapped.
 export async function loadOverlay(lang: string): Promise<LocaleOverlay | null> {
+  if (lang === 'en') return EN_OVERLAY;
   const key = `./locales/${lang}.json`;
   const loader = overlayModules[key];
   if (!loader) return null;
@@ -52,12 +99,11 @@ export interface LocaleOverlay {
   // Display name shown in the language switcher (e.g. "日本語"). Falls back
   // to the locale code if missing.
   label?: string;
-  // UI string overrides keyed by stable identifier. Reserved for future use
-  // when UI strings get extracted; safe to leave empty.
+  // UI string overrides keyed by stable identifier.
   ui?: Record<string, string>;
   // Per-game field overrides keyed by game id. Each entry mirrors the
-  // translatable fields from games.json (title, description, fullDescription,
-  // controls, tips, lore, features). Missing fields fall back to English.
+  // translatable fields (title, description, fullDescription, controls, tips,
+  // lore, features). Missing fields fall back to English.
   games?: Record<string, GameTranslation>;
 }
 
@@ -72,5 +118,5 @@ export interface GameTranslation {
 }
 
 export function getLocaleLabel(lang: string, overlay: LocaleOverlay | null): string {
-  return BUILTIN[lang] ?? overlay?.label ?? lang;
+  return overlay?.label ?? lang;
 }

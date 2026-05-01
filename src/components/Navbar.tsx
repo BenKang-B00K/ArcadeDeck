@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { User, Trophy, Gamepad2, Sun, Moon, Heart, BookOpen } from 'lucide-react';
 import LanguageSwitcher from './LanguageSwitcher';
+import { useUiText } from '../i18n';
 import './Navbar.css';
 
 type Theme = 'light' | 'dark';
@@ -18,6 +19,7 @@ const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const location = useLocation();
+  const t = useUiText();
 
   // Auto-close menu on route change. Sync from external system (router) → local UI state.
   useEffect(() => {
@@ -60,8 +62,8 @@ const Navbar: React.FC = () => {
           <button
             className="theme-toggle"
             onClick={toggleTheme}
-            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+            aria-label={theme === 'dark' ? t('themeToLight', 'Switch to light mode') : t('themeToDark', 'Switch to dark mode')}
+            title={theme === 'dark' ? t('themeLightLabel', 'Light mode') : t('themeDarkLabel', 'Dark mode')}
             type="button"
           >
             {theme === 'dark'
@@ -82,11 +84,11 @@ const Navbar: React.FC = () => {
         </div>
 
         <ul className={`nav-links ${isMenuOpen ? 'open' : ''}`}>
-          <li><Link to="/"           className={isActive('/')           ? 'nav-active' : ''} onClick={closeMenu}>Games</Link></li>
-          <li><Link to="/my-games"   className={isActive('/my-games')   ? 'nav-active' : ''} onClick={closeMenu}><User size={16} aria-hidden="true" /> My Rank</Link></li>
-          <li><Link to="/hall-of-fame" className={isActive('/hall-of-fame') ? 'nav-active' : ''} onClick={closeMenu}><Trophy size={16} aria-hidden="true" /> Hall of Fame</Link></li>
-          <li><Link to="/blog" className={isActive('/blog') ? 'nav-active' : ''} onClick={closeMenu}><BookOpen size={16} aria-hidden="true" /> Blog</Link></li>
-          <li><a href="https://ko-fi.com/developer_benjamink" target="_blank" rel="noopener noreferrer" className="nav-support" onClick={closeMenu}><Heart size={16} aria-hidden="true" /> Support</a></li>
+          <li><Link to="/"           className={isActive('/')           ? 'nav-active' : ''} onClick={closeMenu}>{t('navGames', 'Games')}</Link></li>
+          <li><Link to="/my-games"   className={isActive('/my-games')   ? 'nav-active' : ''} onClick={closeMenu}><User size={16} aria-hidden="true" /> {t('navMyRank', 'My Rank')}</Link></li>
+          <li><Link to="/hall-of-fame" className={isActive('/hall-of-fame') ? 'nav-active' : ''} onClick={closeMenu}><Trophy size={16} aria-hidden="true" /> {t('navHallOfFame', 'Hall of Fame')}</Link></li>
+          <li><Link to="/blog" className={isActive('/blog') ? 'nav-active' : ''} onClick={closeMenu}><BookOpen size={16} aria-hidden="true" /> {t('navBlog', 'Blog')}</Link></li>
+          <li><a href="https://ko-fi.com/developer_benjamink" target="_blank" rel="noopener noreferrer" className="nav-support" onClick={closeMenu}><Heart size={16} aria-hidden="true" /> {t('navSupport', 'Support')}</a></li>
         </ul>
       </div>
       {/* Overlay for mobile menu */}

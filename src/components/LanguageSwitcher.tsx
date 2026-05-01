@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Globe } from 'lucide-react';
-import { SUPPORTED_LOCALES, getLocaleLabel, useLocale } from '../i18n';
+import { SUPPORTED_LOCALES, getLocaleLabel, useLocale, useUiText } from '../i18n';
 import { loadOverlay } from '../i18n/registry';
 import './LanguageSwitcher.css';
 
@@ -8,11 +8,25 @@ interface OverlayLabels {
   [lang: string]: string;
 }
 
+// Module-scope cache so labels survive component remounts (route nav).
+const labelCache: OverlayLabels = {};
+
 const LanguageSwitcher: React.FC = () => {
-  const { lang, setLocale } = useLocale();
+  const { lang, overlay, navigateToLocale } = useLocale();
+  const t = useUiText();
   const [open, setOpen] = useState(false);
-  const [labels, setLabels] = useState<OverlayLabels>({});
+  const [labels, setLabels] = useState<OverlayLabels>(() => ({ ...labelCache }));
   const wrapperRef = useRef<HTMLDivElement | null>(null);
+
+  // Seed cache for the active locale from the already-loaded overlay so the
+  // toggle button shows the native label even on first mount of this component.
+  useEffect(() => {
+    const resolved = getLocaleLabel(lang, overlay);
+    if (labelCache[lang] !== resolved) {
+      labelCache[lang] = resolved;
+      setLabels(prev => ({ ...prev, [lang]: resolved }));
+    }
+  }, [lang, overlay]);
 
   // Resolve labels for non-built-in overlays once when the menu first opens.
   useEffect(() => {
@@ -21,16 +35,18 @@ const LanguageSwitcher: React.FC = () => {
     (async () => {
       const next: OverlayLabels = {};
       for (const code of SUPPORTED_LOCALES) {
-        if (labels[code] !== undefined) continue;
-        const overlay = await loadOverlay(code);
-        next[code] = getLocaleLabel(code, overlay);
+        if (labelCache[code] !== undefined) continue;
+        const ov = await loadOverlay(code);
+        const resolved = getLocaleLabel(code, ov);
+        labelCache[code] = resolved;
+        next[code] = resolved;
       }
       if (!cancelled && Object.keys(next).length > 0) {
         setLabels(prev => ({ ...prev, ...next }));
       }
     })();
     return () => { cancelled = true; };
-  }, [open, labels]);
+  }, [open]);
 
   // Click-away close
   useEffect(() => {
@@ -49,8 +65,8 @@ const LanguageSwitcher: React.FC = () => {
 
   const onPick = useCallback((code: string) => {
     setOpen(false);
-    void setLocale(code);
-  }, [setLocale]);
+    navigateToLocale(code);
+  }, [navigateToLocale]);
 
   if (SUPPORTED_LOCALES.length <= 1) return null;
 
@@ -64,13 +80,13 @@ const LanguageSwitcher: React.FC = () => {
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen(o => !o)}
-        title="Change language"
+        title={t('langSwitcherTitle', 'Change language')}
       >
         <Globe size={16} aria-hidden="true" />
         <span className="lang-toggle-label">{currentLabel}</span>
       </button>
       {open && (
-        <ul className="lang-menu" role="listbox" aria-label="Language">
+        <ul className="lang-menu" role="listbox" aria-label={t('langSwitcherAriaLabel', 'Language')}>
           {SUPPORTED_LOCALES.map(code => {
             const label = labels[code] ?? getLocaleLabel(code, null);
             return (

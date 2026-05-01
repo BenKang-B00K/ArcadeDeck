@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Gamepad2, X } from 'lucide-react';
+import { useUiText } from '../i18n';
 import './InstallPWA.css';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -55,6 +56,7 @@ const isDismissedRecently = (): boolean => {
 };
 
 const InstallPWA: React.FC = () => {
+  const t = useUiText();
   const [supportsPWA, setSupportsPWA] = useState(false);
   const [promptInstall, setPromptInstall] = useState<BeforeInstallPromptEvent | null>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -135,16 +137,16 @@ const InstallPWA: React.FC = () => {
       <div className="pwa-content">
         <div className="pwa-icon"><Gamepad2 size={24} aria-hidden="true" /></div>
         <div className="pwa-text">
-          <h3>Install ArcadeDeck</h3>
+          <h3>{t('installTitle', 'Install ArcadeDeck')}</h3>
           {isIOS ? (
-            <p>Tap <strong>Share</strong> ↗ then <strong>Add to Home Screen</strong></p>
+            <p>{t('installIosHint', 'Tap Share ↗ then Add to Home Screen')}</p>
           ) : (
-            <p>Get the best gaming experience on your home screen!</p>
+            <p>{t('installSubtitle', 'Get the best gaming experience on your home screen!')}</p>
           )}
         </div>
         <div className="pwa-actions">
-          {!isIOS && <button className="install-btn" onClick={onClick}>Install</button>}
-          <button className="close-btn" onClick={closeBanner} aria-label="Close install banner"><X size={18} aria-hidden="true" /></button>
+          {!isIOS && <button className="install-btn" onClick={onClick}>{t('installCta', 'Install')}</button>}
+          <button className="close-btn" onClick={closeBanner} aria-label={t('installCloseBanner', 'Close install banner')}><X size={18} aria-hidden="true" /></button>
         </div>
       </div>
     </div>

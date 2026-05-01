@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
-import { Maximize, Heart, Link as LinkIcon, Home, Globe, X } from 'lucide-react';
-import { games, loadGameDetails } from '../data/games';
+import { Maximize, Heart, Link as LinkIcon, Home, X } from 'lucide-react';
+import { games } from '../data/games';
 import type { Game, LeaderboardEntry } from '../data/games';
 import Navbar from '../components/Navbar';
 import Leaderboard from '../components/Leaderboard';
@@ -31,15 +31,14 @@ import {
   updateDoc,
   doc
 } from "firebase/firestore/lite";
+import { useUiText, useLocale, getLocalizedString } from '../i18n';
 import './GamePlayer.css';
 
 const GamePlayer: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   // Support both slug-based (/play/gate-of-hell) and legacy id-based (/play/1) URLs
   const id = games.find(g => g.slug === slug)?.id ?? slug;
-  const lightGame = useMemo<Game | null>(() => games.find(g => g.id === id) ?? null, [id]);
-  const [fullGame, setFullGame] = useState<{ id: string; game: Game } | null>(null);
-  const game: Game | null = (fullGame && fullGame.id === id ? fullGame.game : null) ?? lightGame;
+  const game = useMemo<Game | null>(() => games.find(g => g.id === id) ?? null, [id]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const nickname = useNickname();
   const [isLiked, setIsLiked] = useState<boolean>(() =>
@@ -49,7 +48,7 @@ const GamePlayer: React.FC = () => {
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [iframeLoading, setIframeLoading] = useState(true);
-  const [lang, setLang] = useState<'en' | 'ko'>('en');
+  const { lang, overlay } = useLocale();
   const { notification, showNotification } = useNotification(4000);
   const [gameResult, setGameResult] = useState<{
     score: number; unit: string;
@@ -59,30 +58,31 @@ const GamePlayer: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [showStickyBar, setShowStickyBar] = useState(false);
   const [iframeKey, setIframeKey] = useState(0);
+  const uiT = useUiText();
   // Forces re-render so getWrapperStyle() recomputes after viewport rotation/resize.
   const [, setOrientationTick] = useState(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const gameWrapperRef = useRef<HTMLDivElement>(null);
 
   const t = {
-    back: lang === 'en' ? 'ArcadeDeck' : '아케이드덱',
-    player: lang === 'en' ? 'Player' : '플레이어',
-    edit: lang === 'en' ? 'Edit' : '편집',
-    save: lang === 'en' ? 'Save' : '저장',
-    fullscreen: lang === 'en' ? 'Fullscreen' : '전체화면',
-    load: lang === 'en' ? 'Load' : '불러오기',
-    share: lang === 'en' ? 'Share' : '공유',
-    overview: lang === 'en' ? 'Overview' : '게임 개요',
-    howToPlay: lang === 'en' ? 'Controls' : '조작 방법',
-    tips: lang === 'en' ? 'Pro Tips' : '플레이 팁',
-    lore: lang === 'en' ? 'World Lore' : '게임 세계관',
-    features: lang === 'en' ? 'Key Features' : '주요 특징',
-    original: lang === 'en' ? 'Original Content' : '오리지널 콘텐츠',
-    last: lang === 'en' ? 'Last' : '최근',
-    bestScore: lang === 'en' ? 'New Personal Best!' : '새로운 개인 최고 기록!',
-    gameOver: lang === 'en' ? 'Game Over!' : '게임 종료!',
-    scoreSubmitted: lang === 'en' ? 'Score submitted!' : '점수가 등록되었습니다!',
-    currentProgress: lang === 'en' ? 'Current Progress:' : '현재 진행 상황:',
+    back: uiT('playerBack', 'ArcadeDeck'),
+    player: uiT('playerLabel', 'Player'),
+    edit: uiT('playerEdit', 'Edit'),
+    save: uiT('homeNicknameSave', 'Save'),
+    fullscreen: uiT('playerFullscreen', 'Fullscreen'),
+    load: uiT('playerLoad', 'Load'),
+    share: uiT('shareTitle', 'Share'),
+    overview: uiT('playerOverview', 'Overview'),
+    howToPlay: uiT('playerControls', 'Controls'),
+    tips: uiT('playerTips', 'Pro Tips'),
+    lore: uiT('playerLore', 'World Lore'),
+    features: uiT('playerFeatures', 'Key Features'),
+    original: uiT('playerOriginal', 'Original Content'),
+    last: uiT('playerLast', 'Last'),
+    bestScore: uiT('resultPersonalBest', 'New Personal Best!'),
+    gameOver: uiT('resultGameOver', 'Game Over!'),
+    scoreSubmitted: uiT('playerScoreSubmitted', 'Score submitted!'),
+    currentProgress: uiT('playerCurrentProgress', 'Current Progress:'),
   };
 
   const fetchLeaderboard = useCallback(async (): Promise<LeaderboardEntry[]> => {
@@ -124,11 +124,11 @@ const GamePlayer: React.FC = () => {
         return finalize(snapSimple.docs.map(mapDoc));
       } catch (e) {
         console.error("Critical leaderboard error:", e);
-        showNotification(lang === 'ko' ? '리더보드를 불러올 수 없습니다.' : 'Failed to load leaderboard.', 'error');
+        showNotification(uiT('playerLeaderboardError', 'Failed to load leaderboard.'), 'error');
         return [];
       }
     }
-  }, [id, lang, showNotification]);
+  }, [id, uiT, showNotification]);
 
   const handleGameComplete = useCallback(async (score: number, subScore?: number) => {
     if (!id) return;
@@ -200,28 +200,23 @@ const GamePlayer: React.FC = () => {
       }
     } catch (error) {
       console.error("Error submitting score: ", error);
-      showNotification(lang === 'ko' ? '점수 등록 실패. 잠시 후 다시 시도해 주세요.' : 'Failed to submit score. Please try again.', 'error');
+      showNotification(uiT('playerScoreSubmitError', 'Failed to submit score. Please try again.'), 'error');
     }
-  }, [id, nickname, lang, t.gameOver, fetchLeaderboard, showNotification]);
+  }, [id, nickname, uiT, t.gameOver, fetchLeaderboard, showNotification]);
 
   useEffect(() => {
-    if (!lightGame || !id) return;
-    const currentId = id;
-
+    if (!game || !id) return;
     const recentlyPlayed = JSON.parse(localStorage.getItem('recently_played') || '[]');
-    const updatedList = [lightGame.id, ...recentlyPlayed.filter((gid: string) => gid !== lightGame.id)].slice(0, 4);
+    const updatedList = [game.id, ...recentlyPlayed.filter((gid: string) => gid !== game.id)].slice(0, 4);
     localStorage.setItem('recently_played', JSON.stringify(updatedList));
+  }, [id, game]);
 
-    let cancelled = false;
-    loadGameDetails(g => g.id === currentId).then(full => {
-      if (!cancelled && full) setFullGame({ id: currentId, game: full });
-    });
-    return () => { cancelled = true; };
-  }, [id, lightGame]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [id]);
 
   useEffect(() => {
     void fetchLeaderboard();
-    window.scrollTo(0, 0);
 
     // Derive the allowed origin from the game's iframe URL
     const lg = games.find(g => g.id === id);
@@ -361,8 +356,8 @@ const GamePlayer: React.FC = () => {
     <div className="game-player-page" style={{ 
       backgroundImage: `linear-gradient(rgba(5, 5, 7, 0.8), rgba(5, 5, 7, 0.9)), url(${thumbnailUrl})` 
     }}>
-      <GameHeadMeta game={game} lang={lang} />
-      
+      <GameHeadMeta game={game} lang={lang} overlay={overlay} />
+
       {notification && (
         <div className={`notification-toast ${notification.type} animate-in`}>
           <span className="notification-message">{notification.message}</span>
@@ -371,33 +366,26 @@ const GamePlayer: React.FC = () => {
 
       <Navbar />
       <main className="container player-container">
-        {/* ── Compact top bar: back + player + lang ── */}
+        {/* ── Compact top bar: back + player ── */}
         <div className="player-header-flex">
           <Link to="/" className="back-button-modern">
             <Home size={16} aria-hidden="true" /> {t.back}
           </Link>
           <div className="player-info-container">
             <span className="player-name-val">{nickname}</span>
-            <button
-              className="lang-toggle-btn-modern"
-              onClick={() => setLang(lang === 'en' ? 'ko' : 'en')}
-              aria-label="Toggle language"
-            >
-              <Globe size={14} aria-hidden="true" /> {lang === 'en' ? 'KO' : 'EN'}
-            </button>
           </div>
         </div>
 
         <nav className="breadcrumbs game-breadcrumbs" aria-label="Breadcrumb">
           <Link to="/">Home</Link>
           <span aria-hidden="true">›</span>
-          <span className="breadcrumb-current">{lang === 'ko' ? (game.titleKo ?? game.title) : game.title}</span>
+          <span className="breadcrumb-current">{getLocalizedString(game, 'title', lang, overlay)}</span>
         </nav>
 
         {/* ── Game title + controls in one row ── */}
         <div className="game-header-section">
           <div className="details-header centered-header">
-            <h1>{lang === 'ko' ? game.titleKo : game.title}</h1>
+            <h1>{getLocalizedString(game, 'title', lang, overlay)}</h1>
             <span className="genre-label">{game.genres[0]}</span>
           </div>
 
@@ -417,20 +405,20 @@ const GamePlayer: React.FC = () => {
         <div ref={gameWrapperRef} className={`game-screen-wrapper ${isPseudoFullscreen ? 'pseudo-fullscreen' : ''} ambient-glow`} style={wrapperStyle}>
           {isPseudoFullscreen && (
             <button className="exit-pseudo-btn" onClick={() => setIsPseudoFullscreen(false)}>
-              <X size={16} aria-hidden="true" /> {lang === 'en' ? 'Close Fullscreen' : '전체화면 닫기'}
+              <X size={16} aria-hidden="true" /> {uiT('playerCloseFullscreen', 'Close Fullscreen')}
             </button>
           )}
           {iframeLoading && (
             <div className="iframe-loader">
               <div className="spinner"></div>
-              <p>{lang === 'en' ? 'Loading game...' : '게임을 불러오는 중...'}</p>
+              <p>{uiT('playerLoadingGame', 'Loading game...')}</p>
             </div>
           )}
           <iframe
             key={iframeKey}
             ref={iframeRef}
             src={game.gameUrl}
-            title={game.title}
+            title={getLocalizedString(game, 'title', 'en', null)}
             frameBorder="0"
             allowFullScreen
             allow="fullscreen; autoplay; gamepad; clipboard-write"
@@ -443,26 +431,26 @@ const GamePlayer: React.FC = () => {
           {!iframeLoading && <AdBanner slot={AD_SLOTS.GAME_PLAYER} style={{ margin: '0' }} />}
         </div>
 
-        <GameInfoTabs game={game} lang={lang} activeTab={activeTab} setActiveTab={setActiveTab} />
+        <GameInfoTabs game={game} lang={lang} overlay={overlay} activeTab={activeTab} setActiveTab={setActiveTab} />
 
         {game.leaderboard && <Leaderboard entries={leaderboard} gameId={game.id} currentNickname={nickname} />}
         <CommentSection gameId={game.id} currentNickname={nickname} />
 
-        <RelatedPosts gameSlug={game.slug} lang={lang} />
-        <RelatedGames current={game} lang={lang} />
+        <RelatedPosts gameSlug={game.slug} />
+        <RelatedGames current={game} />
       </main>
 
       {/* ── Sticky Controls Bar ── */}
       {showStickyBar && !isPseudoFullscreen && (
         <div className="sticky-controls-bar">
           <button className="sticky-btn sticky-fullscreen" onClick={handleFullscreen}>
-            <Maximize size={16} aria-hidden="true" /> {lang === 'ko' ? '전체화면' : 'Fullscreen'}
+            <Maximize size={16} aria-hidden="true" /> {uiT('playerFullscreen', 'Fullscreen')}
           </button>
           <button className={`sticky-btn sticky-like ${isLiked ? 'liked' : ''}`} aria-label={isLiked ? 'Unlike this game' : 'Like this game'} onClick={() => { const n = !isLiked; setIsLiked(n); localStorage.setItem(`liked_${id}`, String(n)); }}>
             <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} aria-hidden="true" />
           </button>
           <button className="sticky-btn sticky-share" onClick={handleShare}>
-            <LinkIcon size={16} aria-hidden="true" /> {lang === 'ko' ? '공유' : 'Share'}
+            <LinkIcon size={16} aria-hidden="true" /> {uiT('shareTitle', 'Share')}
           </button>
         </div>
       )}
@@ -481,21 +469,19 @@ const GamePlayer: React.FC = () => {
       <ShareModal
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
-        gameTitle={lang === 'ko' ? (game.titleKo ?? game.title) : game.title}
+        gameTitle={getLocalizedString(game, 'title', lang, overlay)}
         gameUrl={`https://arcadedeck.net/play/${game.slug}`}
-        lang={lang}
       />
 
       <GameResultModal
         isOpen={gameResult !== null}
         onClose={() => setGameResult(null)}
-        gameTitle={lang === 'ko' ? (game.titleKo ?? game.title) : game.title}
+        gameTitle={getLocalizedString(game, 'title', lang, overlay)}
         gameSlug={game.slug}
         score={gameResult?.score ?? 0}
         scoreUnit={gameResult?.unit ?? ''}
         resultType={gameResult?.resultType ?? 'game-over'}
         rank={gameResult?.rank ?? null}
-        lang={lang}
         onPlayAgain={() => { setIframeKey(k => k + 1); setIframeLoading(true); }}
       />
     </div>

@@ -3,13 +3,14 @@ import { Gamepad2 } from 'lucide-react';
 import GameCard from '../GameCard';
 import { games } from '../../data/games';
 import type { Game } from '../../data/games';
+import { useUiText } from '../../i18n';
 
 interface Props {
   current: Game;
-  lang: 'en' | 'ko';
 }
 
-const RelatedGames: React.FC<Props> = ({ current, lang }) => {
+const RelatedGames: React.FC<Props> = ({ current }) => {
+  const t = useUiText();
   const related = games.filter(
     g => g.id !== current.id &&
          g.status !== 'IN PRODUCTION' &&
@@ -21,7 +22,7 @@ const RelatedGames: React.FC<Props> = ({ current, lang }) => {
   return (
     <div className="related-games-section">
       <h3 className="related-games-title">
-        <Gamepad2 size={18} aria-hidden="true" /> {lang === 'ko' ? '비슷한 게임' : 'You Might Also Like'}
+        <Gamepad2 size={18} aria-hidden="true" /> {t('relatedGamesTitle', 'You Might Also Like')}
       </h3>
       <div className="related-games-grid">
         {related.map(g => <GameCard key={g.id} game={g} />)}

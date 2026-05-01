@@ -1,36 +1,30 @@
 # ArcadeDeck Development Rules
 
-## 1. 새 게임 추가 시 체크리스트
+## 1. Adding a New Game — Two-File Workflow
 
-새 게임을 추가할 때 **`src/data/games.json`만 수정**하면 됩니다. 다른 파일을 직접 수정하지 마세요.
+A new game touches only two source files plus one image. Other locale files are translated separately by the user.
 
-### 필수 필드
+1. **`src/data/games.json`** — structural data only (`id`, `slug`, `gameUrl`, `leaderboard`, etc.). No text.
+2. **`src/i18n/locales/en.json`** (`games[<id>]` block) — canonical English text.
+
+Other languages (`de.json`, `ja.json`, `ko.json`, …) fall back to English per field. Do not auto-fill them.
+
+### `src/data/games.json` (structural fields only)
 
 ```json
 {
-  "id": "15",
-  "title": "Game Title",
-  "titleKo": "게임 제목",
-  "description": "Short description",
-  "descriptionKo": "짧은 설명",
-  "fullDescription": "...",
-  "fullDescriptionKo": "...",
-  "controls": "...",
-  "controlsKo": "...",
-  "tips": "...",
-  "tipsKo": "...",
-  "lore": "...",
-  "loreKo": "...",
-  "features": ["Feature 1", "Feature 2"],
-  "featuresKo": ["특징 1", "특징 2"],
-  "thumbnail": "images/game-thumbnail.webp",
+  "id": "22",
+  "slug": "my-game",
+  "thumbnail": "images/my-game.webp",
   "genres": ["Action"],
-  "gameUrl": "https://...",
+  "gameUrl": "https://my-game.pages.dev/",
   "aspectRatio": "16/9",
   "status": "PLAYABLE",
   "isOriginal": true,
+  "language": "EN",
+  "badge": "POPULAR",
   "leaderboard": {
-    "title": "Game Leaderboard",
+    "title": "My Game Leaderboard",
     "primaryLabel": "Score",
     "primaryUnit": "",
     "secondaryLabel": "Level",
@@ -41,121 +35,168 @@
 }
 ```
 
-### `leaderboard` 필드 설명
+### `src/i18n/locales/en.json` (add a `games["22"]` block)
 
-| 필드 | 타입 | 설명 |
+```json
+{
+  "title": "Game Title",
+  "description": "Short description in English.",
+  "fullDescription": "...",
+  "controls": "...",
+  "tips": "...",
+  "lore": "...",
+  "features": ["Feature 1", "Feature 2"]
+}
+```
+
+### `leaderboard` Field Reference
+
+| Field | Type | Description |
 |------|------|------|
-| `title` | string | 리더보드 제목 |
-| `primaryLabel` | string | 주 점수 라벨 (예: `"Score"`, `"Waves"`) |
-| `primaryUnit` | string | 주 점수 단위 (예: `" pts"`, `"%"`, `""`) |
-| `secondaryLabel` | string | 부 점수 라벨. 없으면 `""` |
-| `secondaryUnit` | string | 부 점수 단위 접두사 (예: `"Lv."`) |
-| `dualSort` | boolean | `true`면 Firestore 쿼리에 `orderBy("subScore")` 추가 |
-| `subSortAsc` | boolean | `true`면 동점 시 subScore가 낮을수록 유리 (Gem Merge 방식) |
+| `title` | string | Leaderboard heading |
+| `primaryLabel` | string | Primary score label (`"Score"`, `"Waves"`, …) |
+| `primaryUnit` | string | Primary score unit (`" pts"`, `"%"`, `""`) |
+| `secondaryLabel` | string | Secondary score label. `""` if none |
+| `secondaryUnit` | string | Secondary score unit prefix (`"Lv."`) |
+| `dualSort` | boolean | When `true`, Firestore query adds `orderBy("subScore")` |
+| `subSortAsc` | boolean | When `true`, lower `subScore` wins ties (Gem Merge style) |
 
-### 게임 추가 후 해야 할 일
+### After Adding a Game
 
-- [ ] `public/sitemap.xml`에 `/play/{id}` URL 추가
-- [ ] `public/images/`에 WebP 썸네일 추가 (`convert_to_webp.cjs` 활용)
-- [ ] `firebase deploy --only firestore:rules` — rules 변경 시에만
+- [ ] Add a WebP thumbnail under `public/images/` (filename = `{slug}.webp`, kebab-case)
+- [ ] Run `npm run validate` and `npm run build` — sitemap, RSS, and prerender shells regenerate automatically
+- [ ] `firebase deploy --only firestore:rules` — only when Firestore rules change
+
+Never edit `public/sitemap.xml`, `public/rss.xml`, or any `dist/play/.../index.html` by hand. They are build outputs.
 
 ---
 
-## 2. 보안 규칙
+## 2. Security Rules
 
 ### Firestore
 
-- `leaderboards` 업데이트 시 `name`, `gameId` 필드는 **변경 불가** (rules에서 강제)
-- `score`는 `0 이상 10,000,000 이하`만 허용
-- `comments` 텍스트는 **300자 이하**, 닉네임은 **30자 이하**
-- Firestore rules 수정 후 반드시 배포: `firebase deploy --only firestore:rules --project ultragames-website`
+- `leaderboards.{name, gameId}` are **immutable** after create (enforced by rules)
+- `score` must satisfy `0 ≤ score ≤ 10_000_000`
+- `comments` text capped at **300 chars**, nicknames at **30 chars**
+- Deploy rule changes with: `firebase deploy --only firestore:rules --project ultragames-website`
 
-### postMessage (게임 점수 수신)
+### postMessage Scoring (Game iframes)
 
-- `event.origin`이 해당 게임의 iframe 도메인과 일치해야만 처리
-- `score`는 `0 이상 10,000,000 이하`, `isFinite(score)`인 경우만 제출
-- 위 조건을 벗어나는 메시지는 **조용히 무시** (alert/error 없이)
+- Process the message only when `event.origin` matches the game's iframe domain
+- Require `isFinite(score)` and clamp to `[0, 10_000_000]`
+- Drop violating messages **silently** — never `alert` or surface an error
 
-### 금지 사항
+### Forbidden
 
-- `allow update: if true` — Firestore rules에 절대 사용 금지
-- `// @ts-ignore` — 타입 선언(`declare global`)으로 해결할 것
-- `any` 타입 — 명시적 인터페이스 정의로 대체
+- `allow update: if true` in Firestore rules
+- `// @ts-ignore` — extend types via `declare global` instead
+- The `any` TypeScript type — define an explicit interface
 
 ---
 
-## 3. 성능 규칙
+## 3. Performance Rules
 
 ### GlobalLeaderboard (Hall of Fame)
 
-- Firestore 쿼리 결과는 **5분 TTL 캐싱** (`rankCache` 모듈 변수)
-- 수동 새로고침(🔄 버튼)만 캐시를 무효화
-- `Promise.all`로 병렬 실행 유지 — 순차 실행 금지
+- Firestore query results are cached in `sessionStorage` for **5 minutes** (`arcadedeck_rank_cache`)
+- The manual refresh (🔄) button is the **only** invalidator
+- Run per-game queries in parallel via `Promise.all` — never serialize them
 
 ### CommentSection
 
-- 초기 로드는 **최신 20개**만 (`limit(20)`)
-- 추가 로드는 `startAfter` 커서 기반 페이지네이션
-- `onSnapshot` 실시간 구독 사용 금지 (비용 및 성능 이슈)
+- Initial load: **20 latest comments** (`limit(20)`)
+- Pagination: cursor-based via `startAfter`
+- **Do not** switch to `onSnapshot` — cost and performance impact
 
-### 코드 분할
+### Code Splitting
 
-- `App.tsx`에서 `Home` 제외 모든 페이지는 `React.lazy`로 지연 로드
-- `Suspense` fallback은 빈 화면(`<div style={{ minHeight: '100vh' }} />`) 유지
-- 새 페이지 추가 시 반드시 `lazy(() => import('./pages/NewPage'))` 사용
+- Every page except `Home` is loaded with `React.lazy`
+- `Suspense` fallback stays a blank shell (`<div style={{ minHeight: '100vh' }} />`)
+- New routes must use `lazy(() => import('./pages/NewPage'))`
 
 ---
 
-## 4. 코드 품질 규칙
+## 4. Code Quality Rules
 
 ### TypeScript
 
-- `any` 타입 사용 금지 — 인터페이스를 명시적으로 정의
-- 외부 전역 객체(window 등)는 `declare global { interface Window {...} }` 으로 선언
-- `verbatimModuleSyntax` 활성화 상태 → 타입 import는 반드시 `import type` 사용
+- No `any`. Define explicit interfaces.
+- Globals (e.g. `window`) live in `declare global { interface Window {…} }`.
+- `verbatimModuleSyntax` is on — type-only imports must use `import type`.
 
-### 컴포넌트
+### Components
 
-- 모든 라우트는 `<ErrorBoundary>`로 감싸져 있음 — 별도 try/catch UI 불필요
-- 점수 표시 문자열은 `games.json`의 `leaderboard` 설정에서 읽어올 것
-- 게임 ID를 코드에 직접 작성하는 것 (`id === '7'` 등) 금지
+- Every route is wrapped in `<ErrorBoundary>` — do not add per-page try/catch UI.
+- Score display strings come from `games.json` `leaderboard` config — never hardcode them.
+- Hardcoding game IDs (`id === '7'`) is forbidden. Branch on configuration instead.
+- Game text (`title`, `description`, `fullDescription`, `controls`, `tips`, `lore`, `features`) must always be resolved through `getLocalizedString` / `getLocalizedArray`. Direct property access (`game.title`) is not on the `Game` type.
 
-### 파일 구조
+### File Layout
 
 ```
 src/
-├── components/   # 재사용 컴포넌트 (CSS 동일 폴더)
-├── pages/        # 라우트 페이지
+├── components/   # Reusable components (CSS colocated)
+├── pages/        # Route components
 ├── data/
-│   ├── games.json    # 게임 데이터 (단일 진실의 원천)
-│   └── games.ts      # Game / LeaderboardConfig 타입 정의 + export
-├── constants/    # 금지어 등 상수
-└── firebase.ts   # Firestore 초기화
+│   ├── games.json    # Structural game data (id/slug/gameUrl/leaderboard) — no text
+│   └── games.ts      # Game / LeaderboardConfig types + exports
+├── i18n/
+│   ├── locales/      # Per-language overlays. en.json is canonical.
+│   ├── registry.ts   # Supported locales, URL helpers, BCP-47 maps
+│   └── store.ts      # useLocale() + URL-prefix-aware boot
+├── constants/    # Static config (banned word list, …)
+└── firebase.ts   # Firestore initialization
 ```
 
 ---
 
-## 5. 배포 절차
+## 5. i18n Rules
+
+- 11 locales supported: `en`, `de`, `es`, `es-LA`, `fr`, `ja`, `ko`, `pt`, `ru`, `vi`, `zh`.
+- `en.json` is the canonical source. Every translatable string lives there first.
+- Missing keys in any other locale fall back to English per-field.
+- **Never invent translations** for non-English locales without explicit instruction. The user owns those files.
+- New UI strings must be added to `en.json` `ui` block. Reference them via `useUiText()` / `ui()` helpers — never hardcode strings in components.
+- URL prefix routing is automatic: English at root (`/`, `/play/{slug}`); other locales at `/{lang}/…` (e.g. `/de/play/foo`, `/es-la/`).
+- Backups must live **outside** `src/i18n/locales/` (the glob bundles every `*.json` in that dir into the build).
+
+---
+
+## 6. SEO / Prerender Rules
+
+- Every playable route ships a static `index.html` shell with visible H1/body + JSON-LD. **Never** hide the prerendered content with `display:none` or off-screen tricks — that triggers cloaking penalties (Google webspam, AdSense review).
+- Per-locale prerender is automatic for `/` and `/play/{slug}`. Each shell carries the full hreflang map, locale-correct `og:locale`, and JSON-LD `inLanguage`.
+- When a locale has **no** translation for a given game, the prerender sets `canonical` to the English URL and `<meta name="robots" content="noindex,follow">` to consolidate signals.
+- Sitemap (`public/sitemap.xml`) is regenerated on every build — **do not** edit by hand.
+- `index.html` head meta tags (`msvalidate.01`, `google-adsense-account`, theme colors, preloads) are managed in source. Per-locale shells inherit them.
+
+---
+
+## 7. Deployment
 
 ```bash
-# 1. 빌드
+# 1. Build (validate → sitemap → rss → tsc → vite build → prerender → 404)
 npm run build
 
-# 2. Firestore rules만 배포 (rules 변경 시)
-cd e:\WebGame\ArcadeDeck
+# 2. Firestore rules only (when rules change)
 firebase deploy --only firestore:rules --project ultragames-website
 
-# 3. 전체 배포 (hosting + rules)
+# 3. Full deploy (Hosting + rules)
 firebase deploy --project ultragames-website
+
+# Convenience: build + Firebase Hosting deploy
+npm run deploy
 ```
 
-> Firebase CLI가 없는 경우: `npm install -g firebase-tools` → `firebase login`
+If Firebase CLI is missing: `npm install -g firebase-tools` then `firebase login`.
 
 ---
 
-## 6. 이미지 규칙
+## 8. Image Rules
 
-- 포맷: **WebP만 사용** (`convert_to_webp.cjs` 스크립트 활용)
-- 경로: `public/images/` → 참조 시 `"images/파일명.webp"`
-- 아이콘: `192x192`, `512x512` 두 가지 필요 (PWA manifest)
-- 썸네일 권장 비율: 게임 `aspectRatio` 값과 일치시킬 것
+- **Format:** WebP only. Use `scripts/optimize-images.cjs` for batch resizing (640w q70).
+- **Path:** `public/images/`. Reference from `games.json` as `"images/{slug}.webp"`.
+- **Naming:** kebab-case lowercase, matching the game `slug`.
+- **PWA icons:** `192×192` and `512×512` are both required (manifest).
+- **Aspect ratio:** thumbnail aspect should match the game's `aspectRatio` field.
+- **System images:** `favicon.webp`, `arcadedeck-banner.webp`, `bg.webp`, `icon-192x192.webp`, `icon-512x512.webp`. The optimizer skips these.

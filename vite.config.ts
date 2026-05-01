@@ -31,6 +31,11 @@ export default defineConfig({
     VitePWA({
       registerType: 'prompt',
       includeAssets: ['favicon.ico', 'images/favicon.webp', 'images/arcadedeck-banner.webp'],
+      // Note: prerender-pages.js writes locale + blog + tag shells AFTER vite
+      // build, so they never enter the Workbox precache manifest. The current
+      // precache stays lean (single index.html shell + hashed assets). If the
+      // build order ever changes, add `workbox.globIgnores` to skip
+      // `**/{de,es,es-la,fr,ja,ko,pt,ru,vi,zh}/**/*` and `**/blog/tag/**/*`.
       manifest: {
         id: '/',
         name: 'ArcadeDeck | The Ultimate Free Browser Games Platform',

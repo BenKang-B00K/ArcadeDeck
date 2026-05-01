@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { posts, getAllTags } from '../data/posts';
+import { useUiText } from '../i18n';
 import './Blog.css';
 import './Home.css';
 
@@ -14,6 +15,10 @@ const formatDate = (iso: string) =>
   });
 
 const Blog: React.FC = () => {
+  const t = useUiText();
+  React.useEffect(() => {
+    document.title = 'Blog | ArcadeDeck Devlog & Game Updates';
+  }, []);
   const blogLd = {
     '@context': 'https://schema.org',
     '@type': 'Blog',
@@ -40,7 +45,6 @@ const Blog: React.FC = () => {
   return (
     <div className="blog-page">
       <>
-        <title>Blog | ArcadeDeck Devlog & Game Updates</title>
         <meta
           name="description"
           content="The ArcadeDeck devlog: patch notes, game design deep-dives, strategy guides, and monthly Hall of Fame recaps."
@@ -58,15 +62,15 @@ const Blog: React.FC = () => {
       <Navbar />
       <main className="container">
         <nav className="breadcrumbs" aria-label="Breadcrumb">
-          <Link to="/">Home</Link>
+          <Link to="/">{t('breadcrumbHome', 'Home')}</Link>
           <span aria-hidden="true">›</span>
-          <span className="breadcrumb-current">Blog</span>
+          <span className="breadcrumb-current">{t('navBlog', 'Blog')}</span>
         </nav>
         <header className="blog-header">
           <h1>
-            ArcadeDeck <span>Blog</span>
+            ArcadeDeck <span>{t('blogTitle', 'Blog')}</span>
           </h1>
-          <p>Patch notes, design deep-dives, and monthly Hall of Fame recaps.</p>
+          <p>{t('blogSubtitle', 'Patch notes, design deep-dives, and monthly Hall of Fame recaps.')}</p>
         </header>
         <nav className="blog-tag-cloud" aria-label="Browse by tag">
           {getAllTags().map((t) => (
@@ -94,19 +98,19 @@ const Blog: React.FC = () => {
       </main>
       <footer className="footer">
         <div className="container footer-container">
-          <p>&copy; 2026 ArcadeDeck. All rights reserved.</p>
+          <p>&copy; 2026 ArcadeDeck. {t('footerAllRights', 'All rights reserved.')}</p>
           <div className="footer-links">
-            <Link to="/about" className="footer-link">About Us</Link>
-            <Link to="/privacy" className="footer-link">Privacy Policy</Link>
-            <Link to="/contact" className="footer-link">Contact</Link>
-            <Link to="/blog" className="footer-link">Blog</Link>
+            <Link to="/about" className="footer-link">{t('footerAbout', 'About Us')}</Link>
+            <Link to="/privacy" className="footer-link">{t('footerPrivacy', 'Privacy Policy')}</Link>
+            <Link to="/contact" className="footer-link">{t('footerContact', 'Contact')}</Link>
+            <Link to="/blog" className="footer-link">{t('navBlog', 'Blog')}</Link>
             <a
               href="https://ko-fi.com/developer_benjamink"
               target="_blank"
               rel="noopener noreferrer"
               className="footer-link footer-link-support"
             >
-              Support ♥
+              {t('footerSupport', 'Support')} ♥
             </a>
           </div>
         </div>

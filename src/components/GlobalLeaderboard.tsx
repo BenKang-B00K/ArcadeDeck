@@ -5,6 +5,7 @@ import { db } from '../firebase';
 import { getDocs } from 'firebase/firestore/lite';
 import { buildLeaderboardQuery } from '../utils/leaderboardQuery';
 import { games } from '../data/games';
+import { useUiText } from '../i18n';
 import './GlobalLeaderboard.css';
 
 interface GlobalRank {
@@ -40,6 +41,7 @@ function setCachedRanks(sorted: GlobalRank[]): void {
 }
 
 const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({ onDataLoaded, variant = 'full' }) => {
+  const t = useUiText();
   const [podiumPlayers, setPodiumPlayers] = useState<GlobalRank[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -140,7 +142,7 @@ const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({ onDataLoaded, var
   }, [calculateGlobalRanking]);
 
   const compactPlaceholder = <div className="global-ranking-bar" aria-hidden="true" style={{ pointerEvents: 'none' }} />;
-  if (loading) return variant === 'compact' ? compactPlaceholder : <div className="global-loader">Loading Hall of Fame...</div>;
+  if (loading) return variant === 'compact' ? compactPlaceholder : <div className="global-loader">{t('globalLoading', 'Loading Hall of Fame...')}</div>;
   if (error) return variant === 'compact' ? compactPlaceholder : <div className="global-loader" style={{ color: '#ff6b6b' }}>{error}</div>;
   if (podiumPlayers.length === 0) return variant === 'compact' ? compactPlaceholder : null;
 
@@ -152,7 +154,7 @@ const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({ onDataLoaded, var
       <Link to="/hall-of-fame" className="global-ranking-bar">
         <div className="ranking-bar-header">
           <Trophy size={14} className="ranking-bar-icon" aria-hidden="true" />
-          <span className="ranking-bar-label">Top Players</span>
+          <span className="ranking-bar-label">{t('globalTopPlayers', 'Top Players')}</span>
           <Trophy size={14} className="ranking-bar-icon" aria-hidden="true" />
         </div>
         <div className="ranking-bar-players">
@@ -170,8 +172,8 @@ const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({ onDataLoaded, var
 
   return (
     <div className="global-leaderboard-section">
-      <h2 className="section-title"><Trophy size={22} aria-hidden="true" /> Global Ranking</h2>
-      <p className="section-subtitle">The Best Players of ArcadeDeck</p>
+      <h2 className="section-title"><Trophy size={22} aria-hidden="true" /> {t('globalRankingTitle', 'Global Ranking')}</h2>
+      <p className="section-subtitle">{t('globalRankingSubtitle', 'The Best Players of ArcadeDeck')}</p>
 
       <div className="hall-of-fame-podium">
         {podiumPlayers.map((player) => (
@@ -199,17 +201,17 @@ const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({ onDataLoaded, var
 
       <div className="hall-of-fame-footer">
         <Link to="/hall-of-fame" className="hof-link-btn">
-          <Trophy size={16} aria-hidden="true" /> Hall of Fame
+          <Trophy size={16} aria-hidden="true" /> {t('navHallOfFame', 'Hall of Fame')}
         </Link>
         <div className="point-info">
-          * 1st: 3pts | 2nd: 2pts | 3rd: 1pt
+          {t('globalPointInfo', '* 1st: 3pts | 2nd: 2pts | 3rd: 1pt')}
         </div>
         <div className="refresh-area">
           {lastUpdated && (
-            <span className="last-updated-label">Updated {lastUpdated}</span>
+            <span className="last-updated-label">{t('globalUpdated', 'Updated')} {lastUpdated}</span>
           )}
           <button className="refresh-btn" onClick={handleRefresh} disabled={isSyncing}>
-            {isSyncing ? <><Loader size={14} className="spin-icon" aria-hidden="true" /> Syncing...</> : <><RefreshCw size={14} aria-hidden="true" /> Sync Stats</>}
+            {isSyncing ? <><Loader size={14} className="spin-icon" aria-hidden="true" /> {t('globalSyncing', 'Syncing...')}</> : <><RefreshCw size={14} aria-hidden="true" /> {t('globalSyncStats', 'Sync Stats')}</>}
           </button>
         </div>
       </div>

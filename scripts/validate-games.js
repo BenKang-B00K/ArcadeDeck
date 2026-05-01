@@ -1,6 +1,8 @@
 import { readFileSync, existsSync } from 'fs';
 
 const games = JSON.parse(readFileSync('src/data/games.json', 'utf-8'));
+const enLocale = JSON.parse(readFileSync('src/i18n/locales/en.json', 'utf-8'));
+const enGames = enLocale.games || {};
 
 let errors = 0;
 let warnings = 0;
@@ -36,18 +38,19 @@ for (const g of games) {
 }
 
 // ── 3. Validate each game ──
-const requiredFields = ['id', 'slug', 'title', 'description', 'fullDescription', 'thumbnail', 'genres', 'gameUrl', 'status'];
-const koFields = ['titleKo', 'descriptionKo', 'fullDescriptionKo', 'controlsKo', 'tipsKo', 'featuresKo'];
+// Structural fields live in games.json. Translatable text lives in en.json.
+const requiredStructural = ['id', 'slug', 'thumbnail', 'genres', 'gameUrl', 'status'];
+const requiredEnText = ['title', 'description', 'fullDescription'];
 const validStatuses = ['PLAYABLE', 'IN PRODUCTION'];
 const validAspectRatios = ['16/9', '9/16', '4/3', '3/4', '1/1'];
 
 for (const g of games) {
   const label = g.slug || g.id || '(unknown)';
 
-  // Required fields
-  for (const field of requiredFields) {
+  // Required structural fields on games.json
+  for (const field of requiredStructural) {
     if (g[field] === undefined || g[field] === null || g[field] === '') {
-      error(label, `Missing required field: "${field}"`);
+      error(label, `Missing required structural field: "${field}"`);
     }
   }
 
@@ -88,17 +91,16 @@ for (const g of games) {
     }
   }
 
-  // Korean translation check
-  for (const field of koFields) {
-    const enField = field.replace('Ko', '');
-    if (g[enField] && !g[field]) {
-      warn(label, `Missing Korean translation: "${field}"`);
+  // English text coverage in en.json
+  const enEntry = enGames[g.id];
+  if (!enEntry) {
+    error(label, `Missing en.json entry for id "${g.id}"`);
+  } else {
+    for (const field of requiredEnText) {
+      if (!enEntry[field] || (typeof enEntry[field] === 'string' && enEntry[field].trim() === '')) {
+        error(label, `Missing required en.json field: "${field}"`);
+      }
     }
-  }
-
-  // features vs featuresKo length mismatch
-  if (g.features && g.featuresKo && g.features.length !== g.featuresKo.length) {
-    warn(label, `features (${g.features.length}) and featuresKo (${g.featuresKo.length}) have different lengths`);
   }
 
   // Leaderboard config validation
@@ -126,7 +128,16 @@ for (const g of games) {
   }
 }
 
-// ── 4. Summary ──
+// ── 4. Orphaned en.json entries (text without matching game) ──
+const liveIds = new Set(games.map(g => g.id));
+for (const id of Object.keys(enGames)) {
+  if (id.startsWith('_')) continue; // doc / _comment keys
+  if (!liveIds.has(id)) {
+    warn(`en.json:${id}`, `en.json games block has no matching games.json entry`);
+  }
+}
+
+// ── 5. Summary ──
 console.log('');
 console.log(`  Validated ${games.length} games.`);
 if (errors > 0) console.error(`  ${errors} error(s) found.`);

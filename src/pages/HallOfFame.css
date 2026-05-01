@@ -7,7 +7,38 @@
 
 .hof-header {
   text-align: center;
-  padding: 60px 0 40px;
+  padding: 110px 24px 70px;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  margin-bottom: 20px;
+  border-radius: 16px;
+  border: 1px solid var(--border-default);
+}
+
+.hof-header::after {
+  content: '';
+  position: absolute;
+  inset: -5%;
+  background: url('/images/hall-of-fame-bg.webp') center / cover no-repeat;
+  animation: hofZoom 25s ease-in-out infinite alternate;
+  z-index: -2;
+}
+
+.hof-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, var(--scrim-soft) 0%, var(--scrim-strong) 100%),
+    radial-gradient(ellipse at 50% 120%, var(--glow-subtle) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes hofZoom {
+  from { transform: scale(1); }
+  to   { transform: scale(1.08); }
 }
 
 .hof-header h1 {
@@ -15,11 +46,17 @@
   margin-bottom: 10px;
   text-transform: uppercase;
   letter-spacing: 2px;
+  position: relative;
 }
 
 .hof-header p {
   color: var(--text-muted);
   font-size: 1.1rem;
+  position: relative;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hof-header::after { animation: none; }
 }
 
 .archive-title {

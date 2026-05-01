@@ -2,13 +2,17 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 import Navbar from '../components/Navbar';
+import { useUiText } from '../i18n';
 import './Home.css';
 
 const Privacy: React.FC = () => {
+  const t = useUiText();
+  React.useEffect(() => {
+    document.title = 'Privacy Policy | ArcadeDeck';
+  }, []);
   return (
     <div className="privacy-page" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <>
-        <title>Privacy Policy | ArcadeDeck</title>
         <meta name="description" content="Read our privacy policy to understand how ArcadeDeck collects, uses, and protects your data, including cookies, Google AdSense, Google Analytics, and Firebase services." />
         <meta property="og:title" content="Privacy Policy | ArcadeDeck" />
         <meta property="og:url" content="https://arcadedeck.net/privacy" />
@@ -97,12 +101,12 @@ const Privacy: React.FC = () => {
       </main>
       <footer className="footer">
         <div className="container footer-container">
-          <p>&copy; 2026 ArcadeDeck. All rights reserved.</p>
+          <p>&copy; 2026 ArcadeDeck. {t('footerAllRights', 'All rights reserved.')}</p>
           <div className="footer-links">
-            <Link to="/about" className="footer-link">About Us</Link>
-            <Link to="/privacy" className="footer-link">Privacy Policy</Link>
-            <Link to="/contact" className="footer-link">Contact</Link>
-            <a href="https://ko-fi.com/developer_benjamink" target="_blank" rel="noopener noreferrer" className="footer-link footer-link-support">Support ♥</a>
+            <Link to="/about" className="footer-link">{t('footerAbout', 'About Us')}</Link>
+            <Link to="/privacy" className="footer-link">{t('footerPrivacy', 'Privacy Policy')}</Link>
+            <Link to="/contact" className="footer-link">{t('footerContact', 'Contact')}</Link>
+            <a href="https://ko-fi.com/developer_benjamink" target="_blank" rel="noopener noreferrer" className="footer-link footer-link-support">{t('footerSupport', 'Support')} ♥</a>
           </div>
         </div>
       </footer>

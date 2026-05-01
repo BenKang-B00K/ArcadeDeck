@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { useUiText } from '../i18n';
 import { db } from '../firebase';
 import {
   collection,
@@ -49,6 +50,7 @@ interface CommentSectionProps {
 }
 
 const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname }) => {
+  const t = useUiText();
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -149,15 +151,15 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
 
   return (
     <div className="comment-section">
-      <h3>Community <span>Comments</span> ({countLabel})</h3>
+      <h3>{t('commentCommunity', 'Community')} <span>{t('commentComments', 'Comments')}</span> ({countLabel})</h3>
 
       <form onSubmit={handleSubmit} className="comment-form">
         <div className="textarea-wrapper">
           <textarea
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Share your thoughts about this game..."
-            aria-label="Comment text"
+            placeholder={t('commentPlaceholder', 'Share your thoughts about this game...')}
+            aria-label={t('commentAriaLabel', 'Comment text')}
             maxLength={COMMENT_MAX}
           />
           <span className={`char-count ${charAtLimit ? 'at-limit' : charNearLimit ? 'near-limit' : ''}`}>
@@ -165,9 +167,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
           </span>
         </div>
         <div className="form-footer">
-          <span>Posting as: <strong>{currentNickname}</strong></span>
+          <span>{t('commentPostingAs', 'Posting as')}: <strong>{currentNickname}</strong></span>
           <button type="submit" disabled={isSubmitting || charCount === 0}>
-            {isSubmitting ? 'Posting...' : 'Post Comment'}
+            {isSubmitting ? t('commentPosting', 'Posting...') : t('commentSubmit', 'Post Comment')}
           </button>
         </div>
         {submitError && <p className="comment-submit-error">{submitError}</p>}
@@ -193,12 +195,12 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
                 onClick={handleLoadMore}
                 disabled={isLoadingMore}
               >
-                {isLoadingMore ? 'Loading...' : 'Load More Comments'}
+                {isLoadingMore ? t('commentLoadingMore', 'Loading...') : t('commentLoadMore', 'Load More Comments')}
               </button>
             )}
           </>
         ) : (
-          <p className="no-comments">No comments yet. Be the first to share your thoughts!</p>
+          <p className="no-comments">{t('commentEmpty', 'No comments yet. Be the first to share your thoughts!')}</p>
         )}
       </div>
     </div>

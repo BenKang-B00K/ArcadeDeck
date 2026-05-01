@@ -2,6 +2,7 @@ import React from 'react';
 import { Trophy, Sparkles, RefreshCw, Home, X } from 'lucide-react';
 import { useEscapeKey } from '../hooks/useEscapeKey';
 import { getRankIcon } from '../utils/leaderboardIcons';
+import { useUiText } from '../i18n';
 import './GameResultModal.css';
 
 interface GameResultModalProps {
@@ -13,7 +14,6 @@ interface GameResultModalProps {
   scoreUnit: string;
   resultType: 'personal-best' | 'first-score' | 'game-over';
   rank: number | null;
-  lang: 'en' | 'ko';
   onPlayAgain: () => void;
 }
 
@@ -25,23 +25,23 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
   scoreUnit,
   resultType,
   rank,
-  lang,
   onPlayAgain,
 }) => {
   useEscapeKey(onClose, isOpen);
+  const uiT = useUiText();
 
   if (!isOpen) return null;
 
   const t = {
-    headerBest: lang === 'ko' ? '새로운 개인 최고 기록!' : 'New Personal Best!',
-    headerFirst: lang === 'ko' ? '첫 점수 등록!' : 'First Score!',
-    headerOver: lang === 'ko' ? '게임 오버' : 'Game Over',
-    score: lang === 'ko' ? '점수' : 'Score',
-    rankLabel: lang === 'ko' ? '리더보드' : 'Leaderboard',
-    rankPos: (r: number) => lang === 'ko' ? `${r}위` : `#${r}`,
-    playAgain: lang === 'ko' ? '다시 플레이' : 'Play Again',
-    home: lang === 'ko' ? '홈으로' : 'Back Home',
-    close: lang === 'ko' ? '닫기' : 'Close',
+    headerBest: uiT('resultPersonalBest', 'New Personal Best!'),
+    headerFirst: uiT('resultFirstScore', 'First Score!'),
+    headerOver: uiT('resultGameOver', 'Game Over'),
+    score: uiT('resultScore', 'Score'),
+    rankLabel: uiT('resultRankLabel', 'Leaderboard'),
+    rankPos: (r: number) => `#${r}`,
+    playAgain: uiT('resultPlayAgain', 'Play Again'),
+    home: uiT('resultBackHome', 'Back Home'),
+    close: uiT('shareClose', 'Close'),
   };
 
   const headerText =

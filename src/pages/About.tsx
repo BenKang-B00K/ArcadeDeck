@@ -2,13 +2,17 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 import Navbar from '../components/Navbar';
+import { useUiText } from '../i18n';
 import './Home.css'; // Reuse common styles
 
 const About: React.FC = () => {
+  const t = useUiText();
+  React.useEffect(() => {
+    document.title = 'About ArcadeDeck | Our Mission & Vision';
+  }, []);
   return (
     <div className="about-page" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <>
-        <title>About ArcadeDeck | Our Mission & Vision</title>
         <meta name="description" content="Learn more about ArcadeDeck, the ultimate destination for free high-quality browser games. Our mission is to make gaming accessible to everyone, anywhere." />
         <meta property="og:title" content="About ArcadeDeck | Our Mission & Vision" />
         <meta property="og:description" content="Learn about the team behind ArcadeDeck and our goal to provide the best free online gaming experience." />
@@ -103,12 +107,12 @@ const About: React.FC = () => {
       </main>
       <footer className="footer">
         <div className="container footer-container">
-          <p>&copy; 2026 ArcadeDeck. All rights reserved.</p>
+          <p>&copy; 2026 ArcadeDeck. {t('footerAllRights', 'All rights reserved.')}</p>
           <div className="footer-links">
-            <Link to="/about" className="footer-link">About Us</Link>
-            <Link to="/privacy" className="footer-link">Privacy Policy</Link>
-            <Link to="/contact" className="footer-link">Contact</Link>
-            <a href="https://ko-fi.com/developer_benjamink" target="_blank" rel="noopener noreferrer" className="footer-link footer-link-support">Support ♥</a>
+            <Link to="/about" className="footer-link">{t('footerAbout', 'About Us')}</Link>
+            <Link to="/privacy" className="footer-link">{t('footerPrivacy', 'Privacy Policy')}</Link>
+            <Link to="/contact" className="footer-link">{t('footerContact', 'Contact')}</Link>
+            <a href="https://ko-fi.com/developer_benjamink" target="_blank" rel="noopener noreferrer" className="footer-link footer-link-support">{t('footerSupport', 'Support')} ♥</a>
           </div>
         </div>
       </footer>

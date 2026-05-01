@@ -1,31 +1,35 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { Game } from '../../data/games';
+import type { LocaleOverlay } from '../../i18n';
+import { getLocalizedString } from '../../i18n';
 
 interface Props {
   game: Game;
-  lang: 'en' | 'ko';
+  lang: string;
+  overlay: LocaleOverlay | null;
 }
 
-const GameHeadMeta: React.FC<Props> = ({ game, lang }) => {
-  const title = lang === 'ko' ? (game.titleKo ?? game.title) : game.title;
-  const desc = lang === 'ko' ? (game.descriptionKo ?? game.description) : game.description;
+const GameHeadMeta: React.FC<Props> = ({ game, lang, overlay }) => {
+  const titleEn = getLocalizedString(game, 'title', 'en', null);
+  const descEn = getLocalizedString(game, 'description', 'en', null);
+  const title = getLocalizedString(game, 'title', lang, overlay);
+  const desc = getLocalizedString(game, 'description', lang, overlay);
   const imageUrl = `https://arcadedeck.net/${encodeURI(game.thumbnail)}`;
   const pageUrl = `https://arcadedeck.net/play/${game.slug}`;
 
+  useEffect(() => {
+    document.title = `${title} - Play Free on ArcadeDeck`;
+  }, [title]);
+
   return (
     <>
-      <html lang={lang === 'ko' ? 'ko' : 'en'} />
-      <title>{title} - Play Free on ArcadeDeck</title>
-      <meta name="description" content={lang === 'ko'
-        ? `${title}: ${desc} ArcadeDeck에서 무료로 즐기세요!`
-        : `Play ${game.title}: ${game.description} Free online browser game on ArcadeDeck.`} />
-      <meta name="keywords" content={`${game.title}, ${game.genres.join(', ')}, free online game, browser game, arcadedeck`} />
+      <html lang={lang} />
+      <meta name="description" content={`Play ${title}: ${desc} Free online browser game on ArcadeDeck.`} />
+      <meta name="keywords" content={`${titleEn}, ${game.genres.join(', ')}, free online game, browser game, arcadedeck`} />
       <link rel="canonical" href={pageUrl} />
 
       <meta property="og:type" content="website" />
       <meta property="og:site_name" content="ArcadeDeck" />
-      <meta property="og:locale" content={lang === 'ko' ? 'ko_KR' : 'en_US'} />
-      <meta property="og:locale:alternate" content={lang === 'ko' ? 'en_US' : 'ko_KR'} />
       <meta property="og:title" content={`${title} - ArcadeDeck`} />
       <meta property="og:description" content={desc} />
       <meta property="og:image" content={imageUrl} />
@@ -39,13 +43,12 @@ const GameHeadMeta: React.FC<Props> = ({ game, lang }) => {
         {JSON.stringify({
           "@context": "https://schema.org",
           "@type": "VideoGame",
-          "name": game.title,
-          "alternateName": game.titleKo,
-          "description": game.description,
+          "name": titleEn,
+          "alternateName": title !== titleEn ? title : undefined,
+          "description": descEn,
           "genre": game.genres,
           "applicationCategory": "GameApplication",
           "operatingSystem": "Web Browser",
-          "inLanguage": ["en", "ko"],
           "image": imageUrl,
           "url": pageUrl,
           "author": {
@@ -79,7 +82,7 @@ const GameHeadMeta: React.FC<Props> = ({ game, lang }) => {
           "itemListElement": [
             { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://arcadedeck.net/" },
             { "@type": "ListItem", "position": 2, "name": game.genres[0] || "Games", "item": "https://arcadedeck.net/" },
-            { "@type": "ListItem", "position": 3, "name": game.title, "item": pageUrl },
+            { "@type": "ListItem", "position": 3, "name": titleEn, "item": pageUrl },
           ],
         })}
       </script>

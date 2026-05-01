@@ -4,6 +4,7 @@ import { games } from '../data/games';
 import type { LeaderboardEntry } from '../data/games';
 import { compareLeaderboardEntries, formatScore } from '../utils/leaderboardUtils';
 import { getRankIcon } from '../utils/leaderboardIcons';
+import { useUiText } from '../i18n';
 import './Leaderboard.css';
 
 interface LeaderboardProps {
@@ -13,6 +14,7 @@ interface LeaderboardProps {
 }
 
 const Leaderboard: React.FC<LeaderboardProps> = ({ entries, gameId, currentNickname }) => {
+  const t = useUiText();
   const lb = games.find(g => g.id === gameId)?.leaderboard;
 
   const label      = lb?.primaryLabel   ?? 'Score';
@@ -29,8 +31,8 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, gameId, currentNickn
   const renderRankIcon = (rank: number) => getRankIcon(rank, { flameRange: [4, 8] });
 
   const getEncouragement = (rank: number) => {
-    if (rank >= 4 && rank <= 6) return "Almost There!";
-    if (rank >= 7 && rank <= 8) return "Keep Pushing!";
+    if (rank >= 4 && rank <= 6) return t('lbAlmostThere', 'Almost There!');
+    if (rank >= 7 && rank <= 8) return t('lbKeepPushing', 'Keep Pushing!');
     return "";
   };
 
@@ -80,8 +82,8 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, gameId, currentNickn
               <table className="leaderboard-table">
                 <thead>
                   <tr>
-                    <th>Rank</th>
-                    <th>Player</th>
+                    <th>{t('lbRank', 'Rank')}</th>
+                    <th>{t('lbPlayer', 'Player')}</th>
                     <th>{label}</th>
                     {subLabel && <th>{subLabel}</th>}
                   </tr>
@@ -100,7 +102,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, gameId, currentNickn
                         <td className="player-cell">
                           <div className="player-info">
                             <span className="player-name-text">{entry.name}</span>
-                            {isMe && <span className="me-badge">YOU</span>}
+                            {isMe && <span className="me-badge">{t('lbYou', 'YOU')}</span>}
                             {encouragement && <span className="cheer-text">{encouragement}</span>}
                           </div>
                         </td>
@@ -115,7 +117,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, gameId, currentNickn
           )}
         </>
       ) : (
-        <div className="no-data-box">No records yet. Be the first!</div>
+        <div className="no-data-box">{t('lbNoRecords', 'No records yet. Be the first!')}</div>
       )}
     </div>
   );

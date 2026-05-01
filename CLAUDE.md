@@ -11,7 +11,7 @@ React 19 + TypeScript + Vite 7. Firebase Firestore for leaderboards/comments. De
 ```bash
 npm run dev          # Vite dev server
 npm run validate     # Lint games.json (warnings only)
-npm run build        # validate → split-games → sitemap → tsc -b → vite build → prerender → cp 404.html
+npm run build        # validate → sitemap → rss → tsc -b → vite build → prerender → cp 404.html
 npm run lint         # ESLint flat config
 npm run preview      # Preview production build
 npm run deploy       # Build + Firebase Hosting publish
@@ -26,7 +26,15 @@ There are no tests in this repo.
 
 ## Architecture — Big Picture
 
-**Single source of truth for games:** `src/data/games.json`. Adding a game means editing only this file (+ adding a WebP to `public/images/`). Code paths read configuration from the JSON entry — never hardcode game IDs (`id === '7'` is forbidden by RULES.md). Type definitions and a typed `games` array live in `src/data/games.ts`.
+**Game data is split between structural config and translatable text:**
+
+- `src/data/games.json` — structural fields only (`id`, `slug`, `thumbnail`, `genres`, `gameUrl`, `aspectRatio`, `status`, `isOriginal`, `language`, `badge`, `leaderboard`). No text.
+- `src/i18n/locales/en.json` — canonical English text under `games[<id>]` (`title`, `description`, `fullDescription`, `controls`, `tips`, `lore`, `features`). Source of truth for game copy.
+- `src/i18n/locales/{lang}.json` — overlay translations for non-English locales (de, es, es-LA, fr, ja, ko, pt, ru, vi, zh). Same shape. Missing fields fall back to English. The user owns all non-English translations.
+
+Adding a new game: edit `games.json` (structural) + `en.json` `games` block (text) + drop a WebP into `public/images/`. Other locales are translated separately by the user. Code paths read structural config from `games.json` — never hardcode game IDs (`id === '7'` is forbidden by RULES.md). Game text is always resolved via `getLocalizedString` / `getLocalizedArray` from `src/i18n/getLocalized.ts` — direct property access (`game.title`) is not on the `Game` type. Type definitions live in `src/data/games.ts`.
+
+**i18n internals:** `src/i18n/registry.ts` eager-imports `en.json` so English is always available as the fallback. Other overlays lazy-load via `import.meta.glob('./locales/*.json')`. `src/i18n/store.ts` exposes `useLocale()` returning `{ lang, overlay }` and seeds `en` synchronously to avoid a null flash on initial render. Underscore-prefixed locale files (e.g. `_template.json`) are ignored by the glob filter. Backups belong outside `src/i18n/locales/` so the glob does not bundle them.
 
 **Routing & code-splitting:** `src/App.tsx` mounts React Router. `Home` is eager; every other page is `React.lazy`. Vite `manualChunks` splits `vendor` (react/router) from `firebase` so Firestore is a parallel-loadable chunk. `Home.tsx` further dynamic-imports `firebase/firestore` inside effects + uses `requestIdleCallback` so Firestore code never blocks FCP/LCP. `GlobalLeaderboard` is `React.lazy` from Home for the same reason.
 
@@ -48,6 +56,7 @@ There are no tests in this repo.
 - **Firestore rules:** never `allow update: if true`. `leaderboards.{name, gameId}` are immutable post-create. Comments capped at 300 chars, nicknames at 30.
 - **Errors:** every route is wrapped in `<ErrorBoundary>` — don't add per-page try/catch UI.
 - **Images:** WebP only, in `public/images/`, referenced as `"images/foo.webp"` from `games.json`. PWA icons: 192×192 and 512×512.
+- **i18n:** When adding a new game, only fill `en.json` `games[id]`. The user adds translations for other locales themselves. Never invent translations for `ko.json`, `ja.json`, etc. without explicit instruction.
 - **Image optimization:** `scripts/optimize-images.cjs` resizes/re-encodes oversized banners in-place to 640w q70. Skips icons and `arcadedeck-banner.webp`. Run manually after adding large new banners.
 - **Image naming:** `{slug}.webp` kebab-case lowercase (matches `games.json` slug). System files: `favicon.webp`, `arcadedeck-banner.webp`, `bg.webp`, `icon-192x192.webp`, `icon-512x512.webp`.
 

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useParams, Navigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getPostsByTag, formatTagLabel } from '../data/posts';
+import { useUiText } from '../i18n';
 import './Blog.css';
 import './Home.css';
 
@@ -17,6 +18,7 @@ const BlogTag: React.FC = () => {
   const { tag = '' } = useParams<{ tag: string }>();
   const normalized = tag.toLowerCase();
   const matches = getPostsByTag(normalized);
+  const t = useUiText();
 
   if (matches.length === 0) {
     return <Navigate to="/blog" replace />;
@@ -26,6 +28,10 @@ const BlogTag: React.FC = () => {
   const url = `https://arcadedeck.net/blog/tag/${normalized}`;
   const title = `${label} | ArcadeDeck Blog`;
   const description = `All ArcadeDeck blog posts tagged "${label}" — strategy guides, design notes, patch notes, and recaps.`;
+
+  useEffect(() => {
+    document.title = title;
+  }, [title]);
 
   const itemListLd = {
     '@context': 'https://schema.org',
@@ -56,7 +62,6 @@ const BlogTag: React.FC = () => {
   return (
     <div className="blog-page">
       <>
-        <title>{title}</title>
         <meta name="description" content={description} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
@@ -68,9 +73,9 @@ const BlogTag: React.FC = () => {
       <Navbar />
       <main className="container">
         <nav className="breadcrumbs" aria-label="Breadcrumb">
-          <Link to="/">Home</Link>
+          <Link to="/">{t('breadcrumbHome', 'Home')}</Link>
           <span aria-hidden="true">›</span>
-          <Link to="/blog">Blog</Link>
+          <Link to="/blog">{t('navBlog', 'Blog')}</Link>
           <span aria-hidden="true">›</span>
           <span className="breadcrumb-current">#{normalized}</span>
         </nav>
@@ -79,7 +84,7 @@ const BlogTag: React.FC = () => {
             #<span>{label}</span>
           </h1>
           <p>
-            {matches.length} post{matches.length === 1 ? '' : 's'} tagged{' '}
+            {matches.length} {matches.length === 1 ? t('blogTagPost', 'post') : t('blogTagPosts', 'posts')} {t('blogTagged', 'tagged')}{' '}
             <strong>{label}</strong>.
           </p>
         </header>
@@ -102,19 +107,19 @@ const BlogTag: React.FC = () => {
       </main>
       <footer className="footer">
         <div className="container footer-container">
-          <p>&copy; 2026 ArcadeDeck. All rights reserved.</p>
+          <p>&copy; 2026 ArcadeDeck. {t('footerAllRights', 'All rights reserved.')}</p>
           <div className="footer-links">
-            <Link to="/about" className="footer-link">About Us</Link>
-            <Link to="/privacy" className="footer-link">Privacy Policy</Link>
-            <Link to="/contact" className="footer-link">Contact</Link>
-            <Link to="/blog" className="footer-link">Blog</Link>
+            <Link to="/about" className="footer-link">{t('footerAbout', 'About Us')}</Link>
+            <Link to="/privacy" className="footer-link">{t('footerPrivacy', 'Privacy Policy')}</Link>
+            <Link to="/contact" className="footer-link">{t('footerContact', 'Contact')}</Link>
+            <Link to="/blog" className="footer-link">{t('navBlog', 'Blog')}</Link>
             <a
               href="https://ko-fi.com/developer_benjamink"
               target="_blank"
               rel="noopener noreferrer"
               className="footer-link footer-link-support"
             >
-              Support ♥
+              {t('footerSupport', 'Support')} ♥
             </a>
           </div>
         </div>

@@ -6,81 +6,97 @@
 --------------------------------------------------
 - WebP 형식만 사용
 - public/images/ 폴더에 파일 추가
-- 파일명 예시: my-game-banner.webp
+- 파일명: {slug}.webp 형태 (kebab-case 소문자)
+- 예시: gem-merge.webp, my-game-banner.webp
+- 큰 배너는 scripts/optimize-images.cjs로 640w q70 리사이즈
 
-[Step 2] games.json에 게임 데이터 추가
+[Step 2] 두 파일 수정 (구조 + 영어 텍스트 분리)
 --------------------------------------------------
-- 수정 파일: src/data/games.json
-- new-game-template.json 을 복사해서 값만 수정
-- id는 기존 마지막 ID + 1 (문자열. 예: "16")
-- slug는 URL에 들어갈 영문 소문자-하이픈 (예: "my-game")
-- 나머지 필드 설명은 아래 참고
+new-game-template.json 의 두 블록을 각각 복사:
+
+  (A) src/data/games.json
+      └─ games_json_entry 를 배열 끝에 추가
+         (id, slug, thumbnail, genres, gameUrl, aspectRatio,
+          status, isOriginal, language, badge, leaderboard 만)
+
+  (B) src/i18n/locales/en.json
+      └─ "games" 블록 안에 en_json_games_entry 추가
+         (title, description, fullDescription, controls, tips,
+          lore, features 가 영어로 들어감)
+
+규칙:
+- id 는 기존 마지막 ID + 1 (문자열. 예: "22")
+- slug 는 URL 경로용 영문 소문자-하이픈 (예: "galaxy-launch")
+- 텍스트(title/description 등)는 games.json 에 절대 넣지 않음
+- 다른 언어 파일(ko.json, ja.json, de.json 등)에는 직접 추가하지 않음
+  → 영어가 fallback으로 자동 사용됨. 번역은 사용자가 별도로 진행.
 
 [Step 3] 검증 & 빌드
 --------------------------------------------------
-npm run validate     ← 데이터 검증만 실행
-npm run build        ← 검증 + sitemap 생성 + 빌드 (한번에)
-npm run deploy       ← GitHub Pages 배포
+npm run validate     ← games.json 데이터 검증만
+npm run build        ← validate → sitemap → rss → tsc → vite build
+                       → prerender (모든 로케일 × 모든 게임 페이지)
+                       → 404.html 복사
 
-※ sitemap.xml은 빌드 시 games.json에서 자동 생성됩니다.
-  수동으로 수정할 필요 없음.
+npm run deploy       ← Firebase Hosting 배포
+
+※ sitemap.xml, rss.xml, /play/{slug}/index.html 는 빌드 시 자동 생성.
+  수동 편집 금지.
+※ 다국어 prerender: 11개 로케일 × 게임 페이지 + 11개 홈 쉘 자동 생성.
+  hreflang/canonical/og:locale 도 자동.
 
 =============================================
-  필드 설명
+  필드 설명 (games.json — 구조적 데이터만)
 =============================================
 
 [필수 필드]
 --------------------------------------------------
-id              숫자 문자열. 기존 마지막 ID + 1 (예: "16")
+id              숫자 문자열. 기존 마지막 ID + 1 (예: "22")
 slug            URL 경로용 영문 소문자-하이픈 (예: "galaxy-launch")
-title           영문 게임 제목
-description     영문 한줄 설명 (1~2문���)
-fullDescription 영문 상세 설명 (3~6문단 권장)
-thumbnail       썸네일 경로 (예: "images/my-game.webp")
+thumbnail       썸네일 경로 ("images/{slug}.webp" 권장)
 genres          장르 배열 (아래 기존 장르 목록 참고)
 gameUrl         게임 iframe URL (예: "https://my-game.pages.dev/")
 status          "PLAYABLE" 또는 "IN PRODUCTION"
-                IN PRODUCTION이면 사이트에 표시되지 않음
+                IN PRODUCTION 이면 사이트에 표시되지 않음
 
 [선택 필드]
 --------------------------------------------------
-language        언어 배지 (KO, EN, KO/EN). 없으면 배지 미표시
+language        언어 배지 ("KO", "EN", "KO/EN"). 게임 자체의 인게임
+                텍스트 언어를 표시. UI 다국어와 무관.
 isOriginal      직접 만든 게임이면 true (Original 배지 표시)
 aspectRatio     화면 비율 (기본값 "16/9". 세로형은 "9/16")
+badge           "POPULAR", "NEW" 등 강조 배지
 
-[한국어 번역] (강력 권장)
+[리더보드 설정 — leaderboard 객체]
 --------------------------------------------------
-titleKo           한국어 제목
-descriptionKo     한국어 한줄 설명
-fullDescriptionKo 한국어 상세 설명
-controlsKo        한국어 조작법
-tipsKo            한국어 팁
-loreKo            한국어 배경 스토리
-featuresKo        한국어 특징 배열
+title          리더보드 제목 (영어. 다국어 UI는 ui 키로 별도 처리)
+primaryLabel   주 점수 라벨 (예: "Score", "Stage", "Waves")
+primaryUnit    주 점수 단위 (예: " pts", "". 없으면 빈 문자열)
+secondaryLabel 부 점수 라벨 (없으면 빈 문자열)
+secondaryUnit  부 점수 단위 (예: "Lv.", "x")
+dualSort       부 점수 2차 정렬 여부 (true/false)
+subSortAsc     동점 시 부 점수 낮은게 유리? (true/false. Gem Merge 방식)
 
-[게임 상세 정보]
---------------------------------------------------
-controls   영문 조작법 (예: "Mouse Click: Attack / WASD: Move")
-tips       영문 전략 팁 (2~4문장)
-lore       영문 배경 스토리 (2~4문단)
-features   특징 태그 배열 (5~8개 권장)
-           ※ 모바일 지원이면 "Web & Mobile Friendly" 포함
-           ※ PC 전용이면 "PC Only" 포함
-
-[리더보드 설정]
---------------------------------------------------
-leaderboard.title          리더보드 제목
-leaderboard.primaryLabel   주 점수 이름 (예: "Score", "Stage", "Waves")
-leaderboard.primaryUnit    주 점수 단위 (예: " pts", "". 없으면 빈 문자열)
-leaderboard.secondaryLabel 부 점수 이름 (없으면 빈 문자열)
-leaderboard.secondaryUnit  부 점수 단위 (예: "Lv.", "x")
-leaderboard.dualSort       부 점수 2차 정렬 여부 (true/false)
-leaderboard.subSortAsc     동점 시 부 점수 낮은게 유리? (true/false)
-
-리더보드 예시:
+리더보드 패턴 예시:
   점수만:        primaryLabel:"Score"  dualSort:false
   점수+레벨:     primaryLabel:"Score"  secondaryLabel:"Level"   dualSort:true  subSortAsc:false
   점수+시도횟수: primaryLabel:"Score"  secondaryLabel:"Merges"  dualSort:true  subSortAsc:true
+
+=============================================
+  필드 설명 (en.json — 영어 텍스트만)
+=============================================
+
+games[id] 블록 안에:
+
+title           영문 게임 제목
+description     영문 한 줄 설명 (1~2문장. 카드/메타 description에 사용)
+fullDescription 영문 상세 설명 (3~6문단 권장. 게임 페이지 본문)
+controls        영문 조작법 (예: "Mouse Click: Attack / WASD: Move")
+tips            영문 전략 팁 (2~4문장)
+lore            영문 배경 스토리 (2~4문단)
+features        특징 태그 배열 (5~8개 권장)
+                ※ 모바일 지원이면 "Web & Mobile Friendly" 포함
+                ※ PC 전용이면 "PC Only" 포함
 
 =============================================
   기존 장르 목록
@@ -89,8 +105,7 @@ Tower Defense, Clicker, Idle, Puzzle, Tycoon,
 Board Game, Survival, Simulation, Roguelike,
 RPG, Strategy, Casual, Arcade, Auto Battler
 
-※ 새 장르 사용 시 validate에서 경고가 뜹니다.
-  의도적이면 무시해도 됩니다.
+※ 새 장르 사용 시 validate 에서 경고. 의도적이면 무시 가능.
 
 =============================================
   게임 내 점수 전송 (게임 코드에서 구현)
@@ -104,17 +119,24 @@ RPG, Strategy, Casual, Arcade, Auto Battler
     subScore: 15          // 부 점수 (선택)
   }, "*");
 
-지원하��� type 값:
+지원하는 type 값:
   "GAME_SCORE", "SCORE_UPDATE", "gameOver", "GAME_OVER"
+
+검증 규칙 (GamePlayer):
+  - event.origin 이 gameUrl 도메인과 일치해야 처리
+  - score 는 isFinite + [0, 10_000_000] 클램프
+  - 위반 메시지는 조용히 무시 (alert 없음)
 
 =============================================
   체크리스트
 =============================================
 
-[ ] public/images/에 WebP 썸네일 추가
-[ ] src/data/games.json에 게임 데이터 추가
-[ ] npm run validate 로 데이터 검증 통과
-[ ] npm run build 로 빌드 성공 확인
-[ ] npm run dev 로 로컬에서 게임 페이지 확인
+[ ] public/images/{slug}.webp 추가 (WebP)
+[ ] src/data/games.json 에 구조 데이터 추가
+[ ] src/i18n/locales/en.json games 블록에 영어 텍스트 추가
+[ ] 다른 언어 파일은 건드리지 않음 (사용자가 별도 번역)
+[ ] npm run validate 통과
+[ ] npm run build 빌드 성공
+[ ] npm run dev 로 /play/{slug} 페이지 확인
 [ ] 게임에서 postMessage 점수 전송 동작 확인
-[ ] npm run deploy 로 배포
+[ ] npm run deploy (Firebase Hosting 배포)

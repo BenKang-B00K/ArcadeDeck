@@ -1,58 +1,54 @@
-import type { Game, GameLight } from '../data/games';
+import type { Game } from '../data/games';
 import type { GameTranslation, LocaleOverlay } from './registry';
+import { EN_OVERLAY } from './registry';
 
-type AnyGame = GameLight | Game;
 type StringField = 'title' | 'description' | 'fullDescription' | 'controls' | 'tips' | 'lore';
 type ArrayField = 'features';
 
-// Suffix used on games.json for the built-in Korean translation
-// (titleKo, descriptionKo, fullDescriptionKo, ...).
-const KO_SUFFIX = 'Ko';
+function readString(overlay: LocaleOverlay | null, id: string, field: StringField): string | undefined {
+  const v = overlay?.games?.[id]?.[field as keyof GameTranslation];
+  return typeof v === 'string' && v.length > 0 ? v : undefined;
+}
 
-function koField(field: string): string {
-  return field + KO_SUFFIX;
+function readArray(overlay: LocaleOverlay | null, id: string, field: ArrayField): string[] | undefined {
+  const v = overlay?.games?.[id]?.[field];
+  if (!Array.isArray(v) || v.length === 0) return undefined;
+  return v.filter((x): x is string => typeof x === 'string');
 }
 
 // Resolve a string field for the active locale.
-//   en   → game[field]
-//   ko   → game[fieldKo] ?? game[field]
-//   else → overlay.games[id][field] ?? game[field]
+//   non-en + overlay has it → overlay value
+//   else                    → English (EN_OVERLAY)
 export function getLocalizedString(
-  game: AnyGame,
+  game: Game,
   field: StringField,
   lang: string,
   overlay: LocaleOverlay | null,
 ): string {
-  const base = (game as unknown as Record<string, unknown>)[field];
-  if (lang === 'en') return typeof base === 'string' ? base : '';
-  if (lang === 'ko') {
-    const ko = (game as unknown as Record<string, unknown>)[koField(field)];
-    if (typeof ko === 'string' && ko.length > 0) return ko;
-    return typeof base === 'string' ? base : '';
+  if (lang !== 'en') {
+    const v = readString(overlay, game.id, field);
+    if (v !== undefined) return v;
   }
-  const t = overlay?.games?.[game.id] as GameTranslation | undefined;
-  const fromOverlay = t?.[field];
-  if (typeof fromOverlay === 'string' && fromOverlay.length > 0) return fromOverlay;
-  return typeof base === 'string' ? base : '';
+  return readString(EN_OVERLAY, game.id, field) ?? '';
 }
 
 // Resolve a string-array field (currently only `features`).
 export function getLocalizedArray(
-  game: AnyGame,
+  game: Game,
   field: ArrayField,
   lang: string,
   overlay: LocaleOverlay | null,
 ): string[] {
-  const base = (game as unknown as Record<string, unknown>)[field];
-  const baseArr = Array.isArray(base) ? base.filter((x): x is string => typeof x === 'string') : [];
-  if (lang === 'en') return baseArr;
-  if (lang === 'ko') {
-    const ko = (game as unknown as Record<string, unknown>)[koField(field)];
-    if (Array.isArray(ko) && ko.length > 0) return ko.filter((x): x is string => typeof x === 'string');
-    return baseArr;
+  if (lang !== 'en') {
+    const v = readArray(overlay, game.id, field);
+    if (v !== undefined) return v;
   }
-  const t = overlay?.games?.[game.id] as GameTranslation | undefined;
-  const fromOverlay = t?.[field];
-  if (Array.isArray(fromOverlay) && fromOverlay.length > 0) return fromOverlay;
-  return baseArr;
+  return readArray(EN_OVERLAY, game.id, field) ?? [];
+}
+
+// English-only feature list. Used for structural checks (e.g. "Local Co-op",
+// "PC Only" platform badges) where the marker is the canonical English string,
+// not a translated label.
+export function getEnFeatures(id: string): string[] {
+  return readArray(EN_OVERLAY, id, 'features') ?? [];
 }

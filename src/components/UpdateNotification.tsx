@@ -1,8 +1,10 @@
 import React from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
+import { useUiText } from '../i18n';
 import './UpdateNotification.css';
 
 const UpdateNotification: React.FC = () => {
+  const t = useUiText();
   const {
     offlineReady: [offlineReady, setOfflineReady],
     needRefresh: [needRefresh, setNeedRefresh],
@@ -40,6 +42,18 @@ const UpdateNotification: React.FC = () => {
     setNeedRefresh(false);
   };
 
+  const handleUpdate = async () => {
+    try {
+      await updateServiceWorker(true);
+    } catch (err) {
+      console.error('SW update failed', err);
+    }
+    // Fallback: force reload if controllerchange didn't fire (no waiting SW,
+    // browser quirk, etc). Safe — if reload already happened from the
+    // `controlling` event, this never runs.
+    setTimeout(() => window.location.reload(), 1500);
+  };
+
   if (!offlineReady && !needRefresh) {
     return null;
   }
@@ -51,23 +65,23 @@ const UpdateNotification: React.FC = () => {
           <div className="update-icon">🚀</div>
           <div className="update-text">
             {offlineReady ? (
-              <p>App ready to work offline!</p>
+              <p>{t('updateOfflineReady', 'App ready to work offline!')}</p>
             ) : (
               <>
-                <h3>New Version Available!</h3>
-                <p>Update now to get the latest features and games.</p>
+                <h3>{t('updateAvailable', 'New Version Available!')}</h3>
+                <p>{t('updateDescription', 'Update now to get the latest features and games.')}</p>
               </>
             )}
           </div>
         </div>
         <div className="update-actions">
           {needRefresh && (
-            <button className="update-btn" onClick={() => updateServiceWorker(true)}>
-              Update Now
+            <button className="update-btn" onClick={handleUpdate}>
+              {t('updateRefresh', 'Update Now')}
             </button>
           )}
           <button className="close-update-btn" onClick={close}>
-            Dismiss
+            {t('updateDismiss', 'Dismiss')}
           </button>
         </div>
       </div>

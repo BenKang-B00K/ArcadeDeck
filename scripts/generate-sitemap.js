@@ -1,31 +1,116 @@
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, readdirSync } from 'fs';
 
 const games = JSON.parse(readFileSync('src/data/games.json', 'utf-8'));
 const posts = JSON.parse(readFileSync('src/data/posts.json', 'utf-8'));
 const today = new Date().toISOString().split('T')[0];
 
-const staticPages = [
-  { path: '/', priority: '1.0', lastmod: today },
-  { path: '/hall-of-fame', priority: '0.8', lastmod: today },
-  { path: '/blog', priority: '0.7', lastmod: today },
-  { path: '/about', priority: '0.6', lastmod: today },
-  { path: '/contact', priority: '0.5', lastmod: today },
-  { path: '/privacy', priority: '0.4', lastmod: today },
+const SITE = 'https://arcadedeck.net';
+
+// Locales discovered from src/i18n/locales — keep sitemap in lockstep with
+// runtime overlay loader.
+const SUPPORTED_LOCALES = readdirSync('src/i18n/locales')
+  .filter(f => f.endsWith('.json') && !f.startsWith('_') && !f.includes('.missing.') && !f.includes('.bak.'))
+  .map(f => f.replace(/\.json$/, ''));
+SUPPORTED_LOCALES.sort((a, b) => (a === 'en' ? -1 : b === 'en' ? 1 : a.localeCompare(b)));
+
+const HREFLANG = {
+  en: 'en', de: 'de', es: 'es', 'es-LA': 'es-419', fr: 'fr',
+  ja: 'ja', ko: 'ko', pt: 'pt', ru: 'ru', vi: 'vi', zh: 'zh',
+};
+
+const overlays = {};
+for (const l of SUPPORTED_LOCALES) {
+  try {
+    overlays[l] = JSON.parse(readFileSync(`src/i18n/locales/${l}.json`, 'utf-8'));
+  } catch {
+    overlays[l] = {};
+  }
+}
+
+const prefix = (lang) => (lang === 'en' ? '' : '/' + lang.toLowerCase());
+
+// Locales that have at least one translation field for a given game id.
+function gameLocales(id) {
+  return SUPPORTED_LOCALES.filter(l => overlays[l]?.games?.[id]);
+}
+
+// Locales that should host a translated home (any locale we ship — even
+// without per-game text the home shell is translated via UI strings).
+const homeLocales = SUPPORTED_LOCALES;
+
+function alternateBlock(routePath, langs) {
+  const lines = langs.map(l =>
+    `    <xhtml:link rel="alternate" hreflang="${HREFLANG[l] || l}" href="${SITE}${prefix(l)}${routePath}" />`
+  );
+  // x-default → English version.
+  lines.push(
+    `    <xhtml:link rel="alternate" hreflang="x-default" href="${SITE}${routePath}" />`
+  );
+  return lines.join('\n');
+}
+
+function urlEntry(lang, routePath, priority, lastmod, alternateLangs = null) {
+  const loc = `${SITE}${prefix(lang)}${routePath}`;
+  const alts = alternateLangs && alternateLangs.length
+    ? '\n' + alternateBlock(routePath, alternateLangs)
+    : '';
+  return `  <url>
+    <loc>${loc}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <priority>${priority}</priority>${alts}
+  </url>`;
+}
+
+const entries = [];
+
+// Multi-locale: home (/)
+for (const lang of homeLocales) {
+  entries.push(urlEntry(lang, '/', '1.0', today, homeLocales));
+}
+
+// Multi-locale: games
+const playableGames = games.filter(g => g.status !== 'IN PRODUCTION');
+for (const game of playableGames) {
+  const langs = gameLocales(game.id);
+  const includeLangs = langs.length ? langs : ['en'];
+  for (const lang of includeLangs) {
+    entries.push(urlEntry(lang, `/play/${game.slug}`, '0.9', today, includeLangs));
+  }
+}
+
+// Multi-locale: genre landing pages
+function genreSlug(name) {
+  return String(name).toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+}
+const allGenres = (() => {
+  const set = new Set();
+  for (const g of playableGames) {
+    for (const genre of g.genres) set.add(genre);
+  }
+  return Array.from(set).sort();
+})();
+for (const genre of allGenres) {
+  const slug = genreSlug(genre);
+  for (const lang of SUPPORTED_LOCALES) {
+    entries.push(urlEntry(lang, `/genre/${slug}`, '0.7', today, SUPPORTED_LOCALES));
+  }
+}
+
+// English-only routes
+const englishOnlyRoutes = [
+  { path: '/hall-of-fame', priority: '0.8' },
+  { path: '/blog', priority: '0.7' },
+  { path: '/about', priority: '0.6' },
+  { path: '/contact', priority: '0.5' },
+  { path: '/privacy', priority: '0.4' },
 ];
+for (const r of englishOnlyRoutes) {
+  entries.push(urlEntry('en', r.path, r.priority, today));
+}
 
-const gamePages = games
-  .filter(g => g.status !== 'IN PRODUCTION')
-  .map(g => ({
-    path: `/play/${g.slug}`,
-    priority: '0.9',
-    lastmod: today,
-  }));
-
-const blogPages = posts.map(p => ({
-  path: `/blog/${p.slug}`,
-  priority: '0.6',
-  lastmod: p.date,
-}));
+for (const p of posts) {
+  entries.push(urlEntry('en', `/blog/${p.slug}`, '0.6', p.date));
+}
 
 const tagMap = new Map();
 posts.forEach((p) => {
@@ -34,29 +119,20 @@ posts.forEach((p) => {
     if (!existing || existing < p.date) tagMap.set(t, p.date);
   });
 });
-const tagPages = Array.from(tagMap.entries())
-  .sort(([a], [b]) => a.localeCompare(b))
-  .map(([tag, lastmod]) => ({
-    path: `/blog/tag/${tag}`,
-    priority: '0.5',
-    lastmod,
-  }));
-
-const allPages = [...staticPages, ...gamePages, ...blogPages, ...tagPages];
+for (const [tag, lastmod] of Array.from(tagMap.entries()).sort(([a], [b]) => a.localeCompare(b))) {
+  entries.push(urlEntry('en', `/blog/tag/${tag}`, '0.5', lastmod));
+}
 
 const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${allPages
-  .map(
-    p => `  <url>
-    <loc>https://arcadedeck.net${p.path}</loc>
-    <lastmod>${p.lastmod}</lastmod>
-    <priority>${p.priority}</priority>
-  </url>`
-  )
-  .join('\n')}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+${entries.join('\n')}
 </urlset>
 `;
 
 writeFileSync('public/sitemap.xml', xml);
-console.log(`Sitemap generated with ${allPages.length} URLs (${gamePages.length} games, ${blogPages.length} posts, ${tagPages.length} tags).`);
+console.log(
+  `Sitemap generated with ${entries.length} URLs ` +
+  `(${playableGames.length} games × locales, ${homeLocales.length} home variants, ` +
+  `${posts.length} posts, ${tagMap.size} tags).`
+);

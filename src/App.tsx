@@ -17,9 +17,14 @@ const MyGames     = lazy(() => import('./pages/MyGames'));
 const Blog        = lazy(() => import('./pages/Blog'));
 const BlogPost    = lazy(() => import('./pages/BlogPost'));
 const BlogTag     = lazy(() => import('./pages/BlogTag'));
+const Genre       = lazy(() => import('./pages/Genre'));
 const NotFound    = lazy(() => import('./pages/NotFound'));
 
-function App() {
+interface AppProps {
+  basename?: string;
+}
+
+function App({ basename = '/' }: AppProps) {
   useEffect(() => {
     const handleContextMenu = (e: MouseEvent) => {
       e.preventDefault();
@@ -31,7 +36,7 @@ function App() {
   }, []);
 
   return (
-    <Router>
+    <Router basename={basename}>
       <div className="app-main-layout">
         <ScrollToTop />
         <ErrorBoundary>
@@ -47,6 +52,7 @@ function App() {
             <Route path="/blog"             element={<Blog />} />
             <Route path="/blog/tag/:tag"    element={<BlogTag />} />
             <Route path="/blog/:slug"       element={<BlogPost />} />
+            <Route path="/genre/:slug"      element={<Genre />} />
             <Route path="*"             element={<NotFound />} />
           </Routes>
         </Suspense>

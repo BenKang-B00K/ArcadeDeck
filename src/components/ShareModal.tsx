@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Link as LinkIcon, Share2, X } from 'lucide-react';
 import { useEscapeKey } from '../hooks/useEscapeKey';
+import { useUiText } from '../i18n';
 import './ShareModal.css';
 
 interface ShareModalProps {
@@ -10,7 +11,6 @@ interface ShareModalProps {
   gameUrl: string;
   score?: number;
   scoreUnit?: string;
-  lang: 'en' | 'ko';
 }
 
 const ShareModal: React.FC<ShareModalProps> = ({
@@ -20,9 +20,9 @@ const ShareModal: React.FC<ShareModalProps> = ({
   gameUrl,
   score,
   scoreUnit = '',
-  lang,
 }) => {
   useEscapeKey(onClose, isOpen);
+  const uiT = useUiText();
   const copyBtnRef = useRef<HTMLButtonElement>(null);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -35,12 +35,8 @@ const ShareModal: React.FC<ShareModalProps> = ({
   const pageUrl = gameUrl;
 
   const shareText = score != null
-    ? lang === 'ko'
-      ? `${gameTitle}에서 ${score.toLocaleString()}${scoreUnit}을 달성했어요! 당신도 도전해보세요 🎮 #ArcadeDeck`
-      : `I scored ${score.toLocaleString()}${scoreUnit} in ${gameTitle}! Can you beat me? 🎮 #ArcadeDeck`
-    : lang === 'ko'
-      ? `${gameTitle} 지금 플레이 중! 🎮 #ArcadeDeck`
-      : `Playing ${gameTitle} right now! 🎮 #ArcadeDeck`;
+    ? `I scored ${score.toLocaleString()}${scoreUnit} in ${gameTitle}! Can you beat me? 🎮 #ArcadeDeck`
+    : `Playing ${gameTitle} right now! 🎮 #ArcadeDeck`;
 
   const encodedText = encodeURIComponent(shareText);
   const encodedUrl = encodeURIComponent(pageUrl);
@@ -50,10 +46,10 @@ const ShareModal: React.FC<ShareModalProps> = ({
   const handleCopyLink = () => {
     navigator.clipboard.writeText(pageUrl);
     if (copyBtnRef.current) {
-      copyBtnRef.current.textContent = lang === 'ko' ? '✅ 복사됨!' : '✅ Copied!';
+      copyBtnRef.current.textContent = uiT('shareCopied', '✅ Copied!');
       clearTimeout(copyTimerRef.current);
       copyTimerRef.current = setTimeout(() => {
-        if (copyBtnRef.current) copyBtnRef.current.textContent = lang === 'ko' ? '🔗 링크 복사' : '🔗 Copy Link';
+        if (copyBtnRef.current) copyBtnRef.current.textContent = `🔗 ${uiT('shareCopyLink', 'Copy Link')}`;
       }, 2000);
     }
   };
@@ -83,13 +79,13 @@ const ShareModal: React.FC<ShareModalProps> = ({
   };
 
   const t = {
-    title: lang === 'ko' ? '공유하기' : 'Share',
-    score: lang === 'ko' ? '내 점수' : 'My Score',
-    twitter: lang === 'ko' ? 'X(트위터)에 공유' : 'Share on X',
-    kakao: lang === 'ko' ? '카카오톡 공유' : 'Share via KakaoTalk',
-    copy: lang === 'ko' ? '링크 복사' : 'Copy Link',
-    native: lang === 'ko' ? '더 보기...' : 'More options...',
-    close: lang === 'ko' ? '닫기' : 'Close',
+    title: uiT('shareTitle', 'Share'),
+    score: uiT('shareMyScore', 'My Score'),
+    twitter: uiT('shareOnX', 'Share on X'),
+    kakao: uiT('shareKakao', 'Share via KakaoTalk'),
+    copy: uiT('shareCopyLink', 'Copy Link'),
+    native: uiT('shareMore', 'More options...'),
+    close: uiT('shareClose', 'Close'),
   };
 
   return (

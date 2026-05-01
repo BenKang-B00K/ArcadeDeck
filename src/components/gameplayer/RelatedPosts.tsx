@@ -2,10 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen } from 'lucide-react';
 import { posts } from '../../data/posts';
+import { useUiText } from '../../i18n';
 
 interface Props {
   gameSlug: string;
-  lang: 'en' | 'ko';
 }
 
 const formatDate = (iso: string) =>
@@ -16,7 +16,8 @@ const formatDate = (iso: string) =>
     timeZone: 'UTC',
   });
 
-const RelatedPosts: React.FC<Props> = ({ gameSlug, lang }) => {
+const RelatedPosts: React.FC<Props> = ({ gameSlug }) => {
+  const t = useUiText();
   const related = posts.filter(
     (p) => Array.isArray(p.relatedGames) && p.relatedGames.includes(gameSlug),
   );
@@ -26,7 +27,7 @@ const RelatedPosts: React.FC<Props> = ({ gameSlug, lang }) => {
     <section className="related-posts-section" aria-label="Related blog posts">
       <h3 className="related-posts-title">
         <BookOpen size={18} aria-hidden="true" />{' '}
-        {lang === 'ko' ? '관련 블로그 글' : 'From the Blog'}
+        {t('relatedPostsTitle', 'From the Blog')}
       </h3>
       <ul className="related-posts-list">
         {related.map((p) => (

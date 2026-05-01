@@ -32,6 +32,10 @@ firebase-debug.log
 # Local reference files
 leaderboard.txt
 
+# Local backups & i18n helper scripts (not for repo)
+*.bak.json
+src/i18n/locales/*.py
+
 # Claude Code local files
 .agents/
 skills-lock.json

@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Monitor, Gamepad2, Play, Trophy } from 'lucide-react';
-import type { GameLight } from '../data/games';
-import { useLocale, getLocalizedString } from '../i18n';
+import type { Game } from '../data/games';
+import { useLocale, getLocalizedString, getEnFeatures, useUiText } from '../i18n';
+import { thumb360, SRCSET_SIZES } from '../utils/thumb';
 import './GameCard.css';
 
 interface GameCardProps {
-  game: GameLight;
+  game: Game;
   onProductionClick?: () => void;
   isRecentlyPlayed?: boolean;
   onGenreClick?: (genre: string) => void;
@@ -17,11 +18,16 @@ interface GameCardProps {
 const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecentlyPlayed = false, onGenreClick, myRank, maxTags }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const { lang, overlay } = useLocale();
+  const t = useUiText();
   const title = getLocalizedString(game, 'title', lang, overlay);
 
-  const thumbnailUrl = game.thumbnail.startsWith('http')
+  const isRemote = game.thumbnail.startsWith('http');
+  const thumbnailUrl = isRemote
     ? game.thumbnail
     : `${import.meta.env.BASE_URL}${game.thumbnail}`;
+  const srcSet = isRemote
+    ? undefined
+    : `${import.meta.env.BASE_URL}${thumb360(game.thumbnail)} 360w, ${thumbnailUrl} 640w`;
 
   const handleClick = (e: React.MouseEvent) => {
     if (game.status === 'IN PRODUCTION') {
@@ -32,11 +38,14 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
 
   const isInProduction = game.status === 'IN PRODUCTION';
 
-  // Show only the most important platform badge (priority: Co-op > PC Only > Mobile)
-  const platformBadge = game.features?.some(f => f.startsWith('Local Co-op'))
-    ? <div className="platform-badge coop"><Gamepad2 size={12} aria-hidden="true" /> Co-op</div>
-    : game.features?.includes('PC Only')
-    ? <div className="platform-badge pc-only"><Monitor size={12} aria-hidden="true" /> PC Only</div>
+  // Show only the most important platform badge (priority: Co-op > PC Only > Mobile).
+  // Read from the canonical English features list — these are semantic markers,
+  // not display strings, so they should not change with locale.
+  const enFeatures = getEnFeatures(game.id);
+  const platformBadge = enFeatures.some(f => f.startsWith('Local Co-op'))
+    ? <div className="platform-badge coop"><Gamepad2 size={12} aria-hidden="true" /> {t('gameCardCoop', 'Co-op')}</div>
+    : enFeatures.includes('PC Only')
+    ? <div className="platform-badge pc-only"><Monitor size={12} aria-hidden="true" /> {t('gameCardPcOnly', 'PC Only')}</div>
     : null;
 
   return (
@@ -44,7 +53,7 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
       {/* Row 1: Title + Badge + Rank */}
       <div className="card-title-row">
         <h3>{title}</h3>
-        {game.isOriginal && <span className="original-dot" title="Original" />}
+        {game.isOriginal && <span className="original-dot" title={t('gameCardOriginal', 'Original')} />}
         {game.badge && (
           <span className={`game-badge badge-${game.badge === 'POPULAR' ? 'popular' : 'cantstop'}`}>
             {game.badge}
@@ -62,6 +71,8 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
       <div className={`card-image${imageLoaded ? '' : ' img-loading'}`}>
         <img
           src={thumbnailUrl}
+          srcSet={srcSet}
+          sizes={srcSet ? SRCSET_SIZES : undefined}
           alt={title}
           width="640"
           height="360"
@@ -71,11 +82,11 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
         />
         {platformBadge}
         {isInProduction && (
-          <div className="status-badge in-production">Coming Soon</div>
+          <div className="status-badge in-production">{t('gameCardComingSoon', 'Coming Soon')}</div>
         )}
         <div className="card-overlay">
           <button className="play-btn">
-            {isInProduction ? 'Coming Soon' : isRecentlyPlayed ? <><Play size={14} aria-hidden="true" /> Resume</> : 'Play Now'}
+            {isInProduction ? t('gameCardComingSoon', 'Coming Soon') : isRecentlyPlayed ? <><Play size={14} aria-hidden="true" /> {t('gameCardResume', 'Resume')}</> : t('gameCardPlayNow', 'Play Now')}
           </button>
         </div>
       </div>

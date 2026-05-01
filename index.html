@@ -24,7 +24,6 @@
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="ArcadeDeck" />
     <meta property="og:locale" content="en_US" />
-    <meta property="og:locale:alternate" content="ko_KR" />
     <meta property="og:url" content="https://arcadedeck.net/" />
     <meta property="og:title" content="ArcadeDeck | The Ultimate Free Browser Games Platform" />
     <meta property="og:description" content="Play the best free online browser games on ArcadeDeck. High-quality Action, RPG, Strategy, and Idle games with global leaderboards." />
@@ -40,34 +39,12 @@
     <meta name="google-adsense-account" content="ca-pub-2461804849200179">
     <meta name="msvalidate.01" content="FCB46D8CE61A5D785931A8B24BF10879" />
 
-    <!-- AdSense verification + crawler hint. Deferred until first user
-         interaction or 5s idle so it never blocks LCP. Script presence
-         is what unsticks "Getting ready" → "Ready" during site review.
-         AdBanner.tsx still gates adsbygoogle.push() behind ADSENSE_APPROVED
-         so no <ins> slots render and we get no 400s during review. -->
-    <script>
-      (function () {
-        var loaded = false;
-        function loadAdsense() {
-          if (loaded) return;
-          loaded = true;
-          var s = document.createElement('script');
-          s.async = true;
-          s.crossOrigin = 'anonymous';
-          s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2461804849200179';
-          document.head.appendChild(s);
-        }
-        var events = ['pointerdown', 'keydown', 'scroll', 'touchstart'];
-        function trigger() {
-          events.forEach(function (e) { window.removeEventListener(e, trigger, { passive: true }); });
-          loadAdsense();
-        }
-        events.forEach(function (e) { window.addEventListener(e, trigger, { passive: true, once: true }); });
-        var ric = window.requestIdleCallback;
-        if (ric) ric(loadAdsense, { timeout: 5000 });
-        else setTimeout(loadAdsense, 5000);
-      })();
-    </script>
+    <!-- AdSense loader. Static async tag for fastest crawler detection
+         during site review. AdBanner.tsx still gates adsbygoogle.push()
+         behind ADSENSE_APPROVED so no <ins> slots render and we get no
+         400s during review. -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2461804849200179"
+     crossorigin="anonymous"></script>
 
     <!-- LCP: hero background. Preload + fetchpriority=high so it lands before CSS parses. -->
     <link rel="preload" as="image" href="/images/bg.webp" type="image/webp" fetchpriority="high">
@@ -125,7 +102,7 @@
     <!-- Static LCP shell: paints the hero before React mounts so Lighthouse
          reports the hero h1+p as the LCP element ~480ms earlier. React's
          first render replaces this subtree with the live <App /> tree. -->
-    <div id="root"><header class="hero"><div class="container hero-content"><h1>Welcome to <span data-text="ArcadeDeck">ArcadeDeck</span></h1><p>Dozens of handcrafted browser games. Pick one, jump in, and see how far you can go.</p></div></header></div>
+    <div id="root"><header class="hero"><div class="container hero-content"><h1>Welcome to <span data-text="ArcadeDeck">ArcadeDeck</span></h1><p>Dozens of handcrafted browser games. Pick one, jump in, and see how far you can go.</p><div class="hero-gamer-spotlight"><span class="neon-arrow neon-arrow-left" aria-hidden="true">&#9654;</span><div class="hero-gamer-display"><div class="hero-gamer-row"><span class="hero-gamer-label">Game Nickname</span></div><div class="hero-gamer-row"><strong class="hero-gamer-name">&nbsp;</strong></div></div><span class="neon-arrow neon-arrow-right" aria-hidden="true">&#9664;</span></div></div></header></div>
     <noscript>
       <div style="background:#171424;color:#eaeaf0;font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;">
         <h1>ArcadeDeck — The Ultimate Free Browser Games Platform</h1>

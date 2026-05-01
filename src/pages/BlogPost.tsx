@@ -4,7 +4,9 @@ import { Clock, List, Gamepad2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { getPostBySlug } from '../data/posts';
 import { games } from '../data/games';
-import type { GameLight } from '../data/games';
+import type { Game } from '../data/games';
+import { useUiText, useLocale, getLocalizedString } from '../i18n';
+import { thumb360, SRCSET_SIZES } from '../utils/thumb';
 import './Blog.css';
 import './Home.css';
 
@@ -61,6 +63,8 @@ const BlogPost: React.FC = () => {
   const post = getPostBySlug(slug);
   const articleRef = useRef<HTMLElement>(null);
   const [progress, setProgress] = useState(0);
+  const t = useUiText();
+  const { lang, overlay } = useLocale();
 
   const processed = useMemo(
     () => (post ? processContent(post.content) : null),
@@ -90,6 +94,10 @@ const BlogPost: React.FC = () => {
     };
   }, [processed]);
 
+  useEffect(() => {
+    if (post) document.title = `${post.title} | ArcadeDeck Blog`;
+  }, [post]);
+
   if (!post || !processed) {
     return <Navigate to="/blog" replace />;
   }
@@ -98,7 +106,7 @@ const BlogPost: React.FC = () => {
   const readingMinutes = Math.max(1, Math.round(processed.wordCount / 220));
   const relatedGameForImage = (post.relatedGames || [])
     .map((s) => games.find((g) => g.slug === s))
-    .find((g): g is GameLight => g !== undefined);
+    .find((g): g is Game => g !== undefined);
   const ogImage = post.coverImage
     ? (post.coverImage.startsWith('http')
         ? post.coverImage
@@ -107,7 +115,9 @@ const BlogPost: React.FC = () => {
       ? `https://arcadedeck.net/${encodeURI(relatedGameForImage.thumbnail)}`
       : 'https://arcadedeck.net/images/blog/blog-default-cover.webp';
   const ogImageAlt = post.coverImageAlt
-    || (relatedGameForImage ? `${relatedGameForImage.title} cover art` : `${post.title} — ArcadeDeck Blog`);
+    || (relatedGameForImage
+      ? `${getLocalizedString(relatedGameForImage, 'title', 'en', null)} cover art`
+      : `${post.title} — ArcadeDeck Blog`);
   const articleSection = post.tags[0] || 'News';
   const dateModified = post.dateModified || post.date;
   const jsonLd = {
@@ -154,7 +164,6 @@ const BlogPost: React.FC = () => {
   return (
     <div className="blog-page">
       <>
-        <title>{`${post.title} | ArcadeDeck Blog`}</title>
         <meta name="description" content={post.excerpt} />
         <meta property="og:type" content="article" />
         <meta property="og:title" content={`${post.title} | ArcadeDeck Blog`} />
@@ -192,14 +201,14 @@ const BlogPost: React.FC = () => {
       <Navbar />
       <main className="container">
         <nav className="breadcrumbs" aria-label="Breadcrumb">
-          <Link to="/">Home</Link>
+          <Link to="/">{t('breadcrumbHome', 'Home')}</Link>
           <span aria-hidden="true">›</span>
-          <Link to="/blog">Blog</Link>
+          <Link to="/blog">{t('navBlog', 'Blog')}</Link>
           <span aria-hidden="true">›</span>
           <span className="breadcrumb-current">{post.title}</span>
         </nav>
         <Link to="/blog" className="blog-back">
-          ← All posts
+          ← {t('blogAllPosts', 'All posts')}
         </Link>
         <article className="blog-post" ref={articleRef}>
           <h1>{post.title}</h1>
@@ -207,7 +216,7 @@ const BlogPost: React.FC = () => {
             <time dateTime={post.date}>{formatDate(post.date)}</time>
             <span>· {post.author}</span>
             <span className="post-reading-time">
-              <Clock size={14} aria-hidden="true" /> {readingMinutes} min read
+              <Clock size={14} aria-hidden="true" /> {readingMinutes} {t('blogMinRead', 'min read')}
             </span>
             {post.tags.map((t) => (
               <Link key={t} to={`/blog/tag/${t}`} className="blog-tag blog-tag-link">
@@ -218,7 +227,7 @@ const BlogPost: React.FC = () => {
           {processed.toc.length >= 3 && (
             <nav className="post-toc" aria-label="Table of contents">
               <p className="post-toc-title">
-                <List size={14} aria-hidden="true" /> In this post
+                <List size={14} aria-hidden="true" /> {t('blogInThisPost', 'In this post')}
               </p>
               <ol>
                 {processed.toc.map((e) => (
@@ -236,32 +245,38 @@ const BlogPost: React.FC = () => {
           {(() => {
             const related = (post.relatedGames || [])
               .map((s) => games.find((g) => g.slug === s))
-              .filter((g): g is GameLight => g !== undefined);
+              .filter((g): g is Game => g !== undefined);
             if (related.length === 0) return null;
             return (
               <section className="post-related" aria-label="Related games">
                 <h2 className="post-related-title">
-                  <Gamepad2 size={18} aria-hidden="true" /> Play the games
+                  <Gamepad2 size={18} aria-hidden="true" /> {t('blogPlayGames', 'Play the games')}
                 </h2>
                 <div className="post-related-grid">
-                  {related.map((g) => (
-                    <Link
-                      key={g.slug}
-                      to={`/play/${g.slug}`}
-                      className="post-related-card"
-                    >
-                      <img
-                        src={`/${g.thumbnail}`}
-                        alt={g.title}
-                        loading="lazy"
-                        decoding="async"
-                      />
-                      <div className="post-related-card-body">
-                        <h3>{g.title}</h3>
-                        <p>{g.description}</p>
-                      </div>
-                    </Link>
-                  ))}
+                  {related.map((g) => {
+                    const title = getLocalizedString(g, 'title', lang, overlay);
+                    const desc = getLocalizedString(g, 'description', lang, overlay);
+                    return (
+                      <Link
+                        key={g.slug}
+                        to={`/play/${g.slug}`}
+                        className="post-related-card"
+                      >
+                        <img
+                          src={`/${g.thumbnail}`}
+                          srcSet={`/${thumb360(g.thumbnail)} 360w, /${g.thumbnail} 640w`}
+                          sizes={SRCSET_SIZES}
+                          alt={title}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                        <div className="post-related-card-body">
+                          <h3>{title}</h3>
+                          <p>{desc}</p>
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
               </section>
             );
@@ -270,19 +285,19 @@ const BlogPost: React.FC = () => {
       </main>
       <footer className="footer">
         <div className="container footer-container">
-          <p>&copy; 2026 ArcadeDeck. All rights reserved.</p>
+          <p>&copy; 2026 ArcadeDeck. {t('footerAllRights', 'All rights reserved.')}</p>
           <div className="footer-links">
-            <Link to="/about" className="footer-link">About Us</Link>
-            <Link to="/privacy" className="footer-link">Privacy Policy</Link>
-            <Link to="/contact" className="footer-link">Contact</Link>
-            <Link to="/blog" className="footer-link">Blog</Link>
+            <Link to="/about" className="footer-link">{t('footerAbout', 'About Us')}</Link>
+            <Link to="/privacy" className="footer-link">{t('footerPrivacy', 'Privacy Policy')}</Link>
+            <Link to="/contact" className="footer-link">{t('footerContact', 'Contact')}</Link>
+            <Link to="/blog" className="footer-link">{t('navBlog', 'Blog')}</Link>
             <a
               href="https://ko-fi.com/developer_benjamink"
               target="_blank"
               rel="noopener noreferrer"
               className="footer-link footer-link-support"
             >
-              Support ♥
+              {t('footerSupport', 'Support')} ♥
             </a>
           </div>
         </div>

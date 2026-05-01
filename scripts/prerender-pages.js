@@ -1,14 +1,40 @@
 /**
- * Post-build script: generates static HTML shells for each game page
- * so that search engine crawlers see rich text content without JS execution.
+ * Post-build script: generates static HTML shells for crawlers.
  *
- * Each /play/{slug}/index.html contains:
- * - Full meta tags (title, description, OG, Twitter, JSON-LD)
- * - All game text (description, controls, tips, lore, features)
- * - A script that boots the SPA for interactive users
+ * Per-locale prerender (full hreflang + translated meta + body):
+ *   - /              + /{lang}/
+ *   - /play/{slug}   + /{lang}/play/{slug}
+ *
+ * English-only prerender (hreflang only points at self):
+ *   - /about, /privacy, /contact, /hall-of-fame, /my-games
+ *   - /blog, /blog/{slug}, /blog/tag/{tag}
  */
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'fs';
+
+const SUPPORTED_LOCALES = readdirSync('src/i18n/locales')
+  .filter(f => f.endsWith('.json') && !f.startsWith('_') && !f.includes('.missing.') && !f.includes('.bak.'))
+  .map(f => f.replace(/\.json$/, ''));
+
+// Stable order: English first, others alpha-sorted.
+SUPPORTED_LOCALES.sort((a, b) => (a === 'en' ? -1 : b === 'en' ? 1 : a.localeCompare(b)));
+
+const BCP47 = {
+  en: 'en_US', de: 'de_DE', es: 'es_ES', 'es-LA': 'es_419', fr: 'fr_FR',
+  ja: 'ja_JP', ko: 'ko_KR', pt: 'pt_BR', ru: 'ru_RU', vi: 'vi_VN', zh: 'zh_CN',
+};
+const HREFLANG = {
+  en: 'en', de: 'de', es: 'es', 'es-LA': 'es-419', fr: 'fr',
+  ja: 'ja', ko: 'ko', pt: 'pt', ru: 'ru', vi: 'vi', zh: 'zh',
+};
+const HTML_LANG = {
+  en: 'en', de: 'de', es: 'es', 'es-LA': 'es-419', fr: 'fr',
+  ja: 'ja', ko: 'ko', pt: 'pt', ru: 'ru', vi: 'vi', zh: 'zh',
+};
+
+const SITE = 'https://arcadedeck.net';
+const prefix = (lang) => (lang === 'en' ? '' : '/' + lang.toLowerCase());
+const fullUrl = (lang, path) => `${SITE}${prefix(lang)}${path}`;
 
 const games = JSON.parse(readFileSync('src/data/games.json', 'utf-8'));
 const posts = JSON.parse(readFileSync('src/data/posts.json', 'utf-8'))
@@ -16,17 +42,71 @@ const posts = JSON.parse(readFileSync('src/data/posts.json', 'utf-8'))
   .sort((a, b) => (a.date < b.date ? 1 : -1));
 const indexHtml = readFileSync('dist/index.html', 'utf-8');
 
-// Extract everything inside <head>...</head> from built index.html
+const overlays = {};
+for (const l of SUPPORTED_LOCALES) {
+  try {
+    overlays[l] = JSON.parse(readFileSync(`src/i18n/locales/${l}.json`, 'utf-8'));
+  } catch {
+    overlays[l] = {};
+  }
+}
+const en = overlays.en || {};
+
+function txt(id, lang) {
+  const o = overlays[lang]?.games?.[id] || {};
+  const f = en.games?.[id] || {};
+  return {
+    title: o.title || f.title || '',
+    description: o.description || f.description || '',
+    fullDescription: o.fullDescription || f.fullDescription || '',
+    controls: o.controls || f.controls || '',
+    tips: o.tips || f.tips || '',
+    lore: o.lore || f.lore || '',
+    features: Array.isArray(o.features) ? o.features : (Array.isArray(f.features) ? f.features : []),
+  };
+}
+
+function ui(key, lang, fallback = '') {
+  return overlays[lang]?.ui?.[key] || en.ui?.[key] || fallback;
+}
+
+function escAttr(s) {
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+
+// hreflang block: list every locale that has a translation entry for `gameId`,
+// or all locales for catalog/static pages (pass gameId=null).
+function hreflangBlock(routePath, gameId = null) {
+  const langs = gameId
+    ? SUPPORTED_LOCALES.filter(l => overlays[l]?.games?.[gameId])
+    : SUPPORTED_LOCALES;
+  const seen = new Set();
+  const lines = [];
+  for (const l of langs) {
+    const url = fullUrl(l, routePath);
+    if (seen.has(url)) continue;
+    seen.add(url);
+    lines.push(`<link rel="alternate" hreflang="${HREFLANG[l] || l}" href="${url}" />`);
+  }
+  // x-default → English
+  lines.push(`<link rel="alternate" hreflang="x-default" href="${fullUrl('en', routePath)}" />`);
+  return lines.join('\n    ');
+}
+
+function ogLocaleAlts(activeLang, scopeLangs = SUPPORTED_LOCALES) {
+  return scopeLangs
+    .filter(l => l !== activeLang)
+    .map(l => `<meta property="og:locale:alternate" content="${BCP47[l] || l}" />`)
+    .join('\n    ');
+}
+
+// Extract head/scripts/CSS from the built index.html so each shell can be
+// self-contained (inline CSS + module preloads + bundled scripts).
 const headMatch = indexHtml.match(/<head>([\s\S]*?)<\/head>/);
 const baseHead = headMatch ? headMatch[1] : '';
-
-// Extract script tags from built index.html body
 const scriptMatches = indexHtml.match(/<script[\s\S]*?<\/script>/g) || [];
 const scriptTags = scriptMatches.join('\n    ');
 
-// Inline CSS: replace render-blocking <link rel="stylesheet"> with <style> tag.
-// Vite's hashed CSS is ~8 KiB; inlining cuts a ~490ms render-blocking request
-// off the LCP critical path. The original link is dropped from every built HTML.
 const cssLinkRegex = /<link[^>]*rel="stylesheet"[^>]*href="([^"]+)"[^>]*>/g;
 const cssHrefs = [...baseHead.matchAll(cssLinkRegex)].map(m => m[1]);
 const inlinedCss = cssHrefs
@@ -39,87 +119,139 @@ const inlinedStyle = inlinedCss ? `<style>${inlinedCss}</style>` : '';
 const modulePreloads = (baseHead.match(/<link[^>]*rel="modulepreload"[^>]*>/g) || []).join('\n    ');
 
 const playableGames = games.filter(g => g.status !== 'IN PRODUCTION');
-
 const postsForGame = (slug) =>
   posts.filter((p) => Array.isArray(p.relatedGames) && p.relatedGames.includes(slug));
 
-for (const game of playableGames) {
-  const slug = game.slug;
-  const dir = `dist/play/${slug}`;
-  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+// Same-genre cross-links for the static game shell. Boosts crawl + internal
+// PageRank without polluting the React tree.
+function sameGenreLinks(game, lang, limit = 3) {
+  const out = [];
+  const seen = new Set([game.id]);
+  for (const g of playableGames) {
+    if (seen.has(g.id)) continue;
+    if (!g.genres.some(x => game.genres.includes(x))) continue;
+    out.push(g);
+    seen.add(g.id);
+    if (out.length >= limit) break;
+  }
+  return out;
+}
 
-  const title = `${game.title} - Play Free on ArcadeDeck`;
-  const desc = `Play ${game.title}: ${game.description} Free online browser game on ArcadeDeck.`;
-  const thumbUrl = `https://arcadedeck.net/${encodeURI(game.thumbnail)}`;
-  const pageUrl = `https://arcadedeck.net/play/${slug}`;
+// =====================================================================
+// PER-LOCALE GAME SHELLS — /play/{slug} + /{lang}/play/{slug}
+// =====================================================================
+for (const lang of SUPPORTED_LOCALES) {
+  for (const game of playableGames) {
+    const slug = game.slug;
+    const routePath = `/play/${slug}`;
+    const dir = `dist${prefix(lang)}/play/${slug}`;
+    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 
-  const jsonLd = JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "VideoGame",
-    "name": game.title,
-    "alternateName": game.titleKo || game.title,
-    "description": game.description,
-    "genre": game.genres,
-    "applicationCategory": "GameApplication",
-    "operatingSystem": "Web Browser",
-    "inLanguage": ["en", "ko"],
-    "image": thumbUrl,
-    "url": pageUrl,
-    "author": { "@type": "Organization", "name": "ArcadeDeck", "url": "https://arcadedeck.net", "sameAs": ["https://www.wikidata.org/wiki/Q139585213"] },
-    "publisher": { "@type": "Organization", "name": "ArcadeDeck", "url": "https://arcadedeck.net", "logo": { "@type": "ImageObject", "url": "https://arcadedeck.net/images/icon-512x512.webp" }, "sameAs": ["https://www.wikidata.org/wiki/Q139585213"] },
-    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/InStock" }
-  });
+    const t = txt(game.id, lang);
+    const tEn = txt(game.id, 'en');
+    const playFreeOn = ui('seoPlayFreeOn', lang, 'Play Free on');
+    const playPrefix = ui('seoPlayPrefix', lang, 'Play');
+    const aboutH2 = ui('seoAboutThisGame', lang, 'About This Game');
+    const howToH2 = ui('seoHowToPlay', lang, 'How to Play');
+    const tipsH2 = ui('seoProTips', lang, 'Pro Tips');
+    const loreH2 = ui('seoWorldLore', lang, 'World Lore');
+    const featH2 = ui('seoKeyFeatures', lang, 'Key Features');
+    const moreH2 = ui('seoMoreLikeThis', lang, 'More Games Like This');
+    const readBlogH2 = ui('seoReadOnBlog', lang, 'Read on the Blog');
+    const genresLabel = ui('seoGenres', lang, 'Genres');
 
-  const breadcrumbLd = JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://arcadedeck.net/" },
-      { "@type": "ListItem", "position": 2, "name": game.genres[0] || "Games", "item": "https://arcadedeck.net/" },
-      { "@type": "ListItem", "position": 3, "name": game.title, "item": pageUrl },
-    ],
-  });
+    const title = `${t.title} - ${playFreeOn} ArcadeDeck`;
+    const desc = `${playPrefix} ${t.title}: ${t.description} ${ui('seoFreeOnlineGame', lang, 'Free online browser game on ArcadeDeck.')}`;
+    const thumbUrl = `${SITE}/${encodeURI(game.thumbnail)}`;
+    const pageUrl = fullUrl(lang, routePath);
+    // If this locale has no translation for the game, the page would just be
+    // an English duplicate at a localized URL — point the canonical at the
+    // English original so search engines consolidate signals there. The shell
+    // still ships so SPA navigation works for users who picked the language.
+    const hasTranslation = lang === 'en' || !!overlays[lang]?.games?.[game.id];
+    const canonical = hasTranslation ? pageUrl : fullUrl('en', routePath);
+    const robotsValue = hasTranslation ? 'index, follow' : 'noindex, follow';
+    const ogAlts = ogLocaleAlts(lang, SUPPORTED_LOCALES.filter(l => overlays[l]?.games?.[game.id]));
 
-  const featuresHtml = (game.features || []).map(f => `<li>${f}</li>`).join('');
+    const jsonLd = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'VideoGame',
+      name: t.title,
+      description: t.description,
+      genre: game.genres,
+      applicationCategory: 'GameApplication',
+      operatingSystem: 'Web Browser',
+      image: thumbUrl,
+      url: pageUrl,
+      inLanguage: HREFLANG[lang] || lang,
+      author: { '@type': 'Organization', name: 'ArcadeDeck', url: SITE, sameAs: ['https://www.wikidata.org/wiki/Q139585213'] },
+      publisher: {
+        '@type': 'Organization', name: 'ArcadeDeck', url: SITE,
+        logo: { '@type': 'ImageObject', url: `${SITE}/images/icon-512x512.webp` },
+        sameAs: ['https://www.wikidata.org/wiki/Q139585213'],
+      },
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD', availability: 'https://schema.org/InStock' },
+    });
 
-  const gameRelatedPosts = postsForGame(slug);
-  const relatedPostsHtml = gameRelatedPosts.length
-    ? `<h2 style="margin-top:32px;font-size:1.3rem;">Read on the Blog</h2><ul style="line-height:1.8;">${gameRelatedPosts
-        .map((p) => `<li><a href="/blog/${p.slug}" style="color:#00d2ff;">${p.title}</a> — ${p.excerpt}</li>`)
-        .join('')}</ul>`
-    : '';
+    const breadcrumbLd = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: ui('breadcrumbHome', lang, 'Home'), item: fullUrl(lang, '/') },
+        { '@type': 'ListItem', position: 2, name: game.genres[0] || 'Games', item: fullUrl(lang, '/') },
+        { '@type': 'ListItem', position: 3, name: t.title, item: pageUrl },
+      ],
+    });
 
-  const html = `<!doctype html>
-<html lang="en">
+    const featuresHtml = t.features.map(f => `<li>${f}</li>`).join('');
+
+    const gameRelatedPosts = postsForGame(slug);
+    const relatedPostsHtml = gameRelatedPosts.length
+      ? `<h2 style="margin-top:32px;font-size:1.3rem;">${readBlogH2}</h2><ul style="line-height:1.8;">${gameRelatedPosts
+          .map((p) => `<li><a href="${SITE}/blog/${p.slug}" style="color:#00d2ff;">${p.title}</a> — ${p.excerpt}</li>`)
+          .join('')}</ul>`
+      : '';
+
+    // Same-genre cross-links: 3 anchors at the bottom of the page. Using
+    // absolute URLs in the per-locale prefix so crawlers reach the right
+    // language shell directly.
+    const crossLinks = sameGenreLinks(game, lang);
+    const crossLinksHtml = crossLinks.length
+      ? `<h2 style="margin-top:32px;font-size:1.3rem;">${moreH2}</h2><ul style="line-height:1.8;">${crossLinks
+          .map((g) => {
+            const gt = txt(g.id, lang);
+            return `<li><a href="${fullUrl(lang, '/play/' + g.slug)}" style="color:#00d2ff;">${gt.title}</a> — ${gt.description}</li>`;
+          }).join('')}</ul>`
+      : '';
+
+    const html = `<!doctype html>
+<html lang="${HTML_LANG[lang] || lang}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>${title}</title>
-    <meta name="description" content="${desc}" />
-    <meta name="keywords" content="${game.title}, ${game.genres.join(', ')}, free online game, browser game, arcadedeck" />
-    <meta name="robots" content="index, follow" />
+    <title>${escAttr(title)}</title>
+    <meta name="description" content="${escAttr(desc)}" />
+    <meta name="keywords" content="${escAttr(t.title)}, ${escAttr(game.genres.join(', '))}, free online game, browser game, arcadedeck" />
+    <meta name="robots" content="${robotsValue}" />
     <meta name="theme-color" content="#050507" />
     <link rel="icon" type="image/webp" href="/images/favicon.webp" />
     <link rel="apple-touch-icon" href="/images/icon-192x192.webp" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <link rel="canonical" href="${pageUrl}" />
-    ${game.titleKo ? `<link rel="alternate" hreflang="en" href="${pageUrl}" />
-    <link rel="alternate" hreflang="ko" href="${pageUrl}" />
-    <link rel="alternate" hreflang="x-default" href="${pageUrl}" />` : `<link rel="alternate" hreflang="en" href="${pageUrl}" />
-    <link rel="alternate" hreflang="x-default" href="${pageUrl}" />`}
-    <link rel="alternate" type="application/rss+xml" title="ArcadeDeck Blog" href="https://arcadedeck.net/rss.xml" />
+    <link rel="canonical" href="${canonical}" />
+    ${hreflangBlock(routePath, game.id)}
+    <link rel="alternate" type="application/rss+xml" title="ArcadeDeck Blog" href="${SITE}/rss.xml" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="ArcadeDeck" />
-    <meta property="og:locale" content="en_US" />
-    <meta property="og:locale:alternate" content="ko_KR" />
-    <meta property="og:title" content="${game.title} - ArcadeDeck" />
-    <meta property="og:description" content="${game.description}" />
+    <meta property="og:locale" content="${BCP47[lang] || lang}" />
+    ${ogAlts}
+    <meta property="og:title" content="${escAttr(t.title)} - ArcadeDeck" />
+    <meta property="og:description" content="${escAttr(t.description)}" />
     <meta property="og:image" content="${thumbUrl}" />
     <meta property="og:url" content="${pageUrl}" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="${game.title} - ArcadeDeck" />
-    <meta name="twitter:description" content="${game.description}" />
+    <meta name="twitter:title" content="${escAttr(t.title)} - ArcadeDeck" />
+    <meta name="twitter:description" content="${escAttr(t.description)}" />
     <meta name="twitter:image" content="${thumbUrl}" />
     <script type="application/ld+json">${jsonLd}</script>
     <script type="application/ld+json">${breadcrumbLd}</script>
@@ -136,49 +268,160 @@ for (const game of playableGames) {
       -->
       <main style="max-width:900px;margin:0 auto;padding:40px 20px;font-family:system-ui,sans-serif;color:#fff;background:#050507;min-height:100vh;">
         <nav aria-label="Breadcrumb" style="font-size:0.85rem;color:#9aa;margin-bottom:16px;">
-          <a href="/" style="color:#00d2ff;">Home</a> &rsaquo; <span>${game.title}</span>
+          <a href="${fullUrl(lang, '/')}" style="color:#00d2ff;">${ui('breadcrumbHome', lang, 'Home')}</a> &rsaquo; <span>${t.title}</span>
         </nav>
-        <h1 style="font-size:2rem;margin-bottom:8px;">${game.title}</h1>
-        ${game.titleKo ? `<p style="color:#9aa;margin:0 0 20px;font-size:1.1rem;">${game.titleKo}</p>` : ''}
-        <p style="font-size:1.1rem;line-height:1.6;">${game.description}</p>
-        ${game.descriptionKo ? `<p style="color:#bbb;line-height:1.6;">${game.descriptionKo}</p>` : ''}
+        <h1 style="font-size:2rem;margin-bottom:8px;">${t.title}</h1>
+        <p style="font-size:1.1rem;line-height:1.6;">${t.description}</p>
 
-        <h2 style="margin-top:32px;font-size:1.3rem;">About This Game</h2>
-        <div style="line-height:1.7;">${(game.fullDescription || '').replace(/\n/g, '<br>')}</div>
-        ${game.fullDescriptionKo ? `<div style="margin-top:12px;color:#bbb;line-height:1.7;">${game.fullDescriptionKo.replace(/\n/g, '<br>')}</div>` : ''}
+        <h2 style="margin-top:32px;font-size:1.3rem;">${aboutH2}</h2>
+        <div style="line-height:1.7;">${(t.fullDescription || '').replace(/\n/g, '<br>')}</div>
 
-        ${game.controls ? `<h2 style="margin-top:32px;font-size:1.3rem;">How to Play</h2><p style="line-height:1.6;">${game.controls}</p>` : ''}
-        ${game.controlsKo ? `<p style="color:#bbb;line-height:1.6;">${game.controlsKo}</p>` : ''}
+        ${t.controls ? `<h2 style="margin-top:32px;font-size:1.3rem;">${howToH2}</h2><p style="line-height:1.6;">${t.controls}</p>` : ''}
 
-        ${game.tips ? `<h2 style="margin-top:32px;font-size:1.3rem;">Pro Tips</h2><p style="line-height:1.6;">${game.tips}</p>` : ''}
-        ${game.tipsKo ? `<p style="color:#bbb;line-height:1.6;">${game.tipsKo}</p>` : ''}
+        ${t.tips ? `<h2 style="margin-top:32px;font-size:1.3rem;">${tipsH2}</h2><p style="line-height:1.6;">${t.tips}</p>` : ''}
 
-        ${game.lore ? `<h2 style="margin-top:32px;font-size:1.3rem;">World Lore</h2><div style="line-height:1.7;font-style:italic;">${game.lore.replace(/\n/g, '<br>')}</div>` : ''}
-        ${game.loreKo ? `<div style="margin-top:12px;color:#bbb;line-height:1.7;font-style:italic;">${game.loreKo.replace(/\n/g, '<br>')}</div>` : ''}
+        ${t.lore ? `<h2 style="margin-top:32px;font-size:1.3rem;">${loreH2}</h2><div style="line-height:1.7;font-style:italic;">${t.lore.replace(/\n/g, '<br>')}</div>` : ''}
 
-        ${featuresHtml ? `<h2 style="margin-top:32px;font-size:1.3rem;">Key Features</h2><ul style="line-height:1.8;">${featuresHtml}</ul>` : ''}
+        ${featuresHtml ? `<h2 style="margin-top:32px;font-size:1.3rem;">${featH2}</h2><ul style="line-height:1.8;">${featuresHtml}</ul>` : ''}
+
+        ${crossLinksHtml}
 
         ${relatedPostsHtml}
 
-        <p style="margin-top:32px;color:#9aa;">Genres: ${game.genres.join(', ')}</p>
-        <p style="color:#9aa;">Loading interactive game… If it doesn't load, <a href="${pageUrl}" style="color:#00d2ff;">visit ${pageUrl}</a>.</p>
+        <p style="margin-top:32px;color:#9aa;">${genresLabel}: ${game.genres.join(', ')}</p>
+        <p style="color:#9aa;">${ui('seoLoadingGame', lang, 'Loading interactive game…')} <a href="${pageUrl}" style="color:#00d2ff;">${pageUrl}</a></p>
       </main>
     </div>
     ${scriptTags}
   </body>
 </html>`;
 
-  writeFileSync(`${dir}/index.html`, html);
+    writeFileSync(`${dir}/index.html`, html);
+  }
 }
 
-// Rewrite the home noscript with the current playable games list so
-// non-JS crawlers always see an up-to-date catalogue.
-const noscriptItems = playableGames
-  .map(g => `          <li><a href="/play/${g.slug}">${g.title}</a> — ${g.description}</li>`)
-  .join('\n');
+// =====================================================================
+// PER-LOCALE GENRE LANDING PAGES — /genre/{slug} + /{lang}/genre/{slug}
+// =====================================================================
+function genreSlug(name) {
+  return String(name).toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+}
 
-// Inline CSS in the home shell too. Each route shell starts from raw
-// indexHtml; we run the css-replace once per shell.
+const allGenres = (() => {
+  const set = new Set();
+  for (const g of playableGames) {
+    for (const genre of g.genres) set.add(genre);
+  }
+  return Array.from(set).sort();
+})();
+
+for (const genre of allGenres) {
+  const slug = genreSlug(genre);
+  const inGenre = playableGames.filter(g => g.genres.includes(genre));
+  const routePath = `/genre/${slug}`;
+
+  for (const lang of SUPPORTED_LOCALES) {
+    const dir = `dist${prefix(lang)}/genre/${slug}`;
+    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+
+    const pageUrl = fullUrl(lang, routePath);
+    const titleTemplate = ui('seoGenrePageTitle', lang, '{genre} Games | Play Free on ArcadeDeck');
+    const descTemplate = ui('seoGenrePageDescription', lang, 'Play {count} {genre} games free on ArcadeDeck. Curated browser titles with global leaderboards. No downloads, no sign-up.');
+    const title = titleTemplate.replace('{genre}', genre).replace('{count}', String(inGenre.length));
+    const desc = descTemplate.replace('{genre}', genre).replace('{count}', String(inGenre.length));
+    const heading = ui('genrePageHeading', lang, '{genre} Games').replace('{genre}', genre);
+    const subheading = ui('genrePageSubheading', lang, '{count} games in this genre on ArcadeDeck.').replace('{count}', String(inGenre.length));
+    const listLabel = ui('genreGameList', lang, 'Games in this genre');
+
+    const itemsHtml = inGenre.map((g) => {
+      const gt = txt(g.id, lang);
+      const href = fullUrl(lang, `/play/${g.slug}`);
+      return `          <li><a href="${href}" style="color:#00d2ff;">${gt.title || ''}</a> — ${gt.description || ''}</li>`;
+    }).join('\n');
+
+    const collectionLd = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: title,
+      url: pageUrl,
+      description: desc,
+      inLanguage: HREFLANG[lang] || lang,
+      mainEntity: {
+        '@type': 'ItemList',
+        itemListElement: inGenre.map((g, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          url: fullUrl(lang, `/play/${g.slug}`),
+          name: txt(g.id, lang).title || '',
+        })),
+      },
+    });
+    const breadcrumbLd = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: ui('breadcrumbHome', lang, 'Home'), item: fullUrl(lang, '/') },
+        { '@type': 'ListItem', position: 2, name: heading, item: pageUrl },
+      ],
+    });
+
+    const html = `<!doctype html>
+<html lang="${HTML_LANG[lang] || lang}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>${escAttr(title)}</title>
+    <meta name="description" content="${escAttr(desc)}" />
+    <meta name="keywords" content="${escAttr(genre)}, free online ${escAttr(genre.toLowerCase())} games, browser games, arcadedeck" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#050507" />
+    <link rel="icon" type="image/webp" href="/images/favicon.webp" />
+    <link rel="apple-touch-icon" href="/images/icon-192x192.webp" />
+    <link rel="canonical" href="${pageUrl}" />
+    ${hreflangBlock(routePath, null)}
+    <link rel="alternate" type="application/rss+xml" title="ArcadeDeck Blog" href="${SITE}/rss.xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ArcadeDeck" />
+    <meta property="og:locale" content="${BCP47[lang] || lang}" />
+    ${ogLocaleAlts(lang)}
+    <meta property="og:title" content="${escAttr(title)}" />
+    <meta property="og:description" content="${escAttr(desc)}" />
+    <meta property="og:image" content="${SITE}/images/arcadedeck-banner.webp" />
+    <meta property="og:url" content="${pageUrl}" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${escAttr(title)}" />
+    <meta name="twitter:description" content="${escAttr(desc)}" />
+    <meta name="twitter:image" content="${SITE}/images/arcadedeck-banner.webp" />
+    <script type="application/ld+json">${collectionLd}</script>
+    <script type="application/ld+json">${breadcrumbLd}</script>
+    ${inlinedStyle}
+    ${modulePreloads}
+  </head>
+  <body>
+    <div id="root">
+      <main style="max-width:900px;margin:0 auto;padding:40px 20px;font-family:system-ui,sans-serif;color:#fff;background:#050507;min-height:100vh;">
+        <nav aria-label="Breadcrumb" style="font-size:0.85rem;color:#9aa;margin-bottom:16px;">
+          <a href="${fullUrl(lang, '/')}" style="color:#00d2ff;">${ui('breadcrumbHome', lang, 'Home')}</a> &rsaquo; <span>${heading}</span>
+        </nav>
+        <h1 style="font-size:2rem;margin-bottom:8px;">${heading}</h1>
+        <p style="font-size:1rem;line-height:1.6;color:#9aa;">${subheading}</p>
+        <h2 style="margin-top:32px;font-size:1.3rem;">${listLabel}</h2>
+        <ul style="line-height:1.8;">
+${itemsHtml}
+        </ul>
+      </main>
+    </div>
+    ${scriptTags}
+  </body>
+</html>`;
+    writeFileSync(`${dir}/index.html`, html);
+  }
+}
+
+// =====================================================================
+// PER-LOCALE HOME SHELLS — / + /{lang}/
+// =====================================================================
+const NOSCRIPT_BLOCK_REGEX = /<noscript>[\s\S]*?<\/noscript>/;
 const inlineCssOnce = (html) => {
   let first = true;
   return html.replace(cssLinkRegex, () => {
@@ -188,27 +431,23 @@ const inlineCssOnce = (html) => {
   });
 };
 
-const homeJsonLd = [
+const homeJsonLd = (lang) => [
   JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'ArcadeDeck',
-    alternateName: 'ArcadeDeck — Free Browser Games',
-    url: 'https://arcadedeck.net/',
-    inLanguage: ['en', 'ko'],
+    alternateName: ui('siteAlternateName', lang, 'ArcadeDeck — Free Browser Games'),
+    url: `${SITE}/`,
+    inLanguage: SUPPORTED_LOCALES.map(l => HREFLANG[l] || l),
   }),
   JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'ArcadeDeck',
     alternateName: '아케이드덱',
-    url: 'https://arcadedeck.net/',
-    logo: 'https://arcadedeck.net/images/icon-512x512.webp',
-    identifier: {
-      '@type': 'PropertyValue',
-      propertyID: 'wikidata',
-      value: 'Q139585213',
-    },
+    url: `${SITE}/`,
+    logo: `${SITE}/images/icon-512x512.webp`,
+    identifier: { '@type': 'PropertyValue', propertyID: 'wikidata', value: 'Q139585213' },
     sameAs: [
       'https://www.wikidata.org/wiki/Q139585213',
       'https://arcadedeck.itch.io',
@@ -225,14 +464,15 @@ const homeJsonLd = [
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     name: 'ArcadeDeck Games Catalog',
-    url: 'https://arcadedeck.net/',
+    url: fullUrl(lang, '/'),
+    inLanguage: HREFLANG[lang] || lang,
     mainEntity: {
       '@type': 'ItemList',
       itemListElement: playableGames.slice(0, 20).map((g, i) => ({
         '@type': 'ListItem',
         position: i + 1,
-        url: `https://arcadedeck.net/play/${g.slug}`,
-        name: g.title,
+        url: fullUrl(lang, `/play/${g.slug}`),
+        name: txt(g.id, lang).title || '',
       })),
     },
   }),
@@ -240,28 +480,85 @@ const homeJsonLd = [
   .map((j) => `<script type="application/ld+json">${j}</script>`)
   .join('\n    ');
 
-const homeHtml = inlineCssOnce(
-  indexHtml
-    .replace(
-      /(<h2>Our Games<\/h2>\s*<ul>)[\s\S]*?(<\/ul>)/,
-      `$1\n${noscriptItems}\n        $2`,
-    )
-    .replace('</head>', `${homeJsonLd}\n  </head>`),
-);
+for (const lang of SUPPORTED_LOCALES) {
+  const dir = lang === 'en' ? 'dist' : `dist${prefix(lang)}`;
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 
-writeFileSync('dist/index.html', homeHtml);
+  const homeUrl = fullUrl(lang, '/');
+  const homeTitle = ui('seoHomeTitle', lang, 'ArcadeDeck | The Ultimate Free Browser Games Platform');
+  const homeDesc = ui('seoHomeDescription', lang, 'Play the best free online browser games on ArcadeDeck. High-quality Action, RPG, Strategy, and Idle games with global leaderboards. No downloads, just pure fun!');
+  const heroTitle = ui('homeHeroTitle', lang, 'Welcome to');
+  const heroSub = ui('homeHeroSubtitle', lang, 'Dozens of handcrafted browser games. Pick one, jump in, and see how far you can go.');
 
-// Per-route shells with unique noscript bodies. Each shell mirrors the
-// page's user-visible copy so crawlers (incl. AdSense reviewer) see
-// route-specific content rather than the home games list.
-const NOSCRIPT_BLOCK_REGEX = /<noscript>[\s\S]*?<\/noscript>/;
+  const noscriptItems = playableGames
+    .map(g => {
+      const tg = txt(g.id, lang);
+      return `          <li><a href="${fullUrl(lang, '/play/' + g.slug)}">${tg.title || ''}</a> — ${tg.description || ''}</li>`;
+    })
+    .join('\n');
 
+  const noscriptBody = `
+      <div style="background:#171424;color:#eaeaf0;font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;">
+        <h1>${heroTitle} ArcadeDeck</h1>
+        <p>${homeDesc}</p>
+        <h2>${ui('seoOurGames', lang, 'Our Games')}</h2>
+        <ul>
+${noscriptItems}
+        </ul>
+        <p>${ui('seoEnableJs', lang, 'Please enable JavaScript to play games on ArcadeDeck.')}</p>
+      </div>`;
+
+  let shell = inlineCssOnce(indexHtml);
+
+  // Set <html lang> for the shell.
+  shell = shell.replace(/<html lang="[^"]*">/, `<html lang="${HTML_LANG[lang] || lang}">`);
+
+  // Title + description
+  shell = shell.replace(/<title>[\s\S]*?<\/title>/, `<title>${escAttr(homeTitle)}</title>`);
+  shell = shell.replace(/(<meta name="description" content=")[^"]*(")/, `$1${escAttr(homeDesc)}$2`);
+
+  // Canonical + hreflang
+  const canonicalBlock = `<link rel="canonical" href="${homeUrl}" />\n    ${hreflangBlock('/', null)}`;
+  shell = shell.replace(/<link rel="canonical" href="[^"]*" \/>/, canonicalBlock);
+
+  // og + twitter
+  shell = shell.replace(/(<meta property="og:url" content=")[^"]*(")/, `$1${homeUrl}$2`);
+  shell = shell.replace(/(<meta property="og:title" content=")[^"]*(")/, `$1${escAttr(homeTitle)}$2`);
+  shell = shell.replace(/(<meta property="og:description" content=")[^"]*(")/, `$1${escAttr(homeDesc)}$2`);
+  shell = shell.replace(/(<meta property="og:locale" content=")[^"]*(")/, `$1${BCP47[lang] || lang}$2`);
+  // Drop existing og:locale:alternate(s) and inject the full set.
+  shell = shell.replace(/\s*<meta property="og:locale:alternate" content="[^"]*" \/>/g, '');
+  shell = shell.replace(/(<meta property="og:locale" content="[^"]*" \/>)/, `$1\n    ${ogLocaleAlts(lang)}`);
+  shell = shell.replace(/(<meta property="twitter:url" content=")[^"]*(")/, `$1${homeUrl}$2`);
+  shell = shell.replace(/(<meta property="twitter:title" content=")[^"]*(")/, `$1${escAttr(homeTitle)}$2`);
+  shell = shell.replace(/(<meta property="twitter:description" content=")[^"]*(")/, `$1${escAttr(homeDesc)}$2`);
+
+  // Replace LCP shell hero text with translated version.
+  // Includes placeholder for the gamer-id spotlight so the static-shell hero
+  // matches the post-hydration React tree dimensions — prevents Lighthouse
+  // from re-detecting a larger LCP candidate when React mounts.
+  const nickLabel = ui('homeNicknameLabel', lang, 'Game Nickname');
+  shell = shell.replace(
+    /<header class="hero">[\s\S]*?<\/header>/,
+    `<header class="hero"><div class="container hero-content"><h1>${heroTitle} <span data-text="ArcadeDeck">ArcadeDeck</span></h1><p>${heroSub}</p><div class="hero-gamer-spotlight"><span class="neon-arrow neon-arrow-left" aria-hidden="true">&#9654;</span><div class="hero-gamer-display"><div class="hero-gamer-row"><span class="hero-gamer-label">${nickLabel}</span></div><div class="hero-gamer-row"><strong class="hero-gamer-name">&nbsp;</strong></div></div><span class="neon-arrow neon-arrow-right" aria-hidden="true">&#9664;</span></div></div></header>`,
+  );
+
+  // Replace noscript body.
+  shell = shell.replace(NOSCRIPT_BLOCK_REGEX, `<noscript>${noscriptBody}\n    </noscript>`);
+
+  // Inject home JSON-LD before </head>.
+  shell = shell.replace('</head>', `${homeJsonLd(lang)}\n  </head>`);
+
+  writeFileSync(`${dir}/index.html`, shell);
+}
+
+// =====================================================================
+// ENGLISH-ONLY STATIC ROUTES — about / privacy / contact / hall-of-fame /
+// my-games / blog (list).
+// =====================================================================
 const formatPostDate = (iso) =>
   new Date(iso + 'T00:00:00Z').toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'UTC',
+    year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC',
   });
 
 const blogListNoscript = `
@@ -271,10 +568,7 @@ const blogListNoscript = `
         <h2>Latest Posts</h2>
         <ul>
 ${posts
-  .map(
-    (p) =>
-      `          <li><a href="/blog/${p.slug}">${p.title}</a> — <em>${formatPostDate(p.date)}</em>. ${p.excerpt}</li>`,
-  )
+  .map((p) => `          <li><a href="/blog/${p.slug}">${p.title}</a> — <em>${formatPostDate(p.date)}</em>. ${p.excerpt}</li>`)
   .join('\n')}
         </ul>
         <p><a href="/">Browse all games</a> · <a href="/hall-of-fame">Hall of Fame</a> · <a href="/about">About ArcadeDeck</a></p>
@@ -285,7 +579,7 @@ const breadcrumbLdFor = (label, url) =>
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://arcadedeck.net/' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE}/` },
       { '@type': 'ListItem', position: 2, name: label, item: url },
     ],
   });
@@ -294,13 +588,13 @@ const blogItemListLd = JSON.stringify({
   '@context': 'https://schema.org',
   '@type': 'Blog',
   name: 'ArcadeDeck Blog',
-  url: 'https://arcadedeck.net/blog',
-  description:
-    'Patch notes, game design deep-dives, strategy guides, and monthly Hall of Fame recaps from the ArcadeDeck team.',
+  url: `${SITE}/blog`,
+  description: 'Patch notes, game design deep-dives, strategy guides, and monthly Hall of Fame recaps from the ArcadeDeck team.',
+  inLanguage: 'en',
   blogPost: posts.map((p) => ({
     '@type': 'BlogPosting',
     headline: p.title,
-    url: `https://arcadedeck.net/blog/${p.slug}`,
+    url: `${SITE}/blog/${p.slug}`,
     datePublished: p.date,
     description: p.excerpt,
   })),
@@ -310,15 +604,15 @@ const routeShells = {
   blog: {
     title: 'Blog | ArcadeDeck Devlog & Game Updates',
     description: 'The ArcadeDeck devlog: patch notes, game design deep-dives, strategy guides, and monthly Hall of Fame recaps.',
-    canonical: 'https://arcadedeck.net/blog',
+    canonical: `${SITE}/blog`,
     noscript: blogListNoscript,
-    extraLd: [blogItemListLd, breadcrumbLdFor('Blog', 'https://arcadedeck.net/blog')],
+    extraLd: [blogItemListLd, breadcrumbLdFor('Blog', `${SITE}/blog`)],
   },
   'hall-of-fame': {
     title: 'Hall of Fame | ArcadeDeck Legends',
     description: 'Witness the legends of ArcadeDeck. Check the top players and historical records of our most competitive browser games.',
-    canonical: 'https://arcadedeck.net/hall-of-fame',
-    extraLd: [breadcrumbLdFor('Hall of Fame', 'https://arcadedeck.net/hall-of-fame')],
+    canonical: `${SITE}/hall-of-fame`,
+    extraLd: [breadcrumbLdFor('Hall of Fame', `${SITE}/hall-of-fame`)],
     noscript: `
       <div style="background:#171424;color:#eaeaf0;font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;">
         <h1>Hall of Fame — ArcadeDeck Legends</h1>
@@ -340,8 +634,8 @@ const routeShells = {
   'my-games': {
     title: 'My Games | ArcadeDeck',
     description: 'Your personal ArcadeDeck library. Recently played games, liked titles, and your active Gamer ID — all synced to your browser.',
-    canonical: 'https://arcadedeck.net/my-games',
-    extraLd: [breadcrumbLdFor('My Games', 'https://arcadedeck.net/my-games')],
+    canonical: `${SITE}/my-games`,
+    extraLd: [breadcrumbLdFor('My Games', `${SITE}/my-games`)],
     noscript: `
       <div style="background:#171424;color:#eaeaf0;font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;">
         <h1>My Games — Your ArcadeDeck Library</h1>
@@ -360,8 +654,8 @@ const routeShells = {
   about: {
     title: 'About | ArcadeDeck',
     description: 'About ArcadeDeck — a curated home for original, free-to-play browser games with global leaderboards and zero sign-up friction.',
-    canonical: 'https://arcadedeck.net/about',
-    extraLd: [breadcrumbLdFor('About', 'https://arcadedeck.net/about')],
+    canonical: `${SITE}/about`,
+    extraLd: [breadcrumbLdFor('About', `${SITE}/about`)],
     noscript: `
       <div style="background:#171424;color:#eaeaf0;font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;">
         <h1>About ArcadeDeck</h1>
@@ -387,8 +681,8 @@ const routeShells = {
   privacy: {
     title: 'Privacy Policy | ArcadeDeck',
     description: 'Read the ArcadeDeck Privacy Policy: data we collect, cookies, Google AdSense, Google Analytics, Firebase, GDPR/CCPA rights, and contact details.',
-    canonical: 'https://arcadedeck.net/privacy',
-    extraLd: [breadcrumbLdFor('Privacy', 'https://arcadedeck.net/privacy')],
+    canonical: `${SITE}/privacy`,
+    extraLd: [breadcrumbLdFor('Privacy', `${SITE}/privacy`)],
     noscript: `
       <div style="background:#171424;color:#eaeaf0;font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;">
         <h1>ArcadeDeck Privacy Policy</h1>
@@ -410,8 +704,8 @@ const routeShells = {
   contact: {
     title: 'Contact | ArcadeDeck',
     description: 'Contact ArcadeDeck — email help@arcadedeck.net for support, bug reports, partnership inquiries, or game submissions.',
-    canonical: 'https://arcadedeck.net/contact',
-    extraLd: [breadcrumbLdFor('Contact', 'https://arcadedeck.net/contact')],
+    canonical: `${SITE}/contact`,
+    extraLd: [breadcrumbLdFor('Contact', `${SITE}/contact`)],
     noscript: `
       <div style="background:#171424;color:#eaeaf0;font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;">
         <h1>Contact ArcadeDeck</h1>
@@ -430,73 +724,43 @@ const routeShells = {
 };
 
 const replaceMeta = (html, name, value) =>
-  html.replace(
-    new RegExp(`(<meta name="${name}" content=")[^"]*(")`),
-    `$1${value}$2`
-  );
-const replaceTitle = (html, value) =>
-  html.replace(/<title>[\s\S]*?<\/title>/, `<title>${value}</title>`);
+  html.replace(new RegExp(`(<meta name="${name}" content=")[^"]*(")`), `$1${value}$2`);
+const replaceTitle = (html, value) => html.replace(/<title>[\s\S]*?<\/title>/, `<title>${value}</title>`);
 const replaceCanonical = (html, value) =>
-  html.replace(
-    /(<link rel="canonical" href=")[^"]*(")/,
-    `$1${value}$2`
-  );
-const injectHreflang = (html, value) => {
+  html.replace(/(<link rel="canonical" href=")[^"]*(")/, `$1${value}$2`);
+const injectHreflangSelf = (html, value) => {
   const block = `<link rel="canonical" href="${value}" />\n    <link rel="alternate" hreflang="en" href="${value}" />\n    <link rel="alternate" hreflang="x-default" href="${value}" />`;
-  return html.replace(
-    /<link rel="canonical" href="[^"]*" \/>/,
-    block,
-  );
+  return html.replace(/<link rel="canonical" href="[^"]*" \/>/, block);
 };
 const replaceOgUrl = (html, value) =>
-  html.replace(
-    /(<meta property="og:url" content=")[^"]*(")/,
-    `$1${value}$2`
-  );
+  html.replace(/(<meta property="og:url" content=")[^"]*(")/, `$1${value}$2`);
 const replaceOgTitle = (html, value) =>
-  html.replace(
-    /(<meta property="og:title" content=")[^"]*(")/,
-    `$1${value}$2`
-  );
+  html.replace(/(<meta property="og:title" content=")[^"]*(")/, `$1${value}$2`);
 const replaceOgDesc = (html, value) =>
-  html.replace(
-    /(<meta property="og:description" content=")[^"]*(")/,
-    `$1${value}$2`
-  );
-
+  html.replace(/(<meta property="og:description" content=")[^"]*(")/, `$1${value}$2`);
 const overrideTwitter = (shell, url, title, description) => {
   const esc = (s) => String(s).replace(/"/g, '&quot;');
   return shell
-    .replace(
-      /(<meta (?:name|property)="twitter:url" content=")[^"]*(")/,
-      `$1${url}$2`,
-    )
-    .replace(
-      /(<meta (?:name|property)="twitter:title" content=")[^"]*(")/,
-      `$1${esc(title)}$2`,
-    )
-    .replace(
-      /(<meta (?:name|property)="twitter:description" content=")[^"]*(")/,
-      `$1${esc(description)}$2`,
-    );
+    .replace(/(<meta (?:name|property)="twitter:url" content=")[^"]*(")/, `$1${url}$2`)
+    .replace(/(<meta (?:name|property)="twitter:title" content=")[^"]*(")/, `$1${esc(title)}$2`)
+    .replace(/(<meta (?:name|property)="twitter:description" content=")[^"]*(")/, `$1${esc(description)}$2`);
 };
 
 for (const [route, cfg] of Object.entries(routeShells)) {
   const dir = `dist/${route}`;
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 
-  let shell = inlineCssOnce(indexHtml).replace(
-    NOSCRIPT_BLOCK_REGEX,
-    `<noscript>${cfg.noscript}\n    </noscript>`
-  );
+  let shell = inlineCssOnce(indexHtml).replace(NOSCRIPT_BLOCK_REGEX, `<noscript>${cfg.noscript}\n    </noscript>`);
   shell = replaceTitle(shell, cfg.title);
   shell = replaceMeta(shell, 'description', cfg.description);
   shell = replaceCanonical(shell, cfg.canonical);
-  shell = injectHreflang(shell, cfg.canonical);
+  shell = injectHreflangSelf(shell, cfg.canonical);
   shell = replaceOgUrl(shell, cfg.canonical);
   shell = replaceOgTitle(shell, cfg.title);
   shell = replaceOgDesc(shell, cfg.description);
   shell = overrideTwitter(shell, cfg.canonical, cfg.title, cfg.description);
+  // Drop stale og:locale:alternate from the root template — these pages are English-only.
+  shell = shell.replace(/\s*<meta property="og:locale:alternate" content="[^"]*" \/>/g, '');
 
   if (Array.isArray(cfg.extraLd) && cfg.extraLd.length) {
     const extraLdTags = cfg.extraLd
@@ -508,15 +772,16 @@ for (const [route, cfg] of Object.entries(routeShells)) {
   writeFileSync(`${dir}/index.html`, shell);
 }
 
-// Per-blog-post static shells with full post HTML in noscript so crawlers
-// (search engines, AdSense reviewer) see the article body without JS.
-const DEFAULT_OG_IMAGE = 'https://arcadedeck.net/images/blog/blog-default-cover.webp';
+// =====================================================================
+// BLOG POSTS — English-only.
+// =====================================================================
+const DEFAULT_OG_IMAGE = `${SITE}/images/blog/blog-default-cover.webp`;
 
 const absoluteImageUrl = (raw) => {
   if (!raw) return null;
   if (/^https?:\/\//i.test(raw)) return raw;
   const trimmed = raw.replace(/^\//, '');
-  return `https://arcadedeck.net/${encodeURI(trimmed)}`;
+  return `${SITE}/${encodeURI(trimmed)}`;
 };
 
 const wordCountOf = (html) =>
@@ -531,7 +796,7 @@ for (const post of posts) {
   const dir = `dist/blog/${post.slug}`;
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 
-  const url = `https://arcadedeck.net/blog/${post.slug}`;
+  const url = `${SITE}/blog/${post.slug}`;
   const title = `${post.title} | ArcadeDeck Blog`;
   const tagsHtml = post.tags
     .map((t) => `<a href="/blog/tag/${t}" style="color:#00d2ff;text-decoration:none;">#${t}</a>`)
@@ -545,16 +810,18 @@ for (const post of posts) {
         <h2 style="margin:0 0 16px;font-size:1.05rem;text-transform:uppercase;letter-spacing:0.06em;color:#fff;">Play the games</h2>
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;">
 ${relatedGames
-  .map(
-    (g) => `          <a href="/play/${g.slug}" style="display:flex;flex-direction:column;background:rgba(255,255,255,0.04);border:1px solid #2a2740;border-radius:12px;overflow:hidden;text-decoration:none;color:inherit;">
-            <img src="/${encodeURI(g.thumbnail)}" alt="${g.title} cover" loading="lazy" decoding="async" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block;" />
+  .map((g) => {
+    const gt = txt(g.id, 'en');
+    const thumb360Path = g.thumbnail.replace(/\.webp$/i, '-360.webp');
+    return `          <a href="/play/${g.slug}" style="display:flex;flex-direction:column;background:rgba(255,255,255,0.04);border:1px solid #2a2740;border-radius:12px;overflow:hidden;text-decoration:none;color:inherit;">
+            <img src="/${encodeURI(g.thumbnail)}" srcset="/${encodeURI(thumb360Path)} 360w, /${encodeURI(g.thumbnail)} 640w" sizes="(min-width: 769px) 220px, 100vw" alt="${gt.title || ''} cover" loading="lazy" decoding="async" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block;" />
             <div style="padding:12px 14px;">
-              <h3 style="font-size:0.98rem;margin:0 0 4px;color:#fff;">${g.title}</h3>
-              <p style="font-size:0.82rem;margin:0;color:#9aa;line-height:1.45;">${g.description}</p>
+              <h3 style="font-size:0.98rem;margin:0 0 4px;color:#fff;">${gt.title || ''}</h3>
+              <p style="font-size:0.82rem;margin:0;color:#9aa;line-height:1.45;">${gt.description || ''}</p>
               <p style="margin:8px 0 0;"><strong style="color:#00d2ff;">▶ Play free →</strong></p>
             </div>
-          </a>`,
-  )
+          </a>`;
+  })
   .join('\n')}
         </div>
       </section>`
@@ -562,12 +829,10 @@ ${relatedGames
 
   const postImage =
     absoluteImageUrl(post.coverImage) ||
-    (relatedGames.length
-      ? `https://arcadedeck.net/${encodeURI(relatedGames[0].thumbnail)}`
-      : DEFAULT_OG_IMAGE);
+    (relatedGames.length ? `${SITE}/${encodeURI(relatedGames[0].thumbnail)}` : DEFAULT_OG_IMAGE);
   const postImageAlt =
     post.coverImageAlt ||
-    (relatedGames.length ? `${relatedGames[0].title} cover art` : `${post.title} — ArcadeDeck Blog`);
+    (relatedGames.length ? `${(txt(relatedGames[0].id, 'en').title || '')} cover art` : `${post.title} — ArcadeDeck Blog`);
   const articleSection = (post.tags && post.tags[0]) || 'News';
   const wordCount = wordCountOf(post.content);
   const readingMinutes = Math.max(1, Math.round(wordCount / 220));
@@ -595,19 +860,10 @@ ${relatedGames
     image: [postImage],
     datePublished: post.date,
     dateModified,
-    author: {
-      '@type': 'Organization',
-      name: post.author,
-      url: 'https://arcadedeck.net/about',
-    },
+    author: { '@type': 'Organization', name: post.author, url: `${SITE}/about` },
     publisher: {
-      '@type': 'Organization',
-      name: 'ArcadeDeck',
-      url: 'https://arcadedeck.net',
-      logo: {
-        '@type': 'ImageObject',
-        url: 'https://arcadedeck.net/images/icon-512x512.webp',
-      },
+      '@type': 'Organization', name: 'ArcadeDeck', url: SITE,
+      logo: { '@type': 'ImageObject', url: `${SITE}/images/icon-512x512.webp` },
       sameAs: ['https://www.wikidata.org/wiki/Q139585213'],
     },
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
@@ -622,37 +878,26 @@ ${relatedGames
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://arcadedeck.net/' },
-      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://arcadedeck.net/blog' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE}/` },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: `${SITE}/blog` },
       { '@type': 'ListItem', position: 3, name: post.title, item: url },
     ],
   });
 
-  let shell = inlineCssOnce(indexHtml).replace(
-    NOSCRIPT_BLOCK_REGEX,
-    `<noscript>${postNoscript}\n    </noscript>`,
-  );
+  let shell = inlineCssOnce(indexHtml).replace(NOSCRIPT_BLOCK_REGEX, `<noscript>${postNoscript}\n    </noscript>`);
   shell = replaceTitle(shell, title);
   shell = replaceMeta(shell, 'description', post.excerpt);
   shell = replaceCanonical(shell, url);
-  shell = injectHreflang(shell, url);
+  shell = injectHreflangSelf(shell, url);
   shell = replaceOgUrl(shell, url);
   shell = replaceOgTitle(shell, title);
   shell = replaceOgDesc(shell, post.excerpt);
   shell = overrideTwitter(shell, url, title, post.excerpt);
-  // og:image override for the post (use related game thumb if any)
-  shell = shell.replace(
-    /(<meta property="og:image" content=")[^"]*(")/,
-    `$1${postImage}$2`,
-  );
-  shell = shell.replace(
-    /(<meta (?:name|property)="twitter:image" content=")[^"]*(")/,
-    `$1${postImage}$2`,
-  );
-  // Inject og:image:alt + twitter:image:alt + Twitter labels right after twitter:image
-  const articleTagMetas = post.tags
-    .map((t) => `    <meta property="article:tag" content="${t}" />`)
-    .join('\n');
+  // Drop stale og:locale:alternate from the root template — blog is English-only.
+  shell = shell.replace(/\s*<meta property="og:locale:alternate" content="[^"]*" \/>/g, '');
+  shell = shell.replace(/(<meta property="og:image" content=")[^"]*(")/, `$1${postImage}$2`);
+  shell = shell.replace(/(<meta (?:name|property)="twitter:image" content=")[^"]*(")/, `$1${postImage}$2`);
+  const articleTagMetas = post.tags.map((t) => `    <meta property="article:tag" content="${t}" />`).join('\n');
   const extraSocialMeta = `
     <meta property="og:image:alt" content="${postImageAlt}" />
     <meta name="twitter:image:alt" content="${postImageAlt}" />
@@ -664,21 +909,12 @@ ${relatedGames
     /(<meta (?:name|property)="twitter:image" content="[^"]*" \/>)/,
     `$1${extraSocialMeta}`,
   );
-  // Override generic keywords + author with post-specific values
-  shell = shell.replace(
-    /(<meta name="keywords" content=")[^"]*(")/,
-    `$1${post.tags.join(', ')}$2`,
-  );
-  shell = shell.replace(
-    /(<meta name="author" content=")[^"]*(")/,
-    `$1${post.author}$2`,
-  );
-  // og:type article for posts
+  shell = shell.replace(/(<meta name="keywords" content=")[^"]*(")/, `$1${post.tags.join(', ')}$2`);
+  shell = shell.replace(/(<meta name="author" content=")[^"]*(")/, `$1${post.author}$2`);
   shell = shell.replace(
     /<meta property="og:type" content="website" \/>/,
     `<meta property="og:type" content="article" />\n    <meta property="article:published_time" content="${post.date}" />\n    <meta property="article:modified_time" content="${dateModified}" />\n    <meta property="article:section" content="${articleSection}" />\n    <meta property="article:author" content="${post.author}" />\n${articleTagMetas}`,
   );
-  // Inject BlogPosting + BreadcrumbList JSON-LD before </head>
   shell = shell.replace(
     '</head>',
     `<script type="application/ld+json">${articleJsonLd}</script>\n    <script type="application/ld+json">${breadcrumbLd}</script>\n  </head>`,
@@ -687,8 +923,9 @@ ${relatedGames
   writeFileSync(`${dir}/index.html`, shell);
 }
 
-// Per-tag blog index pages: /blog/tag/{tag}/index.html. Crawlers and AdSense
-// reviewer see the tagged-post list in noscript; React replaces on mount.
+// =====================================================================
+// BLOG TAG PAGES — English-only.
+// =====================================================================
 const allTags = (() => {
   const set = new Set();
   posts.forEach((p) => p.tags.forEach((t) => set.add(t)));
@@ -706,7 +943,7 @@ for (const tag of allTags) {
   if (!matches.length) continue;
   const dir = `dist/blog/tag/${tag}`;
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-  const tagUrl = `https://arcadedeck.net/blog/tag/${tag}`;
+  const tagUrl = `${SITE}/blog/tag/${tag}`;
   const label = formatTagLabel(tag);
   const tagTitle = `${label} | ArcadeDeck Blog`;
   const tagDesc = `All ArcadeDeck blog posts tagged "${label}" — strategy guides, design notes, patch notes, and recaps.`;
@@ -723,10 +960,7 @@ for (const tag of allTags) {
         <h2>Posts</h2>
         <ul>
 ${matches
-  .map(
-    (p) =>
-      `          <li><a href="/blog/${p.slug}">${p.title}</a> — <em>${formatPostDate(p.date)}</em>. ${p.excerpt}</li>`,
-  )
+  .map((p) => `          <li><a href="/blog/${p.slug}">${p.title}</a> — <em>${formatPostDate(p.date)}</em>. ${p.excerpt}</li>`)
   .join('\n')}
         </ul>
         <p><a href="/blog">All blog posts</a> · <a href="/">Browse all games</a></p>
@@ -738,12 +972,13 @@ ${matches
     name: tagTitle,
     url: tagUrl,
     description: tagDesc,
+    inLanguage: 'en',
     mainEntity: {
       '@type': 'ItemList',
       itemListElement: matches.map((p, i) => ({
         '@type': 'ListItem',
         position: i + 1,
-        url: `https://arcadedeck.net/blog/${p.slug}`,
+        url: `${SITE}/blog/${p.slug}`,
         name: p.title,
       })),
     },
@@ -752,24 +987,22 @@ ${matches
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://arcadedeck.net/' },
-      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://arcadedeck.net/blog' },
+      { '@type': 'ListItem', position: 1, name: 'Home', item: `${SITE}/` },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: `${SITE}/blog` },
       { '@type': 'ListItem', position: 3, name: label, item: tagUrl },
     ],
   });
 
-  let shell = inlineCssOnce(indexHtml).replace(
-    NOSCRIPT_BLOCK_REGEX,
-    `<noscript>${tagNoscript}\n    </noscript>`,
-  );
+  let shell = inlineCssOnce(indexHtml).replace(NOSCRIPT_BLOCK_REGEX, `<noscript>${tagNoscript}\n    </noscript>`);
   shell = replaceTitle(shell, tagTitle);
   shell = replaceMeta(shell, 'description', tagDesc);
   shell = replaceCanonical(shell, tagUrl);
-  shell = injectHreflang(shell, tagUrl);
+  shell = injectHreflangSelf(shell, tagUrl);
   shell = replaceOgUrl(shell, tagUrl);
   shell = replaceOgTitle(shell, tagTitle);
   shell = replaceOgDesc(shell, tagDesc);
   shell = overrideTwitter(shell, tagUrl, tagTitle, tagDesc);
+  shell = shell.replace(/\s*<meta property="og:locale:alternate" content="[^"]*" \/>/g, '');
   const tagLdTags = [tagItemListLd, tagBreadcrumbLd]
     .map((j) => `<script type="application/ld+json">${j}</script>`)
     .join('\n    ');
@@ -777,4 +1010,10 @@ ${matches
   writeFileSync(`${dir}/index.html`, shell);
 }
 
-console.log(`Pre-rendered ${playableGames.length} game pages + ${Object.keys(routeShells).length} static routes + ${posts.length} blog posts + ${allTags.length} tag pages (per-route noscript bodies).`);
+const localeShellCount = SUPPORTED_LOCALES.length;
+console.log(
+  `Pre-rendered ${playableGames.length} games × ${localeShellCount} locales` +
+  ` + ${localeShellCount} home shells + ${allGenres.length} genres × ${localeShellCount} locales` +
+  ` + ${Object.keys(routeShells).length} static routes` +
+  ` + ${posts.length} blog posts + ${allTags.length} tag pages.`
+);

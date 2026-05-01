@@ -9,6 +9,8 @@ import { games } from '../data/games';
 import { compareLeaderboardEntries } from '../utils/leaderboardUtils';
 import { useNotification } from '../hooks/useNotification';
 import { BANNED_WORDS, RANDOM_ID_MIN, RANDOM_ID_MAX, AD_SLOTS, LEADERBOARD_FETCH_LIMIT } from '../constants/gameConstants';
+import { useUiText, useLocale, getLocalizedString } from '../i18n';
+import { thumb360, SRCSET_SIZES } from '../utils/thumb';
 import './Home.css';
 
 const GlobalLeaderboard = lazy(() => import('../components/GlobalLeaderboard'));
@@ -19,6 +21,8 @@ const safeSetSession = (key: string, value: string): void => {
 };
 
 const Home: React.FC = () => {
+  const t = useUiText();
+  const { lang, overlay } = useLocale();
   const [nickname, setNickname] = React.useState<string>(() => {
     const saved = localStorage.getItem('player_nickname');
     if (saved) return saved;
@@ -138,10 +142,13 @@ const Home: React.FC = () => {
   const recentlyPlayedGames = games.filter(g => recentlyPlayedIds.includes(g.id))
     .sort((a, b) => recentlyPlayedIds.indexOf(a.id) - recentlyPlayedIds.indexOf(b.id));
 
+  React.useEffect(() => {
+    document.title = 'ArcadeDeck | Play the Best Online Browser Games';
+  }, []);
+
   return (
     <div className="home-page">
       <>
-        <title>ArcadeDeck | Play the Best Online Browser Games</title>
         <meta name="description" content="Discover and play the highest quality free online browser games on ArcadeDeck. Join our community, compete on global leaderboards, and find your next favorite game!" />
         <meta name="keywords" content="free browser games, online games, play free games, arcadedeck, action games, rpg games, idle games, browser arcade" />
         <link rel="canonical" href="https://arcadedeck.net/" />
@@ -195,8 +202,8 @@ const Home: React.FC = () => {
       {/* ── Hero: welcome + Gamer ID ── */}
       <header className="hero">
         <div className="container hero-content">
-          <h1>Welcome to <span data-text="ArcadeDeck">ArcadeDeck</span></h1>
-          <p>Dozens of handcrafted browser games. Pick one, jump in, and see how far you can go.</p>
+          <h1>{t('homeHeroTitle', 'Welcome to')} <span data-text="ArcadeDeck">ArcadeDeck</span></h1>
+          <p>{t('homeHeroSubtitle', 'Dozens of handcrafted browser games. Pick one, jump in, and see how far you can go.')}</p>
 
           {isEditing ? (
             <div className="hero-gamer-display editing">
@@ -207,14 +214,14 @@ const Home: React.FC = () => {
                     value={tempName}
                     onChange={(e) => setTempName(e.target.value)}
                     maxLength={12}
-                    placeholder="Enter nickname..."
-                    aria-label="Game nickname"
+                    placeholder={t('homeNicknamePlaceholder', 'Enter nickname...')}
+                    aria-label={t('homeNicknameAriaLabel', 'Game nickname')}
                     autoFocus
                   />
                 </div>
                 <div className="hero-gamer-row">
-                  <button type="submit">Save</button>
-                  <button type="button" className="cancel-btn" onClick={() => setIsEditing(false)}>Cancel</button>
+                  <button type="submit">{t('homeNicknameSave', 'Save')}</button>
+                  <button type="button" className="cancel-btn" onClick={() => setIsEditing(false)}>{t('homeNicknameCancel', 'Cancel')}</button>
                 </div>
               </form>
             </div>
@@ -227,10 +234,10 @@ const Home: React.FC = () => {
                 tabIndex={0}
                 onClick={() => { setTempName(''); setIsEditing(true); }}
                 onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setTempName(''); setIsEditing(true); } }}
-                aria-label="Click to change nickname"
+                aria-label={t('homeNicknameChangeAria', 'Click to change nickname')}
               >
                 <div className="hero-gamer-row">
-                  <span className="hero-gamer-label">Game Nickname</span>
+                  <span className="hero-gamer-label">{t('homeNicknameLabel', 'Game Nickname')}</span>
                 </div>
                 <div className="hero-gamer-row">
                   <strong className="hero-gamer-name">{nickname}</strong>
@@ -260,13 +267,13 @@ const Home: React.FC = () => {
                 <input
                   type="search"
                   className="inline-search-input"
-                  placeholder="Search..."
-                  aria-label="Search games"
+                  placeholder={t('homeSearchPlaceholder', 'Search...')}
+                  aria-label={t('homeSearchAriaLabel', 'Search games')}
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                 />
                 {searchQuery && (
-                  <button className="inline-search-clear" onClick={() => setSearchQuery('')} aria-label="Clear search"><X size={14} aria-hidden="true" /></button>
+                  <button className="inline-search-clear" onClick={() => setSearchQuery('')} aria-label={t('homeSearchClearAria', 'Clear search')}><X size={14} aria-hidden="true" /></button>
                 )}
               </div>
               <div className="genre-filters">
@@ -296,12 +303,24 @@ const Home: React.FC = () => {
               {games
                 .filter(g => g.genres.includes(selectedGenre))
                 .sort((a, b) => parseInt(b.id) - parseInt(a.id))
-                .map(g => (
-                  <Link key={`quick-${g.id}`} to={`/play/${g.slug}`} className="quick-card">
-                    <img src={`${import.meta.env.BASE_URL}${g.thumbnail}`} alt={g.title} width="640" height="360" loading="lazy" decoding="async" />
-                    <span className="quick-card-title">{g.title}</span>
-                  </Link>
-                ))
+                .map(g => {
+                  const title = getLocalizedString(g, 'title', lang, overlay);
+                  return (
+                    <Link key={`quick-${g.id}`} to={`/play/${g.slug}`} className="quick-card">
+                      <img
+                        src={`${import.meta.env.BASE_URL}${g.thumbnail}`}
+                        srcSet={`${import.meta.env.BASE_URL}${thumb360(g.thumbnail)} 360w, ${import.meta.env.BASE_URL}${g.thumbnail} 640w`}
+                        sizes={SRCSET_SIZES}
+                        alt={title}
+                        width="640"
+                        height="360"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      <span className="quick-card-title">{title}</span>
+                    </Link>
+                  );
+                })
               }
             </div>
           </div>
@@ -311,7 +330,7 @@ const Home: React.FC = () => {
         {recentlyPlayedGames.length > 0 && !searchQuery && selectedGenre === 'All' && (
           <div className="container">
             <section className="recently-played-section">
-              <h2 className="section-title-small" style={{ textAlign: 'left', marginBottom: '20px' }}>Jump <span>Back In</span></h2>
+              <h2 className="section-title-small" style={{ textAlign: 'left', marginBottom: '20px' }}>{t('homeRecentTitle', 'Jump')} <span>{t('homeRecentSpan', 'Back In')}</span></h2>
               <div className="game-grid small-grid">
                 {recentlyPlayedGames.map(game => (
                   <GameCard
@@ -319,7 +338,7 @@ const Home: React.FC = () => {
                     game={game}
                     isRecentlyPlayed
                     maxTags={2}
-                    onProductionClick={() => showNotification('This game is coming soon!', 'info')}
+                    onProductionClick={() => showNotification(t('homeComingSoonNotification', 'This game is coming soon!'), 'info')}
                   />
                 ))}
               </div>
@@ -340,7 +359,7 @@ const Home: React.FC = () => {
               selectedGenre={selectedGenre}
               searchQuery={searchQuery}
               userRanks={userRanks}
-              onProductionClick={() => showNotification('This game is coming soon!', 'info')}
+              onProductionClick={() => showNotification(t('homeComingSoonNotification', 'This game is coming soon!'), 'info')}
               onGenreClick={(genre) => {
                 setSelectedGenre(genre);
                 safeSetSession('selected_genre', genre);
@@ -361,12 +380,12 @@ const Home: React.FC = () => {
 
       <footer className="footer">
         <div className="container footer-container">
-          <p>&copy; 2026 ArcadeDeck. All rights reserved.</p>
+          <p>&copy; 2026 ArcadeDeck. {t('footerAllRights', 'All rights reserved.')}</p>
           <div className="footer-links">
-            <Link to="/about" className="footer-link">About Us</Link>
-            <Link to="/privacy" className="footer-link">Privacy Policy</Link>
-            <Link to="/contact" className="footer-link">Contact</Link>
-            <a href="https://ko-fi.com/developer_benjamink" target="_blank" rel="noopener noreferrer" className="footer-link footer-link-support">Support ♥</a>
+            <Link to="/about" className="footer-link">{t('footerAbout', 'About Us')}</Link>
+            <Link to="/privacy" className="footer-link">{t('footerPrivacy', 'Privacy Policy')}</Link>
+            <Link to="/contact" className="footer-link">{t('footerContact', 'Contact')}</Link>
+            <a href="https://ko-fi.com/developer_benjamink" target="_blank" rel="noopener noreferrer" className="footer-link footer-link-support">{t('footerSupport', 'Support')} ♥</a>
           </div>
         </div>
       </footer>

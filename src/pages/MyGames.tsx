@@ -9,8 +9,10 @@ import { db } from '../firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore/lite';
 import { compareLeaderboardEntries, formatScore } from '../utils/leaderboardUtils';
 import { buildLeaderboardQuery } from '../utils/leaderboardQuery';
+import { thumb360, SRCSET_SIZES } from '../utils/thumb';
 import { useNickname } from '../hooks/useNickname';
 import { LEADERBOARD_FETCH_LIMIT } from '../constants/gameConstants';
+import { useUiText, useLocale, getLocalizedString } from '../i18n';
 import './MyGames.css';
 
 interface GameWithRank extends Game {
@@ -20,6 +22,8 @@ interface GameWithRank extends Game {
 }
 
 const MyGames = () => {
+  const t = useUiText();
+  const { lang, overlay } = useLocale();
   const [rankedGames, setRankedGames] = useState<GameWithRank[]>([]);
   const [noRankGames, setNoRankGames] = useState<GameWithRank[]>([]);
   const [loading, setLoading] = useState(true);
@@ -86,10 +90,13 @@ const MyGames = () => {
     fetchMyRanks();
   }, [nickname]);
 
+  useEffect(() => {
+    document.title = 'My Gaming Stats & Ranks | ArcadeDeck';
+  }, []);
+
   return (
     <div className="my-games-page">
       <>
-        <title>My Gaming Stats & Ranks | ArcadeDeck</title>
         <meta name="description" content="Check your personal ranking, achievements, and game progress on ArcadeDeck. Track your performance across all universes!" />
         <meta property="og:title" content="My Gaming Stats & Ranks | ArcadeDeck" />
         <meta property="og:url" content="https://arcadedeck.net/my-games" />
@@ -98,61 +105,86 @@ const MyGames = () => {
       <Navbar />
       <main className="container">
         <header className="my-games-header">
-          <h1>My <span>Ranking</span></h1>
-          <p className="subtitle">Track your performance across all universes</p>
-          <div className="nickname-badge">Operator: {nickname}</div>
+          <h1>{t('myRankTitle', 'My')} <span>{t('myRankSpan', 'Ranking')}</span></h1>
+          <p className="subtitle">{t('myRankSubtitle', 'Track your performance across all universes')}</p>
+          <div className="nickname-badge">{t('myRankOperator', 'Operator')}: {nickname}</div>
         </header>
 
         {loading ? (
           <div className="loading-container">
             <div className="spinner"></div>
-            <p>Scanning universes for your records...</p>
+            <p>{t('myRankLoading', 'Scanning universes for your records...')}</p>
           </div>
         ) : (
           <div className="my-games-content">
             <section className="ranked-section">
-              <h2 className="section-title"><Trophy size={20} aria-hidden="true" /> Top 3 Achievements</h2>
+              <h2 className="section-title"><Trophy size={20} aria-hidden="true" /> {t('myRankTop3', 'Top 3 Achievements')}</h2>
               {rankedGames.length > 0 ? (
                 <div className="my-games-grid">
-                  {rankedGames.map(game => (
-                    <div key={game.id} className={`my-game-card rank-${game.rank}`}>
-                      <div className="rank-badge-large">
-                        <Medal size={24} className={`rank-medal rank-${game.rank}`} aria-hidden="true" />
-                        <span className="rank-num">{game.rank === 1 ? '1st' : game.rank === 2 ? '2nd' : '3rd'}</span>
-                      </div>
-                      <img src={game.thumbnail} alt={game.title} className="card-thumb" width="640" height="360" loading="lazy" decoding="async" />
-                      <div className="card-info">
-                        <h3>{game.title}</h3>
-                        <div className="score-info">
-                          <span className="score-val">{formatScore(game.score ?? 0)}</span>
-                          <span className="score-label">Score</span>
+                  {rankedGames.map(game => {
+                    const title = getLocalizedString(game, 'title', lang, overlay);
+                    return (
+                      <div key={game.id} className={`my-game-card rank-${game.rank}`}>
+                        <div className="rank-badge-large">
+                          <Medal size={24} className={`rank-medal rank-${game.rank}`} aria-hidden="true" />
+                          <span className="rank-num">{game.rank === 1 ? t('myRank1st', '1st') : game.rank === 2 ? t('myRank2nd', '2nd') : t('myRank3rd', '3rd')}</span>
                         </div>
-                        <Link to={`/play/${game.id}`} className="play-again-btn">Play Again</Link>
+                        <img
+                          src={game.thumbnail}
+                          srcSet={`${thumb360(game.thumbnail)} 360w, ${game.thumbnail} 640w`}
+                          sizes={SRCSET_SIZES}
+                          alt={title}
+                          className="card-thumb"
+                          width="640"
+                          height="360"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                        <div className="card-info">
+                          <h3>{title}</h3>
+                          <div className="score-info">
+                            <span className="score-val">{formatScore(game.score ?? 0)}</span>
+                            <span className="score-label">{t('myRankScore', 'Score')}</span>
+                          </div>
+                          <Link to={`/play/${game.id}`} className="play-again-btn">{t('myRankPlayAgain', 'Play Again')}</Link>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="empty-state">
-                  <p>You haven't reached the Top 3 in any game yet. Time to level up!</p>
+                  <p>{t('myRankEmpty', "You haven't reached the Top 3 in any game yet. Time to level up!")}</p>
                 </div>
               )}
             </section>
 
             <section className="no-rank-section">
-              <h2 className="section-title"><Rocket size={20} aria-hidden="true" /> Missions for You</h2>
-              <p className="section-desc">Games where you haven't secured a top rank yet.</p>
+              <h2 className="section-title"><Rocket size={20} aria-hidden="true" /> {t('myRankMissions', 'Missions for You')}</h2>
+              <p className="section-desc">{t('myRankMissionsDesc', "Games where you haven't secured a top rank yet.")}</p>
               <div className="my-games-list">
-                {noRankGames.map(game => (
-                  <Link key={game.id} to={`/play/${game.id}`} className="mini-game-card">
-                    <img src={game.thumbnail} alt={game.title} width="640" height="360" loading="lazy" decoding="async" />
-                    <div className="mini-info">
-                      <h4>{game.title}</h4>
-                      <span className="genre-tag">{game.genres[0]}</span>
-                    </div>
-                    <span className="go-arrow">→</span>
-                  </Link>
-                ))}
+                {noRankGames.map(game => {
+                  const title = getLocalizedString(game, 'title', lang, overlay);
+                  return (
+                    <Link key={game.id} to={`/play/${game.id}`} className="mini-game-card">
+                      <img
+                        src={game.thumbnail}
+                        srcSet={`${thumb360(game.thumbnail)} 360w, ${game.thumbnail} 640w`}
+                        sizes={SRCSET_SIZES}
+                        alt={title}
+                        width="640"
+                        height="360"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      <div className="mini-info">
+                        <h4>{title}</h4>
+                        <span className="genre-tag">{game.genres[0]}</span>
+                      </div>
+                      <span className="go-arrow">→</span>
+                    </Link>
+                  );
+                })}
               </div>
             </section>
           </div>

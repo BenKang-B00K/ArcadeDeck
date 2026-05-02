@@ -495,6 +495,23 @@
         "Web & Mobile Friendly"
       ]
     },
+    "22": {
+      "title": "Mythic Defender: Heroes Returns",
+      "description": "A card-driven tower defense where mythic heroes return to hold the line against endless legions.",
+      "fullDescription": "\n      Mythic Defender: Heroes Returns fuses classic tower defense with deck-building strategy. Draw heroes from your card pool, place them along the path, and unleash devastating abilities to crush waves of orcs, demons, and worse.\n      Every map is a puzzle of positioning and timing. Some heroes deal heavy single-target damage, others rain area-of-effect lightning, and a few support the whole line with auras. Mix and match to counter what each wave throws at you.\n      Earn mana between rounds, upgrade your strongest heroes, and unlock new cards as you progress deeper into the campaign. The legions never stop — how long can your kingdom stand?\n    ",
+      "controls": "Mouse: Drag hero cards onto valid tiles, click heroes to upgrade or activate abilities, click UI buttons to start waves and manage your deck.",
+      "tips": "Front-load tanky melee heroes near chokepoints to soak damage while ranged casters work safely from the back. Save mana for the wave's elite enemies — burning everything early leaves you defenseless when the boss arrives. Upgrades scale better than placing more low-tier units; concentrate your firepower.",
+      "lore": "\n      Once, the Mythic Heroes walked among mortals — Thor of the Storm Hammer, the rune-bound shieldmaidens of the North, the silent archers of the Whispering Wood. When the world found peace, they faded into legend, their cards sealed in the vaults of forgotten kings.\n      Now the Burning Horde has torn through the seals, and ancient citadels burn beneath blood-red skies. The cards have begun to glow again. The heroes are returning — but only one defender can summon them.\n      You hold the deck. The legions are at the gate.\n    ",
+      "features": [
+        "Card-Based Hero Summoning System",
+        "Strategic Tower Defense Gameplay",
+        "Diverse Hero Roster with Unique Abilities",
+        "Wave-Based Campaign Progression",
+        "Deck-Building & Upgrade Mechanics",
+        "Hand-Painted Mythic Fantasy Art",
+        "PC Only"
+      ]
+    },
     "_comment": "Per-game canonical English. Translators mirror this in {lang}.json."
   }
 }

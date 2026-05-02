@@ -493,6 +493,23 @@
         "Ranking Global",
         "Compatível com web e dispositivos móveis"
       ]
+    },
+    "22": {
+      "title": "Mythic Defender: Heroes Returns",
+      "description": "Um tower defense baseado em cartas onde heróis míticos retornam para segurar a linha contra legiões infinitas.",
+      "fullDescription": "\n      Mythic Defender: Heroes Returns funde a defesa de torres clássica com a estratégia de construção de decks. Compre heróis do seu conjunto de cartas, coloque-os ao longo do caminho e liberte habilidades devastadoras para esmagar ondas de orcs, demônios e coisas piores.\n      Cada mapa é um quebra-cabeça de posicionamento e tempo. Alguns heróis causam dano pesado a um único alvo, outros fazem chover relâmpagos em área e alguns apoiam toda a linha com auras. Combine e misture para combater o que cada onda lançar contra você.\n      Ganhe mana entre as rodadas, melhore seus heróis mais fortes e desbloqueie novas cartas conforme avança na campanha. As legiões nunca param — quanto tempo seu reino conseguirá resistir?\n    ",
+      "controls": "Mouse: Arraste as cartas de herói para blocos válidos, clique nos heróis para melhorar ou ativar habilidades, clique nos botões da interface para iniciar ondas e gerenciar seu deck.",
+      "tips": "Coloque heróis de combate corpo a corpo resistentes perto de pontos de estrangulamento para absorver danos enquanto os lançadores à distância trabalham com segurança na retaguarda. Economize mana para os inimigos de elite da onda — gastar tudo cedo deixa você indefeso quando o chefe chegar. As melhorias escalam melhor do que colocar mais unidades de nível baixo; concentre seu poder de fogo.",
+      "lore": "\n      Antigamente, os Heróis Míticos caminhavam entre os mortais — Thor do Martelo da Tempestade, as donzelas de escudo rúnico do Norte, os arqueiros silenciosos da Floresta Sussurrante. Quando o mundo encontrou a paz, eles desapareceram na lenda, suas cartas seladas nos cofres de reis esquecidos.\n      Agora a Horda Ardente rompeu os selos, e as antigas cidadelas queimam sob céus cor de sangue. As cartas começaram a brilhar novamente. Os heróis estão retornando — mas apenas um defensor pode invocá-los.\n      Você segura o deck. As legiões estão no portão.\n    ",
+      "features": [
+        "Sistema de Invocação de Heróis Baseado em Cartas",
+        "Jogabilidade Estratégica de Tower Defense",
+        "Elenco Diversificado de Heróis com Habilidades Únicas",
+        "Progressão de Campanha Baseada em Ondas",
+        "Mecânicas de Deck-Building e Melhorias",
+        "Arte de Fantasia Mítica Pintada à Mão",
+        "Apenas PC"
+      ]
     }
   }
 }

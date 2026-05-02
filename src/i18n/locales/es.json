@@ -493,6 +493,23 @@
         "Clasificación global",
         "Optimizado para web y móviles"
       ]
+    },
+    "22": {
+      "title": "Mythic Defender: Heroes Returns",
+      "description": "Un defensa de torres basado en cartas donde héroes míticos regresan para resistir contra legiones infinitas.",
+      "fullDescription": "\n      Mythic Defender: Heroes Returns fusiona la defensa de torres clásica con la estrategia de construcción de mazos. Roba héroes de tu reserva de cartas, colócalos a lo largo del camino y desata habilidades devastadoras para aplastar oleadas de orcos, demonios y cosas peores.\n      Cada mapa es un rompecabezas de posicionamiento y sincronización. Algunos héroes infligen gran daño a un solo objetivo, otros hacen llover rayos de área y unos pocos apoyan a toda la línea con auras. Combina y mezcla para contrarrestar lo que cada oleada te lance.\n      Gana maná entre rondas, mejora a tus héroes más fuertes y desbloquea nuevas cartas a medida que avanzas en la campaña. Las legiones nunca se detienen, ¿cuánto tiempo podrá resistir tu reino?\n    ",
+      "controls": "Ratón: Arrastra cartas de héroe a casillas válidas, haz clic en héroes para mejorarlos o activar habilidades, haz clic en botones de la interfaz para iniciar oleadas y gestionar tu mazo.",
+      "tips": "Coloca héroes cuerpo a cuerpo resistentes cerca de puntos de estrangulamiento para absorber daño mientras los magos a distancia atacan desde atrás. Ahorra maná para los enemigos de élite; gastarlo todo pronto te dejará indefenso ante el jefe. Las mejoras rinden más que colocar muchas unidades de nivel bajo; concentra tu potencia de fuego.",
+      "lore": "\n      Antaño, los Héroes Míticos caminaban entre los mortales: Thor del Martillo de la Tormenta, las valquirias rúnicas del Norte, los arqueros silenciosos del Bosque Susurrante. Cuando el mundo encontró la paz, se desvanecieron en la leyenda, con sus cartas selladas en las bóvedas de reyes olvidados.\n      Ahora la Horda Ardiente ha roto los sellos y las ciudadelas antiguas arden bajo cielos de color sangre. Las cartas han comenzado a brillar de nuevo. Los héroes están regresando, pero solo un defensor puede invocarlos.\n      Tú tienes el mazo. Las legiones están a las puertas.\n    ",
+      "features": [
+        "Sistema de invocación de héroes basado en cartas",
+        "Jugabilidad estratégica de defensa de torres",
+        "Variado elenco de héroes con habilidades únicas",
+        "Progresión de campaña basada en oleadas",
+        "Mecánicas de construcción de mazos y mejoras",
+        "Arte de fantasía mítica pintado a mano",
+        "Solo PC"
+      ]
     }
   }
 }

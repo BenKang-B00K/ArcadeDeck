@@ -494,6 +494,23 @@
         "Thân thiện với Web & Di động"
       ]
     },
+    "22": {
+      "title": "Mythic Defender: Heroes Returns",
+      "description": "Một trò chơi thủ thành dựa trên thẻ bài, nơi các anh hùng thần thoại trở lại để ngăn chặn những đoàn quân vô tận.",
+      "fullDescription": "\n      Mythic Defender: Heroes Returns kết hợp lối chơi thủ thành cổ điển với chiến thuật xây dựng bộ bài. Rút các anh hùng từ kho thẻ của bạn, đặt họ dọc theo con đường và giải phóng những kỹ năng tàn khốc để tiêu diệt các đợt tấn công của quỷ, yêu tinh và những thế lực tồi tệ hơn.\n      Mỗi bản đồ là một câu đố về vị trí và thời điểm. Một số anh hùng gây sát thương đơn mục tiêu cực lớn, số khác triệu hồi sấm sét diện rộng, và một vài anh hùng hỗ trợ toàn đội bằng hào quang. Kết hợp linh hoạt để khắc chế những đợt tấn công của kẻ thù.\n      Thu thập mana giữa các vòng đấu, nâng cấp những anh hùng mạnh nhất và mở khóa thẻ bài mới khi bạn tiến sâu hơn vào chiến dịch. Các đoàn quân sẽ không bao giờ dừng lại — vương quốc của bạn sẽ trụ vững được bao lâu?\n    ",
+      "controls": "Chuột: Kéo thẻ anh hùng vào các ô hợp lệ, nhấp vào anh hùng để nâng cấp hoặc kích hoạt kỹ năng, nhấp vào các nút giao diện để bắt đầu các đợt tấn công và quản lý bộ bài.",
+      "tips": "Đặt các anh hùng cận chiến chống chịu tốt ở phía trước gần các điểm nghẽn để thu hút sát thương, trong khi các pháp sư tầm xa tấn công an toàn từ phía sau. Tiết kiệm mana cho những kẻ thù tinh nhuệ — dùng hết mana quá sớm sẽ khiến bạn không còn khả năng phòng thủ khi trùm xuất hiện. Việc nâng cấp các đơn vị hiện có sẽ hiệu quả hơn việc đặt nhiều đơn vị cấp thấp; hãy tập trung hỏa lực của bạn.",
+      "lore": "\n      Ngày xửa ngày xưa, các Anh hùng Thần thoại đã từng bước đi giữa những người phàm trần — Thor với Cây búa Sấm sét, những nữ chiến binh khiên rún của phương Bắc, những cung thủ thầm lặng của Khu rừng Thì thầm. Khi thế giới tìm thấy hòa bình, họ mờ nhạt dần vào huyền thoại, những thẻ bài của họ bị phong ấn trong hầm mộ của các vị vua bị lãng quên.\n      Giờ đây, Burning Horde đã xé toạc các phong ấn, và các thành trì cổ xưa đang rực cháy dưới bầu trời đỏ rực. Các thẻ bài đã bắt đầu tỏa sáng trở lại. Các anh hùng đang trở về — nhưng chỉ có một người bảo vệ mới có thể triệu hồi họ.\n      Bạn đang nắm giữ bộ bài. Các đoàn quân đã ở ngay trước cổng.\n    ",
+      "features": [
+        "Hệ thống triệu hồi anh hùng dựa trên thẻ bài",
+        "Lối chơi thủ thành chiến thuật",
+        "Danh sách anh hùng đa dạng với kỹ năng độc đáo",
+        "Tiến trình chiến dịch theo từng đợt tấn công",
+        "Cơ chế xây dựng bộ bài và nâng cấp",
+        "Đồ họa thần thoại vẽ tay",
+        "Chỉ dành cho PC"
+      ]
+    },
     "seoPlayFreeOn": "Chơi miễn phí trên",
     "seoPlayPrefix": "Chơi",
     "seoFreeOnlineGame": "Trò chơi trình duyệt trực tuyến miễn phí trên ArcadeDeck.",

@@ -407,5 +407,19 @@
       "dualSort": false,
       "subSortAsc": false
     }
+  },
+  {
+    "id": "22",
+    "slug": "mythic-defenders-heroes-returns",
+    "language": "EN",
+    "thumbnail": "images/mythic-defenders-heroes-returns.webp",
+    "genres": [
+      "Tower Defense",
+      "Strategy"
+    ],
+    "gameUrl": "https://mythic-defenders-bk.pages.dev/",
+    "aspectRatio": "1/1",
+    "status": "PLAYABLE",
+    "isOriginal": true
   }
 ]

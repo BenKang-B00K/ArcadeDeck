@@ -493,6 +493,23 @@
         "Globale Bestenliste",
         "Web- und mobilfreundlich"
       ]
+    },
+    "22": {
+      "title": "Mythic Defender: Heroes Returns",
+      "description": "Ein kartenbasiertes Tower-Defense-Spiel, in dem mythische Helden zurückkehren, um die Linie gegen endlose Legionen zu halten.",
+      "fullDescription": "\n      Mythic Defender: Heroes Returns verschmilzt klassische Tower Defense mit Deckbuilding-Strategie. Ziehe Helden aus deinem Kartenpool, platziere sie entlang des Weges und entfessle verheerende Fähigkeiten, um Wellen von Orks, Dämonen und Schlimmerem zu zerschmettern.\n      Jede Karte ist ein Rätsel aus Positionierung und Timing. Einige Helden verursachen schweren Einzelzielschaden, andere lassen Flächenschaden-Blitze regnen, und einige unterstützen die gesamte Linie mit Auren. Kombiniere sie nach Belieben, um allem zu begegnen, was dir jede Welle entgegenwirft.\n      Verdiene Mana zwischen den Runden, verbessere deine stärksten Helden und schalte neue Karten frei, während du tiefer in die Kampagne vordringst. Die Legionen halten nie an – wie lange kann dein Königreich standhalten?\n    ",
+      "controls": "Maus: Ziehe Heldenkarten auf gültige Kacheln, klicke auf Helden, um sie zu verbessern oder Fähigkeiten zu aktivieren, klicke auf UI-Schaltflächen, um Wellen zu starten und dein Deck zu verwalten.",
+      "tips": "Platziere robuste Nahkampfhelden frühzeitig an Engpässen, um Schaden abzufangen, während Fernkampfzauberer sicher aus dem Hintergrund agieren. Spare Mana für die Elitegegner der Welle – alles frühzeitig zu verbrauchen, macht dich wehrlos, wenn der Boss erscheint. Upgrades skalieren besser als das Platzieren von mehr Einheiten niedrigerer Stufen; konzentriere deine Feuerkraft.",
+      "lore": "\n      Einst wandelten die mythischen Helden unter den Sterblichen – Thor mit seinem Sturmhammer, die runengebundenen Schildmaidinnen des Nordens, die stillen Bogenschützen des flüsternden Waldes. Als die Welt Frieden fand, verblassten sie zur Legende, ihre Karten wurden in den Gewölben vergessener Könige versiegelt.\n      Nun hat die Brennende Horde die Siegel durchbrochen, und alte Zitadellen brennen unter blutrotem Himmel. Die Karten haben begonnen, wieder zu leuchten. Die Helden kehren zurück – aber nur ein einziger Verteidiger kann sie beschwören.\n      Du hältst das Deck. Die Legionen stehen am Tor.\n    ",
+      "features": [
+        "Kartenbasiertes Helden-Beschwörungssystem",
+        "Strategisches Tower-Defense-Gameplay",
+        "Vielfältige Heldenauswahl mit einzigartigen Fähigkeiten",
+        "Wellenbasierter Kampagnenfortschritt",
+        "Deckbuilding- & Upgrade-Mechaniken",
+        "Handgemalte mythische Fantasy-Grafik",
+        "Nur PC"
+      ]
     }
   }
 }

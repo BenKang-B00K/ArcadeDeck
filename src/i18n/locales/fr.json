@@ -493,6 +493,23 @@
         "Classement mondial",
         "Adapté au web et au mobile"
       ]
+    },
+    "22": {
+      "title": "Mythic Defender: Heroes Returns",
+      "description": "Un tower defense basé sur des cartes où les héros mythiques reviennent pour tenir la ligne contre des légions infinies.",
+      "fullDescription": "\n      Mythic Defender: Heroes Returns fusionne le tower defense classique avec la stratégie de deck-building. Piochez des héros dans votre réserve de cartes, placez-les le long du chemin et déchaînez des capacités dévastatrices pour écraser des vagues d'orques, de démons et pire encore.\n      Chaque carte est un casse-tête de positionnement et de timing. Certains héros infligent de lourds dégâts à cible unique, d'autres font pleuvoir des éclairs à zone d'effet, et quelques-uns soutiennent toute la ligne avec des auras. Mélangez et associez pour contrer ce que chaque vague vous réserve.\n      Gagnez du mana entre les rounds, améliorez vos héros les plus forts et débloquez de nouvelles cartes au fur et à mesure que vous progressez dans la campagne. Les légions ne s'arrêtent jamais — combien de temps votre royaume pourra-t-il tenir ?\n    ",
+      "controls": "Souris : faites glisser les cartes de héros sur les tuiles valides, cliquez sur les héros pour les améliorer ou activer des capacités, cliquez sur les boutons de l'interface utilisateur pour lancer les vagues et gérer votre deck.",
+      "tips": "Placez des héros de mêlée résistants à l'avant près des points de passage pour absorber les dégâts, tandis que les lanceurs de sorts à distance travaillent en sécurité à l'arrière. Économisez du mana pour les ennemis d'élite de la vague — tout dépenser trop tôt vous laisse sans défense à l'arrivée du boss. Les améliorations sont plus efficaces que le placement de nombreuses unités de bas niveau ; concentrez votre puissance de feu.",
+      "lore": "\n      Autrefois, les Héros Mythiques marchaient parmi les mortels — Thor au Marteau de l'Orage, les guerrières runiques du Nord, les archers silencieux de la Forêt des Murmures. Quand le monde a trouvé la paix, ils ont sombré dans la légende, leurs cartes scellées dans les coffres de rois oubliés.\n      Maintenant, la Horde Ardiente a déchiré les sceaux, et les anciennes citadelles brûlent sous des cieux rouge sang. Les cartes ont recommencé à briller. Les héros reviennent — mais un seul défenseur peut les invoquer.\n      Vous tenez le deck. Les légions sont à la porte.\n    ",
+      "features": [
+        "Système d'invocation de héros basé sur des cartes",
+        "Gameplay stratégique de Tower Defense",
+        "Liste de héros diversifiée avec des capacités uniques",
+        "Progression de campagne par vagues",
+        "Mécaniques de deck-building et d'amélioration",
+        "Art fantastique mythique peint à la main",
+        "PC uniquement"
+      ]
     }
   }
 }

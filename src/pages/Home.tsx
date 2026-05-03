@@ -11,6 +11,7 @@ import { useNotification } from '../hooks/useNotification';
 import { BANNED_WORDS, RANDOM_ID_MIN, RANDOM_ID_MAX, AD_SLOTS, LEADERBOARD_FETCH_LIMIT } from '../constants/gameConstants';
 import { useUiText, useLocale, getLocalizedString } from '../i18n';
 import { thumb360, SRCSET_SIZES } from '../utils/thumb';
+import { SkeletonGrid } from '../components/Skeleton';
 import './Home.css';
 
 const GlobalLeaderboard = lazy(() => import('../components/GlobalLeaderboard'));
@@ -35,7 +36,7 @@ const Home: React.FC = () => {
   const [tempName, setTempName] = React.useState(nickname);
   const [selectedGenre, setSelectedGenre] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [recentlyPlayedIds] = useState<string[]>(() => {
+  const [recentlyPlayedIds, setRecentlyPlayedIds] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('recently_played');
       return saved ? JSON.parse(saved) : [];
@@ -43,6 +44,19 @@ const Home: React.FC = () => {
       return [];
     }
   });
+
+  React.useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== 'recently_played') return;
+      try {
+        setRecentlyPlayedIds(e.newValue ? JSON.parse(e.newValue) : []);
+      } catch {
+        setRecentlyPlayedIds([]);
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
   const { notification, showNotification } = useNotification(3000);
   const [userRanks, setUserRanks] = useState<Record<string, number>>({});
 
@@ -354,7 +368,7 @@ const Home: React.FC = () => {
 
         {/* ── Main Game Grid ── */}
         <div className="container grid-content-wrapper">
-          <Suspense fallback={<div style={{ minHeight: 800 }} aria-hidden="true" />}>
+          <Suspense fallback={<SkeletonGrid count={8} />}>
             <GameGrid
               selectedGenre={selectedGenre}
               searchQuery={searchQuery}

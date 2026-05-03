@@ -1,6 +1,6 @@
 {
-  "_comment": "Korean overlay scaffold. Empty strings fall back to English. Translate values in place.",
-  "label": "한국어",
+  "_comment": "English overlay. Mirror of base English fields from games.json — kept here as canonical reference for translators. UI strings live under ui.",
+  "label": "English",
   "ui": {
     "_comment": "UI strings keyed by stable identifier. These are the canonical English source for all translatable chrome strings.",
     "navGames": "게임",
@@ -52,6 +52,8 @@
     "globalUpdated": "업데이트됨",
     "globalSyncing": "동기화 중...",
     "globalSyncStats": "통계 동기화",
+    "globalEmptyMessage": "No champions yet. Play a game and post a score — the throne is open.",
+    "globalEmptyCta": "Browse Games",
     "lbRank": "순위",
     "lbPlayer": "플레이어",
     "lbYou": "나",
@@ -110,6 +112,18 @@
     "myRankEmpty": "아직 어떤 게임에서도 상위 3위에 들지 못했습니다. 레벨을 높여보세요!",
     "myRankMissions": "나를 위한 미션",
     "myRankMissionsDesc": "아직 상위권을 차지하지 못한 게임들입니다.",
+    "myRankNoScoresTitle": "No scores yet",
+    "myRankNoScoresDesc": "Pick a game and post your first score — your achievements will land here.",
+    "myRankBrowseGames": "Browse Games",
+    "myAchAriaLabel": "Achievements",
+    "myAchStreak": "{n}-Day Streak",
+    "myAchBestStreak": "Best Streak",
+    "myAchBestStreakLabel": "Best: {n} days",
+    "myAchChampion": "Champion",
+    "myAchPodium": "Podium Finish",
+    "myAchFirstScore": "First Score",
+    "myAchVeteran": "Versatile (5+)",
+    "myAchMarathon": "Marathon (10+)",
     "blogTitle": "블로그",
     "blogSubtitle": "패치 노트, 디자인 심층 분석 및 월간 명예의 전당 요약.",
     "blogAllPosts": "모든 게시물",
@@ -126,6 +140,7 @@
     "playerLabel": "플레이어",
     "playerEdit": "편집",
     "playerFullscreen": "전체 화면",
+    "playerExitFullscreen": "Exit",
     "playerLoad": "로드",
     "playerOverview": "개요",
     "playerControls": "조작법",
@@ -142,6 +157,10 @@
     "tabTips": "팁",
     "tabLore": "스토리",
     "tabFeatures": "특징",
+    "helpfulPrompt": "Was this helpful?",
+    "helpfulYes": "Yes, helpful",
+    "helpfulNo": "Not helpful",
+    "helpfulThanks": "Thanks!",
     "relatedGamesTitle": "추천 게임",
     "relatedPostsTitle": "블로그 소식",
     "seoPlayFreeOn": "ArcadeDeck에서 무료 플레이",
@@ -510,6 +529,7 @@
         "수작업으로 그려진 신화적 판타지 아트",
         "PC 전용"
       ]
-    }
+    },
+    "_comment": "Per-game canonical English. Translators mirror this in {lang}.json."
   }
 }

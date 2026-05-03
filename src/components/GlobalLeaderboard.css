@@ -14,6 +14,41 @@
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
 }
 
+.hof-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 40px 20px;
+  position: relative;
+  z-index: 1;
+  color: var(--text-muted);
+}
+
+.hof-empty-state p {
+  max-width: 420px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.hof-empty-state .empty-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 22px;
+  background: linear-gradient(135deg, #00d2ff, #6e8cff);
+  color: #000;
+  border-radius: 999px;
+  font-weight: 800;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.hof-empty-state .empty-cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 210, 255, 0.35);
+}
+
 .global-leaderboard-section::before {
   content: '';
   position: absolute;

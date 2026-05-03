@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { Trophy, Rocket, Medal } from 'lucide-react';
+import { Trophy, Rocket, Medal, Flame, Crown, Award, Target, Zap } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { games } from '../data/games';
 import type { Game } from '../data/games';
@@ -11,6 +11,7 @@ import { compareLeaderboardEntries, formatScore } from '../utils/leaderboardUtil
 import { buildLeaderboardQuery } from '../utils/leaderboardQuery';
 import { thumb360, SRCSET_SIZES } from '../utils/thumb';
 import { useNickname } from '../hooks/useNickname';
+import { getCurrentStreak, readStreak } from '../utils/streak';
 import { LEADERBOARD_FETCH_LIMIT } from '../constants/gameConstants';
 import { useUiText, useLocale, getLocalizedString } from '../i18n';
 import './MyGames.css';
@@ -27,6 +28,10 @@ const MyGames = () => {
   const [rankedGames, setRankedGames] = useState<GameWithRank[]>([]);
   const [noRankGames, setNoRankGames] = useState<GameWithRank[]>([]);
   const [loading, setLoading] = useState(true);
+  const [playedCount, setPlayedCount] = useState(0);
+  const [hasAnyScore, setHasAnyScore] = useState(false);
+  const [bestRank, setBestRank] = useState<number | null>(null);
+  const [streak] = useState(() => ({ current: getCurrentStreak(), best: readStreak().best }));
   const nickname = useNickname();
 
   useEffect(() => {
@@ -80,6 +85,9 @@ const MyGames = () => {
 
         setRankedGames(ranked);
         setNoRankGames(noRank);
+        setPlayedCount(playedGames.length);
+        setHasAnyScore(userScoresByGame.size > 0);
+        setBestRank(ranked.length > 0 ? ranked[0].rank ?? null : null);
       } catch (error) {
         console.error("Error fetching my ranks:", error);
       } finally {
@@ -93,6 +101,28 @@ const MyGames = () => {
   useEffect(() => {
     document.title = 'My Gaming Stats & Ranks | ArcadeDeck';
   }, []);
+
+  const achievements = useMemo(() => {
+    const list: { id: string; label: string; icon: React.ReactNode; tier: 'gold' | 'silver' | 'bronze' | 'flame' }[] = [];
+    if (streak.current >= 3) {
+      list.push({ id: 'streak', label: t('myAchStreak', '{n}-Day Streak').replace('{n}', String(streak.current)), icon: <Flame size={14} aria-hidden="true" />, tier: 'flame' });
+    }
+    if (bestRank === 1) {
+      list.push({ id: 'champion', label: t('myAchChampion', 'Champion'), icon: <Crown size={14} aria-hidden="true" />, tier: 'gold' });
+    } else if (bestRank !== null && bestRank <= 3) {
+      list.push({ id: 'podium', label: t('myAchPodium', 'Podium Finish'), icon: <Medal size={14} aria-hidden="true" />, tier: 'silver' });
+    }
+    if (playedCount >= 1) {
+      list.push({ id: 'firstScore', label: t('myAchFirstScore', 'First Score'), icon: <Target size={14} aria-hidden="true" />, tier: 'bronze' });
+    }
+    if (playedCount >= 5) {
+      list.push({ id: 'veteran', label: t('myAchVeteran', 'Versatile (5+)'), icon: <Award size={14} aria-hidden="true" />, tier: 'silver' });
+    }
+    if (playedCount >= 10) {
+      list.push({ id: 'marathon', label: t('myAchMarathon', 'Marathon (10+)'), icon: <Zap size={14} aria-hidden="true" />, tier: 'gold' });
+    }
+    return list;
+  }, [streak.current, bestRank, playedCount, t]);
 
   return (
     <div className="my-games-page">
@@ -108,12 +138,33 @@ const MyGames = () => {
           <h1>{t('myRankTitle', 'My')} <span>{t('myRankSpan', 'Ranking')}</span></h1>
           <p className="subtitle">{t('myRankSubtitle', 'Track your performance across all universes')}</p>
           <div className="nickname-badge">{t('myRankOperator', 'Operator')}: {nickname}</div>
+          {!loading && (achievements.length > 0 || streak.best > 0) && (
+            <div className="ach-row" aria-label={t('myAchAriaLabel', 'Achievements')}>
+              {achievements.map(a => (
+                <span key={a.id} className={`ach-badge tier-${a.tier}`} title={a.label}>
+                  {a.icon}<span className="ach-label">{a.label}</span>
+                </span>
+              ))}
+              {streak.best > streak.current && streak.best >= 3 && (
+                <span className="ach-badge tier-bronze" title={t('myAchBestStreak', 'Best Streak')}>
+                  <Flame size={14} aria-hidden="true" /><span className="ach-label">{t('myAchBestStreakLabel', 'Best: {n} days').replace('{n}', String(streak.best))}</span>
+                </span>
+              )}
+            </div>
+          )}
         </header>
 
         {loading ? (
           <div className="loading-container">
             <div className="spinner"></div>
             <p>{t('myRankLoading', 'Scanning universes for your records...')}</p>
+          </div>
+        ) : !hasAnyScore ? (
+          <div className="my-games-empty empty-state">
+            <Rocket size={40} aria-hidden="true" />
+            <h2>{t('myRankNoScoresTitle', 'No scores yet')}</h2>
+            <p>{t('myRankNoScoresDesc', 'Pick a game and post your first score — your achievements will land here.')}</p>
+            <Link to="/" className="empty-cta-btn">{t('myRankBrowseGames', 'Browse Games')} →</Link>
           </div>
         ) : (
           <div className="my-games-content">

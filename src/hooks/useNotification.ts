@@ -1,4 +1,5 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback } from 'react';
+import { useToast } from '../contexts/ToastContext';
 
 export type NotificationType = 'success' | 'info' | 'error';
 
@@ -13,14 +14,11 @@ export interface UseNotificationReturn {
 }
 
 export function useNotification(durationMs: number = 4000): UseNotificationReturn {
-  const [notification, setNotification] = useState<Notification | null>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const { showToast } = useToast();
 
   const showNotification = useCallback((message: string, type: NotificationType = 'info') => {
-    setNotification({ message, type });
-    clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => setNotification(null), durationMs);
-  }, [durationMs]);
+    showToast(message, type, durationMs);
+  }, [showToast, durationMs]);
 
-  return { notification, showNotification };
+  return { notification: null, showNotification };
 }

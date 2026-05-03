@@ -6,6 +6,7 @@ import { getDocs } from 'firebase/firestore/lite';
 import { buildLeaderboardQuery } from '../utils/leaderboardQuery';
 import { games } from '../data/games';
 import { useUiText } from '../i18n';
+import { SkeletonPodium } from './Skeleton';
 import './GlobalLeaderboard.css';
 
 interface GlobalRank {
@@ -142,9 +143,28 @@ const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({ onDataLoaded, var
   }, [calculateGlobalRanking]);
 
   const compactPlaceholder = <div className="global-ranking-bar" aria-hidden="true" style={{ pointerEvents: 'none' }} />;
-  if (loading) return variant === 'compact' ? compactPlaceholder : <div className="global-loader">{t('globalLoading', 'Loading Hall of Fame...')}</div>;
+  if (loading) return variant === 'compact' ? compactPlaceholder : (
+    <div className="global-leaderboard-section">
+      <h2 className="section-title"><Trophy size={22} aria-hidden="true" /> {t('globalRankingTitle', 'Global Ranking')}</h2>
+      <p className="section-subtitle">{t('globalRankingSubtitle', 'The Best Players of ArcadeDeck')}</p>
+      <SkeletonPodium />
+    </div>
+  );
   if (error) return variant === 'compact' ? compactPlaceholder : <div className="global-loader" style={{ color: '#ff6b6b' }}>{error}</div>;
-  if (podiumPlayers.length === 0) return variant === 'compact' ? compactPlaceholder : null;
+  if (podiumPlayers.length === 0) {
+    if (variant === 'compact') return compactPlaceholder;
+    return (
+      <div className="global-leaderboard-section">
+        <h2 className="section-title"><Trophy size={22} aria-hidden="true" /> {t('globalRankingTitle', 'Global Ranking')}</h2>
+        <p className="section-subtitle">{t('globalRankingSubtitle', 'The Best Players of ArcadeDeck')}</p>
+        <div className="empty-state hof-empty-state">
+          <Trophy size={36} aria-hidden="true" />
+          <p>{t('globalEmptyMessage', 'No champions yet. Play a game and post a score — the throne is open.')}</p>
+          <Link to="/" className="empty-cta-btn">{t('globalEmptyCta', 'Browse Games')} →</Link>
+        </div>
+      </div>
+    );
+  }
 
   // Sort back to 1st, 2nd, 3rd order for compact view
   const sortedPlayers = [...podiumPlayers].sort((a, b) => (a.originalRank ?? 0) - (b.originalRank ?? 0));

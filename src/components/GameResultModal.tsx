@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Trophy, Sparkles, RefreshCw, Home, X } from 'lucide-react';
 import { useEscapeKey } from '../hooks/useEscapeKey';
 import { getRankIcon } from '../utils/leaderboardIcons';
@@ -29,6 +29,31 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
 }) => {
   useEscapeKey(onClose, isOpen);
   const uiT = useUiText();
+  const [displayScore, setDisplayScore] = useState(0);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setDisplayScore(0);
+      return;
+    }
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion || score === 0) {
+      setDisplayScore(score);
+      return;
+    }
+    const start = performance.now();
+    const duration = 900;
+    let rafId = 0;
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setDisplayScore(Math.floor(score * eased));
+      if (t < 1) rafId = requestAnimationFrame(tick);
+      else setDisplayScore(score);
+    };
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [isOpen, score]);
 
   if (!isOpen) return null;
 
@@ -72,7 +97,7 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
         <p className="grm-game-title">{gameTitle}</p>
 
         <div className="grm-score-box">
-          <span className="grm-score-num">{score.toLocaleString()}</span>
+          <span className="grm-score-num" aria-live="polite">{displayScore.toLocaleString()}</span>
           {scoreUnit && <span className="grm-score-unit">{scoreUnit}</span>}
         </div>
 

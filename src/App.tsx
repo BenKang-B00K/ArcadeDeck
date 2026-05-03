@@ -5,6 +5,8 @@ import InstallPWA from './components/InstallPWA';
 import UpdateNotification from './components/UpdateNotification';
 import ErrorBoundary from './components/ErrorBoundary';
 import ScrollToTop from './components/ScrollToTop';
+import RouteTransition from './components/RouteTransition';
+import { ToastProvider } from './contexts/ToastContext';
 
 // Lazy-load all pages except Home so the initial bundle stays small.
 // Each page's JS (and its unique imports) loads only when first navigated to.
@@ -37,29 +39,33 @@ function App({ basename = '/' }: AppProps) {
 
   return (
     <Router basename={basename}>
-      <div className="app-main-layout">
-        <ScrollToTop />
-        <ErrorBoundary>
-        <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
-          <Routes>
-            <Route path="/"             element={<Home />} />
-            <Route path="/play/:slug"    element={<GamePlayer />} />
-            <Route path="/about"        element={<About />} />
-            <Route path="/privacy"      element={<Privacy />} />
-            <Route path="/contact"      element={<Contact />} />
-            <Route path="/hall-of-fame" element={<HallOfFame />} />
-            <Route path="/my-games"     element={<MyGames />} />
-            <Route path="/blog"             element={<Blog />} />
-            <Route path="/blog/tag/:tag"    element={<BlogTag />} />
-            <Route path="/blog/:slug"       element={<BlogPost />} />
-            <Route path="/genre/:slug"      element={<Genre />} />
-            <Route path="*"             element={<NotFound />} />
-          </Routes>
-        </Suspense>
-        </ErrorBoundary>
-        <InstallPWA />
-        <UpdateNotification />
-      </div>
+      <ToastProvider>
+        <div className="app-main-layout">
+          <ScrollToTop />
+          <ErrorBoundary>
+          <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+            <RouteTransition>
+              <Routes>
+                <Route path="/"             element={<Home />} />
+                <Route path="/play/:slug"    element={<GamePlayer />} />
+                <Route path="/about"        element={<About />} />
+                <Route path="/privacy"      element={<Privacy />} />
+                <Route path="/contact"      element={<Contact />} />
+                <Route path="/hall-of-fame" element={<HallOfFame />} />
+                <Route path="/my-games"     element={<MyGames />} />
+                <Route path="/blog"             element={<Blog />} />
+                <Route path="/blog/tag/:tag"    element={<BlogTag />} />
+                <Route path="/blog/:slug"       element={<BlogPost />} />
+                <Route path="/genre/:slug"      element={<Genre />} />
+                <Route path="*"             element={<NotFound />} />
+              </Routes>
+            </RouteTransition>
+          </Suspense>
+          </ErrorBoundary>
+          <InstallPWA />
+          <UpdateNotification />
+        </div>
+      </ToastProvider>
     </Router>
   );
 }

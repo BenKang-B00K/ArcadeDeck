@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import type { Game } from '../../data/games';
 import type { LocaleOverlay } from '../../i18n';
 import { getLocalizedString } from '../../i18n';
+import { genreSlug } from '../../utils/genres';
 
 interface Props {
   game: Game;
@@ -81,7 +82,14 @@ const GameHeadMeta: React.FC<Props> = ({ game, lang, overlay }) => {
           "@type": "BreadcrumbList",
           "itemListElement": [
             { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://arcadedeck.net/" },
-            { "@type": "ListItem", "position": 2, "name": game.genres[0] || "Games", "item": "https://arcadedeck.net/" },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": game.genres[0] || "Games",
+              "item": game.genres[0]
+                ? `https://arcadedeck.net/genre/${genreSlug(game.genres[0])}`
+                : "https://arcadedeck.net/",
+            },
             { "@type": "ListItem", "position": 3, "name": titleEn, "item": pageUrl },
           ],
         })}

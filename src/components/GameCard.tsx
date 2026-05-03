@@ -1,10 +1,27 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Monitor, Gamepad2, Play, Trophy } from 'lucide-react';
 import type { Game } from '../data/games';
 import { useLocale, getLocalizedString, getEnFeatures, useUiText } from '../i18n';
 import { thumb360, SRCSET_SIZES } from '../utils/thumb';
 import './GameCard.css';
+
+const prefetchedUrls = new Set<string>();
+
+function prefetchGameUrl(url: string): void {
+  if (!url || prefetchedUrls.has(url)) return;
+  prefetchedUrls.add(url);
+  try {
+    const link = document.createElement('link');
+    link.rel = 'prefetch';
+    link.as = 'document';
+    link.href = url;
+    link.crossOrigin = 'anonymous';
+    document.head.appendChild(link);
+  } catch {
+    // ignore prefetch errors — purely a perf hint
+  }
+}
 
 interface GameCardProps {
   game: Game;
@@ -36,6 +53,21 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
     }
   };
 
+  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleMouseEnter = () => {
+    if (game.status === 'IN PRODUCTION' || !game.gameUrl) return;
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    hoverTimerRef.current = setTimeout(() => prefetchGameUrl(game.gameUrl), 120);
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+  };
+
   const isInProduction = game.status === 'IN PRODUCTION';
 
   // Show only the most important platform badge (priority: Co-op > PC Only > Mobile).
@@ -49,7 +81,14 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
     : null;
 
   return (
-    <Link to={`/play/${game.slug}`} className={`game-card${isInProduction ? ' card-coming-soon' : ''}`} onClick={handleClick}>
+    <Link
+      to={`/play/${game.slug}`}
+      className={`game-card${isInProduction ? ' card-coming-soon' : ''}`}
+      onClick={handleClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onFocus={handleMouseEnter}
+    >
       {/* Row 1: Title + Badge + Rank */}
       <div className="card-title-row">
         <h3>{title}</h3>

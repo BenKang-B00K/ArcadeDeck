@@ -1,7 +1,8 @@
 {
-  "_comment": "Japanese overlay. UI strings are translated; game entries can be added per-game as needed.",
-  "label": "日本語",
+  "_comment": "English overlay. Mirror of base English fields from games.json — kept here as canonical reference for translators. UI strings live under ui.",
+  "label": "English",
   "ui": {
+    "_comment": "UI strings keyed by stable identifier. These are the canonical English source for all translatable chrome strings.",
     "navGames": "ゲーム",
     "navHallOfFame": "名誉の殿堂",
     "navBlog": "ブログ",
@@ -51,6 +52,8 @@
     "globalUpdated": "更新",
     "globalSyncing": "同期中...",
     "globalSyncStats": "データを同期",
+    "globalEmptyMessage": "No champions yet. Play a game and post a score — the throne is open.",
+    "globalEmptyCta": "Browse Games",
     "lbRank": "順位",
     "lbPlayer": "プレイヤー",
     "lbYou": "あなた",
@@ -109,6 +112,18 @@
     "myRankEmpty": "まだどのゲームでもトップ3に入っていません。レベルアップしよう！",
     "myRankMissions": "あなたへのミッション",
     "myRankMissionsDesc": "まだトップランクを獲得していないゲーム。",
+    "myRankNoScoresTitle": "No scores yet",
+    "myRankNoScoresDesc": "Pick a game and post your first score — your achievements will land here.",
+    "myRankBrowseGames": "Browse Games",
+    "myAchAriaLabel": "Achievements",
+    "myAchStreak": "{n}-Day Streak",
+    "myAchBestStreak": "Best Streak",
+    "myAchBestStreakLabel": "Best: {n} days",
+    "myAchChampion": "Champion",
+    "myAchPodium": "Podium Finish",
+    "myAchFirstScore": "First Score",
+    "myAchVeteran": "Versatile (5+)",
+    "myAchMarathon": "Marathon (10+)",
     "blogTitle": "ブログ",
     "blogSubtitle": "パッチノート、デザイン解説、月刊名誉の殿堂まとめ。",
     "blogAllPosts": "すべての投稿",
@@ -125,6 +140,7 @@
     "playerLabel": "プレイヤー",
     "playerEdit": "編集",
     "playerFullscreen": "全画面",
+    "playerExitFullscreen": "Exit",
     "playerLoad": "読み込み",
     "playerOverview": "概要",
     "playerControls": "操作方法",
@@ -141,6 +157,10 @@
     "tabTips": "ヒント",
     "tabLore": "世界観",
     "tabFeatures": "特徴",
+    "helpfulPrompt": "Was this helpful?",
+    "helpfulYes": "Yes, helpful",
+    "helpfulNo": "Not helpful",
+    "helpfulThanks": "Thanks!",
     "relatedGamesTitle": "おすすめゲーム",
     "relatedPostsTitle": "ブログから",
     "seoPlayFreeOn": "ArcadeDeckで無料プレイ",
@@ -509,6 +529,7 @@
         "手書き風のミシックファンタジー・アート",
         "PC専用"
       ]
-    }
+    },
+    "_comment": "Per-game canonical English. Translators mirror this in {lang}.json."
   }
 }

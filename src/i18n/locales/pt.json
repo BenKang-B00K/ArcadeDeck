@@ -1,6 +1,6 @@
 {
-  "_comment": "Portuguese overlay scaffold. Empty strings fall back to English. Translate values in place.",
-  "label": "Português",
+  "_comment": "English overlay. Mirror of base English fields from games.json — kept here as canonical reference for translators. UI strings live under ui.",
+  "label": "English",
   "ui": {
     "_comment": "UI strings keyed by stable identifier. These are the canonical English source for all translatable chrome strings.",
     "navGames": "Jogos",
@@ -52,6 +52,8 @@
     "globalUpdated": "Atualizado",
     "globalSyncing": "Sincronizando...",
     "globalSyncStats": "Sincronizar Stats",
+    "globalEmptyMessage": "No champions yet. Play a game and post a score — the throne is open.",
+    "globalEmptyCta": "Browse Games",
     "lbRank": "Rank",
     "lbPlayer": "Jogador",
     "lbYou": "VOCÊ",
@@ -110,6 +112,18 @@
     "myRankEmpty": "Você ainda não chegou ao Top 3 em nenhum jogo. Hora de subir de nível!",
     "myRankMissions": "Missões para Você",
     "myRankMissionsDesc": "Jogos onde você ainda não garantiu um rank alto.",
+    "myRankNoScoresTitle": "No scores yet",
+    "myRankNoScoresDesc": "Pick a game and post your first score — your achievements will land here.",
+    "myRankBrowseGames": "Browse Games",
+    "myAchAriaLabel": "Achievements",
+    "myAchStreak": "{n}-Day Streak",
+    "myAchBestStreak": "Best Streak",
+    "myAchBestStreakLabel": "Best: {n} days",
+    "myAchChampion": "Champion",
+    "myAchPodium": "Podium Finish",
+    "myAchFirstScore": "First Score",
+    "myAchVeteran": "Versatile (5+)",
+    "myAchMarathon": "Marathon (10+)",
     "blogTitle": "Blog",
     "blogSubtitle": "Notas de atualização, mergulhos profundos no design e resumos mensais do Salão da Fama.",
     "blogAllPosts": "Todos os posts",
@@ -126,6 +140,7 @@
     "playerLabel": "Jogador",
     "playerEdit": "Editar",
     "playerFullscreen": "Tela Cheia",
+    "playerExitFullscreen": "Exit",
     "playerLoad": "Carregar",
     "playerOverview": "Visão Geral",
     "playerControls": "Controles",
@@ -142,6 +157,10 @@
     "tabTips": "Dicas",
     "tabLore": "História",
     "tabFeatures": "Recursos",
+    "helpfulPrompt": "Was this helpful?",
+    "helpfulYes": "Yes, helpful",
+    "helpfulNo": "Not helpful",
+    "helpfulThanks": "Thanks!",
     "relatedGamesTitle": "Você Também Pode Gostar",
     "relatedPostsTitle": "Do Blog",
     "seoPlayFreeOn": "Jogue Grátis no",
@@ -510,6 +529,7 @@
         "Arte de Fantasia Mítica Pintada à Mão",
         "Apenas PC"
       ]
-    }
+    },
+    "_comment": "Per-game canonical English. Translators mirror this in {lang}.json."
   }
 }

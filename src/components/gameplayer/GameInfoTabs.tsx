@@ -3,6 +3,7 @@ import { BookOpen, Joystick, Lightbulb, ScrollText, Sparkles } from 'lucide-reac
 import type { Game } from '../../data/games';
 import type { LocaleOverlay } from '../../i18n';
 import { getLocalizedString, getLocalizedArray, useUiText } from '../../i18n';
+import HelpfulThumbs from './HelpfulThumbs';
 
 interface Props {
   game: Game;
@@ -62,12 +63,14 @@ const GameInfoTabs: React.FC<Props> = ({ game, lang, overlay, activeTab, setActi
         <section id="section-tips" className="info-section detail-card">
           <h2 className="info-section-title"><Lightbulb size={18} aria-hidden="true" /> {t('playerTips', 'Pro Tips')}</h2>
           <div className="detail-content tip-highlight">{tips}</div>
+          <HelpfulThumbs gameId={game.id} section="tips" />
         </section>
       )}
       {hasLore && (
         <section id="section-lore" className="info-section detail-card">
           <h2 className="info-section-title"><ScrollText size={18} aria-hidden="true" /> {t('playerLore', 'World Lore')}</h2>
           <div className="detail-content italic">{lore}</div>
+          <HelpfulThumbs gameId={game.id} section="lore" />
         </section>
       )}
       {hasFeatures && (

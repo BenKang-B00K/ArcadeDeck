@@ -42,6 +42,7 @@ interface Comment {
   nickname: string;
   text: string;
   createdAt: FirestoreTimestamp | null;
+  pending?: boolean;
 }
 
 interface CommentSectionProps {
@@ -92,7 +93,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
     setHasMore(snapshot.docs.length === PAGE_SIZE);
 
     if (reset) {
-      setComments(fetched);
+      // Preserve any pending optimistic comments not yet confirmed by server
+      setComments(prev => {
+        const pending = prev.filter(c => c.pending);
+        return [...pending, ...fetched];
+      });
     } else {
       setComments(prev => [...prev, ...fetched]);
     }
@@ -115,25 +120,42 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
       return;
     }
 
+    // Strip HTML tags as defense-in-depth (React escapes by default, but Firestore data is shared)
+    const sanitizedText = newComment.trim().replace(/<[^>]*>/g, '');
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const localDate = new Date();
+    const optimistic: Comment = {
+      id: tempId,
+      gameId,
+      nickname: currentNickname,
+      text: sanitizedText,
+      createdAt: { toDate: () => localDate },
+      pending: true,
+    };
+
     setIsSubmitting(true);
     lastSubmitRef.current = Date.now();
+    setComments(prev => [optimistic, ...prev]);
+    setNewComment('');
+    // Dismiss keyboard on mobile
+    (document.activeElement as HTMLElement)?.blur();
+
     try {
-      // Strip HTML tags as defense-in-depth (React escapes by default, but Firestore data is shared)
-      const sanitizedText = newComment.trim().replace(/<[^>]*>/g, '');
       await addDoc(collection(db, "comments"), {
         gameId,
         nickname: currentNickname,
         text: sanitizedText,
         createdAt: serverTimestamp()
       });
-      setNewComment('');
-      // Dismiss keyboard on mobile
-      (document.activeElement as HTMLElement)?.blur();
-      // Re-fetch from the top so the new comment appears immediately
+      // Replace optimistic with confirmed server data
+      setComments(prev => prev.filter(c => c.id !== tempId));
       lastDocRef.current = null;
       await fetchComments(true);
     } catch (error) {
       console.error("Error adding comment: ", error);
+      // Rollback optimistic + restore input
+      setComments(prev => prev.filter(c => c.id !== tempId));
+      setNewComment(sanitizedText);
       setSubmitError("Failed to post comment. Please try again.");
       setTimeout(() => setSubmitError(null), 4000);
     } finally {
@@ -179,11 +201,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
         {comments.length > 0 ? (
           <>
             {comments.map((comment) => (
-              <div key={comment.id} className="comment-item">
+              <div key={comment.id} className={`comment-item${comment.pending ? ' comment-pending' : ''}`}>
                 <div className="comment-header">
                   <span className="comment-author">{comment.nickname}</span>
                   <span className="comment-date" title={comment.createdAt?.toDate ? comment.createdAt.toDate().toLocaleString() : ''}>
-                    {comment.createdAt?.toDate ? timeAgo(comment.createdAt.toDate()) : 'Just now'}
+                    {comment.pending ? t('commentPosting', 'Posting...') : (comment.createdAt?.toDate ? timeAgo(comment.createdAt.toDate()) : 'Just now')}
                   </span>
                 </div>
                 <p className="comment-text">{comment.text}</p>

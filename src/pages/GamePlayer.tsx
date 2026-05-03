@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
-import { Maximize, Heart, Link as LinkIcon, Home, X } from 'lucide-react';
+import { Maximize, Minimize, Heart, Link as LinkIcon, Home, X } from 'lucide-react';
 import { games } from '../data/games';
 import type { Game, LeaderboardEntry } from '../data/games';
 import Navbar from '../components/Navbar';
@@ -32,6 +32,7 @@ import {
   doc
 } from "firebase/firestore/lite";
 import { useUiText, useLocale, getLocalizedString } from '../i18n';
+import { genreSlug } from '../utils/genres';
 import './GamePlayer.css';
 
 const GamePlayer: React.FC = () => {
@@ -45,6 +46,7 @@ const GamePlayer: React.FC = () => {
     localStorage.getItem(`liked_${id}`) === 'true'
   );
   const [isPseudoFullscreen, setIsPseudoFullscreen] = useState(false);
+  const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [iframeLoading, setIframeLoading] = useState(true);
@@ -207,8 +209,9 @@ const GamePlayer: React.FC = () => {
   useEffect(() => {
     if (!game || !id) return;
     const recentlyPlayed = JSON.parse(localStorage.getItem('recently_played') || '[]');
-    const updatedList = [game.id, ...recentlyPlayed.filter((gid: string) => gid !== game.id)].slice(0, 4);
+    const updatedList = [game.id, ...recentlyPlayed.filter((gid: string) => gid !== game.id)].slice(0, 5);
     localStorage.setItem('recently_played', JSON.stringify(updatedList));
+    void import('../utils/streak').then(m => m.recordPlayToday());
   }, [id, game]);
 
   useEffect(() => {
@@ -267,6 +270,28 @@ const GamePlayer: React.FC = () => {
     };
   }, [isPseudoFullscreen]);
 
+  useEffect(() => {
+    const onChange = () => {
+      const d = document as Document & {
+        webkitFullscreenElement?: Element | null;
+        mozFullScreenElement?: Element | null;
+        msFullscreenElement?: Element | null;
+      };
+      const active = !!(d.fullscreenElement || d.webkitFullscreenElement || d.mozFullScreenElement || d.msFullscreenElement);
+      setIsNativeFullscreen(active);
+    };
+    document.addEventListener('fullscreenchange', onChange);
+    document.addEventListener('webkitfullscreenchange', onChange);
+    document.addEventListener('mozfullscreenchange', onChange);
+    document.addEventListener('MSFullscreenChange', onChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', onChange);
+      document.removeEventListener('webkitfullscreenchange', onChange);
+      document.removeEventListener('mozfullscreenchange', onChange);
+      document.removeEventListener('MSFullscreenChange', onChange);
+    };
+  }, []);
+
   // Re-render on orientation change to recalculate game wrapper size (debounced)
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout>;
@@ -295,6 +320,28 @@ const GamePlayer: React.FC = () => {
   }, [game]);
 
   const handleFullscreen = () => {
+    if (isPseudoFullscreen) {
+      setIsPseudoFullscreen(false);
+      return;
+    }
+
+    if (isNativeFullscreen) {
+      const d = document as Document & {
+        webkitExitFullscreen?: () => void;
+        mozCancelFullScreen?: () => void;
+        msExitFullscreen?: () => void;
+      };
+      try {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (d.webkitExitFullscreen) d.webkitExitFullscreen();
+        else if (d.mozCancelFullScreen) d.mozCancelFullScreen();
+        else if (d.msExitFullscreen) d.msExitFullscreen();
+      } catch (err) {
+        console.error("Exit fullscreen error:", err);
+      }
+      return;
+    }
+
     const element = iframeRef.current;
     if (!element) return;
 
@@ -322,6 +369,10 @@ const GamePlayer: React.FC = () => {
       setIsPseudoFullscreen(true);
     }
   };
+
+  const isFs = isNativeFullscreen || isPseudoFullscreen;
+  const fullscreenLabel = isFs ? uiT('playerExitFullscreen', 'Exit') : t.fullscreen;
+  const FsIcon = isFs ? Minimize : Maximize;
 
   const handleShare = () => {
     setShowShareModal(true);
@@ -377,8 +428,14 @@ const GamePlayer: React.FC = () => {
         </div>
 
         <nav className="breadcrumbs game-breadcrumbs" aria-label="Breadcrumb">
-          <Link to="/">Home</Link>
+          <Link to="/">{uiT('breadcrumbHome', 'Home')}</Link>
           <span aria-hidden="true">›</span>
+          {game.genres[0] && (
+            <>
+              <Link to={`/genre/${genreSlug(game.genres[0])}`}>{game.genres[0]}</Link>
+              <span aria-hidden="true">›</span>
+            </>
+          )}
           <span className="breadcrumb-current">{getLocalizedString(game, 'title', lang, overlay)}</span>
         </nav>
 
@@ -390,8 +447,8 @@ const GamePlayer: React.FC = () => {
           </div>
 
           <div className="game-controls">
-            <button className="control-btn primary fullscreen-btn" onClick={handleFullscreen}>
-              <Maximize size={16} aria-hidden="true" /> {t.fullscreen}
+            <button className="control-btn primary fullscreen-btn" onClick={handleFullscreen} aria-pressed={isFs}>
+              <FsIcon size={16} aria-hidden="true" /> {fullscreenLabel}
             </button>
             <button className={`control-btn like-btn ${isLiked ? 'active' : ''}`} onClick={() => { const n = !isLiked; setIsLiked(n); localStorage.setItem(`liked_${id}`, String(n)); }}>
               <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} aria-hidden="true" />
@@ -443,8 +500,8 @@ const GamePlayer: React.FC = () => {
       {/* ── Sticky Controls Bar ── */}
       {showStickyBar && !isPseudoFullscreen && (
         <div className="sticky-controls-bar">
-          <button className="sticky-btn sticky-fullscreen" onClick={handleFullscreen}>
-            <Maximize size={16} aria-hidden="true" /> {uiT('playerFullscreen', 'Fullscreen')}
+          <button className="sticky-btn sticky-fullscreen" onClick={handleFullscreen} aria-pressed={isFs}>
+            <FsIcon size={16} aria-hidden="true" /> {fullscreenLabel}
           </button>
           <button className={`sticky-btn sticky-like ${isLiked ? 'liked' : ''}`} aria-label={isLiked ? 'Unlike this game' : 'Like this game'} onClick={() => { const n = !isLiked; setIsLiked(n); localStorage.setItem(`liked_${id}`, String(n)); }}>
             <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} aria-hidden="true" />

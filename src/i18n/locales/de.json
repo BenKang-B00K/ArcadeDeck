@@ -1,6 +1,6 @@
 {
-  "_comment": "Deutsch overlay scaffold. Empty strings fall back to English. Translate values in place.",
-  "label": "Deutsch",
+  "_comment": "English overlay. Mirror of base English fields from games.json — kept here as canonical reference for translators. UI strings live under ui.",
+  "label": "English",
   "ui": {
     "_comment": "UI strings keyed by stable identifier. These are the canonical English source for all translatable chrome strings.",
     "navGames": "Spiele",
@@ -52,6 +52,8 @@
     "globalUpdated": "Aktualisiert",
     "globalSyncing": "Synchronisierung...",
     "globalSyncStats": "Statistiken synchronisieren",
+    "globalEmptyMessage": "No champions yet. Play a game and post a score — the throne is open.",
+    "globalEmptyCta": "Browse Games",
     "lbRank": "Rang",
     "lbPlayer": "Spieler",
     "lbYou": "DU",
@@ -110,6 +112,18 @@
     "myRankEmpty": "Du hast in noch keinem Spiel die Top 3 erreicht. Zeit für ein Level-up!",
     "myRankMissions": "Missionen für dich",
     "myRankMissionsDesc": "Spiele, bei denen du dir noch keinen Spitzenplatz gesichert hast.",
+    "myRankNoScoresTitle": "No scores yet",
+    "myRankNoScoresDesc": "Pick a game and post your first score — your achievements will land here.",
+    "myRankBrowseGames": "Browse Games",
+    "myAchAriaLabel": "Achievements",
+    "myAchStreak": "{n}-Day Streak",
+    "myAchBestStreak": "Best Streak",
+    "myAchBestStreakLabel": "Best: {n} days",
+    "myAchChampion": "Champion",
+    "myAchPodium": "Podium Finish",
+    "myAchFirstScore": "First Score",
+    "myAchVeteran": "Versatile (5+)",
+    "myAchMarathon": "Marathon (10+)",
     "blogTitle": "Blog",
     "blogSubtitle": "Patchnotizen, Design-Deep-Dives und monatliche Ruhmeshallen-Zusammenfassungen.",
     "blogAllPosts": "Alle Beiträge",
@@ -126,6 +140,7 @@
     "playerLabel": "Spieler",
     "playerEdit": "Bearbeiten",
     "playerFullscreen": "Vollbild",
+    "playerExitFullscreen": "Exit",
     "playerLoad": "Laden",
     "playerOverview": "Übersicht",
     "playerControls": "Steuerung",
@@ -142,6 +157,10 @@
     "tabTips": "Tipps",
     "tabLore": "Lore",
     "tabFeatures": "Features",
+    "helpfulPrompt": "Was this helpful?",
+    "helpfulYes": "Yes, helpful",
+    "helpfulNo": "Not helpful",
+    "helpfulThanks": "Thanks!",
     "relatedGamesTitle": "Das könnte dir auch gefallen",
     "relatedPostsTitle": "Vom Blog",
     "seoPlayFreeOn": "Kostenlos spielen auf",
@@ -510,6 +529,7 @@
         "Handgemalte mythische Fantasy-Grafik",
         "Nur PC"
       ]
-    }
+    },
+    "_comment": "Per-game canonical English. Translators mirror this in {lang}.json."
   }
 }

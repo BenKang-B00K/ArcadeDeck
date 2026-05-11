@@ -15,6 +15,9 @@ npm run build        # validate → sitemap → rss → tsc -b → vite build �
 npm run lint         # ESLint flat config
 npm run preview      # Preview production build
 npm run deploy       # Build + Firebase Hosting publish
+npm run indexnow         # Ping IndexNow for changed URLs (full set)
+npm run indexnow:posts   # Ping IndexNow for blog posts only
+npm run indexnow:all     # Ping IndexNow for every URL in sitemap
 ```
 
 Firestore rules deploy (separate from app deploy):
@@ -32,15 +35,17 @@ There are no tests in this repo.
 - `src/i18n/locales/en.json` — canonical English text under `games[<id>]` (`title`, `description`, `fullDescription`, `controls`, `tips`, `lore`, `features`). Source of truth for game copy.
 - `src/i18n/locales/{lang}.json` — overlay translations for non-English locales (de, es, es-LA, fr, ja, ko, pt, ru, vi, zh). Same shape. Missing fields fall back to English. The user owns all non-English translations.
 
-Adding a new game: edit `games.json` (structural) + `en.json` `games` block (text) + drop a WebP into `public/images/`. Other locales are translated separately by the user. Code paths read structural config from `games.json` — never hardcode game IDs (`id === '7'` is forbidden by RULES.md). Game text is always resolved via `getLocalizedString` / `getLocalizedArray` from `src/i18n/getLocalized.ts` — direct property access (`game.title`) is not on the `Game` type. Type definitions live in `src/data/games.ts`.
+Adding a new game: edit `games.json` (structural) + `en.json` `games` block (text) + drop a WebP into `public/images/`. Templates: `new-game-template.txt`, `new-game-template.json`. Other locales are translated separately by the user. Code paths read structural config from `games.json` — never hardcode game IDs (`id === '7'` is forbidden by RULES.md). Game text is always resolved via `getLocalizedString` / `getLocalizedArray` from `src/i18n/getLocalized.ts` — direct property access (`game.title`) is not on the `Game` type. Type definitions live in `src/data/games.ts`.
 
 **i18n internals:** `src/i18n/registry.ts` eager-imports `en.json` so English is always available as the fallback. Other overlays lazy-load via `import.meta.glob('./locales/*.json')`. `src/i18n/store.ts` exposes `useLocale()` returning `{ lang, overlay }` and seeds `en` synchronously to avoid a null flash on initial render. Underscore-prefixed locale files (e.g. `_template.json`) are ignored by the glob filter. Backups belong outside `src/i18n/locales/` so the glob does not bundle them.
 
-**Routing & code-splitting:** `src/App.tsx` mounts React Router. `Home` is eager; every other page is `React.lazy`. Vite `manualChunks` splits `vendor` (react/router) from `firebase` so Firestore is a parallel-loadable chunk. `Home.tsx` further dynamic-imports `firebase/firestore` inside effects + uses `requestIdleCallback` so Firestore code never blocks FCP/LCP. `GlobalLeaderboard` is `React.lazy` from Home for the same reason.
+**Locale-prefixed URLs:** English serves at root (`/`, `/play/{slug}`); other locales prefixed (`/de/`, `/de/play/{slug}`, `/es-la/…`). React Router boots with `basename` derived from the URL prefix. The language switcher does a full-page navigate so the prerendered shell for the target locale serves directly (no client-side hydration mismatch).
 
-**Pre-rendering for SEO:** This is an SPA, but `scripts/prerender-pages.js` runs after `vite build` and emits a static `dist/play/{slug}/index.html` for every playable game (extracts head + script tags from the built `index.html`, injects per-game meta/JSON-LD/visible content). It also re-syncs the home `<noscript>` block with the current playable game list and creates static shells for `/about`, `/privacy`, `/contact`, `/hall-of-fame`, `/my-games`. React replaces the prerendered subtree on mount — do **not** hide the prerendered content with `display:none` (cloaking).
+**Routing & code-splitting:** `src/App.tsx` mounts React Router. `Home` is eager; every other page is `React.lazy`. Vite `manualChunks` splits `vendor` (react/router) from `firebase` and `icons` (lucide-react) so Firestore is a parallel-loadable chunk. `Home.tsx` further dynamic-imports `firebase/firestore` inside effects + uses `requestIdleCallback` so Firestore code never blocks FCP/LCP. `GlobalLeaderboard` is `React.lazy` from Home for the same reason. `vite.config.ts` injects a `<link rel="modulepreload">` for the entry chunk near the top of `<head>` (custom `preloadEntry()` plugin) so the entry fetch starts in parallel with HTML parsing.
 
-**Sitemap:** `scripts/generate-sitemap.js` writes `public/sitemap.xml` from `games.json` on every build. Do not edit `sitemap.xml` by hand — it's regenerated.
+**Pre-rendering for SEO:** This is an SPA, but `scripts/prerender-pages.js` runs after `vite build` and emits a static `dist/play/{slug}/index.html` for every playable game (extracts head + script tags from the built `index.html`, injects per-game meta/JSON-LD/visible content). It also emits **per-locale shells**: 11 translated shells per game, 11 home shells, plus blog and static routes (`/about`, `/privacy`, `/contact`, `/hall-of-fame`, `/my-games`). Each shell carries the full hreflang map, locale-correct `og:locale`, and JSON-LD `inLanguage`. When a locale has no translation for a given game, the prerender sets `canonical` to the English URL and `<meta name="robots" content="noindex,follow">` to consolidate signals. React replaces the prerendered subtree on mount — do **not** hide the prerendered content with `display:none` (cloaking).
+
+**Sitemap:** `scripts/generate-sitemap.js` writes `public/sitemap.xml` from `games.json` on every build, with `xhtml:hreflang` alternates per locale. `scripts/generate-rss.js` emits the blog feed. Do not edit either output by hand — they're regenerated.
 
 **Game iframes & score postMessage:** Games run in iframes hosted elsewhere (`gameUrl`). `GamePlayer` listens for `postMessage` score events. Validate `event.origin` matches the game's iframe domain; clamp `score` to `[0, 10_000_000]` and `isFinite`; silently drop anything else (no alerts).
 
@@ -57,6 +62,7 @@ Adding a new game: edit `games.json` (structural) + `en.json` `games` block (tex
 - **Errors:** every route is wrapped in `<ErrorBoundary>` — don't add per-page try/catch UI.
 - **Images:** WebP only, in `public/images/`, referenced as `"images/foo.webp"` from `games.json`. PWA icons: 192×192 and 512×512.
 - **i18n:** When adding a new game, only fill `en.json` `games[id]`. The user adds translations for other locales themselves. Never invent translations for `ko.json`, `ja.json`, etc. without explicit instruction.
+- **UI strings:** new UI copy goes into `en.json` `ui` block, accessed via `useUiText()` / `ui()`. Never hardcode user-facing strings in components.
 - **Image optimization:** `scripts/optimize-images.cjs` resizes/re-encodes oversized banners in-place to 640w q70. Skips icons and `arcadedeck-banner.webp`. Run manually after adding large new banners.
 - **Image naming:** `{slug}.webp` kebab-case lowercase (matches `games.json` slug). System files: `favicon.webp`, `arcadedeck-banner.webp`, `bg.webp`, `icon-192x192.webp`, `icon-512x512.webp`.
 

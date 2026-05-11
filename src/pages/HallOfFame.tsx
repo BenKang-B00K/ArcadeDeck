@@ -27,6 +27,7 @@ const HallOfFame: React.FC = () => {
         <header className="hof-header">
           <h1><Landmark size={28} aria-hidden="true" /> {t('hofTitle', 'Hall of Fame Archive')}</h1>
           <p>{t('hofSubtitle', 'The Eternal Records of ArcadeDeck Legends')}</p>
+          <p className="hof-intro">{t('hofIntro', 'Every score submitted across ArcadeDeck is ranked here in real time. The leaders of each game claim glory for the current month — at month\'s end, the top names are immortalized in the Hall of Fame archive. Compete, climb, and leave your mark.')}</p>
         </header>
 
         <section className="archive-section">

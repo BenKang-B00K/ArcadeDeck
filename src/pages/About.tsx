@@ -22,24 +22,24 @@ const About: React.FC = () => {
       <main className="container" style={{ paddingTop: '120px', flex: 1, color: '#fff' }}>
         <h1 style={{ fontSize: '3rem', marginBottom: '2rem' }}>About <span style={{ color: '#00d2ff' }}>ArcadeDeck</span></h1>
         <div style={{ lineHeight: '1.8', fontSize: '1.1rem', maxWidth: '800px' }}>
-          <p>Welcome to ArcadeDeck, your ultimate destination for high-quality web-based gaming experiences. We are a small team of independent game developers and web engineers passionate about creating fun, accessible games that anyone can enjoy instantly in their browser.</p>
+          <p>Welcome to ArcadeDeck, your destination for high-quality web-based gaming. We're a small team of independent game developers and web engineers building original browser games that anyone can play instantly, on any device, with zero friction.</p>
 
           <h2 style={{ marginTop: '3rem', color: '#00d2ff' }}>Our Mission</h2>
-          <p>ArcadeDeck was built on a simple belief: great games should be free, instant, and available to everyone. No downloads, no sign-ups, no app store fees — just open a link and play. We design and develop original browser games spanning multiple genres including Tower Defense, Roguelike, RPG, Strategy, Puzzle, Casual, Arcade, and more.</p>
-          <p>Every game on ArcadeDeck is crafted with care — from deep strategic auto-battlers to quick casual experiences. ArcadeDeck focuses on gameplay quality over quantity, ensuring each title delivers a polished and engaging experience.</p>
+          <p>ArcadeDeck was built on a simple belief: great games should be free, instant, and available to everyone. No downloads, no sign-ups, no app store fees — just open a link and play. We design and develop original browser games spanning Tower Defense, Roguelike, RPG, Strategy, Puzzle, Casual, Arcade, and more.</p>
+          <p>Every game on ArcadeDeck is crafted with care — from deep strategic auto-battlers to quick casual experiences. We prioritize gameplay quality over catalog size, so every title we ship is polished, balanced, and worth your time.</p>
 
           <h2 style={{ marginTop: '3rem', color: '#00d2ff' }}>What Makes Us Different</h2>
-          <p><strong>Original Games:</strong> Most titles on ArcadeDeck are original creations, developed in-house by our team. We don't just aggregate games from other sources — we build them from scratch with unique mechanics, art, and storylines.</p>
-          <p><strong>Global Leaderboards:</strong> Every game features real-time leaderboards so you can compete with players worldwide. Your scores are tracked, ranked, and archived monthly in our Hall of Fame.</p>
-          <p><strong>Cross-Platform:</strong> Our games work on desktops, tablets, and mobile phones. We optimize for touch controls and responsive layouts so you get the best experience regardless of your device.</p>
-          <p><strong>Bilingual Support:</strong> ArcadeDeck supports both English and Korean, making our games accessible to a wider audience. Game descriptions, controls, tips, and world lore are available in both languages.</p>
+          <p><strong>Original Games:</strong> Most titles on ArcadeDeck are original creations, developed in-house. We don't just aggregate games from other sources — we build them from scratch with unique mechanics, art, and storylines.</p>
+          <p><strong>Global Leaderboards:</strong> Every game features real-time leaderboards so you can compete with players worldwide. Scores are tracked, ranked, and archived monthly in our Hall of Fame.</p>
+          <p><strong>Cross-Platform:</strong> Our games run on desktops, tablets, and phones. We optimize for touch controls and responsive layouts so you get the best experience regardless of device.</p>
+          <p><strong>11 Languages:</strong> ArcadeDeck is localized in English, Korean, Japanese, Chinese, German, French, Spanish (EU and LATAM), Portuguese, Russian, and Vietnamese. Game titles, descriptions, controls, tips, and world lore are translated per locale, and every locale has its own URL path for SEO.</p>
 
           <h2 style={{ marginTop: '3rem', color: '#00d2ff' }}>Our Technology</h2>
-          <p>ArcadeDeck is built with modern web technologies including React, TypeScript, Firebase, and Vite. ArcadeDeck games run entirely in the browser using HTML5 Canvas and WebGL, delivering smooth performance without plugins. ArcadeDeck is a Progressive Web App (PWA), meaning you can install it to your home screen for a native app-like experience.</p>
+          <p>ArcadeDeck is built with React 19, TypeScript, Firebase, and Vite. Games run entirely in the browser via HTML5 Canvas and WebGL — no plugins, no installs. The site is a Progressive Web App (PWA), so you can install it to your home screen for a native app-like experience and offline access to recently played titles.</p>
 
           <h2 style={{ marginTop: '3rem', color: '#00d2ff' }}>Our Growing Library</h2>
-          <p>We are constantly expanding our game catalog. From the intense action of <em>Gate of Hell: Rise of Demons</em> to the strategic depth of <em>Kingdom's Last Stand</em>, from the quick thrills of <em>Fruit Frenzy</em> to the brain-teasing puzzles of <em>Gem Merge</em> — there's something for every type of gamer.</p>
-          <p>New games are added regularly, and existing games receive updates with new content, balance changes, and quality-of-life improvements based on player feedback.</p>
+          <p>We're constantly expanding the catalog. From the deck-building tower defense of <em>Mythic Defender: Heroes Returns</em> and the intense action of <em>Gate of Hell: Rise of Demons</em>, to the strategic depth of <em>Kingdom's Last Stand</em>, the quick thrills of <em>Fruit Frenzy</em>, and the brain-teasing puzzles of <em>Gem Merge</em> — there's something for every type of gamer.</p>
+          <p>New games ship regularly, and existing games receive balance patches, new content, and quality-of-life improvements based on player feedback.</p>
 
           <h2 style={{ marginTop: '3rem', color: '#00d2ff' }}>Community</h2>
           <p>We value our players' voices. Every game page has a comment section where you can share strategies, give feedback, or just say hello. Our leaderboards create a competitive yet friendly community where players push each other to improve.</p>

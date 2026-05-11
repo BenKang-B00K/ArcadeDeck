@@ -55,6 +55,15 @@
   position: relative;
 }
 
+.hof-header .hof-intro {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  max-width: 720px;
+  margin: 1.25rem auto 0;
+  color: var(--text-muted);
+  opacity: 0.85;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hof-header::after { animation: none; }
 }

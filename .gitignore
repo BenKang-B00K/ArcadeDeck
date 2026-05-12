@@ -31,10 +31,12 @@ firebase-debug.log
 
 # Local reference files
 leaderboard.txt
+googleadsense.txt
 
 # Local backups & i18n helper scripts (not for repo)
 *.bak.json
 src/i18n/locales/*.py
+src/i18n/locales/language_addition.txt
 
 # Claude Code local files
 .agents/
@@ -65,6 +67,3 @@ Desktop.ini
 # Coverage & test output
 coverage/
 *.lcov
-src/i18n/locales/language_addition.txt
-googleadsense.txt
-CLAUDE.md

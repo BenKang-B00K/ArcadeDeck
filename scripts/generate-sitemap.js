@@ -99,6 +99,7 @@ for (const genre of allGenres) {
 // English-only routes
 const englishOnlyRoutes = [
   { path: '/hall-of-fame', priority: '0.8' },
+  { path: '/forum', priority: '0.7' },
   { path: '/blog', priority: '0.7' },
   { path: '/about', priority: '0.6' },
   { path: '/contact', priority: '0.5' },

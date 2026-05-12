@@ -701,6 +701,29 @@ const routeShells = {
         <p>Privacy questions: <a href="mailto:help@arcadedeck.net">help@arcadedeck.net</a>.</p>
       </div>`,
   },
+  forum: {
+    title: 'Player Forum | ArcadeDeck Community',
+    description: 'Discuss games, share strategies, and connect with other ArcadeDeck players in the community forum.',
+    canonical: `${SITE}/forum`,
+    extraLd: [breadcrumbLdFor('Forum', `${SITE}/forum`)],
+    noscript: `
+      <div style="background:#171424;color:#eaeaf0;font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;">
+        <nav aria-label="Breadcrumb" style="color:#9aa;font-size:0.85rem;margin-bottom:12px;">
+          <a href="/" style="color:#00d2ff;">Home</a> &rsaquo;
+          <span>Forum</span>
+        </nav>
+        <h1>ArcadeDeck Player Forum</h1>
+        <p>Talk about games, share tips, post strategies, and meet other players on the ArcadeDeck community forum. No account required — pick a nickname and post.</p>
+        <h2>Categories</h2>
+        <ul>
+          <li><strong>General</strong> — anything ArcadeDeck-related.</li>
+          <li><strong>Game Talk</strong> — discuss specific games in the catalogue.</li>
+          <li><strong>Suggestions</strong> — feature ideas, new games, site feedback.</li>
+          <li><strong>Off-Topic</strong> — everything else gamers care about.</li>
+        </ul>
+        <p>Enable JavaScript to browse threads, post new topics, and reply to other players. <a href="/" style="color:#00d2ff;">Browse all games</a> · <a href="/hall-of-fame" style="color:#00d2ff;">Hall of Fame</a></p>
+      </div>`,
+  },
   contact: {
     title: 'Contact | ArcadeDeck',
     description: 'Contact ArcadeDeck — email help@arcadedeck.net for support, bug reports, partnership inquiries, or game submissions.',

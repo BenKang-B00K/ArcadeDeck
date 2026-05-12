@@ -20,6 +20,9 @@ const Blog        = lazy(() => import('./pages/Blog'));
 const BlogPost    = lazy(() => import('./pages/BlogPost'));
 const BlogTag     = lazy(() => import('./pages/BlogTag'));
 const Genre       = lazy(() => import('./pages/Genre'));
+const Forum       = lazy(() => import('./pages/Forum'));
+const ForumThread = lazy(() => import('./pages/ForumThread'));
+const ForumNew    = lazy(() => import('./pages/ForumNew'));
 const NotFound    = lazy(() => import('./pages/NotFound'));
 
 interface AppProps {
@@ -57,6 +60,9 @@ function App({ basename = '/' }: AppProps) {
                 <Route path="/blog/tag/:tag"    element={<BlogTag />} />
                 <Route path="/blog/:slug"       element={<BlogPost />} />
                 <Route path="/genre/:slug"      element={<Genre />} />
+                <Route path="/forum"            element={<Forum />} />
+                <Route path="/forum/new"        element={<ForumNew />} />
+                <Route path="/forum/t/:id"      element={<ForumThread />} />
                 <Route path="*"             element={<NotFound />} />
               </Routes>
             </RouteTransition>

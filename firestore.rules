@@ -52,6 +52,57 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Forum threads — top-level posts in the player forum.
+    match /forum_threads/{document} {
+      allow read: if true;
+
+      // Create: title <=120, body <=5000, category in allowlist,
+      // nickname <=30, replyCount=0, lastActivity=createdAt.
+      allow create: if request.resource.data.keys().hasAll(['title', 'body', 'category', 'nickname', 'replyCount', 'createdAt', 'lastActivity'])
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 120
+        && request.resource.data.body is string
+        && request.resource.data.body.size() > 0
+        && request.resource.data.body.size() <= 5000
+        && request.resource.data.category is string
+        && request.resource.data.category in ['general', 'games', 'suggestions', 'off-topic']
+        && request.resource.data.nickname is string
+        && request.resource.data.nickname.size() > 0
+        && request.resource.data.nickname.size() <= 30
+        && request.resource.data.replyCount == 0;
+
+      // Update: only replyCount + lastActivity may change. Original
+      // fields are immutable. replyCount is monotonically non-decreasing
+      // and bumps by 1 at a time.
+      allow update: if resource.data.title == request.resource.data.title
+        && resource.data.body == request.resource.data.body
+        && resource.data.category == request.resource.data.category
+        && resource.data.nickname == request.resource.data.nickname
+        && resource.data.createdAt == request.resource.data.createdAt
+        && request.resource.data.replyCount is int
+        && request.resource.data.replyCount == resource.data.replyCount + 1;
+
+      allow delete: if false;
+    }
+
+    // Forum posts — replies attached to a thread.
+    match /forum_posts/{document} {
+      allow read: if true;
+
+      allow create: if request.resource.data.keys().hasAll(['threadId', 'nickname', 'body', 'createdAt'])
+        && request.resource.data.threadId is string
+        && request.resource.data.threadId.size() > 0
+        && request.resource.data.nickname is string
+        && request.resource.data.nickname.size() > 0
+        && request.resource.data.nickname.size() <= 30
+        && request.resource.data.body is string
+        && request.resource.data.body.size() > 0
+        && request.resource.data.body.size() <= 2000;
+
+      allow update, delete: if false;
+    }
+
     // Default deny for everything else
     match /{document=**} {
       allow read, write: if false;

@@ -3,9 +3,10 @@
 .game-player-page {
   min-height: 100vh;
   min-height: 100dvh;
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+  background-size: 100% 100%, 100% auto;
+  background-repeat: no-repeat, repeat-y;
+  background-position: top center, top center;
+  background-attachment: scroll;
   color: var(--text-primary);
   padding-bottom: 100px;
 }

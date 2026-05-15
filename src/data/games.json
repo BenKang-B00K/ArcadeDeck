@@ -4,6 +4,7 @@
     "slug": "gate-of-hell",
     "language": "KO",
     "thumbnail": "images/gate-of-hell.webp",
+    "pageBg": "images/gate-of-hell-bg.webp",
     "genres": [
       "Tower Defense",
       "Survival",

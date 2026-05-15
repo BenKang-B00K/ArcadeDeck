@@ -24,6 +24,7 @@ export interface Game {
   id: string;
   slug: string;
   thumbnail: string;
+  pageBg?: string;
   genres: string[];
   gameUrl: string;
   aspectRatio?: string;

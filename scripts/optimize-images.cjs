@@ -35,6 +35,7 @@ const SKIP = new Set([
   'hall-of-fame-bg.webp',
   'my-rank-bg.webp',
   'blog-bg.webp',
+  'gate-of-hell-bg.webp',
 ]);
 
 const isVariant = (f) => /-360\.webp$/i.test(f);

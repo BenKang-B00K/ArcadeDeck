@@ -399,13 +399,14 @@ const GamePlayer: React.FC = () => {
   };
 
   const wrapperStyle = getWrapperStyle();
-  const thumbnailUrl = game.thumbnail.startsWith('http') 
-    ? game.thumbnail 
-    : `${import.meta.env.BASE_URL}${game.thumbnail}`;
+  const bgSrc = game.pageBg ?? game.thumbnail;
+  const bgUrl = bgSrc.startsWith('http')
+    ? bgSrc
+    : `${import.meta.env.BASE_URL}${bgSrc}`;
 
   return (
-    <div className="game-player-page" style={{ 
-      backgroundImage: `linear-gradient(rgba(5, 5, 7, 0.8), rgba(5, 5, 7, 0.9)), url(${thumbnailUrl})` 
+    <div className="game-player-page" style={{
+      backgroundImage: `linear-gradient(rgba(5, 5, 7, 0.8), rgba(5, 5, 7, 0.9)), url(${bgUrl})`
     }}>
       <GameHeadMeta game={game} lang={lang} overlay={overlay} />
 

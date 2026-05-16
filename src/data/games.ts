@@ -32,6 +32,7 @@ export interface Game {
   isOriginal?: boolean;
   language?: string;
   badge?: string;
+  lastUpdated?: string;
   leaderboard?: LeaderboardConfig;
 }
 

@@ -156,6 +156,23 @@ const Home: React.FC = () => {
   const recentlyPlayedGames = games.filter(g => recentlyPlayedIds.includes(g.id))
     .sort((a, b) => recentlyPlayedIds.indexOf(a.id) - recentlyPlayedIds.indexOf(b.id));
 
+  const recentlyUpdatedGames = useMemo(
+    () =>
+      games
+        .filter((g): g is typeof g & { lastUpdated: string } => Boolean(g.lastUpdated))
+        .sort((a, b) => (a.lastUpdated < b.lastUpdated ? 1 : -1))
+        .slice(0, 8),
+    [],
+  );
+
+  const formatUpdateDate = (iso: string) =>
+    new Date(iso + 'T00:00:00Z').toLocaleDateString(lang === 'en' ? 'en-US' : lang, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      timeZone: 'UTC',
+    });
+
   React.useEffect(() => {
     document.title = 'ArcadeDeck | Play the Best Online Browser Games';
   }, []);
@@ -354,6 +371,29 @@ const Home: React.FC = () => {
                     maxTags={2}
                     onProductionClick={() => showNotification(t('homeComingSoonNotification', 'This game is coming soon!'), 'info')}
                   />
+                ))}
+              </div>
+            </section>
+          </div>
+        )}
+
+        {/* ── Recently Updated ── */}
+        {recentlyUpdatedGames.length > 0 && !searchQuery && selectedGenre === 'All' && (
+          <div className="container">
+            <section className="recently-updated-section">
+              <h2 className="section-title-small" style={{ textAlign: 'left', marginBottom: '20px' }}>{t('homeUpdatedTitle', 'Recently')} <span>{t('homeUpdatedSpan', 'Updated')}</span></h2>
+              <div className="game-grid small-grid">
+                {recentlyUpdatedGames.map(game => (
+                  <div key={`updated-${game.id}`} className="updated-card-wrapper">
+                    <div className="updated-date-pill">
+                      {t('homeUpdatedOn', 'Updated {date}').replace('{date}', formatUpdateDate(game.lastUpdated))}
+                    </div>
+                    <GameCard
+                      game={game}
+                      maxTags={2}
+                      onProductionClick={() => showNotification(t('homeComingSoonNotification', 'This game is coming soon!'), 'info')}
+                    />
+                  </div>
                 ))}
               </div>
             </section>

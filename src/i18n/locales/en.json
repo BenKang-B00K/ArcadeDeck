@@ -37,6 +37,9 @@
     "homeSearchClearAria": "Clear search",
     "homeRecentTitle": "Jump",
     "homeRecentSpan": "Back In",
+    "homeUpdatedTitle": "Recently",
+    "homeUpdatedSpan": "Updated",
+    "homeUpdatedOn": "Updated {date}",
     "homeComingSoonNotification": "This game is coming soon!",
     "footerAllRights": "All rights reserved.",
     "footerAbout": "About Us",
@@ -229,7 +232,7 @@
   },
   "games": {
     "1": {
-      "title": "Gate of Hell: Rise of Demons",
+      "title": "Gate of Hell: Rise of Demons v2.0",
       "description": "An intense action survival game where you must hold back the tides of hell.",
       "fullDescription": "\n      The gates of hell have opened, and thousands of demons are pouring onto the surface. As humanity's last bastion, you must stop the relentless enemies and close the gate at the heart of hell.\n      This game combines intense pixel graphics with thrilling action in a survival tower defense format. New enemies appear with each wave, and players can upgrade their weapons and defenses using collected Soul Stones.\n      Strategic placement and quick decision-making are the keys to victory. Can you overcome the horrors of hell and save humanity? Take on the challenge now!\n      As the commander of the Night's Watch, you are entrusted with the most dangerous mission in human history. The Breach, a dimensional tear in the center of the Old City, is spewing forth entities that defy biological logic.\n      You must manage a limited supply of enchanted essence to build arcane towers and equip your soldiers with blessed weaponry. Each demon you slay releases a Soul Fragment, the only currency that matters in this dying world.\n      Use these fragments to research forgotten technologies and call down orbital strikes from the last remaining satellite weapon, the \"Aegis-7\". The survival of our species depends on your tactical brilliance.\n    ",
       "controls": "Mouse Click: Attack and select upgrades / Drag: Place defensive structures",

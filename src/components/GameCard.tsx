@@ -94,7 +94,15 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
         <h3>{title}</h3>
         {game.isOriginal && <span className="original-dot" title={t('gameCardOriginal', 'Original')} />}
         {game.badge && (
-          <span className={`game-badge badge-${game.badge === 'POPULAR' ? 'popular' : 'cantstop'}`}>
+          <span
+            className={`game-badge badge-${
+              game.badge === 'POPULAR'
+                ? 'popular'
+                : game.badge === 'UPDATE'
+                  ? 'update'
+                  : 'cantstop'
+            }`}
+          >
             {game.badge}
           </span>
         )}

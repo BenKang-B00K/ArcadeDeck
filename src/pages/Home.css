@@ -481,6 +481,36 @@
   display: none;
 }
 
+/* ── Recently Updated ── */
+.recently-updated-section {
+  margin: var(--space-5) 0;
+  padding: var(--space-5);
+  background: var(--surface-1);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+}
+
+.updated-card-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.updated-date-pill {
+  align-self: flex-start;
+  margin-bottom: 6px;
+  padding: 3px 10px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #22c55e;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(0, 229, 255, 0.15));
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  border-radius: var(--radius-full);
+  text-shadow: 0 0 6px rgba(34, 197, 94, 0.35);
+}
+
 /* ── Footer ── */
 .footer {
   padding: var(--space-8) 0;
@@ -536,6 +566,7 @@
   .hero p { font-size: var(--text-sm); margin-bottom: var(--space-5); }
   .hero-gamer-form input { width: 160px; }
   .recently-played-section { padding: var(--space-4); margin: var(--space-3) 0; }
+  .recently-updated-section { padding: var(--space-4); margin: var(--space-3) 0; }
   .section-title-small { font-size: var(--text-base); margin-bottom: var(--space-3); }
 
   .genre-filters-container {

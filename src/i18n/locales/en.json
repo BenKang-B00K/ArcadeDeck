@@ -556,7 +556,7 @@
       ]
     },
     "22": {
-      "title": "Mythic Defender: Heroes Returns",
+      "title": "Mythic Defender: Heroes Returns v2.0",
       "description": "A card-driven tower defense where mythic heroes return to hold the line against endless legions.",
       "fullDescription": "\n      Mythic Defender: Heroes Returns fuses classic tower defense with deck-building strategy. Draw heroes from your card pool, place them along the path, and unleash devastating abilities to crush waves of orcs, demons, and worse.\n      Every map is a puzzle of positioning and timing. Some heroes deal heavy single-target damage, others rain area-of-effect lightning, and a few support the whole line with auras. Mix and match to counter what each wave throws at you.\n      Earn mana between rounds, upgrade your strongest heroes, and unlock new cards as you progress deeper into the campaign. The legions never stop — how long can your kingdom stand?\n    ",
       "controls": "Mouse: Drag hero cards onto valid tiles, click heroes to upgrade or activate abilities, click UI buttons to start waves and manage your deck.",
@@ -570,6 +570,22 @@
         "Deck-Building & Upgrade Mechanics",
         "Hand-Painted Mythic Fantasy Art",
         "PC Only"
+      ]
+    },
+    "23": {
+      "title": "Falling Dodger",
+      "description": "A neon free-fall arcade run — twist through saw blades, lasers, and lightning while distance and obstacle count climb together.",
+      "fullDescription": "\n      Falling Dodger drops you into an endless neon shaft where gravity does the driving. Your only job is to steer — slide left and right between spinning saw blades, pulsing lasers, and arcs of electric current as the shaft scrolls past faster and faster.\n      Two numbers define your run: total distance fallen and total obstacles cleared. Distance is the primary score, but the leaderboard uses obstacle count as the tiebreaker — so threading the tightest gaps is always worth more than playing it safe.\n      The deeper you fall, the more aggressive the patterns get. Twin saws close from both walls. Laser grids force last-second commits. Lightning chains punish hesitation. Every meter is earned.\n      One mistake ends the run. How far can you fall?\n    ",
+      "controls": "Keyboard: A / D or ←/→ to steer. Touch: tap or drag left/right side of the screen.",
+      "tips": "Stay centered between threats — committing to a wall early leaves you no escape when the next pattern shifts. Read two obstacles ahead, not one; the shaft scrolls faster than your reactions at high speed. Tight gaps reward more obstacle points than wide ones, so push for the narrow line when distance is close.",
+      "lore": "\n      Deep beneath the synthwave city lies the Shaft — an infinite neon tunnel said to drill through reality itself. Each night, runners jack in and fall, chasing the legend of what waits at the bottom.\n      No one has ever found it. The shaft keeps growing, the obstacles keep evolving, and the names on the leaderboard keep climbing. Every meter is a vote against gravity.\n    ",
+      "features": [
+        "Endless Free-fall Arcade Run",
+        "Distance + Obstacle Dual Scoring",
+        "Escalating Hazard Patterns",
+        "Neon Synthwave Aesthetic",
+        "Global Leaderboard",
+        "Web & Mobile Friendly"
       ]
     },
     "_comment": "Per-game canonical English. Translators mirror this in {lang}.json."

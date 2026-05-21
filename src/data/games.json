@@ -458,5 +458,30 @@
       "dualSort": true,
       "subSortAsc": false
     }
+  },
+  {
+    "id": "24",
+    "slug": "entrepreneur-tycoon",
+    "language": "EN",
+    "thumbnail": "images/entrepreneur-tycoon.webp",
+    "genres": [
+      "Tycoon",
+      "Simulation",
+      "Idle"
+    ],
+    "gameUrl": "https://entrepreneur-tycoon.pages.dev/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "isOriginal": true,
+    "badge": "NEW",
+    "leaderboard": {
+      "title": "Entrepreneur Tycoon Leaderboard",
+      "primaryLabel": "Money Earned",
+      "primaryUnit": "$",
+      "secondaryLabel": "Products",
+      "secondaryUnit": "",
+      "dualSort": true,
+      "subSortAsc": false
+    }
   }
 ]

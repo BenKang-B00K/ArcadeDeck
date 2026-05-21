@@ -6,6 +6,7 @@
     "navGames": "Games",
     "navHallOfFame": "Hall of Fame",
     "navBlog": "Blog",
+    "navFracturedRealm": "Fractured Realm",
     "navMyRank": "My Rank",
     "navSupport": "Support",
     "themeToLight": "Switch to light mode",
@@ -383,17 +384,18 @@
     },
     "11": {
       "title": "Dicefall Chronicles",
-      "description": "A strategic dice-building roguelike adventure.",
-      "fullDescription": "\n      Embark on a journey through a world governed by the roll of the dice. Build your deck of powerful dice, battle monsters, and uncover the secrets of the Dicefall.\n      Every roll matters in this roguelike adventure. Strategize your moves, manage your dice pool, and adapt to the ever-changing challenges of the dungeon.\n      Unlock new characters with unique abilities and discover rare dice that can turn the tide of battle. Can you master the chaos and become the champion of Alea?\n    ",
-      "controls": "Mouse/Touch: Select dice and targets.",
-      "tips": "Balance your dice pool between attack and defense. Save your special abilities for boss fights.",
-      "lore": "\n      In the realm of Alea, chance is the only law. The Dicefall event shattered reality, and now only those who can master the dice can survive.\n    ",
+      "description": "A strategic dice-building roguelike adventure where every roll rewrites the run.",
+      "fullDescription": "\n      Dicefall Chronicles fuses deckbuilding strategy with roguelike permadeath, but the deck is a pool of dice. Each die has its own faces — damage, block, mana, status effects, hybrid utility — and the build you assemble across a run is the build you fight every encounter with. There is no perfect deck: there is the deck that survives the floor you are on right now.\n      Combat is turn-based and economy-driven. You spend rolls to deal damage, sustain block, trigger relic effects, and chain combos across your dice pool. Choose a path between elite gauntlets, merchant rests, treasure caches, and unknown events — each branch trades safety for power. Lose a run and the meta-progression unlocks new dice tiers, character archetypes, and starting relics for the next descent.\n      Three classes (Berserker, Sage, Trickster) each rewrite the math of risk: the Berserker doubles damage on max rolls, the Sage rerolls on event triggers, the Trickster banks unused faces for later. Boss fights gate each act with a phase-changing pattern that punishes one-trick builds and rewards adaptive pool composition. Can you master the chaos of the Dicefall and become the champion of Alea?\n    ",
+      "controls": "Mouse/Touch: Select dice and targets. Drag dice from your pool onto enemies, allies, or relics. Right-click (or long-press on touch) to inspect any die face for full effect text.",
+      "tips": "Plan two turns ahead — most deaths come from spending your block dice when you needed them for the next enemy strike. Keep at least one utility die unspent on every turn for emergencies. Boss runs reward consistency over peak damage: a pool of reliable 4–5 faces wipes act bosses faster than swingy 1-or-10 builds. When merchant offers a die upgrade, weigh whether it raises floor or ceiling — your current floor is usually the bottleneck. Status effects stack — poison plus burn plus bleed shreds armored elites that resist direct damage.",
+      "lore": "\n      In the realm of Alea, chance is the only law. The Dicefall event shattered reality into a lattice of rolling probabilities, and every soul that survived woke up changed — bonded to a personal pool of living dice. The Order of Outcomes hunts the lattice for the original First Die, said to grant its bearer the power to fix every roll forever.\n      You are an adventurer who refuses to let fate be auctioned. Descend the shifting strata of Alea, recruit allies forged from impossible numbers, and write your own probabilities in the bones of the world.\n    ",
       "features": [
-        "Roguelike Deckbuilding",
-        "Procedural Dungeons",
-        "Turn-based Combat",
-        "Unlockables",
-        "Boss Battles",
+        "Roguelike Deckbuilding with Dice Pools, Not Cards",
+        "Three Distinct Classes with Unique Risk Profiles",
+        "Procedurally Generated Multi-Branch Dungeon Paths",
+        "Turn-based Tactical Combat with Status Stacking",
+        "Phase-shifting Boss Battles at the End of Each Act",
+        "Persistent Meta-Progression Across Runs",
         "Web & Mobile Friendly"
       ]
     },
@@ -431,18 +433,19 @@
     },
     "14": {
       "title": "Fruit Frenzy",
-      "description": "A juicy and addictive arcade game where you collect fruits to complete your encyclopedia!",
-      "fullDescription": "In Fruit Frenzy, your goal is to collect as many fruits as possible to unlock all entries in the legendary Encyclopedia. Each fruit you collect brings you closer to becoming the ultimate Fruit Master. Watch out for special frenzy modes and aim for the highest score!",
-      "controls": "Mouse/Touch: Click or tap to collect fruits.",
-      "tips": "Unlock new fruits in the encyclopedia to boost your score multiplier. During frenzy mode, all fruit values are doubled!",
-      "lore": "The Orchard of Abundance has overflowed with magic, causing the fruits to take on a life of their own. As the chosen Harvester, you must document every variety and maintain the balance of the orchard.",
+      "description": "A juicy, fast-twitch arcade collector where every catch fills your Encyclopedia and stacks your score multiplier.",
+      "fullDescription": "Fruit Frenzy is a vertical arcade collector tuned for one-handed phone play and equally satisfying on desktop. Fruits cascade from above at escalating speeds; you tap or click to catch them mid-fall. Each unique fruit you catch for the first time fills a slot in the Encyclopedia, and every filled slot permanently raises your score multiplier for future runs — turning a casual session into a long-tail metagame.\n      Frenzy Mode triggers on chain catches: hit five fruits without missing and the screen lights up, fruit values double, and a wave of rare encyclopedia entries enters the spawn pool. Drop the chain and Frenzy resets — the tension between greed and caution drives every run. Special fruits (Golden Apple, Phantom Pear, Mystic Mango) appear under specific weather conditions on the orchard backdrop, rewarding players who pay attention to ambient cues, not just falling sprites.\n      The leaderboard is dual-sort: top score primary, Encyclopedia completion percentage as tiebreaker. That rewards both burst high-scorers and patient collectors. New fruits ship with seasonal events, so the Encyclopedia is never truly finished.",
+      "controls": "Mouse/Touch: Click or tap fruits to collect them. Hold and drag on touch devices to sweep across multiple fruits in one motion. Avoid the falling rotten fruits — they break your chain and end Frenzy Mode early.",
+      "tips": "Prioritize fruits you have never caught before — Encyclopedia entries raise your permanent multiplier and pay off across every future run, while duplicates only buff the current session. Watch for color streaks in the falling pattern: three of the same color in a row signals a guaranteed Frenzy trigger if you catch all three. During Frenzy, ignore the bottom row of low-tier fruits and hunt the rare drops appearing near the top. Rotten fruit looks similar to ripe at high speeds — when in doubt, do not tap. Saving a Frenzy bank for a Golden Apple spawn typically doubles a single tap's score over a sustained chain.",
+      "lore": "The Orchard of Abundance is a magical grove suspended between seasons, where every fruit ever grown still ripens somewhere on its impossible trees. When the Encyclopedia of the Harvest was stolen and its pages scattered into the wind, the orchard's magic spilled over and the fruits gained mischievous minds of their own.\n      You are the next Harvester, chosen by the orchard itself. Your task is to catch every variety, rebuild the Encyclopedia, and restore the balance — one falling apple, one impossible mango at a time.",
       "features": [
-        "50+ Unique Fruits to Unlock",
-        "Challenging Encyclopedia System",
-        "Dynamic Frenzy Mode",
-        "Global Leaderboard: Encyclopedia Count & Best Score",
-        "Optimized for Mobile & Web",
-        "Web & Mobile Friendly"
+        "50+ Unique Fruits to Discover and Document",
+        "Encyclopedia Progression with Permanent Score Multipliers",
+        "Frenzy Mode Triggered by Chain Catches",
+        "Rare Weather-Gated Special Fruit Spawns",
+        "Dual-Sort Global Leaderboard (Score + Completion)",
+        "Seasonal Events with New Encyclopedia Pages",
+        "One-Handed Mobile and Desktop Friendly"
       ]
     },
     "15": {
@@ -481,31 +484,36 @@
     },
     "17": {
       "title": "Tank Battle: 1v1",
-      "description": "Battle against a friend in this intense 1v1 local multiplayer tank arena!",
-      "fullDescription": "\n      Tank Battle: 1v1 is a fast-paced action game designed for two players on the same screen. Command your tank with precision, use obstacles for cover, and destroy your opponent's tank before they take you down.\n      Perfect for casual gaming sessions with friends, this game brings back the classic arcade feel with modern, smooth mechanics. Strategy is key: will you rush your opponent or wait for the perfect shot?\n    ",
-      "controls": "Player 1: WASD (Move), Space (Fire) / Player 2: Arrow Keys (Move), Enter (Fire)",
-      "tips": "Use blocks for cover and wait for the right moment. The tanks bounce off walls slightly, so keep moving to avoid becoming an easy target!",
-      "lore": "\n      The Tank Arena is where true commanders are forged. In a world of steel and smoke, two titans face off for ultimate supremacy. \n      Every shot counts, every move is critical. Only one will emerge victorious from the dust of battle.\n    ",
+      "description": "An intense same-screen 1v1 tank duel built for couch rivalries — destructible cover, ricochet shots, no luck involved.",
+      "fullDescription": "\n      Tank Battle: 1v1 is a fast-paced couch-multiplayer arena game designed for two players sharing the same keyboard. There is no online matchmaking, no account, no waiting room — pull up a friend, pick a side, and start firing. Each round resets in seconds so a single sitting easily turns into thirty matches.\n      Maps mix solid walls, destructible crates, and ricochet pads. Crates absorb one shot and then collapse, shifting cover lines mid-round so static defenders die. Ricochet pads bounce projectiles at fixed angles, enabling bank shots around corners — a core skill for higher-level play. Tanks have a brief reload window between shots, which means winning a round is usually about controlling your opponent's reload timer, not raw aim.\n      Three arena layouts ship with the game (Symmetric Wedge, Open Plains, Maze) and unlock as you progress. Win streaks build a small momentum bonus that grants slightly faster reload — the only catch-up mechanic in an otherwise pure-skill game. Strategy is everything: rush the opponent before they set up cover, or stake out a sightline and punish their reload? Read your friend, not the screen.\n    ",
+      "controls": "Player 1: WASD to move, Space to fire. Player 2: Arrow Keys to move, Enter to fire. Best on a keyboard with N-key rollover — membrane keyboards drop simultaneous inputs and cause lost shots.",
+      "tips": "Never sit still during the enemy's reload — the catch-up reload bonus rewards aggression, not entrenchment. Use destructible crates as one-shot decoys: fire a probe round into a crate to break cover the opponent was leaning on. Ricochet pads beat direct shots on the Maze layout because corridors funnel return fire. On membrane keyboards, choose Player 1 (WASD) — Arrow Keys are more likely to ghost on simultaneous-press inputs. Most experienced players win by controlling map center, not by sniping from the edges.",
+      "lore": "\n      The Tank Arena is the proving ground of the last age of armor — a sealed crucible where two commanders fight not for territory but for legend. Above the arena, every duel is broadcast to the cities that no longer remember why the war began.\n      Every shot counts. Every move is recorded. Only one tank leaves the dust under its own power, and only one name is written into the iron ledger.\n    ",
       "features": [
-        "Local 1v1 PvP Action",
-        "Fast-paced Gameplay",
-        "Strategic Cover Mechanics",
-        "PC Optimized",
+        "Local 1v1 PvP — One Keyboard, Two Players",
+        "Three Arena Layouts with Destructible Cover",
+        "Ricochet Mechanics for Skill-Based Bank Shots",
+        "Catch-Up Reload Bonus to Reward Aggression",
+        "Reload-Timing Combat (No RNG)",
+        "Optimized for N-Key Rollover Keyboards",
         "Clean Minimalist Design"
       ]
     },
     "18": {
       "title": "Skyfall",
-      "description": "Dodge the falling obstacles and survive as long as you can in this fast-paced arcade game!",
-      "fullDescription": "Skyfall is a challenging survival arcade game that tests your reflexes and agility. As various objects descend from above, you must navigate through the storm and find the safest path. The intensity increases as you survive longer, pushing your limits. Compete for the highest survival time and master the art of dodging!",
-      "controls": "Left/Right Arrows or A/D to move / Touch buttons on mobile",
-      "tips": "Stay near the center for better movement options. Watch for the shadows to predict where objects will land. Practice makes perfect!",
+      "description": "A reflex-driven survival arcade game — read the shadows, dodge the storm, and chase the longest survival run on the leaderboard.",
+      "fullDescription": "Skyfall is a high-intensity survival arcade game that rewards reaction time, pattern recognition, and nerve. Objects of escalating size and speed descend from the top of the screen, and you have one job: do not get hit. Each surviving second adds to your score; the difficulty curve rises continuously, so a thirty-second run feels twice as fast as a fifteen-second run.\n      Three object types alternate through the storm. Small debris is fast but predictable. Mid-size hazards land in patterns that broadcast their target column. Heavy crashers shake the screen and clear nearby debris on impact — a high-risk, high-reward window if you survive the shake. Every fifteen seconds the storm pattern rotates, swapping spawn density and column distribution to break muscle memory.\n      Skyfall is built for short bursts. A single run rarely exceeds two minutes, but the loop is engineered for the next-attempt impulse — death-to-restart is one tap, your previous score sits at the top of the screen daring you, and the global leaderboard updates within seconds of a personal best.",
+      "controls": "Left / Right Arrows or A / D to slide between lanes. On mobile, large touch buttons sit at the bottom edge — held inputs slide continuously, taps step a single column. No jump, no shield, no inventory: pure movement.",
+      "tips": "Watch the falling shadows on the ground, not the objects in the sky — your reaction window is the shadow's travel time, and tracking objects directly causes overcorrection. Stay near the center column when the storm rotates: edges give you fewer escape directions when patterns shift. Heavy crashers clear a small area on landing — if you can survive landing next to one, the cleared zone buys you a free second to reposition. Never panic-slide more than two columns in one direction; momentum overshoot is the leading cause of late-run deaths.",
+      "lore": "The cities below the storm were warned the sky was falling. They did not believe it until the first crash. Now the storm is permanent, the streets are gone, and only the dancers remain — the few who learned to read the shadows and step between catastrophes.\n      You are one of them. Out here in the dust between hits, every second you survive is a small refusal to be crushed.",
       "features": [
-        "Fast-paced Arcade Action",
-        "Increasing Difficulty Over Time",
-        "Responsive Keyboard & Touch Controls",
-        "Clean Visuals and Effects",
-        "Addictive High-Score Gameplay"
+        "Pure-Reflex Survival Arcade Loop",
+        "Three Hazard Types with Distinct Patterns",
+        "Rotating Storm Patterns Every Fifteen Seconds",
+        "Continuous Difficulty Curve — No Plateau",
+        "One-Tap Restart Loop for Burst Sessions",
+        "Responsive Keyboard and Mobile Touch Controls",
+        "Global Survival-Time Leaderboard"
       ]
     },
     "19": {
@@ -542,17 +550,19 @@
     },
     "21": {
       "title": "Just Jump",
-      "description": "A simple, addictive jumping arcade game — time your leaps and climb as high as you can.",
-      "fullDescription": "\n      Just Jump strips the platformer down to its purest form: jump, land, repeat. Time each leap perfectly to clear gaps, stick tricky landings, and push your run further than the last.\n      Easy to pick up, hard to master. One mistimed jump and the run ends — but the next attempt is one tap away. Chase a personal best, then chase the global top of the leaderboard.\n    ",
-      "controls": "Click / Tap / Spacebar: Jump",
-      "tips": "Read the rhythm before reacting — most deaths come from over-jumping. Short hops cover more ground than you think. Keep your eyes on the next platform, not your feet.",
+      "description": "A pure, one-button platformer — time your leaps, stick tricky landings, and push every run further than the last.",
+      "fullDescription": "\n      Just Jump strips the platformer down to its purest form: jump, land, repeat. There is one input. There is one goal. There is one score. Time each leap perfectly to clear gaps, stick tricky landings, and ride the rhythm further than the previous attempt.\n      Platforms scroll continuously upward and the gap pattern shifts every ten platforms — long stretches reward held inputs, short stretches reward tapping, and mixed stretches punish either rhythm if you commit too early. Edge landings count for a small style bonus on the score, so the optimal play is always to land as close to the leading edge as you can dare. The further you climb, the faster the world scrolls — eventually faster than human reaction time, which is the point.\n      Easy to pick up, brutally hard to master. One mistimed jump and the run ends, but the next attempt is one tap away. Chase a personal best, then chase the global top of the leaderboard.\n    ",
+      "controls": "Click, Tap, or Spacebar to jump. Hold for a longer arc; tap for a short hop. There is no second button, no boost, no shield, no second chance — the entire skill ceiling lives inside the length of one press.",
+      "tips": "Read the rhythm before reacting — most deaths come from over-jumping the first platform of a new pattern. Short hops cover more horizontal ground than they feel like they should; trust the physics. Keep your eyes one platform ahead of your feet, not on the platform you are leaving. Edge landings score a style bonus and also leave a longer next-jump window — the safest landing is also usually the highest-scoring one. When the world starts scrolling faster than you can think, switch from reacting to predicting: commit to the rhythm, not the visuals.",
       "lore": "\n      No story. No cutscenes. No upgrades. Just you, a platform, and the next jump.\n      Every leap is a small bet against gravity. How long can you keep winning?\n    ",
       "features": [
-        "One-button Pick-up-and-play Controls",
-        "Endless Score-chasing Loop",
-        "Tight, Predictable Jump Physics",
-        "Global Leaderboard",
-        "Web & Mobile Friendly"
+        "One-Button, One-Goal Pure Platformer",
+        "Variable-Length Jump Arc Based on Press Duration",
+        "Edge-Landing Style Bonus Adds Skill Ceiling",
+        "Continuous Scroll with Shifting Rhythm Patterns",
+        "Tight, Predictable Physics — No RNG",
+        "Global Score Leaderboard",
+        "Web and Mobile Friendly"
       ]
     },
     "22": {
@@ -586,6 +596,23 @@
         "Neon Synthwave Aesthetic",
         "Global Leaderboard",
         "Web & Mobile Friendly"
+      ]
+    },
+    "24": {
+      "title": "Entrepreneur Tycoon",
+      "description": "Build a multi-floor business empire from a single coffee stand to a city-spanning retail tower — every product sold pushes you up the leaderboard.",
+      "fullDescription": "\n      Entrepreneur Tycoon puts you in charge of a vertical business empire. Start with a humble shop on the ground floor, hire staff, stock shelves, and watch customers stream in. Reinvest every dollar to unlock new floors, new product lines, and faster automation.\n      Two numbers define your run: total money earned and total products produced. Money is the primary score, but production count is the tiebreaker — so a tycoon who pushes volume always edges out one who only marks up prices.\n      Expand from groceries to electronics to a coffee chain. Each new department compounds your income and demands smarter logistics. Upgrade checkout speed, train smarter staff, and automate restocks so the registers never stop ringing.\n      The skyline is the limit. How tall will your tower of profit grow?\n    ",
+      "controls": "Mouse: Click departments to upgrade, hire staff, restock inventory, and unlock new floors. Touch: Tap any building element to interact.",
+      "tips": "Reinvest aggressively in early floors — compounding income beats hoarding cash. Balance product production with staff capacity; idle shelves earn nothing. Unlock a new floor only after the current one is fully automated, or you'll bottleneck on management. Watch the product counter — it's the tiebreaker that wins close leaderboard races.",
+      "lore": "\n      They said the city had no room for one more dreamer. You bought the smallest plot on the block anyway, put a single counter on it, and started selling coffee at sunrise.\n      One floor became two. Two became a tower. Now your name flickers in neon above the skyline, and rival tycoons watch their charts dip every time your registers chime.\n      The empire is yours to build — one customer, one product, one dollar at a time.\n    ",
+      "features": [
+        "Multi-Floor Business Expansion",
+        "Money + Product Dual Scoring",
+        "Staff Hiring & Automation",
+        "Compounding Idle Income",
+        "Diverse Product Departments",
+        "Global Leaderboard",
+        "PC Only"
       ]
     },
     "_comment": "Per-game canonical English. Translators mirror this in {lang}.json."

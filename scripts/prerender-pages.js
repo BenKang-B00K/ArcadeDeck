@@ -203,7 +203,54 @@ for (const lang of SUPPORTED_LOCALES) {
       ],
     });
 
+    // FAQ schema — Google rewards FAQ-rich pages for both rich results and
+    // AdSense "substantive content" signals. We synthesise five Q/A pairs
+    // from the game's own metadata so the answers are authentic, not boilerplate.
+    const isMobileAspect = String(game.aspectRatio || '').startsWith('9');
+    const mobileAnswer = isMobileAspect
+      ? `Yes — ${t.title} is built mobile-first and runs in any modern mobile browser. Tap controls are sized for one-handed play.`
+      : `Yes — ${t.title} runs in any modern mobile browser. The game is optimised for desktop play, but mobile controls are available.`;
+    const faqPairs = [
+      { q: `What is ${t.title}?`, a: `${t.description} ${t.fullDescription || ''}`.replace(/\s+/g, ' ').trim() },
+      { q: `How do I play ${t.title}?`, a: t.controls },
+      { q: `What tips will help me improve at ${t.title}?`, a: t.tips },
+      { q: `Is ${t.title} free to play on ArcadeDeck?`, a: `Yes — ${t.title} is completely free to play on ArcadeDeck. No downloads, no sign-ups, no in-app purchases. Open the page and start playing.` },
+      { q: `Can I play ${t.title} on a mobile device?`, a: mobileAnswer },
+    ].filter(p => p.a && p.a.length > 4);
+    const faqLd = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      inLanguage: HREFLANG[lang] || lang,
+      mainEntity: faqPairs.map(p => ({
+        '@type': 'Question',
+        name: p.q,
+        acceptedAnswer: { '@type': 'Answer', text: p.a },
+      })),
+    });
+
     const featuresHtml = t.features.map(f => `<li>${f}</li>`).join('');
+
+    // UGC pointers — give crawlers a visible, indexable anchor for the
+    // community surfaces (leaderboard, comments, forum). The actual data is
+    // rendered client-side from Firestore, but the prerender at least tells
+    // crawlers that the page has user-generated content tied to it.
+    const lbTitle = (game.leaderboard && game.leaderboard.title) || `${t.title} Leaderboard`;
+    const lbPrimary = (game.leaderboard && game.leaderboard.primaryLabel) || 'Score';
+    const ugcCommunityH2 = ui('seoCommunityTitle', lang, 'Community & Leaderboard');
+    const ugcLeaderboardLine = ui(
+      'seoLeaderboardIntro', lang,
+      `Every score posted in ${t.title} updates the global "${lbTitle}" leaderboard, sorted by ${lbPrimary}. Top players are archived to the Hall of Fame at the end of every month.`,
+    );
+    const ugcCommentsLine = ui(
+      'seoCommentsIntro', lang,
+      `Players share strategies, post personal-best replays, and discuss tactics in the comments section below the game frame.`,
+    );
+    const ugcForumLink = ui('seoForumLinkLabel', lang, 'Visit the ArcadeDeck player forum');
+    const ugcHallLink = ui('seoHallLinkLabel', lang, 'Hall of Fame');
+    const ugcHtml = `<h2 style="margin-top:32px;font-size:1.3rem;">${ugcCommunityH2}</h2>
+        <p style="line-height:1.7;">${ugcLeaderboardLine}</p>
+        <p style="line-height:1.7;">${ugcCommentsLine}</p>
+        <p style="line-height:1.7;"><a href="${fullUrl(lang, '/forum')}" style="color:#00d2ff;">${ugcForumLink}</a> · <a href="${fullUrl(lang, '/hall-of-fame')}" style="color:#00d2ff;">${ugcHallLink}</a></p>`;
 
     const gameRelatedPosts = postsForGame(slug);
     const relatedPostsHtml = gameRelatedPosts.length
@@ -255,6 +302,7 @@ for (const lang of SUPPORTED_LOCALES) {
     <meta name="twitter:image" content="${thumbUrl}" />
     <script type="application/ld+json">${jsonLd}</script>
     <script type="application/ld+json">${breadcrumbLd}</script>
+    ${faqPairs.length ? `<script type="application/ld+json">${faqLd}</script>` : ''}
     ${inlinedStyle}
     ${modulePreloads}
   </head>
@@ -283,6 +331,8 @@ for (const lang of SUPPORTED_LOCALES) {
         ${t.lore ? `<h2 style="margin-top:32px;font-size:1.3rem;">${loreH2}</h2><div style="line-height:1.7;font-style:italic;">${t.lore.replace(/\n/g, '<br>')}</div>` : ''}
 
         ${featuresHtml ? `<h2 style="margin-top:32px;font-size:1.3rem;">${featH2}</h2><ul style="line-height:1.8;">${featuresHtml}</ul>` : ''}
+
+        ${ugcHtml}
 
         ${crossLinksHtml}
 
@@ -373,7 +423,7 @@ for (const genre of allGenres) {
     <title>${escAttr(title)}</title>
     <meta name="description" content="${escAttr(desc)}" />
     <meta name="keywords" content="${escAttr(genre)}, free online ${escAttr(genre.toLowerCase())} games, browser games, arcadedeck" />
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content="${inGenre.length <= 2 ? 'noindex, follow' : 'index, follow'}" />
     <meta name="theme-color" content="#050507" />
     <link rel="icon" type="image/webp" href="/images/favicon.webp" />
     <link rel="apple-touch-icon" href="/images/icon-192x192.webp" />
@@ -724,6 +774,30 @@ const routeShells = {
         <p>Enable JavaScript to browse threads, post new topics, and reply to other players. <a href="/" style="color:#00d2ff;">Browse all games</a> · <a href="/hall-of-fame" style="color:#00d2ff;">Hall of Fame</a></p>
       </div>`,
   },
+  'fractured-realm': {
+    title: 'The Fractured Realm — Web MMO | ArcadeDeck',
+    description: 'Explore The Fractured Realm, a browser-based MMO adventure hosted on ArcadeDeck.',
+    canonical: `${SITE}/fractured-realm`,
+    extraLd: [breadcrumbLdFor('The Fractured Realm', `${SITE}/fractured-realm`)],
+    noscript: `
+      <div style="background:#0a0a12;color:#eaeaf0;font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;line-height:1.7;">
+        <nav aria-label="Breadcrumb" style="color:#9aa;font-size:0.85rem;margin-bottom:12px;">
+          <a href="/" style="color:#00d2ff;">Home</a> &rsaquo;
+          <span>The Fractured Realm</span>
+        </nav>
+        <h1>The Fractured Realm — Web MMO</h1>
+        <p>The Fractured Realm is a browser-based MMO adventure. Explore a shattered world, level up, and meet other players directly in your browser — no downloads, no installs.</p>
+        <h2>About the Game</h2>
+        <p>The game runs in a fullscreen frame on this page. Enable JavaScript to load the experience, or open the source build directly at <a href="https://the-fractured-realm-webmmo.pages.dev/" style="color:#00d2ff;" rel="noopener">the-fractured-realm-webmmo.pages.dev</a>.</p>
+        <h2>What to Expect</h2>
+        <ul>
+          <li>Persistent web world you can return to from any device.</li>
+          <li>Real-time exploration and combat in a fractured fantasy realm.</li>
+          <li>No installs, no sign-ups required — just pick a name and play.</li>
+        </ul>
+        <p><a href="/" style="color:#00d2ff;">Browse all ArcadeDeck games</a> · <a href="/hall-of-fame" style="color:#00d2ff;">Hall of Fame</a></p>
+      </div>`,
+  },
   contact: {
     title: 'Contact | ArcadeDeck',
     description: 'Contact ArcadeDeck — email help@arcadedeck.net for support, bug reports, partnership inquiries, or game submissions.',
@@ -1019,6 +1093,11 @@ ${matches
   let shell = inlineCssOnce(indexHtml).replace(NOSCRIPT_BLOCK_REGEX, `<noscript>${tagNoscript}\n    </noscript>`);
   shell = replaceTitle(shell, tagTitle);
   shell = replaceMeta(shell, 'description', tagDesc);
+  // Single-post tag pages are too thin to index — point the canonical at the
+  // single underlying post and tell crawlers not to compete with it.
+  if (matches.length <= 1) {
+    shell = replaceMeta(shell, 'robots', 'noindex, follow');
+  }
   shell = replaceCanonical(shell, tagUrl);
   shell = injectHreflangSelf(shell, tagUrl);
   shell = replaceOgUrl(shell, tagUrl);

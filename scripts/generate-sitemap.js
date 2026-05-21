@@ -89,7 +89,15 @@ const allGenres = (() => {
   }
   return Array.from(set).sort();
 })();
-for (const genre of allGenres) {
+// Genres with ≤2 games are too thin to compete with the underlying game pages —
+// the prerender marks them noindex,follow and we omit them from the sitemap so
+// crawlers don't waste budget on pages we're explicitly de-emphasising.
+const genreGameCount = new Map();
+for (const g of playableGames) {
+  for (const genre of g.genres) genreGameCount.set(genre, (genreGameCount.get(genre) || 0) + 1);
+}
+const indexableGenres = allGenres.filter(g => (genreGameCount.get(g) || 0) > 2);
+for (const genre of indexableGenres) {
   const slug = genreSlug(genre);
   for (const lang of SUPPORTED_LOCALES) {
     entries.push(urlEntry(lang, `/genre/${slug}`, '0.7', today, SUPPORTED_LOCALES));
@@ -104,6 +112,7 @@ const englishOnlyRoutes = [
   { path: '/about', priority: '0.6' },
   { path: '/contact', priority: '0.5' },
   { path: '/privacy', priority: '0.4' },
+  { path: '/fractured-realm', priority: '0.6' },
 ];
 for (const r of englishOnlyRoutes) {
   entries.push(urlEntry('en', r.path, r.priority, today));
@@ -114,13 +123,19 @@ for (const p of posts) {
 }
 
 const tagMap = new Map();
+const tagPostCount = new Map();
 posts.forEach((p) => {
   p.tags.forEach((t) => {
     const existing = tagMap.get(t);
     if (!existing || existing < p.date) tagMap.set(t, p.date);
+    tagPostCount.set(t, (tagPostCount.get(t) || 0) + 1);
   });
 });
+// Single-post tags are thin and duplicate the underlying post — prerender sets
+// them to noindex and we drop them from the sitemap so crawl budget goes to
+// the canonical post page instead.
 for (const [tag, lastmod] of Array.from(tagMap.entries()).sort(([a], [b]) => a.localeCompare(b))) {
+  if ((tagPostCount.get(tag) || 0) <= 1) continue;
   entries.push(urlEntry('en', `/blog/tag/${tag}`, '0.5', lastmod));
 }
 

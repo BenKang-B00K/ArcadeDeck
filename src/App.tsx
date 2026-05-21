@@ -24,6 +24,17 @@ const Forum       = lazy(() => import('./pages/Forum'));
 const ForumThread = lazy(() => import('./pages/ForumThread'));
 const ForumNew    = lazy(() => import('./pages/ForumNew'));
 const NotFound    = lazy(() => import('./pages/NotFound'));
+const Microsite   = lazy(() => import('./pages/Microsite'));
+
+const MICROSITES = {
+  'fractured-realm': {
+    slug: 'fractured-realm',
+    title: 'The Fractured Realm — Web MMO',
+    description: 'Explore The Fractured Realm, a browser-based MMO adventure.',
+    embedUrl: 'https://the-fractured-realm-webmmo.pages.dev/',
+    themeColor: '#0a0a12'
+  }
+} as const;
 
 interface AppProps {
   basename?: string;
@@ -63,6 +74,7 @@ function App({ basename = '/' }: AppProps) {
                 <Route path="/forum"            element={<Forum />} />
                 <Route path="/forum/new"        element={<ForumNew />} />
                 <Route path="/forum/t/:id"      element={<ForumThread />} />
+                <Route path="/fractured-realm" element={<Microsite config={MICROSITES['fractured-realm']} />} />
                 <Route path="*"             element={<NotFound />} />
               </Routes>
             </RouteTransition>

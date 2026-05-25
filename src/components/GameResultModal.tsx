@@ -33,6 +33,7 @@ const GameResultModal: React.FC<GameResultModalProps> = ({
 
   useEffect(() => {
     if (!isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDisplayScore(0);
       return;
     }

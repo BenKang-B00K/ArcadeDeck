@@ -24,6 +24,7 @@ const LanguageSwitcher: React.FC = () => {
     const resolved = getLocaleLabel(lang, overlay);
     if (labelCache[lang] !== resolved) {
       labelCache[lang] = resolved;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLabels(prev => ({ ...prev, [lang]: resolved }));
     }
   }, [lang, overlay]);

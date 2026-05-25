@@ -1,0 +1,2 @@
+Prepare using sync_i18n.py
+Merge using sync_i18n.py

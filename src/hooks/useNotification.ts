@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useToast } from '../contexts/ToastContext';
+import { useToast } from '../contexts/useToast';
 
 export type NotificationType = 'success' | 'info' | 'error';
 

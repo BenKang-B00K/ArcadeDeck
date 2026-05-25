@@ -20,18 +20,19 @@ const BlogTag: React.FC = () => {
   const matches = getPostsByTag(normalized);
   const t = useUiText();
 
-  if (matches.length === 0) {
-    return <Navigate to="/blog" replace />;
-  }
-
   const label = formatTagLabel(normalized);
   const url = `https://arcadedeck.net/blog/tag/${normalized}`;
   const title = `${label} | ArcadeDeck Blog`;
   const description = `All ArcadeDeck blog posts tagged "${label}" — strategy guides, design notes, patch notes, and recaps.`;
 
   useEffect(() => {
+    if (matches.length === 0) return;
     document.title = title;
-  }, [title]);
+  }, [title, matches.length]);
+
+  if (matches.length === 0) {
+    return <Navigate to="/blog" replace />;
+  }
 
   const itemListLd = {
     '@context': 'https://schema.org',

@@ -122,7 +122,7 @@ const MyGames = () => {
       list.push({ id: 'marathon', label: t('myAchMarathon', 'Marathon (10+)'), icon: <Zap size={14} aria-hidden="true" />, tier: 'gold' });
     }
     return list;
-  }, [streak.current, bestRank, playedCount, t]);
+  }, [streak, bestRank, playedCount, t]);
 
   return (
     <div className="my-games-page">

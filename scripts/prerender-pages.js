@@ -55,6 +55,7 @@ const en = overlays.en || {};
 function txt(id, lang) {
   const o = overlays[lang]?.games?.[id] || {};
   const f = en.games?.[id] || {};
+  const pickArr = (k) => (Array.isArray(o[k]) ? o[k] : (Array.isArray(f[k]) ? f[k] : []));
   return {
     title: o.title || f.title || '',
     description: o.description || f.description || '',
@@ -62,7 +63,12 @@ function txt(id, lang) {
     controls: o.controls || f.controls || '',
     tips: o.tips || f.tips || '',
     lore: o.lore || f.lore || '',
-    features: Array.isArray(o.features) ? o.features : (Array.isArray(f.features) ? f.features : []),
+    features: pickArr('features'),
+    objectives: o.objectives || f.objectives || '',
+    controlsTable: pickArr('controlsTable'),
+    faq: pickArr('faq'),
+    characters: pickArr('characters'),
+    featuredComments: pickArr('featuredComments'),
   };
 }
 
@@ -164,6 +170,15 @@ for (const lang of SUPPORTED_LOCALES) {
     const desc = `${playPrefix} ${t.title}: ${t.description} ${ui('seoFreeOnlineGame', lang, 'Free online browser game on ArcadeDeck.')}`;
     const thumbUrl = `${SITE}/${encodeURI(game.thumbnail)}`;
     const pageUrl = fullUrl(lang, routePath);
+    // Hero banner is the LCP element on the click-to-start page. Preload it
+    // in <head> so the fetch starts in parallel with HTML parsing.
+    const heroBannerSrc = game.pageBg || game.thumbnail || '';
+    const heroBannerHref = heroBannerSrc
+      ? (heroBannerSrc.startsWith('http') ? heroBannerSrc : `/${heroBannerSrc.replace(/^\//, '')}`)
+      : '';
+    const heroPreload = heroBannerHref
+      ? `<link rel="preload" as="image" href="${escAttr(heroBannerHref)}" fetchpriority="high" />`
+      : '';
     // If this locale has no translation for the game, the page would just be
     // an English duplicate at a localized URL — point the canonical at the
     // English original so search engines consolidate signals there. The shell
@@ -204,19 +219,22 @@ for (const lang of SUPPORTED_LOCALES) {
     });
 
     // FAQ schema — Google rewards FAQ-rich pages for both rich results and
-    // AdSense "substantive content" signals. We synthesise five Q/A pairs
-    // from the game's own metadata so the answers are authentic, not boilerplate.
+    // AdSense "substantive content" signals. Prefer authored t.faq when it
+    // exists; otherwise synthesise five Q/A pairs from the game's metadata so
+    // the answers are authentic, not boilerplate.
     const isMobileAspect = String(game.aspectRatio || '').startsWith('9');
     const mobileAnswer = isMobileAspect
       ? `Yes — ${t.title} is built mobile-first and runs in any modern mobile browser. Tap controls are sized for one-handed play.`
       : `Yes — ${t.title} runs in any modern mobile browser. The game is optimised for desktop play, but mobile controls are available.`;
-    const faqPairs = [
-      { q: `What is ${t.title}?`, a: `${t.description} ${t.fullDescription || ''}`.replace(/\s+/g, ' ').trim() },
-      { q: `How do I play ${t.title}?`, a: t.controls },
-      { q: `What tips will help me improve at ${t.title}?`, a: t.tips },
-      { q: `Is ${t.title} free to play on ArcadeDeck?`, a: `Yes — ${t.title} is completely free to play on ArcadeDeck. No downloads, no sign-ups, no in-app purchases. Open the page and start playing.` },
-      { q: `Can I play ${t.title} on a mobile device?`, a: mobileAnswer },
-    ].filter(p => p.a && p.a.length > 4);
+    const faqPairs = (Array.isArray(t.faq) && t.faq.length > 0)
+      ? t.faq.filter(p => p && p.q && p.a)
+      : [
+          { q: `What is ${t.title}?`, a: `${t.description} ${t.fullDescription || ''}`.replace(/\s+/g, ' ').trim() },
+          { q: `How do I play ${t.title}?`, a: t.controls },
+          { q: `What tips will help me improve at ${t.title}?`, a: t.tips },
+          { q: `Is ${t.title} free to play on ArcadeDeck?`, a: `Yes — ${t.title} is completely free to play on ArcadeDeck. No downloads, no sign-ups, no in-app purchases. Open the page and start playing.` },
+          { q: `Can I play ${t.title} on a mobile device?`, a: mobileAnswer },
+        ].filter(p => p.a && p.a.length > 4);
     const faqLd = JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'FAQPage',
@@ -229,6 +247,32 @@ for (const lang of SUPPORTED_LOCALES) {
     });
 
     const featuresHtml = t.features.map(f => `<li>${f}</li>`).join('');
+
+    // Structured long-mode subsections — rendered into the SEO body so crawlers
+    // index them even before React mounts.
+    const objectivesHeading = ui('playerObjectives', lang, 'Objectives');
+    const ctblHeading = ui('controlsTableHeading', lang, 'Quick Reference');
+    const ctblKeyH = ui('controlsTableKey', lang, 'Input');
+    const ctblActH = ui('controlsTableAction', lang, 'Action');
+    const faqStaticHeading = ui('faqHeading', lang, 'FAQ');
+    const castHeading = ui('charactersHeading', lang, 'Cast');
+
+    const objectivesHtml = t.objectives
+      ? `<h2 style="margin-top:32px;font-size:1.3rem;">🎯 ${objectivesHeading}</h2><p style="line-height:1.7;">${t.objectives}</p>`
+      : '';
+    const controlsTableHtml = (Array.isArray(t.controlsTable) && t.controlsTable.length)
+      ? `<h2 style="margin-top:32px;font-size:1.3rem;">${ctblHeading}</h2><table style="width:100%;border-collapse:collapse;margin-top:8px;"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid #2a2740;">${ctblKeyH}</th><th style="text-align:left;padding:8px;border-bottom:1px solid #2a2740;">${ctblActH}</th></tr></thead><tbody>${t.controlsTable.map(r => `<tr><td style="padding:8px;font-family:monospace;border-bottom:1px solid #1a1726;">${r.key}</td><td style="padding:8px;border-bottom:1px solid #1a1726;">${r.action}</td></tr>`).join('')}</tbody></table>`
+      : '';
+    const charactersHtml = (Array.isArray(t.characters) && t.characters.length)
+      ? `<h2 style="margin-top:32px;font-size:1.3rem;">${castHeading}</h2><ul style="line-height:1.7;list-style:none;padding:0;">${t.characters.map(c => `<li style="margin-bottom:12px;"><strong>${c.name}</strong> <em style="color:#9aa;font-size:0.85rem;">${c.role}</em><br>${c.desc}</li>`).join('')}</ul>`
+      : '';
+    const faqStaticHtml = (Array.isArray(t.faq) && t.faq.length)
+      ? `<h2 style="margin-top:32px;font-size:1.3rem;">${faqStaticHeading}</h2><dl style="line-height:1.7;">${t.faq.map(p => `<dt style="font-weight:700;color:#00d2ff;margin-top:12px;">${p.q}</dt><dd style="margin:4px 0 0 0;">${p.a}</dd>`).join('')}</dl>`
+      : '';
+    const featuredCommentsHeading = ui('seoPlayerHighlights', lang, 'Player Highlights');
+    const featuredCommentsHtml = (Array.isArray(t.featuredComments) && t.featuredComments.length)
+      ? `<h2 style="margin-top:32px;font-size:1.3rem;">${featuredCommentsHeading}</h2>${t.featuredComments.map(c => `<blockquote style="border-left:3px solid #00d2ff;background:rgba(0,210,255,0.04);padding:12px 16px;margin:12px 0;border-radius:0 8px 8px 0;"><p style="margin:0 0 6px;line-height:1.6;">"${c.text}"</p><cite style="color:#9aa;font-style:normal;font-size:0.85rem;">— ${c.name}${c.badge ? ` <span style=\"color:#00d2ff;font-weight:700;\">(${c.badge})</span>` : ''}</cite></blockquote>`).join('')}`
+      : '';
 
     // UGC pointers — give crawlers a visible, indexable anchor for the
     // community surfaces (leaderboard, comments, forum). The actual data is
@@ -286,6 +330,7 @@ for (const lang of SUPPORTED_LOCALES) {
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="canonical" href="${canonical}" />
+    ${heroPreload}
     ${hreflangBlock(routePath, game.id)}
     <link rel="alternate" type="application/rss+xml" title="ArcadeDeck Blog" href="${SITE}/rss.xml" />
     <meta property="og:type" content="website" />
@@ -324,15 +369,25 @@ for (const lang of SUPPORTED_LOCALES) {
         <h2 style="margin-top:32px;font-size:1.3rem;">${aboutH2}</h2>
         <div style="line-height:1.7;">${(t.fullDescription || '').replace(/\n/g, '<br>')}</div>
 
+        ${objectivesHtml}
+
         ${t.controls ? `<h2 style="margin-top:32px;font-size:1.3rem;">${howToH2}</h2><p style="line-height:1.6;">${t.controls}</p>` : ''}
+
+        ${controlsTableHtml}
 
         ${t.tips ? `<h2 style="margin-top:32px;font-size:1.3rem;">${tipsH2}</h2><p style="line-height:1.6;">${t.tips}</p>` : ''}
 
+        ${faqStaticHtml}
+
         ${t.lore ? `<h2 style="margin-top:32px;font-size:1.3rem;">${loreH2}</h2><div style="line-height:1.7;font-style:italic;">${t.lore.replace(/\n/g, '<br>')}</div>` : ''}
+
+        ${charactersHtml}
 
         ${featuresHtml ? `<h2 style="margin-top:32px;font-size:1.3rem;">${featH2}</h2><ul style="line-height:1.8;">${featuresHtml}</ul>` : ''}
 
         ${ugcHtml}
+
+        ${featuredCommentsHtml}
 
         ${crossLinksHtml}
 

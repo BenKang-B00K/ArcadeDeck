@@ -25,6 +25,10 @@
     "gameGridGames": "Games",
     "gameGridNoResults": "No results found",
     "gameGridNoResultsHint": "Try a different keyword or genre.",
+    "gameGridEyebrowAll": "The Collection",
+    "gameGridEyebrowSearch": "Results",
+    "gameGridCountSuffix": "games",
+    "gameGridEmptyTrySuffix": "Try one of these:",
     "homeHeroTitle": "Welcome to",
     "homeHeroSubtitle": "Dozens of handcrafted browser games. Pick one, jump in, and see how far you can go.",
     "homeNicknamePlaceholder": "Enter nickname...",
@@ -38,10 +42,27 @@
     "homeSearchClearAria": "Clear search",
     "homeRecentTitle": "Jump",
     "homeRecentSpan": "Back In",
+    "homeRecentGreeting": "Jump back in,",
+    "homeRecentLastBadge": "Last",
     "homeUpdatedTitle": "Recently",
     "homeUpdatedSpan": "Updated",
     "homeUpdatedOn": "Updated {date}",
     "homeComingSoonNotification": "This game is coming soon!",
+    "homeHeroCarouselAria": "Featured games",
+    "homeHeroFeatured": "Featured",
+    "homeHeroCtaPlay": "Play Now",
+    "homeHeroCtaBrowse": "Browse All",
+    "homeHeroPrevAria": "Previous featured game",
+    "homeHeroNextAria": "Next featured game",
+    "homeHeroIndicatorAria": "Go to slide {n}",
+    "homeStatsGamesLabel": "Games",
+    "homeStatsGenresLabel": "Genres",
+    "homeStatsOriginalsLabel": "Originals",
+    "homeStatsPlaysLabel": "Your Plays",
+    "homeTrendingTitle": "Trending",
+    "homeTrendingSpan": "Right Now",
+    "homeTrendingAria": "Trending games carousel",
+    "homeBackToTopAria": "Back to top",
     "footerAllRights": "All rights reserved.",
     "footerAbout": "About Us",
     "footerPrivacy": "Privacy Policy",
@@ -74,6 +95,7 @@
     "commentLoadMore": "Load More Comments",
     "commentLoadingMore": "Loading...",
     "commentEmpty": "No comments yet. Be the first to share your thoughts!",
+    "commentFeaturedBadge": "Featured",
     "shareTitle": "Share",
     "shareMyScore": "My Score",
     "shareOnX": "Share on X",
@@ -158,10 +180,20 @@
     "playerCurrentProgress": "Current Progress:",
     "playerCloseFullscreen": "Close Fullscreen",
     "playerLoadingGame": "Loading game...",
+    "playerPlayNow": "Play Now",
+    "viewLong": "Long",
+    "viewShort": "Short",
+    "viewToggleAria": "Switch view mode",
     "tabNavAriaLabel": "Jump to game info",
     "tabTips": "Tips",
     "tabLore": "Lore",
     "tabFeatures": "Features",
+    "playerObjectives": "Objectives",
+    "controlsTableHeading": "Quick Reference",
+    "controlsTableKey": "Input",
+    "controlsTableAction": "Action",
+    "faqHeading": "FAQ",
+    "charactersHeading": "Cast",
     "helpfulPrompt": "Was this helpful?",
     "helpfulYes": "Yes, helpful",
     "helpfulNo": "Not helpful",
@@ -247,6 +279,33 @@
         "Deep Tech Tree for Permanent Power-ups",
         "Global Leaderboard for Survival Times",
         "Web & Mobile Friendly"
+      ],
+      "objectives": "Hold back endless demon waves, strategically upgrade towers and weapons with Soul Fragments, and survive long enough to close the Gate of Hell before Elite Demons overwhelm your defenses.",
+      "controlsTable": [
+        { "key": "Mouse Click", "action": "Attack enemies or select an upgrade" },
+        { "key": "Drag", "action": "Place defensive towers on the map" },
+        { "key": "Mouse Click (UI)", "action": "Spend Soul Fragments on upgrades" },
+        { "key": "Mouse Click (Orbital)", "action": "Trigger Aegis-7 orbital strike" }
+      ],
+      "faq": [
+        { "q": "How do I start the first wave?", "a": "Place at least one defensive tower near the chokepoint, then confirm your placement to begin the first demon wave. The game paces itself — you have a brief setup window before enemies spawn." },
+        { "q": "What are Soul Fragments used for?", "a": "Soul Fragments are the main currency, earned by defeating demons. Spend them on tower upgrades, new weapon research, and the Aegis-7 orbital strike. Don't spend all of them at once — keep a reserve for emergencies." },
+        { "q": "When do Elite Demons appear?", "a": "Elite Demons begin appearing around Wave 10. They are significantly tougher than standard enemies, so save orbital strikes specifically for these encounters rather than burning them on regular waves." },
+        { "q": "What is the best early strategy?", "a": "Upgrade fire rate on your starting tower before spending on additional structures. A fast single tower at the main chokepoint outperforms two slow towers spread across the map in the early waves." },
+        { "q": "Is there an end to the game?", "a": "The wave count is effectively infinite with increasing difficulty. Your goal is to survive as long as possible and maximize your survival time for the global leaderboard." }
+      ],
+      "characters": [
+        { "name": "The Commander (Night's Watch)", "role": "Player character", "desc": "The last commander of humanity's defensive forces, tasked with closing the Breach using enchanted towers and blessed weaponry. Every strategic decision rests on their shoulders." },
+        { "name": "Lords of the Pit", "role": "Primary antagonists", "desc": "Ancient entities trapped for eons and freed when scientists pierced the final subterranean seal in 2099. They tore reality itself upon escaping, turning the Old City into ruins." },
+        { "name": "Scribes of the Flame", "role": "Allied faction", "desc": "A secret order that spent centuries preparing for the demon incursion. They fused ancient runes with modern technology to create the weapons and towers the Commander wields." }
+      ],
+      "featuredComments": [
+        { "name": "SoulFragment99", "text": "Don't waste your Soul Fragments clearing early waves — save them for Wave 10 when the Elite Demons show up. Lost my first four runs because I kept burning the Aegis-7 on trash mobs.", "badge": "Top Tip" },
+        { "name": "NightWatchVex", "text": "The lore hit me unexpectedly hard. Scientists drilling into a prison for ancient entities, skyscrapers as monuments to despair — this has no right to go as hard as it does for a tower defense game." },
+        { "name": "EmberChoke", "text": "Single upgraded fire-rate tower at the main chokepoint absolutely wrecks the first six waves. Two slow towers spread across the map is objectively worse. Trust the tip." },
+        { "name": "AegisStrike7", "text": "That moment when Wave 10 hits and the screen fills with Elite Demons and you realize you spent all your orbital strikes... yeah. Keep 2 in reserve minimum." },
+        { "name": "RuneForgedX", "text": "The Scribes of the Flame backstory is doing a lot of work here. Ancient runes fused into modern weapons is such a good excuse for the upgrade tree to exist in-world.", "badge": "Lore" },
+        { "name": "DemonGate00", "text": "Survived to wave 24 first serious attempt by just upgrading fire rate and hoarding fragments. This loop is exactly as addictive as advertised." }
       ]
     },
     "2": {
@@ -264,6 +323,31 @@
         "Prestige System: \"Galaxy Jump\" for Permanent Multipliers",
         "Visual Upgrades for your Space Station",
         "Web & Mobile Friendly"
+      ],
+      "objectives": "Expand your fleet from a single derelict station at the galaxy's edge, automate resource collection, defeat pirate raids, and advance toward the legendary Primal Star before the Flotilla's factions collapse.",
+      "controlsTable": [
+        { "key": "Left Click", "action": "Collect resources manually" },
+        { "key": "Menu Buttons", "action": "Purchase ship upgrades and new vessel types" },
+        { "key": "Menu Buttons", "action": "Research technologies (e.g. Hyper-drive, Dyson Swarm)" },
+        { "key": "Menu Buttons", "action": "Upgrade Space Station shields and modules" }
+      ],
+      "faq": [
+        { "q": "How do I get started?", "a": "Click the resource node to begin generating fleet fuel manually. Use your first earnings to buy an automated mining drone so you can step away without losing progress." },
+        { "q": "What is the 'Galaxy Jump' prestige system?", "a": "Galaxy Jump resets your current run in exchange for permanent multipliers that carry forward. Triggering it at the right moment — typically after conquering your third or fourth planet — compounds your total earnings far faster than continuing the same run." },
+        { "q": "How do I survive pirate raids?", "a": "Pirate raids ramp up significantly after you claim your third planet. Upgrade your Station shields before expanding further, and maintain a reserve of interceptors so raids don't drain your resource stockpile mid-expansion." },
+        { "q": "What does Hyper-drive do?", "a": "Researching Hyper-drive dramatically increases fleet travel speed between planets, shortening the time between resource drops and enabling faster colonization — it's one of the highest-value early research picks." },
+        { "q": "Is there an endpoint to the game?", "a": "The stated goal is finding the Primal Star beyond the Great Barrier, but the gameplay loop is effectively infinite. Each Galaxy Jump cycle lets you push deeper into the universe while your permanent multipliers grow." }
+      ],
+      "characters": [
+        { "name": "The Grand Admiral", "role": "Player character", "desc": "Commander of the Neo-Terran Hegemony's Great Expansion, operating from Vanguard Station at the edge of Andromeda. Responsible for balancing ship production, resource logistics, and planetary conquest." },
+        { "name": "The Elder Council", "role": "Sanctioning authority", "desc": "The governing body of the Flotilla that officially commissioned the search for the Primal Star. They represent humanity's last hope for finding a permanent home among the stars." }
+      ],
+      "featuredComments": [
+        { "name": "VanguardDrift", "text": "Hyper-drive research in the first ten minutes and you'll feel the difference immediately. Expansion speed doubles and you start colonizing planets before the pirate raids ramp up. Non-negotiable first pick.", "badge": "Top Tip" },
+        { "name": "PrimalStarX", "text": "Earth is a myth, humanity wanders in a Flotilla of interconnected ships, and the Primal Star is somewhere past the Great Barrier. I did not expect a clicker game to have actual stakes." },
+        { "name": "GalacticLoop77", "text": "Galaxy Jump at the right moment is insane. Third or fourth planet conquered, hit the prestige, and your next run starts with multipliers that make the grind feel like actual progress." },
+        { "name": "NovaDrone", "text": "Idle but with enough decisions per minute to stay engaging. The pirate raid timing alone forces you to actually pay attention instead of just watching numbers go up." },
+        { "name": "DysonSwarm9", "text": "Upgrade Station shields before claiming your third planet. I made that mistake twice. Raiders hit harder than anything you've seen up to that point and they'll drain your stockpile in one hit." }
       ]
     },
     "3": {
@@ -280,6 +364,33 @@
         "Global Raid Bosses with Massive Rewards",
         "Player-driven Economy and Trading",
         "Pet System: Tame Monsters to Fight Alongside You"
+      ],
+      "objectives": "Project your Avatar into the Wildlands of Aethelgard, gather Echo Dust from defeated monsters, equip relics of the old world, and grow powerful enough through Rebirth cycles to push back the Shadow-Blight threatening to erase all remaining light.",
+      "controlsTable": [
+        { "key": "Auto-battle", "action": "Avatar fights continuously without input" },
+        { "key": "Click (Skill)", "action": "Manually activate a skill for instant effect" },
+        { "key": "Click (Equipment)", "action": "Equip, swap, or enhance gear items" },
+        { "key": "Click (Rebirth)", "action": "Reset progress to gain permanent stat bonuses" },
+        { "key": "Click (Pet)", "action": "Tame or assign a monster companion" }
+      ],
+      "faq": [
+        { "q": "Do I need to keep the game open to progress?", "a": "No — the game features true offline progress. Your Avatar continues fighting and collecting while the app is closed, so you can log back in after hours and collect accumulated rewards." },
+        { "q": "When should I use the Rebirth mechanic?", "a": "Rebirth at the point where your Avatar's progress begins to slow significantly. The permanent bonuses from a well-timed Rebirth snowball across all future runs, accelerating your growth far more than grinding the same stage." },
+        { "q": "What stat should I prioritize first?", "a": "Prioritize Luck early on. Higher Luck increases the drop rate of Rare-tier equipment from even low-level enemies, which sets up a much stronger foundation for mid-game class specialization." },
+        { "q": "What is Echo Dust?", "a": "Echo Dust is the primary attunement resource dropped by defeated foes in the Wildlands. It is used to align your Avatar to one of three elements — Fire, Ice, or Void — and unlocks access to elemental skill branches." },
+        { "q": "What are the relics I collect?", "a": "Relics are equipment pieces that are literally solidified memories from Aethelgard's destroyed civilization. Wearing them grants stat bonuses and they can be enhanced with the Enchanting system to scale into the late game." }
+      ],
+      "characters": [
+        { "name": "The Soul-Binder", "role": "Player character", "desc": "A rare individual capable of projecting consciousness into a powerful Avatar. Their physical body rests in the Temple of Stasis while the Avatar roams Aethelgard's Wildlands, gathering relics and battling the Shadow-Blight." },
+        { "name": "The Shadow-Blight", "role": "Primary antagonist force", "desc": "The void's hunger made manifest — a creeping darkness that seeks to erase the fragmented islands of reality left after the Unraveling. It is the central threat the Soul-Binder must push back." },
+        { "name": "The Great Weavers", "role": "Lost civilization (lore)", "desc": "Ancient rulers who once governed Aethelgard by spinning the threads of fate. The Unraveling shattered their loom and scattered reality into fragments; the relics players collect are remnants of their civilization." }
+      ],
+      "featuredComments": [
+        { "name": "EchoDustPriest", "text": "Prioritize Luck early. I know every idle game says something like this, but here it genuinely matters — Rare drops from low-level goblins set up mid-game progression faster than anything else you can do.", "badge": "Strategy" },
+        { "name": "ShadowBlight0", "text": "Wearing relics that are literally solidified memories from a destroyed civilization while your body sits in the Temple of Stasis. The lore framing for gear is genuinely clever." },
+        { "name": "RebornAvatarV", "text": "Do NOT Rebirth at the first sign of slowdown. Wait until progress truly stalls, then reset. The permanent bonus difference between early and well-timed Rebirth is enormous." },
+        { "name": "VoidAttuned", "text": "The offline progress is real. Logged back in after 8 hours and had accumulated enough Echo Dust to unlock the Void attunement I'd been working toward. This is how idle games should work." },
+        { "name": "LunaWeave", "text": "Shadow-Blight as a creeping hunger that erases reality fragments is exactly the kind of ambient villain that works best in idle games — you feel the pressure without it being in your face." }
       ]
     },
     "5": {
@@ -297,6 +408,27 @@
         "Adaptive Soundscape that Changes with your Score",
         "Global Monthly Tournaments",
         "Web & Mobile Friendly"
+      ],
+      "objectives": "Drop and merge identical gems inside the Alchemist's Vessel to create increasingly rare jewels, score as high as possible, and prevent the container from overflowing before reaching the legendary Star-Core tier.",
+      "controlsTable": [
+        { "key": "Mouse Drag / Touch Drag", "action": "Aim gem drop position" },
+        { "key": "Release", "action": "Drop the gem into the container" },
+        { "key": "Shake (UI button)", "action": "Nudge gems to trigger stuck merges" },
+        { "key": "Next Gem Preview", "action": "Plan placement based on the upcoming gem type" }
+      ],
+      "faq": [
+        { "q": "How does merging work?", "a": "When two identical gems touch, they fuse into the next tier gem. Merges can chain — a newly formed gem that contacts another of the same tier will merge again automatically, potentially triggering a cascade." },
+        { "q": "What causes the game to end?", "a": "The run ends when gems stack above the container's overflow line. Keeping large gems at the bottom and small gems near the top delays overflow significantly." },
+        { "q": "When should I use the Shake feature?", "a": "Use Shake sparingly and only when gems are wedged in corners and blocking merges. Shaking is a limited resource, so save it for tight situations rather than using it reactively." },
+        { "q": "Why is the 'Next Gem' preview important?", "a": "Sometimes it's worth placing a small gem in a corner to wait for a larger matching gem rather than dropping it into a crowded area. Knowing what's coming lets you set up merge chains one step ahead." },
+        { "q": "What is the highest gem tier?", "a": "The lore describes the Star-Core as the ultimate tier — a universe-defining gem representing the final stage of celestial evolution. Reaching it requires sustained merge chains and strong vertical management." }
+      ],
+      "featuredComments": [
+        { "name": "QuartzSink", "text": "Large gems on the bottom, small gems on the top. Once that clicked I stopped losing to overflow in the first three minutes and actually started building toward the high tiers." },
+        { "name": "CelestialAlch", "text": "The chain reaction physics are surprisingly satisfying. A merge nudging another gem into a third merge into a fourth is the kind of thing that makes you just stare at the screen for a second.", "badge": "Editor's Pick" },
+        { "name": "StarCoreDream", "text": "Save the Shake for when you're genuinely stuck, not as a reflex. It's a limited resource and burning it on something that would have merged naturally is the most common way to lose a strong run." },
+        { "name": "PrismDropV", "text": "The Next Gem preview changes the game completely once you start using it. Sometimes dropping a small gem in a corner and waiting for the right merge is objectively better than filling space immediately.", "badge": "Strategy" },
+        { "name": "AlchemyGrid", "text": "Each gem tier is a different stage of celestial evolution according to the lore. I genuinely read it. Gives the whole progression loop a strange mythic weight for a physics puzzle game.", "badge": "Lore" }
       ]
     },
     "6": {
@@ -313,6 +445,27 @@
         "Procedural World Maps with Unique Resources",
         "Customizable City Layouts for Optimized Production",
         "Leaderboard for the Wealthiest Empires"
+      ],
+      "objectives": "Grow your coastal tribe from Bronze Age barter into a globe-spanning empire by establishing profitable trade routes, managing resource surpluses, and out-competing rival civilizations on the wealth leaderboard.",
+      "controlsTable": [
+        { "key": "Mouse Click", "action": "Select city structures and open upgrade menus" },
+        { "key": "Mouse Click (Menu)", "action": "Assign resources to production or trade routes" },
+        { "key": "Mouse Click (Diplomacy)", "action": "Initiate trade agreements or military actions" },
+        { "key": "Mouse Click (Tech)", "action": "Advance through technology eras" }
+      ],
+      "faq": [
+        { "q": "What resources matter most early on?", "a": "Grain is the most critical early resource — production drops in winter while prices spike, so always keep a healthy surplus before expanding. Neglecting Grain leads to starvation penalties that cripple your economy." },
+        { "q": "How do I balance expansion without crashing?", "a": "Over-expansion is the most common mistake. Expand only when your current territories are generating stable surplus, and check the Happiness-Tax balance before adding new cities to avoid productivity penalties." },
+        { "q": "How do market prices work?", "a": "Prices for gold, spices, and iron fluctuate based on global supply and demand. Watch the market panel and sell high-demand goods rather than hoarding them, then reinvest in production of currently scarce commodities." },
+        { "q": "What is the difference between peaceful and military play?", "a": "Peaceful merchant strategies compound wealth faster in the mid-game through compounding trade routes. Military conquest gives faster map control but incurs maintenance costs and risks counter-attacks that can destabilize your treasury." },
+        { "q": "What is the end goal?", "a": "The leaderboard ranks the wealthiest empires, so your target is maximum accumulated wealth. Reaching the Space era via the technology tree unlocks the highest-value production buildings in the game." }
+      ],
+      "featuredComments": [
+        { "name": "GrainHoarder", "text": "Always keep a Grain surplus before expanding. Production drops in winter and prices spike — I ignored this exactly once and watched my entire economy implode in a single season.", "badge": "Top Tip" },
+        { "name": "SilkRoadKaiser", "text": "Peaceful merchant compound mid-game wealth so much faster than military conquest. Control the trade routes, not the territory, and the leaderboard takes care of itself." },
+        { "name": "CoastalTribe1", "text": "Watching commodity prices fluctuate based on global supply and demand is genuinely interesting. Selling iron when it's scarce and buying when it's cheap is where the real game is." },
+        { "name": "DynastyLedger", "text": "The Happiness-Tax balance is the thing no one explains well enough. Too much tax and productivity craters, too little and your military expansion stalls. Keep it centered and expand gradually." },
+        { "name": "FirstMerchant", "text": "From a single pearl to a kingdom according to the lore. That's exactly how the early game progression feels — barter, a ship, a province, then suddenly a continent.", "badge": "Lore" }
       ]
     },
     "7": {
@@ -330,6 +483,25 @@
         "Minimalist, Distraction-free Interface",
         "Adrenaline-pumping Final Phase Visuals",
         "Web & Mobile Friendly"
+      ],
+      "objectives": "Click the target as many times as possible within exactly 15 seconds to maximize your Total Clicks and Clicks Per Second score, then beat your personal record and climb the global leaderboard.",
+      "controlsTable": [
+        { "key": "Mouse Left-Click", "action": "Click the target to register a hit" },
+        { "key": "Mouse Left-Click (repeat)", "action": "Sustain rapid clicking for high CPS" }
+      ],
+      "faq": [
+        { "q": "How do I start a run?", "a": "Click the target to begin the 15-second timer. The clock starts on your first click, so position your cursor over the target before committing." },
+        { "q": "What is Clicks Per Second (CPS)?", "a": "CPS is your total clicks divided by 15 seconds. It is the primary metric for comparing performance. A score above 10 CPS puts you in pro-player territory." },
+        { "q": "What are Jitter Click and Butterfly Click?", "a": "Jitter Clicking involves tensing your forearm to create rapid involuntary finger vibrations, generating high click rates. Butterfly Clicking alternates between two fingers on the same button in rapid succession — both techniques are used by competitive clickers to push above 10 CPS." },
+        { "q": "What happens in the final 5 seconds?", "a": "Overdrive mode activates — the screen pulses with light and sound. It is designed to test your focus under pressure. Maintain your rhythm rather than speeding up erratically, as consistency beats adrenaline bursts." },
+        { "q": "Does technique matter more than speed?", "a": "Yes. Consistency is more important than peak bursts. A steady 8 CPS throughout all 15 seconds outperforms 12 CPS for 5 seconds followed by fatigue. Use your wrist for speed, breathe steadily, and pace yourself." }
+      ],
+      "featuredComments": [
+        { "name": "ButterflyClick", "text": "Jitter clicking got me from 6 CPS to 9.4 CPS in a week. Wrist-based, not finger-based. Once you stop tensing your whole hand the consistency improves immediately.", "badge": "Top Tip" },
+        { "name": "OD_Reflex", "text": "That Overdrive pulse in the final 5 seconds is genuinely designed to break your rhythm. Don't speed up — maintain exactly what you were doing and let the visual effects be noise." },
+        { "name": "CPS_Architect", "text": "8 CPS steady for 15 seconds beats a 12 CPS burst that fades. I charted my own runs. Fatigue drops always cost more than the burst earns. Pace yourself from second one." },
+        { "name": "MillisecondEdge", "text": "The Latency Architects lore is silly in the best way. Being called a biological input test subject hits differently when you're on your 40th attempt trying to beat your personal best by 3 clicks." },
+        { "name": "LightningClick", "text": "Broke 10 CPS using butterfly click after about 2 weeks of practice. Position your cursor before the timer starts — that first click triggers the countdown, so don't waste your positioning time." }
       ]
     },
     "8": {
@@ -347,6 +519,25 @@
         "Local Co-op (Two-player Mode)",
         "Leaderboard for Win Rates and Elo Rating",
         "Web & Mobile Friendly"
+      ],
+      "objectives": "Align five of your stones in an unbroken row — horizontally, vertically, or diagonally — on the board before your opponent does, while simultaneously blocking their forming sequences.",
+      "controlsTable": [
+        { "key": "Mouse Click", "action": "Place a stone on the selected board intersection" }
+      ],
+      "faq": [
+        { "q": "How do I win a game of OMOK?", "a": "Place five of your stones in a continuous row in any direction — horizontal, vertical, or diagonal — before your opponent does. The first to achieve five-in-a-row wins the round." },
+        { "q": "What is an 'Open Three'?", "a": "An Open Three is a sequence of three of your stones with both ends unblocked. It is a powerful formation because it threatens to become an Open Four, which is nearly impossible to stop. Building Open Threes while blocking your opponent's is a core mid-game strategy." },
+        { "q": "What is an Open Four and why is it critical?", "a": "An Open Four is four stones in a row with at least one open end. If your opponent has one, you must block it immediately — failing to do so on that very turn means they win the next move." },
+        { "q": "Why is controlling the center important?", "a": "Stones placed near the center have more directions available to form rows of five. Corner and edge stones are restricted to fewer angles, making them easier for an opponent to preemptively block." },
+        { "q": "How advanced is the AI?", "a": "The AI is calibrated to styles of legendary masters. It reads Open Threes and Open Fours accurately at higher difficulties. Playing against it at medium difficulty is an effective way to learn to recognize patterns before competing against humans." }
+      ],
+      "featuredComments": [
+        { "name": "OpenThree_M", "text": "The moment you internalize what an Open Three looks like and start scanning for it every turn, the game completely changes. Before that you're just placing stones. After, you're actually playing.", "badge": "Strategy" },
+        { "name": "GeometricSoul", "text": "\"The board is a map of the soul\" is the kind of thing that sounds overwrought until you're 30 moves deep in a game and realize every stone you placed tells a story about how you think." },
+        { "name": "CenterControl", "text": "Control the center. Not metaphorically, literally — place your first two or three stones in the center cluster and the AI immediately loses its easiest winning angles." },
+        { "name": "FiveInRow", "text": "The replay system is the sleeper feature. Watching back a loss and seeing exactly where you missed the Open Four your opponent was building is better than any tutorial." },
+        { "name": "StoneBalance", "text": "If your opponent has an Open Four it is already over unless you block it this turn. I've tested every other response. There are none. Block it or lose." },
+        { "name": "GrandScholar", "text": "Clean, minimalist, no noise. Just you and the board and decisions. This is a palate cleanser after every other game with a progress bar attached to it." }
       ]
     },
     "9": {
@@ -364,6 +555,28 @@
         "Atmospheric Synth-wave Soundtrack",
         "Daily Challenges with Exclusive Rewards",
         "Web & Mobile Friendly"
+      ],
+      "objectives": "Pilot the Void-Walker through endless waves of cosmic horrors, collect artifacts to power up, survive as long as possible, and maximize your score to claim the top spot on the global leaderboard.",
+      "controlsTable": [
+        { "key": "WASD", "action": "Move the Void-Walker ship in any direction" },
+        { "key": "Arrow Keys", "action": "Alternative movement controls" },
+        { "key": "Mouse", "action": "Aim your weapons at enemies" },
+        { "key": "Mouse Click", "action": "Fire at enemies" },
+        { "key": "Spacebar", "action": "Activate special ability" }
+      ],
+      "faq": [
+        { "q": "How do I survive the early waves?", "a": "Stay mobile — never hold still for more than 3 seconds. The Void-Walker is most vulnerable when stationary, so constant movement prevents enemies from converging on your position." },
+        { "q": "What are artifacts and why do I need them?", "a": "Artifacts are collectible power-ups discovered throughout the void. They grant passive bonuses and, crucially, some artifact pairs synergize for devastating effects — finding the Void-Heart and Singularity-Core together, for example, creates powerful area damage." },
+        { "q": "What is the Quantum Upgrade system?", "a": "Every time you level up, you choose one of three randomly offered upgrade paths. This roguelike system means no two runs are identical. Focus on either kinetic projectiles or esoteric energy beams to avoid splitting your build too thinly." },
+        { "q": "Are there daily challenges?", "a": "Yes — daily challenges run with fixed starting conditions and offer exclusive rewards unavailable in standard runs. Completing them consistently is one of the fastest ways to unlock new ships." },
+        { "q": "What is the strongest artifact combo?", "a": "The Void-Heart and Singularity-Core combination is described as the most powerful synergy — look for both items early and build your upgrade path to support area-of-effect damage to make full use of them." }
+      ],
+      "featuredComments": [
+        { "name": "VoidPilot38", "text": "Never stop moving. Three seconds stationary and the horrors cluster around you faster than you can shoot. Constant circular movement around the center of the map is the only early-game strategy that works.", "badge": "Strategy" },
+        { "name": "SingCore", "text": "Void-Heart plus Singularity-Core is not an exaggeration. Found both by wave 4 on one run and the AOE basically tripled my clear speed. Every Quantum Upgrade pick after went into supporting it." },
+        { "name": "OmegaCode_V", "text": "The Solar Extinction was a harvest, not a natural event. Void entities returning to claim what they planted billions of years ago. That's a genuinely unsettling premise buried in what could be a mindless bullet dodger.", "badge": "Lore" },
+        { "name": "RoguePilot9", "text": "Kinetic or energy — don't split. I tried building both trees on one run and ended up mediocre at everything. Pick a direction at the first Quantum Upgrade and commit." },
+        { "name": "ArtifactHunter", "text": "Daily challenges are underrated for unlocking ships. Consistent daily completions get you new ships far faster than grinding standard runs. The fixed starting conditions also let you practice specific builds." }
       ]
     },
     "10": {
@@ -380,6 +593,26 @@
         "Dynamic Battlefield Events: Solar Flares and Abyssal Rifts",
         "Deep Tactical Formations and Orders",
         "Persistent Global War Progress Tracker"
+      ],
+      "objectives": "Direct the souls of the fallen into Heaven's Golden Army or Hell's Infernal Legion, manage your Karma meter, and survive as many waves as possible while maintaining tactical equilibrium between divine and infernal forces.",
+      "controlsTable": [
+        { "key": "Mouse Click", "action": "Navigate menus and select unit types to deploy" },
+        { "key": "Keyboard Hotkeys", "action": "Issue formation orders and manage unit commands" },
+        { "key": "Mouse Click (Karma)", "action": "Direct souls toward Holy or Hell sides to adjust Karma" }
+      ],
+      "faq": [
+        { "q": "How do I start the simulation?", "a": "Select your starting unit mix from the Holy and Hell rosters, then confirm deployment. The simulation begins automatically and you manage formations and orders as waves progress." },
+        { "q": "What is the Karma meter?", "a": "Karma tracks your balance between directing souls to the Holy side versus the Infernal side. Keeping it centered unlocks the Divine Storm ability, which clears an entire screen of enemies and is one of the most powerful tools available." },
+        { "q": "What army composition works best?", "a": "Diversify between ranged and melee units. A melee-only or ranged-only force becomes countered by enemy wave compositions as you progress. At least a 40/60 split between the two types covers most threat profiles." },
+        { "q": "What are Abyssal Rifts and Solar Flares?", "a": "These are dynamic battlefield events that spawn mid-wave and alter conditions. Solar Flares buff Holy units briefly; Abyssal Rifts empower Infernal forces. Timing your unit surges around these events is a key tactical skill." },
+        { "q": "Is there a win condition?", "a": "The conflict is designed as an eternal simulation — there is no final wave. The goal is to survive as many waves as possible and grow your score on the persistent global war progress tracker." }
+      ],
+      "featuredComments": [
+        { "name": "KarmaArbiter", "text": "Keep the Karma meter centered and you unlock Divine Storm when you need it most. I ran Holy-heavy for 10 waves thinking it would help — it just locked me out of the ability and I got steamrolled.", "badge": "Top Tip" },
+        { "name": "ThresholdVex", "text": "Echoes of every prayer and sin taking physical form as warriors on a plane where time is malleable. The lore for this simulation is doing real work under what is essentially a wave survival game.", "badge": "Lore" },
+        { "name": "InfernalRange", "text": "40/60 melee to ranged split is the floor, not the ceiling. Some waves skew heavily toward fast enemies that melt melee — reading the incoming composition and adjusting before the wave hits is where the game actually is." },
+        { "name": "SolarAbyssal", "text": "Abyssal Rifts and Solar Flares timing your surges around them is huge. The game basically tells you which side to pump for the next 15 seconds. Listen to it." },
+        { "name": "MacroStrategist", "text": "The Macro-Management framing is interesting — you're adjusting divine laws and formations, not individual soldiers. It makes the scale feel genuinely large rather than just big numbers." }
       ]
     },
     "11": {
@@ -397,6 +630,31 @@
         "Phase-shifting Boss Battles at the End of Each Act",
         "Persistent Meta-Progression Across Runs",
         "Web & Mobile Friendly"
+      ],
+      "objectives": "Descend the shifting strata of Alea by building a winning dice pool across the run, defeating phase-changing act bosses, and surviving long enough to challenge the Order of Outcomes for control of the legendary First Die.",
+      "controlsTable": [
+        { "key": "Mouse Click / Touch", "action": "Select a die from your pool" },
+        { "key": "Drag", "action": "Drop a die onto an enemy, ally, or relic to apply its face effect" },
+        { "key": "Right-Click / Long-Press", "action": "Inspect any die face for full effect description" },
+        { "key": "Click (Path Choice)", "action": "Choose your next branch: elite, merchant, treasure, or unknown event" }
+      ],
+      "faq": [
+        { "q": "How does combat work?", "a": "Combat is turn-based and economy-driven. Each turn you spend dice rolls to deal damage, build block, trigger relic effects, and chain combos. You must manage your pool carefully each turn — spending all your block dice can leave you defenseless when the enemy strikes." },
+        { "q": "What do the three classes do differently?", "a": "Berserker doubles damage on maximum-face rolls, rewarding high-risk builds. Sage triggers rerolls on event conditions, giving more control over outcomes. Trickster banks unused faces for later turns, enabling burst combos across multiple rounds." },
+        { "q": "What is the best dice pool strategy?", "a": "Consistency beats peak damage — a pool of reliable 4–5 face results clears act bosses more efficiently than swingy 1-or-10 builds. Plan two turns ahead and keep at least one utility die unspent per turn for emergencies." },
+        { "q": "How do status effects work?", "a": "Status effects stack — poison, burn, and bleed applied together shred armored elites that resist direct damage. Building a status-stacking pool is one of the most effective counters to high-armor enemy types." },
+        { "q": "What is meta-progression?", "a": "When you lose a run, you unlock new dice tiers, character archetypes, and starting relics that persist into future attempts. Each run makes subsequent runs more powerful, so losing is part of the progression system." }
+      ],
+      "characters": [
+        { "name": "The Adventurer", "role": "Player character", "desc": "A soul who refuses to let fate be auctioned, descended into the shifting lattice of Alea with a personal pool of living dice. Their class choice (Berserker, Sage, or Trickster) defines how they interact with probability." },
+        { "name": "Order of Outcomes", "role": "Antagonist faction", "desc": "A group that hunts the lattice of Alea searching for the original First Die — the artifact said to grant its bearer the power to fix every roll forever. They stand between the adventurer and true mastery of chance." }
+      ],
+      "featuredComments": [
+        { "name": "DiceFall_Sage", "text": "Play the Sage on your first few runs. The reroll-on-event trigger covers for inexperience and lets you learn the enemy attack patterns without getting wiped by bad luck on turn one.", "badge": "Strategy" },
+        { "name": "ProbabilityX", "text": "Status stacking on armored elites is the answer no one talks about enough. Poison plus burn plus bleed on a single target destroys armor faster than any direct damage build I've tested." },
+        { "name": "FirstDieHunter", "text": "Always keep one utility die unspent. Every single run I've died from burning it on extra damage when I needed it for block. One die held back has saved me more times than I can count.", "badge": "Top Tip" },
+        { "name": "AleaDescend", "text": "The 'chance is the only law' lore actually matters mechanically. The Dicefall shattered reality into rolling probabilities and every soul woke up bonded to dice. The worldbuilding earns the gameplay premise." },
+        { "name": "ReliableFour", "text": "Consistent 4-5 face pool beats swingy 1-or-10 builds on boss fights. I learned this the hard way. Peak ceiling looks impressive until the boss phases and you roll a 1 three turns in a row." }
       ]
     },
     "12": {
@@ -413,6 +671,30 @@
         "Deep Hero Progression and Skill Trees",
         "Global Leaderboard for Most Heroes Collected",
         "Web & Mobile Friendly"
+      ],
+      "objectives": "Summon legendary heroes to defend the Last Nexus from endless monster waves, level up your roster, and collect as many heroes as possible to restore the Nexus's fading power before the Void consumes it.",
+      "controlsTable": [
+        { "key": "Mouse Click / Touch", "action": "Summon a hero to the battlefield" },
+        { "key": "Mouse Click / Touch", "action": "Select and manage hero upgrades" },
+        { "key": "Mouse Click / Touch", "action": "Activate Soul-Binder support abilities" }
+      ],
+      "faq": [
+        { "q": "How do I get started?", "a": "Summon your first hero using available resources and place them to intercept the incoming monster wave. The game explains summoning order through its tutorial — focus on a tank hero first to soak early damage." },
+        { "q": "Which heroes should I upgrade first?", "a": "Tank heroes should be upgraded first. They absorb incoming damage and keep your fragile damage-dealers alive long enough to output meaningful DPS. A low-tier tank with several upgrades outperforms a high-tier caster who dies quickly." },
+        { "q": "What are hero synergies?", "a": "Different hero classes interact with each other — combining tank, support, and damage-dealer classes unlocks passive bonuses that none could achieve alone. Experimenting with compositions is key to surviving later waves." },
+        { "q": "What are Soul-Binder abilities?", "a": "As the Soul-Binder, you have your own set of support abilities separate from the heroes. Use them when your frontline is overwhelmed rather than saving them indefinitely — they exist precisely for high-pressure moments." },
+        { "q": "What is the win condition?", "a": "There is no finite end — the wave count is endless and the Void grows stronger continuously. Your score on the global leaderboard reflects the number of unique heroes collected, so breadth of collection matters as much as survival depth." }
+      ],
+      "characters": [
+        { "name": "The Soul-Binder", "role": "Player character", "desc": "A being tasked with summoning the Heroes of Legend to protect the Last Nexus. The Soul-Binder holds the power to call warriors back from myth and direct them in battle against the encroaching Void." },
+        { "name": "Ancient Celestials", "role": "Creators (lore)", "desc": "The divine entities who originally created the Last Nexus as a beacon of light to hold back the Void. Their power is fading, and only the gathered Heroes of Legend can restore it." }
+      ],
+      "featuredComments": [
+        { "name": "TankFirst_J", "text": "Upgrade your tank heroes before anything else. I ran a damage-first lineup through wave 6 and watched my casters die before they got a single ability off. Frontline or bust.", "badge": "Top Tip" },
+        { "name": "NexusLight", "text": "The Last Nexus fading as a beacon of light while you scramble to summon enough heroes to restore it — the idle urgency the lore creates actually makes you care about the collection metagame." },
+        { "name": "SoulBind_K", "text": "Soul-Binder abilities exist for emergencies, not as a rotation. I see people popping them on wave 3. Save them. When your frontline collapses on wave 15, you'll be grateful you held them." },
+        { "name": "HeroSynergy", "text": "Class synergies are not optional in the later waves. Tank, support, damage-dealer in the same roster unlocks passives that none of the three achieve solo. Trial and error the combinations early.", "badge": "Strategy" },
+        { "name": "VoidResist", "text": "The leaderboard rewards breadth of collection, not just survival depth. A wide hero roster actually matters for ranking even if you never reach the late waves with all of them." }
       ]
     },
     "13": {
@@ -429,6 +711,25 @@
         "Challenging 'Rush Hour' Mode",
         "Aesthetic Pixel Art and Satisfying Sound Effects",
         "Web & Mobile Friendly"
+      ],
+      "objectives": "Cook every dish to perfection by clicking at precisely the right moment, manage incoming orders without letting heat overflow, and earn a five-star rating by completing the dinner rush flawlessly.",
+      "controlsTable": [
+        { "key": "Mouse Click / Tap", "action": "Start a cooking action" },
+        { "key": "Mouse Click / Tap", "action": "Stop cooking at the exact perfect window" }
+      ],
+      "faq": [
+        { "q": "How do I cook a dish perfectly?", "a": "Each ingredient has a visual and audio 'perfect' window — watch the heat indicator and listen for the cue, then click to stop cooking at that exact moment. Clicking too early or too late drops the dish quality." },
+        { "q": "What happens if heat builds up too much?", "a": "Excess heat burns the dish, failing the order entirely. Monitor your heat gauge continuously and click to stop cooking before it enters the red zone — it is better to undercook slightly than to burn." },
+        { "q": "How do I handle multiple orders at once?", "a": "Prioritize orders with the shortest remaining time on their countdown. Quick-completing one dish frees your attention for the next, rather than juggling all simultaneously and risking multiple burns." },
+        { "q": "What do kitchen upgrades do?", "a": "Upgrades reduce cooking time, widen the 'perfect' window, or add capacity for additional simultaneous orders. Investing in wider perfect windows is the most forgiving upgrade for players still learning ingredient timings." },
+        { "q": "What is Rush Hour mode?", "a": "Rush Hour is a high-intensity mode that floods the kitchen with orders faster than normal play. It tests whether you can maintain precision timing under extreme time pressure — it's the ultimate challenge for five-star players." }
+      ],
+      "featuredComments": [
+        { "name": "PerfectWindow", "text": "Listen before you look. The audio cue for the perfect window is slightly ahead of the visual indicator, which gives you a fraction of a second of extra reaction time once you train your ear to it.", "badge": "Top Tip" },
+        { "name": "FiveStarRush", "text": "Rush Hour mode is unforgiving in the best way. Normal play gives you time to think. Rush Hour takes that away and you find out very quickly which recipes you actually have memorized." },
+        { "name": "HeatPanic", "text": "The heat gauge creeping into the red while you're mid-click on a second dish is a specific kind of stress I was not prepared for on my first run. Now I check heat before starting any new action." },
+        { "name": "MichelinDash", "text": "Wider perfect window upgrades are absolutely the right call early. They're not glamorous but they let you build confidence and internalize ingredient timings before the margins get tight." },
+        { "name": "SizzleTimer", "text": "Prioritize the countdown order, not the one that looks most urgent. Lowest remaining time wins every time even if another dish looks more done. Manage by timer, not by eye." }
       ]
     },
     "14": {
@@ -446,6 +747,26 @@
         "Dual-Sort Global Leaderboard (Score + Completion)",
         "Seasonal Events with New Encyclopedia Pages",
         "One-Handed Mobile and Desktop Friendly"
+      ],
+      "objectives": "Catch falling fruits to rebuild the Encyclopedia of the Harvest, trigger Frenzy Mode by chaining catches, and push your score as high as possible — with Encyclopedia completion percentage as the leaderboard tiebreaker.",
+      "controlsTable": [
+        { "key": "Mouse Click / Tap", "action": "Catch a falling fruit" },
+        { "key": "Hold and Drag (Touch)", "action": "Sweep across multiple fruits in one motion" },
+        { "key": "Avoid (no input)", "action": "Let rotten fruits pass — tapping them breaks your chain" }
+      ],
+      "faq": [
+        { "q": "What is the Encyclopedia and why does it matter?", "a": "The Encyclopedia tracks every unique fruit variety you have caught. Each new entry permanently raises your score multiplier for all future runs — making Encyclopedia completion a long-term metagame that compounds across sessions." },
+        { "q": "How do I trigger Frenzy Mode?", "a": "Catch five fruits in a row without missing or hitting a rotten fruit. On the fifth catch, Frenzy Mode activates: the screen lights up, fruit values double, and rare Encyclopedia entries enter the spawn pool." },
+        { "q": "How do I tell rotten fruit from fresh?", "a": "Rotten fruit closely resembles ripe fruit at high speeds. When in doubt, do not tap — a missed catch is better than breaking your chain. The leaderboard rewards chain consistency, not total taps." },
+        { "q": "What are the special fruits (Golden Apple, Phantom Pear, Mystic Mango)?", "a": "Special fruits spawn under specific weather conditions on the orchard backdrop. Pay attention to ambient visual cues — cloud cover, lighting shifts — not just the falling sprites. These rare entries provide the largest Encyclopedia multiplier jumps." },
+        { "q": "What is the best strategy during Frenzy?", "a": "During Frenzy, ignore low-value fruits at the bottom row and hunt rare drops appearing near the top of the screen. Saving your chain for a Golden Apple spawn typically doubles a single catch's score versus sustained low-tier chaining." }
+      ],
+      "featuredComments": [
+        { "name": "HarvestChain", "text": "Encyclopedia entries are the whole game. Don't grind high scores on early runs — grind for new varieties. Every unique catch permanently raises your multiplier and makes every future run worth more.", "badge": "Strategy" },
+        { "name": "FrenzyTrip", "text": "Three of the same color in a row is a guaranteed Frenzy trigger if you catch all three. Once I started recognizing the color streaks I could actually plan for Frenzy instead of just hoping it happened." },
+        { "name": "PhantomPear", "text": "The Orchard of Abundance suspended between seasons with fruits that have mischievous minds of their own — I wasn't expecting the lore to be charming but here we are.", "badge": "Lore" },
+        { "name": "RottenDoubt", "text": "When in doubt, don't tap. A missed catch is better than breaking a Frenzy chain. The leaderboard rewards consistency. One mistaken rotten fruit tap at the wrong moment costs more than the points were ever worth." },
+        { "name": "GoldenBurst", "text": "Saving a built Frenzy chain for a Golden Apple spawn is the highest-value play in the game. The doubled fruit value on a special fruit during Frenzy is genuinely the score spike you're building toward every run." }
       ]
     },
     "15": {
@@ -464,6 +785,33 @@
         "Dual Damage Types: Physical & Magical",
         "Global Leaderboard",
         "Web & Mobile Friendly"
+      ],
+      "objectives": "Assemble a formation of elemental units, defend Aethermoor against increasingly powerful waves of corrupted enemies, and survive as many stages as possible before the kingdom falls.",
+      "controlsTable": [
+        { "key": "Mouse Click", "action": "Select a unit from the roster" },
+        { "key": "Mouse Click (Grid)", "action": "Place selected unit in the front, middle, or back row" },
+        { "key": "Drag", "action": "Rearrange existing units within the formation" },
+        { "key": "UI Button (Buy)", "action": "Recruit a new unit using gold" },
+        { "key": "UI Button (Upgrade)", "action": "Upgrade an existing unit's stats" },
+        { "key": "UI Button (Start)", "action": "Begin the next battle round" }
+      ],
+      "faq": [
+        { "q": "How does the auto-battle system work?", "a": "Once you confirm your formation and start the round, units fight automatically based on their abilities and row position. Your role is to optimize placement and gold spending between rounds — positioning is everything." },
+        { "q": "What are the elemental interactions?", "a": "Fire beats Nature, Nature beats Lightning, Lightning beats Ice, and Ice beats Fire. Matching your units' elements to counter the incoming wave's predominant type gives a significant advantage on each stage." },
+        { "q": "Should I recruit more units or upgrade existing ones?", "a": "Balance both, but upgrades often outperform raw numbers. Concentrated firepower on fewer well-upgraded units beats spreading gold thin across many weak ones — especially against elite enemies." },
+        { "q": "Why is front-row placement important?", "a": "Front-row units absorb incoming attacks and protect fragile damage dealers in the back row. Always place your tankiest units in the front. A back-row caster killed on turn one contributes nothing to the rest of the round." },
+        { "q": "How many elements should I use in one formation?", "a": "Two to three elements is the recommended range. Pure mono-element builds are countered by a single bad matchup wave, while running all four spreads your units too thin to exploit any interaction effectively." }
+      ],
+      "characters": [
+        { "name": "The Shield-Captain", "role": "Player character", "desc": "Chosen by the dying king of Aethermoor with his last breath, the Shield-Captain commands the realm's remnant forces with nothing but loyal soldiers and scattered Elemental Crystal shards." },
+        { "name": "The Court Mage", "role": "Antagonist (backstory)", "desc": "The traitor who shattered Aethermoor's four Elemental Crystals from within, tearing open the Veil and allowing the corrupted hordes to pour through. The cause of the kingdom's collapse." }
+      ],
+      "featuredComments": [
+        { "name": "ShieldCaptain", "text": "Fire beats Nature, Nature beats Lightning, Lightning beats Ice, Ice beats Fire. Learn the cycle before wave 5. The game does not explain this clearly upfront and I wasted three runs finding it out.", "badge": "Top Tip" },
+        { "name": "AethermoorX", "text": "The Court Mage betrayal is the best villain setup in any auto-battler I've played. No dramatic cutscene, just a single paragraph of lore that explains why everything is already on fire when you start.", "badge": "Lore" },
+        { "name": "FrontRowBrace", "text": "Upgraded melee in the front row, upgraded casters safely in the back. A back-row damage dealer killed on turn one of the round contributes nothing. Frontline is not optional." },
+        { "name": "TwoElement", "text": "Two or three elements max in one formation. Four elements and you're spreading too thin to exploit any interaction. Mono-element gets countered by one bad matchup. Two-element with a splash of a third is the answer." },
+        { "name": "GoldBalance", "text": "Upgrades over volume. Three upgraded units beat six weak ones in the elite waves every time. It feels wrong to not spend gold, but concentrated firepower on your strongest unit is almost always right." }
       ]
     },
     "16": {
@@ -480,6 +828,27 @@
         "Colorful Neon Visuals",
         "Quick Rounds & High Replayability",
         "Web & Mobile Friendly"
+      ],
+      "objectives": "Move across the board faster than your opponents, claim points to form triangles, block rivals from completing their own shapes, and outscore everyone to become the triangle champion of the Grid.",
+      "controlsTable": [
+        { "key": "WASD", "action": "Move Player 1 across the board" },
+        { "key": "Arrow Keys", "action": "Move Player 2 across the board" },
+        { "key": "On-screen Buttons", "action": "Move Players 3 and 4 (touch devices)" },
+        { "key": "Touch Controls", "action": "Move all players on mobile" }
+      ],
+      "faq": [
+        { "q": "How do I form a triangle?", "a": "Move your player to claim three points that connect into a triangle shape on the board. Completing the shape scores you points and contributes toward your total." },
+        { "q": "What is the best starting position?", "a": "Claim corner positions early — corners give you access to more triangle-forming angles than edge or center positions, so securing them before opponents restricts their options." },
+        { "q": "How do I block an opponent?", "a": "Move onto a point your opponent needs to complete their triangle. A blocked point forces them to reroute, buying you time to complete your own shape or take a more advantageous position." },
+        { "q": "Does it work for two players?", "a": "Yes — two players share the same keyboard using WASD and Arrow Keys. The game scales well from 1-player practice to 4-player chaos on a single device." },
+        { "q": "What is a good 3-4 player strategy?", "a": "In multi-player games, temporary alliances help — focus pressure on the leading player cooperatively, then break the alliance and compete once their score is reduced. Identify who is ahead and coordinate blocking." }
+      ],
+      "featuredComments": [
+        { "name": "GridKing", "text": "Corners first. Every time. Corners have the most triangle-forming angles and locking two corners in the first fifteen seconds limits what everyone else can do for the rest of the round." },
+        { "name": "NeonTriangle", "text": "The 4-player mode transforms it into chaos in the best way. Temporary alliances against the leader, betrayals the moment they're behind, then a three-way scramble for the last corner.", "badge": "Editor's Pick" },
+        { "name": "GeometricWar", "text": "WASD and Arrow Keys on the same keyboard is more comfortable than I expected. Two people leaning over the same laptop being equally tense about a triangle game is a specific kind of fun." },
+        { "name": "BlockerPro", "text": "Blocking is often better than scoring. If you're one triangle behind, blocking the leader's next shape and completing your own in the same two moves swings the game faster than hunting open board space." },
+        { "name": "GridProtocol", "text": "The ancient Triangle Protocol. The Grid remembers every triangle ever formed. This is absolutely not necessary lore for an arcade game and I respect it enormously." }
       ]
     },
     "17": {
@@ -497,6 +866,28 @@
         "Reload-Timing Combat (No RNG)",
         "Optimized for N-Key Rollover Keyboards",
         "Clean Minimalist Design"
+      ],
+      "objectives": "Outmaneuver and outshoot your opponent across arena rounds, exploiting reload windows, destructible cover, and ricochet angles to land the decisive shot first and win the duel.",
+      "controlsTable": [
+        { "key": "WASD", "action": "Move Player 1's tank" },
+        { "key": "Spacebar", "action": "Player 1 fires" },
+        { "key": "Arrow Keys", "action": "Move Player 2's tank" },
+        { "key": "Enter", "action": "Player 2 fires" }
+      ],
+      "faq": [
+        { "q": "How do rounds work?", "a": "Each round ends when one tank is destroyed. Rounds reset in seconds, and a session easily runs to thirty or more matches. Win streaks build a small momentum bonus that gives slightly faster reload speed." },
+        { "q": "What are ricochet pads and how do I use them?", "a": "Ricochet pads bounce projectiles at fixed angles, enabling bank shots around corners. On the Maze layout especially, bounced shots beat direct fire because corridors funnel opponents into predictable positions — practicing fixed-angle bank shots is a high-return skill." },
+        { "q": "How do destructible crates affect strategy?", "a": "Crates absorb exactly one shot and then collapse, eliminating that cover. Fire a probe shot into a crate your opponent is leaning on to remove their protection mid-round. Static defenders relying on crates are particularly vulnerable to this." },
+        { "q": "What is the key to winning firefights?", "a": "Control your opponent's reload timer. Never sit still during their reload — aggression during that window prevents them from setting up advantageous angles. Most rounds are decided by who exploits the reload gap better, not who aims best." },
+        { "q": "Does keyboard type matter?", "a": "Yes — N-key rollover keyboards register all simultaneous inputs. Membrane keyboards may drop inputs when both players press simultaneously, which causes missed shots. If you can choose, take Player 1 (WASD) on a membrane board, as Arrow Keys ghost more easily." }
+      ],
+      "featuredComments": [
+        { "name": "IronLedger", "text": "Fire a probe shot into the crate your opponent is leaning on. They reposition, you advance. This single trick won me six straight rounds before my friend figured out what I was doing.", "badge": "Top Tip" },
+        { "name": "ReloadEdge", "text": "The entire game is about their reload timer. Rush during their reload, fall back during yours. Every round I've lost was because I went passive when I should have been aggressive. Never sit still." },
+        { "name": "MazeRicochet", "text": "Ricochet pads on the Maze layout are genuinely high-skill. A bank shot around a corner that your opponent can't see coming is the most satisfying thing in this entire game." },
+        { "name": "WedgePusher", "text": "Map center control on Symmetric Wedge. Edges give you one or two firing angles. Center gives you four and pressure in every direction. This is the first thing I teach anyone new to the game." },
+        { "name": "ArmorDuel", "text": "A sealed crucible where two commanders fight not for territory but for legend. Every shot recorded. The melodramatic lore framing makes hitting a ricochet shot feel ten times more dramatic than it has any right to." },
+        { "name": "MembraneP1", "text": "Take Player 1 on a membrane keyboard every time. Arrow Keys ghost on simultaneous inputs and cost you shots you can't afford to lose. The tip about N-key rollover is not optional information." }
       ]
     },
     "18": {
@@ -514,6 +905,28 @@
         "One-Tap Restart Loop for Burst Sessions",
         "Responsive Keyboard and Mobile Touch Controls",
         "Global Survival-Time Leaderboard"
+      ],
+      "objectives": "Dodge all falling hazards for as long as possible by reading shadows and moving between lanes — every surviving second adds to your score and pushes you up the global survival-time leaderboard.",
+      "controlsTable": [
+        { "key": "Left / Right Arrows", "action": "Slide between lanes" },
+        { "key": "A / D", "action": "Alternative lane controls" },
+        { "key": "Touch (Left side)", "action": "Slide left on mobile" },
+        { "key": "Touch (Right side)", "action": "Slide right on mobile" }
+      ],
+      "faq": [
+        { "q": "How do I avoid the objects?", "a": "Watch the falling shadows on the ground rather than the objects in the sky. Your effective reaction window is the shadow's travel time — tracking the objects directly causes overcorrection and late dodges." },
+        { "q": "What are the three hazard types?", "a": "Small debris is fast but follows predictable individual paths. Mid-size hazards land in patterns that broadcast their target column in advance. Heavy crashers shake the screen and clear nearby debris on impact, creating a dangerous but survivable window if you hold your position nearby." },
+        { "q": "How do storm pattern rotations work?", "a": "Every fifteen seconds the storm pattern shifts — changing spawn density and column distribution to break your muscle memory. Stay near the center column when a rotation occurs since edge positions give you fewer escape directions when the pattern changes." },
+        { "q": "What causes most late-run deaths?", "a": "Panic-sliding more than two columns in one direction. Momentum overshoot carries you into another hazard. Commit to single-column steps rather than wide desperate slides, even when an object looks dangerously close." },
+        { "q": "Can I use heavy crashers to my advantage?", "a": "Yes — heavy crashers clear a small area on landing. If you can survive landing adjacent to one, the cleared zone gives you a free second to reposition before the next pattern arrives, which is a significant breather in late-game high-density storms." }
+      ],
+      "featuredComments": [
+        { "name": "ShadowReader", "text": "Watch the shadows on the ground, not the objects falling from above. This actually works. Tracking the objects caused constant overcorrection for me. Switched to shadows and immediately cleared 10 extra seconds." },
+        { "name": "StormDancer", "text": "The only ones left after the storm are the people who learned to read shadows and step between catastrophes. This is an excellent piece of lore for a game that is essentially about reflexes.", "badge": "Lore" },
+        { "name": "CenterLane", "text": "Stay center during storm rotations. Edge positions halve your available escape directions the moment the pattern shifts. Two runs in, I realized every late death happened from being pushed to a wall." },
+        { "name": "CrasherEdge", "text": "Surviving next to a heavy crasher landing is a high-skill play but genuinely worth practicing. The cleared zone is a free second of breathing room that can be the difference between wave 4 and wave 5 of the late storm.", "badge": "Strategy" },
+        { "name": "NoPanic", "text": "Panic-sliding more than two columns is how runs die. One to two columns max, deliberate, no matter how close the object looks. Overcorrection kills you faster than the hazard." },
+        { "name": "ReflexLoop", "text": "One run rarely exceeds two minutes and the restart is instant. I lost 45 minutes without noticing. The loop is exactly as tight as the game claims." }
       ]
     },
     "19": {
@@ -530,6 +943,30 @@
         "Deep Tactical Decision-Making",
         "Fast Rounds & High Replayability",
         "Web & Mobile Friendly"
+      ],
+      "objectives": "Out-maneuver your opponent through careful resource management and strategic spirit summoning across 1v1 duels, depleting their forces before they deplete yours, whether against a friend locally or against the AI.",
+      "controlsTable": [
+        { "key": "Mouse Click / Touch", "action": "Select a spirit from your roster" },
+        { "key": "Mouse Click / Touch", "action": "Choose a target or action for your selected spirit" },
+        { "key": "UI Button (Confirm)", "action": "Confirm a move or ability" },
+        { "key": "UI Button (End Turn)", "action": "End your turn and pass to opponent" }
+      ],
+      "faq": [
+        { "q": "How do I start a duel?", "a": "Select your roster of spirits before the match begins. In local play, both players take turns on the same device. Against the AI, you play first and alternate turns until one spirit binder's forces are exhausted." },
+        { "q": "What makes resource tempo important?", "a": "Overextending early — summoning too many spirits at once — leaves you resource-starved in later turns. Pacing your summons to match the opponent's pace prevents being caught unable to respond to their key plays." },
+        { "q": "How do I beat the AI?", "a": "Watch the AI's summoning patterns across several turns to identify which spirit types it prioritizes. Once you recognize its pattern, you can counter-summon the spirit type that specifically exploits its weakness." },
+        { "q": "Do spirit abilities matter more than their stats?", "a": "Distinct abilities are what differentiate spirits — stats alone rarely decide duels. Learn each spirit's ability before committing to your roster, and build a team whose abilities cover each other's weaknesses." },
+        { "q": "Is the game better with two players or solo?", "a": "Both modes are viable. Local 1v1 adds psychological reads and bluffing, which can't be replicated against the AI. Solo play against the AI is the best way to learn ability interactions before competing against friends." }
+      ],
+      "characters": [
+        { "name": "The Spirit Binders", "role": "Player characters (both sides)", "desc": "Two individuals who have mastered the art of commanding ancient spirits in sacred dueling grounds. Their wills clash through the spirits they summon — the duel is described as a conversation between souls." }
+      ],
+      "featuredComments": [
+        { "name": "SpiritRead", "text": "Watch the AI's summoning pattern for three turns before committing your counter. It repeats a rotation once it hits its preferred composition. Find the rotation and you'll always know what's coming.", "badge": "Strategy" },
+        { "name": "SoulConversation", "text": "\"A conversation between souls\" is a beautiful framing for what is a back-and-forth tactical resource game. It makes you think about your summons differently — as statements, not just units." },
+        { "name": "TempoMind", "text": "Don't overextend in the first two turns. Summon one spirit, see how they respond, pace from there. The players who flood the field immediately run out of resources exactly when the opponent's counterplay lands." },
+        { "name": "BinderEdge", "text": "The local 1v1 mode adds a layer the AI mode can't replicate. You can bluff, misrepresent your tempo, make a \"mistake\" to see how they react. The psychological read is an entire second game running underneath the mechanics." },
+        { "name": "AbilityFirst", "text": "Abilities over raw stats. I built a roster of high-stat spirits for my first tournament match and lost to someone with weaker spirits whose abilities countered mine specifically. Learn the interactions before the roster." }
       ]
     },
     "20": {
@@ -546,6 +983,27 @@
         "Peak Wave & Kill Count Leaderboard",
         "Fast-paced Tactical Gameplay",
         "Web & Mobile Friendly"
+      ],
+      "objectives": "Place and upgrade towers strategically to repel endless waves of geometric invaders before they reach your core, reaching the highest possible wave count and kill total for the global leaderboard.",
+      "controlsTable": [
+        { "key": "Mouse Click / Touch", "action": "Select a tower type from the build menu" },
+        { "key": "Mouse Click / Touch (Map)", "action": "Place the selected tower on a valid tile" },
+        { "key": "Mouse Click / Touch (Tower)", "action": "Open upgrade menu for an existing tower" },
+        { "key": "Mouse Click / Touch (Upgrade)", "action": "Spend resources to upgrade a tower" }
+      ],
+      "faq": [
+        { "q": "How do I start defending?", "a": "Select a tower from the build menu and place it on a valid tile before the first wave launches. Cover the chokepoint nearest to your core first — a single well-placed tower is more effective than several spread across the map." },
+        { "q": "What do the different polygon enemy types mean?", "a": "Fast triangles move quickly and can slip past poorly positioned towers. Armored hexagons resist single-target damage and need splash or concentrated fire. Swarming squares arrive in large groups and demand area-of-effect towers." },
+        { "q": "When should I upgrade versus build new towers?", "a": "Upgrade chokepoint towers before building new ones in open areas. An upgraded tower at the key bottleneck blocks more enemies per resource spent than a new low-tier tower positioned away from the main path." },
+        { "q": "What happens during boss waves?", "a": "Boss waves feature significantly tougher enemies that require emergency upgrades. Save a resource reserve specifically for boss wave upgrades rather than spending everything between normal waves." },
+        { "q": "What is the leaderboard based on?", "a": "The leaderboard ranks by peak wave reached as the primary metric and total enemy kills as the tiebreaker. Surviving deeper into the invasion always matters more than maximizing kills on earlier waves." }
+      ],
+      "featuredComments": [
+        { "name": "HexArmor", "text": "Armored hexagons will walk through your single-target towers like they aren't there. Splash tower at the chokepoint handles them and the swarming squares at the same time. Build splash first.", "badge": "Top Tip" },
+        { "name": "PolygonCore", "text": "Upgrade your chokepoint tower before building anywhere else. I spread towers across the map for my first ten waves and got overrun every time. One upgraded bottleneck tower outperforms three weak ones." },
+        { "name": "GeometricOrder", "text": "The Polygon Dimension breaching reality and its inhabitants marching in formation is exactly the kind of absurd one-line lore premise that works perfectly for a tower defense game." },
+        { "name": "BossReserve", "text": "Keep a resource reserve specifically for boss waves. Boss enemies need emergency upgrades that normal-wave spending doesn't support. Every player who spends everything between waves learns this the same way I did." },
+        { "name": "FastTriangle", "text": "Fast triangles slip through gaps in coverage that you didn't know existed until wave 8 when three of them rush through simultaneously. Single-target towers aimed at the entry chokepoint are the only reliable counter." }
       ]
     },
     "21": {
@@ -563,6 +1021,27 @@
         "Tight, Predictable Physics — No RNG",
         "Global Score Leaderboard",
         "Web and Mobile Friendly"
+      ],
+      "objectives": "Time each jump to clear the continuously scrolling platform gaps, stick edge landings for style bonuses, and climb as high as possible before a mistimed leap ends the run and posts your score to the global leaderboard.",
+      "controlsTable": [
+        { "key": "Mouse Click", "action": "Jump — hold for a longer arc, tap for a short hop" },
+        { "key": "Tap (Mobile)", "action": "Jump — hold for longer arc, tap for short hop" },
+        { "key": "Spacebar", "action": "Jump — hold for longer arc, tap for short hop" }
+      ],
+      "faq": [
+        { "q": "What is the difference between a hold and a tap?", "a": "Holding the input produces a longer, higher arc that clears wider gaps. Tapping produces a short hop for narrow gaps. The entire skill ceiling of the game lives inside knowing when to hold and when to tap." },
+        { "q": "Why do I keep dying at pattern transitions?", "a": "The gap pattern shifts every ten platforms — long stretches reward held inputs, short stretches reward tapping. Deaths most commonly occur on the first platform of a new pattern because players carry the previous rhythm into the wrong gap size. Read the new pattern before reacting." },
+        { "q": "What is an edge landing?", "a": "Landing as close to the leading edge of a platform as possible awards a style bonus on top of your score. Edge landings also leave a longer jump window for the next leap, making them both higher-scoring and tactically safer." },
+        { "q": "Where should I look — at my feet or ahead?", "a": "Keep your eyes one platform ahead of where you are standing, not on the platform you are leaving. Looking at your current position causes late jumps; looking ahead lets you commit to the right input before landing." },
+        { "q": "What do I do when the scrolling gets impossibly fast?", "a": "Switch from reacting to predicting. At extreme scroll speeds, the gap pattern is the only usable signal. Commit to the platform rhythm rather than tracking individual visuals — trust the physics and let your muscle memory drive the timing." }
+      ],
+      "featuredComments": [
+        { "name": "PlatformEdge", "text": "Edge landings are simultaneously the highest-scoring play and the safest next-jump setup. The game is telling you the optimal strategy is also the risky-looking one. Once that clicks, your scores jump immediately.", "badge": "Strategy" },
+        { "name": "OneButton", "text": "One button. One goal. One score. I played for 40 minutes before I noticed. The simplicity is doing enormous work here." },
+        { "name": "RhythmLeap", "text": "Most deaths happen on the first platform after a pattern shift because you're carrying the previous rhythm. Read the new gap size before you land on the last platform of the old pattern. That's the only reliable fix." },
+        { "name": "NoStory", "text": "No story. No upgrades. Just a platform and the next jump. The self-aware lore is perfect — it's the whole game's design philosophy in two lines." },
+        { "name": "MuscleTrust", "text": "When the scroll gets impossibly fast, stop reacting and start predicting the rhythm. Your eyes can't track at that speed but your muscle memory can follow the pattern. Let go and commit." },
+        { "name": "AheadOfFeet", "text": "Look one platform ahead of where you are standing, not at your current position. I was told this three times before it stuck. Then it immediately improved my average run by 40 platforms." }
       ]
     },
     "22": {
@@ -580,6 +1059,31 @@
         "Deck-Building & Upgrade Mechanics",
         "Hand-Painted Mythic Fantasy Art",
         "PC Only"
+      ],
+      "objectives": "Summon mythic heroes from your card deck, place them along the enemy path, and survive every wave of orcs, demons, and worse — earning mana to upgrade your strongest heroes before the Burning Horde reaches your citadel.",
+      "controlsTable": [
+        { "key": "Mouse Drag", "action": "Drag a hero card from hand onto a valid map tile" },
+        { "key": "Mouse Click (Hero)", "action": "Select a placed hero to upgrade or activate their ability" },
+        { "key": "Mouse Click (UI)", "action": "Start a wave, manage your deck, or spend mana" }
+      ],
+      "faq": [
+        { "q": "How does the card summoning system work?", "a": "You draw hero cards from your deck at the start of each round. Drag cards onto valid tiles along the enemy path to summon them. Heroes remain on the map until they are defeated or the round ends." },
+        { "q": "Where should I place melee heroes?", "a": "Front-load tanky melee heroes near chokepoints to absorb damage while ranged casters work safely from the back row. A melee hero positioned deep into the map near your core provides no damage reduction for the path before it." },
+        { "q": "When should I save mana instead of spending it?", "a": "Save mana for each wave's elite enemies and boss arrivals. Burning all mana on standard enemies leaves you defenseless when the boss appears — bosses require concentrated upgraded firepower, not distributed low-tier units." },
+        { "q": "Is it better to upgrade one hero or place more?", "a": "Upgrades scale better than placing additional low-tier units. Concentrate your mana on your strongest frontline hero rather than spreading upgrades evenly — a single well-upgraded hero outperforms three under-upgraded ones." },
+        { "q": "What is the Burning Horde?", "a": "The Burning Horde is the army that has torn through the ancient seals and set citadels ablaze. It consists of orcs, demons, and worse — each wave is a new portion of the Horde pressing toward your position." }
+      ],
+      "characters": [
+        { "name": "Thor of the Storm Hammer", "role": "Mythic hero (lore)", "desc": "One of the legendary heroes sealed away when the world found peace. His card has begun to glow again as the Burning Horde tears through the ancient vaults, signaling his return to defend the realm." },
+        { "name": "Shieldmaidens of the North", "role": "Mythic hero faction (lore)", "desc": "Rune-bound warriors sealed alongside Thor in the vaults of forgotten kings. They represent the tanky frontline archetype in the game's hero roster." },
+        { "name": "Archers of the Whispering Wood", "role": "Mythic hero faction (lore)", "desc": "Silent ranged heroes awakened by the Burning Horde's breach. They form the backbone of the game's ranged damage-dealer card types." }
+      ],
+      "featuredComments": [
+        { "name": "ThorDeck", "text": "Front-load melee at the chokepoint, casters safely behind. A caster placed forward dies to the first elite and you've wasted the mana. The positioning rule is not flexible." },
+        { "name": "BurningVault", "text": "The cards glowing as the Burning Horde tears through the seals is a great image. Mythic heroes waking from legend as a direct response to the threat — the lore earns the card summoning mechanic.", "badge": "Lore" },
+        { "name": "ManaHold", "text": "Save mana for the boss arrival. I burnt everything on the standard wave and had nothing when the boss phase hit. One upgraded hero carrying the line beats four underpowered ones scrambling.", "badge": "Top Tip" },
+        { "name": "HeroUpgrade", "text": "Upgrades scale better than placement. I tested this extensively. Concentrated mana on your strongest frontline hero consistently outperforms spreading upgrades evenly across the roster." },
+        { "name": "WhisperArcher", "text": "The hand-painted art style on the cards is the detail that makes replaying waves feel fresh. Each hero looks distinct enough that you actually care which one you drew." }
       ]
     },
     "23": {
@@ -596,6 +1100,27 @@
         "Neon Synthwave Aesthetic",
         "Global Leaderboard",
         "Web & Mobile Friendly"
+      ],
+      "objectives": "Steer through an endless neon shaft, dodging spinning saw blades, pulsing lasers, and lightning arcs as long as possible — maximizing total distance fallen as your primary score and obstacle count as the tiebreaker on the global leaderboard.",
+      "controlsTable": [
+        { "key": "A / Left Arrow", "action": "Steer left through the shaft" },
+        { "key": "D / Right Arrow", "action": "Steer right through the shaft" },
+        { "key": "Tap (Left side, Mobile)", "action": "Move left" },
+        { "key": "Drag (Touch)", "action": "Drag left or right to steer continuously" }
+      ],
+      "faq": [
+        { "q": "How is my score calculated?", "a": "Distance fallen is your primary score. Total obstacles cleared is the tiebreaker on the leaderboard — threading tight gaps always adds more obstacle points than wide ones, so pushing through narrow passages is worth the risk when distance scores are close." },
+        { "q": "What are the three hazard types?", "a": "Spinning saw blades, pulsing lasers, and lightning arcs. Each has different timing — saws spin at fixed speeds, lasers pulse in intervals, and lightning chains punish hesitation. Learning each hazard's rhythm lets you commit earlier and thread tighter gaps." },
+        { "q": "Where should I position myself in the shaft?", "a": "Stay centered between threats. Committing to a wall early leaves no escape when the next pattern shifts. Center positioning maximizes your available reaction directions as patterns change." },
+        { "q": "How do I deal with patterns at high speed?", "a": "Read two obstacles ahead rather than one — at high shaft speeds, reacting to what is immediately in front of you is too slow. Identify the next gap before you reach the current one and begin steering toward it in advance." },
+        { "q": "Does it matter which side I dodge toward?", "a": "Yes — the leaderboard uses obstacle count as a tiebreaker, so pushing through tight gaps on the correct side (the narrower one) earns more points than the easy route. When distance scores are close, tight-gap threading separates leaderboard positions." }
+      ],
+      "featuredComments": [
+        { "name": "ShaftRunner", "text": "Stay centered, read two obstacles ahead, not one. At high shaft speed, reacting to what's immediately in front of you is already too late. Identify the next gap before you reach the current one." },
+        { "name": "NeonFall_V", "text": "Every meter is a vote against gravity. That's genuinely the best framing of what this game asks you to do. High-speed obstacle avoidance recontextualized as defiance.", "badge": "Lore" },
+        { "name": "TightGap", "text": "Push the narrow gap. The obstacle tiebreaker on the leaderboard means threading tight passages is always worth the risk when you're close on distance scores. Wide-gap safety play costs you ranking positions.", "badge": "Strategy" },
+        { "name": "SynthShaft", "text": "Lightning chains punish hesitation specifically. The moment you hover at the edge of a lightning arc instead of committing through, it catches you. Commit or dodge away, never pause." },
+        { "name": "PatternJack", "text": "Twin saws closing from both walls is when you earn your distance. The gap is always there. Breathe, find it, trust your steering. Panic is the mechanic that actually kills you, not the saws." }
       ]
     },
     "24": {
@@ -613,6 +1138,28 @@
         "Diverse Product Departments",
         "Global Leaderboard",
         "PC Only"
+      ],
+      "objectives": "Grow a single ground-floor shop into a fully automated multi-floor retail tower by reinvesting earnings into new departments and staff — maximizing total money earned as your primary score and total products produced as the leaderboard tiebreaker.",
+      "controlsTable": [
+        { "key": "Mouse Click (Department)", "action": "Upgrade a department or restock its inventory" },
+        { "key": "Mouse Click (Staff)", "action": "Hire or train staff for a department" },
+        { "key": "Mouse Click (Floor)", "action": "Unlock a new floor with accumulated earnings" },
+        { "key": "Touch Tap", "action": "Interact with any building element on mobile" }
+      ],
+      "faq": [
+        { "q": "How do I start the business?", "a": "You begin with a single ground-floor shop. Click it to open the upgrade menu, stock the shelves, and hire your first staff member. Once customers start arriving and spending, reinvest those earnings into checkout speed to keep the revenue flowing." },
+        { "q": "When should I unlock a new floor?", "a": "Only unlock a new floor after your current one is fully automated — restocking and staffing running without manual input. Opening a new floor while still managing the previous one manually creates a bottleneck that slows both departments." },
+        { "q": "What is the product count tiebreaker?", "a": "When multiple players have similar total earnings, the leaderboard ranks by total products produced. A tycoon pushing high product volume at thinner margins can edge out one who only marks up prices, so balance production speed with profitability." },
+        { "q": "What is the most important early upgrade?", "a": "Reinvest aggressively in early floor income rather than hoarding cash. Compounding income from a well-upgraded first floor funds new departments far faster than gradual investment. Checkout speed and restocking automation are the two highest-return early upgrades." },
+        { "q": "How do product departments differ?", "a": "Each department — groceries, electronics, coffee, and others — has different price points and customer traffic rates. Higher-value departments like electronics earn more per sale but attract fewer customers; high-volume departments like groceries need faster restocking to maximize throughput." }
+      ],
+      "featuredComments": [
+        { "name": "FloorUnlock", "text": "Don't unlock a new floor until the current one is fully automated. I broke this rule twice and both times created a management bottleneck that slowed both floors simultaneously. The rule exists for a reason.", "badge": "Top Tip" },
+        { "name": "NeonSignal", "text": "They said the city had no room for one more dreamer. Starting from a single coffee counter and watching your name flicker in neon above the skyline is exactly the kind of progression loop that works.", "badge": "Lore" },
+        { "name": "CompoundIncome", "text": "Reinvest aggressively early. Hoarding cash feels safe but compounding income from a fully upgraded first floor funds new departments in half the time. Checkout speed and restocking are your two best early picks." },
+        { "name": "ProductTiebreak", "text": "Watch the product counter if you're near the top of the leaderboard. When money scores are similar, production volume is the separator. Thin margins at high volume can edge out a premium-priced competitor." },
+        { "name": "IdleRegister", "text": "Idle but you're actually making constant decisions — staff allocation, restock timing, floor unlocks, department expansion. The management density keeps it engaging long past the point where most idle games go on autopilot." },
+        { "name": "GroceryVolume", "text": "Groceries first, electronics second. High-volume with fast restocking builds the income foundation. Then electronics as the premium layer. Starting with electronics feels good but starves you on cash flow before automation." }
       ]
     },
     "_comment": "Per-game canonical English. Translators mirror this in {lang}.json."

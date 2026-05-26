@@ -107,6 +107,11 @@ export interface LocaleOverlay {
   games?: Record<string, GameTranslation>;
 }
 
+export interface ControlEntry { key: string; action: string; }
+export interface FaqEntry { q: string; a: string; }
+export interface CharacterEntry { name: string; role: string; desc: string; }
+export interface FeaturedComment { name: string; text: string; badge?: string; }
+
 export interface GameTranslation {
   title?: string;
   description?: string;
@@ -115,6 +120,13 @@ export interface GameTranslation {
   tips?: string;
   lore?: string;
   features?: string[];
+  // Structured long-mode fields (all optional). Rendered as subsections in
+  // the Long view of the corresponding section.
+  objectives?: string;
+  controlsTable?: ControlEntry[];
+  faq?: FaqEntry[];
+  characters?: CharacterEntry[];
+  featuredComments?: FeaturedComment[];
 }
 
 export function getLocaleLabel(lang: string, overlay: LocaleOverlay | null): string {

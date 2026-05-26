@@ -45,6 +45,26 @@ const Navbar: React.FC = () => {
   const closeMenu  = useCallback(() => setIsMenuOpen(false), []);
   const toggleTheme = useCallback(() => setTheme(prev => (prev === 'dark' ? 'light' : 'dark')), []);
 
+  // Scroll-aware shrink: write `data-scrolled` attribute (no setState → no re-render).
+  useEffect(() => {
+    const nav = document.querySelector('.navbar');
+    if (!nav) return;
+    let pending = false;
+    const update = () => {
+      pending = false;
+      if (window.scrollY > 40) nav.setAttribute('data-scrolled', 'true');
+      else nav.removeAttribute('data-scrolled');
+    };
+    const onScroll = () => {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   const isActive = (path: string) =>
     path === '/' ? location.pathname === '/' : location.pathname === path || location.pathname.startsWith(path + '/');
 
@@ -60,15 +80,18 @@ const Navbar: React.FC = () => {
         <div className="navbar-actions">
           <LanguageSwitcher />
           <button
-            className="theme-toggle"
+            className={`theme-toggle theme-${theme}`}
             onClick={toggleTheme}
             aria-label={theme === 'dark' ? t('themeToLight', 'Switch to light mode') : t('themeToDark', 'Switch to dark mode')}
             title={theme === 'dark' ? t('themeLightLabel', 'Light mode') : t('themeDarkLabel', 'Dark mode')}
             type="button"
           >
-            {theme === 'dark'
-              ? <Sun size={16} aria-hidden="true" />
-              : <Moon size={16} aria-hidden="true" />}
+            <span className="theme-toggle-icon theme-toggle-sun" aria-hidden="true">
+              <Sun size={16} />
+            </span>
+            <span className="theme-toggle-icon theme-toggle-moon" aria-hidden="true">
+              <Moon size={16} />
+            </span>
           </button>
 
           <button

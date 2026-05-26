@@ -4,6 +4,7 @@ import { Monitor, Gamepad2, Play, Trophy } from 'lucide-react';
 import type { Game } from '../data/games';
 import { useLocale, getLocalizedString, getEnFeatures, useUiText } from '../i18n';
 import { thumb360, SRCSET_SIZES } from '../utils/thumb';
+import { useTilt } from '../hooks/useTilt';
 import './GameCard.css';
 
 const prefetchedUrls = new Set<string>();
@@ -30,9 +31,10 @@ interface GameCardProps {
   onGenreClick?: (genre: string) => void;
   myRank?: number;
   maxTags?: number;
+  recentIndex?: number;
 }
 
-const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecentlyPlayed = false, onGenreClick, myRank, maxTags }) => {
+const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecentlyPlayed = false, onGenreClick, myRank, maxTags, recentIndex }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const { lang, overlay } = useLocale();
   const t = useUiText();
@@ -54,6 +56,7 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
   };
 
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { tiltHandlers } = useTilt<HTMLAnchorElement>(5);
 
   const handleMouseEnter = () => {
     if (game.status === 'IN PRODUCTION' || !game.gameUrl) return;
@@ -61,11 +64,12 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
     hoverTimerRef.current = setTimeout(() => prefetchGameUrl(game.gameUrl), 120);
   };
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (hoverTimerRef.current) {
       clearTimeout(hoverTimerRef.current);
       hoverTimerRef.current = null;
     }
+    tiltHandlers.onMouseLeave(e);
   };
 
   const isInProduction = game.status === 'IN PRODUCTION';
@@ -80,6 +84,12 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
     ? <div className="platform-badge pc-only"><Monitor size={12} aria-hidden="true" /> {t('gameCardPcOnly', 'PC Only')}</div>
     : null;
 
+  const badgeClass =
+    game.badge === 'POPULAR' ? 'popular'
+    : game.badge === 'UPDATE' ? 'update'
+    : game.badge === 'NEW' ? 'new'
+    : 'cantstop';
+
   return (
     <Link
       to={`/play/${game.slug}`}
@@ -87,6 +97,7 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onMouseMove={tiltHandlers.onMouseMove}
       onFocus={handleMouseEnter}
     >
       {/* Row 1: Title + Badge + Rank */}
@@ -94,15 +105,7 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
         <h3>{title}</h3>
         {game.isOriginal && <span className="original-dot" title={t('gameCardOriginal', 'Original')} />}
         {game.badge && (
-          <span
-            className={`game-badge badge-${
-              game.badge === 'POPULAR'
-                ? 'popular'
-                : game.badge === 'UPDATE'
-                  ? 'update'
-                  : 'cantstop'
-            }`}
-          >
+          <span className={`game-badge badge-${badgeClass}`}>
             {game.badge}
           </span>
         )}
@@ -128,6 +131,12 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
           onLoad={() => setImageLoaded(true)}
         />
         {platformBadge}
+        {typeof recentIndex === 'number' && (
+          <div className="recent-index-chip">
+            <span className="recent-index-num">#{recentIndex + 1}</span>
+            {recentIndex === 0 && <span className="recent-index-tag">{t('homeRecentLastBadge', 'Last')}</span>}
+          </div>
+        )}
         {isInProduction && (
           <div className="status-badge in-production">{t('gameCardComingSoon', 'Coming Soon')}</div>
         )}

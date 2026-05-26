@@ -3,99 +3,85 @@
   min-height: 100vh;
 }
 
-/* ── Hero ── */
-.hero {
-  min-height: 44vh;
-  display: flex;
-  align-items: center;
-  position: relative;
-  overflow: hidden;
-  padding: 110px 0 70px;
-  background: var(--bg-color);
+/* ═══════════════════════════════════════════════════════════════
+   Scroll-reveal system
+   - .reveal-section : whole section fades + slides up on first
+     intersection. JS toggles .in-view.
+   - .reveal-stagger : child wrapper with --i index; staggered delay.
+   ═══════════════════════════════════════════════════════════════ */
+.reveal-section {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0);
+  transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out);
+  will-change: opacity, transform;
 }
 
-/* Background image with slow zoom */
-.hero::after {
-  content: '';
-  position: absolute;
-  inset: -5%;
-  background: url('/images/bg.webp') center / cover no-repeat;
-  animation: heroZoom 25s ease-in-out infinite alternate;
-  z-index: 0;
+.reveal-section.in-view {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
 }
 
-@keyframes heroZoom {
-  from { transform: scale(1); }
-  to   { transform: scale(1.08); }
+.reveal-stagger {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition: opacity 600ms var(--ease-out), transform 600ms var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 60ms);
 }
 
-/* Overlay gradient — tinted by current theme bg so image reads in both modes */
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(180deg, var(--scrim-soft) 0%, var(--scrim-strong) 100%),
-    radial-gradient(ellipse at 50% 120%, var(--glow-subtle) 0%, transparent 60%);
-  pointer-events: none;
-  z-index: 1;
+.reveal-section.in-view .reveal-stagger {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
 }
 
-.hero-content {
-  text-align: center;
-  position: relative;
-  z-index: 2;
+/* StatsStrip tile reveal (it carries its own .reveal class via component) */
+.stats-strip.in-view .stats-tile.reveal {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
 }
 
-.hero h1 {
-  font-size: var(--text-5xl);
-  margin-bottom: var(--space-3);
-  line-height: 1.1;
-  color: var(--text-secondary);
-  font-weight: 400;
-}
-
-.hero h1 span {
-  display: inline-block;
-  position: relative;
-  background: linear-gradient(135deg, #f5c542 0%, #ff8c00 40%, #e040fb 70%, #00e5ff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 8px rgba(245, 197, 66, 0.5)) drop-shadow(0 0 24px rgba(224, 64, 251, 0.3));
-  font-weight: 400;
-}
-
-.hero h1 span::before {
-  content: attr(data-text);
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, #f5c542, #ff8c00, #e040fb, #00e5ff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: blur(16px);
-  opacity: 0.5;
-  z-index: -1;
-  will-change: opacity;
-  animation: glowPulse 6s ease-in-out infinite alternate;
-}
-
-@keyframes glowPulse {
-  0%   { opacity: 0.35; }
-  100% { opacity: 0.65; }
+.stats-tile.reveal {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition: opacity 600ms var(--ease-out), transform 600ms var(--ease-spring), border-color 0.3s, box-shadow 0.3s;
+  transition-delay: calc(var(--i, 0) * 80ms);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero h1 span::before { animation: none; }
+  .reveal-section, .reveal-stagger, .stats-tile.reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
 }
 
-.hero p {
-  font-size: var(--text-lg);
-  color: var(--text-secondary);
-  margin-bottom: var(--space-7);
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
-  line-height: 1.5;
+/* ── Neon scanline divider ── */
+.neon-scanline {
+  height: 1px;
+  margin: var(--space-6) auto;
+  max-width: 1200px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(0, 229, 255, 0.6) 40%,
+    rgba(224, 64, 251, 0.6) 60%,
+    transparent 100%);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 900ms var(--ease-out);
+  filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.4));
+}
+
+.neon-scanline.in-view {
+  transform: scaleX(1);
+}
+
+/* ── Gamer ID section (extracted from old hero) ── */
+.gamer-id-section {
+  padding: var(--space-5) 0 var(--space-6);
+}
+
+.gamer-id-wrapper {
+  display: flex;
+  justify-content: center;
 }
 
 /* ── Hero Gamer ID Spotlight ── */
@@ -311,6 +297,11 @@
   padding: 2px;
 }
 
+.sticky-sentinel {
+  height: 1px;
+  width: 100%;
+}
+
 .genre-filters-container {
   display: flex;
   justify-content: center;
@@ -328,6 +319,18 @@
   margin-left: auto;
   margin-right: auto;
   box-shadow: var(--shadow-md);
+  transition: padding 0.25s var(--ease-out), box-shadow 0.25s, border-color 0.25s, background 0.25s;
+}
+
+.genre-filters-container.is-stuck {
+  padding: 6px 12px;
+  background: var(--scrim-strong);
+  border-color: var(--border-accent);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 0 16px var(--glow-subtle);
+}
+
+.genre-filters-container.is-stuck .genre-btn {
+  padding: 6px 14px;
 }
 
 .genre-filters {
@@ -450,19 +453,63 @@
   line-height: 1;
 }
 
-/* ── Recently Played ── */
-.recently-played-section {
+/* ── Shared neon panel container ── */
+.neon-panel {
+  position: relative;
   margin: var(--space-5) 0;
   padding: var(--space-5);
-  background: var(--surface-1);
   border-radius: var(--radius-lg);
+  background:
+    linear-gradient(135deg, rgba(0, 229, 255, 0.05), rgba(224, 64, 251, 0.05)),
+    var(--surface-1);
   border: 1px solid var(--border-subtle);
+  isolation: isolate;
+  overflow: hidden;
 }
+
+.neon-panel::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg,
+    rgba(0, 229, 255, 0.4) 0%,
+    rgba(224, 64, 251, 0.35) 50%,
+    rgba(245, 197, 66, 0.3) 100%);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.7;
+}
+
+.neon-panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0 3px,
+    rgba(255, 255, 255, 0.018) 3px 4px
+  );
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: overlay;
+}
+
+.neon-panel > * { position: relative; z-index: 1; }
 
 .section-title-small {
   font-size: var(--text-xl);
   margin-bottom: var(--space-4);
   color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .section-title-small span {
@@ -471,6 +518,69 @@
   -webkit-text-fill-color: transparent;
 }
 
+/* LIVE dot — soft pulse, opacity-only (matches project's badgePulse pattern) */
+.live-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+  animation: liveDotPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes liveDotPulse {
+  0%, 100% { opacity: 0.5; }
+  50%      { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .live-dot { animation: none; }
+}
+
+/* ── Personalized greeting on Jump Back In ── */
+.section-greeting {
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 2.2vw, 1.4rem);
+  font-weight: 700;
+  margin: 0 0 var(--space-4);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: var(--text-secondary);
+  letter-spacing: 0.01em;
+}
+
+.section-greeting-name {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+  text-shadow: 0 0 12px rgba(0, 229, 255, 0.2);
+  animation: greetingHue 4s ease-in-out infinite alternate;
+}
+
+@keyframes greetingHue {
+  0%   { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(40deg); }
+}
+
+.section-greeting-arrow {
+  color: var(--primary-color);
+  filter: drop-shadow(0 0 6px var(--glow-color));
+  transition: transform 0.3s var(--ease-spring);
+}
+
+.section-greeting:hover .section-greeting-arrow {
+  transform: translateX(6px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section-greeting-name { animation: none; }
+}
+
+/* ── Game grids ── */
 .small-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -481,15 +591,29 @@
   display: none;
 }
 
-/* ── Recently Updated ── */
-.recently-updated-section {
-  margin: var(--space-5) 0;
-  padding: var(--space-5);
-  background: var(--surface-1);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-subtle);
+/* Recently Played: horizontal scroll on mobile for arcade-strip feel */
+@media (max-width: 768px) {
+  .small-grid-scroll {
+    display: flex;
+    grid-template-columns: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: var(--space-2);
+    mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+  }
+  .small-grid-scroll::-webkit-scrollbar { display: none; }
+  .small-grid-scroll > .reveal-stagger {
+    flex: 0 0 auto;
+    width: 220px;
+    scroll-snap-align: start;
+  }
 }
 
+/* ── Recently Updated date pill ── */
 .updated-card-wrapper {
   position: relative;
   display: flex;
@@ -509,6 +633,31 @@
   border: 1px solid rgba(34, 197, 94, 0.35);
   border-radius: var(--radius-full);
   text-shadow: 0 0 6px rgba(34, 197, 94, 0.35);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transform: rotateX(90deg);
+  transform-origin: top center;
+  opacity: 0;
+  transition: transform 0.45s var(--ease-spring), opacity 0.4s var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 60ms + 200ms);
+}
+
+.updated-date-pill svg {
+  filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.5));
+}
+
+.recently-updated-section.in-view .updated-card-wrapper .updated-date-pill {
+  transform: rotateX(0deg);
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .updated-date-pill {
+    transform: none;
+    opacity: 1;
+    transition: none;
+  }
 }
 
 /* ── Footer ── */

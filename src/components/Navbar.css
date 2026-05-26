@@ -10,7 +10,19 @@
   width: 100%;
   z-index: var(--z-navbar);
   border-bottom: 1px solid var(--border-subtle);
+  transition: height 0.25s var(--ease-out), background 0.25s, box-shadow 0.25s, border-color 0.25s;
 }
+
+.navbar[data-scrolled="true"] {
+  height: calc(48px + env(safe-area-inset-top));
+  background: var(--scrim-strong);
+  border-bottom-color: var(--border-accent);
+  box-shadow:
+    0 1px 0 rgba(0, 229, 255, 0.18),
+    0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.navbar[data-scrolled="true"] .logo { font-size: 1.2rem; }
 
 .navbar-content {
   display: flex;
@@ -77,6 +89,18 @@
 
 .logo:hover .logo-icon {
   transform: rotate(-8deg) scale(1.1);
+  animation: logoIconJitter 0.6s var(--ease-spring);
+}
+
+@keyframes logoIconJitter {
+  0%   { transform: rotate(-8deg) scale(1.1) translateX(0); }
+  35%  { transform: rotate(-10deg) scale(1.12) translateX(-1px); }
+  70%  { transform: rotate(-6deg) scale(1.08) translateX(1px); }
+  100% { transform: rotate(-8deg) scale(1.1) translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo:hover .logo-icon { animation: none; }
 }
 
 /* ── Nav Links ── */
@@ -117,16 +141,29 @@
   color: #ff5e8a;
 }
 
-.nav-links li a.nav-active::after {
+.nav-links li a::after {
   content: '';
   position: absolute;
-  bottom: -4px;
+  bottom: -6px;
   left: 0;
   right: 0;
   height: 2px;
-  background: var(--primary-color);
+  background: var(--brand-gradient);
   border-radius: 2px;
-  opacity: 0.8;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.3s var(--ease-spring), opacity 0.2s;
+  opacity: 0.85;
+  filter: drop-shadow(0 0 4px rgba(0, 229, 255, 0.5));
+}
+
+.nav-links li a:hover::after {
+  transform: scaleX(0.6);
+}
+
+.nav-links li a.nav-active::after {
+  transform: scaleX(1);
+  opacity: 1;
 }
 
 /* ── Right-side Actions Cluster ── */
@@ -138,6 +175,7 @@
 
 /* ── Theme Toggle ── */
 .theme-toggle {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -150,17 +188,48 @@
   cursor: pointer;
   transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.2s var(--ease-out);
   padding: 0;
+  overflow: hidden;
 }
 
 .theme-toggle:hover {
   color: var(--primary-color);
   border-color: var(--border-accent);
   background: var(--glow-subtle);
-  transform: rotate(-12deg);
 }
 
 .theme-toggle:active {
-  transform: rotate(0deg) scale(0.95);
+  transform: scale(0.92);
+}
+
+.theme-toggle-icon {
+  position: absolute;
+  inset: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.35s var(--ease-out), transform 0.45s var(--ease-spring);
+  transform-style: preserve-3d;
+}
+
+.theme-toggle.theme-dark .theme-toggle-sun {
+  opacity: 1;
+  transform: rotateY(0deg) scale(1);
+}
+.theme-toggle.theme-dark .theme-toggle-moon {
+  opacity: 0;
+  transform: rotateY(-180deg) scale(0.6);
+}
+.theme-toggle.theme-light .theme-toggle-sun {
+  opacity: 0;
+  transform: rotateY(180deg) scale(0.6);
+}
+.theme-toggle.theme-light .theme-toggle-moon {
+  opacity: 1;
+  transform: rotateY(0deg) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle-icon { transition: opacity 0.01ms; transform: none !important; }
 }
 
 /* ── Mobile Hamburger ── */
@@ -244,13 +313,42 @@
     font-weight: 600;
     display: block;
     width: 100%;
-    padding: var(--space-3) 0;
+    padding: var(--space-3) var(--space-3);
     border-bottom: 1px solid var(--border-subtle);
+    position: relative;
+    transition: padding-left 0.25s var(--ease-out), color 0.2s;
   }
 
-  .nav-links li a:hover {
-    padding-left: var(--space-3);
+  .nav-links li a::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 12px;
+    bottom: 12px;
+    width: 3px;
+    background: var(--brand-gradient);
+    border-radius: 3px;
+    transform: scaleY(0);
+    transform-origin: center;
+    transition: transform 0.3s var(--ease-spring);
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.6);
   }
+
+  .nav-links li a:hover,
+  .nav-links li a:focus-visible,
+  .nav-links li a.nav-active {
+    padding-left: var(--space-4);
+    color: var(--text-primary);
+  }
+
+  .nav-links li a:hover::before,
+  .nav-links li a:focus-visible::before,
+  .nav-links li a.nav-active::before {
+    transform: scaleY(1);
+  }
+
+  /* Disable the desktop bottom pill in mobile drawer — using left stripe instead */
+  .nav-links li a::after { display: none; }
 
   .menu-toggle.open span:nth-child(1) {
     transform: translateY(7px) rotate(45deg);

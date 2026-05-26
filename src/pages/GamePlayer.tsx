@@ -11,6 +11,7 @@ import CommentSection from '../components/CommentSection';
 import ShareModal from '../components/ShareModal';
 import GameResultModal from '../components/GameResultModal';
 import GameHeadMeta from '../components/gameplayer/GameHeadMeta';
+import GameHero from '../components/gameplayer/GameHero';
 import GameInfoTabs from '../components/gameplayer/GameInfoTabs';
 import RelatedGames from '../components/gameplayer/RelatedGames';
 import RelatedPosts from '../components/gameplayer/RelatedPosts';
@@ -31,7 +32,7 @@ import {
   updateDoc,
   doc
 } from "firebase/firestore/lite";
-import { useUiText, useLocale, getLocalizedString } from '../i18n';
+import { useUiText, useLocale, getLocalizedString, getLocalizedFeatured } from '../i18n';
 import { genreSlug } from '../utils/genres';
 import './GamePlayer.css';
 
@@ -60,6 +61,13 @@ const GamePlayer: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [showStickyBar, setShowStickyBar] = useState(false);
   const [iframeKey, setIframeKey] = useState(0);
+  // Click-to-start gate. Iframe stays unmounted until user clicks PLAY,
+  // so we don't burn bandwidth + LCP on a hidden game frame.
+  // ?play=1 deep link skips the hero for share-direct flows.
+  const [gameStarted, setGameStarted] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return new URLSearchParams(window.location.search).get('play') === '1';
+  });
   const uiT = useUiText();
   // Forces re-render so getWrapperStyle() recomputes after viewport rotation/resize.
   const [, setOrientationTick] = useState(0);
@@ -319,6 +327,35 @@ const GamePlayer: React.FC = () => {
     return () => observer.disconnect();
   }, [game]);
 
+  // Click PLAY → start game AND request fullscreen in same user-gesture tick.
+  // Target the wrapper (already mounted) so iframe mounts inside the fullscreen
+  // element a render later. Fallback to pseudo-fullscreen on browsers without
+  // Element.requestFullscreen (iOS Safari).
+  const handlePlay = () => {
+    setGameStarted(true);
+    const wrapper = gameWrapperRef.current as (HTMLDivElement & {
+      webkitRequestFullscreen?: () => void;
+      mozRequestFullScreen?: () => void;
+      msRequestFullscreen?: () => void;
+    }) | null;
+    if (!wrapper) return;
+    try {
+      if (wrapper.requestFullscreen) {
+        wrapper.requestFullscreen().catch(() => setIsPseudoFullscreen(true));
+      } else if (wrapper.webkitRequestFullscreen) {
+        wrapper.webkitRequestFullscreen();
+      } else if (wrapper.mozRequestFullScreen) {
+        wrapper.mozRequestFullScreen();
+      } else if (wrapper.msRequestFullscreen) {
+        wrapper.msRequestFullscreen();
+      } else {
+        setIsPseudoFullscreen(true);
+      }
+    } catch {
+      setIsPseudoFullscreen(true);
+    }
+  };
+
   const handleFullscreen = () => {
     if (isPseudoFullscreen) {
       setIsPseudoFullscreen(false);
@@ -448,9 +485,11 @@ const GamePlayer: React.FC = () => {
           </div>
 
           <div className="game-controls">
-            <button className="control-btn primary fullscreen-btn" onClick={handleFullscreen} aria-pressed={isFs}>
-              <FsIcon size={16} aria-hidden="true" /> {fullscreenLabel}
-            </button>
+            {gameStarted && (
+              <button className="control-btn primary fullscreen-btn" onClick={handleFullscreen} aria-pressed={isFs}>
+                <FsIcon size={16} aria-hidden="true" /> {fullscreenLabel}
+              </button>
+            )}
             <button className={`control-btn like-btn ${isLiked ? 'active' : ''}`} onClick={() => { const n = !isLiked; setIsLiked(n); localStorage.setItem(`liked_${id}`, String(n)); }}>
               <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} aria-hidden="true" />
             </button>
@@ -460,46 +499,62 @@ const GamePlayer: React.FC = () => {
           </div>
         </div>
 
-        <div ref={gameWrapperRef} className={`game-screen-wrapper ${isPseudoFullscreen ? 'pseudo-fullscreen' : ''} ambient-glow`} style={wrapperStyle}>
+        <div ref={gameWrapperRef} className={`game-screen-wrapper ${isPseudoFullscreen ? 'pseudo-fullscreen' : ''} ambient-glow`} style={gameStarted ? wrapperStyle : undefined}>
           {isPseudoFullscreen && (
             <button className="exit-pseudo-btn" onClick={() => setIsPseudoFullscreen(false)}>
               <X size={16} aria-hidden="true" /> {uiT('playerCloseFullscreen', 'Close Fullscreen')}
             </button>
           )}
-          {iframeLoading && (
-            <div className="iframe-loader">
-              <div className="spinner"></div>
-              <p>{uiT('playerLoadingGame', 'Loading game...')}</p>
-            </div>
+          {!gameStarted ? (
+            <GameHero
+              game={game}
+              lang={lang}
+              overlay={overlay}
+              topEntry={leaderboard[0] ?? null}
+              onPlay={handlePlay}
+            />
+          ) : (
+            <>
+              {iframeLoading && (
+                <div className="iframe-loader">
+                  <div className="spinner"></div>
+                  <p>{uiT('playerLoadingGame', 'Loading game...')}</p>
+                </div>
+              )}
+              <iframe
+                key={iframeKey}
+                ref={iframeRef}
+                src={game.gameUrl}
+                title={getLocalizedString(game, 'title', 'en', null)}
+                frameBorder="0"
+                allowFullScreen
+                allow="fullscreen; autoplay; gamepad; clipboard-write"
+                className="game-iframe"
+                onLoad={() => setIframeLoading(false)}
+              ></iframe>
+            </>
           )}
-          <iframe
-            key={iframeKey}
-            ref={iframeRef}
-            src={game.gameUrl}
-            title={getLocalizedString(game, 'title', 'en', null)}
-            frameBorder="0"
-            allowFullScreen
-            allow="fullscreen; autoplay; gamepad; clipboard-write"
-            className="game-iframe"
-            onLoad={() => setIframeLoading(false)}
-          ></iframe>
         </div>
-        
+
         <div className="player-ad-container">
-          {!iframeLoading && <AdBanner slot={AD_SLOTS.GAME_PLAYER} style={{ margin: '0' }} />}
+          {(!gameStarted || !iframeLoading) && <AdBanner slot={AD_SLOTS.GAME_PLAYER} style={{ margin: '0' }} />}
         </div>
 
         <GameInfoTabs game={game} lang={lang} overlay={overlay} activeTab={activeTab} setActiveTab={setActiveTab} />
 
         {game.leaderboard && <Leaderboard entries={leaderboard} gameId={game.id} currentNickname={nickname} />}
-        <CommentSection gameId={game.id} currentNickname={nickname} />
+        <CommentSection
+          gameId={game.id}
+          currentNickname={nickname}
+          featured={getLocalizedFeatured(game, lang, overlay)}
+        />
 
         <RelatedPosts gameSlug={game.slug} />
         <RelatedGames current={game} />
       </main>
 
       {/* ── Sticky Controls Bar ── */}
-      {showStickyBar && !isPseudoFullscreen && (
+      {showStickyBar && !isPseudoFullscreen && gameStarted && (
         <div className="sticky-controls-bar">
           <button className="sticky-btn sticky-fullscreen" onClick={handleFullscreen} aria-pressed={isFs}>
             <FsIcon size={16} aria-hidden="true" /> {fullscreenLabel}
@@ -540,6 +595,7 @@ const GamePlayer: React.FC = () => {
         scoreUnit={gameResult?.unit ?? ''}
         resultType={gameResult?.resultType ?? 'game-over'}
         rank={gameResult?.rank ?? null}
+        // Reload iframe in place; do NOT reset gameStarted — user already chose to play.
         onPlayAgain={() => { setIframeKey(k => k + 1); setIframeLoading(true); }}
       />
     </div>

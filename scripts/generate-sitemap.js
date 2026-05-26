@@ -14,8 +14,8 @@ const SUPPORTED_LOCALES = readdirSync('src/i18n/locales')
 SUPPORTED_LOCALES.sort((a, b) => (a === 'en' ? -1 : b === 'en' ? 1 : a.localeCompare(b)));
 
 const HREFLANG = {
-  en: 'en', de: 'de', es: 'es', 'es-LA': 'es-419', fr: 'fr',
-  ja: 'ja', ko: 'ko', pt: 'pt', ru: 'ru', vi: 'vi', zh: 'zh',
+  en: 'en', de: 'de', fr: 'fr',
+  ja: 'ja', ko: 'ko', zh: 'zh',
 };
 
 const overlays = {};

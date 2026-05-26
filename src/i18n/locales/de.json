@@ -1,6 +1,6 @@
 {
   "_comment": "English overlay. Mirror of base English fields from games.json — kept here as canonical reference for translators. UI strings live under ui.",
-  "label": "English",
+  "label": "Deutsch",
   "ui": {
     "_comment": "UI strings keyed by stable identifier. These are the canonical English source for all translatable chrome strings.",
     "navGames": "Spiele",

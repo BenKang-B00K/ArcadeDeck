@@ -59,14 +59,9 @@ export function stripLocalePrefix(pathname: string): { lang: string; rest: strin
 export const LOCALE_BCP47: Record<string, string> = {
   en: 'en_US',
   de: 'de_DE',
-  es: 'es_ES',
-  'es-LA': 'es_419',
   fr: 'fr_FR',
   ja: 'ja_JP',
   ko: 'ko_KR',
-  pt: 'pt_BR',
-  ru: 'ru_RU',
-  vi: 'vi_VN',
   zh: 'zh_CN',
 };
 
@@ -74,14 +69,9 @@ export const LOCALE_BCP47: Record<string, string> = {
 export const LOCALE_HREFLANG: Record<string, string> = {
   en: 'en',
   de: 'de',
-  es: 'es',
-  'es-LA': 'es-419',
   fr: 'fr',
   ja: 'ja',
   ko: 'ko',
-  pt: 'pt',
-  ru: 'ru',
-  vi: 'vi',
   zh: 'zh',
 };
 

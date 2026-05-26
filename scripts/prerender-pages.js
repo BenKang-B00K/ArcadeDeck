@@ -20,16 +20,16 @@ const SUPPORTED_LOCALES = readdirSync('src/i18n/locales')
 SUPPORTED_LOCALES.sort((a, b) => (a === 'en' ? -1 : b === 'en' ? 1 : a.localeCompare(b)));
 
 const BCP47 = {
-  en: 'en_US', de: 'de_DE', es: 'es_ES', 'es-LA': 'es_419', fr: 'fr_FR',
-  ja: 'ja_JP', ko: 'ko_KR', pt: 'pt_BR', ru: 'ru_RU', vi: 'vi_VN', zh: 'zh_CN',
+  en: 'en_US', de: 'de_DE', fr: 'fr_FR',
+  ja: 'ja_JP', ko: 'ko_KR', zh: 'zh_CN',
 };
 const HREFLANG = {
-  en: 'en', de: 'de', es: 'es', 'es-LA': 'es-419', fr: 'fr',
-  ja: 'ja', ko: 'ko', pt: 'pt', ru: 'ru', vi: 'vi', zh: 'zh',
+  en: 'en', de: 'de', fr: 'fr',
+  ja: 'ja', ko: 'ko', zh: 'zh',
 };
 const HTML_LANG = {
-  en: 'en', de: 'de', es: 'es', 'es-LA': 'es-419', fr: 'fr',
-  ja: 'ja', ko: 'ko', pt: 'pt', ru: 'ru', vi: 'vi', zh: 'zh',
+  en: 'en', de: 'de', fr: 'fr',
+  ja: 'ja', ko: 'ko', zh: 'zh',
 };
 
 const SITE = 'https://arcadedeck.net';

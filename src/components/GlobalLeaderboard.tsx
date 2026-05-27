@@ -2,12 +2,19 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Trophy, Crown, Medal, RefreshCw, Loader } from 'lucide-react';
 import { db } from '../firebase';
-import { getDocs } from 'firebase/firestore/lite';
+import { doc, getDoc, getDocs } from 'firebase/firestore/lite';
 import { buildLeaderboardQuery } from '../utils/leaderboardQuery';
 import { games } from '../data/games';
 import { useUiText } from '../i18n';
 import { SkeletonPodium } from './Skeleton';
+import { safeRead, circuitOpen } from '../utils/firestoreCircuit';
 import './GlobalLeaderboard.css';
+
+declare global {
+  interface Window {
+    __ARCADEDECK_PODIUM__?: GlobalRank[];
+  }
+}
 
 interface GlobalRank {
   name: string;
@@ -21,23 +28,23 @@ interface GlobalLeaderboardProps {
   variant?: 'full' | 'compact';
 }
 
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
-const CACHE_KEY = 'arcadedeck_rank_cache';
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+const CACHE_KEY = 'arcadedeck_rank_cache_v2';
 
-function getCachedRanks(): GlobalRank[] | null {
+function getCachedRanks(allowStale = false): GlobalRank[] | null {
   try {
-    const raw = sessionStorage.getItem(CACHE_KEY);
+    const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
     const { sorted, expiresAt } = JSON.parse(raw);
-    if (Date.now() < expiresAt) return sorted;
-    sessionStorage.removeItem(CACHE_KEY);
+    if (allowStale || Date.now() < expiresAt) return sorted;
+    localStorage.removeItem(CACHE_KEY);
   } catch { /* ignore corrupt cache */ }
   return null;
 }
 
 function setCachedRanks(sorted: GlobalRank[]): void {
   try {
-    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ sorted, expiresAt: Date.now() + CACHE_TTL_MS }));
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ sorted, expiresAt: Date.now() + CACHE_TTL_MS }));
   } catch { /* storage full — ignore */ }
 }
 
@@ -64,72 +71,112 @@ const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({ onDataLoaded, var
     setLastUpdated(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
   }, [onDataLoaded]);
 
+  const fallbackFanout = useCallback(async (): Promise<GlobalRank[]> => {
+    const playerPoints: Record<string, GlobalRank> = {};
+    const promises = games.map(async (game) => {
+      const q = buildLeaderboardQuery(db, game.id, {
+        dualSort: game.leaderboard?.dualSort ?? false,
+        subSortAsc: game.leaderboard?.subSortAsc ?? false,
+        limit: 3,
+      });
+      const snapshot = await getDocs(q);
+      snapshot.docs.forEach((d, index) => {
+        const data = d.data();
+        const name = data.name;
+        const rank = index + 1;
+        const points = rank === 1 ? 3 : rank === 2 ? 2 : 1;
+        if (!playerPoints[name]) {
+          playerPoints[name] = { name, totalPoints: 0, medals: { gold: 0, silver: 0, bronze: 0 } };
+        }
+        playerPoints[name].totalPoints += points;
+        if (rank === 1) playerPoints[name].medals.gold++;
+        if (rank === 2) playerPoints[name].medals.silver++;
+        if (rank === 3) playerPoints[name].medals.bronze++;
+      });
+    });
+    await Promise.all(promises);
+    return Object.values(playerPoints)
+      .sort((a, b) => b.totalPoints - a.totalPoints)
+      .slice(0, 3);
+  }, []);
+
   const calculateGlobalRanking = useCallback(async () => {
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
     setLoading(true);
     setError(null);
 
-    // Return cached result if still fresh
-    const cached = getCachedRanks();
+    // 0) Prerendered/baked-in podium (window-injected from build-time bake)
+    if (typeof window !== 'undefined' && window.__ARCADEDECK_PODIUM__?.length) {
+      const baked = window.__ARCADEDECK_PODIUM__.slice(0, 3);
+      setCachedRanks(baked);
+      applyResult(baked);
+      isFetchingRef.current = false;
+      return;
+    }
+
+    // 1) localStorage cache (24h, or stale if circuit open)
+    const cached = getCachedRanks(circuitOpen());
     if (cached) {
       applyResult(cached);
       isFetchingRef.current = false;
       return;
     }
 
-    const playerPoints: Record<string, GlobalRank> = {};
-
     try {
-      const promises = games.map(async (game) => {
-        const q = buildLeaderboardQuery(db, game.id, {
-          dualSort: game.leaderboard?.dualSort ?? false,
-          subSortAsc: game.leaderboard?.subSortAsc ?? false,
-          limit: 3,
-        });
+      // 2) Single read of denormalized aggregate doc (circuit-aware)
+      const snap = await safeRead(
+        () => getDoc(doc(db, 'aggregates', 'podium')),
+        null,
+      );
+      if (snap && snap.exists()) {
+        const data = snap.data() as { podium?: GlobalRank[] };
+        const sorted = (data.podium || []).slice(0, 3);
+        if (sorted.length > 0) {
+          setCachedRanks(sorted);
+          applyResult(sorted);
+          return;
+        }
+      }
 
-        const snapshot = await getDocs(q);
-        snapshot.docs.forEach((doc, index) => {
-          const data = doc.data();
-          const name = data.name;
-          const rank = index + 1;
-          const points = rank === 1 ? 3 : rank === 2 ? 2 : 1;
+      // 3) If circuit just opened, serve stale podium if any; else give up gracefully.
+      if (circuitOpen()) {
+        const stale = getCachedRanks(true);
+        if (stale && stale.length) {
+          applyResult(stale);
+          return;
+        }
+        setPodiumPlayers([]);
+        setLoading(false);
+        return;
+      }
 
-          if (!playerPoints[name]) {
-            playerPoints[name] = {
-              name,
-              totalPoints: 0,
-              medals: { gold: 0, silver: 0, bronze: 0 }
-            };
-          }
-
-          playerPoints[name].totalPoints += points;
-          if (rank === 1) playerPoints[name].medals.gold++;
-          if (rank === 2) playerPoints[name].medals.silver++;
-          if (rank === 3) playerPoints[name].medals.bronze++;
-        });
-      });
-
-      await Promise.all(promises);
-
-      const sorted = Object.values(playerPoints)
-        .sort((a, b) => b.totalPoints - a.totalPoints)
-        .slice(0, 3);
-
-      setCachedRanks(sorted);
-
-      applyResult(sorted);
+      // 4) Cold-start fallback: fan-out (only fires if aggregate not yet seeded)
+      const sorted = await safeRead(fallbackFanout, [] as GlobalRank[]);
+      if (sorted.length > 0) {
+        setCachedRanks(sorted);
+        applyResult(sorted);
+      } else {
+        setPodiumPlayers([]);
+        setLoading(false);
+      }
     } catch (err) {
       console.error("Error calculating global ranking:", err);
-      setError("Failed to load rankings.");
-      setLoading(false);
+      // Last-resort: serve stale cache if present
+      const stale = getCachedRanks(true);
+      if (stale && stale.length) {
+        applyResult(stale);
+      } else {
+        setError("Failed to load rankings.");
+        setLoading(false);
+      }
     } finally {
       isFetchingRef.current = false;
     }
-  }, [applyResult]);
+  }, [applyResult, fallbackFanout]);
 
   const handleRefresh = useCallback(async () => {
-    sessionStorage.removeItem(CACHE_KEY);
+    localStorage.removeItem(CACHE_KEY);
     setIsSyncing(true);
     await calculateGlobalRanking();
     setIsSyncing(false);

@@ -63,7 +63,7 @@ const GameGrid: React.FC<GameGridProps> = ({ selectedGenre = 'All', searchQuery 
   return (
     <section className="game-grid-section">
       <div className="container">
-        <div className="section-heading reveal-section">
+        <div className="section-heading">
           <span className="section-eyebrow">{eyebrow}</span>
           <h2 className="section-title-big" aria-label={bigTitle}>
             <span className="title-bracket" aria-hidden="true">[</span>

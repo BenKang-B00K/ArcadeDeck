@@ -161,9 +161,9 @@
   },
   {
     "id": "10",
-    "slug": "endless-war",
+    "slug": "kingdom-of-ashes-endless-war",
     "language": "EN",
-    "thumbnail": "images/endless-war.webp",
+    "thumbnail": "images/kingdom-of-ashes-endless-war.webp",
     "genres": [
       "Strategy",
       "Idle"
@@ -172,8 +172,10 @@
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
     "isOriginal": true,
+    "badge": "UPDATE",
+    "lastUpdated": "2026-05-26",
     "leaderboard": {
-      "title": "Eternal War Leaderboard",
+      "title": "Kingdom of Ashes - Endless War Leaderboard",
       "primaryLabel": "Waves",
       "primaryUnit": " waves",
       "secondaryLabel": "Battles",
@@ -184,9 +186,9 @@
   },
   {
     "id": "11",
-    "slug": "dicefall-chronicles",
+    "slug": "kingdom-of-ashes-dice-war",
     "language": "EN",
-    "thumbnail": "images/dicefall-chronicles.webp",
+    "thumbnail": "images/kingdom-of-ashes-dice-war.webp",
     "genres": [
       "Roguelike",
       "RPG"
@@ -196,14 +198,16 @@
     "status": "PLAYABLE",
     "isOriginal": true,
     "leaderboard": {
-      "title": "Dicefall Chronicles Leaderboard",
+      "title": "Kingdom of Ashes - Dice War Leaderboard",
       "primaryLabel": "Chapters",
       "primaryUnit": " Chapters",
       "secondaryLabel": "Stages",
       "secondaryUnit": "",
       "dualSort": true,
       "subSortAsc": false
-    }
+    },
+    "badge": "UPDATE",
+    "lastUpdated": "2026-05-26"
   },
   {
     "id": "12",

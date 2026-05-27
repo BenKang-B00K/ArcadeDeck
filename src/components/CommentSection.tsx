@@ -17,6 +17,7 @@ import {
   type DocumentData,
 } from "firebase/firestore/lite";
 import { COMMENT_PAGE_SIZE as PAGE_SIZE } from '../constants/gameConstants';
+import { safeRead, safeWrite, circuitOpen } from '../utils/firestoreCircuit';
 import './CommentSection.css';
 
 const COMMENT_MAX = 300;
@@ -84,7 +85,12 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
           limit(PAGE_SIZE)
         );
 
-    const snapshot = await getDocs(q);
+    const snapshot = await safeRead(() => getDocs(q), null);
+    if (!snapshot) {
+      // Quota cooldown or read failure — leave comments empty, no error UI.
+      setHasMore(false);
+      return;
+    }
     const fetched = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
@@ -143,13 +149,33 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
     // Dismiss keyboard on mobile
     (document.activeElement as HTMLElement)?.blur();
 
+    // Quota cooldown — short-circuit write and tell user.
+    if (circuitOpen()) {
+      setComments(prev => prev.filter(c => c.id !== tempId));
+      setNewComment(sanitizedText);
+      setSubmitError("Comments temporarily unavailable. Please try again later.");
+      setTimeout(() => setSubmitError(null), 4000);
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      await addDoc(collection(db, "comments"), {
+      const w = await safeWrite(() => addDoc(collection(db, "comments"), {
         gameId,
         nickname: currentNickname,
         text: sanitizedText,
         createdAt: serverTimestamp()
-      });
+      }));
+      if (!w.ok) {
+        // Rollback + show message
+        setComments(prev => prev.filter(c => c.id !== tempId));
+        setNewComment(sanitizedText);
+        setSubmitError(w.quotaExhausted
+          ? "Comments temporarily unavailable. Please try again later."
+          : "Failed to post comment. Please try again.");
+        setTimeout(() => setSubmitError(null), 4000);
+        return;
+      }
       // Replace optimistic with confirmed server data
       setComments(prev => prev.filter(c => c.id !== tempId));
       lastDocRef.current = null;

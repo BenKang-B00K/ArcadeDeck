@@ -19,7 +19,7 @@ const TrendingRail: React.FC<TrendingRailProps> = ({ games }) => {
   const loop = [...games, ...games];
 
   return (
-    <section className="trending-rail reveal-section">
+    <section className="trending-rail">
       <div className="container">
         <div className="trending-rail-header">
           <h2 className="trending-rail-title">
@@ -35,6 +35,7 @@ const TrendingRail: React.FC<TrendingRailProps> = ({ games }) => {
             const title = getLocalizedString(g, 'title', lang, overlay);
             const thumb = `${import.meta.env.BASE_URL}${g.thumbnail}`;
             const srcSet = `${import.meta.env.BASE_URL}${thumb360(g.thumbnail)} 360w, ${thumb} 640w`;
+            const eager = idx < 4;
             return (
               <Link
                 key={`trend-${g.id}-${idx}`}
@@ -51,7 +52,8 @@ const TrendingRail: React.FC<TrendingRailProps> = ({ games }) => {
                     alt={title}
                     width="640"
                     height="360"
-                    loading="lazy"
+                    loading={eager ? 'eager' : 'lazy'}
+                    fetchPriority={eager ? 'high' : 'auto'}
                     decoding="async"
                   />
                 </div>

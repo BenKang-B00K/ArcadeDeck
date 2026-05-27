@@ -12,6 +12,47 @@
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'fs';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Bake top-3 podium into the Home shell at build time. Reads the
+// server-maintained /aggregates/podium doc via Firestore REST (rules allow
+// public read). Result is injected as window.__ARCADEDECK_PODIUM__ so the
+// GlobalLeaderboard component renders instantly with zero cold-start reads.
+// ─────────────────────────────────────────────────────────────────────────────
+const FIRESTORE_PROJECT = 'ultragames-website';
+const FIRESTORE_API_KEY = 'AIzaSyDFwB-Yt7ARcMZoPD6-1vI892PXyLEvdcU';
+
+async function fetchBakedPodium() {
+  const url = `https://firestore.googleapis.com/v1/projects/${FIRESTORE_PROJECT}/databases/(default)/documents/aggregates/podium?key=${FIRESTORE_API_KEY}`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) return [];
+    const json = await res.json();
+    const arr = json?.fields?.podium?.arrayValue?.values || [];
+    return arr.map((entry) => {
+      const f = entry?.mapValue?.fields || {};
+      const medalsF = f.medals?.mapValue?.fields || {};
+      return {
+        name: String(f.name?.stringValue || ''),
+        totalPoints: Number(f.totalPoints?.integerValue || f.totalPoints?.doubleValue || 0),
+        medals: {
+          gold: Number(medalsF.gold?.integerValue || medalsF.gold?.doubleValue || 0),
+          silver: Number(medalsF.silver?.integerValue || medalsF.silver?.doubleValue || 0),
+          bronze: Number(medalsF.bronze?.integerValue || medalsF.bronze?.doubleValue || 0),
+        },
+      };
+    }).filter((p) => p.name);
+  } catch {
+    return [];
+  }
+}
+
+const BAKED_PODIUM = await fetchBakedPodium();
+const bakedPodiumScript = BAKED_PODIUM.length
+  ? `<script>window.__ARCADEDECK_PODIUM__=${JSON.stringify(BAKED_PODIUM)};</script>`
+  : '';
+console.log(`[prerender] baked podium: ${BAKED_PODIUM.length} entries`);
+
+
 const SUPPORTED_LOCALES = readdirSync('src/i18n/locales')
   .filter(f => f.endsWith('.json') && !f.startsWith('_') && !f.includes('.missing.') && !f.includes('.bak.'))
   .map(f => f.replace(/\.json$/, ''));
@@ -651,8 +692,8 @@ ${noscriptItems}
   // Replace noscript body.
   shell = shell.replace(NOSCRIPT_BLOCK_REGEX, `<noscript>${noscriptBody}\n    </noscript>`);
 
-  // Inject home JSON-LD before </head>.
-  shell = shell.replace('</head>', `${homeJsonLd(lang)}\n  </head>`);
+  // Inject home JSON-LD + baked podium before </head>.
+  shell = shell.replace('</head>', `${homeJsonLd(lang)}\n    ${bakedPodiumScript}\n  </head>`);
 
   writeFileSync(`${dir}/index.html`, shell);
 }

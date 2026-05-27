@@ -104,7 +104,9 @@
         "firebase-debug.*.log",
         "*.local"
       ],
-      "predeploy": []
+      "predeploy": [
+        "node -e \"require('fs').copyFileSync('src/data/games.json','functions/games-config.json')\""
+      ]
     }
   ]
 }

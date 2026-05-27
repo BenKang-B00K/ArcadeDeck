@@ -22,14 +22,28 @@
  */
 
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
+const { onDocumentWritten } = require('firebase-functions/v2/firestore');
 const { setGlobalOptions } = require('firebase-functions/v2');
 const admin = require('firebase-admin');
 const crypto = require('crypto');
+const path = require('path');
 
 admin.initializeApp();
 const db = admin.firestore();
 
 setGlobalOptions({ region: 'us-central1', maxInstances: 50 });
+
+// Lazy-load games config (copied in by predeploy hook).
+let _gamesConfig = null;
+function getGamesConfig() {
+  if (_gamesConfig) return _gamesConfig;
+  try {
+    _gamesConfig = require(path.join(__dirname, 'games-config.json'));
+  } catch {
+    _gamesConfig = [];
+  }
+  return _gamesConfig;
+}
 
 const SECRET_NAME = 'ARCADEDECK_HMAC_SECRET';
 const MAX_TOKEN_AGE_MS = 30 * 60 * 1000; // 30 min — covers long sessions
@@ -128,4 +142,104 @@ exports.submitScore = onCall({ secrets: [SECRET_NAME], cors: true }, async (req)
   }
   await existing.docs[0].ref.set(payload, { merge: true });
   return { ok: true, action: 'updated', id: existing.docs[0].id };
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Podium aggregate — denormalized read cache for /aggregates/podium and
+// /leaderboardCache/{gameId}. Triggered on any leaderboards/* write.
+// Drops Home-page Firestore reads from ~72 to 1.
+// ─────────────────────────────────────────────────────────────────────────────
+
+async function rebuildGameCache(gameId) {
+  const cfg = getGamesConfig().find((g) => g.id === gameId);
+  const dualSort = cfg?.leaderboard?.dualSort ?? false;
+  const subSortAsc = cfg?.leaderboard?.subSortAsc ?? false;
+  const subDir = subSortAsc ? 'asc' : 'desc';
+
+  let q = db.collection('leaderboards')
+    .where('gameId', '==', gameId)
+    .orderBy('score', 'desc');
+  if (dualSort) q = q.orderBy('subScore', subDir);
+  const snap = await q.limit(3).get();
+
+  const top3 = snap.docs.map((d) => {
+    const x = d.data();
+    return {
+      name: String(x.name || ''),
+      score: Number(x.score || 0),
+      subScore: Number(x.subScore || 0),
+    };
+  });
+
+  await db.collection('leaderboardCache').doc(gameId).set({
+    gameId,
+    top3,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+  return top3;
+}
+
+async function rebuildGlobalPodium() {
+  const allSnap = await db.collection('leaderboardCache').get();
+  const playerPoints = {};
+  allSnap.docs.forEach((d) => {
+    const top3 = (d.data().top3 || []);
+    top3.forEach((p, i) => {
+      const points = i === 0 ? 3 : i === 1 ? 2 : 1;
+      if (!playerPoints[p.name]) {
+        playerPoints[p.name] = {
+          name: p.name,
+          totalPoints: 0,
+          medals: { gold: 0, silver: 0, bronze: 0 },
+        };
+      }
+      playerPoints[p.name].totalPoints += points;
+      if (i === 0) playerPoints[p.name].medals.gold += 1;
+      else if (i === 1) playerPoints[p.name].medals.silver += 1;
+      else if (i === 2) playerPoints[p.name].medals.bronze += 1;
+    });
+  });
+  const podium = Object.values(playerPoints)
+    .sort((a, b) => b.totalPoints - a.totalPoints)
+    .slice(0, 10);
+
+  await db.collection('aggregates').doc('podium').set({
+    podium,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+}
+
+exports.onLeaderboardWrite = onDocumentWritten('leaderboards/{docId}', async (event) => {
+  const before = event.data?.before?.exists ? event.data.before.data() : null;
+  const after = event.data?.after?.exists ? event.data.after.data() : null;
+  const affected = new Set();
+  if (before?.gameId) affected.add(String(before.gameId));
+  if (after?.gameId) affected.add(String(after.gameId));
+  if (affected.size === 0) return;
+
+  // Failsafe: a single failure (quota / permission / transient) must not
+  // explode the whole rebuild. Recompute what we can and continue.
+  for (const gameId of affected) {
+    try {
+      await rebuildGameCache(gameId);
+    } catch (err) {
+      console.error(`[onLeaderboardWrite] rebuildGameCache(${gameId}) failed:`, err?.code || err?.message || err);
+    }
+  }
+  try {
+    await rebuildGlobalPodium();
+  } catch (err) {
+    console.error('[onLeaderboardWrite] rebuildGlobalPodium failed:', err?.code || err?.message || err);
+  }
+});
+
+// Manual rebuild — call once after deploy to seed both caches.
+exports.rebuildAggregates = onCall({ cors: true }, async () => {
+  const games = getGamesConfig();
+  for (const g of games) {
+    if (!g?.leaderboard) continue;
+    await rebuildGameCache(g.id);
+  }
+  await rebuildGlobalPodium();
+  return { ok: true, rebuilt: games.filter((g) => g.leaderboard).length };
 });

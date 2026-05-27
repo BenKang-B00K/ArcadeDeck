@@ -11,9 +11,8 @@
    ═══════════════════════════════════════════════════════════════ */
 .reveal-section {
   opacity: 0;
-  transform: translate3d(0, 28px, 0);
-  transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out);
-  will-change: opacity, transform;
+  transform: translate3d(0, 20px, 0);
+  transition: opacity 380ms var(--ease-out), transform 380ms var(--ease-out);
 }
 
 .reveal-section.in-view {

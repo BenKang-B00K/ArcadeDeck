@@ -580,43 +580,43 @@
       ]
     },
     "10": {
-      "title": "Endless War: Holy vs Hell",
-      "description": "An epic simulation of the eternal conflict between heaven and hell.",
-      "fullDescription": "\n      The eternal conflict between the forces of Holy and Hell has reached a new peak. In Endless War: Holy vs Hell, you witness and influence the tide of battle in this grand simulation. \n      Strategize and manage your resources as you progress through countless waves of enemies. How many waves can you survive? How many battles can you conquer? \n      Experience high-stakes simulation and test your tactical prowess in the ultimate struggle for cosmic balance.\n      You play as the \"Arbiter,\" a neutral entity tasked with maintaining the equilibrium of the afterlife. Your interface allows you to direct the souls of the fallen into either the Golden Army of the Heavens or the Infernal Legion of the Abyss.\n      The game uses a \"Macro-Management\" system, where you don't control individual soldiers, but rather the divine laws and tactical formations of entire legions.\n    ",
-      "controls": "Mouse: Navigate menus / Keyboard: Hotkeys for unit management",
-      "tips": "Diversify your army. A mix of ranged and melee units is essential to counter the evolving enemy waves. Don't ignore the \"Karma\" meter; keeping it centered grants you the \"Divine Storm\" ability, which can clear an entire screen of enemies.",
-      "lore": "\n      Since the beginning of time, two powers have vied for supremacy. Today, you decide which side tips the scale.\n      The war started when the \"First Archon\" and the \"Primal Demon\" disagreed on the destiny of mortal souls. \n      This disagreement turned into a conflict that has lasted billions of years, consuming entire galaxies in its wake.\n      The battlefield is the \"Threshold,\" a plane of existence where time and space are malleable. Here, the echoes of every prayer and every sin take physical form as warriors.\n    ",
+      "title": "Kingdom of Ashes - Endless War",
+      "description": "Macro-scale faction war for the ruins of Alea — direct the Golden Army or the Infernal Legion across an endless wave-survival simulation.",
+      "fullDescription": "\n      Kingdom of Ashes - Endless War is the strategy entry in the Kingdom of Ashes series. After the Dicefall shattered Alea, two surviving orders rose from the ash and turned the ruined kingdom into a permanent battlefield. You are an Arbiter — neither side claims you, both sides answer to you — and your job is to keep the war from ending.\n      You do not command individual soldiers. You set the divine laws, tactical formations, and deployment cadence for entire legions. Wave after wave, the Golden Army of the surviving spires and the Infernal Legion of the ash-pits trade ground across the Threshold, a malleable plane where every prayer and every sin takes physical form as a warrior.\n      Combat runs as a continuous simulation. You pick your starting roster, set the Karma balance between the two factions, react to dynamic battlefield events, and adjust formations as the enemy composition shifts. Wave depth, battles won, and Karma swings all feed the persistent global war progress tracker.\n      Three pressure points define every run: the Karma meter (centered unlocks the Divine Storm screen-clear), the ranged/melee balance (a 40/60 split is the floor, not the ceiling), and timing your surges around Solar Flares and Abyssal Rifts. Master those three and the wave count climbs. Ignore any one and the ash takes you.\n    ",
+      "controls": "Mouse: Navigate menus and direct souls / Keyboard: Hotkeys for formation orders and unit management",
+      "tips": "Diversify your army — a mix of ranged and melee is essential against the evolving wave compositions. Keep the Karma meter centered to retain the Divine Storm screen-clear; over-committing to one faction locks you out of it. Read incoming wave composition before the wave hits — adjusting on the fly is where the game lives. Time your unit surges with Solar Flares and Abyssal Rifts to compound their event buffs.",
+      "lore": "\n      The Dicefall ended Alea as a realm. It did not end the war for it.\n      Two orders survived the shattering. The Golden Army gathered in the last unburned spires and took the dawn for their banner. The Infernal Legion crawled out of the ash-pits beneath the broken cities and claimed the night. Between them lies the Threshold — a plane that bends to belief, where every prayer and every sin from the old world surfaces as a warrior with a sword in its hand.\n      You are the Arbiter. You did not choose this title; the Dicefall did, the same way it chose the dice-bonded survivors in the rest of Alea. Your purpose is not to win the war for either side. Your purpose is to keep it going — because the moment one faction takes the Threshold, the ash falls everywhere, and what little remains of Alea finally goes silent.\n    ",
       "features": [
-        "Massive-scale Unit Battle Simulation",
-        "Complex Morality and Karma System",
-        "Over 30 Divine and Infernal Unit Types",
+        "Massive-scale Faction Battle Simulation",
+        "Karma Balance System with Divine Storm Screen-Clear",
+        "Over 30 Golden and Infernal Unit Types",
         "Dynamic Battlefield Events: Solar Flares and Abyssal Rifts",
-        "Deep Tactical Formations and Orders",
+        "Deep Tactical Formations and Macro Orders",
         "Persistent Global War Progress Tracker"
       ],
-      "objectives": "Direct the souls of the fallen into Heaven's Golden Army or Hell's Infernal Legion, manage your Karma meter, and survive as many waves as possible while maintaining tactical equilibrium between divine and infernal forces.",
+      "objectives": "Direct the fallen souls of Alea into the Golden Army or the Infernal Legion, manage the Karma meter to hold the Threshold, and survive as many waves as possible while keeping the war from ending in either side's favor.",
       "controlsTable": [
         { "key": "Mouse Click", "action": "Navigate menus and select unit types to deploy" },
         { "key": "Keyboard Hotkeys", "action": "Issue formation orders and manage unit commands" },
-        { "key": "Mouse Click (Karma)", "action": "Direct souls toward Holy or Hell sides to adjust Karma" }
+        { "key": "Mouse Click (Karma)", "action": "Direct souls toward Golden or Infernal sides to adjust Karma" }
       ],
       "faq": [
-        { "q": "How do I start the simulation?", "a": "Select your starting unit mix from the Holy and Hell rosters, then confirm deployment. The simulation begins automatically and you manage formations and orders as waves progress." },
-        { "q": "What is the Karma meter?", "a": "Karma tracks your balance between directing souls to the Holy side versus the Infernal side. Keeping it centered unlocks the Divine Storm ability, which clears an entire screen of enemies and is one of the most powerful tools available." },
-        { "q": "What army composition works best?", "a": "Diversify between ranged and melee units. A melee-only or ranged-only force becomes countered by enemy wave compositions as you progress. At least a 40/60 split between the two types covers most threat profiles." },
-        { "q": "What are Abyssal Rifts and Solar Flares?", "a": "These are dynamic battlefield events that spawn mid-wave and alter conditions. Solar Flares buff Holy units briefly; Abyssal Rifts empower Infernal forces. Timing your unit surges around these events is a key tactical skill." },
-        { "q": "Is there a win condition?", "a": "The conflict is designed as an eternal simulation — there is no final wave. The goal is to survive as many waves as possible and grow your score on the persistent global war progress tracker." }
+        { "q": "How do I start the simulation?", "a": "Select your starting unit mix from the Golden and Infernal rosters, then confirm deployment. The simulation begins automatically and you manage formations and orders as waves progress." },
+        { "q": "What is the Karma meter?", "a": "Karma tracks your balance between directing souls to the Golden Army versus the Infernal Legion. Keeping it centered unlocks the Divine Storm ability, which clears an entire screen of enemies and is one of the strongest tools the Arbiter has." },
+        { "q": "What army composition works best?", "a": "Diversify between ranged and melee units. A melee-only or ranged-only force gets countered by later wave compositions. At least a 40/60 split between the two types covers most threat profiles." },
+        { "q": "What are Abyssal Rifts and Solar Flares?", "a": "Dynamic battlefield events that spawn mid-wave and alter conditions. Solar Flares buff Golden units briefly; Abyssal Rifts empower Infernal forces. Timing your unit surges around these events is a key tactical skill." },
+        { "q": "Is there a win condition?", "a": "No. The conflict is an eternal simulation — the Arbiter's job is to keep the war going, not end it. The score is how many waves and battles you hold the Threshold before one side breaks through." }
       ],
       "featuredComments": [
-        { "name": "KarmaArbiter", "text": "Keep the Karma meter centered and you unlock Divine Storm when you need it most. I ran Holy-heavy for 10 waves thinking it would help — it just locked me out of the ability and I got steamrolled.", "badge": "Top Tip" },
-        { "name": "ThresholdVex", "text": "Echoes of every prayer and sin taking physical form as warriors on a plane where time is malleable. The lore for this simulation is doing real work under what is essentially a wave survival game.", "badge": "Lore" },
-        { "name": "InfernalRange", "text": "40/60 melee to ranged split is the floor, not the ceiling. Some waves skew heavily toward fast enemies that melt melee — reading the incoming composition and adjusting before the wave hits is where the game actually is." },
-        { "name": "SolarAbyssal", "text": "Abyssal Rifts and Solar Flares timing your surges around them is huge. The game basically tells you which side to pump for the next 15 seconds. Listen to it." },
-        { "name": "MacroStrategist", "text": "The Macro-Management framing is interesting — you're adjusting divine laws and formations, not individual soldiers. It makes the scale feel genuinely large rather than just big numbers." }
+        { "name": "KarmaArbiter", "text": "Keep the Karma meter centered and you unlock Divine Storm when you need it most. I ran Golden-heavy for 10 waves thinking it would help — it just locked me out of the ability and the ash-pits steamrolled me.", "badge": "Top Tip" },
+        { "name": "ThresholdVex", "text": "Every prayer and sin from old Alea surfacing as a warrior on a plane where time is malleable — the lore is doing real work under what is, mechanically, a wave survival sim.", "badge": "Lore" },
+        { "name": "InfernalRange", "text": "40/60 melee to ranged is the floor, not the ceiling. Some waves skew heavily toward fast Infernal units that melt melee — reading the incoming composition and adjusting before the wave hits is where the game actually is." },
+        { "name": "SolarAbyssal", "text": "Abyssal Rifts and Solar Flares — timing your surges around them is huge. The game basically tells you which faction to pump for the next 15 seconds. Listen to it." },
+        { "name": "MacroStrategist", "text": "The macro framing makes Kingdom of Ashes feel right. You're not micromanaging soldiers, you're adjusting divine laws and formations across the Threshold. The scale lands because of it." }
       ]
     },
     "11": {
-      "title": "Dicefall Chronicles",
+      "title": "Kingdom of Ashes - Dice War",
       "description": "A strategic dice-building roguelike adventure where every roll rewrites the run.",
       "fullDescription": "\n      Dicefall Chronicles fuses deckbuilding strategy with roguelike permadeath, but the deck is a pool of dice. Each die has its own faces — damage, block, mana, status effects, hybrid utility — and the build you assemble across a run is the build you fight every encounter with. There is no perfect deck: there is the deck that survives the floor you are on right now.\n      Combat is turn-based and economy-driven. You spend rolls to deal damage, sustain block, trigger relic effects, and chain combos across your dice pool. Choose a path between elite gauntlets, merchant rests, treasure caches, and unknown events — each branch trades safety for power. Lose a run and the meta-progression unlocks new dice tiers, character archetypes, and starting relics for the next descent.\n      Three classes (Berserker, Sage, Trickster) each rewrite the math of risk: the Berserker doubles damage on max rolls, the Sage rerolls on event triggers, the Trickster banks unused faces for later. Boss fights gate each act with a phase-changing pattern that punishes one-trick builds and rewards adaptive pool composition. Can you master the chaos of the Dicefall and become the champion of Alea?\n    ",
       "controls": "Mouse/Touch: Select dice and targets. Drag dice from your pool onto enemies, allies, or relics. Right-click (or long-press on touch) to inspect any die face for full effect text.",

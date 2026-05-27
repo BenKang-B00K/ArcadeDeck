@@ -103,6 +103,18 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Denormalized podium aggregate (server-maintained via Cloud Function)
+    match /aggregates/{document} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Per-game leaderboard top-3 cache (server-maintained via Cloud Function)
+    match /leaderboardCache/{document} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     // Default deny for everything else
     match /{document=**} {
       allow read, write: if false;

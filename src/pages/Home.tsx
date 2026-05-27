@@ -17,6 +17,7 @@ import ScrollProgress from '../components/home/ScrollProgress';
 import BackToTop from '../components/home/BackToTop';
 import { getLocalizedString } from '../i18n';
 import { thumb360, SRCSET_SIZES } from '../utils/thumb';
+import { safeRead, circuitOpen } from '../utils/firestoreCircuit';
 import './Home.css';
 
 const GlobalLeaderboard = lazy(() => import('../components/GlobalLeaderboard'));
@@ -68,6 +69,23 @@ const Home: React.FC = () => {
 
   // Fetch user's rank for each game they've played
   React.useEffect(() => {
+    const RANK_CACHE_KEY = `arcadedeck_user_ranks_v2_${nickname}`;
+    const RANK_TTL_MS = 24 * 60 * 60 * 1000;
+
+    try {
+      const raw = localStorage.getItem(RANK_CACHE_KEY);
+      if (raw) {
+        const { ranks, expiresAt } = JSON.parse(raw);
+        if (Date.now() < expiresAt) {
+          setUserRanks(ranks);
+          return;
+        }
+        localStorage.removeItem(RANK_CACHE_KEY);
+      }
+    } catch { /* ignore corrupt cache */ }
+
+    if (circuitOpen()) return; // quota cooldown — skip; user-ranks are non-critical
+
     const fetchUserRanks = async () => {
       try {
         const [{ db }, { collection, query, where, getDocs }, { buildLeaderboardQuery }] = await Promise.all([
@@ -75,10 +93,11 @@ const Home: React.FC = () => {
           import('firebase/firestore/lite'),
           import('../utils/leaderboardQuery'),
         ]);
-        const userScoresSnap = await getDocs(
-          query(collection(db, "leaderboards"), where("name", "==", nickname))
+        const userScoresSnap = await safeRead(
+          () => getDocs(query(collection(db, "leaderboards"), where("name", "==", nickname))),
+          null,
         );
-        if (userScoresSnap.empty) return;
+        if (!userScoresSnap || userScoresSnap.empty) return;
 
         const playedGameIds = new Set<string>();
         userScoresSnap.docs.forEach(doc => playedGameIds.add(doc.data().gameId));
@@ -88,9 +107,11 @@ const Home: React.FC = () => {
           const game = games.find(g => g.id === gameId);
           if (!game) return;
           const subSortAsc = game.leaderboard?.subSortAsc ?? false;
-          const lbSnap = await getDocs(
-            buildLeaderboardQuery(db, gameId, { limit: LEADERBOARD_FETCH_LIMIT })
+          const lbSnap = await safeRead(
+            () => getDocs(buildLeaderboardQuery(db, gameId, { limit: LEADERBOARD_FETCH_LIMIT })),
+            null,
           );
+          if (!lbSnap) return;
           const docs = lbSnap.docs.map(d => d.data());
           docs.sort((a, b) => compareLeaderboardEntries(
             { score: a.score ?? 0, subScore: a.subScore ?? 0 },
@@ -102,6 +123,9 @@ const Home: React.FC = () => {
         });
         await Promise.all(promises);
         setUserRanks(ranks);
+        try {
+          localStorage.setItem(RANK_CACHE_KEY, JSON.stringify({ ranks, expiresAt: Date.now() + RANK_TTL_MS }));
+        } catch { /* quota — ignore */ }
       } catch (err) {
         console.error("Error fetching user ranks:", err);
       }
@@ -202,23 +226,25 @@ const Home: React.FC = () => {
       return;
     }
 
-    // Check for nickname duplication
-    try {
-      const [{ db }, { collection, query, where, getDocs, limit }] = await Promise.all([
-        import('../firebase'),
-        import('firebase/firestore/lite'),
-      ]);
-      const q = query(collection(db, "leaderboards"), where("name", "==", finalName), limit(1));
-      const querySnapshot = await getDocs(q);
+    // Check for nickname duplication (skipped during quota cooldown)
+    if (!circuitOpen()) {
+      try {
+        const [{ db }, { collection, query, where, getDocs, limit }] = await Promise.all([
+          import('../firebase'),
+          import('firebase/firestore/lite'),
+        ]);
+        const q = query(collection(db, "leaderboards"), where("name", "==", finalName), limit(1));
+        const querySnapshot = await safeRead(() => getDocs(q), null);
 
-      if (!querySnapshot.empty && finalName !== nickname) {
-        const uniqueId = Math.floor(RANDOM_ID_MIN + Math.random() * (RANDOM_ID_MAX - RANDOM_ID_MIN + 1));
-        finalName = `${finalName}#${uniqueId}`;
-        showNotification(`Name taken — assigned unique tag: ${finalName}`, 'info');
+        if (querySnapshot && !querySnapshot.empty && finalName !== nickname) {
+          const uniqueId = Math.floor(RANDOM_ID_MIN + Math.random() * (RANDOM_ID_MAX - RANDOM_ID_MIN + 1));
+          finalName = `${finalName}#${uniqueId}`;
+          showNotification(`Name taken — assigned unique tag: ${finalName}`, 'info');
+        }
+      } catch (error) {
+        console.error("Error checking nickname:", error);
+        showNotification("Could not verify name. Saving anyway.", 'info');
       }
-    } catch (error) {
-      console.error("Error checking nickname:", error);
-      showNotification("Could not verify name. Saving anyway.", 'info');
     }
 
     setNickname(finalName);

@@ -32,6 +32,7 @@ import {
   updateDoc,
   doc
 } from "firebase/firestore/lite";
+import { safeRead, safeWrite, circuitOpen } from '../utils/firestoreCircuit';
 import { useUiText, useLocale, getLocalizedString, getLocalizedFeatured } from '../i18n';
 import { genreSlug } from '../utils/genres';
 import './GamePlayer.css';
@@ -118,10 +119,17 @@ const GamePlayer: React.FC = () => {
       return sorted;
     };
 
+    if (circuitOpen()) {
+      // Quota cooldown — render empty leaderboard, don't bother the API.
+      return finalize([]);
+    }
+
     try {
       const q = buildLeaderboardQuery(db, id, { dualSort, subSortAsc, limit: LEADERBOARD_FETCH_LIMIT });
-      const querySnapshot = await getDocs(q);
-      return finalize(querySnapshot.docs.map(mapDoc));
+      const querySnapshot = await safeRead(() => getDocs(q), null);
+      if (querySnapshot) return finalize(querySnapshot.docs.map(mapDoc));
+      // safeRead returned null — circuit just opened, bail to empty
+      return finalize([]);
     } catch (error) {
       console.error("Error fetching leaderboard: ", error);
       try {
@@ -130,8 +138,9 @@ const GamePlayer: React.FC = () => {
           where("gameId", "==", id),
           limit(LEADERBOARD_FETCH_LIMIT)
         );
-        const snapSimple = await getDocs(qSimple);
-        return finalize(snapSimple.docs.map(mapDoc));
+        const snapSimple = await safeRead(() => getDocs(qSimple), null);
+        if (snapSimple) return finalize(snapSimple.docs.map(mapDoc));
+        return finalize([]);
       } catch (e) {
         console.error("Critical leaderboard error:", e);
         showNotification(uiT('playerLeaderboardError', 'Failed to load leaderboard.'), 'error');
@@ -153,6 +162,15 @@ const GamePlayer: React.FC = () => {
     const buildSubPart = (sub: number) =>
       secondaryLabel ? ` (${secondaryLabel}: ${secondaryUnit}${sub})` : '';
 
+    const currentSubScore = subScore ?? 0;
+
+    // Quota cooldown: show local-only result, don't hit Firestore.
+    if (circuitOpen()) {
+      setGameResult({ score, unit: primaryUnit, resultType: 'first-score', rank: null });
+      showNotification(uiT('playerScoreSubmitOffline', 'Score recorded locally — leaderboard temporarily unavailable.'), 'info');
+      return;
+    }
+
     try {
       const q = query(
         collection(db, "leaderboards"),
@@ -160,9 +178,13 @@ const GamePlayer: React.FC = () => {
         where("name", "==", nickname),
         limit(1)
       );
-      const querySnapshot = await getDocs(q);
-
-      const currentSubScore = subScore ?? 0;
+      const querySnapshot = await safeRead(() => getDocs(q), null);
+      if (!querySnapshot) {
+        // Circuit opened mid-call
+        setGameResult({ score, unit: primaryUnit, resultType: 'first-score', rank: null });
+        showNotification(uiT('playerScoreSubmitOffline', 'Score recorded locally — leaderboard temporarily unavailable.'), 'info');
+        return;
+      }
 
       if (!querySnapshot.empty) {
         const docSnap = querySnapshot.docs[0];
@@ -173,11 +195,15 @@ const GamePlayer: React.FC = () => {
         const isNewBest = isNewPersonalBest(score, currentSubScore, prevScore, prevSubScore, subSortAsc);
 
         if (isNewBest) {
-          await updateDoc(doc(db, "leaderboards", docSnap.id), {
+          const w = await safeWrite(() => updateDoc(doc(db, "leaderboards", docSnap.id), {
             score,
             subScore: currentSubScore,
             createdAt: serverTimestamp()
-          });
+          }));
+          if (!w.ok) {
+            showNotification(uiT('playerScoreSubmitError', 'Failed to submit score. Please try again.'), 'error');
+            return;
+          }
           const updatedEntries = await fetchLeaderboard();
           const myRank = updatedEntries.findIndex(e => e.name === nickname) + 1;
           setGameResult({ score, unit: primaryUnit, resultType: 'personal-best', rank: myRank > 0 ? myRank : null });
@@ -189,13 +215,17 @@ const GamePlayer: React.FC = () => {
           );
         }
       } else {
-        await addDoc(collection(db, "leaderboards"), {
+        const w = await safeWrite(() => addDoc(collection(db, "leaderboards"), {
           gameId: id,
           name: nickname,
           score,
           subScore: currentSubScore,
           createdAt: serverTimestamp()
-        });
+        }));
+        if (!w.ok) {
+          showNotification(uiT('playerScoreSubmitError', 'Failed to submit score. Please try again.'), 'error');
+          return;
+        }
         const updatedEntries = await fetchLeaderboard();
         const myRank = updatedEntries.findIndex(e => e.name === nickname) + 1;
         setGameResult({ score, unit: primaryUnit, resultType: 'first-score', rank: myRank > 0 ? myRank : null });

@@ -363,6 +363,9 @@ const GamePlayer: React.FC = () => {
   // Element.requestFullscreen (iOS Safari).
   const handlePlay = () => {
     setGameStarted(true);
+    // Opt-out per game: skip auto-fullscreen when autoFullscreen === false.
+    // Manual Fullscreen button stays available.
+    if (game?.autoFullscreen === false) return;
     const wrapper = gameWrapperRef.current as (HTMLDivElement & {
       webkitRequestFullscreen?: () => void;
       mozRequestFullScreen?: () => void;

@@ -33,6 +33,9 @@ export interface Game {
   language?: string;
   badge?: string;
   lastUpdated?: string;
+  // Auto-enter fullscreen on PLAY click. Defaults to true when omitted; set
+  // false for games that misbehave or look worse in fullscreen.
+  autoFullscreen?: boolean;
   leaderboard?: LeaderboardConfig;
 }
 

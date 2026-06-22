@@ -487,5 +487,46 @@
       "dualSort": true,
       "subSortAsc": false
     }
+  },
+  {
+    "id": "25",
+    "slug": "vault-of-ashes-fallen-era",
+    "language": "EN",
+    "thumbnail": "images/vault-of-ashes-fallen-era.webp",
+    "genres": [
+      "Loadout Grid-Auto-Battle",
+      "Auto Battler",
+      "Strategy"
+    ],
+    "gameUrl": "https://vault-of-ashes-fallen-era.pages.dev/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "isOriginal": true,
+    "badge": "NEW"
+  },
+  {
+    "id": "26",
+    "slug": "neon-stack",
+    "language": "EN",
+    "thumbnail": "images/neon-stack.webp",
+    "genres": [
+      "Arcade",
+      "Casual"
+    ],
+    "gameUrl": "https://neon-stack-19n.pages.dev/",
+    "aspectRatio": "9/16",
+    "status": "PLAYABLE",
+    "isOriginal": true,
+    "badge": "NEW",
+    "autoFullscreen": false,
+    "leaderboard": {
+      "title": "Neon Stack Leaderboard",
+      "primaryLabel": "Blocks",
+      "primaryUnit": "",
+      "secondaryLabel": "Best Combo",
+      "secondaryUnit": "x",
+      "dualSort": true,
+      "subSortAsc": false
+    }
   }
 ]

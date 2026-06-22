@@ -1162,6 +1162,88 @@
         { "name": "GroceryVolume", "text": "Groceries first, electronics second. High-volume with fast restocking builds the income foundation. Then electronics as the premium layer. Starting with electronics feels good but starves you on cash flow before automation." }
       ]
     },
+    "25": {
+      "title": "Vault of Ashes: Fallen Era",
+      "description": "A grim loadout-driven grid auto-battler — assemble blades, wards, and alchemy across an arcane grid, then watch your build fight on its own through the ruins of a fallen age.",
+      "fullDescription": "\n      Vault of Ashes: Fallen Era is a loadout-focused grid auto-battler set in a kingdom devoured by an eclipse. You don't control the fight directly — you build it. Slot weapons, armor, potions, and runes onto a tactical grid before each run, then watch your hooded vanguard cut through waves of fallen knights, cinder-wraiths, and gate-born horrors.\n      Every cell on the grid matters. Adjacency unlocks synergies: a flame-blade beside an ember rune deals burn ticks; a shield beside a vitality flask trades attack speed for survival. The wrong arrangement loses runs before the first sword swing — the right one shreds bosses in seconds.\n      Loot dropped from each chapter expands your vault. Rotate gear between runs, hunt set bonuses, and chase legendary anchor pieces that reshape entire builds. The fallen era doesn't reward reflexes. It rewards preparation.\n      The vault is sealed. The eclipse is bleeding. Will your loadout hold the line, or will you join the ash?\n    ",
+      "controls": "Mouse Click: Place gear onto grid cells and confirm loadout / Mouse Drag: Rearrange equipped items / Mouse Click (Combat UI): Trigger ultimate abilities and view stats.",
+      "tips": "Adjacency is everything — never place a rune alone if a matching weapon could sit beside it. Save legendary anchor pieces for builds you've already validated in early chapters; rerolling around them mid-run wastes vault slots. When two builds tie on damage, the one with a dedicated potion column survives longer boss phases. Read every set bonus before slotting; one missed two-piece can halve your effective damage.",
+      "lore": "\n      The eclipse came at midday and never left. Within a single rotation, the kingdom's spires bled fire, the cathedral choirs fell silent, and the Vault — sealed since the first age — cracked at its seam.\n      The fallen knights are the ones who answered the bell. They marched into the breach in gleaming order and emerged as something else. Now they patrol the ruins in slow, ceremonial loops, blades dragging across stone.\n      You are the last vanguard to remember the sealing rites. Your gear is older than the kingdom that minted it. Each loadout you assemble is half preparation, half remembrance — a wager that the old combinations still hold against what the Vault has become.\n    ",
+      "features": [
+        "Loadout-Driven Auto Combat",
+        "Tactical Grid Adjacency Synergies",
+        "Set Bonuses & Legendary Anchor Pieces",
+        "Chapter-Based Run Progression",
+        "Vault Loot & Build Rotation",
+        "Dark Fantasy Eclipse Setting",
+        "PC Only"
+      ],
+      "objectives": "Assemble a synergistic loadout of weapons, armor, potions, and runes on a tactical grid before each chapter, leveraging adjacency bonuses and set effects to carry your auto-battling vanguard through escalating waves of fallen knights and gate-born bosses in the ruins of a sealed kingdom.",
+      "controlsTable": [
+        { "key": "Mouse Click (Grid Cell)", "action": "Place a weapon, armor piece, potion, or rune onto a loadout slot" },
+        { "key": "Mouse Drag", "action": "Rearrange equipped items between cells to chase adjacency bonuses" },
+        { "key": "Mouse Click (Confirm)", "action": "Lock the loadout and begin auto-battle for the chapter" },
+        { "key": "Mouse Click (Combat UI)", "action": "Trigger ultimate abilities or open the live stat panel mid-fight" }
+      ],
+      "faq": [
+        { "q": "How does the auto-battle actually resolve?", "a": "Once you confirm a loadout, your vanguard fights waves automatically using the gear, runes, and potions you slotted. Damage, defense, and ability triggers are derived from the grid layout — adjacency between matching pieces produces synergy effects that scale your output far beyond raw item stats." },
+        { "q": "What is grid adjacency and why does it matter?", "a": "Every gear piece you place on the grid checks its four neighboring cells for matching tags. A flame-blade beside an ember rune adds burn-over-time; a shield beside a vitality flask trades attack speed for survival. Two identical loadouts arranged differently can produce wildly different damage and survival numbers." },
+        { "q": "What are legendary anchor pieces?", "a": "Anchor pieces are top-tier gear that reshape entire builds. They are rare drops from late chapters and bosses, and they usually demand a specific cluster of supporting gear to function. Save anchors for builds you've already validated in early chapters rather than forcing a run around an unfamiliar piece." },
+        { "q": "Why did my run end so fast?", "a": "Most early losses come from isolated runes — a rune placed without a matching weapon neighbor contributes almost nothing. Re-check adjacency before confirming, make sure at least one set bonus is active, and dedicate a column to potions if you're losing to drawn-out boss phases." },
+        { "q": "Does the game support mobile?", "a": "Vault of Ashes: Fallen Era is PC only. The tactical grid requires precise click and drag input for loadout assembly and gear rotation, which the current build does not adapt to touch screens." }
+      ],
+      "characters": [
+        { "name": "The Last Vanguard", "role": "Player avatar", "desc": "A hooded warrior who remembers the original sealing rites of the Vault. Wields heirloom gear older than the kingdom that minted it and fights only when the loadout is set — every swing in combat is the consequence of a decision made on the grid." },
+        { "name": "The Fallen Knights", "role": "Primary enemies", "desc": "Soldiers who marched into the breach in gleaming order and emerged as something else entirely. They patrol the ruins in slow ceremonial loops, blades dragging across stone, and form the bulk of every chapter's standard waves." },
+        { "name": "Gate-Born Horrors", "role": "Chapter bosses", "desc": "Creatures that crawled out of the cracked Vault seam after the eclipse. Each one is built around a single mechanical theme — burn, drain, shatter, summon — that punishes loadouts missing the correct counter set bonus." }
+      ],
+      "featuredComments": [
+        { "name": "AshenAnchor", "text": "Adjacency is the whole game. Spent five runs ignoring it and getting flattened, then placed the ember rune next to the flame-blade and watched a boss melt in a single phase. Read your tooltips.", "badge": "Top Tip" },
+        { "name": "EclipseSeal", "text": "The lore of a kingdom that answered its own bell and got swallowed by the eclipse is so much heavier than this genre usually goes. Patrolling fallen knights dragging blades across stone is a nightmare image.", "badge": "Lore" },
+        { "name": "VaultLoom", "text": "Don't slot a legendary anchor until you've actually finished a clean run with the supporting set. I bricked three runs forcing a build around an anchor I didn't understand. Anchors are commitments, not upgrades." },
+        { "name": "RuneCluster", "text": "Dedicated potion column wins boss phases. Two-piece vitality plus a regen rune kept my vanguard alive through gate-born horrors that one-shot every glass-cannon build I tried before it." },
+        { "name": "BurnTickBlade", "text": "Flame-blade plus ember rune plus a shatter set on the third row is unreasonable. It shouldn't be allowed to clear chapter four that fast. Please don't patch it." },
+        { "name": "GridCeremony", "text": "Auto-battler usually means I tab out and check the result. This one I sit and watch because the loadout I built is fighting on its own and every decision I made on the grid is visible in real time. Rare for the genre." }
+      ]
+    },
+    "26": {
+      "title": "Neon Stack",
+      "description": "A neon timing arcade game — drop glowing blocks onto a rising tower, nail perfect aligns to chain combos, and stack as high as your reflexes allow.",
+      "fullDescription": "\n      Neon Stack is a one-tap timing game wrapped in a synthwave skyline. A glowing block slides back and forth above your tower — tap to drop it. Land it dead-center and the next block keeps full width; miss, and the overhang shears off, leaving you a narrower platform to aim at.\n      Two numbers define your run: total blocks stacked and your best combo streak. Blocks stacked is the primary score, but the leaderboard uses your best combo as the tiebreaker — so a clean run of perfect aligns always outranks a sloppy tower of the same height.\n      Every flawless drop tightens the rhythm and feeds your combo multiplier. Break the chain and the tower keeps growing, but your streak resets to zero. The tower never stops rising and the block never stops moving — there is no safe moment, only the next drop.\n      Simple to start, brutal to master. How high can you build before one mistimed tap topples the run?\n    ",
+      "controls": "Mouse Click / Tap / Spacebar: Drop the moving block onto the stack. Time the release so the block lands flush over the one below — perfect aligns keep full width and build your combo.",
+      "tips": "Watch the block's edge, not its center — your eyes track edges faster and that's where the overhang gets sheared. Find the tower's rhythm and tap on the beat rather than reacting; the speed is constant until you break a combo. A perfect align restores no width, so protect the platform you have — one greedy drop can leave a sliver that ends the run. Best combo is the leaderboard tiebreaker, so chase clean chains even when height feels safe.",
+      "lore": "\n      Above the synthwave city, the old broadcast tower fell dark decades ago. The signal that built it never stopped transmitting — block by block, frequency by frequency, it still tries to climb back toward the channel it lost.\n      Every player who taps in lends the signal a hand. Each clean align is a frequency locked, each combo a verse of the song that once lit the whole skyline. Miss the rhythm and the tower narrows, the neon dims, and the signal starts again.\n      No one has reached the top. The leaderboard is just a list of how close the signal got before the rhythm broke.\n    ",
+      "features": [
+        "One-Tap Timing Arcade",
+        "Blocks + Best Combo Dual Scoring",
+        "Perfect-Align Combo Chains",
+        "Neon Synthwave Aesthetic",
+        "Constant Escalating Tempo",
+        "Global Leaderboard",
+        "Web & Mobile Friendly"
+      ],
+      "objectives": "Drop glowing blocks onto a rising tower with precise timing, landing each one flush over the last to keep full width and chain combo multipliers — maximizing total blocks stacked as your primary score and best combo streak as the leaderboard tiebreaker.",
+      "controlsTable": [
+        { "key": "Mouse Click", "action": "Drop the moving block onto the stack" },
+        { "key": "Spacebar", "action": "Drop the moving block (keyboard)" },
+        { "key": "Tap (Mobile)", "action": "Drop the moving block onto the stack" },
+        { "key": "Perfect Align", "action": "Land dead-center to keep full width and extend your combo" }
+      ],
+      "faq": [
+        { "q": "How is my score calculated?", "a": "Total blocks stacked is your primary score — every block you land successfully adds one. Your best combo streak (the longest run of consecutive perfect aligns) is the leaderboard tiebreaker, so when two players reach the same height, the cleaner run with the higher combo ranks above the sloppier one." },
+        { "q": "What counts as a perfect align?", "a": "Dropping a block so it lands flush over the one below it, with no overhang sheared off. A perfect align keeps the platform at full width and increments your combo multiplier. A partial landing keeps the run alive but cuts the overhang away, narrowing your next target." },
+        { "q": "Why did my tower get so narrow?", "a": "Each imperfect drop shears off the part of the block hanging past the platform, so the tower can only get narrower, never wider. A string of small misses compounds into a sliver that's nearly impossible to hit — protect your width by aiming for perfect aligns, not just survivable ones." },
+        { "q": "Does the game get faster?", "a": "The block's sliding speed stays constant through a run — the difficulty comes from the platform narrowing as you miss, not from acceleration. This means the best strategy is to find the steady rhythm early and tap on the beat rather than reacting to each block individually." },
+        { "q": "Does it work on mobile?", "a": "Yes. Neon Stack is built for both desktop and mobile — tap anywhere on the screen to drop on touch devices, or use a mouse click or the spacebar on desktop. The one-input design plays identically across both." }
+      ],
+      "featuredComments": [
+        { "name": "PerfectDrop", "text": "Watch the edge of the block, not the center. Your eyes track edges way faster and the overhang gets sheared from the edge anyway. Switching my focus point doubled my best height in one session.", "badge": "Top Tip" },
+        { "name": "SignalLost", "text": "An old broadcast tower's signal trying to climb back to the channel it lost, one clean align at a time. That's a lot of atmosphere for a one-tap game and it absolutely lands.", "badge": "Lore" },
+        { "name": "ComboChain", "text": "Best combo is the tiebreaker, so don't get complacent once you're tall. I lost a top-10 spot to someone the same height because my combo was trash. Chase the clean chain even when height feels safe.", "badge": "Strategy" },
+        { "name": "RhythmTap", "text": "Stop reacting and start tapping on the beat. The speed is constant, so it's a rhythm game pretending to be a stacking game. Once it clicked I stopped panicking on every block." },
+        { "name": "NarrowLedge", "text": "One greedy drop leaves you a sliver and the run is basically over. Protect your width like it's the actual score, because narrow platforms kill more runs than tower height ever does." }
+      ]
+    },
     "_comment": "Per-game canonical English. Translators mirror this in {lang}.json."
   }
 }

@@ -7,7 +7,7 @@ import GameCard from '../components/GameCard';
 import AdBanner from '../components/AdBanner';
 import { games } from '../data/games';
 import { compareLeaderboardEntries } from '../utils/leaderboardUtils';
-import { useNotification } from '../hooks/useNotification';
+import { useToast, type ToastType } from '../contexts/useToast';
 import { BANNED_WORDS, RANDOM_ID_MIN, RANDOM_ID_MAX, AD_SLOTS, LEADERBOARD_FETCH_LIMIT } from '../constants/gameConstants';
 import { useUiText, useLocale } from '../i18n';
 import { SkeletonGrid } from '../components/Skeleton';
@@ -64,7 +64,8 @@ const Home: React.FC = () => {
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
   }, []);
-  const { notification, showNotification } = useNotification(3000);
+  const { showToast } = useToast();
+  const showNotification = (msg: string, type: ToastType = 'info') => showToast(msg, type, 3000);
   const [userRanks, setUserRanks] = useState<Record<string, number>>({});
 
   // Fetch user's rank for each game they've played
@@ -276,56 +277,11 @@ const Home: React.FC = () => {
     document.title = 'ArcadeDeck | Play the Best Online Browser Games';
   }, []);
 
+  // Head meta, hreflang and JSON-LD for every home shell are baked by
+  // scripts/prerender-pages.js. Rendering them here too would make React 19
+  // hoist a second, locale-blind copy into <head>.
   return (
     <div className="home-page">
-      <>
-        <meta name="description" content="Discover and play the highest quality free online browser games on ArcadeDeck. Join our community, compete on global leaderboards, and find your next favorite game!" />
-        <meta name="keywords" content="free browser games, online games, play free games, arcadedeck, action games, rpg games, idle games, browser arcade" />
-        <link rel="canonical" href="https://arcadedeck.net/" />
-
-        {/* Open Graph & Twitter Card */}
-        <meta property="og:type" content="website" />
-        <meta property="og:title" content="ArcadeDeck | The Ultimate Free Browser Games Platform" />
-        <meta property="og:description" content="Play the best free online browser games on ArcadeDeck. No downloads required. Join now and start playing!" />
-        <meta property="og:image" content="https://arcadedeck.net/images/arcadedeck-banner.webp" />
-        <meta property="og:url" content="https://arcadedeck.net/" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="ArcadeDeck | The Ultimate Free Browser Games Platform" />
-        <meta name="twitter:description" content="Play the best free online browser games on ArcadeDeck. No downloads required. Join now and start playing!" />
-        <meta name="twitter:image" content="https://arcadedeck.net/images/arcadedeck-banner.webp" />
-
-        {/* JSON-LD Structured Data */}
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            "name": "ArcadeDeck",
-            "url": "https://arcadedeck.net/",
-            "description": "The Ultimate Free Browser Games Platform",
-            "inLanguage": ["en", "ko"],
-            "publisher": {
-              "@type": "Organization",
-              "name": "ArcadeDeck",
-              "url": "https://arcadedeck.net"
-            },
-            "potentialAction": {
-              "@type": "SearchAction",
-              "target": {
-                "@type": "EntryPoint",
-                "urlTemplate": "https://arcadedeck.net/?search={search_term_string}"
-              },
-              "query-input": "required name=search_term_string"
-            }
-          })}
-        </script>
-      </>
-
-      {notification && (
-        <div className={`notification-toast ${notification.type} animate-in`}>
-          <span className="notification-message">{notification.message}</span>
-        </div>
-      )}
-
       <ScrollProgress />
       <Navbar />
 

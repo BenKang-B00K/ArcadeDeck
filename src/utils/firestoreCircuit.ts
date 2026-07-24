@@ -43,10 +43,6 @@ export function openCircuit(): void {
   } catch { /* ignore */ }
 }
 
-export function closeCircuit(): void {
-  try { localStorage.removeItem(CIRCUIT_KEY); } catch { /* ignore */ }
-}
-
 /**
  * Wrap a Firestore read. If the circuit is open or a quota error fires,
  * returns `fallback` instead of throwing. Other errors still throw.

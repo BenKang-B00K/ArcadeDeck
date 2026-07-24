@@ -5,9 +5,7 @@ import type { LocaleOverlay } from '../../i18n';
 import {
   getLocalizedString,
   getLocalizedArray,
-  getLocalizedControlsTable,
-  getLocalizedFaq,
-  getLocalizedCharacters,
+  getLocalizedObjects,
   useUiText,
 } from '../../i18n';
 import HelpfulThumbs from './HelpfulThumbs';
@@ -68,9 +66,9 @@ const GameInfoTabs: React.FC<Props> = ({ game, lang, overlay, activeTab, setActi
   const lore = getLocalizedString(game, 'lore', lang, overlay);
   const features = getLocalizedArray(game, 'features', lang, overlay);
   const objectives = getLocalizedString(game, 'objectives', lang, overlay);
-  const controlsTable = getLocalizedControlsTable(game, lang, overlay);
-  const faq = getLocalizedFaq(game, lang, overlay);
-  const characters = getLocalizedCharacters(game, lang, overlay);
+  const controlsTable = getLocalizedObjects(game, 'controlsTable', lang, overlay);
+  const faq = getLocalizedObjects(game, 'faq', lang, overlay);
+  const characters = getLocalizedObjects(game, 'characters', lang, overlay);
 
   const hasTips = tips.length > 0;
   const hasLore = lore.length > 0;

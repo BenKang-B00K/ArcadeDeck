@@ -27,7 +27,9 @@ function detectInitial(): string {
   return DEFAULT_LOCALE;
 }
 
-let currentLocale: string = detectInitial();
+// Fixed for the page's lifetime: navigateToLocale switches language with a
+// full-page load, so the locale is decided once at boot.
+const currentLocale: string = detectInitial();
 // English overlay is bundled eagerly, so we can seed the cache for 'en'
 // without an async hop. Other locales hydrate after loadOverlay resolves.
 let currentOverlay: LocaleOverlay | null = currentLocale === 'en' ? EN_OVERLAY : null;
@@ -54,18 +56,6 @@ export const localeStore = {
   getOverlay(): LocaleOverlay | null {
     return currentOverlay;
   },
-  async setLocale(lang: string): Promise<void> {
-    if (!SUPPORTED_LOCALES.includes(lang) || lang === currentLocale) return;
-    currentLocale = lang;
-    try { localStorage.setItem(STORAGE_KEY, lang); } catch { /* ignore */ }
-    if (typeof document !== 'undefined') {
-      document.documentElement.lang = lang;
-    }
-    // Seed 'en' synchronously to avoid a null flash; otherwise clear and hydrate.
-    currentOverlay = lang === 'en' ? EN_OVERLAY : null;
-    notify();
-    if (lang !== 'en') await hydrateOverlay(lang);
-  },
   // Switch language by navigating to the locale-prefixed equivalent of the
   // current URL. This forces a full reload so the visitor lands on the
   // pre-rendered shell for the new locale (correct meta + JSON-LD for SEO).
@@ -86,7 +76,6 @@ export const localeStore = {
 export function useLocale(): {
   lang: string;
   overlay: LocaleOverlay | null;
-  setLocale: (l: string) => Promise<void>;
   navigateToLocale: (l: string) => void;
 } {
   const lang = useSyncExternalStore(
@@ -102,7 +91,6 @@ export function useLocale(): {
   return {
     lang,
     overlay,
-    setLocale: localeStore.setLocale,
     navigateToLocale: localeStore.navigateToLocale,
   };
 }

@@ -12,14 +12,11 @@ export {
   type CharacterEntry,
   type FeaturedComment,
 } from './registry';
-export { useLocale, localeStore } from './store';
+export { useLocale } from './store';
 export {
   getLocalizedString,
   getLocalizedArray,
-  getLocalizedControlsTable,
-  getLocalizedFaq,
-  getLocalizedCharacters,
-  getLocalizedFeatured,
+  getLocalizedObjects,
   getEnFeatures,
 } from './getLocalized';
 export { useUiText } from './useUiText';

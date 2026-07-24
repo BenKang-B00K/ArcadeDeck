@@ -18,7 +18,7 @@ import RelatedPosts from '../components/gameplayer/RelatedPosts';
 import { isNewPersonalBest, compareLeaderboardEntries, formatScore } from '../utils/leaderboardUtils';
 import { buildLeaderboardQuery } from '../utils/leaderboardQuery';
 import { useNickname } from '../hooks/useNickname';
-import { useNotification } from '../hooks/useNotification';
+import { useToast } from '../contexts/useToast';
 import { MAX_SCORE, AD_SLOTS, LEADERBOARD_FETCH_LIMIT } from '../constants/gameConstants';
 import { db } from '../firebase';
 import {
@@ -33,7 +33,7 @@ import {
   doc
 } from "firebase/firestore/lite";
 import { safeRead, safeWrite, circuitOpen } from '../utils/firestoreCircuit';
-import { useUiText, useLocale, getLocalizedString, getLocalizedFeatured } from '../i18n';
+import { useUiText, useLocale, getLocalizedString, getLocalizedObjects } from '../i18n';
 import { genreSlug } from '../utils/genres';
 import './GamePlayer.css';
 
@@ -53,7 +53,7 @@ const GamePlayer: React.FC = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [iframeLoading, setIframeLoading] = useState(true);
   const { lang, overlay } = useLocale();
-  const { notification, showNotification } = useNotification(4000);
+  const { showToast: showNotification } = useToast();
   const [gameResult, setGameResult] = useState<{
     score: number; unit: string;
     resultType: 'personal-best' | 'first-score' | 'game-over';
@@ -71,29 +71,13 @@ const GamePlayer: React.FC = () => {
   });
   const uiT = useUiText();
   // Forces re-render so getWrapperStyle() recomputes after viewport rotation/resize.
-  const [, setOrientationTick] = useState(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const gameWrapperRef = useRef<HTMLDivElement>(null);
 
   const t = {
     back: uiT('playerBack', 'ArcadeDeck'),
-    player: uiT('playerLabel', 'Player'),
-    edit: uiT('playerEdit', 'Edit'),
-    save: uiT('homeNicknameSave', 'Save'),
     fullscreen: uiT('playerFullscreen', 'Fullscreen'),
-    load: uiT('playerLoad', 'Load'),
-    share: uiT('shareTitle', 'Share'),
-    overview: uiT('playerOverview', 'Overview'),
-    howToPlay: uiT('playerControls', 'Controls'),
-    tips: uiT('playerTips', 'Pro Tips'),
-    lore: uiT('playerLore', 'World Lore'),
-    features: uiT('playerFeatures', 'Key Features'),
-    original: uiT('playerOriginal', 'Original Content'),
-    last: uiT('playerLast', 'Last'),
-    bestScore: uiT('resultPersonalBest', 'New Personal Best!'),
     gameOver: uiT('resultGameOver', 'Game Over!'),
-    scoreSubmitted: uiT('playerScoreSubmitted', 'Score submitted!'),
-    currentProgress: uiT('playerCurrentProgress', 'Current Progress:'),
   };
 
   const fetchLeaderboard = useCallback(async (): Promise<LeaderboardEntry[]> => {
@@ -131,21 +115,11 @@ const GamePlayer: React.FC = () => {
       // safeRead returned null — circuit just opened, bail to empty
       return finalize([]);
     } catch (error) {
+      // Composite index is declared in firestore.indexes.json; quota is handled
+      // by safeRead. Anything left is a real fault — surface it, render empty.
       console.error("Error fetching leaderboard: ", error);
-      try {
-        const qSimple = query(
-          collection(db, "leaderboards"),
-          where("gameId", "==", id),
-          limit(LEADERBOARD_FETCH_LIMIT)
-        );
-        const snapSimple = await safeRead(() => getDocs(qSimple), null);
-        if (snapSimple) return finalize(snapSimple.docs.map(mapDoc));
-        return finalize([]);
-      } catch (e) {
-        console.error("Critical leaderboard error:", e);
-        showNotification(uiT('playerLeaderboardError', 'Failed to load leaderboard.'), 'error');
-        return [];
-      }
+      showNotification(uiT('playerLeaderboardError', 'Failed to load leaderboard.'), 'error');
+      return finalize([]);
     }
   }, [id, uiT, showNotification]);
 
@@ -308,41 +282,17 @@ const GamePlayer: React.FC = () => {
     };
   }, [isPseudoFullscreen]);
 
+  // ponytail: webkit prefix kept for older Safari; moz/ms dropped (Firefox <64, IE11).
   useEffect(() => {
     const onChange = () => {
-      const d = document as Document & {
-        webkitFullscreenElement?: Element | null;
-        mozFullScreenElement?: Element | null;
-        msFullscreenElement?: Element | null;
-      };
-      const active = !!(d.fullscreenElement || d.webkitFullscreenElement || d.mozFullScreenElement || d.msFullscreenElement);
-      setIsNativeFullscreen(active);
+      const d = document as Document & { webkitFullscreenElement?: Element | null };
+      setIsNativeFullscreen(!!(d.fullscreenElement || d.webkitFullscreenElement));
     };
     document.addEventListener('fullscreenchange', onChange);
     document.addEventListener('webkitfullscreenchange', onChange);
-    document.addEventListener('mozfullscreenchange', onChange);
-    document.addEventListener('MSFullscreenChange', onChange);
     return () => {
       document.removeEventListener('fullscreenchange', onChange);
       document.removeEventListener('webkitfullscreenchange', onChange);
-      document.removeEventListener('mozfullscreenchange', onChange);
-      document.removeEventListener('MSFullscreenChange', onChange);
-    };
-  }, []);
-
-  // Re-render on orientation change to recalculate game wrapper size (debounced)
-  useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout>;
-    const handleResize = () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => setOrientationTick(t => t + 1), 150);
-    };
-    window.addEventListener('orientationchange', handleResize);
-    window.addEventListener('resize', handleResize);
-    return () => {
-      clearTimeout(timeoutId);
-      window.removeEventListener('orientationchange', handleResize);
-      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
@@ -368,8 +318,6 @@ const GamePlayer: React.FC = () => {
     if (game?.autoFullscreen === false) return;
     const wrapper = gameWrapperRef.current as (HTMLDivElement & {
       webkitRequestFullscreen?: () => void;
-      mozRequestFullScreen?: () => void;
-      msRequestFullscreen?: () => void;
     }) | null;
     if (!wrapper) return;
     try {
@@ -377,10 +325,6 @@ const GamePlayer: React.FC = () => {
         wrapper.requestFullscreen().catch(() => setIsPseudoFullscreen(true));
       } else if (wrapper.webkitRequestFullscreen) {
         wrapper.webkitRequestFullscreen();
-      } else if (wrapper.mozRequestFullScreen) {
-        wrapper.mozRequestFullScreen();
-      } else if (wrapper.msRequestFullscreen) {
-        wrapper.msRequestFullscreen();
       } else {
         setIsPseudoFullscreen(true);
       }
@@ -396,16 +340,10 @@ const GamePlayer: React.FC = () => {
     }
 
     if (isNativeFullscreen) {
-      const d = document as Document & {
-        webkitExitFullscreen?: () => void;
-        mozCancelFullScreen?: () => void;
-        msExitFullscreen?: () => void;
-      };
+      const d = document as Document & { webkitExitFullscreen?: () => void };
       try {
         if (document.exitFullscreen) document.exitFullscreen();
         else if (d.webkitExitFullscreen) d.webkitExitFullscreen();
-        else if (d.mozCancelFullScreen) d.mozCancelFullScreen();
-        else if (d.msExitFullscreen) d.msExitFullscreen();
       } catch (err) {
         console.error("Exit fullscreen error:", err);
       }
@@ -416,19 +354,11 @@ const GamePlayer: React.FC = () => {
     if (!element) return;
 
     try {
-      const el = element as HTMLIFrameElement & {
-        webkitRequestFullscreen?: () => void;
-        mozRequestFullScreen?: () => void;
-        msRequestFullscreen?: () => void;
-      };
+      const el = element as HTMLIFrameElement & { webkitRequestFullscreen?: () => void };
       if (el.requestFullscreen) {
         el.requestFullscreen();
       } else if (el.webkitRequestFullscreen) {
         el.webkitRequestFullscreen();
-      } else if (el.mozRequestFullScreen) {
-        el.mozRequestFullScreen();
-      } else if (el.msRequestFullscreen) {
-        el.msRequestFullscreen();
       } else {
         // Pseudo-fullscreen for iOS iPhone
         setIsPseudoFullscreen(true);
@@ -480,12 +410,6 @@ const GamePlayer: React.FC = () => {
     }}>
       <GameHeadMeta game={game} lang={lang} overlay={overlay} />
 
-      {notification && (
-        <div className={`notification-toast ${notification.type} animate-in`}>
-          <span className="notification-message">{notification.message}</span>
-        </div>
-      )}
-
       <Navbar />
       <main className="container player-container">
         {/* ── Compact top bar: back + player ── */}
@@ -527,7 +451,7 @@ const GamePlayer: React.FC = () => {
               <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} aria-hidden="true" />
             </button>
             <button className="control-btn share-btn" onClick={() => handleShare()}>
-              <LinkIcon size={16} aria-hidden="true" /> {t.share}
+              <LinkIcon size={16} aria-hidden="true" /> {uiT('shareTitle', 'Share')}
             </button>
           </div>
         </div>
@@ -579,7 +503,7 @@ const GamePlayer: React.FC = () => {
         <CommentSection
           gameId={game.id}
           currentNickname={nickname}
-          featured={getLocalizedFeatured(game, lang, overlay)}
+          featured={getLocalizedObjects(game, 'featuredComments', lang, overlay)}
         />
 
         <RelatedPosts gameSlug={game.slug} />

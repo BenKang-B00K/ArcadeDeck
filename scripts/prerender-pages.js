@@ -64,15 +64,6 @@ const BCP47 = {
   en: 'en_US', de: 'de_DE', fr: 'fr_FR',
   ja: 'ja_JP', ko: 'ko_KR', zh: 'zh_CN',
 };
-const HREFLANG = {
-  en: 'en', de: 'de', fr: 'fr',
-  ja: 'ja', ko: 'ko', zh: 'zh',
-};
-const HTML_LANG = {
-  en: 'en', de: 'de', fr: 'fr',
-  ja: 'ja', ko: 'ko', zh: 'zh',
-};
-
 const SITE = 'https://arcadedeck.net';
 const prefix = (lang) => (lang === 'en' ? '' : '/' + lang.toLowerCase());
 const fullUrl = (lang, path) => `${SITE}${prefix(lang)}${path}`;
@@ -133,7 +124,7 @@ function hreflangBlock(routePath, gameId = null) {
     const url = fullUrl(l, routePath);
     if (seen.has(url)) continue;
     seen.add(url);
-    lines.push(`<link rel="alternate" hreflang="${HREFLANG[l] || l}" href="${url}" />`);
+    lines.push(`<link rel="alternate" hreflang="${l}" href="${url}" />`);
   }
   // x-default → English
   lines.push(`<link rel="alternate" hreflang="x-default" href="${fullUrl('en', routePath)}" />`);
@@ -239,7 +230,7 @@ for (const lang of SUPPORTED_LOCALES) {
       operatingSystem: 'Web Browser',
       image: thumbUrl,
       url: pageUrl,
-      inLanguage: HREFLANG[lang] || lang,
+      inLanguage: lang,
       author: { '@type': 'Organization', name: 'ArcadeDeck', url: SITE, sameAs: ['https://www.wikidata.org/wiki/Q139585213'] },
       publisher: {
         '@type': 'Organization', name: 'ArcadeDeck', url: SITE,
@@ -279,7 +270,7 @@ for (const lang of SUPPORTED_LOCALES) {
     const faqLd = JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'FAQPage',
-      inLanguage: HREFLANG[lang] || lang,
+      inLanguage: lang,
       mainEntity: faqPairs.map(p => ({
         '@type': 'Question',
         name: p.q,
@@ -357,7 +348,7 @@ for (const lang of SUPPORTED_LOCALES) {
       : '';
 
     const html = `<!doctype html>
-<html lang="${HTML_LANG[lang] || lang}">
+<html lang="${lang}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -491,7 +482,7 @@ for (const genre of allGenres) {
       name: title,
       url: pageUrl,
       description: desc,
-      inLanguage: HREFLANG[lang] || lang,
+      inLanguage: lang,
       mainEntity: {
         '@type': 'ItemList',
         itemListElement: inGenre.map((g, i) => ({
@@ -512,7 +503,7 @@ for (const genre of allGenres) {
     });
 
     const html = `<!doctype html>
-<html lang="${HTML_LANG[lang] || lang}">
+<html lang="${lang}">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
@@ -584,7 +575,7 @@ const homeJsonLd = (lang) => [
     name: 'ArcadeDeck',
     alternateName: ui('siteAlternateName', lang, 'ArcadeDeck — Free Browser Games'),
     url: `${SITE}/`,
-    inLanguage: SUPPORTED_LOCALES.map(l => HREFLANG[l] || l),
+    inLanguage: SUPPORTED_LOCALES,
   }),
   JSON.stringify({
     '@context': 'https://schema.org',
@@ -611,7 +602,7 @@ const homeJsonLd = (lang) => [
     '@type': 'CollectionPage',
     name: 'ArcadeDeck Games Catalog',
     url: fullUrl(lang, '/'),
-    inLanguage: HREFLANG[lang] || lang,
+    inLanguage: lang,
     mainEntity: {
       '@type': 'ItemList',
       itemListElement: playableGames.slice(0, 20).map((g, i) => ({
@@ -657,7 +648,7 @@ ${noscriptItems}
   let shell = inlineCssOnce(indexHtml);
 
   // Set <html lang> for the shell.
-  shell = shell.replace(/<html lang="[^"]*">/, `<html lang="${HTML_LANG[lang] || lang}">`);
+  shell = shell.replace(/<html lang="[^"]*">/, `<html lang="${lang}">`);
 
   // Title + description
   shell = shell.replace(/<title>[\s\S]*?<\/title>/, `<title>${escAttr(homeTitle)}</title>`);

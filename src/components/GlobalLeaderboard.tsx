@@ -2,9 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Trophy, Crown, Medal, RefreshCw, Loader } from 'lucide-react';
 import { db } from '../firebase';
-import { doc, getDoc, getDocs } from 'firebase/firestore/lite';
-import { buildLeaderboardQuery } from '../utils/leaderboardQuery';
-import { games } from '../data/games';
+import { doc, getDoc } from 'firebase/firestore/lite';
 import { useUiText } from '../i18n';
 import { SkeletonPodium } from './Skeleton';
 import { safeRead, circuitOpen } from '../utils/firestoreCircuit';
@@ -71,35 +69,6 @@ const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({ onDataLoaded, var
     setLastUpdated(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
   }, [onDataLoaded]);
 
-  const fallbackFanout = useCallback(async (): Promise<GlobalRank[]> => {
-    const playerPoints: Record<string, GlobalRank> = {};
-    const promises = games.map(async (game) => {
-      const q = buildLeaderboardQuery(db, game.id, {
-        dualSort: game.leaderboard?.dualSort ?? false,
-        subSortAsc: game.leaderboard?.subSortAsc ?? false,
-        limit: 3,
-      });
-      const snapshot = await getDocs(q);
-      snapshot.docs.forEach((d, index) => {
-        const data = d.data();
-        const name = data.name;
-        const rank = index + 1;
-        const points = rank === 1 ? 3 : rank === 2 ? 2 : 1;
-        if (!playerPoints[name]) {
-          playerPoints[name] = { name, totalPoints: 0, medals: { gold: 0, silver: 0, bronze: 0 } };
-        }
-        playerPoints[name].totalPoints += points;
-        if (rank === 1) playerPoints[name].medals.gold++;
-        if (rank === 2) playerPoints[name].medals.silver++;
-        if (rank === 3) playerPoints[name].medals.bronze++;
-      });
-    });
-    await Promise.all(promises);
-    return Object.values(playerPoints)
-      .sort((a, b) => b.totalPoints - a.totalPoints)
-      .slice(0, 3);
-  }, []);
-
   const calculateGlobalRanking = useCallback(async () => {
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
@@ -139,27 +108,16 @@ const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({ onDataLoaded, var
         }
       }
 
-      // 3) If circuit just opened, serve stale podium if any; else give up gracefully.
-      if (circuitOpen()) {
-        const stale = getCachedRanks(true);
-        if (stale && stale.length) {
-          applyResult(stale);
-          return;
-        }
-        setPodiumPlayers([]);
-        setLoading(false);
+      // 3) Aggregate missing/empty: serve stale podium if any, else render empty.
+      // ponytail: no per-game fan-out fallback — onLeaderboardWrite keeps
+      // aggregates/podium seeded. Restore the fan-out if that trigger is removed.
+      const stale = getCachedRanks(true);
+      if (stale && stale.length) {
+        applyResult(stale);
         return;
       }
-
-      // 4) Cold-start fallback: fan-out (only fires if aggregate not yet seeded)
-      const sorted = await safeRead(fallbackFanout, [] as GlobalRank[]);
-      if (sorted.length > 0) {
-        setCachedRanks(sorted);
-        applyResult(sorted);
-      } else {
-        setPodiumPlayers([]);
-        setLoading(false);
-      }
+      setPodiumPlayers([]);
+      setLoading(false);
     } catch (err) {
       console.error("Error calculating global ranking:", err);
       // Last-resort: serve stale cache if present
@@ -173,7 +131,7 @@ const GlobalLeaderboard: React.FC<GlobalLeaderboardProps> = ({ onDataLoaded, var
     } finally {
       isFetchingRef.current = false;
     }
-  }, [applyResult, fallbackFanout]);
+  }, [applyResult]);
 
   const handleRefresh = useCallback(async () => {
     localStorage.removeItem(CACHE_KEY);

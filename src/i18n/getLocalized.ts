@@ -64,52 +64,27 @@ export function getLocalizedArray(
   return readArray(EN_OVERLAY, game.id, field) ?? [];
 }
 
-export function getLocalizedControlsTable(
-  game: Game,
-  lang: string,
-  overlay: LocaleOverlay | null,
-): ControlEntry[] {
-  if (lang !== 'en') {
-    const v = readObjectArray<ControlEntry>(overlay, game.id, 'controlsTable');
-    if (v) return v;
-  }
-  return readObjectArray<ControlEntry>(EN_OVERLAY, game.id, 'controlsTable') ?? [];
+// Resolve a structured (object-array) field. Field name fixes the element type:
+//   'controlsTable' → ControlEntry, 'faq' → FaqEntry, etc.
+interface ObjectArrayTypes {
+  controlsTable: ControlEntry;
+  faq: FaqEntry;
+  characters: CharacterEntry;
+  featuredComments: FeaturedComment;
 }
 
-export function getLocalizedFaq(
+export function getLocalizedObjects<F extends ObjectArrayField>(
   game: Game,
+  field: F,
   lang: string,
   overlay: LocaleOverlay | null,
-): FaqEntry[] {
+): ObjectArrayTypes[F][] {
+  type T = ObjectArrayTypes[F];
   if (lang !== 'en') {
-    const v = readObjectArray<FaqEntry>(overlay, game.id, 'faq');
+    const v = readObjectArray<T>(overlay, game.id, field);
     if (v) return v;
   }
-  return readObjectArray<FaqEntry>(EN_OVERLAY, game.id, 'faq') ?? [];
-}
-
-export function getLocalizedCharacters(
-  game: Game,
-  lang: string,
-  overlay: LocaleOverlay | null,
-): CharacterEntry[] {
-  if (lang !== 'en') {
-    const v = readObjectArray<CharacterEntry>(overlay, game.id, 'characters');
-    if (v) return v;
-  }
-  return readObjectArray<CharacterEntry>(EN_OVERLAY, game.id, 'characters') ?? [];
-}
-
-export function getLocalizedFeatured(
-  game: Game,
-  lang: string,
-  overlay: LocaleOverlay | null,
-): FeaturedComment[] {
-  if (lang !== 'en') {
-    const v = readObjectArray<FeaturedComment>(overlay, game.id, 'featuredComments');
-    if (v) return v;
-  }
-  return readObjectArray<FeaturedComment>(EN_OVERLAY, game.id, 'featuredComments') ?? [];
+  return readObjectArray<T>(EN_OVERLAY, game.id, field) ?? [];
 }
 
 // English-only feature list. Used for structural checks (e.g. "Local Co-op",

@@ -54,27 +54,6 @@ export function stripLocalePrefix(pathname: string): { lang: string; rest: strin
   return { lang: 'en', rest: pathname || '/' };
 }
 
-// BCP-47 codes for og:locale + hreflang. Keep aligned with locale codes
-// surfaced to crawlers.
-export const LOCALE_BCP47: Record<string, string> = {
-  en: 'en_US',
-  de: 'de_DE',
-  fr: 'fr_FR',
-  ja: 'ja_JP',
-  ko: 'ko_KR',
-  zh: 'zh_CN',
-};
-
-// hreflang attribute values (BCP-47 with hyphens).
-export const LOCALE_HREFLANG: Record<string, string> = {
-  en: 'en',
-  de: 'de',
-  fr: 'fr',
-  ja: 'ja',
-  ko: 'ko',
-  zh: 'zh',
-};
-
 // Load overlay JSON on demand. English is bundled eagerly and returned synchronously-wrapped.
 export async function loadOverlay(lang: string): Promise<LocaleOverlay | null> {
   if (lang === 'en') return EN_OVERLAY;

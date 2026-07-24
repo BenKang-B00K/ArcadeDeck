@@ -13,11 +13,6 @@ const SUPPORTED_LOCALES = readdirSync('src/i18n/locales')
   .map(f => f.replace(/\.json$/, ''));
 SUPPORTED_LOCALES.sort((a, b) => (a === 'en' ? -1 : b === 'en' ? 1 : a.localeCompare(b)));
 
-const HREFLANG = {
-  en: 'en', de: 'de', fr: 'fr',
-  ja: 'ja', ko: 'ko', zh: 'zh',
-};
-
 const overlays = {};
 for (const l of SUPPORTED_LOCALES) {
   try {
@@ -40,7 +35,7 @@ const homeLocales = SUPPORTED_LOCALES;
 
 function alternateBlock(routePath, langs) {
   const lines = langs.map(l =>
-    `    <xhtml:link rel="alternate" hreflang="${HREFLANG[l] || l}" href="${SITE}${prefix(l)}${routePath}" />`
+    `    <xhtml:link rel="alternate" hreflang="${l}" href="${SITE}${prefix(l)}${routePath}" />`
   );
   // x-default → English version.
   lines.push(

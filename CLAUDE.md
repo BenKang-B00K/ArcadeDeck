@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Stack
 
-React 19 + TypeScript + Vite 7. Firebase Firestore for leaderboards/comments. Deployed via Firebase Hosting (`firebase deploy --only hosting`, custom domain `arcadedeck.net`). PWA via `vite-plugin-pwa`. Security headers (CSP, HSTS, COOP, XFO) in `firebase.json`.
+React 19 + TypeScript + Vite 7. Firebase Firestore for comments/forum. Deployed via Firebase Hosting (`firebase deploy --only hosting`, custom domain `arcadedeck.net`). PWA via `vite-plugin-pwa`. Security headers (CSP, HSTS, COOP, XFO) in `firebase.json`.
 
 ## Commands
 
@@ -31,7 +31,7 @@ There are no tests in this repo.
 
 **Game data is split between structural config and translatable text:**
 
-- `src/data/games.json` — structural fields only (`id`, `slug`, `thumbnail`, `genres`, `gameUrl`, `aspectRatio`, `status`, `isOriginal`, `language`, `badge`, `leaderboard`). No text.
+- `src/data/games.json` — structural fields only (`id`, `slug`, `thumbnail`, `genres`, `gameUrl`, `aspectRatio`, `status`, `isOriginal`, `language`, `badge`). No text.
 - `src/i18n/locales/en.json` — canonical English text under `games[<id>]` (`title`, `description`, `fullDescription`, `controls`, `tips`, `lore`, `features`). Source of truth for game copy.
 - `src/i18n/locales/{lang}.json` — overlay translations for non-English locales (de, fr, ja, ko, zh). Same shape. Missing fields fall back to English. The user owns all non-English translations.
 
@@ -41,24 +41,20 @@ Adding a new game: edit `games.json` (structural) + `en.json` `games` block (tex
 
 **Locale-prefixed URLs:** English serves at root (`/`, `/play/{slug}`); other locales prefixed (`/de/`, `/de/play/{slug}`, `/es-la/…`). React Router boots with `basename` derived from the URL prefix. The language switcher does a full-page navigate so the prerendered shell for the target locale serves directly (no client-side hydration mismatch).
 
-**Routing & code-splitting:** `src/App.tsx` mounts React Router. `Home` is eager; every other page is `React.lazy`. Vite `manualChunks` splits `vendor` (react/router) from `firebase` and `icons` (lucide-react) so Firestore is a parallel-loadable chunk. `Home.tsx` further dynamic-imports `firebase/firestore` inside effects + uses `requestIdleCallback` so Firestore code never blocks FCP/LCP. `GlobalLeaderboard` is `React.lazy` from Home for the same reason. `vite.config.ts` injects a `<link rel="modulepreload">` for the entry chunk near the top of `<head>` (custom `preloadEntry()` plugin) so the entry fetch starts in parallel with HTML parsing.
+**Routing & code-splitting:** `src/App.tsx` mounts React Router. `Home` is eager; every other page is `React.lazy`. Vite `manualChunks` splits `vendor` (react/router) from `firebase` and `icons` (lucide-react) so Firestore is a parallel-loadable chunk. Firestore is only touched by `CommentSection` and the forum pages, so it never blocks FCP/LCP on Home. `vite.config.ts` injects a `<link rel="modulepreload">` for the entry chunk near the top of `<head>` (custom `preloadEntry()` plugin) so the entry fetch starts in parallel with HTML parsing.
 
-**Pre-rendering for SEO:** This is an SPA, but `scripts/prerender-pages.js` runs after `vite build` and emits a static `dist/play/{slug}/index.html` for every playable game (extracts head + script tags from the built `index.html`, injects per-game meta/JSON-LD/visible content). It also emits **per-locale shells**: 6 translated shells per game, 6 home shells, plus blog and static routes (`/about`, `/privacy`, `/contact`, `/hall-of-fame`, `/my-games`). Each shell carries the full hreflang map, locale-correct `og:locale`, and JSON-LD `inLanguage`. When a locale has no translation for a given game, the prerender sets `canonical` to the English URL and `<meta name="robots" content="noindex,follow">` to consolidate signals. React replaces the prerendered subtree on mount — do **not** hide the prerendered content with `display:none` (cloaking).
+**Pre-rendering for SEO:** This is an SPA, but `scripts/prerender-pages.js` runs after `vite build` and emits a static `dist/play/{slug}/index.html` for every playable game (extracts head + script tags from the built `index.html`, injects per-game meta/JSON-LD/visible content). It also emits **per-locale shells**: 6 translated shells per game, 6 home shells, plus blog and static routes (`/about`, `/privacy`, `/contact`, `/my-games`). Each shell carries the full hreflang map, locale-correct `og:locale`, and JSON-LD `inLanguage`. When a locale has no translation for a given game, the prerender sets `canonical` to the English URL and `<meta name="robots" content="noindex,follow">` to consolidate signals. React replaces the prerendered subtree on mount — do **not** hide the prerendered content with `display:none` (cloaking).
 
 **Sitemap:** `scripts/generate-sitemap.js` writes `public/sitemap.xml` from `games.json` on every build, with `xhtml:hreflang` alternates per locale. `scripts/generate-rss.js` emits the blog feed. Do not edit either output by hand — they're regenerated.
 
-**Game iframes & score postMessage:** Games run in iframes hosted elsewhere (`gameUrl`). `GamePlayer` listens for `postMessage` score events. Validate `event.origin` matches the game's iframe domain; clamp `score` to `[0, 10_000_000]` and `isFinite`; silently drop anything else (no alerts).
+**Game iframes:** Games run in iframes hosted elsewhere (`gameUrl`). There is no score/leaderboard plumbing — `GamePlayer` just mounts the frame behind a click-to-start gate.
 
-**Leaderboard config is data-driven:** `games.json` `leaderboard.{primaryLabel, primaryUnit, secondaryLabel, secondaryUnit, dualSort, subSortAsc}` controls Firestore sort order and UI labels. `dualSort=true` adds `orderBy("subScore")`; `subSortAsc=true` means lower subScore wins ties (Gem Merge style). Score-display strings must come from this config.
-
-**Caching:**
-- `GlobalLeaderboard` reads the denormalized `aggregates/podium` doc (one read), after a build-time baked podium and a 24h `localStorage` cache (key `arcadedeck_rank_cache_v2`). Manual refresh button is the only invalidator. There is no per-game fan-out fallback — `onLeaderboardWrite` in `functions/` keeps the aggregate seeded.
-- `CommentSection` loads latest 20 with cursor pagination (`startAfter`). Do not switch to `onSnapshot` (cost/perf).
+**Caching:** `CommentSection` loads latest 20 with cursor pagination (`startAfter`). Do not switch to `onSnapshot` (cost/perf).
 
 ## Conventions (from RULES.md)
 
 - **TypeScript:** no `any`, no `// @ts-ignore`. Use `declare global { interface Window {...} }` for globals. `verbatimModuleSyntax` is on, so type-only imports must use `import type`.
-- **Firestore rules:** never `allow update: if true`. `leaderboards.{name, gameId}` are immutable post-create. Comments capped at 300 chars, nicknames at 30.
+- **Firestore rules:** never `allow update: if true`. Comments capped at 300 chars, nicknames at 30.
 - **Errors:** every route is wrapped in `<ErrorBoundary>` — don't add per-page try/catch UI.
 - **Images:** WebP only, in `public/images/`, referenced as `"images/foo.webp"` from `games.json`. PWA icons: 192×192 and 512×512.
 - **i18n:** When adding a new game, only fill `en.json` `games[id]`. The user adds translations for other locales themselves. Never invent translations for `ko.json`, `ja.json`, etc. without explicit instruction.

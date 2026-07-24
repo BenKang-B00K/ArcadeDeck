@@ -61,10 +61,7 @@
   --gold-gradient: linear-gradient(135deg, #f5c542, #e8962e);
   --gold-glow: rgba(245, 197, 66, 0.25);
 
-  /* Rank */
-  --rank-gold: #f5c542;
-  --rank-silver: #b0b8c8;
-  --rank-bronze: #cd7f32;
+  /* Accents */
   --rank-fire: #ff6b35;
 
   /* Status */
@@ -332,15 +329,6 @@ select:focus-visible {
 }
 
 /* ── SVG icon utilities ── */
-.rank-icon.gold   { color: var(--rank-gold); }
-.rank-icon.silver { color: var(--rank-silver); }
-.rank-icon.bronze { color: var(--rank-bronze); }
-.rank-icon.fire   { color: var(--rank-fire); }
-
-.rank-medal.rank-1 { color: var(--rank-gold); }
-.rank-medal.rank-2 { color: var(--rank-silver); }
-.rank-medal.rank-3 { color: var(--rank-bronze); }
-
 .spin-icon { animation: spin 1s linear infinite; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 

@@ -153,44 +153,6 @@
   50%      { opacity: 1; }
 }
 
-/* ── My Rank Badge ── */
-.my-rank-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
-  font-size: 0.65rem;
-  font-weight: 700;
-  flex-shrink: 0;
-  letter-spacing: 0.02em;
-}
-
-.my-rank-badge.rank-tier-1 {
-  background: rgba(245, 197, 66, 0.15);
-  color: var(--rank-gold);
-  border: 1px solid rgba(245, 197, 66, 0.3);
-  text-shadow: 0 0 6px rgba(245, 197, 66, 0.3);
-}
-
-.my-rank-badge.rank-tier-2 {
-  background: rgba(176, 184, 200, 0.12);
-  color: var(--rank-silver);
-  border: 1px solid rgba(176, 184, 200, 0.25);
-}
-
-.my-rank-badge.rank-tier-3 {
-  background: rgba(205, 127, 50, 0.12);
-  color: var(--rank-bronze);
-  border: 1px solid rgba(205, 127, 50, 0.25);
-}
-
-.my-rank-badge.rank-tier-other {
-  background: var(--surface-2);
-  color: var(--text-muted);
-  border: 1px solid var(--border-subtle);
-}
-
 /* ── Row 2: Image ── */
 .card-image {
   position: relative;

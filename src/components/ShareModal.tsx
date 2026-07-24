@@ -9,8 +9,6 @@ interface ShareModalProps {
   onClose: () => void;
   gameTitle: string;
   gameUrl: string;
-  score?: number;
-  scoreUnit?: string;
 }
 
 const ShareModal: React.FC<ShareModalProps> = ({
@@ -18,8 +16,6 @@ const ShareModal: React.FC<ShareModalProps> = ({
   onClose,
   gameTitle,
   gameUrl,
-  score,
-  scoreUnit = '',
 }) => {
   useEscapeKey(onClose, isOpen);
   const uiT = useUiText();
@@ -34,9 +30,7 @@ const ShareModal: React.FC<ShareModalProps> = ({
 
   const pageUrl = gameUrl;
 
-  const shareText = score != null
-    ? `I scored ${score.toLocaleString()}${scoreUnit} in ${gameTitle}! Can you beat me? 🎮 #ArcadeDeck`
-    : `Playing ${gameTitle} right now! 🎮 #ArcadeDeck`;
+  const shareText = `Playing ${gameTitle} right now! 🎮 #ArcadeDeck`;
 
   const encodedText = encodeURIComponent(shareText);
   const encodedUrl = encodeURIComponent(pageUrl);
@@ -80,7 +74,6 @@ const ShareModal: React.FC<ShareModalProps> = ({
 
   const t = {
     title: uiT('shareTitle', 'Share'),
-    score: uiT('shareMyScore', 'My Score'),
     twitter: uiT('shareOnX', 'Share on X'),
     kakao: uiT('shareKakao', 'Share via KakaoTalk'),
     copy: uiT('shareCopyLink', 'Copy Link'),
@@ -94,13 +87,6 @@ const ShareModal: React.FC<ShareModalProps> = ({
         <button className="share-modal-close" onClick={onClose} aria-label="Close"><X size={16} aria-hidden="true" /></button>
 
         <h3 className="share-modal-title"><Share2 size={20} aria-hidden="true" /> {t.title}</h3>
-
-        {score != null && (
-          <div className="share-score-display">
-            <span className="share-score-label">{t.score}</span>
-            <span className="share-score-value">{score.toLocaleString()}{scoreUnit}</span>
-          </div>
-        )}
 
         <p className="share-preview-text">{shareText}</p>
 

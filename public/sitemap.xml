@@ -2118,11 +2118,6 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/genre/tower-defense" />
   </url>
   <url>
-    <loc>https://arcadedeck.net/hall-of-fame</loc>
-    <lastmod>2026-07-24</lastmod>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://arcadedeck.net/forum</loc>
     <lastmod>2026-07-24</lastmod>
     <priority>0.7</priority>

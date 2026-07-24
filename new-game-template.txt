@@ -17,7 +17,7 @@ new-game-template.json 의 두 블록을 각각 복사:
   (A) src/data/games.json
       └─ games_json_entry 를 배열 끝에 추가
          (id, slug, thumbnail, genres, gameUrl, aspectRatio,
-          status, isOriginal, language, badge, leaderboard 만)
+          status, isOriginal, language, badge 만)
 
   (B) src/i18n/locales/en.json
       └─ "games" 블록 안에 en_json_games_entry 추가
@@ -67,21 +67,6 @@ isOriginal      직접 만든 게임이면 true (Original 배지 표시)
 aspectRatio     화면 비율 (기본값 "16/9". 세로형은 "9/16")
 badge           "POPULAR", "NEW" 등 강조 배지
 
-[리더보드 설정 — leaderboard 객체]
---------------------------------------------------
-title          리더보드 제목 (영어. 다국어 UI는 ui 키로 별도 처리)
-primaryLabel   주 점수 라벨 (예: "Score", "Stage", "Waves")
-primaryUnit    주 점수 단위 (예: " pts", "". 없으면 빈 문자열)
-secondaryLabel 부 점수 라벨 (없으면 빈 문자열)
-secondaryUnit  부 점수 단위 (예: "Lv.", "x")
-dualSort       부 점수 2차 정렬 여부 (true/false)
-subSortAsc     동점 시 부 점수 낮은게 유리? (true/false. Gem Merge 방식)
-
-리더보드 패턴 예시:
-  점수만:        primaryLabel:"Score"  dualSort:false
-  점수+레벨:     primaryLabel:"Score"  secondaryLabel:"Level"   dualSort:true  subSortAsc:false
-  점수+시도횟수: primaryLabel:"Score"  secondaryLabel:"Merges"  dualSort:true  subSortAsc:true
-
 =============================================
   필드 설명 (en.json — 영어 텍스트만)
 =============================================
@@ -108,26 +93,6 @@ RPG, Strategy, Casual, Arcade, Auto Battler
 ※ 새 장르 사용 시 validate 에서 경고. 의도적이면 무시 가능.
 
 =============================================
-  게임 내 점수 전송 (게임 코드에서 구현)
-=============================================
-
-게임 종료 시 아래 코드를 호출하면 ArcadeDeck이 자동으로 점수를 수신합니다:
-
-  window.parent.postMessage({
-    type: "GAME_SCORE",
-    score: 12500,         // 주 점수 (0 ~ 10,000,000)
-    subScore: 15          // 부 점수 (선택)
-  }, "*");
-
-지원하는 type 값:
-  "GAME_SCORE", "SCORE_UPDATE", "gameOver", "GAME_OVER"
-
-검증 규칙 (GamePlayer):
-  - event.origin 이 gameUrl 도메인과 일치해야 처리
-  - score 는 isFinite + [0, 10_000_000] 클램프
-  - 위반 메시지는 조용히 무시 (alert 없음)
-
-=============================================
   체크리스트
 =============================================
 
@@ -138,5 +103,4 @@ RPG, Strategy, Casual, Arcade, Auto Battler
 [ ] npm run validate 통과
 [ ] npm run build 빌드 성공
 [ ] npm run dev 로 /play/{slug} 페이지 확인
-[ ] 게임에서 postMessage 점수 전송 동작 확인
 [ ] npm run deploy (Firebase Hosting 배포)

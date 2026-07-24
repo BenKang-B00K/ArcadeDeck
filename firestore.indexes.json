@@ -1,15 +1,6 @@
 {
   "indexes": [
     {
-      "collectionGroup": "leaderboards",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "gameId", "order": "ASCENDING" },
-        { "fieldPath": "score", "order": "DESCENDING" },
-        { "fieldPath": "subScore", "order": "DESCENDING" }
-      ]
-    },
-    {
       "collectionGroup": "comments",
       "queryScope": "COLLECTION",
       "fields": [

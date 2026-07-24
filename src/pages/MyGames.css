@@ -21,7 +21,7 @@
   position: absolute;
   inset: -5%;
   background: url('/images/my-rank-bg.webp') center / cover no-repeat;
-  animation: myRankZoom 25s ease-in-out infinite alternate;
+  animation: myGamesZoom 25s ease-in-out infinite alternate;
   z-index: -2;
 }
 
@@ -36,7 +36,7 @@
   z-index: -1;
 }
 
-@keyframes myRankZoom {
+@keyframes myGamesZoom {
   from { transform: scale(1); }
   to   { transform: scale(1.08); }
 }
@@ -167,28 +167,6 @@
   box-shadow: 0 6px 18px rgba(0, 210, 255, 0.35);
 }
 
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 100px 0;
-}
-
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 3px solid rgba(0, 210, 255, 0.1);
-  border-top-color: #00d2ff;
-  border-radius: 50%;
-  animation: spin 1s ease-in-out infinite;
-  margin-bottom: 20px;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
 .section-title {
   font-size: 1.8rem;
   margin: 40px 0 25px;
@@ -200,97 +178,6 @@
 .section-desc {
   color: var(--text-muted);
   margin-bottom: 20px;
-}
-
-.my-games-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 25px;
-}
-
-.my-game-card {
-  position: relative;
-  background: var(--card-bg);
-  border-radius: 15px;
-  overflow: hidden;
-  border: 1px solid var(--border-default);
-  transition: transform 0.3s ease, border-color 0.3s ease;
-}
-
-.my-game-card:hover {
-  transform: translateY(-5px);
-}
-
-.rank-1 { border-color: #ffd700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.1); }
-.rank-2 { border-color: #c0c0c0; }
-.rank-3 { border-color: #cd7f32; }
-
-.rank-badge-large {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: var(--scrim-soft);
-  padding: 5px 12px;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  z-index: 2;
-  font-weight: bold;
-}
-
-.rank-num {
-  font-size: 0.9rem;
-}
-
-.card-thumb {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-  opacity: 0.8;
-}
-
-.card-info {
-  padding: 20px;
-}
-
-.card-info h3 {
-  margin-bottom: 15px;
-  font-size: 1.3rem;
-}
-
-.score-info {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 20px;
-}
-
-.score-val {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #00d2ff;
-}
-
-.score-label {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-}
-
-.play-again-btn {
-  display: block;
-  text-align: center;
-  background: #00d2ff;
-  color: #000;
-  text-decoration: none;
-  padding: 10px;
-  border-radius: 8px;
-  font-weight: bold;
-  transition: opacity 0.2s;
-}
-
-.play-again-btn:hover {
-  opacity: 0.9;
 }
 
 .my-games-list {

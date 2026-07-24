@@ -9,7 +9,6 @@ interface GameGridProps {
   searchQuery?: string;
   onProductionClick?: () => void;
   onGenreClick?: (genre: string) => void;
-  userRanks?: Record<string, number>;
 }
 
 // Precompute top genres by populated count — used by the empty state suggestions.
@@ -26,7 +25,7 @@ const TOP_GENRES: string[] = (() => {
     .map(([genre]) => genre);
 })();
 
-const GameGrid: React.FC<GameGridProps> = ({ selectedGenre = 'All', searchQuery = '', onProductionClick, onGenreClick, userRanks = {} }) => {
+const GameGrid: React.FC<GameGridProps> = ({ selectedGenre = 'All', searchQuery = '', onProductionClick, onGenreClick }) => {
   const t = useUiText();
   const { lang, overlay } = useLocale();
   const processedGames = useMemo(() => {
@@ -86,7 +85,7 @@ const GameGrid: React.FC<GameGridProps> = ({ selectedGenre = 'All', searchQuery 
 
         <div className="game-grid">
           {processedGames.length > 0 ? (
-            processedGames.map((game) => <GameCard key={game.id} game={game} onProductionClick={onProductionClick} onGenreClick={onGenreClick} myRank={userRanks[game.id]} />)
+            processedGames.map((game) => <GameCard key={game.id} game={game} onProductionClick={onProductionClick} onGenreClick={onGenreClick} />)
           ) : (
             <div className="empty-state">
               <div className="empty-state-block" aria-hidden="true">

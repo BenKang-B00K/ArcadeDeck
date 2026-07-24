@@ -11,16 +11,7 @@
     "status": "PLAYABLE",
     "isOriginal": true,
     "language": "EN",
-    "badge": "POPULAR",
-    "leaderboard": {
-      "title": "My Game Leaderboard",
-      "primaryLabel": "Score",
-      "primaryUnit": "",
-      "secondaryLabel": "",
-      "secondaryUnit": "",
-      "dualSort": false,
-      "subSortAsc": false
-    }
+    "badge": "POPULAR"
   },
 
   "en_json_games_entry": {
@@ -34,7 +25,6 @@
       "features": [
         "Feature 1",
         "Feature 2",
-        "Global Leaderboard",
         "Web & Mobile Friendly"
       ]
     }

@@ -15,16 +15,7 @@
     "status": "PLAYABLE",
     "isOriginal": true,
     "badge": "UPDATE",
-    "lastUpdated": "2026-05-14",
-    "leaderboard": {
-      "title": "Survivor Leaderboard",
-      "primaryLabel": "Depth",
-      "primaryUnit": " Depth",
-      "secondaryLabel": "",
-      "secondaryUnit": "",
-      "dualSort": false,
-      "subSortAsc": false
-    }
+    "lastUpdated": "2026-05-14"
   },
   {
     "id": "2",
@@ -37,16 +28,7 @@
     "gameUrl": "https://galaxylaunch.onrender.com/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
-    "isOriginal": true,
-    "leaderboard": {
-      "title": "Ultimate Conqueror",
-      "primaryLabel": "Conquests",
-      "primaryUnit": "",
-      "secondaryLabel": "Max Planet Level",
-      "secondaryUnit": "Lv.",
-      "dualSort": true,
-      "subSortAsc": false
-    }
+    "isOriginal": true
   },
   {
     "id": "3",
@@ -73,15 +55,6 @@
     "aspectRatio": "1/1",
     "status": "PLAYABLE",
     "isOriginal": true,
-    "leaderboard": {
-      "title": "Master Merger Leaderboard",
-      "primaryLabel": "Total Score",
-      "primaryUnit": " pts",
-      "secondaryLabel": "Merges",
-      "secondaryUnit": "",
-      "dualSort": false,
-      "subSortAsc": true
-    },
     "badge": "CAN'T STOP"
   },
   {
@@ -110,16 +83,7 @@
     "status": "PLAYABLE",
     "isOriginal": true,
     "badge": "UPDATE",
-    "lastUpdated": "2026-05-16",
-    "leaderboard": {
-      "title": "Fastest Clicker Leaderboard",
-      "primaryLabel": "Level",
-      "primaryUnit": " level",
-      "secondaryLabel": "Clicks",
-      "secondaryUnit": "",
-      "dualSort": true,
-      "subSortAsc": false
-    }
+    "lastUpdated": "2026-05-16"
   },
   {
     "id": "8",
@@ -148,15 +112,6 @@
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
     "isOriginal": true,
-    "leaderboard": {
-      "title": "Void Survivor Leaderboard",
-      "primaryLabel": "Stage",
-      "primaryUnit": "",
-      "secondaryLabel": "Artifacts",
-      "secondaryUnit": "",
-      "dualSort": true,
-      "subSortAsc": false
-    },
     "badge": "POPULAR"
   },
   {
@@ -173,16 +128,7 @@
     "status": "PLAYABLE",
     "isOriginal": true,
     "badge": "UPDATE",
-    "lastUpdated": "2026-05-26",
-    "leaderboard": {
-      "title": "Kingdom of Ashes - Endless War Leaderboard",
-      "primaryLabel": "Waves",
-      "primaryUnit": " waves",
-      "secondaryLabel": "Battles",
-      "secondaryUnit": "",
-      "dualSort": true,
-      "subSortAsc": false
-    }
+    "lastUpdated": "2026-05-26"
   },
   {
     "id": "11",
@@ -197,15 +143,6 @@
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
     "isOriginal": true,
-    "leaderboard": {
-      "title": "Kingdom of Ashes - Dice War Leaderboard",
-      "primaryLabel": "Chapters",
-      "primaryUnit": " Chapters",
-      "secondaryLabel": "Stages",
-      "secondaryUnit": "",
-      "dualSort": true,
-      "subSortAsc": false
-    },
     "badge": "UPDATE",
     "lastUpdated": "2026-05-26"
   },
@@ -220,16 +157,7 @@
     "gameUrl": "https://heroes-of-the-last-nexus-bk.pages.dev/",
     "aspectRatio": "16/9",
     "status": "IN PRODUCTION",
-    "isOriginal": true,
-    "leaderboard": {
-      "title": "Heroes of the Last Nexus Leaderboard",
-      "primaryLabel": "Heroes",
-      "primaryUnit": " heroes",
-      "secondaryLabel": "Monsters",
-      "secondaryUnit": "",
-      "dualSort": true,
-      "subSortAsc": false
-    }
+    "isOriginal": true
   },
   {
     "id": "13",
@@ -245,16 +173,7 @@
     "status": "PLAYABLE",
     "isOriginal": true,
     "badge": "UPDATE",
-    "lastUpdated": "2026-05-16",
-    "leaderboard": {
-      "title": "Timing Chef Master Leaderboard",
-      "primaryLabel": "Total Stars",
-      "primaryUnit": " Stars",
-      "secondaryLabel": "Receipts",
-      "secondaryUnit": "",
-      "dualSort": true,
-      "subSortAsc": false
-    }
+    "lastUpdated": "2026-05-16"
   },
   {
     "id": "14",
@@ -269,18 +188,8 @@
     "aspectRatio": "9/16",
     "status": "PLAYABLE",
     "isOriginal": true,
-    "badge": "UPDATE",
-    "lastUpdated": "2026-05-15",
-    "leaderboard": {
-      "title": "Fruit Frenzy Leaderboard",
-      "primaryLabel": "Score",
-      "primaryUnit": "",
-      "secondaryLabel": "Fruits",
-      "secondaryUnit": "",
-      "dualSort": true,
-      "subSortAsc": false
-    },
-    "badge": "CAN'T STOP"
+    "badge": "CAN'T STOP",
+    "lastUpdated": "2026-05-15"
   },
   {
     "id": "15",
@@ -295,15 +204,6 @@
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
     "isOriginal": true,
-    "leaderboard": {
-      "title": "Kingdom's Last Stand Leaderboard",
-      "primaryLabel": "Stage",
-      "primaryUnit": "",
-      "secondaryLabel": "Round",
-      "secondaryUnit": "",
-      "dualSort": true,
-      "subSortAsc": false
-    },
     "badge": "POPULAR"
   },
   {
@@ -366,16 +266,7 @@
     "gameUrl": "https://skyfall-bk.pages.dev/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
-    "isOriginal": true,
-    "leaderboard": {
-      "title": "Skyfall Survival Leaderboard",
-      "primaryLabel": "Survival Time",
-      "primaryUnit": "s",
-      "secondaryLabel": "",
-      "secondaryUnit": "",
-      "dualSort": false,
-      "subSortAsc": false
-    }
+    "isOriginal": true
   },
   {
     "id": "20",
@@ -389,16 +280,7 @@
     "gameUrl": "https://polygon-invasion-td-bk.pages.dev/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
-    "isOriginal": true,
-    "leaderboard": {
-      "title": "Polygon Invasion Leaderboard",
-      "primaryLabel": "Peak Wave",
-      "primaryUnit": "",
-      "secondaryLabel": "Kills",
-      "secondaryUnit": "",
-      "dualSort": true,
-      "subSortAsc": false
-    }
+    "isOriginal": true
   },
   {
     "id": "21",
@@ -412,16 +294,7 @@
     "gameUrl": "https://just-jump-bk.pages.dev/",
     "aspectRatio": "9/16",
     "status": "PLAYABLE",
-    "isOriginal": true,
-    "leaderboard": {
-      "title": "Just Jump Leaderboard",
-      "primaryLabel": "Score",
-      "primaryUnit": "",
-      "secondaryLabel": "",
-      "secondaryUnit": "",
-      "dualSort": false,
-      "subSortAsc": false
-    }
+    "isOriginal": true
   },
   {
     "id": "22",
@@ -452,16 +325,7 @@
     "aspectRatio": "9/16",
     "status": "PLAYABLE",
     "isOriginal": true,
-    "badge": "NEW",
-    "leaderboard": {
-      "title": "Falling Dodger Leaderboard",
-      "primaryLabel": "Distance",
-      "primaryUnit": "m",
-      "secondaryLabel": "Obstacles",
-      "secondaryUnit": "",
-      "dualSort": true,
-      "subSortAsc": false
-    }
+    "badge": "NEW"
   },
   {
     "id": "24",
@@ -477,16 +341,7 @@
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
     "isOriginal": true,
-    "badge": "NEW",
-    "leaderboard": {
-      "title": "Entrepreneur Tycoon Leaderboard",
-      "primaryLabel": "Money Earned",
-      "primaryUnit": "$",
-      "secondaryLabel": "Products",
-      "secondaryUnit": "",
-      "dualSort": true,
-      "subSortAsc": false
-    }
+    "badge": "NEW"
   },
   {
     "id": "25",
@@ -518,15 +373,6 @@
     "status": "PLAYABLE",
     "isOriginal": true,
     "badge": "NEW",
-    "autoFullscreen": false,
-    "leaderboard": {
-      "title": "Neon Stack Leaderboard",
-      "primaryLabel": "Blocks",
-      "primaryUnit": "",
-      "secondaryLabel": "Best Combo",
-      "secondaryUnit": "x",
-      "dualSort": true,
-      "subSortAsc": false
-    }
+    "autoFullscreen": false
   }
 ]

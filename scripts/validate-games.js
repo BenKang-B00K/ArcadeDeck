@@ -103,20 +103,6 @@ for (const g of games) {
     }
   }
 
-  // Leaderboard config validation
-  if (g.leaderboard) {
-    const lb = g.leaderboard;
-    const lbRequired = ['title', 'primaryLabel', 'dualSort'];
-    for (const field of lbRequired) {
-      if (lb[field] === undefined || lb[field] === null) {
-        error(label, `Leaderboard missing field: "${field}"`);
-      }
-    }
-    if (lb.dualSort && !lb.secondaryLabel) {
-      warn(label, `dualSort is true but secondaryLabel is empty`);
-    }
-  }
-
   // gameUrl basic check
   if (g.gameUrl && !g.gameUrl.startsWith('http')) {
     error(label, `gameUrl must start with http: "${g.gameUrl}"`);

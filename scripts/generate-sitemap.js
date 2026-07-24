@@ -101,7 +101,6 @@ for (const genre of indexableGenres) {
 
 // English-only routes
 const englishOnlyRoutes = [
-  { path: '/hall-of-fame', priority: '0.8' },
   { path: '/forum', priority: '0.7' },
   { path: '/blog', priority: '0.7' },
   { path: '/about', priority: '0.6' },

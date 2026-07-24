@@ -1,245 +1,116 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { Trophy, Rocket, Medal, Flame, Crown, Award, Target, Zap } from 'lucide-react';
+import { Rocket, Flame, Gamepad2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { games } from '../data/games';
 import type { Game } from '../data/games';
-import { db } from '../firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore/lite';
-import { compareLeaderboardEntries, formatScore } from '../utils/leaderboardUtils';
-import { buildLeaderboardQuery } from '../utils/leaderboardQuery';
 import { thumb360, SRCSET_SIZES } from '../utils/thumb';
 import { useNickname } from '../hooks/useNickname';
 import { getCurrentStreak, readStreak } from '../utils/streak';
-import { LEADERBOARD_FETCH_LIMIT } from '../constants/gameConstants';
 import { useUiText, useLocale, getLocalizedString } from '../i18n';
 import './MyGames.css';
 
-interface GameWithRank extends Game {
-  rank?: number;
-  score?: number;
-  subScore?: number;
+// ponytail: everything here is localStorage-only — no network, no loading state.
+function readRecentlyPlayed(): Game[] {
+  try {
+    const ids: string[] = JSON.parse(localStorage.getItem('recently_played') || '[]');
+    return ids.map(id => games.find(g => g.id === id)).filter((g): g is Game => Boolean(g));
+  } catch {
+    return [];
+  }
 }
 
 const MyGames = () => {
   const t = useUiText();
   const { lang, overlay } = useLocale();
-  const [rankedGames, setRankedGames] = useState<GameWithRank[]>([]);
-  const [noRankGames, setNoRankGames] = useState<GameWithRank[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [playedCount, setPlayedCount] = useState(0);
-  const [hasAnyScore, setHasAnyScore] = useState(false);
-  const [bestRank, setBestRank] = useState<number | null>(null);
-  const [streak] = useState(() => ({ current: getCurrentStreak(), best: readStreak().best }));
   const nickname = useNickname();
+  const [streak] = useState(() => ({ current: getCurrentStreak(), best: readStreak().best }));
+  const recentGames = useMemo(() => readRecentlyPlayed(), []);
+  const otherGames = useMemo(
+    () => games.filter(g => !recentGames.some(r => r.id === g.id)),
+    [recentGames],
+  );
 
   useEffect(() => {
-    const fetchMyRanks = async () => {
-      setLoading(true);
-      const ranked: GameWithRank[] = [];
-      const noRank: GameWithRank[] = [];
-
-      try {
-        // Step 1: Fetch all user scores in one query
-        const userScoresSnap = await getDocs(
-          query(collection(db, "leaderboards"), where("name", "==", nickname))
-        );
-        const userScoresByGame = new Map<string, { score: number; subScore: number }>();
-        userScoresSnap.docs.forEach(doc => {
-          const d = doc.data();
-          userScoresByGame.set(d.gameId, { score: d.score, subScore: d.subScore || 0 });
-        });
-
-        // Step 2: Only fetch leaderboards for games the user has played
-        const playedGames = games.filter(g => userScoresByGame.has(g.id));
-        const unplayedGames = games.filter(g => !userScoresByGame.has(g.id));
-        noRank.push(...unplayedGames);
-
-        const promises = playedGames.map(async (game) => {
-          const userData = userScoresByGame.get(game.id)!;
-          const subSortAsc = game.leaderboard?.subSortAsc ?? false;
-
-          const lbQuery = buildLeaderboardQuery(db, game.id, { limit: LEADERBOARD_FETCH_LIMIT });
-          const lbSnap = await getDocs(lbQuery);
-          const docs = lbSnap.docs.map(d => d.data());
-
-          docs.sort((a, b) => compareLeaderboardEntries(
-            { score: a.score ?? 0, subScore: a.subScore ?? 0 },
-            { score: b.score ?? 0, subScore: b.subScore ?? 0 },
-            subSortAsc
-          ));
-
-          const index = docs.findIndex(d => d.name === nickname);
-          const rank = index !== -1 ? index + 1 : 101;
-
-          if (rank >= 1 && rank <= 3) {
-            ranked.push({ ...game, rank, score: userData.score, subScore: userData.subScore });
-          } else {
-            noRank.push(game);
-          }
-        });
-
-        await Promise.all(promises);
-        ranked.sort((a, b) => (a.rank || 0) - (b.rank || 0));
-
-        setRankedGames(ranked);
-        setNoRankGames(noRank);
-        setPlayedCount(playedGames.length);
-        setHasAnyScore(userScoresByGame.size > 0);
-        setBestRank(ranked.length > 0 ? ranked[0].rank ?? null : null);
-      } catch (error) {
-        console.error("Error fetching my ranks:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMyRanks();
-  }, [nickname]);
-
-  useEffect(() => {
-    document.title = 'My Gaming Stats & Ranks | ArcadeDeck';
+    document.title = 'My Games | ArcadeDeck';
   }, []);
 
-  const achievements = useMemo(() => {
-    const list: { id: string; label: string; icon: React.ReactNode; tier: 'gold' | 'silver' | 'bronze' | 'flame' }[] = [];
-    if (streak.current >= 3) {
-      list.push({ id: 'streak', label: t('myAchStreak', '{n}-Day Streak').replace('{n}', String(streak.current)), icon: <Flame size={14} aria-hidden="true" />, tier: 'flame' });
-    }
-    if (bestRank === 1) {
-      list.push({ id: 'champion', label: t('myAchChampion', 'Champion'), icon: <Crown size={14} aria-hidden="true" />, tier: 'gold' });
-    } else if (bestRank !== null && bestRank <= 3) {
-      list.push({ id: 'podium', label: t('myAchPodium', 'Podium Finish'), icon: <Medal size={14} aria-hidden="true" />, tier: 'silver' });
-    }
-    if (playedCount >= 1) {
-      list.push({ id: 'firstScore', label: t('myAchFirstScore', 'First Score'), icon: <Target size={14} aria-hidden="true" />, tier: 'bronze' });
-    }
-    if (playedCount >= 5) {
-      list.push({ id: 'veteran', label: t('myAchVeteran', 'Versatile (5+)'), icon: <Award size={14} aria-hidden="true" />, tier: 'silver' });
-    }
-    if (playedCount >= 10) {
-      list.push({ id: 'marathon', label: t('myAchMarathon', 'Marathon (10+)'), icon: <Zap size={14} aria-hidden="true" />, tier: 'gold' });
-    }
-    return list;
-  }, [streak, bestRank, playedCount, t]);
+  const renderCard = (game: Game) => {
+    const title = getLocalizedString(game, 'title', lang, overlay);
+    return (
+      <Link key={game.id} to={`/play/${game.slug}`} className="mini-game-card">
+        <img
+          src={game.thumbnail}
+          srcSet={`${thumb360(game.thumbnail)} 360w, ${game.thumbnail} 640w`}
+          sizes={SRCSET_SIZES}
+          alt={title}
+          width="640"
+          height="360"
+          loading="lazy"
+          decoding="async"
+        />
+        <div className="mini-info">
+          <h4>{title}</h4>
+          <span className="genre-tag">{game.genres[0]}</span>
+        </div>
+        <span className="go-arrow">→</span>
+      </Link>
+    );
+  };
 
   return (
     <div className="my-games-page">
       <>
-        <meta name="description" content="Check your personal ranking, achievements, and game progress on ArcadeDeck. Track your performance across all universes!" />
-        <meta property="og:title" content="My Gaming Stats & Ranks | ArcadeDeck" />
+        <meta name="description" content="Your personal ArcadeDeck library — recently played games and your Gamer ID, stored in your browser." />
+        <meta property="og:title" content="My Games | ArcadeDeck" />
         <meta property="og:url" content="https://arcadedeck.net/my-games" />
         <meta name="robots" content="noindex, follow" />
       </>
       <Navbar />
       <main className="container">
         <header className="my-games-header">
-          <h1>{t('myRankTitle', 'My')} <span>{t('myRankSpan', 'Ranking')}</span></h1>
-          <p className="subtitle">{t('myRankSubtitle', 'Track your performance across all universes')}</p>
-          <div className="nickname-badge">{t('myRankOperator', 'Operator')}: {nickname}</div>
-          {!loading && (achievements.length > 0 || streak.best > 0) && (
+          <h1>{t('myGamesTitle', 'My')} <span>{t('myGamesSpan', 'Games')}</span></h1>
+          <p className="subtitle">{t('myGamesSubtitle', 'Your library, saved right here in this browser')}</p>
+          <div className="nickname-badge">{t('myGamesOperator', 'Operator')}: {nickname}</div>
+          {streak.best > 0 && (
             <div className="ach-row" aria-label={t('myAchAriaLabel', 'Achievements')}>
-              {achievements.map(a => (
-                <span key={a.id} className={`ach-badge tier-${a.tier}`} title={a.label}>
-                  {a.icon}<span className="ach-label">{a.label}</span>
+              {streak.current >= 3 && (
+                <span className="ach-badge tier-flame">
+                  <Flame size={14} aria-hidden="true" />
+                  <span className="ach-label">{t('myAchStreak', '{n}-Day Streak').replace('{n}', String(streak.current))}</span>
                 </span>
-              ))}
+              )}
               {streak.best > streak.current && streak.best >= 3 && (
                 <span className="ach-badge tier-bronze" title={t('myAchBestStreak', 'Best Streak')}>
-                  <Flame size={14} aria-hidden="true" /><span className="ach-label">{t('myAchBestStreakLabel', 'Best: {n} days').replace('{n}', String(streak.best))}</span>
+                  <Flame size={14} aria-hidden="true" />
+                  <span className="ach-label">{t('myAchBestStreakLabel', 'Best: {n} days').replace('{n}', String(streak.best))}</span>
                 </span>
               )}
             </div>
           )}
         </header>
 
-        {loading ? (
-          <div className="loading-container">
-            <div className="spinner"></div>
-            <p>{t('myRankLoading', 'Scanning universes for your records...')}</p>
-          </div>
-        ) : !hasAnyScore ? (
-          <div className="my-games-empty empty-state">
-            <Rocket size={40} aria-hidden="true" />
-            <h2>{t('myRankNoScoresTitle', 'No scores yet')}</h2>
-            <p>{t('myRankNoScoresDesc', 'Pick a game and post your first score — your achievements will land here.')}</p>
-            <Link to="/" className="empty-cta-btn">{t('myRankBrowseGames', 'Browse Games')} →</Link>
-          </div>
-        ) : (
-          <div className="my-games-content">
-            <section className="ranked-section">
-              <h2 className="section-title"><Trophy size={20} aria-hidden="true" /> {t('myRankTop3', 'Top 3 Achievements')}</h2>
-              {rankedGames.length > 0 ? (
-                <div className="my-games-grid">
-                  {rankedGames.map(game => {
-                    const title = getLocalizedString(game, 'title', lang, overlay);
-                    return (
-                      <div key={game.id} className={`my-game-card rank-${game.rank}`}>
-                        <div className="rank-badge-large">
-                          <Medal size={24} className={`rank-medal rank-${game.rank}`} aria-hidden="true" />
-                          <span className="rank-num">{game.rank === 1 ? t('myRank1st', '1st') : game.rank === 2 ? t('myRank2nd', '2nd') : t('myRank3rd', '3rd')}</span>
-                        </div>
-                        <img
-                          src={game.thumbnail}
-                          srcSet={`${thumb360(game.thumbnail)} 360w, ${game.thumbnail} 640w`}
-                          sizes={SRCSET_SIZES}
-                          alt={title}
-                          className="card-thumb"
-                          width="640"
-                          height="360"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                        <div className="card-info">
-                          <h3>{title}</h3>
-                          <div className="score-info">
-                            <span className="score-val">{formatScore(game.score ?? 0)}</span>
-                            <span className="score-label">{t('myRankScore', 'Score')}</span>
-                          </div>
-                          <Link to={`/play/${game.id}`} className="play-again-btn">{t('myRankPlayAgain', 'Play Again')}</Link>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="empty-state">
-                  <p>{t('myRankEmpty', "You haven't reached the Top 3 in any game yet. Time to level up!")}</p>
-                </div>
-              )}
-            </section>
-
+        <div className="my-games-content">
+          {recentGames.length > 0 ? (
             <section className="no-rank-section">
-              <h2 className="section-title"><Rocket size={20} aria-hidden="true" /> {t('myRankMissions', 'Missions for You')}</h2>
-              <p className="section-desc">{t('myRankMissionsDesc', "Games where you haven't secured a top rank yet.")}</p>
-              <div className="my-games-list">
-                {noRankGames.map(game => {
-                  const title = getLocalizedString(game, 'title', lang, overlay);
-                  return (
-                    <Link key={game.id} to={`/play/${game.id}`} className="mini-game-card">
-                      <img
-                        src={game.thumbnail}
-                        srcSet={`${thumb360(game.thumbnail)} 360w, ${game.thumbnail} 640w`}
-                        sizes={SRCSET_SIZES}
-                        alt={title}
-                        width="640"
-                        height="360"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                      <div className="mini-info">
-                        <h4>{title}</h4>
-                        <span className="genre-tag">{game.genres[0]}</span>
-                      </div>
-                      <span className="go-arrow">→</span>
-                    </Link>
-                  );
-                })}
-              </div>
+              <h2 className="section-title"><Gamepad2 size={20} aria-hidden="true" /> {t('myGamesRecent', 'Recently Played')}</h2>
+              <div className="my-games-list">{recentGames.map(renderCard)}</div>
             </section>
-          </div>
-        )}
+          ) : (
+            <div className="my-games-empty empty-state">
+              <Rocket size={40} aria-hidden="true" />
+              <h2>{t('myGamesEmptyTitle', 'Nothing played yet')}</h2>
+              <p>{t('myGamesEmptyDesc', 'Pick a game below — it will show up here next time you visit.')}</p>
+            </div>
+          )}
+
+          <section className="no-rank-section">
+            <h2 className="section-title"><Rocket size={20} aria-hidden="true" /> {t('myGamesAll', 'More to Play')}</h2>
+            <p className="section-desc">{t('myGamesAllDesc', 'The rest of the ArcadeDeck catalogue.')}</p>
+            <div className="my-games-list">{otherGames.map(renderCard)}</div>
+          </section>
+        </div>
       </main>
     </div>
   );

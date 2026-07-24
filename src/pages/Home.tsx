@@ -6,9 +6,8 @@ import Navbar from '../components/Navbar';
 import GameCard from '../components/GameCard';
 import AdBanner from '../components/AdBanner';
 import { games } from '../data/games';
-import { compareLeaderboardEntries } from '../utils/leaderboardUtils';
 import { useToast, type ToastType } from '../contexts/useToast';
-import { BANNED_WORDS, RANDOM_ID_MIN, RANDOM_ID_MAX, AD_SLOTS, LEADERBOARD_FETCH_LIMIT } from '../constants/gameConstants';
+import { BANNED_WORDS, RANDOM_ID_MIN, RANDOM_ID_MAX, AD_SLOTS } from '../constants/gameConstants';
 import { useUiText, useLocale } from '../i18n';
 import { SkeletonGrid } from '../components/Skeleton';
 import HeroCarousel from '../components/home/HeroCarousel';
@@ -17,10 +16,8 @@ import ScrollProgress from '../components/home/ScrollProgress';
 import BackToTop from '../components/home/BackToTop';
 import { getLocalizedString } from '../i18n';
 import { thumb360, SRCSET_SIZES } from '../utils/thumb';
-import { safeRead, circuitOpen } from '../utils/firestoreCircuit';
 import './Home.css';
 
-const GlobalLeaderboard = lazy(() => import('../components/GlobalLeaderboard'));
 const GameGrid = lazy(() => import('../components/GameGrid'));
 const TrendingRail = lazy(() => import('../components/home/TrendingRail'));
 
@@ -66,76 +63,6 @@ const Home: React.FC = () => {
   }, []);
   const { showToast } = useToast();
   const showNotification = (msg: string, type: ToastType = 'info') => showToast(msg, type, 3000);
-  const [userRanks, setUserRanks] = useState<Record<string, number>>({});
-
-  // Fetch user's rank for each game they've played
-  React.useEffect(() => {
-    const RANK_CACHE_KEY = `arcadedeck_user_ranks_v2_${nickname}`;
-    const RANK_TTL_MS = 24 * 60 * 60 * 1000;
-
-    try {
-      const raw = localStorage.getItem(RANK_CACHE_KEY);
-      if (raw) {
-        const { ranks, expiresAt } = JSON.parse(raw);
-        if (Date.now() < expiresAt) {
-          setUserRanks(ranks);
-          return;
-        }
-        localStorage.removeItem(RANK_CACHE_KEY);
-      }
-    } catch { /* ignore corrupt cache */ }
-
-    if (circuitOpen()) return; // quota cooldown — skip; user-ranks are non-critical
-
-    const fetchUserRanks = async () => {
-      try {
-        const [{ db }, { collection, query, where, getDocs }, { buildLeaderboardQuery }] = await Promise.all([
-          import('../firebase'),
-          import('firebase/firestore/lite'),
-          import('../utils/leaderboardQuery'),
-        ]);
-        const userScoresSnap = await safeRead(
-          () => getDocs(query(collection(db, "leaderboards"), where("name", "==", nickname))),
-          null,
-        );
-        if (!userScoresSnap || userScoresSnap.empty) return;
-
-        const playedGameIds = new Set<string>();
-        userScoresSnap.docs.forEach(doc => playedGameIds.add(doc.data().gameId));
-
-        const ranks: Record<string, number> = {};
-        const promises = [...playedGameIds].map(async (gameId) => {
-          const game = games.find(g => g.id === gameId);
-          if (!game) return;
-          const subSortAsc = game.leaderboard?.subSortAsc ?? false;
-          const lbSnap = await safeRead(
-            () => getDocs(buildLeaderboardQuery(db, gameId, { limit: LEADERBOARD_FETCH_LIMIT })),
-            null,
-          );
-          if (!lbSnap) return;
-          const docs = lbSnap.docs.map(d => d.data());
-          docs.sort((a, b) => compareLeaderboardEntries(
-            { score: a.score ?? 0, subScore: a.subScore ?? 0 },
-            { score: b.score ?? 0, subScore: b.subScore ?? 0 },
-            subSortAsc
-          ));
-          const idx = docs.findIndex(d => d.name === nickname);
-          if (idx !== -1) ranks[gameId] = idx + 1;
-        });
-        await Promise.all(promises);
-        setUserRanks(ranks);
-        try {
-          localStorage.setItem(RANK_CACHE_KEY, JSON.stringify({ ranks, expiresAt: Date.now() + RANK_TTL_MS }));
-        } catch { /* quota — ignore */ }
-      } catch (err) {
-        console.error("Error fetching user ranks:", err);
-      }
-    };
-    // Defer to idle so firebase chunk doesn't compete with FCP/LCP.
-    const ric = (window as Window & { requestIdleCallback?: (cb: () => void) => number }).requestIdleCallback;
-    if (ric) ric(() => fetchUserRanks());
-    else setTimeout(fetchUserRanks, 1500);
-  }, [nickname]);
 
   // Extract all unique genres from data (memoized — games array is static)
   const allGenres = useMemo(() => ['All', ...new Set(games.flatMap(g => g.genres))], []);
@@ -161,12 +88,10 @@ const Home: React.FC = () => {
     return picks;
   }, []);
 
-  // Trending: PLAYABLE games with leaderboards, sorted by lastUpdated desc, top 10.
+  // Trending: playable games sorted by lastUpdated desc, top 10.
   const trendingGames = useMemo(() => {
-    return games
-      .filter(g => g.leaderboard)
-      .sort((a, b) => (a.lastUpdated || '').localeCompare(b.lastUpdated || '')) // asc
-      .reverse() // desc
+    return [...games]
+      .sort((a, b) => (b.lastUpdated || '').localeCompare(a.lastUpdated || ''))
       .slice(0, 10);
   }, []);
 
@@ -213,9 +138,9 @@ const Home: React.FC = () => {
     return () => io.disconnect();
   }, []);
 
-  const handleSaveName = async (e: React.FormEvent) => {
+  const handleSaveName = (e: React.FormEvent) => {
     e.preventDefault();
-    let finalName = tempName.trim();
+    const finalName = tempName.trim();
     if (!finalName) return;
 
     // Check for inappropriate words
@@ -225,27 +150,6 @@ const Home: React.FC = () => {
     if (hasBannedWord) {
       showNotification("Inappropriate language detected. Please choose a different nickname.", 'error');
       return;
-    }
-
-    // Check for nickname duplication (skipped during quota cooldown)
-    if (!circuitOpen()) {
-      try {
-        const [{ db }, { collection, query, where, getDocs, limit }] = await Promise.all([
-          import('../firebase'),
-          import('firebase/firestore/lite'),
-        ]);
-        const q = query(collection(db, "leaderboards"), where("name", "==", finalName), limit(1));
-        const querySnapshot = await safeRead(() => getDocs(q), null);
-
-        if (querySnapshot && !querySnapshot.empty && finalName !== nickname) {
-          const uniqueId = Math.floor(RANDOM_ID_MIN + Math.random() * (RANDOM_ID_MAX - RANDOM_ID_MIN + 1));
-          finalName = `${finalName}#${uniqueId}`;
-          showNotification(`Name taken — assigned unique tag: ${finalName}`, 'info');
-        }
-      } catch (error) {
-        console.error("Error checking nickname:", error);
-        showNotification("Could not verify name. Saving anyway.", 'info');
-      }
     }
 
     setNickname(finalName);
@@ -346,13 +250,6 @@ const Home: React.FC = () => {
             </div>
           </div>
         </section>
-
-        {/* ── Compact Global Ranking Bar ── */}
-        <div className="container reveal-section">
-          <Suspense fallback={<div style={{ minHeight: 88, margin: '16px 0' }} />}>
-            <GlobalLeaderboard variant="compact" />
-          </Suspense>
-        </div>
 
         {/* ── Trending Rail (auto-scrolling marquee) ── */}
         <Suspense fallback={<div style={{ minHeight: 240 }} />}>
@@ -497,7 +394,6 @@ const Home: React.FC = () => {
               <GameGrid
                 selectedGenre={selectedGenre}
                 searchQuery={searchQuery}
-                userRanks={userRanks}
                 onProductionClick={() => showNotification(t('homeComingSoonNotification', 'This game is coming soon!'), 'info')}
                 onGenreClick={(genre) => {
                   setSelectedGenre(genre);

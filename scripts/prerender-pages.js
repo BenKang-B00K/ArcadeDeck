@@ -6,52 +6,11 @@
  *   - /play/{slug}   + /{lang}/play/{slug}
  *
  * English-only prerender (hreflang only points at self):
- *   - /about, /privacy, /contact, /hall-of-fame, /my-games
+ *   - /about, /privacy, /contact, /my-games
  *   - /blog, /blog/{slug}, /blog/tag/{tag}
  */
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'fs';
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Bake top-3 podium into the Home shell at build time. Reads the
-// server-maintained /aggregates/podium doc via Firestore REST (rules allow
-// public read). Result is injected as window.__ARCADEDECK_PODIUM__ so the
-// GlobalLeaderboard component renders instantly with zero cold-start reads.
-// ─────────────────────────────────────────────────────────────────────────────
-const FIRESTORE_PROJECT = 'ultragames-website';
-const FIRESTORE_API_KEY = 'AIzaSyDFwB-Yt7ARcMZoPD6-1vI892PXyLEvdcU';
-
-async function fetchBakedPodium() {
-  const url = `https://firestore.googleapis.com/v1/projects/${FIRESTORE_PROJECT}/databases/(default)/documents/aggregates/podium?key=${FIRESTORE_API_KEY}`;
-  try {
-    const res = await fetch(url);
-    if (!res.ok) return [];
-    const json = await res.json();
-    const arr = json?.fields?.podium?.arrayValue?.values || [];
-    return arr.map((entry) => {
-      const f = entry?.mapValue?.fields || {};
-      const medalsF = f.medals?.mapValue?.fields || {};
-      return {
-        name: String(f.name?.stringValue || ''),
-        totalPoints: Number(f.totalPoints?.integerValue || f.totalPoints?.doubleValue || 0),
-        medals: {
-          gold: Number(medalsF.gold?.integerValue || medalsF.gold?.doubleValue || 0),
-          silver: Number(medalsF.silver?.integerValue || medalsF.silver?.doubleValue || 0),
-          bronze: Number(medalsF.bronze?.integerValue || medalsF.bronze?.doubleValue || 0),
-        },
-      };
-    }).filter((p) => p.name);
-  } catch {
-    return [];
-  }
-}
-
-const BAKED_PODIUM = await fetchBakedPodium();
-const bakedPodiumScript = BAKED_PODIUM.length
-  ? `<script>window.__ARCADEDECK_PODIUM__=${JSON.stringify(BAKED_PODIUM)};</script>`
-  : '';
-console.log(`[prerender] baked podium: ${BAKED_PODIUM.length} entries`);
-
 
 const SUPPORTED_LOCALES = readdirSync('src/i18n/locales')
   .filter(f => f.endsWith('.json') && !f.startsWith('_') && !f.includes('.missing.') && !f.includes('.bak.'))
@@ -307,26 +266,18 @@ for (const lang of SUPPORTED_LOCALES) {
       : '';
 
     // UGC pointers — give crawlers a visible, indexable anchor for the
-    // community surfaces (leaderboard, comments, forum). The actual data is
-    // rendered client-side from Firestore, but the prerender at least tells
-    // crawlers that the page has user-generated content tied to it.
-    const lbTitle = (game.leaderboard && game.leaderboard.title) || `${t.title} Leaderboard`;
-    const lbPrimary = (game.leaderboard && game.leaderboard.primaryLabel) || 'Score';
-    const ugcCommunityH2 = ui('seoCommunityTitle', lang, 'Community & Leaderboard');
-    const ugcLeaderboardLine = ui(
-      'seoLeaderboardIntro', lang,
-      `Every score posted in ${t.title} updates the global "${lbTitle}" leaderboard, sorted by ${lbPrimary}. Top players are archived to the Hall of Fame at the end of every month.`,
-    );
+    // community surfaces (comments, forum). The actual data is rendered
+    // client-side from Firestore, but the prerender at least tells crawlers
+    // that the page has user-generated content tied to it.
+    const ugcCommunityH2 = ui('seoCommunityTitle', lang, 'Community');
     const ugcCommentsLine = ui(
       'seoCommentsIntro', lang,
       `Players share strategies, post personal-best replays, and discuss tactics in the comments section below the game frame.`,
     );
     const ugcForumLink = ui('seoForumLinkLabel', lang, 'Visit the ArcadeDeck player forum');
-    const ugcHallLink = ui('seoHallLinkLabel', lang, 'Hall of Fame');
     const ugcHtml = `<h2 style="margin-top:32px;font-size:1.3rem;">${ugcCommunityH2}</h2>
-        <p style="line-height:1.7;">${ugcLeaderboardLine}</p>
         <p style="line-height:1.7;">${ugcCommentsLine}</p>
-        <p style="line-height:1.7;"><a href="${fullUrl(lang, '/forum')}" style="color:#00d2ff;">${ugcForumLink}</a> · <a href="${fullUrl(lang, '/hall-of-fame')}" style="color:#00d2ff;">${ugcHallLink}</a></p>`;
+        <p style="line-height:1.7;"><a href="${fullUrl(lang, '/forum')}" style="color:#00d2ff;">${ugcForumLink}</a></p>`;
 
     const gameRelatedPosts = postsForGame(slug);
     const relatedPostsHtml = gameRelatedPosts.length
@@ -463,7 +414,7 @@ for (const genre of allGenres) {
 
     const pageUrl = fullUrl(lang, routePath);
     const titleTemplate = ui('seoGenrePageTitle', lang, '{genre} Games | Play Free on ArcadeDeck');
-    const descTemplate = ui('seoGenrePageDescription', lang, 'Play {count} {genre} games free on ArcadeDeck. Curated browser titles with global leaderboards. No downloads, no sign-up.');
+    const descTemplate = ui('seoGenrePageDescription', lang, 'Play {count} {genre} games free on ArcadeDeck. Curated browser titles, straight in your browser. No downloads, no sign-up.');
     const title = titleTemplate.replace('{genre}', genre).replace('{count}', String(inGenre.length));
     const desc = descTemplate.replace('{genre}', genre).replace('{count}', String(inGenre.length));
     const heading = ui('genrePageHeading', lang, '{genre} Games').replace('{genre}', genre);
@@ -623,7 +574,7 @@ for (const lang of SUPPORTED_LOCALES) {
 
   const homeUrl = fullUrl(lang, '/');
   const homeTitle = ui('seoHomeTitle', lang, 'ArcadeDeck | The Ultimate Free Browser Games Platform');
-  const homeDesc = ui('seoHomeDescription', lang, 'Play the best free online browser games on ArcadeDeck. High-quality Action, RPG, Strategy, and Idle games with global leaderboards. No downloads, just pure fun!');
+  const homeDesc = ui('seoHomeDescription', lang, 'Play the best free online browser games on ArcadeDeck. High-quality Action, RPG, Strategy, and Idle games. No downloads, just pure fun!');
   const heroTitle = ui('homeHeroTitle', lang, 'Welcome to');
   const heroSub = ui('homeHeroSubtitle', lang, 'Dozens of handcrafted browser games. Pick one, jump in, and see how far you can go.');
 
@@ -683,15 +634,15 @@ ${noscriptItems}
   // Replace noscript body.
   shell = shell.replace(NOSCRIPT_BLOCK_REGEX, `<noscript>${noscriptBody}\n    </noscript>`);
 
-  // Inject home JSON-LD + baked podium before </head>.
-  shell = shell.replace('</head>', `${homeJsonLd(lang)}\n    ${bakedPodiumScript}\n  </head>`);
+  // Inject home JSON-LD before </head>.
+  shell = shell.replace('</head>', `${homeJsonLd(lang)}\n  </head>`);
 
   writeFileSync(`${dir}/index.html`, shell);
 }
 
 // =====================================================================
-// ENGLISH-ONLY STATIC ROUTES — about / privacy / contact / hall-of-fame /
-// my-games / blog (list).
+// ENGLISH-ONLY STATIC ROUTES — about / privacy / contact / my-games /
+// blog (list).
 // =====================================================================
 const formatPostDate = (iso) =>
   new Date(iso + 'T00:00:00Z').toLocaleDateString('en-US', {
@@ -701,14 +652,14 @@ const formatPostDate = (iso) =>
 const blogListNoscript = `
       <div style="background:#171424;color:#eaeaf0;font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;">
         <h1>ArcadeDeck Blog</h1>
-        <p>Patch notes, game design deep-dives, strategy guides, and monthly Hall of Fame recaps from the ArcadeDeck team.</p>
+        <p>Patch notes, game design deep-dives, and strategy guides from the ArcadeDeck team.</p>
         <h2>Latest Posts</h2>
         <ul>
 ${posts
   .map((p) => `          <li><a href="/blog/${p.slug}">${p.title}</a> — <em>${formatPostDate(p.date)}</em>. ${p.excerpt}</li>`)
   .join('\n')}
         </ul>
-        <p><a href="/">Browse all games</a> · <a href="/hall-of-fame">Hall of Fame</a> · <a href="/about">About ArcadeDeck</a></p>
+        <p><a href="/">Browse all games</a> · <a href="/about">About ArcadeDeck</a></p>
       </div>`;
 
 const breadcrumbLdFor = (label, url) =>
@@ -726,7 +677,7 @@ const blogItemListLd = JSON.stringify({
   '@type': 'Blog',
   name: 'ArcadeDeck Blog',
   url: `${SITE}/blog`,
-  description: 'Patch notes, game design deep-dives, strategy guides, and monthly Hall of Fame recaps from the ArcadeDeck team.',
+  description: 'Patch notes, game design deep-dives, and strategy guides from the ArcadeDeck team.',
   inLanguage: 'en',
   blogPost: posts.map((p) => ({
     '@type': 'BlogPosting',
@@ -740,57 +691,34 @@ const blogItemListLd = JSON.stringify({
 const routeShells = {
   blog: {
     title: 'Blog | ArcadeDeck Devlog & Game Updates',
-    description: 'The ArcadeDeck devlog: patch notes, game design deep-dives, strategy guides, and monthly Hall of Fame recaps.',
+    description: 'The ArcadeDeck devlog: patch notes, game design deep-dives, and strategy guides.',
     canonical: `${SITE}/blog`,
     noscript: blogListNoscript,
     extraLd: [blogItemListLd, breadcrumbLdFor('Blog', `${SITE}/blog`)],
   },
-  'hall-of-fame': {
-    title: 'Hall of Fame | ArcadeDeck Legends',
-    description: 'Witness the legends of ArcadeDeck. Check the top players and historical records of our most competitive browser games.',
-    canonical: `${SITE}/hall-of-fame`,
-    extraLd: [breadcrumbLdFor('Hall of Fame', `${SITE}/hall-of-fame`)],
-    noscript: `
-      <div style="background:#171424;color:#eaeaf0;font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;">
-        <h1>Hall of Fame — ArcadeDeck Legends</h1>
-        <p>The eternal record of ArcadeDeck's most accomplished players. Each month we crown the top three legends across our entire game catalogue, then archive their names for posterity.</p>
-        <h2>How the Hall of Fame Works</h2>
-        <p>Every playable game on ArcadeDeck contributes points to the global leaderboard. Players earn points by claiming top ranks on individual game leaderboards, with bonus weight for first place finishes. At the end of each month, the cumulative point totals are frozen and the top three players are inducted into the historical archive.</p>
-        <h2>Current Month</h2>
-        <p>Live rankings update in real time. Visit the page with JavaScript enabled to see who is leading right now and how far ahead they are. Every score you submit on a game leaderboard counts towards the running monthly total.</p>
-        <h2>How to Climb</h2>
-        <ul>
-          <li>Pick a game you genuinely enjoy — sustained play beats one-off attempts.</li>
-          <li>Read the per-game tips and controls before grinding for top scores.</li>
-          <li>Watch the secondary tiebreaker on dual-sort leaderboards (e.g. Gem Merge rewards lower move counts).</li>
-          <li>Comment on game pages to share strategies with other contenders.</li>
-        </ul>
-        <p><a href="/">Browse all games</a> · <a href="/about">About ArcadeDeck</a></p>
-      </div>`,
-  },
   'my-games': {
     title: 'My Games | ArcadeDeck',
-    description: 'Your personal ArcadeDeck library. Recently played games, liked titles, and your active Gamer ID — all synced to your browser.',
+    description: 'Your personal ArcadeDeck library. Recently played games, liked titles, and your active Gamer ID — all stored in your browser.',
     canonical: `${SITE}/my-games`,
     extraLd: [breadcrumbLdFor('My Games', `${SITE}/my-games`)],
     noscript: `
       <div style="background:#171424;color:#eaeaf0;font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;">
         <h1>My Games — Your ArcadeDeck Library</h1>
-        <p>The My Games page is your personal hub on ArcadeDeck. It collects the games you have played most recently, the titles you have liked, and the Gamer ID currently associated with your scores and comments.</p>
+        <p>The My Games page is your personal hub on ArcadeDeck. It collects the games you have played most recently, the titles you have liked, and the Gamer ID currently associated with your comments.</p>
         <h2>Recently Played</h2>
         <p>Every game you launch is recorded locally in your browser. The five most recent titles appear here so you can resume a session in one click. The list is stored in localStorage — clearing your browser data will reset it.</p>
         <h2>Liked Games</h2>
-        <p>Tap the heart icon on any game card or game page to add it to your liked list. Liked games surface here for quick access and contribute to community popularity rankings on the home page.</p>
+        <p>Tap the heart icon on any game card or game page to add it to your liked list. Liked games surface here for quick access.</p>
         <h2>Your Gamer ID</h2>
-        <p>Your Gamer ID is the nickname displayed on every leaderboard and comment you submit. You can change it at any time from this page; existing scores remain attached to whatever name was active when they were submitted.</p>
+        <p>Your Gamer ID is the nickname displayed on every comment you submit. You can change it at any time from the home page.</p>
         <h2>Privacy</h2>
         <p>ArcadeDeck never asks for an email, password, or any real personal information. Everything on the My Games page is stored client-side in your browser. See our <a href="/privacy">Privacy Policy</a> for full details.</p>
-        <p><a href="/">Browse all games</a> · <a href="/hall-of-fame">Hall of Fame</a></p>
+        <p><a href="/">Browse all games</a> · <a href="/blog">Read the blog</a></p>
       </div>`,
   },
   about: {
     title: 'About | ArcadeDeck',
-    description: 'About ArcadeDeck — a curated home for original, free-to-play browser games with global leaderboards and zero sign-up friction.',
+    description: 'About ArcadeDeck — a curated home for original, free-to-play browser games with zero sign-up friction.',
     canonical: `${SITE}/about`,
     extraLd: [breadcrumbLdFor('About', `${SITE}/about`)],
     noscript: `
@@ -799,8 +727,8 @@ const routeShells = {
         <p>ArcadeDeck is a curated home for original, free-to-play browser games. Every title in the catalogue is built specifically for the web — no downloads, no installs, no sign-up walls. Pick a game, hit play, and you are in within seconds.</p>
         <h2>What We Stand For</h2>
         <p>We believe casual browser games deserve the same craft and polish as their console and mobile counterparts. Each ArcadeDeck game is hand-selected for tight controls, fair difficulty curves, and replay value. You will find Action, RPG, Strategy, Idle, Roguelike, Tower Defense, Puzzle, and Casual genres represented, with new titles added regularly.</p>
-        <h2>Global Leaderboards</h2>
-        <p>Every game ships with a real-time global leaderboard powered by Firebase. Scores are validated client-side and clamped server-side, with custom secondary sort rules per game (for example, Gem Merge tiebreaks on lowest move count). Compete, climb, and watch the Hall of Fame for monthly champions.</p>
+        <h2>No Accounts, No Friction</h2>
+        <p>There is no sign-up, no email capture, and no paywall. Pick a nickname if you want to comment or post on the forum — everything else is stored locally in your browser and stays there.</p>
         <h2>Built for Speed</h2>
         <p>The site is a React 19 single-page app deployed on Firebase Hosting with aggressive code splitting, image optimisation, and pre-rendered HTML for every game page. Lighthouse performance scores are a first-class concern — we want you in the game, not staring at a loader.</p>
         <h2>Contact</h2>
@@ -825,11 +753,11 @@ const routeShells = {
         <h1>ArcadeDeck Privacy Policy</h1>
         <p>This page summarises what data ArcadeDeck collects, how it is used, and the choices you have. Load the page with JavaScript enabled to view the fully formatted policy with all sections and links.</p>
         <h2>What We Collect</h2>
-        <p>We collect only the minimum needed to operate the service: your self-chosen Gamer ID (nickname), game scores, comments you voluntarily post, and standard automatic browser data (user-agent, screen size, language, approximate location from IP). We never ask for your real name, email, or password.</p>
+        <p>We collect only the minimum needed to operate the service: your self-chosen Gamer ID (nickname), comments and forum posts you voluntarily submit, and standard automatic browser data (user-agent, screen size, language, approximate location from IP). We never ask for your real name, email, or password.</p>
         <h2>Cookies and Local Storage</h2>
         <p>Strictly necessary localStorage holds your Gamer ID, language, recently played games, and liked games. Google Analytics sets cookies for aggregate traffic measurement. Google AdSense and its partners may set cookies to deliver and measure ads.</p>
         <h2>Third-Party Services</h2>
-        <p>ArcadeDeck relies on Google AdSense (advertising), Google Analytics (traffic measurement), Google Firebase / Firestore (leaderboard and comment storage), and Google Fonts (typography). Each operates under its own privacy policy.</p>
+        <p>ArcadeDeck relies on Google AdSense (advertising), Google Analytics (traffic measurement), Google Firebase / Firestore (comment and forum storage), and Google Fonts (typography). Each operates under its own privacy policy.</p>
         <h2>Your Rights</h2>
         <p>Under GDPR and CCPA you may request access, correction, or deletion of your data, object to processing, withdraw advertising consent, or lodge a complaint with your local data protection authority. Email <a href="mailto:help@arcadedeck.net">help@arcadedeck.net</a> with your Gamer ID to exercise these rights.</p>
         <h2>Children</h2>
@@ -858,7 +786,7 @@ const routeShells = {
           <li><strong>Suggestions</strong> — feature ideas, new games, site feedback.</li>
           <li><strong>Off-Topic</strong> — everything else gamers care about.</li>
         </ul>
-        <p>Enable JavaScript to browse threads, post new topics, and reply to other players. <a href="/" style="color:#00d2ff;">Browse all games</a> · <a href="/hall-of-fame" style="color:#00d2ff;">Hall of Fame</a></p>
+        <p>Enable JavaScript to browse threads, post new topics, and reply to other players. <a href="/" style="color:#00d2ff;">Browse all games</a> · <a href="/blog" style="color:#00d2ff;">Read the blog</a></p>
       </div>`,
   },
   'fractured-realm': {
@@ -882,7 +810,7 @@ const routeShells = {
           <li>Real-time exploration and combat in a fractured fantasy realm.</li>
           <li>No installs, no sign-ups required — just pick a name and play.</li>
         </ul>
-        <p><a href="/" style="color:#00d2ff;">Browse all ArcadeDeck games</a> · <a href="/hall-of-fame" style="color:#00d2ff;">Hall of Fame</a></p>
+        <p><a href="/" style="color:#00d2ff;">Browse all ArcadeDeck games</a> · <a href="/forum" style="color:#00d2ff;">Player forum</a></p>
       </div>`,
   },
   contact: {
@@ -895,13 +823,13 @@ const routeShells = {
         <h1>Contact ArcadeDeck</h1>
         <p>The fastest way to reach us is email. We answer every message — whether it is a bug report, a partnership inquiry, a game submission, or general feedback.</p>
         <h2>Support</h2>
-        <p>Issues with a game, leaderboard, or your Gamer ID: <a href="mailto:help@arcadedeck.net">help@arcadedeck.net</a>. Include the game name, your Gamer ID, and a short description of what happened. Screenshots speed up triage.</p>
+        <p>Issues with a game or your Gamer ID: <a href="mailto:help@arcadedeck.net">help@arcadedeck.net</a>. Include the game name, your Gamer ID, and a short description of what happened. Screenshots speed up triage.</p>
         <h2>Game Submissions</h2>
         <p>If you have built an original browser game and want it featured on ArcadeDeck, send a playable URL plus a one-paragraph description to <a href="mailto:help@arcadedeck.net">help@arcadedeck.net</a>. We review submissions for quality, originality, and platform fit.</p>
         <h2>Partnerships and Press</h2>
         <p>Press kits, partnership proposals, and bulk inquiries can also be sent to the same address. Please mention "Partnership" or "Press" in the subject line so we can route it quickly.</p>
         <h2>Privacy and Data Requests</h2>
-        <p>For GDPR, CCPA, or general privacy requests, see the <a href="/privacy">Privacy Policy</a>, then email us with your Gamer ID and the affected games.</p>
+        <p>For GDPR, CCPA, or general privacy requests, see the <a href="/privacy">Privacy Policy</a>, then email us with your Gamer ID.</p>
         <p><a href="/">Browse all games</a> · <a href="/about">About ArcadeDeck</a></p>
       </div>`,
   },

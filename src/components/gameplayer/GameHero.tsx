@@ -1,19 +1,17 @@
 import React from 'react';
 import { Play } from 'lucide-react';
-import type { Game, LeaderboardEntry } from '../../data/games';
+import type { Game } from '../../data/games';
 import { getLocalizedString, useUiText } from '../../i18n';
 import type { LocaleOverlay } from '../../i18n';
-import { formatScore } from '../../utils/leaderboardUtils';
 
 interface Props {
   game: Game;
   lang: string;
   overlay: LocaleOverlay | null;
-  topEntry: LeaderboardEntry | null;
   onPlay: () => void;
 }
 
-const GameHero: React.FC<Props> = ({ game, lang, overlay, topEntry, onPlay }) => {
+const GameHero: React.FC<Props> = ({ game, lang, overlay, onPlay }) => {
   const uiT = useUiText();
   const title = getLocalizedString(game, 'title', lang, overlay);
   const description = getLocalizedString(game, 'description', lang, overlay);
@@ -21,8 +19,6 @@ const GameHero: React.FC<Props> = ({ game, lang, overlay, topEntry, onPlay }) =>
   const bannerUrl = bannerSrc.startsWith('http')
     ? bannerSrc
     : `${import.meta.env.BASE_URL}${bannerSrc}`;
-  const showTopScore = !!game.leaderboard && !!topEntry;
-  const primaryUnit = game.leaderboard?.primaryUnit ?? '';
 
   return (
     // Hero forces 16/9 cinematic banner regardless of game.aspectRatio.
@@ -49,11 +45,6 @@ const GameHero: React.FC<Props> = ({ game, lang, overlay, topEntry, onPlay }) =>
           <Play size={22} aria-hidden="true" />
           {uiT('playerPlayNow', 'Play Now')}
         </button>
-        {showTopScore && topEntry && (
-          <div className="hero-top-score">
-            <span aria-hidden="true">🏆</span> #1 {topEntry.name} — {formatScore(topEntry.score, primaryUnit)}
-          </div>
-        )}
       </div>
     </div>
   );

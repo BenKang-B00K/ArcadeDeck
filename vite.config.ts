@@ -71,13 +71,6 @@ export default defineConfig({
         ],
         shortcuts: [
           {
-            name: 'Hall of Fame',
-            short_name: 'Leaders',
-            description: 'View global leaderboards',
-            url: '/hall-of-fame',
-            icons: [{ src: 'images/icon-192x192.webp', sizes: '192x192', type: 'image/webp' }]
-          },
-          {
             name: 'My Games',
             short_name: 'Library',
             description: 'Your saved games',

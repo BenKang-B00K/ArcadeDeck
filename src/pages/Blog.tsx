@@ -25,7 +25,7 @@ const Blog: React.FC = () => {
     name: 'ArcadeDeck Blog',
     url: 'https://arcadedeck.net/blog',
     description:
-      'Patch notes, game design deep-dives, strategy guides, and monthly Hall of Fame recaps from the ArcadeDeck team.',
+      'Patch notes, game design deep-dives, and strategy guides from the ArcadeDeck team.',
     blogPost: posts.map((p) => ({
       '@type': 'BlogPosting',
       headline: p.title,
@@ -47,12 +47,12 @@ const Blog: React.FC = () => {
       <>
         <meta
           name="description"
-          content="The ArcadeDeck devlog: patch notes, game design deep-dives, strategy guides, and monthly Hall of Fame recaps."
+          content="The ArcadeDeck devlog: patch notes, game design deep-dives, and strategy guides."
         />
         <meta property="og:title" content="Blog | ArcadeDeck Devlog & Game Updates" />
         <meta
           property="og:description"
-          content="Patch notes, design deep-dives, and Hall of Fame recaps from the ArcadeDeck team."
+          content="Patch notes, design deep-dives, and strategy guides from the ArcadeDeck team."
         />
         <meta property="og:url" content="https://arcadedeck.net/blog" />
         <link rel="canonical" href="https://arcadedeck.net/blog" />
@@ -70,7 +70,7 @@ const Blog: React.FC = () => {
           <h1>
             ArcadeDeck <span>{t('blogTitle', 'Blog')}</span>
           </h1>
-          <p>{t('blogSubtitle', 'Patch notes, design deep-dives, and monthly Hall of Fame recaps.')}</p>
+          <p>{t('blogSubtitle', 'Patch notes, design deep-dives, and strategy guides.')}</p>
         </header>
         <nav className="blog-tag-cloud" aria-label="Browse by tag">
           {getAllTags().map((t) => (

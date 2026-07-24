@@ -4,7 +4,7 @@
 
 A new game touches only two source files plus one image. Other locale files are translated separately by the user.
 
-1. **`src/data/games.json`** — structural data only (`id`, `slug`, `gameUrl`, `leaderboard`, etc.). No text.
+1. **`src/data/games.json`** — structural data only (`id`, `slug`, `gameUrl`, etc.). No text.
 2. **`src/i18n/locales/en.json`** (`games[<id>]` block) — canonical English text.
 
 Other languages (`de.json`, `ja.json`, `ko.json`, …) fall back to English per field. Do not auto-fill them.
@@ -22,16 +22,7 @@ Other languages (`de.json`, `ja.json`, `ko.json`, …) fall back to English per 
   "status": "PLAYABLE",
   "isOriginal": true,
   "language": "EN",
-  "badge": "POPULAR",
-  "leaderboard": {
-    "title": "My Game Leaderboard",
-    "primaryLabel": "Score",
-    "primaryUnit": "",
-    "secondaryLabel": "Level",
-    "secondaryUnit": "",
-    "dualSort": true,
-    "subSortAsc": false
-  }
+  "badge": "POPULAR"
 }
 ```
 
@@ -49,18 +40,6 @@ Other languages (`de.json`, `ja.json`, `ko.json`, …) fall back to English per 
 }
 ```
 
-### `leaderboard` Field Reference
-
-| Field | Type | Description |
-|------|------|------|
-| `title` | string | Leaderboard heading |
-| `primaryLabel` | string | Primary score label (`"Score"`, `"Waves"`, …) |
-| `primaryUnit` | string | Primary score unit (`" pts"`, `"%"`, `""`) |
-| `secondaryLabel` | string | Secondary score label. `""` if none |
-| `secondaryUnit` | string | Secondary score unit prefix (`"Lv."`) |
-| `dualSort` | boolean | When `true`, Firestore query adds `orderBy("subScore")` |
-| `subSortAsc` | boolean | When `true`, lower `subScore` wins ties (Gem Merge style) |
-
 ### After Adding a Game
 
 - [ ] Add a WebP thumbnail under `public/images/` (filename = `{slug}.webp`, kebab-case)
@@ -75,16 +54,8 @@ Never edit `public/sitemap.xml`, `public/rss.xml`, or any `dist/play/.../index.h
 
 ### Firestore
 
-- `leaderboards.{name, gameId}` are **immutable** after create (enforced by rules)
-- `score` must satisfy `0 ≤ score ≤ 10_000_000`
 - `comments` text capped at **300 chars**, nicknames at **30 chars**
 - Deploy rule changes with: `firebase deploy --only firestore:rules --project ultragames-website`
-
-### postMessage Scoring (Game iframes)
-
-- Process the message only when `event.origin` matches the game's iframe domain
-- Require `isFinite(score)` and clamp to `[0, 10_000_000]`
-- Drop violating messages **silently** — never `alert` or surface an error
 
 ### Forbidden
 
@@ -95,12 +66,6 @@ Never edit `public/sitemap.xml`, `public/rss.xml`, or any `dist/play/.../index.h
 ---
 
 ## 3. Performance Rules
-
-### GlobalLeaderboard (Hall of Fame)
-
-- Firestore query results are cached in `sessionStorage` for **5 minutes** (`arcadedeck_rank_cache`)
-- The manual refresh (🔄) button is the **only** invalidator
-- Run per-game queries in parallel via `Promise.all` — never serialize them
 
 ### CommentSection
 
@@ -127,7 +92,6 @@ Never edit `public/sitemap.xml`, `public/rss.xml`, or any `dist/play/.../index.h
 ### Components
 
 - Every route is wrapped in `<ErrorBoundary>` — do not add per-page try/catch UI.
-- Score display strings come from `games.json` `leaderboard` config — never hardcode them.
 - Hardcoding game IDs (`id === '7'`) is forbidden. Branch on configuration instead.
 - Game text (`title`, `description`, `fullDescription`, `controls`, `tips`, `lore`, `features`) must always be resolved through `getLocalizedString` / `getLocalizedArray`. Direct property access (`game.title`) is not on the `Game` type.
 
@@ -138,8 +102,8 @@ src/
 ├── components/   # Reusable components (CSS colocated)
 ├── pages/        # Route components
 ├── data/
-│   ├── games.json    # Structural game data (id/slug/gameUrl/leaderboard) — no text
-│   └── games.ts      # Game / LeaderboardConfig types + exports
+│   ├── games.json    # Structural game data (id/slug/gameUrl) — no text
+│   └── games.ts      # Game type + exports
 ├── i18n/
 │   ├── locales/      # Per-language overlays. en.json is canonical.
 │   ├── registry.ts   # Supported locales, URL helpers, BCP-47 maps

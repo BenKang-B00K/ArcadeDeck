@@ -23,15 +23,3 @@ export const SkeletonGrid: React.FC<SkeletonGridProps> = ({ count = 8 }) => (
     </div>
   </section>
 );
-
-export const SkeletonPodium: React.FC = () => (
-  <div className="hall-of-fame-podium" aria-busy="true" aria-label="Loading rankings">
-    {[1, 2, 3].map(i => (
-      <div key={i} className={`skeleton-podium-card rank-${i}`}>
-        <div className="skeleton-circle shimmer" />
-        <div className="skeleton-line shimmer skeleton-podium-name" />
-        <div className="skeleton-line shimmer skeleton-podium-pts" />
-      </div>
-    ))}
-  </div>
-);

@@ -44,7 +44,6 @@ const gameUrls = games
 const staticUrls = [
   `https://${HOST}/`,
   `https://${HOST}/blog`,
-  `https://${HOST}/hall-of-fame`,
   `https://${HOST}/about`,
 ];
 

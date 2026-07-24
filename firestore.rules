@@ -2,37 +2,6 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Leaderboards collection
-    match /leaderboards/{document} {
-      // Anyone can read the leaderboards
-      allow read: if true;
-
-      // Create: validate all required fields and types
-      allow create: if request.resource.data.keys().hasAll(['gameId', 'name', 'score', 'createdAt'])
-        && request.resource.data.score is number
-        && request.resource.data.score >= 0
-        && request.resource.data.score <= 10000000
-        && (
-          !request.resource.data.keys().hasAny(['subScore'])
-          || (request.resource.data.subScore is number && request.resource.data.subScore >= 0)
-        )
-        && request.resource.data.name is string
-        && request.resource.data.name.size() > 0
-        && request.resource.data.name.size() <= 30
-        && request.resource.data.gameId is string;
-
-      // Update: name and gameId must not change, score/subScore must be valid
-      allow update: if resource.data.name == request.resource.data.name
-        && resource.data.gameId == request.resource.data.gameId
-        && request.resource.data.score is number
-        && request.resource.data.score >= 0
-        && request.resource.data.score <= 10000000
-        && (
-          !request.resource.data.keys().hasAny(['subScore'])
-          || (request.resource.data.subScore is number && request.resource.data.subScore >= 0)
-        );
-    }
-
     // Comments collection
     match /comments/{document} {
       // Anyone can read comments
@@ -101,18 +70,6 @@ service cloud.firestore {
         && request.resource.data.body.size() <= 2000;
 
       allow update, delete: if false;
-    }
-
-    // Denormalized podium aggregate (server-maintained via Cloud Function)
-    match /aggregates/{document} {
-      allow read: if true;
-      allow write: if false;
-    }
-
-    // Per-game leaderboard top-3 cache (server-maintained via Cloud Function)
-    match /leaderboardCache/{document} {
-      allow read: if true;
-      allow write: if false;
     }
 
     // Default deny for everything else

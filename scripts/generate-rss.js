@@ -57,7 +57,7 @@ const xml = `<?xml version="1.0" encoding="UTF-8"?>
     <title>ArcadeDeck Blog</title>
     <link>${SITE}/blog</link>
     <atom:link href="${FEED_URL}" rel="self" type="application/rss+xml" />
-    <description>Patch notes, game design deep-dives, strategy guides, and monthly Hall of Fame recaps from the ArcadeDeck team.</description>
+    <description>Patch notes, game design deep-dives, and strategy guides from the ArcadeDeck team.</description>
     <language>en-us</language>
     <copyright>Copyright ${new Date().getUTCFullYear()} ArcadeDeck</copyright>
     <lastBuildDate>${buildDate}</lastBuildDate>

@@ -1,38 +1,20 @@
-import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
 import { Maximize, Minimize, Heart, Link as LinkIcon, Home, X } from 'lucide-react';
 import { games } from '../data/games';
-import type { Game, LeaderboardEntry } from '../data/games';
+import type { Game } from '../data/games';
 import Navbar from '../components/Navbar';
-import Leaderboard from '../components/Leaderboard';
 import AdBanner from '../components/AdBanner';
 import CommentSection from '../components/CommentSection';
 import ShareModal from '../components/ShareModal';
-import GameResultModal from '../components/GameResultModal';
 import GameHeadMeta from '../components/gameplayer/GameHeadMeta';
 import GameHero from '../components/gameplayer/GameHero';
 import GameInfoTabs from '../components/gameplayer/GameInfoTabs';
 import RelatedGames from '../components/gameplayer/RelatedGames';
 import RelatedPosts from '../components/gameplayer/RelatedPosts';
-import { isNewPersonalBest, compareLeaderboardEntries, formatScore } from '../utils/leaderboardUtils';
-import { buildLeaderboardQuery } from '../utils/leaderboardQuery';
 import { useNickname } from '../hooks/useNickname';
-import { useToast } from '../contexts/useToast';
-import { MAX_SCORE, AD_SLOTS, LEADERBOARD_FETCH_LIMIT } from '../constants/gameConstants';
-import { db } from '../firebase';
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  limit,
-  addDoc,
-  serverTimestamp,
-  updateDoc,
-  doc
-} from "firebase/firestore/lite";
-import { safeRead, safeWrite, circuitOpen } from '../utils/firestoreCircuit';
+import { AD_SLOTS } from '../constants/gameConstants';
 import { useUiText, useLocale, getLocalizedString, getLocalizedObjects } from '../i18n';
 import { genreSlug } from '../utils/genres';
 import './GamePlayer.css';
@@ -42,26 +24,17 @@ const GamePlayer: React.FC = () => {
   // Support both slug-based (/play/gate-of-hell) and legacy id-based (/play/1) URLs
   const id = games.find(g => g.slug === slug)?.id ?? slug;
   const game = useMemo<Game | null>(() => games.find(g => g.id === id) ?? null, [id]);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const nickname = useNickname();
   const [isLiked, setIsLiked] = useState<boolean>(() =>
     localStorage.getItem(`liked_${id}`) === 'true'
   );
   const [isPseudoFullscreen, setIsPseudoFullscreen] = useState(false);
   const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
-  const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [iframeLoading, setIframeLoading] = useState(true);
   const { lang, overlay } = useLocale();
-  const { showToast: showNotification } = useToast();
-  const [gameResult, setGameResult] = useState<{
-    score: number; unit: string;
-    resultType: 'personal-best' | 'first-score' | 'game-over';
-    rank: number | null;
-  } | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [showStickyBar, setShowStickyBar] = useState(false);
-  const [iframeKey, setIframeKey] = useState(0);
   // Click-to-start gate. Iframe stays unmounted until user clicks PLAY,
   // so we don't burn bandwidth + LCP on a hidden game frame.
   // ?play=1 deep link skips the hero for share-direct flows.
@@ -77,146 +50,7 @@ const GamePlayer: React.FC = () => {
   const t = {
     back: uiT('playerBack', 'ArcadeDeck'),
     fullscreen: uiT('playerFullscreen', 'Fullscreen'),
-    gameOver: uiT('resultGameOver', 'Game Over!'),
   };
-
-  const fetchLeaderboard = useCallback(async (): Promise<LeaderboardEntry[]> => {
-    if (!id) return [];
-    const lb = games.find(g => g.id === id)?.leaderboard;
-    if (!lb) return [];
-    const subSortAsc = lb.subSortAsc ?? false;
-    const dualSort = lb.dualSort ?? false;
-
-    const mapDoc = (doc: { data: () => Record<string, unknown> }): LeaderboardEntry => {
-      const data = doc.data() as { name: string; score: number; subScore?: number; createdAt?: { toDate?: () => Date } };
-      return {
-        name: data.name,
-        score: data.score,
-        subScore: Number(data.subScore) || 0,
-        date: data.createdAt?.toDate ? data.createdAt.toDate().toLocaleDateString() : 'Unknown'
-      };
-    };
-
-    const finalize = (entries: LeaderboardEntry[]) => {
-      const sorted = [...entries].sort((a, b) => compareLeaderboardEntries(a, b, subSortAsc));
-      setLeaderboard(sorted);
-      return sorted;
-    };
-
-    if (circuitOpen()) {
-      // Quota cooldown — render empty leaderboard, don't bother the API.
-      return finalize([]);
-    }
-
-    try {
-      const q = buildLeaderboardQuery(db, id, { dualSort, subSortAsc, limit: LEADERBOARD_FETCH_LIMIT });
-      const querySnapshot = await safeRead(() => getDocs(q), null);
-      if (querySnapshot) return finalize(querySnapshot.docs.map(mapDoc));
-      // safeRead returned null — circuit just opened, bail to empty
-      return finalize([]);
-    } catch (error) {
-      // Composite index is declared in firestore.indexes.json; quota is handled
-      // by safeRead. Anything left is a real fault — surface it, render empty.
-      console.error("Error fetching leaderboard: ", error);
-      showNotification(uiT('playerLeaderboardError', 'Failed to load leaderboard.'), 'error');
-      return finalize([]);
-    }
-  }, [id, uiT, showNotification]);
-
-  const handleGameComplete = useCallback(async (score: number, subScore?: number) => {
-    if (!id) return;
-    const lb = games.find(g => g.id === id)?.leaderboard;
-    if (!lb) return;
-
-    const primaryUnit    = lb.primaryUnit    ?? '';
-    const secondaryLabel = lb.secondaryLabel ?? '';
-    const secondaryUnit  = lb.secondaryUnit  ?? '';
-    const subSortAsc     = lb.subSortAsc     ?? false;
-
-    const buildSubPart = (sub: number) =>
-      secondaryLabel ? ` (${secondaryLabel}: ${secondaryUnit}${sub})` : '';
-
-    const currentSubScore = subScore ?? 0;
-
-    // Quota cooldown: show local-only result, don't hit Firestore.
-    if (circuitOpen()) {
-      setGameResult({ score, unit: primaryUnit, resultType: 'first-score', rank: null });
-      showNotification(uiT('playerScoreSubmitOffline', 'Score recorded locally — leaderboard temporarily unavailable.'), 'info');
-      return;
-    }
-
-    try {
-      const q = query(
-        collection(db, "leaderboards"),
-        where("gameId", "==", id),
-        where("name", "==", nickname),
-        limit(1)
-      );
-      const querySnapshot = await safeRead(() => getDocs(q), null);
-      if (!querySnapshot) {
-        // Circuit opened mid-call
-        setGameResult({ score, unit: primaryUnit, resultType: 'first-score', rank: null });
-        showNotification(uiT('playerScoreSubmitOffline', 'Score recorded locally — leaderboard temporarily unavailable.'), 'info');
-        return;
-      }
-
-      if (!querySnapshot.empty) {
-        const docSnap = querySnapshot.docs[0];
-        const prevData = docSnap.data();
-        const prevScore    = Number(prevData.score)    || 0;
-        const prevSubScore = Number(prevData.subScore) || 0;
-
-        const isNewBest = isNewPersonalBest(score, currentSubScore, prevScore, prevSubScore, subSortAsc);
-
-        if (isNewBest) {
-          const w = await safeWrite(() => updateDoc(doc(db, "leaderboards", docSnap.id), {
-            score,
-            subScore: currentSubScore,
-            createdAt: serverTimestamp()
-          }));
-          if (!w.ok) {
-            showNotification(uiT('playerScoreSubmitError', 'Failed to submit score. Please try again.'), 'error');
-            return;
-          }
-          const updatedEntries = await fetchLeaderboard();
-          const myRank = updatedEntries.findIndex(e => e.name === nickname) + 1;
-          setGameResult({ score, unit: primaryUnit, resultType: 'personal-best', rank: myRank > 0 ? myRank : null });
-          return;
-        } else {
-          showNotification(
-            `${t.gameOver} ${formatScore(score, primaryUnit)}${buildSubPart(currentSubScore)} (Best: ${formatScore(prevScore, primaryUnit)})`,
-            'info'
-          );
-        }
-      } else {
-        const w = await safeWrite(() => addDoc(collection(db, "leaderboards"), {
-          gameId: id,
-          name: nickname,
-          score,
-          subScore: currentSubScore,
-          createdAt: serverTimestamp()
-        }));
-        if (!w.ok) {
-          showNotification(uiT('playerScoreSubmitError', 'Failed to submit score. Please try again.'), 'error');
-          return;
-        }
-        const updatedEntries = await fetchLeaderboard();
-        const myRank = updatedEntries.findIndex(e => e.name === nickname) + 1;
-        setGameResult({ score, unit: primaryUnit, resultType: 'first-score', rank: myRank > 0 ? myRank : null });
-        return;
-      }
-
-      const updatedEntries = await fetchLeaderboard();
-      const myRank = updatedEntries.findIndex(e => e.name === nickname) + 1;
-
-      if (myRank > 0 && myRank <= 3) {
-        setShowLeaderboard(true);
-      }
-    } catch (error) {
-      console.error("Error submitting score: ", error);
-      showNotification(uiT('playerScoreSubmitError', 'Failed to submit score. Please try again.'), 'error');
-    }
-  }, [id, nickname, uiT, t.gameOver, fetchLeaderboard, showNotification]);
 
   useEffect(() => {
     if (!game || !id) return;
@@ -229,47 +63,6 @@ const GamePlayer: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
-
-  useEffect(() => {
-    void fetchLeaderboard();
-
-    // Derive the allowed origin from the game's iframe URL
-    const lg = games.find(g => g.id === id);
-    let allowedOrigin: string | null = null;
-    if (lg?.gameUrl) {
-      try {
-        allowedOrigin = new URL(lg.gameUrl).origin;
-      } catch {
-        allowedOrigin = null;
-      }
-    }
-
-    const handleMessage = (event: MessageEvent) => {
-      // Block messages from any origin other than the game's own domain
-      if (!allowedOrigin || event.origin !== allowedOrigin) return;
-
-      const types = ['GAME_SCORE', 'SCORE_UPDATE', 'gameOver', 'GAME_OVER'];
-      if (event.data && types.includes(event.data.type)) {
-        const rawScore = event.data.score;
-        const rawSubScore = event.data.subScore;
-
-        const score = typeof rawScore === 'number' ? rawScore : Number(rawScore);
-        const subScore = typeof rawSubScore === 'number' ? rawSubScore : (rawSubScore !== undefined ? Number(rawSubScore) : undefined);
-
-        // Validate score is a safe, non-negative finite number within a sane ceiling
-        if (rawScore === undefined || isNaN(score) || !isFinite(score) || score < 0 || score > MAX_SCORE) return;
-
-        const safeSubScore = (subScore !== undefined && !isNaN(subScore) && isFinite(subScore) && subScore >= 0 && subScore <= MAX_SCORE)
-          ? subScore
-          : undefined;
-
-        void handleGameComplete(score, safeSubScore);
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [id, fetchLeaderboard, handleGameComplete]);
 
   useEffect(() => {
     if (isPseudoFullscreen) {
@@ -467,7 +260,6 @@ const GamePlayer: React.FC = () => {
               game={game}
               lang={lang}
               overlay={overlay}
-              topEntry={leaderboard[0] ?? null}
               onPlay={handlePlay}
             />
           ) : (
@@ -479,7 +271,6 @@ const GamePlayer: React.FC = () => {
                 </div>
               )}
               <iframe
-                key={iframeKey}
                 ref={iframeRef}
                 src={game.gameUrl}
                 title={getLocalizedString(game, 'title', 'en', null)}
@@ -499,7 +290,6 @@ const GamePlayer: React.FC = () => {
 
         <GameInfoTabs game={game} lang={lang} overlay={overlay} activeTab={activeTab} setActiveTab={setActiveTab} />
 
-        {game.leaderboard && <Leaderboard entries={leaderboard} gameId={game.id} currentNickname={nickname} />}
         <CommentSection
           gameId={game.id}
           currentNickname={nickname}
@@ -525,35 +315,11 @@ const GamePlayer: React.FC = () => {
         </div>
       )}
 
-      {game.leaderboard && showLeaderboard && (
-        <div className="leaderboard-modal-overlay" onClick={() => setShowLeaderboard(false)}>
-          <div className="leaderboard-modal-content" onClick={e => e.stopPropagation()}>
-            <button className="close-modal-btn" onClick={() => setShowLeaderboard(false)} aria-label="Close leaderboard"><X size={18} aria-hidden="true" /></button>
-            <div className="modal-inner-scroll">
-              <Leaderboard entries={leaderboard} gameId={game.id} currentNickname={nickname} />
-            </div>
-          </div>
-        </div>
-      )}
-
       <ShareModal
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
         gameTitle={getLocalizedString(game, 'title', lang, overlay)}
         gameUrl={`https://arcadedeck.net/play/${game.slug}`}
-      />
-
-      <GameResultModal
-        isOpen={gameResult !== null}
-        onClose={() => setGameResult(null)}
-        gameTitle={getLocalizedString(game, 'title', lang, overlay)}
-        gameSlug={game.slug}
-        score={gameResult?.score ?? 0}
-        scoreUnit={gameResult?.unit ?? ''}
-        resultType={gameResult?.resultType ?? 'game-over'}
-        rank={gameResult?.rank ?? null}
-        // Reload iframe in place; do NOT reset gameStarted — user already chose to play.
-        onPlayAgain={() => { setIframeKey(k => k + 1); setIframeLoading(true); }}
       />
     </div>
   );

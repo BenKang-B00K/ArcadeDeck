@@ -39,7 +39,6 @@ const SKIP = new Set([
   'icon-512x512.webp',
   'arcadedeck-banner.webp',
   'bg.webp',
-  'hall-of-fame-bg.webp',
   'my-rank-bg.webp',
   'blog-bg.webp',
   'gate-of-hell-bg.webp',

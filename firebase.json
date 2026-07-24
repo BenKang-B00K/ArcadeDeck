@@ -6,6 +6,13 @@
       "**/.*",
       "**/node_modules/**"
     ],
+    "redirects": [
+      {
+        "source": "/hall-of-fame",
+        "destination": "/",
+        "type": 301
+      }
+    ],
     "rewrites": [
       {
         "source": "**",
@@ -64,7 +71,7 @@
         ]
       },
       {
-        "source": "/{about,privacy,contact,hall-of-fame,my-games,blog}",
+        "source": "/{about,privacy,contact,my-games,blog}",
         "headers": [
           { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
         ]
@@ -92,21 +99,5 @@
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
-  },
-  "functions": [
-    {
-      "source": "functions",
-      "codebase": "default",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log",
-        "*.local"
-      ],
-      "predeploy": [
-        "node -e \"require('fs').copyFileSync('src/data/games.json','functions/games-config.json')\""
-      ]
-    }
-  ]
+  }
 }

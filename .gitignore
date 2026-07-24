@@ -68,3 +68,6 @@ Desktop.ini
 # Coverage & test output
 coverage/
 *.lcov
+
+# Local Firestore export (contains player nicknames)
+leaderboards-backup.json

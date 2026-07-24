@@ -14,7 +14,6 @@ const GamePlayer  = lazy(() => import('./pages/GamePlayer'));
 const About       = lazy(() => import('./pages/About'));
 const Privacy     = lazy(() => import('./pages/Privacy'));
 const Contact     = lazy(() => import('./pages/Contact'));
-const HallOfFame  = lazy(() => import('./pages/HallOfFame'));
 const MyGames     = lazy(() => import('./pages/MyGames'));
 const Blog        = lazy(() => import('./pages/Blog'));
 const BlogPost    = lazy(() => import('./pages/BlogPost'));
@@ -63,7 +62,6 @@ function App({ basename = '/' }: AppProps) {
                 <Route path="/about"        element={<About />} />
                 <Route path="/privacy"      element={<Privacy />} />
                 <Route path="/contact"      element={<Contact />} />
-                <Route path="/hall-of-fame" element={<HallOfFame />} />
                 <Route path="/my-games"     element={<MyGames />} />
                 <Route path="/blog"             element={<Blog />} />
                 <Route path="/blog/tag/:tag"    element={<BlogTag />} />

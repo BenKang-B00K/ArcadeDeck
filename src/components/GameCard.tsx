@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Monitor, Gamepad2, Play, Trophy } from 'lucide-react';
+import { Monitor, Gamepad2, Play } from 'lucide-react';
 import type { Game } from '../data/games';
 import { useLocale, getLocalizedString, getEnFeatures, useUiText } from '../i18n';
 import { thumb360, SRCSET_SIZES } from '../utils/thumb';
@@ -29,12 +29,11 @@ interface GameCardProps {
   onProductionClick?: () => void;
   isRecentlyPlayed?: boolean;
   onGenreClick?: (genre: string) => void;
-  myRank?: number;
   maxTags?: number;
   recentIndex?: number;
 }
 
-const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecentlyPlayed = false, onGenreClick, myRank, maxTags, recentIndex }) => {
+const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecentlyPlayed = false, onGenreClick, maxTags, recentIndex }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const { lang, overlay } = useLocale();
   const t = useUiText();
@@ -100,19 +99,13 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
       onMouseMove={tiltHandlers.onMouseMove}
       onFocus={handleMouseEnter}
     >
-      {/* Row 1: Title + Badge + Rank */}
+      {/* Row 1: Title + Badge */}
       <div className="card-title-row">
         <h3>{title}</h3>
         {game.isOriginal && <span className="original-dot" title={t('gameCardOriginal', 'Original')} />}
         {game.badge && (
           <span className={`game-badge badge-${badgeClass}`}>
             {game.badge}
-          </span>
-        )}
-        {myRank && (
-          <span className={`my-rank-badge rank-tier-${myRank <= 3 ? myRank : 'other'}`}>
-            <Trophy size={10} aria-hidden="true" />
-            #{myRank}
           </span>
         )}
       </div>

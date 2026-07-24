@@ -29,7 +29,7 @@ export const SUPPORTED_LOCALES: string[] = (() => {
 })();
 
 // English (default locale) lives at the root; other locales sit under a
-// lower-cased path prefix (e.g. /de, /es-la). These helpers keep the
+// lower-cased path prefix (e.g. /ja, /ko). These helpers keep the
 // canonical form ↔ URL form mapping in one place.
 export function localeToUrlPrefix(lang: string): string {
   if (!lang || lang === 'en') return '';

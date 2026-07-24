@@ -35,7 +35,7 @@ export default defineConfig({
       // build, so they never enter the Workbox precache manifest. The current
       // precache stays lean (single index.html shell + hashed assets). If the
       // build order ever changes, add `workbox.globIgnores` to skip
-      // `**/{de,es,es-la,fr,ja,ko,pt,ru,vi,zh}/**/*` and `**/blog/tag/**/*`.
+      // `**/{ja,ko}/**/*` and `**/blog/tag/**/*`.
       manifest: {
         id: '/',
         name: 'ArcadeDeck | The Ultimate Free Browser Games Platform',

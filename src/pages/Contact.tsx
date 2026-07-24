@@ -21,7 +21,7 @@ const Contact: React.FC = () => {
       <main className="container" style={{ paddingTop: '120px', flex: 1, color: 'var(--text-primary)' }}>
         <h1 style={{ fontSize: '3rem', marginBottom: '2rem' }}>Contact <span style={{ color: '#00d2ff' }}>Us</span></h1>
         <div style={{ lineHeight: '1.8', fontSize: '1.1rem', maxWidth: '800px' }}>
-          <p>We love hearing from our players. Whether you spotted a bug, want to suggest a feature, have a question about a game, want to flag a translation issue in one of our 11 supported languages, or want to talk about a partnership, the inboxes below all reach a human.</p>
+          <p>We love hearing from our players. Whether you spotted a bug, want to suggest a feature, have a question about a game, want to flag a translation issue in one of our 3 supported languages, or want to talk about a partnership, the inboxes below all reach a human.</p>
 
           <div style={{ marginTop: '40px', background: 'var(--surface-2)', padding: '30px', borderRadius: '15px' }}>
             <h3 style={{ color: '#00d2ff' }}>Player Support &amp; Bug Reports</h3>
@@ -43,7 +43,7 @@ const Contact: React.FC = () => {
           <h2 style={{ marginTop: '40px', color: '#00d2ff' }}>Frequently Asked Questions</h2>
           <p><strong>Are the games really free?</strong> Yes. Every game on ArcadeDeck is free to play with no downloads, sign-ups, or paywalls. ArcadeDeck is supported by ads.</p>
           <p><strong>How do I change my Gamer ID?</strong> Click the edit icon next to your name on the homepage. Comments and forum posts keep the name they were submitted under.</p>
-          <p><strong>Can I switch the site language?</strong> Yes. Use the language switcher in the navbar to pick from English, Korean, Japanese, Chinese, German, or French. Each locale has its own URL path so you can share or bookmark links in your preferred language.</p>
+          <p><strong>Can I switch the site language?</strong> Yes. Use the language switcher in the navbar to pick from English, Korean, or Japanese. Each locale has its own URL path so you can share or bookmark links in your preferred language.</p>
           <p><strong>I spotted a translation error — what should I do?</strong> Email <a href="mailto:help@arcadedeck.net" style={{ color: '#00d2ff' }}>help@arcadedeck.net</a> with the locale code (e.g., <code>ja</code>, <code>de</code>), the game or page, and the suggested correction. Native-speaker fixes ship fast.</p>
           <p><strong>Can I submit my own game?</strong> Yes — see the Business &amp; Game Submissions email above. Include a playable build link, a short description, and your contact info.</p>
         </div>

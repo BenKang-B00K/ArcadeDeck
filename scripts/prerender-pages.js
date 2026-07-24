@@ -20,8 +20,7 @@ const SUPPORTED_LOCALES = readdirSync('src/i18n/locales')
 SUPPORTED_LOCALES.sort((a, b) => (a === 'en' ? -1 : b === 'en' ? 1 : a.localeCompare(b)));
 
 const BCP47 = {
-  en: 'en_US', de: 'de_DE', fr: 'fr_FR',
-  ja: 'ja_JP', ko: 'ko_KR', zh: 'zh_CN',
+  en: 'en_US', ja: 'ja_JP', ko: 'ko_KR',
 };
 const SITE = 'https://arcadedeck.net';
 const prefix = (lang) => (lang === 'en' ? '' : '/' + lang.toLowerCase());

@@ -13,7 +13,7 @@ const DEFAULT_LOCALE = 'en';
 
 function detectInitial(): string {
   if (typeof window === 'undefined') return DEFAULT_LOCALE;
-  // 1. URL prefix is authoritative — a visitor landing on /de/... must see German.
+  // 1. URL prefix is authoritative — a visitor landing on /ja/... must see Japanese.
   const fromUrl = stripLocalePrefix(window.location.pathname).lang;
   if (fromUrl !== DEFAULT_LOCALE) return fromUrl;
   // 2. Persisted choice from a previous visit.

@@ -35,7 +35,7 @@ const Privacy: React.FC = () => {
           <h3 style={{ marginTop: '16px', color: '#00d2ff' }}>2.2 Information Collected Automatically</h3>
           <ul>
             <li><strong>Browser & device data:</strong> User-agent, screen size, language, and approximate location derived from IP address — collected by Google Analytics for traffic measurement.</li>
-            <li><strong>Cookies and local storage:</strong> Small data files stored in your browser to remember your Gamer ID, recently played games, locale preference (one of 11 supported languages), and like state. See Section 4 for details.</li>
+            <li><strong>Cookies and local storage:</strong> Small data files stored in your browser to remember your Gamer ID, recently played games, locale preference (one of 3 supported languages), and like state. See Section 4 for details.</li>
             <li><strong>Advertising identifiers:</strong> Google AdSense and its partners may set cookies to deliver and measure ads. See Section 5.</li>
           </ul>
 

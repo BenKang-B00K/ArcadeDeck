@@ -11,7 +11,13 @@
         "source": "/hall-of-fame",
         "destination": "/",
         "type": 301
-      }
+      },
+      { "source": "/de", "destination": "/", "type": 301 },
+      { "source": "/de/:rest*", "destination": "/:rest*", "type": 301 },
+      { "source": "/fr", "destination": "/", "type": 301 },
+      { "source": "/fr/:rest*", "destination": "/:rest*", "type": 301 },
+      { "source": "/zh", "destination": "/", "type": 301 },
+      { "source": "/zh/:rest*", "destination": "/:rest*", "type": 301 }
     ],
     "rewrites": [
       {

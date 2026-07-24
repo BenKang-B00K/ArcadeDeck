@@ -121,7 +121,7 @@ src/
 - Missing keys in any other locale fall back to English per-field.
 - **Never invent translations** for non-English locales without explicit instruction. The user owns those files.
 - New UI strings must be added to `en.json` `ui` block. Reference them via `useUiText()` / `ui()` helpers — never hardcode strings in components.
-- URL prefix routing is automatic: English at root (`/`, `/play/{slug}`); other locales at `/{lang}/…` (e.g. `/de/play/foo`, `/es-la/`).
+- URL prefix routing is automatic: English at root (`/`, `/play/{slug}`); other locales at `/{lang}/…` (e.g. `/ja/play/foo`, `/ko/`).
 - Backups must live **outside** `src/i18n/locales/` (the glob bundles every `*.json` in that dir into the build).
 
 ---

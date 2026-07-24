@@ -32,7 +32,7 @@ const About: React.FC = () => {
           <p><strong>Original Games:</strong> Most titles on ArcadeDeck are original creations, developed in-house. We don't just aggregate games from other sources — we build them from scratch with unique mechanics, art, and storylines.</p>
           <p><strong>No Accounts, No Friction:</strong> No sign-up, no email capture, no paywall. Pick a nickname if you want to comment or post on the forum — everything else stays in your browser.</p>
           <p><strong>Cross-Platform:</strong> Our games run on desktops, tablets, and phones. We optimize for touch controls and responsive layouts so you get the best experience regardless of device.</p>
-          <p><strong>11 Languages:</strong> ArcadeDeck is localized in English, Korean, Japanese, Chinese, German, French, Spanish (EU and LATAM), Portuguese, Russian, and Vietnamese. Game titles, descriptions, controls, tips, and world lore are translated per locale, and every locale has its own URL path for SEO.</p>
+          <p><strong>3 Languages:</strong> ArcadeDeck is localized in English, Korean, and Japanese. Game titles, descriptions, controls, tips, and world lore are translated per locale, and every locale has its own URL path for SEO.</p>
 
           <h2 style={{ marginTop: '3rem', color: '#00d2ff' }}>Our Technology</h2>
           <p>ArcadeDeck is built with React 19, TypeScript, Firebase, and Vite. Games run entirely in the browser via HTML5 Canvas and WebGL — no plugins, no installs. The site is a Progressive Web App (PWA), so you can install it to your home screen for a native app-like experience and offline access to recently played titles.</p>

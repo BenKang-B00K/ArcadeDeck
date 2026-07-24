@@ -4,7 +4,7 @@ import './index.css'
 import App from './App.tsx'
 import { matchLocaleSlug, localeToUrlPrefix } from './i18n/registry'
 
-// Detect locale from the URL prefix (e.g. /de, /es-la). React Router runs
+// Detect locale from the URL prefix (e.g. /ja, /ko). React Router runs
 // with the prefix as basename so child routes match the canonical English
 // path shape, and every internal <Link> automatically inherits the prefix.
 const firstSeg = window.location.pathname.split('/')[1] ?? '';

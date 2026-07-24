@@ -145,7 +145,9 @@ for (const lang of SUPPORTED_LOCALES) {
 
     const t = txt(game.id, lang);
     const tEn = txt(game.id, 'en');
-    const playFreeOn = ui('seoPlayFreeOn', lang, 'Play Free on');
+    // Self-contained per locale — ja/ko put "ArcadeDeck" at the front, so the
+    // template must not append it again.
+    const playFreeOn = ui('seoPlayFreeOn', lang, 'Play Free on ArcadeDeck');
     const playPrefix = ui('seoPlayPrefix', lang, 'Play');
     const aboutH2 = ui('seoAboutThisGame', lang, 'About This Game');
     const howToH2 = ui('seoHowToPlay', lang, 'How to Play');
@@ -156,7 +158,7 @@ for (const lang of SUPPORTED_LOCALES) {
     const readBlogH2 = ui('seoReadOnBlog', lang, 'Read on the Blog');
     const genresLabel = ui('seoGenres', lang, 'Genres');
 
-    const title = `${t.title} - ${playFreeOn} ArcadeDeck`;
+    const title = `${t.title} - ${playFreeOn}`;
     const desc = `${playPrefix} ${t.title}: ${t.description} ${ui('seoFreeOnlineGame', lang, 'Free online browser game on ArcadeDeck.')}`;
     const thumbUrl = `${SITE}/${encodeURI(game.thumbnail)}`;
     const pageUrl = fullUrl(lang, routePath);

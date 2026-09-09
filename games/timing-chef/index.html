@@ -1,0 +1,1731 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="타이밍 셰프 - 타이밍을 맞춰 완벽한 요리를 완성하는 캐주얼 리듬 요리 게임">
+<meta name="theme-color" content="#d4562a">
+<meta property="og:title" content="타이밍 셰프 (Timing Chef)">
+<meta property="og:description" content="타이밍을 맞춰 완벽한 요리를 완성하세요. 1초의 차이가 명작과 실패를 가릅니다.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ko_KR">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍳</text></svg>">
+<title>타이밍 셰프</title>
+
+</head>
+<body>
+
+<!-- ═══ TOAST ═══ -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══ TITLE SCREEN ═══ -->
+<div id="title-screen" class="screen active">
+  <div class="title-bg-pattern"></div>
+  <div class="title-hero">
+    <div class="title-tag">Timing Game</div>
+    <div class="title-main">Timing<br><em>Chef</em></div>
+    <div class="title-sub">타이밍을 맞춰 완벽한 요리를 완성하세요. <br>1초의 차이가 명작과 실패를 가릅니다.</div>
+  </div>
+  <div class="title-dish-row">
+    <div class="dish-preview-card"><span class="dpc-emoji">🍜</span><div class="dpc-name">라멘</div></div>
+    <div class="dish-preview-card"><span class="dpc-emoji">🥩</span><div class="dpc-name">스테이크</div></div>
+    <div class="dish-preview-card"><span class="dpc-emoji">🍣</span><div class="dpc-name">스시</div></div>
+    <div class="dish-preview-card"><span class="dpc-emoji">🥘</span><div class="dpc-name">파에야</div></div>
+    <div class="dish-preview-card"><span class="dpc-emoji">🦞</span><div class="dpc-name">랍스터</div></div>
+    <div class="dish-preview-card"><span class="dpc-emoji">🍮</span><div class="dpc-name">크렘브뤼레</div></div>
+    <div class="dish-preview-card"><span class="dpc-emoji">👑</span><div class="dpc-name">그랑피날레</div></div>
+  </div>
+  <div class="title-actions">
+    <button class="btn btn-primary" onclick="showScreen('hub-screen'); loadHub('stages')">🍳 요리 시작</button>
+    <button class="btn btn-secondary" onclick="showScreen('mode-screen')">모드 선택</button>
+  </div>
+</div>
+
+<!-- ═══ MODE SCREEN ═══ -->
+<div id="mode-screen" class="screen">
+  <div style="width:100%;padding:1.5rem 1.25rem 1rem;border-bottom:1px solid var(--sand);">
+    <button class="btn-outline btn" style="width:auto;padding:0.5rem 1rem;font-size:0.8rem;margin-bottom:1rem" onclick="showScreen('title-screen')">← 뒤로</button>
+    <div class="mode-header">
+      <div class="mode-title">모드 선택</div>
+      <div class="mode-sub">어떻게 요리할까요?</div>
+    </div>
+  </div>
+  <div style="padding:1.25rem;width:100%">
+    <div class="mode-cards">
+      <div class="mode-card" onclick="showScreen('hub-screen');loadHub('stages')">
+        <span class="mc-emoji">📖</span>
+        <div class="mc-badge badge-new">추천</div>
+        <div class="mc-name">스테이지 모드</div>
+        <div class="mc-desc">60개의 엄선된 레시피를 6개 챕터로 클리어하세요. 별 3개를 모아 다음 챕터를 해금하세요.</div>
+      </div>
+      <div class="mode-card" onclick="startEndless()">
+        <span class="mc-emoji">♾️</span>
+        <div class="mc-badge badge-hard">도전</div>
+        <div class="mc-name">엔드리스 모드</div>
+        <div class="mc-desc">끝없이 쏟아지는 레시피를 얼마나 버틸 수 있을까요? 연속 콤보로 최고 기록에 도전하세요.</div>
+      </div>
+      <div class="mode-card" onclick="showMinigame()">
+        <span class="mc-emoji">🎪</span>
+        <div class="mc-name">식재료 수집 미니게임</div>
+        <div class="mc-desc">하늘에서 떨어지는 식재료를 받아내세요. 수집한 재료는 코인으로 교환됩니다.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ HUB SCREEN ═══ -->
+<div id="hub-screen" class="screen">
+  <div class="hub-topbar">
+    <div>
+      <div class="hub-greeting">안녕하세요,</div>
+      <div class="hub-chef-name">셰프 🧑‍🍳</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+      <button class="snd-btn" id="snd-toggle" onclick="toggleSound()">🔊</button>
+      <div class="hub-currency">
+        <span class="hub-coin">🪙</span>
+        <span class="hub-coin-val" id="coin-display">0</span>
+      </div>
+    </div>
+  </div>
+  <div class="hub-tabs">
+    <button class="hub-tab active" onclick="loadHub('stages')" id="tab-stages">스테이지</button>
+    <button class="hub-tab" onclick="loadHub('endless')" id="tab-endless">엔드리스</button>
+    <button class="hub-tab" onclick="loadHub('upgrade')" id="tab-upgrade">업그레이드</button>
+    <button class="hub-tab" onclick="loadHub('codex')" id="tab-codex">요리 도감</button>
+    <button class="hub-tab" onclick="loadHub('codex_ing')" id="tab-codex-ing">식재료 도감</button>
+  </div>
+  <div class="hub-content" id="hub-content"></div>
+</div>
+
+<!-- ═══ 오늘 뭐 먹을까 FAB ═══ -->
+<button class="wfd-fab" id="wfd-fab" onclick="openWFD()" title="오늘 뭐 먹을까?">🍽️</button>
+
+<!-- ═══ 오늘 뭐 먹을까 MODAL ═══ -->
+<div class="wfd-overlay" id="wfd-overlay">
+  <div class="wfd-sheet">
+    <div class="wfd-handle"></div>
+    <div class="wfd-header">
+      <div class="wfd-title">오늘 뭐 먹을까? 🤔</div>
+      <button class="wfd-close" onclick="closeWFD()">✕</button>
+    </div>
+    <div class="wfd-sub">랜덤으로 3가지 요리를 추천해드려요. 하나를 골라보세요!</div>
+
+    <button class="wfd-spin-btn" id="wfd-spin-btn" onclick="spinWFD()">
+      🎲 &nbsp; 랜덤 추천 받기
+    </button>
+
+    <div class="wfd-cards" id="wfd-cards">
+      <!-- cards injected by JS -->
+    </div>
+
+    <div class="wfd-detail" id="wfd-detail">
+      <div class="wfd-detail-top">
+        <span class="wfd-detail-emoji" id="wd-emoji">🍜</span>
+        <div class="wfd-detail-info">
+          <div class="wfd-detail-name" id="wd-name">요리명</div>
+          <div class="wfd-detail-desc" id="wd-desc">설명</div>
+          <div class="wfd-detail-meta" id="wd-meta"></div>
+        </div>
+      </div>
+      <div class="wfd-ing-title">🧂 주요 식재료</div>
+      <div class="wfd-ing-grid" id="wd-ings"></div>
+      <div class="wfd-steps-title">👨‍🍳 조리 단계</div>
+      <div class="wfd-steps-list" id="wd-steps"></div>
+      <div class="wfd-action-row">
+        <button class="wfd-play-btn" id="wd-play-btn" onclick="playFromWFD()">이 요리 도전하기 →</button>
+        <button class="wfd-respin-btn" onclick="spinWFD()">🎲 다시</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ GAME SCREEN ═══ -->
+<div id="game-screen" class="screen">
+  <!-- topbar -->
+  <div class="game-topbar">
+    <div class="topbar-left">
+      <div class="topbar-stage" id="g-stage-label">STAGE 1</div>
+      <div class="topbar-score" id="g-score">0</div>
+    </div>
+    <div class="topbar-center">
+      <div class="topbar-dish-name" id="g-dish-name">요리 준비 중...</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px;">
+        <div class="audio-pulse" id="audio-pulse" style="display:none">
+          <div class="ap-bar" style="height:40%"></div>
+          <div class="ap-bar" style="height:60%"></div>
+          <div class="ap-bar" style="height:100%"></div>
+          <div class="ap-bar" style="height:70%"></div>
+          <div class="ap-bar" style="height:40%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div>
+        <div style="font-size:0.55rem;color:var(--muted);letter-spacing:0.1em;text-align:right;margin-bottom:3px;">목숨</div>
+        <div class="heart-row" id="g-hearts"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- endless HUD -->
+  <div class="endless-hud" id="endless-hud" style="display:none">
+    <div><div class="endless-label">점수</div><div class="endless-val" id="el-score">0</div></div>
+    <div style="text-align:center"><div class="endless-label">콤보</div><div class="endless-val endless-streak" id="el-combo">×0</div></div>
+    <div style="text-align:right"><div class="endless-label">최고</div><div class="endless-val" id="el-best">0</div></div>
+  </div>
+
+  <div class="stage-progress" id="stage-progress"></div>
+
+  <div class="cook-area" id="cook-area">
+    <div class="recipe-card" id="recipe-card">
+      <div class="rc-emoji" id="rc-emoji">🍳</div>
+      <div class="rc-info">
+        <div class="rc-name" id="rc-name">요리명</div>
+        <div class="rc-desc" id="rc-desc">레시피 설명</div>
+        <div class="rc-stars" id="rc-stars"></div>
+      </div>
+    </div>
+    <div class="multitask-warning" id="multitask-warn">⚡ 멀티태스킹 구간! 두 단계가 동시에 진행됩니다</div>
+    <div class="steps-container" id="steps-container"></div>
+    <button id="timing-btn" class="timing-btn">탭!</button>
+  </div>
+
+  <div class="game-bottom">
+      <button class="btn btn-outline" onclick="openQuitModal()" style="font-size:0.8rem;padding:0.75rem">← 나가기</button>
+    </div>
+
+  <!-- ═══ QUIT MODAL ═══ -->
+  <div class="modal-overlay" id="quit-modal" style="display:none;">
+    <div class="modal-sheet">
+      <div class="modal-title">게임을 종료하시겠습니까?</div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" onclick="confirmQuit()">나가기</button>
+        <button class="btn btn-outline" onclick="closeQuitModal()">취소</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ RESULT OVERLAY ═══ -->
+<div class="result-overlay" id="result-overlay">
+  <div class="result-modal">
+    <div class="result-hero">
+      <span class="result-emoji" id="res-emoji">🏆</span>
+      <div class="result-verdict" id="res-verdict">완벽한 요리!</div>
+      <div class="result-dish" id="res-dish"></div>
+      <div class="result-stars" id="res-stars">
+        <span class="res-star" id="rs0">⭐</span>
+        <span class="res-star" id="rs1">⭐</span>
+        <span class="res-star" id="rs2">⭐</span>
+      </div>
+    </div>
+    <div class="result-stats" id="res-stats"></div>
+    <div class="result-actions">
+      <button class="btn btn-primary" id="res-next-btn" onclick="nextStage()">다음 스테이지 →</button>
+      <button class="btn btn-outline" onclick="retryStage()">다시 도전</button>
+      <button class="btn btn-outline" onclick="exitToHub()">메인으로</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CODEX DISH DETAIL OVERLAY ═══ -->
+<div class="wfd-overlay" id="codex-overlay">
+  <div class="wfd-sheet">
+    <div class="wfd-handle"></div>
+    <div class="wfd-header">
+      <div class="wfd-title" id="cd-title">요리 도감</div>
+      <button class="wfd-close" onclick="closeCodexDish()">✕</button>
+    </div>
+    <div class="wfd-sub" id="cd-sub">레시피 상세 정보</div>
+
+    <div class="wfd-detail show" style="display:block">
+      <div class="wfd-detail-top">
+        <span class="wfd-detail-emoji" id="cd-emoji">🍳</span>
+        <div class="wfd-detail-info">
+          <div class="wfd-detail-name" id="cd-name">요리명</div>
+          <div class="wfd-detail-desc" id="cd-desc">설명</div>
+          <div class="wfd-detail-meta" id="cd-meta"></div>
+        </div>
+      </div>
+      <div class="wfd-ing-title">🧂 주요 식재료</div>
+      <div class="wfd-ing-grid" id="cd-ings"></div>
+      <div class="wfd-steps-title">👨‍🍳 조리 단계</div>
+      <div class="wfd-steps-list" id="cd-steps"></div>
+      <div class="wfd-action-row">
+        <button class="wfd-play-btn" id="cd-play-btn" onclick="playFromCodex()">이 요리 도전하기 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ INGREDIENT DETAIL OVERLAY ═══ -->
+<div class="wfd-overlay" id="ing-overlay">
+  <div class="wfd-sheet">
+    <div class="wfd-handle"></div>
+    <div class="wfd-header">
+      <div class="wfd-title" id="ing-title">식재료</div>
+      <button class="wfd-close" onclick="closeIngredient()">✕</button>
+    </div>
+    <div class="wfd-sub" id="ing-sub">이 재료를 사용하는 요리들</div>
+
+    <div class="wfd-detail show" style="display:block">
+      <div class="wfd-detail-top">
+        <span class="wfd-detail-emoji" id="ing-emoji">🧅</span>
+        <div class="wfd-detail-info">
+          <div class="wfd-detail-name" id="ing-name">재료명</div>
+          <div class="wfd-detail-desc" id="ing-desc">설명</div>
+        </div>
+      </div>
+      <div class="wfd-steps-title">🍽️ 관련 요리 <span id="ing-count" style="font-family:'DM Sans',sans-serif;font-size:0.65rem;color:var(--muted);font-weight:400"></span></div>
+      <div class="wfd-cards" id="ing-related"></div>
+      <div id="ing-empty" style="display:none;text-align:center;padding:1rem;font-size:0.78rem;color:var(--muted)">이 재료를 사용하는 요리가 없습니다.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MINIGAME OVERLAY ═══ -->
+<div class="minigame-overlay" id="mg-overlay">
+  <div class="minigame-sheet">
+    <div class="minigame-handle"></div>
+    <div class="mg-title">🎪 식재료 수집</div>
+    <div class="mg-desc">하늘에서 떨어지는 식재료를 탭해서 받아내세요! 30초 안에 최대한 많이 모으세요.</div>
+    <div class="mg-score-row">
+      <div><div class="mg-score-label">수집량</div><div class="mg-score-val" id="mg-score">0</div></div>
+      <div style="text-align:right"><div class="mg-score-label">보상</div><div class="mg-score-val" id="mg-reward" style="color:var(--gold)">+0 🪙</div></div>
+    </div>
+    <div class="mg-timer-bar"><div class="mg-timer-fill" id="mg-timer-fill" style="width:100%"></div></div>
+    <div class="mg-basket" id="mg-basket">
+      <div class="mg-basket-icon" id="mg-basket-icon">🧺</div>
+    </div>
+    <div style="display:flex;gap:0.75rem;margin-top:0;">
+      <button class="btn btn-primary" id="mg-start-btn" onclick="startMinigame()">시작!</button>
+      <button class="btn btn-outline" onclick="closeMinigame()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// AUDIO ENGINE
+// ═══════════════════════════════════════════
+let audioCtx=null, soundOn=true, bgmGain=null, bgmPlaying=false, bgmTimer=null;
+let bgmStep=0;
+const SCALE=[261.63,293.66,329.63,349.23,392,440,493.88,523.25,587.33,659.25];
+
+function ac(){
+  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended') audioCtx.resume();
+  return audioCtx;
+}
+function tone(f,t,d,v=0.15,wave='sine'){
+  if(!soundOn) return;
+  const ctx=ac(), o=ctx.createOscillator(), g=ctx.createGain();
+  o.connect(g);g.connect(ctx.destination);
+  o.type=wave;o.frequency.value=f;
+  g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(0.001,t+d);
+  o.start(t);o.stop(t+d+0.01);
+}
+function noise(d,v=0.1,freq=600){
+  if(!soundOn) return;
+  const ctx=ac(),buf=ctx.createBuffer(1,ctx.sampleRate*d,ctx.sampleRate),data=buf.getChannelData(0);
+  for(let i=0;i<data.length;i++) data[i]=Math.random()*2-1;
+  const src=ctx.createBufferSource(),filt=ctx.createBiquadFilter(),g=ctx.createGain();
+  src.buffer=buf;filt.type='bandpass';filt.frequency.value=freq;filt.Q.value=1;
+  src.connect(filt);filt.connect(g);g.connect(ctx.destination);
+  g.gain.setValueAtTime(v,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+d);
+  src.start();src.stop(ctx.currentTime+d+0.01);
+}
+
+function sfxPerfect(){ const t=ac().currentTime; tone(523,t,0.1,0.2); tone(659,t+0.07,0.1,0.18); tone(784,t+0.14,0.15,0.2); tone(1047,t+0.21,0.2,0.15); }
+function sfxGood()  { const t=ac().currentTime; tone(440,t,0.1,0.15); tone(554,t+0.07,0.12,0.13); }
+function sfxBad()   { tone(200,ac().currentTime,0.15,0.2,'sawtooth'); noise(0.12,0.1,300); }
+function sfxTap()   { tone(660,ac().currentTime,0.05,0.08); }
+function sfxCoin()  { const t=ac().currentTime; tone(880,t,0.07,0.12); tone(1108,t+0.06,0.08,0.1); }
+function sfxWin()   { const t=ac().currentTime; [523,659,784,1047,1319].forEach((f,i)=>tone(f,t+i*0.1,0.15,0.2)); }
+function sfxLose()  { const t=ac().currentTime; [400,350,300,250].forEach((f,i)=>tone(f,t+i*0.12,0.15,0.18,'sawtooth')); }
+function sfxUnlock(){ const t=ac().currentTime; [392,523,659,784].forEach((f,i)=>tone(f,t+i*0.08,0.12,0.15)); }
+function sfxEvent() { const t=ac().currentTime; [523,784,1047].forEach((f,i)=>{ tone(f,t+i*0.06,0.1,0.2); tone(f*1.5,t+i*0.06+0.03,0.08,0.1); }); }
+
+const BGM_ARP=[0,2,4,7,9,7,4,2,1,3,5,8,10,8,5,3];
+const BGM_BASS=[130.81,146.83,164.81,174.61];
+function scheduleBgm(){
+  if(!bgmPlaying||!soundOn) return;
+  const ctx=ac(), now=ctx.currentTime;
+  const ai=BGM_ARP[bgmStep%BGM_ARP.length];
+  const af=SCALE[ai%SCALE.length];
+  const beat=60/120;
+  // melody
+  tone(af*2,now,beat*0.6,0.035,'square');
+  // bass
+  if(bgmStep%2===0){ const bf=BGM_BASS[Math.floor(bgmStep/2)%BGM_BASS.length]; tone(bf,now,beat*1.4,0.06,'sawtooth'); }
+  // hihat
+  noise(0.03,0.025,8000+Math.random()*2000);
+  // kick
+  if(bgmStep%4===0){ const ko=ctx.createOscillator(),kg=ctx.createGain(); ko.connect(kg);kg.connect(ctx.destination); ko.type='sine'; ko.frequency.setValueAtTime(120,now); ko.frequency.exponentialRampToValueAtTime(40,now+0.08); kg.gain.setValueAtTime(0.25,now); kg.gain.exponentialRampToValueAtTime(0.001,now+0.12); ko.start(now);ko.stop(now+0.15); }
+  // snare
+  if(bgmStep%8===4) noise(0.06,0.07,1500);
+  bgmStep++;
+  bgmTimer=setTimeout(scheduleBgm,beat*1000);
+}
+function startBgm(){ if(bgmPlaying||!soundOn) return; bgmPlaying=true; bgmStep=0; scheduleBgm(); document.getElementById('audio-pulse').style.display='flex'; }
+function stopBgm() { bgmPlaying=false; if(bgmTimer) clearTimeout(bgmTimer); document.getElementById('audio-pulse').style.display='none'; }
+function toggleSound(){
+  soundOn=!soundOn;
+  document.getElementById('snd-toggle').textContent=soundOn?'🔊':'🔇';
+  if(!soundOn) stopBgm(); else if(gameState.running) startBgm();
+}
+
+// ═══════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════
+
+
+
+// 외부 JSON 데이터 동적 로딩
+let RECIPES, RECIPE_INGREDIENTS, CODEX_INGREDIENTS, UPGRADES;
+let dataLoaded = false;
+
+async function loadGameData() {
+  const fetchJson = async (path) => {
+    const res = await fetch(path);
+    if (!res.ok) throw new Error(path + ' HTTP ' + res.status);
+    return res.json();
+  };
+  const [recipes, recipeIngredients, codexIngredients, upgrades] = await Promise.all([
+    fetchJson('recipes.json'),
+    fetchJson('recipe_ingredients.json'),
+    fetchJson('codex_ingredients.json'),
+    fetchJson('upgrades.json'),
+  ]);
+  RECIPES = recipes;
+  RECIPE_INGREDIENTS = recipeIngredients;
+  CODEX_INGREDIENTS = codexIngredients;
+  UPGRADES = upgrades;
+  dataLoaded = true;
+}
+
+function setTitleButtonsEnabled(on){
+  document.querySelectorAll('#title-screen .btn, #mode-screen .mode-card').forEach(el=>{
+    el.style.pointerEvents = on ? '' : 'none';
+    el.style.opacity = on ? '' : '0.5';
+  });
+  const fab = document.getElementById('wfd-fab');
+  if(fab) fab.style.display = on ? '' : 'none';
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+  setTitleButtonsEnabled(false);
+  try {
+    await loadGameData();
+    setCoinDisplay(save.coins);
+    setTitleButtonsEnabled(true);
+  } catch (err) {
+    console.error('Data load failed:', err);
+    const ts = document.getElementById('title-screen');
+    if (ts) {
+      const msg = document.createElement('div');
+      msg.style.cssText = 'padding:1rem;margin:1rem;background:#fee;color:#900;border-radius:8px;font-size:0.85rem;text-align:center';
+      msg.textContent = '게임 데이터 로딩에 실패했습니다. 페이지를 새로고침해 주세요.';
+      ts.appendChild(msg);
+    }
+  }
+});
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let save;
+try {
+  save = JSON.parse(localStorage.getItem('tc_save') || '{}');
+  if (typeof save !== 'object' || save === null || Array.isArray(save)) save = {};
+} catch (e) {
+  console.warn('Corrupted save reset:', e);
+  save = {};
+}
+function initSave(){
+  save = Object.assign({
+    coins:0, bestEndless:0,
+    stageStars:{}, // recipeId -> stars (0-3)
+    upgrades:{}, // upgradeId -> level
+    codexDishes:[], codexIngredients:[],
+    newCodex:[],
+    mgLastPlayed: '', // 미니게임 마지막 플레이 날짜
+  }, save);
+}
+initSave();
+function persist(){ localStorage.setItem('tc_save',JSON.stringify(save)); }
+
+function getUpgradeLv(id){ return save.upgrades[id]||0; }
+function getUpgradeCost(id){
+  const u = UPGRADES.find(x => x.id === id);
+  const mult = u.costMult || 1.6;
+  return Math.floor(u.baseCost * Math.pow(mult, getUpgradeLv(id)));
+}
+
+// timing helpers — smaller per-level buffs, more levels (see upgrades.json)
+function getZoneWidths(){
+  const zoneUp = getUpgradeLv('timing');
+  return { perfect: 0.12 + zoneUp*0.012, good: 0.22 + zoneUp*0.018 };
+}
+function getNeedleSpeed(){ return Math.max(0.003, 0.008 - getUpgradeLv('speed')*0.0005); }
+function getBaseLife(){ return 3 + getUpgradeLv('life'); }
+function getScoreMult(){ return 1 + getUpgradeLv('score')*0.10; }
+function getCoinMult(){  return 1 + getUpgradeLv('coin')*0.08; }
+function getComboStep(){ return 0.10 + getUpgradeLv('combo')*0.02; }
+function getReviveChance(){ return getUpgradeLv('revive')*0.05; }
+function getMinigameCoinPerItem(){ return 2 + getUpgradeLv('mgboost')*0.4; }
+
+// ═══════════════════════════════════════════
+// GAME STATE
+// ═══════════════════════════════════════════
+let gameState = {
+  mode:'stage', // 'stage'|'endless'
+  running:false,
+  recipe:null,
+  stageIdx:0,
+  steps:[],
+  currentStep:0,
+  needlePos:0, needleDir:1,
+  stepResults:[],
+  perfects:0, goods:0, bads:0,
+  score:0, lives:3,
+  // endless
+  endlessScore:0, endlessCombo:0,
+  endlessDone:false,
+  endlessChain:0,
+  animId:null,
+  lastTime:0,
+  pendingTimers:[],
+};
+
+function trackTimer(id){ gameState.pendingTimers.push(id); return id; }
+function clearPendingTimers(){
+  gameState.pendingTimers.forEach(id=>{ clearTimeout(id); });
+  gameState.pendingTimers = [];
+}
+
+// ═══════════════════════════════════════════
+// SCREEN NAV
+// ═══════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  // FAB only visible on hub + title screens
+  const fab = document.getElementById('wfd-fab');
+  if(fab){
+    const showFab = (id === 'hub-screen' || id === 'title-screen') && dataLoaded;
+    fab.style.display = showFab ? '' : 'none';
+  }
+}
+
+// shared coin display updater with bump animation
+function setCoinDisplay(val){
+  const el = document.getElementById('coin-display');
+  if(!el) return;
+  const prev = parseInt(el.textContent, 10) || 0;
+  el.textContent = val;
+  if(val !== prev){
+    el.classList.remove('bump');
+    void el.offsetWidth;
+    el.classList.add('bump');
+  }
+}
+
+// unified return-to-hub helper (replaces inline spaghetti)
+function exitToHub(){
+  closeResult();
+  stopBgm();
+  gameState.running=false;
+  clearPendingTimers();
+  Object.values(needleAnimIds).forEach(id=>cancelAnimationFrame(id));
+  needleAnimIds={};
+  gameState.mode='stage';
+  const eh=document.getElementById('endless-hud'); if(eh) eh.style.display='none';
+  const tb=document.getElementById('timing-btn'); if(tb){ tb.style.display='none'; tb.disabled=true; }
+  document.getElementById('game-screen').style.display='none';
+  document.getElementById('hub-screen').style.display='block';
+  showScreen('hub-screen');
+  setTimeout(()=>loadHub('stages'), 10);
+}
+
+// ═══════════════════════════════════════════
+// HUB
+// ═══════════════════════════════════════════
+function loadHub(tab){
+  if(!dataLoaded){
+    showScreen('hub-screen');
+    document.getElementById('hub-content').innerHTML='<div style="padding:2rem;text-align:center;color:var(--muted)">데이터 로딩 중...</div>';
+    return;
+  }
+  showScreen('hub-screen');
+  document.querySelectorAll('.hub-tab').forEach(t=>t.classList.remove('active'));
+  const tabEl = document.getElementById('tab-'+tab);
+  if(tabEl){
+    tabEl.classList.add('active');
+    try { tabEl.scrollIntoView({inline:'center', block:'nearest', behavior:'smooth'}); } catch(e){}
+  }
+  // restore FAB on hub
+  const fab = document.getElementById('wfd-fab');
+  if(fab) fab.style.display = '';
+  setCoinDisplay(save.coins);
+  const c=document.getElementById('hub-content');
+
+  if(tab==='stages')  c.innerHTML=renderStages();
+  if(tab==='endless') c.innerHTML=renderEndlessHub();
+  if(tab==='upgrade') c.innerHTML=renderUpgrades();
+  if(tab==='codex')   c.innerHTML=renderCodex();
+  if(tab==='codex_ing') c.innerHTML=renderCodexIngredients();
+  // 식재료 도감 렌더링 함수
+  function renderCodexIngredients(){
+    let html = `<div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--dark);margin-bottom:0.75rem">식재료 도감 <span style="font-family:'DM Sans',sans-serif;font-size:0.7rem;color:var(--muted)">${save.codexIngredients.length}/${CODEX_INGREDIENTS.length}</span></div>`;
+    html += `<div class="codex-grid" style="margin-bottom:1.5rem">`;
+    if (CODEX_INGREDIENTS) {
+      CODEX_INGREDIENTS.forEach(ing => {
+        const unlocked = save.codexIngredients && save.codexIngredients.includes(ing.id);
+        const escId = String(ing.id).replace(/'/g, "\\'");
+        const clickAttr = unlocked
+          ? ` onclick="openIngredient('${escId}')" style="cursor:pointer" role="button" tabindex="0"`
+          : '';
+        html += `<div class="codex-item${unlocked ? '' : ' locked'}" title="${unlocked ? ing.desc : '???'}"${clickAttr}>
+          <div class="codex-emoji">${unlocked ? ing.emoji : '❓'}</div>
+          <div class="codex-name">${unlocked ? ing.name : '???'}</div>
+        </div>`;
+      });
+    }
+    html += `</div>`;
+    return html;
+  }
+  stopBgm();
+}
+
+function renderStages(){
+  const CHAPTERS = [
+    {num:1, name:'기초 요리',       tag:'챕터 1', unlockAfter:null},
+    {num:2, name:'아시아 요리',     tag:'챕터 2', unlockAfter:1},
+    {num:3, name:'유럽 요리',       tag:'챕터 3', unlockAfter:2},
+    {num:4, name:'고급 요리',       tag:'챕터 4', unlockAfter:3},
+    {num:5, name:'세계 요리',       tag:'챕터 5', unlockAfter:4},
+    {num:6, name:'마스터',          tag:'챕터 6', unlockAfter:5},
+    {num:7, name:'분자요리 실험실', tag:'챕터 7', unlockAfter:6},
+    {num:8, name:'디저트 마스터',   tag:'챕터 8', unlockAfter:7},
+  ];
+
+  // Event banner
+  let html=`<div class="event-banner" onclick="triggerEvent()">
+    <span class="eb-emoji">🎊</span>
+    <div class="eb-text"><div class="eb-title">특별 이벤트: 분자요리 도전</div><div class="eb-sub">오늘 하루만! 보상 2배 · 마스터 챕터 선공개</div></div>
+    <span class="eb-arrow">→</span>
+  </div>`;
+
+  CHAPTERS.forEach(ch => {
+    // check chapter unlock: previous chapter has at least 5 cleared recipes
+    const prevChRecipes = ch.unlockAfter ? RECIPES.filter(r=>r.chapter===ch.unlockAfter) : [];
+    const chapterLocked = ch.unlockAfter && prevChRecipes.filter(r=>save.stageStars[r.id]>0).length < 5;
+
+    const chRecipes = RECIPES.filter(r=>r.chapter===ch.num);
+    const cleared   = chRecipes.filter(r=>save.stageStars[r.id]>0).length;
+    const totalStars= chRecipes.reduce((s,r)=>s+(save.stageStars[r.id]||0),0);
+
+    html+=`<div class="stage-section-title">
+      ${ch.name} <span class="section-tag">${ch.tag}</span>
+      ${chapterLocked?'<span style="font-size:0.6rem;color:var(--muted);font-family:\'DM Sans\',sans-serif">🔒 이전 챕터 5개 클리어 필요</span>'
+        :`<span style="font-size:0.6rem;color:var(--muted);font-family:\'DM Sans\',sans-serif">${cleared}/${chRecipes.length} · ⭐${totalStars}</span>`}
+    </div>`;
+
+    if(chapterLocked){
+      html+=`<div style="background:#fff;border:1.5px solid var(--sand);border-radius:16px;padding:1.5rem;text-align:center;margin-bottom:1.5rem;opacity:0.6">
+        <div style="font-size:2rem;margin-bottom:0.5rem">🔒</div>
+        <div style="font-size:0.8rem;color:var(--muted)">이전 챕터에서 5개 이상의 요리를 클리어하세요</div>
+      </div>`;
+      return;
+    }
+
+    html+=`<div class="stage-grid" style="margin-bottom:1.5rem">`;
+    chRecipes.forEach(r => {
+      const globalIdx = RECIPES.indexOf(r);
+      const stars = save.stageStars[r.id]||0;
+      const starsHtml=[0,1,2].map(j=>`<span class="sc-star${j<stars?' lit':''}">${j<stars?'⭐':'☆'}</span>`).join('');
+      const diffEmoji='⚡'.repeat(r.diff);
+      const specialBadge = r.special ? `<span style="position:absolute;top:8px;left:8px;font-size:0.55rem;padding:2px 6px;border-radius:20px;background:rgba(212,86,42,0.12);color:var(--accent);font-weight:700">${r.special}</span>` : '';
+      html+=`<div class="stage-card" onclick="startStage(${globalIdx})">
+        ${specialBadge}
+        <div class="sc-emoji">${r.emoji}</div>
+        <div class="sc-name">${r.name}</div>
+        <div class="sc-stars">${starsHtml}</div>
+        <div style="font-size:0.6rem;color:var(--muted)">🪙${r.coin} · ${diffEmoji}</div>
+      </div>`;
+    });
+    html+=`</div>`;
+  });
+
+  return html;
+}
+
+function renderEndlessHub(){
+  return `<div style="text-align:center;padding:2rem 0">
+    <div style="font-size:4rem;margin-bottom:1rem">♾️</div>
+    <div style="font-family:'DM Serif Display',serif;font-size:1.4rem;color:var(--dark);margin-bottom:0.5rem">엔드리스 모드</div>
+    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:0.5rem">끝없이 도전하는 무한 요리</div>
+    <div style="font-family:'DM Serif Display',serif;font-size:2rem;color:var(--gold);margin-bottom:0.25rem">${save.bestEndless}</div>
+    <div style="font-size:0.7rem;color:var(--muted);margin-bottom:2rem">최고 기록</div>
+    <button class="btn btn-primary" style="max-width:220px;margin:0 auto" onclick="startEndless()">도전 시작 →</button>
+  </div>`;
+}
+
+function renderUpgrades(){
+  let html='<div class="upgrade-grid">';
+  UPGRADES.forEach(u=>{
+    const lv=getUpgradeLv(u.id);
+    const maxed=lv>=u.maxLv;
+    const cost=getUpgradeCost(u.id);
+    const canAfford = !maxed && save.coins >= cost;
+    const pct = Math.round(lv / u.maxLv * 100);
+    const dots = Array.from({length:u.maxLv}, (_,i)=>
+      `<span class="uc-dot${i<lv?' filled':''}"></span>`
+    ).join('');
+    html+=`<div class="upgrade-card${maxed?' is-maxed':''}">
+      <div class="uc-icon">${u.emoji}</div>
+      <div class="uc-info">
+        <div class="uc-name">${u.name}</div>
+        <div class="uc-desc">${u.desc}</div>
+        <div class="uc-progress">
+          <div class="uc-dots">${dots}</div>
+          <div class="uc-level">${maxed?'MAX':'Lv '+lv+' / '+u.maxLv}</div>
+        </div>
+        <div class="uc-bar"><div class="uc-bar-fill" style="width:${pct}%"></div></div>
+      </div>
+      <button class="uc-btn${maxed?' maxed':''}${!maxed&&!canAfford?' cant-afford':''}" onclick="${maxed?'':'buyUpgrade(\''+u.id+'\')'}" ${maxed||!canAfford?'disabled':''}>
+        ${maxed?'완료':'강화'}
+        ${maxed?'':'<span class="uc-cost">🪙'+cost+'</span>'}
+      </button>
+    </div>`;
+  });
+  html+='</div>';
+  return html;
+}
+
+function buyUpgrade(id){
+  const lv=getUpgradeLv(id);
+  const u=UPGRADES.find(x=>x.id===id);
+  if(lv>=u.maxLv){ showToast('이미 최대 레벨입니다!'); return; }
+  const cost=getUpgradeCost(id);
+  if(save.coins<cost){ showToast('코인이 부족합니다! 🪙'); return; }
+  save.coins-=cost;
+  save.upgrades[id]=(save.upgrades[id]||0)+1;
+  persist();
+  sfxUnlock();
+  showToast('업그레이드 완료! '+u.emoji);
+  loadHub('upgrade');
+}
+
+function renderCodex(){
+  let html = `<div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--dark);margin-bottom:0.75rem">요리 도감 <span style="font-family:'DM Sans',sans-serif;font-size:0.7rem;color:var(--muted)">${save.codexDishes.length}/${RECIPES.length}</span></div>`;
+  html += `<div class="codex-grid" style="margin-bottom:1.5rem">`;
+  if (RECIPES) {
+    RECIPES.forEach(r => {
+      const unlocked = save.codexDishes && save.codexDishes.includes(r.id);
+      const escId = String(r.id).replace(/'/g, "\\'");
+      const clickAttr = unlocked
+        ? ` onclick="openCodexDish('${escId}')" style="cursor:pointer" role="button" tabindex="0"`
+        : '';
+      html += `<div class="codex-item${unlocked ? '' : ' locked'}" title="${unlocked ? r.desc : '???'}"${clickAttr}>
+        <div class="codex-emoji">${unlocked ? r.emoji : '❓'}</div>
+        <div class="codex-name">${unlocked ? r.name : '???'}</div>
+      </div>`;
+    });
+  }
+  html += `</div>`;
+  return html;
+}
+
+let codexSelectedId = null;
+function openCodexDish(id){
+  const r = RECIPES.find(x => x.id === id);
+  if(!r) return;
+  codexSelectedId = id;
+  const cleared = (save.stageStars[r.id]||0) > 0;
+  const stars = save.stageStars[r.id] || 0;
+
+  document.getElementById('cd-title').textContent = r.name + ' 레시피';
+  document.getElementById('cd-sub').textContent = '재료와 조리 단계를 확인하세요.';
+  document.getElementById('cd-emoji').textContent = r.emoji;
+  document.getElementById('cd-name').textContent  = r.name;
+  document.getElementById('cd-desc').textContent  = r.desc;
+
+  const meta = document.getElementById('cd-meta');
+  meta.innerHTML = '';
+  const mk = (cls, txt) => {
+    const s = document.createElement('span');
+    s.className = 'wfd-meta-tag ' + cls;
+    s.textContent = txt;
+    return s;
+  };
+  meta.appendChild(mk(DIFF_META_CLS[r.diff], '⚡'.repeat(r.diff) + ' ' + DIFF_LABELS[r.diff]));
+  meta.appendChild(mk('meta-chapter', '챕터 ' + r.chapter + ' · ' + CHAPTER_NAMES[r.chapter]));
+  if(r.multitask) meta.appendChild(mk('meta-diff2', '⚡ 멀티태스킹'));
+  if(r.special)   meta.appendChild(mk('meta-special', '🎊 ' + r.special));
+  if(stars > 0)   meta.appendChild(mk('meta-cleared', '⭐'.repeat(stars)));
+  meta.appendChild(mk('meta-chapter', '🪙 ' + r.coin));
+
+  const ings = (RECIPE_INGREDIENTS && RECIPE_INGREDIENTS[r.id]) || [];
+  const ingGrid = document.getElementById('cd-ings');
+  ingGrid.innerHTML = '';
+  if(ings.length > 0){
+    ings.forEach(ing => {
+      const item = document.createElement('div');
+      item.className = 'wfd-ing-item';
+      const e = document.createElement('span'); e.className='wfd-ing-emoji'; e.textContent = ing.e;
+      const n = document.createElement('span'); n.className='wfd-ing-name';  n.textContent = ing.n;
+      item.appendChild(e); item.appendChild(n);
+      ingGrid.appendChild(item);
+    });
+  } else {
+    const empty = document.createElement('div');
+    empty.style.cssText = 'grid-column:1/-1;font-size:0.72rem;color:var(--muted);padding:0.5rem 0';
+    empty.textContent = '재료 정보를 준비 중입니다';
+    ingGrid.appendChild(empty);
+  }
+
+  const stepsList = document.getElementById('cd-steps');
+  stepsList.innerHTML = '';
+  r.steps.forEach((s,i) => {
+    const row = document.createElement('div'); row.className = 'wfd-step-row';
+    const num = document.createElement('div'); num.className = 'wfd-step-num'; num.textContent = i+1;
+    const nm  = document.createElement('div'); nm.className  = 'wfd-step-name'; nm.textContent = s;
+    row.appendChild(num); row.appendChild(nm);
+    stepsList.appendChild(row);
+  });
+
+  const playBtn = document.getElementById('cd-play-btn');
+  playBtn.textContent = `${r.emoji} "${r.name}" 도전하기 →`;
+
+  document.getElementById('codex-overlay').classList.add('show');
+  sfxTap();
+}
+function closeCodexDish(){
+  document.getElementById('codex-overlay').classList.remove('show');
+}
+function playFromCodex(){
+  if(!codexSelectedId) return;
+  const idx = RECIPES.findIndex(x => x.id === codexSelectedId);
+  if(idx < 0) return;
+  closeCodexDish();
+  setTimeout(() => startStage(idx), 200);
+}
+
+// ═══════════════════════════════════════════
+// INGREDIENT DETAIL (식재료 도감)
+// ═══════════════════════════════════════════
+function findRecipesWithIngredient(ing){
+  if(!RECIPE_INGREDIENTS || !RECIPES) return [];
+  const matchedIds = [];
+  for(const rid in RECIPE_INGREDIENTS){
+    const list = RECIPE_INGREDIENTS[rid] || [];
+    const hit = list.some(it => it.n === ing.name || it.e === ing.emoji);
+    if(hit) matchedIds.push(rid);
+  }
+  return matchedIds
+    .map(id => RECIPES.find(r => r.id === id))
+    .filter(Boolean);
+}
+
+function openIngredient(id){
+  const ing = CODEX_INGREDIENTS.find(x => x.id === id);
+  if(!ing) return;
+
+  document.getElementById('ing-title').textContent = ing.name + ' 정보';
+  document.getElementById('ing-emoji').textContent = ing.emoji;
+  document.getElementById('ing-name').textContent  = ing.name;
+  document.getElementById('ing-desc').textContent  = ing.desc;
+
+  const all = findRecipesWithIngredient(ing);
+  // shuffle + take 3
+  const picks = all.slice().sort(() => Math.random() - 0.5).slice(0, 3);
+
+  const countEl = document.getElementById('ing-count');
+  countEl.textContent = all.length > 0 ? `(전체 ${all.length}개 중 3개)` : '';
+
+  const container = document.getElementById('ing-related');
+  const empty = document.getElementById('ing-empty');
+  container.innerHTML = '';
+
+  if(picks.length === 0){
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+    picks.forEach((r, i) => {
+      const cleared = (save.stageStars[r.id]||0) > 0;
+      const unlocked = save.codexDishes.includes(r.id);
+
+      const card = document.createElement('div');
+      card.className = 'wfd-card flip-in';
+      card.style.animationDelay = (i * 0.1) + 's';
+      card.style.cursor = 'pointer';
+      card.dataset.id = r.id;
+      card.onclick = () => {
+        closeIngredient();
+        if(unlocked) {
+          setTimeout(() => openCodexDish(r.id), 250);
+        } else {
+          setTimeout(() => startStage(RECIPES.indexOf(r)), 250);
+        }
+      };
+
+      const lock = r.special ? `<div class="wfd-card-lock">${r.special}</div>` : '';
+      const emoji = document.createElement('span');
+      emoji.className = 'wfd-card-emoji';
+      emoji.textContent = unlocked ? r.emoji : '❓';
+
+      const name = document.createElement('div');
+      name.className = 'wfd-card-name';
+      name.textContent = unlocked ? r.name : '???';
+
+      const ch = document.createElement('div');
+      ch.className = 'wfd-card-ch';
+      ch.textContent = `챕터 ${r.chapter} · ${CHAPTER_NAMES[r.chapter]}`;
+
+      const diff = document.createElement('div');
+      diff.className = 'wfd-card-diff';
+      diff.textContent = '⚡'.repeat(r.diff) + ' ' + DIFF_LABELS[r.diff] + (cleared ? ' · ✅' : '');
+
+      if(lock) card.innerHTML = lock;
+      card.appendChild(emoji);
+      card.appendChild(name);
+      card.appendChild(ch);
+      card.appendChild(diff);
+
+      container.appendChild(card);
+    });
+  }
+
+  document.getElementById('ing-overlay').classList.add('show');
+  sfxTap();
+}
+
+function closeIngredient(){
+  document.getElementById('ing-overlay').classList.remove('show');
+}
+
+function renderStageProgress(){
+  const el=document.getElementById('stage-progress');
+  el.innerHTML='';
+  gameState.steps.forEach((_,i)=>{
+    const d=document.createElement('div');
+    d.className='stage-dot'+(i<gameState.currentStep?' done':i===gameState.currentStep?' current':'');
+    d.id='prog-dot-'+i;
+    el.appendChild(d);
+  });
+}
+
+function renderRecipeCard(){
+  const r=gameState.recipe;
+  document.getElementById('rc-emoji').textContent=r.emoji;
+  document.getElementById('rc-name').textContent=r.name;
+  document.getElementById('rc-desc').textContent=r.desc;
+  const stars=save.stageStars[r.id]||0;
+  document.getElementById('rc-stars').innerHTML=[0,1,2].map(i=>`<span class="rc-star">${i<stars?'⭐':'☆'}</span>`).join('');
+}
+
+function renderSteps(){
+  const c=document.getElementById('steps-container');
+  c.innerHTML='';
+  const r=gameState.recipe;
+  // multitask warning
+  const mw=document.getElementById('multitask-warn');
+  mw.className='multitask-warning'+(r.multitask?' show':'');
+
+  gameState.steps.forEach((step,i)=>{
+    const div=document.createElement('div');
+    div.className='step-card locked';
+    div.id='step-card-'+i;
+
+    const header=document.createElement('div');
+    header.className='step-header';
+
+    const num=document.createElement('div');
+    num.className='step-num';
+    num.textContent=i+1;
+
+    const name=document.createElement('div');
+    name.className='step-name';
+    name.textContent=step.name;
+
+    const badge=document.createElement('div');
+    badge.className='step-result-badge';
+    badge.id='step-badge-'+i;
+
+    header.appendChild(num);header.appendChild(name);header.appendChild(badge);
+
+    // timing bar
+    const tb=document.createElement('div');
+    tb.className='step-timing-bar';
+    tb.id='step-timing-'+i;
+    tb.innerHTML=buildTimingBar(i);
+
+    div.appendChild(header);div.appendChild(tb);
+    c.appendChild(div);
+  });
+}
+
+function buildTimingBar(stepIdx){
+  const {perfect,good}=getZoneWidths();
+  const center=0.3+Math.random()*0.4;
+  const pl=(center-perfect/2)*100, pw=perfect*100;
+  const gl=(center-good/2)*100, gw=good*100;
+
+  // top chip labels positioned above zones
+  const ticks = [10,25,50,75,90].map(p =>
+    `<div class="tt-tick" style="left:${p}%"></div>`
+  ).join('');
+
+  return `<div class="timing-wrap">
+    <div class="timing-labels">
+      <span class="tl-chip tl-good"  style="left:${gl+gw/2}%">GOOD</span>
+      <span class="tl-chip tl-perfect" style="left:${pl+pw/2}%">PERFECT</span>
+    </div>
+    <div class="timing-track" id="track-${stepIdx}" data-center="${center}">
+      <div class="tt-ticks">${ticks}</div>
+      <div class="zone-good" style="left:${gl}%;width:${gw}%"></div>
+      <div class="zone-perfect" style="left:${pl}%;width:${pw}%">
+        <div class="zp-glow"></div>
+        <div class="zp-stripes"></div>
+      </div>
+      <div class="zone-perfect-center" style="left:${center*100}%"></div>
+      <div class="timing-needle" id="needle-${stepIdx}" style="left:15%">
+        <div class="tn-top"></div>
+        <div class="tn-bar"></div>
+        <div class="tn-bot"></div>
+        <div class="tn-halo"></div>
+      </div>
+    </div>
+    <div class="tap-instruction">▼ <strong>PERFECT 존</strong>에 바늘이 닿는 순간 탭!</div>
+  </div>`;
+}
+
+function activateStep(idx){
+    // 타이밍 버튼 활성화
+    const timingBtn = document.getElementById('timing-btn');
+    timingBtn.style.display = 'block';
+    timingBtn.disabled = false;
+    timingBtn.onclick = () => {
+      if (gameState.running && gameState.currentStep === idx) {
+        tapStep(idx);
+      }
+    };
+  if(idx>=gameState.steps.length) return finishCooking();
+
+  gameState.currentStep=idx;
+  gameState.running=true;
+
+  const card=document.getElementById('step-card-'+idx);
+  card.className='step-card active';
+  // auto-scroll active step into view (centered) so it never hides behind tap button
+  try { card.scrollIntoView({behavior:'smooth', block:'center'}); } catch(e){}
+
+  // update progress
+  document.querySelectorAll('.stage-dot').forEach((d,i)=>{
+    d.className='stage-dot'+(i<idx?' done':i===idx?' current':'');
+  });
+
+  // start needle animation
+  if(gameState.animId) cancelAnimationFrame(gameState.animId);
+  gameState.needlePos=0.1;
+  gameState.needleDir=1;
+  gameState.lastTime=0;
+  animateNeedle(idx);
+
+  // multitask: also animate adjacent step
+  if(gameState.recipe.multitask && idx>0 && idx<gameState.steps.length-1){
+    const prev=document.getElementById('step-card-'+(idx-1));
+    if(prev && prev.className.includes('done')){
+      // show multitask on next
+    }
+  }
+}
+
+let needleAnimIds={};
+function animateNeedle(stepIdx){
+  // chapter-normalized difficulty so chapter 6 isn't unplayable
+  const chapter = (gameState.recipe && gameState.recipe.chapter) || 1;
+  const chapterBoost = Math.min(0.004, (chapter-1)*0.0008);
+  const endlessBoost = gameState.mode==='endless' ? Math.min(0.004, gameState.endlessChain*0.0003) : 0;
+  const speed = getNeedleSpeed() + chapterBoost + endlessBoost;
+  function loop(){
+    gameState.needlePos+=gameState.needleDir*speed;
+    if(gameState.needlePos>=0.9){ gameState.needlePos=0.9; gameState.needleDir=-1; }
+    if(gameState.needlePos<=0.1){ gameState.needlePos=0.1; gameState.needleDir=1; }
+    const needle=document.getElementById('needle-'+stepIdx);
+    if(needle) needle.style.left=(gameState.needlePos*100)+'%';
+    if(gameState.running && gameState.currentStep===stepIdx)
+      needleAnimIds[stepIdx]=requestAnimationFrame(loop);
+  }
+  needleAnimIds[stepIdx]=requestAnimationFrame(loop);
+}
+
+function tapStep(stepIdx){
+    // 버튼 비활성화 및 숨김
+    const timingBtn = document.getElementById('timing-btn');
+    if (timingBtn) {
+      timingBtn.disabled = true;
+      timingBtn.style.display = 'none';
+    }
+  if(!gameState.running||gameState.currentStep!==stepIdx) return;
+  gameState.running=false;
+  sfxTap();
+  cancelAnimationFrame(needleAnimIds[stepIdx]);
+
+  const track=document.getElementById('track-'+stepIdx);
+  const center=parseFloat(track.dataset.center);
+  const {perfect,good}=getZoneWidths();
+  const pos=gameState.needlePos;
+  const dist=Math.abs(pos-center);
+
+  let result,pts,badgeClass,badgeText;
+  if(dist<=perfect/2){
+    result='perfect'; pts=100*getScoreMult(); badgeClass='badge-perfect'; badgeText='PERFECT ⭐';
+    gameState.perfects++; sfxPerfect();
+    spawnFloatScore('PERFECT +'+Math.round(pts), track, '#c8952a');
+    // 행운의 회복: chance to restore 1 life on PERFECT (capped at base)
+    if(gameState.lives < getBaseLife() && Math.random() < getReviveChance()){
+      gameState.lives++;
+      renderHearts();
+      sfxCoin();
+      spawnFloatScore('+1 ❤️', track, '#d4562a');
+    }
+  } else if(dist<=good/2){
+    result='good'; pts=50; badgeClass='badge-good'; badgeText='GOOD ✓';
+    gameState.goods++; sfxGood();
+    spawnFloatScore('GOOD +'+pts, track, '#3d7a5c');
+  } else {
+    result='bad'; pts=0; badgeClass='badge-bad'; badgeText='MISS ✗';
+    gameState.bads++; sfxBad();
+    gameState.lives--;
+    renderHearts();
+    spawnFloatScore('MISS', track, '#d4562a');
+    if(gameState.lives<=0){ trackTimer(setTimeout(()=>endGame(false),600)); return; }
+  }
+
+  gameState.score+=Math.round(pts);
+  document.getElementById('g-score').textContent=gameState.score;
+  gameState.steps[stepIdx].result=result;
+
+  // endless: track combo + score
+  if(gameState.mode==='endless'){
+    if(result==='bad'){ gameState.endlessCombo=0; }
+    else {
+      gameState.endlessCombo++;
+      const comboMult = 1 + gameState.endlessCombo*getComboStep();
+      gameState.endlessScore += Math.round(pts * comboMult);
+    }
+    updateEndlessHud();
+  }
+
+  // update card
+  const card=document.getElementById('step-card-'+stepIdx);
+  card.className='step-card '+(result==='bad'?'failed':'done');
+  const badge=document.getElementById('step-badge-'+stepIdx);
+  badge.className='step-result-badge '+badgeClass;
+  badge.textContent=badgeText;
+
+  // collect codex ingredients randomly
+  maybCollectIngredient();
+
+  trackTimer(setTimeout(()=>{
+    if(gameState.lives>0) activateStep(stepIdx+1);
+  }, 500));
+}
+
+function maybCollectIngredient(){
+  if(Math.random()<0.3){
+    const ing=CODEX_INGREDIENTS[Math.floor(Math.random()*CODEX_INGREDIENTS.length)];
+    if(!save.codexIngredients.includes(ing.id)){
+      save.codexIngredients.push(ing.id);
+      persist();
+      showToast('새 재료 발견! '+ing.emoji+' '+ing.name);
+    }
+  }
+}
+
+function finishCooking(){
+  const r=gameState.recipe;
+  const total=gameState.steps.length;
+  const pct=gameState.perfects/total;
+  let stars=pct>=0.9?3:pct>=0.6?2:gameState.bads<total?1:0;
+
+  // codex unlock applies in both modes
+  if(!save.codexDishes.includes(r.id)){ save.codexDishes.push(r.id); save.newCodex.push(r.id); }
+
+  // endless: chain next random recipe, no star pollution
+  if(gameState.mode==='endless'){
+    gameState.endlessChain++;
+    // small coin reward per dish completed
+    const coinMult=getCoinMult();
+    const earned=Math.round(r.coin*Math.max(1,stars)*0.5*coinMult);
+    save.coins+=earned;
+    persist();
+    sfxGood();
+    showToast(r.emoji+' 완료! +🪙'+earned+' (콤보 ×'+gameState.endlessCombo+')');
+    trackTimer(setTimeout(()=>{
+      const nextIdx=Math.floor(Math.random()*RECIPES.length);
+      startStage(nextIdx);
+      document.getElementById('endless-hud').style.display='flex';
+      document.getElementById('g-stage-label').textContent='ENDLESS ×'+gameState.endlessChain;
+      updateEndlessHud();
+    }, 800));
+    return;
+  }
+
+  // stage mode: persist stars + coins
+  stopBgm();
+  const coinMult=getCoinMult();
+  const earned=Math.round(r.coin*stars*coinMult);
+  save.coins+=earned;
+  if(!save.stageStars[r.id]||save.stageStars[r.id]<stars) save.stageStars[r.id]=stars;
+  persist();
+
+  if(stars>0) sfxWin(); else sfxLose();
+
+  const verdicts=['다시 도전하세요','잘 했어요!','훌륭해요!','완벽한 요리! 🏆'];
+  const emojis=['😓','😊','😄','🏆'];
+  showResult({
+    emoji: emojis[stars], verdict: verdicts[stars],
+    dish: r.name, stars,
+    stats:[
+      {label:'총 점수',val:gameState.score,cls:''},
+      {label:'퍼펙트',val:gameState.perfects+'/'+total,cls:'gold'},
+      {label:'획득 코인',val:'🪙 '+earned,cls:'green'},
+    ],
+    nextAvail: gameState.stageIdx<RECIPES.length-1,
+  });
+}
+
+function endGame(win){
+  stopBgm();
+  if(!win) sfxLose();
+
+  // endless: persist best score + show endless-flavored result
+  if(gameState.mode==='endless'){
+    const finalScore = gameState.endlessScore;
+    let newBest=false;
+    if(finalScore > (save.bestEndless||0)){
+      save.bestEndless = finalScore;
+      newBest=true;
+    }
+    persist();
+    showResult({
+      emoji: newBest?'🏆':'💀',
+      verdict: newBest?'신기록 달성!':'엔드리스 종료',
+      dish: '×'+gameState.endlessChain+' 요리 완성',
+      stars: 0,
+      stats:[
+        {label:'엔드리스 점수',val:finalScore,cls:'gold'},
+        {label:'최고 콤보',val:'×'+gameState.endlessCombo,cls:''},
+        {label:'최고 기록',val:save.bestEndless,cls:'green'},
+      ],
+      nextAvail:false,
+    });
+    return;
+  }
+
+  showResult({
+    emoji:'💀', verdict:'요리 실패...',
+    dish:gameState.recipe.name, stars:0,
+    stats:[
+      {label:'총 점수',val:gameState.score,cls:''},
+      {label:'퍼펙트',val:gameState.perfects,cls:'gold'},
+      {label:'남은 목숨',val:gameState.lives,cls:''},
+    ],
+    nextAvail:false,
+  });
+}
+
+// ═══════════════════════════════════════════
+// ENDLESS MODE
+// ═══════════════════════════════════════════
+function startEndless(){
+  if(!dataLoaded){ showToast('데이터 로딩 중...'); return; }
+  const idx=Math.floor(Math.random()*RECIPES.length);
+  gameState.mode='endless';
+  gameState.endlessScore=0;
+  gameState.endlessCombo=0;
+  gameState.endlessChain=0;
+  gameState.endlessDone=false;
+
+  startStage(idx); // reuse stage setup
+  document.getElementById('endless-hud').style.display='flex';
+  document.getElementById('g-stage-label').textContent='ENDLESS';
+  document.getElementById('el-best').textContent=save.bestEndless;
+  updateEndlessHud();
+  showScreen('game-screen');
+}
+
+function updateEndlessHud(){
+  document.getElementById('el-score').textContent=gameState.endlessScore;
+  document.getElementById('el-combo').textContent='×'+gameState.endlessCombo;
+}
+
+// ═══════════════════════════════════════════
+// RESULT
+// ═══════════════════════════════════════════
+function showResult({emoji,verdict,dish,stars,stats,nextAvail}){
+  document.getElementById('res-emoji').textContent=emoji;
+  document.getElementById('res-verdict').textContent=verdict;
+  document.getElementById('res-dish').textContent=dish;
+  // stars
+  for(let i=0;i<3;i++){
+    const el=document.getElementById('rs'+i);
+    el.className='res-star'+(i<stars?' lit':'');
+    if(i<stars) el.style.animationDelay=(0.2+i*0.15)+'s';
+  }
+  // stats
+  document.getElementById('res-stats').innerHTML=stats.map(s=>`
+    <div class="res-stat">
+      <span class="res-stat-label">${s.label}</span>
+      <span class="res-stat-val ${s.cls}">${s.val}</span>
+    </div>`).join('');
+  setCoinDisplay(save.coins);
+  document.getElementById('res-next-btn').style.display=nextAvail?'block':'none';
+  document.getElementById('result-overlay').classList.add('show');
+  const tb=document.getElementById('timing-btn');
+  if(tb){ tb.style.display='none'; tb.disabled=true; }
+  // ArcadeDeck 연동: GAME_OVER, GAME_SCORE
+  sendArcadeDeckScore('GAME_OVER');
+  sendArcadeDeckScore('GAME_SCORE');
+}
+function closeResult(){ document.getElementById('result-overlay').classList.remove('show'); }
+function nextStage(){ closeResult(); startStage(gameState.stageIdx+1); }
+function retryStage(){ closeResult(); startStage(gameState.stageIdx); }
+function openQuitModal(){
+  document.getElementById('quit-modal').style.display = 'flex';
+}
+function closeQuitModal(){
+  document.getElementById('quit-modal').style.display = 'none';
+}
+function confirmQuit(){
+  closeQuitModal();
+  exitToHub();
+}
+
+
+// ═══════════════════════════════════════════
+// ArcadeDeck 연동 함수
+// ═══════════════════════════════════════════
+function sendArcadeDeckScore(eventType) {
+  // 별점 총합 계산 (Score)
+  let totalStars = 0;
+  if (save.stageStars) {
+    for (const k in save.stageStars) {
+      if (Object.prototype.hasOwnProperty.call(save.stageStars, k)) {
+        totalStars += save.stageStars[k];
+      }
+    }
+  }
+  // 해금된 요리 개수 (SubScore)
+  const unlockedDishes = Array.isArray(save.codexDishes) ? save.codexDishes.length : 0;
+  // ArcadeDeck 프로토콜에 맞춰 postMessage
+  // origin '*' required because ArcadeDeck host origin unknown at build time;
+  // payload contains no secrets (only public game stats), so broadcast is safe.
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage({
+      type: eventType,
+      currentMainPoints: totalStars, // 별점 총합
+      currentExtraStats: unlockedDishes // 해금된 요리 개수
+    }, '*');
+  }
+}
+
+// ═══════════════════════════════════════════
+// SPECIAL EVENT
+// ═══════════════════════════════════════════
+function triggerEvent(){
+  sfxEvent();
+  const el=document.createElement('div');
+  el.className='event-flash';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),500);
+  showToast('🎊 이벤트 스테이지 시작! 보상 2배!');
+  // find sushi
+  const idx=RECIPES.findIndex(r=>r.id==='sushi');
+  setTimeout(()=>startStage(idx),600);
+}
+
+// ═══════════════════════════════════════════
+// MINI GAME
+// ═══════════════════════════════════════════
+let mgRunning=false, mgScore=0, mgTimeLeft=30, mgTimerId=null, mgSpawnId=null, mgToken=0;
+const MG_EMOJIS=['🧅','🧄','🍅','🥕','🥔','🍄','🫑','🌽','🥦','🍆','🥬','🥒','🥑','🥚','🥩','🍗','🐟','🦐','🍣','🦀','🧈','🧀','🍚','🍝','🌾','🍞','🫙','🍶','🌶️','🧂','🌿','🌱','🍂','🍋','🍫','🍯','🥥','🍷','🧴','🍬'];
+
+function showMinigame(){
+  if(!dataLoaded){ showToast('데이터 로딩 중...'); return; }
+  document.getElementById('mg-overlay').classList.add('show');
+  resetMinigame();
+}
+function closeMinigame(){ document.getElementById('mg-overlay').classList.remove('show'); stopMinigame(); }
+
+function resetMinigame(){
+  mgRunning=false; mgScore=0; mgTimeLeft=30;
+  document.getElementById('mg-score').textContent='0';
+  document.getElementById('mg-reward').textContent='+0 🪙';
+  document.getElementById('mg-timer-fill').style.width='100%';
+  // 하루 1회 제한 체크
+  const today = new Date().toISOString().slice(0,10);
+  if(save.mgLastPlayed === today){
+    document.getElementById('mg-start-btn').textContent='내일 다시 도전!';
+    document.getElementById('mg-start-btn').onclick=null;
+    document.getElementById('mg-start-btn').disabled=true;
+  }else{
+    document.getElementById('mg-start-btn').textContent='시작!';
+    document.getElementById('mg-start-btn').onclick=startMinigame;
+    document.getElementById('mg-start-btn').disabled=false;
+  }
+  const basket=document.getElementById('mg-basket');
+  basket.innerHTML='<div class="mg-basket-icon" id="mg-basket-icon">🧺</div>';
+}
+
+function startMinigame(){
+  // 하루 1회 제한
+  const today = new Date().toISOString().slice(0,10);
+  if(save.mgLastPlayed === today){
+    showToast('오늘은 이미 플레이했습니다!');
+    return;
+  }
+  if(mgRunning) return;
+  mgRunning=true; mgScore=0; mgTimeLeft=30;
+  const myToken = ++mgToken;
+  document.getElementById('mg-start-btn').textContent='진행 중...';
+  document.getElementById('mg-start-btn').onclick=null;
+  // basket follows touch
+  const basket=document.getElementById('mg-basket');
+  basket.ontouchstart=basket.ontouchmove=function(e){
+    e.preventDefault();
+    const r=basket.getBoundingClientRect();
+    const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
+    const pct=Math.max(10,Math.min(90,x/r.width*100));
+    document.getElementById('mg-basket-icon').style.left=pct+'%';
+    document.getElementById('mg-basket-icon').style.transform='translateX(-50%)';
+  };
+
+  // spawn ingredients
+  function spawnIng(){
+    if(!mgRunning || myToken!==mgToken) return;
+    const basket=document.getElementById('mg-basket');
+    const r=basket.getBoundingClientRect();
+    const emoji=MG_EMOJIS[Math.floor(Math.random()*MG_EMOJIS.length)];
+    const el=document.createElement('div');
+    el.className='mg-ingredient';
+    el.textContent=emoji;
+    el.style.left=Math.random()*80+10+'%';
+    el.style.animationDuration=(1.5+Math.random()*1.5)+'s';
+    el.onclick=function(){
+      if(!mgRunning) return;
+      mgScore++;
+      sfxCoin();
+      document.getElementById('mg-score').textContent=mgScore;
+      document.getElementById('mg-reward').textContent='+'+Math.round(mgScore*getMinigameCoinPerItem())+' 🪙';
+      el.remove();
+      // check codex
+      const ing=CODEX_INGREDIENTS.find(x=>x.emoji===emoji);
+      if(ing&&!save.codexIngredients.includes(ing.id)){
+        save.codexIngredients.push(ing.id); persist();
+      }
+    };
+    basket.appendChild(el);
+    setTimeout(()=>el.remove(),3000);
+    if(mgRunning && myToken===mgToken) mgSpawnId=setTimeout(spawnIng, 600+Math.random()*400);
+  }
+  spawnIng();
+
+  // timer
+  mgTimerId=setInterval(()=>{
+    mgTimeLeft--;
+    document.getElementById('mg-timer-fill').style.width=(mgTimeLeft/30*100)+'%';
+    if(mgTimeLeft<=0) finishMinigame();
+  },1000);
+}
+
+function stopMinigame(){
+  mgRunning=false;
+  mgToken++;
+  if(mgTimerId){ clearInterval(mgTimerId); mgTimerId=null; }
+  if(mgSpawnId){ clearTimeout(mgSpawnId); mgSpawnId=null; }
+  const basket=document.getElementById('mg-basket');
+  if(basket) basket.querySelectorAll('.mg-ingredient').forEach(el=>el.remove());
+}
+
+function finishMinigame(){
+  stopMinigame();
+  const earned=Math.round(mgScore*getMinigameCoinPerItem());
+  save.coins+=earned;
+  // 오늘 날짜 저장
+  save.mgLastPlayed = new Date().toISOString().slice(0,10);
+  persist();
+  setCoinDisplay(save.coins);
+  document.getElementById('mg-start-btn').textContent='내일 다시 도전!';
+  document.getElementById('mg-start-btn').onclick=null;
+  document.getElementById('mg-start-btn').disabled=true;
+  sfxWin();
+  showToast('수집 완료! 🪙'+earned+' 획득!');
+}
+
+// ═══════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+function spawnFloatScore(text, refEl, color){
+  const rect=refEl.getBoundingClientRect();
+  const el=document.createElement('div');
+  el.className='float-score';
+  el.textContent=text;
+  el.style.color=color;
+  el.style.left=(rect.left+rect.width/2)+'px';
+  el.style.top=(rect.top-10)+'px';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),900);
+}
+
+function showCodexDetail(id,type){
+  if(type==='dish'){
+    const r=RECIPES.find(x=>x.id===id);
+    if(r) showToast(r.emoji+' '+r.name+': '+r.desc);
+  }
+}
+
+// ═══════════════════════════════════════════
+// 오늘 뭐 먹을까 (What's For Dinner)
+// ═══════════════════════════════════════════
+const CHAPTER_NAMES = {1:'기초',2:'아시아',3:'유럽',4:'고급',5:'세계',6:'마스터',7:'분자요리',8:'디저트'};
+const DIFF_LABELS    = {1:'초급',2:'중급',3:'고급'};
+const DIFF_META_CLS  = {1:'meta-diff1',2:'meta-diff2',3:'meta-diff3'};
+
+let wfdPicks = [];        // current 3 picks
+let wfdSelected = null;   // currently selected recipe id
+
+function openWFD(){
+  document.getElementById('wfd-overlay').classList.add('show');
+  // auto-spin on first open if no picks yet
+  if(wfdPicks.length===0) spinWFD();
+}
+function closeWFD(){
+  document.getElementById('wfd-overlay').classList.remove('show');
+}
+
+function spinWFD(){
+  const btn = document.getElementById('wfd-spin-btn');
+  btn.classList.remove('spinning');
+  void btn.offsetWidth;
+  btn.classList.add('spinning');
+
+  // pick 3 unique random recipes from ALL recipes
+  const pool = [...RECIPES];
+  wfdPicks = [];
+  while(wfdPicks.length < 3 && pool.length > 0){
+    const idx = Math.floor(Math.random() * pool.length);
+    wfdPicks.push(pool.splice(idx, 1)[0]);
+  }
+  wfdSelected = null;
+
+  // hide detail
+  const detail = document.getElementById('wfd-detail');
+  detail.classList.remove('show');
+  detail.style.display = 'none';
+
+  renderWFDCards();
+  sfxTap();
+}
+
+function renderWFDCards(){
+  const container = document.getElementById('wfd-cards');
+  container.innerHTML = '';
+  wfdPicks.forEach((r, i) => {
+    const cleared = (save.stageStars[r.id]||0) > 0;
+    const globalIdx = RECIPES.indexOf(r);
+
+    const card = document.createElement('div');
+    card.className = 'wfd-card flip-in';
+    card.style.animationDelay = (i * 0.1) + 's';
+    card.dataset.id = r.id;
+    card.onclick = () => selectWFD(r.id);
+
+    card.innerHTML = `
+      ${r.special ? `<div class="wfd-card-lock">${r.special}</div>` : ''}
+      <span class="wfd-card-emoji">${r.emoji}</span>
+      <div class="wfd-card-name">${r.name}</div>
+      <div class="wfd-card-ch">챕터 ${r.chapter} · ${CHAPTER_NAMES[r.chapter]}</div>
+      <div class="wfd-card-diff">${'⚡'.repeat(r.diff)} ${DIFF_LABELS[r.diff]}
+        ${cleared ? ' · ✅' : ''}
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function selectWFD(id){
+  wfdSelected = id;
+  const r = RECIPES.find(x => x.id === id);
+
+  // update card selection styles
+  document.querySelectorAll('.wfd-card').forEach(c => {
+    if(c.dataset.id === id){
+      c.className = 'wfd-card selected';
+    } else {
+      c.className = 'wfd-card unselected';
+    }
+  });
+
+  sfxGood();
+  renderWFDDetail(r);
+}
+
+function renderWFDDetail(r){
+  const detail = document.getElementById('wfd-detail');
+  detail.style.display = 'block';
+  // force reflow for animation
+  void detail.offsetWidth;
+  detail.classList.add('show');
+
+  document.getElementById('wd-emoji').textContent = r.emoji;
+  document.getElementById('wd-name').textContent  = r.name;
+  document.getElementById('wd-desc').textContent  = r.desc;
+
+  // meta tags
+  const cleared = (save.stageStars[r.id]||0) > 0;
+  const meta = document.getElementById('wd-meta');
+  meta.innerHTML = `
+    <span class="wfd-meta-tag ${DIFF_META_CLS[r.diff]}">${'⚡'.repeat(r.diff)} ${DIFF_LABELS[r.diff]}</span>
+    <span class="wfd-meta-tag meta-chapter">챕터 ${r.chapter} · ${CHAPTER_NAMES[r.chapter]}</span>
+    ${r.multitask ? '<span class="wfd-meta-tag meta-diff2">⚡ 멀티태스킹</span>' : ''}
+    ${r.special ? `<span class="wfd-meta-tag meta-special">🎊 ${r.special}</span>` : ''}
+    ${cleared ? '<span class="wfd-meta-tag meta-cleared">✅ 클리어</span>' : ''}
+    <span class="wfd-meta-tag meta-chapter">🪙 ${r.coin}</span>
+  `;
+
+  // ingredients
+  const ings = RECIPE_INGREDIENTS[r.id] || [];
+  const ingGrid = document.getElementById('wd-ings');
+  if(ings.length > 0){
+    ingGrid.innerHTML = ings.map(ing => `
+      <div class="wfd-ing-item">
+        <span class="wfd-ing-emoji">${ing.e}</span>
+        <span class="wfd-ing-name">${ing.n}</span>
+      </div>
+    `).join('');
+  } else {
+    ingGrid.innerHTML = '<div style="grid-column:1/-1;font-size:0.72rem;color:var(--muted);padding:0.5rem 0">재료 정보를 준비 중입니다</div>';
+  }
+
+  // steps
+  const stepsList = document.getElementById('wd-steps');
+  stepsList.innerHTML = r.steps.map((s,i) => `
+    <div class="wfd-step-row">
+      <div class="wfd-step-num">${i+1}</div>
+      <div class="wfd-step-name">${s}</div>
+    </div>
+  `).join('');
+
+  // play btn label
+  const playBtn = document.getElementById('wd-play-btn');
+  const globalIdx = RECIPES.indexOf(r);
+  playBtn.textContent = `${r.emoji} "${r.name}" 도전하기 →`;
+}
+
+function playFromWFD(){
+  if(!wfdSelected) return;
+  const r = RECIPES.find(x => x.id === wfdSelected);
+  const idx = RECIPES.indexOf(r);
+  closeWFD();
+  setTimeout(() => startStage(idx), 200);
+}
+
+
+// ═══════════════════════════════════════════
+// ─── INIT ───
+// 남은 목숨(하트) 표시 함수 복구
+function renderHearts() {
+  const el = document.getElementById('g-hearts');
+  if (!el) return;
+  el.innerHTML = '';
+  for (let i = 0; i < getBaseLife(); i++) {
+    const s = document.createElement('span');
+    s.className = 'heart' + (i >= gameState.lives ? ' empty' : '');
+    s.textContent = '❤️';
+    el.appendChild(s);
+  }
+}
+// 스테이지 시작 함수 복구
+function startStage(idx) {
+  if (!dataLoaded) { showToast('데이터 로딩 중...'); return; }
+  if (!RECIPES || idx < 0 || idx >= RECIPES.length) {
+    showToast('스테이지 정보를 불러올 수 없습니다.');
+    return;
+  }
+  // cancel any leftover timers/anim from prior session
+  clearPendingTimers();
+  Object.values(needleAnimIds).forEach(id=>cancelAnimationFrame(id));
+  needleAnimIds={};
+  // 게임 상태 초기화
+  gameState.stageIdx = idx;
+  gameState.recipe = RECIPES[idx];
+  gameState.steps = gameState.recipe.steps.map((s, i) => ({
+    name: s,
+    result: null
+  }));
+  gameState.currentStep = 0;
+  gameState.score = 0;
+  gameState.lives = getBaseLife();
+  gameState.perfects = 0;
+  gameState.goods = 0;
+  gameState.bads = 0;
+  gameState.running = false;
+  // UI 세팅
+  renderRecipeCard();
+  renderStageProgress();
+  renderSteps();
+  renderHearts && renderHearts();
+  document.getElementById('g-score').textContent = 0;
+  document.getElementById('g-stage-label').textContent = gameState.recipe.name;
+  document.getElementById('game-screen').style.display = 'block';
+  document.getElementById('hub-screen').style.display = 'none';
+  // hide FAB during gameplay so it doesn't overlap cook area
+  const fab = document.getElementById('wfd-fab');
+  if(fab) fab.style.display = 'none';
+  // 첫 스텝 활성화
+  activateStep(0);
+  // 배경음
+  if (soundOn) startBgm();
+}
+// ═══════════════════════════════════════════
+// UX HYGIENE: backdrop dismiss + ESC key
+// ═══════════════════════════════════════════
+function wireBackdropDismiss(overlayId, closeFn){
+  const el = document.getElementById(overlayId);
+  if(!el) return;
+  el.addEventListener('click', (e) => {
+    // only dismiss if click hit overlay itself, not inner sheet
+    if(e.target === el) closeFn();
+  });
+}
+wireBackdropDismiss('wfd-overlay',   closeWFD);
+wireBackdropDismiss('codex-overlay', closeCodexDish);
+wireBackdropDismiss('ing-overlay',   closeIngredient);
+wireBackdropDismiss('quit-modal',    closeQuitModal);
+wireBackdropDismiss('mg-overlay',    closeMinigame);
+
+document.addEventListener('keydown', (e) => {
+  if(e.key !== 'Escape') return;
+  if(document.getElementById('wfd-overlay').classList.contains('show'))   { closeWFD(); return; }
+  if(document.getElementById('codex-overlay').classList.contains('show')) { closeCodexDish(); return; }
+  if(document.getElementById('ing-overlay').classList.contains('show'))   { closeIngredient(); return; }
+  if(document.getElementById('quit-modal').style.display === 'flex')      { closeQuitModal(); return; }
+  if(document.getElementById('mg-overlay').classList.contains('show'))    { closeMinigame(); return; }
+  if(document.getElementById('result-overlay').classList.contains('show')){ exitToHub(); return; }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "Omok - Five in a Row",
+  "short_name": "Omok",
+  "description": "Play Omok (Gomoku) against AI or a friend",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#3a3a3a",
+  "theme_color": "#eebc1d",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/icon-192.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

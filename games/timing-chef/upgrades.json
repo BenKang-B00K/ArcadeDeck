@@ -1,0 +1,10 @@
+[
+  {"id":"timing","name":"타이밍 존 확대","emoji":"⏱️","desc":"퍼펙트/굿 존이 살짝 넓어집니다 (+1.2%/+1.8%)","maxLv":10,"baseCost":400,"costMult":1.32,"effect":"zone"},
+  {"id":"score","name":"점수 배율 강화","emoji":"⭐","desc":"퍼펙트 보너스 점수 +10%/Lv","maxLv":8,"baseCost":150,"costMult":1.28,"effect":"score"},
+  {"id":"life","name":"여분 목숨","emoji":"❤️","desc":"게임 시작 시 목숨 +1/Lv","maxLv":5,"baseCost":500,"costMult":1.45,"effect":"life"},
+  {"id":"coin","name":"코인 획득량 증가","emoji":"🪙","desc":"스테이지 클리어 코인 +8%/Lv","maxLv":10,"baseCost":250,"costMult":1.28,"effect":"coin"},
+  {"id":"speed","name":"바늘 속도 조절","emoji":"🎯","desc":"바늘이 조금씩 더 느려집니다","maxLv":8,"baseCost":200,"costMult":1.28,"effect":"speed"},
+  {"id":"combo","name":"콤보 강화","emoji":"🔗","desc":"엔드리스 콤보 보너스 +2%/Lv","maxLv":8,"baseCost":350,"costMult":1.30,"effect":"combo"},
+  {"id":"revive","name":"행운의 회복","emoji":"🍀","desc":"퍼펙트 시 5%/Lv 확률로 목숨 +1","maxLv":5,"baseCost":600,"costMult":1.40,"effect":"revive"},
+  {"id":"mgboost","name":"수집 부스트","emoji":"🧺","desc":"미니게임 재료당 코인 +0.4/Lv","maxLv":6,"baseCost":300,"costMult":1.32,"effect":"mgboost"}
+]

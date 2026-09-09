@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="160" height="160" shape-rendering="crispEdges">
+
+  <!-- Shield: cols 0-2, rows 4-13 -->
+  <rect x="0" y="4" width="3" height="10" fill="#8B5E3C"/>
+  <rect x="0" y="4" width="1" height="10" fill="#A8A8A8"/>
+  <rect x="2" y="4" width="1" height="10" fill="#A8A8A8"/>
+  <rect x="0" y="4" width="3" height="1" fill="#A8A8A8"/>
+  <rect x="0" y="13" width="3" height="1" fill="#A8A8A8"/>
+  <!-- Shield boss -->
+  <rect x="1" y="8" width="1" height="2" fill="#C8A010"/>
+
+  <!-- Left arm to shield: cols 3-5 row 8 -->
+  <rect x="3" y="8" width="3" height="1" fill="#909090"/>
+
+  <!-- Red crest on helmet top -->
+  <rect x="7" y="0" width="3" height="1" fill="#CC0000"/>
+  <rect x="8" y="1" width="1" height="1" fill="#CC0000"/>
+
+  <!-- Helmet: rows 2-3 cols 7-11 -->
+  <rect x="7" y="2" width="4" height="1" fill="#C0C0C0"/>
+  <rect x="6" y="3" width="5" height="1" fill="#909090"/>
+  <!-- Cheek guards rows 4-6 -->
+  <rect x="6" y="4" width="1" height="3" fill="#909090"/>
+  <rect x="10" y="4" width="1" height="3" fill="#909090"/>
+  <!-- Face rows 4-6, cols 7-9 -->
+  <rect x="7" y="4" width="3" height="3" fill="#F0B870"/>
+  <rect x="7" y="5" width="1" height="1" fill="#1A0E00"/>
+  <!-- Chin guard row 7 -->
+  <rect x="6" y="7" width="5" height="1" fill="#909090"/>
+
+  <!-- Body cols 6-12, rows 8-12 -->
+  <rect x="6" y="8" width="6" height="4" fill="#909090"/>
+  <rect x="7" y="8" width="1" height="3" fill="#C0C0C0"/>
+  <rect x="6" y="12" width="6" height="1" fill="#C8A010"/>
+  <!-- Right arm col 12 rows 8-11 -->
+  <rect x="12" y="8" width="1" height="4" fill="#909090"/>
+  <!-- Sword sheathed on back (col 13-14, rows 6-13) -->
+  <rect x="13" y="6" width="1" height="8" fill="#D0D0D0"/>
+  <rect x="12" y="7" width="2" height="1" fill="#C8A010"/>
+
+  <!-- Legs rows 13-14 -->
+  <rect x="7" y="13" width="2" height="2" fill="#909090"/>
+  <rect x="10" y="13" width="2" height="2" fill="#909090"/>
+  <!-- Boots row 15 -->
+  <rect x="6" y="15" width="3" height="1" fill="#3A200A"/>
+  <rect x="10" y="15" width="3" height="1" fill="#3A200A"/>
+
+</svg>

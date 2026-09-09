@@ -1,0 +1,1665 @@
+{
+  "meta": {
+    "code": "en",
+    "name": "English",
+    "endonym": "English"
+  },
+  "ui": {
+    "start": {
+      "subtitle": "Return of Evil Spirits",
+      "btn_continue": "Continue",
+      "btn_new": "New Game",
+      "btn_tutorial": "Guide",
+      "tutorial_label": "Beginner's Guide",
+      "status_on": "ON",
+      "status_off": "OFF"
+    },
+    "loading": {
+      "title": "GATE OF HELL",
+      "status": "Opening the Gates of Abyss...",
+      "subtitle": "GATE OF HELL CHRONICLES",
+      "msg_0": "Opening the Gates of Abyss...",
+      "msg_1": "Extracting the essence of souls...",
+      "msg_2": "Organizing the bibles of exorcism...",
+      "msg_3": "Recording the names of evil spirits...",
+      "msg_4": "Sealing the energy of the abyss...",
+      "msg_5": "Appraising ancient relics...",
+      "msg_6": "Lighting the shrine lanterns...",
+      "ready": "Ready!",
+      "error": "The Gates of Abyss have closed (Loading failed)"
+    },
+    "hud": {
+      "sleeping_statue": "Sleeping Statue",
+      "cursed_status": "Dormant Curse",
+      "stage_name_default": "Whispering Gate",
+      "depth": "Depth",
+      "se_tooltip": "Soul Energy (SE): Used to summon and upgrade units (Click for details)",
+      "pe_tooltip": "Portal Erosion (PE): Game Over if it reaches 100% (Click for details)",
+      "rs_tooltip": "Remaining Spirits (RS): Kills required to clear stage (Click for details)",
+      "curse_lv_prefix": "Abyssal Curse",
+      "curse_lv1": "Abyssal Curse Level 1",
+      "curse_lv2": "Abyssal Curse Level 2",
+      "curse_lv3": "Abyssal Curse Level 3",
+      "curse_tooltip_title_active": "Abyssal Curse",
+      "curse_tooltip_title_dormant": "Dormant Curse",
+      "curse_tooltip_desc_active": "High portal erosion has triggered an ancient curse. Purge to lower erosion.",
+      "curse_tooltip_desc_dormant": "The curse has not yet awakened. Activates when erosion exceeds 30%.",
+      "curse_stat_lv1": "Level 1 (30%↑)",
+      "curse_stat_lv2": "Level 2 (50%↑)",
+      "curse_stat_lv3": "Level 3 (75%↑)",
+      "curse_stat_lv1_val": "All ally ATK SPD -5%",
+      "curse_stat_lv2_val": "All ally ATK SPD -10%",
+      "curse_stat_lv3_val": "All ally ATK SPD -20%",
+      "se_tooltip_title": "Soul Energy (SE)",
+      "se_tooltip_desc": "Spiritual energy required to summon exorcists and build shrines.",
+      "se_gain_method": "Kill evil spirits",
+      "se_gain_label": "How to Gain",
+      "pe_tooltip_title": "Portal Erosion (PE)",
+      "pe_tooltip_desc": "Erosion that builds up as evil spirits pass through the portal. Game Over at 100%.",
+      "pe_purge_method": "Use Purge function",
+      "pe_purge_label": "How to Purge",
+      "rs_tooltip_title": "Remaining Spirits (RS)",
+      "rs_tooltip_desc": "Total amount of evil spirits that must be killed to clear the current stage.",
+      "rs_progress_label": "Progress",
+      "rs_progress_val": "Decreases on kill",
+      "gargoyle_atk_speed": "Attack Speed",
+      "gargoyle_atk_range": "Attack Range",
+      "gargoyle_atk_damage": "Attack Damage",
+      "gargoyle_se_gain": "SE Gain",
+      "gargoyle_no_debuff": "None",
+      "se_short": "Low SE",
+      "stage_countdown_enemies": "The spirits are swarming!",
+      "stage_banner_title": "Whispering Gate"
+    },
+    "controls": {
+      "se_short": "Low SE",
+      "sf_tooltip": "Soul Fragment — Resource for crafting relics",
+      "sc_tooltip": "Soul Crystal — Resource for equipment reroll",
+      "new_badge": "NEW",
+      "tba": "TBA",
+      "btn_pause": "Pause",
+      "btn_resume": "Resume",
+      "summon_title": "Summon",
+      "summon_desc": "Randomly summons either a Novice or Apprentice Exorcist.",
+      "shrine_title": "Sacred Shrine",
+      "shrine_desc": "Place in exclusive slots to provide powerful ATK buffs to nearby allies.",
+      "purge_title": "Purge Space",
+      "purge_desc": "Instantly removes 50% of Portal Erosion. Use in emergencies.",
+      "relics_title": "Relics",
+      "relics_desc": "Treasures found during purging that permanently enhance all allies.",
+      "equip_title": "Equipment",
+      "equip_desc": "Ancient armaments that significantly boost specific stats when equipped.",
+      "equip_manage_title": "Sacred Armory",
+      "equip_manage_desc": "Manage and enhance sacred equipment obtained from the abyss.",
+      "equip_lore": "Even a broken blade becomes a divine sword in the hands of an exorcist.",
+      "collections_title": "Chronicles",
+      "collections_desc": "Check detailed records of encountered spirits and allies.",
+      "pact_title": "Cursed Pact",
+      "pact_unlock_fmt": "Unlocks at stage {stage}.",
+      "pact_ready": "Ready to Summon",
+      "pact_cooldown_fmt": "{cur}/{cd} stages to reuse",
+      "pact_desc_fmt": "Instantly summons a boss-level soul. Guarantees a relic on kill. Once every {cd} stages. Penalties accumulate if not summoned for {grace} stages or more.",
+      "pact_penalty_fmt": "Ignore Penalty: Enemy HP +{hp}%, SE −{se}%",
+      "tba_title": "TBA",
+      "tba_desc": "New features coming soon.",
+      "relics_cost_fmt": "Normal {n} · Supreme {s} SF"
+    },
+    "info_panel": {
+      "default_title": "GATE OF HELL",
+      "default_subtitle": "SACRED TABLET",
+      "lore_default": "The Abyssal Tablet analyzes soul essence to light the path of purification.",
+      "hint_touch": "▾ Touch Unit or Enemy ▾",
+      "shrine_scope_local": "Local",
+      "shrine_scope_global": "Global",
+      "shrine_buffed_fmt": "{n} buffed",
+      "shrine_demolish_btn": "Demolish Shrine",
+      "unit_role_default": "Exorcist",
+      "unit_promote_t1": "Soul Awakening",
+      "unit_promote_t2": "Transcendent Awakening",
+      "unit_promote_t3": "Legendary Promotion",
+      "unit_corrupt_btn": "Sacrifice",
+      "unit_corrupt_full_btn": "Corrupted",
+      "unit_instakill_disp": "Instakill",
+      "unit_global_range_disp": "Global",
+      "enemy_desc_unknown": "A being of unknown origin from the abyss.",
+      "enemy_flavor": "Its essence lingers briefly on the tablet...",
+      "slot_warning_title": "Cannot Place",
+      "slot_warning_flavor": "This spot does not allow for soul harmony.",
+      "slot_sacred_only": "Exclusive slot for Sacred Shrines.",
+      "slot_shrine_only": "Exclusive slot for Shrines.",
+      "slot_unit_only": "Exclusive slot for Exorcists.",
+      "enemy_lore_unknown": "There is no record of this soul.",
+      "shrine_badge": "Shrine",
+      "shrine_demo_prefix": "On Demolish",
+      "sacred_slot_only_log": "Only Sacred Shrine (Tier 2) can be placed here."
+    },
+    "modal": {
+      "close": "Close"
+    },
+    "collections": {
+      "subtitle": "Every being in the abyss is engraved on this tablet",
+      "default_title": "GATE OF HELL",
+      "default_subtitle": "CHRONICLES",
+      "tab_ghosts": "Evil Beings",
+      "tab_exorcists": "Exorcist Lineage",
+      "tab_shrines": "Shrines",
+      "ghost_locked": "Not yet encountered",
+      "ghost_locked_lore": "A being hiding deep within the abyss.",
+      "shrine_sacred_label": "Sacred Shrine",
+      "shrine_normal_label": "Normal Shrine",
+      "shrine_range_global": "Global",
+      "shrine_range_local": "Local",
+      "shrine_stat_range": "Range",
+      "shrine_stat_role": "Role",
+      "shrine_stat_effect": "Effect",
+      "shrine_stat_demolish": "Demolish",
+      "ghost_stat_hp": "HP",
+      "ghost_stat_def": "DEF",
+      "ghost_stat_reward": "Reward",
+      "ghost_stat_kills": "Kills",
+      "section": {
+        "specter": "Specter",
+        "wraith": "Wraith",
+        "spirit": "Spirit",
+        "demon": "Demon",
+        "abyssal_boss": "Boss",
+        "mini_boss": "Mini Boss",
+        "treasure": "Anomaly",
+        "buff": "Buff Shrine",
+        "prob": "Chance Shrine",
+        "util": "Utility Shrine",
+        "sacred": "Sacred Shrine"
+      },
+      "exo": {
+        "family_suffix": "Lineage",
+        "family_subtitle": {
+          "novice_exorcist": "Support Type",
+          "apprentice": "Attack Type",
+          "acolyte_priest": "Holy Type",
+          "acolyte_warrior": "Melee Type"
+        },
+        "tier": {
+          "1": "Basic",
+          "2": "Skilled",
+          "3": "Advanced",
+          "4": "Legendary"
+        },
+        "tier_label": {
+          "1": "TIER  I",
+          "2": "TIER  II",
+          "3": "TIER  III",
+          "4": "TIER  IV"
+        },
+        "units_count_format": "{n} units · 5→10→5"
+      }
+    },
+    "detail": {
+      "lbl_attack": "ATK",
+      "lbl_dps": "DPS",
+      "lbl_range": "Range",
+      "lbl_cooldown": "Cooldown",
+      "lbl_role": "Role",
+      "lbl_effect": "Effect",
+      "lbl_demolish": "Demolish",
+      "lbl_hp": "HP",
+      "lbl_defense": "DEF",
+      "lbl_reward": "Reward",
+      "lbl_kills": "Kills",
+      "lbl_ability": "Ability",
+      "lbl_range_type": "Range",
+      "sub_damage": "DMG",
+      "sub_dps": "DPS",
+      "sub_distance": "Dist",
+      "sub_per_sec": "per sec",
+      "sub_passive": "Passive",
+      "sub_instakill": "Instakill",
+      "sub_global": "Global",
+      "tag_passive": "PASSIVE",
+      "tag_instakill": "INSTAKILL",
+      "tag_global": "GLOBAL",
+      "shrine_normal": "Normal Shrine",
+      "shrine_sacred": "Sacred Shrine",
+      "shrine_range_local": "Local",
+      "shrine_range_global": "Global",
+      "danger": {
+        "extreme": "Extreme",
+        "high": "High",
+        "caution": "Caution",
+        "minor": "Minor",
+        "low": "Low"
+      }
+    },
+    "relics": {
+      "float_surge": "Abyssal Surge!",
+      "float_revival": "Soul Revival!",
+      "float_ledger_suffix": " SE Claimed!",
+      "subtitle": "Cursed relics harvested from the depths of the abyss",
+      "default_title": "GATE OF HELL",
+      "default_subtitle": "RELIC VAULT",
+      "sf_tooltip": "Soul Fragment — Resource for crafting relics",
+      "count_tooltip": "Owned Relics",
+      "total_bonus": "Total Relic Bonus",
+      "found_title": "Relic Found!",
+      "effect_label": "Effect",
+      "source_label": "Source",
+      "owned_fmt": "Owned ×{n}",
+      "not_owned": "Not Obtained",
+      "section_normal": "Normal Relic",
+      "section_supreme": "Supreme Relic",
+      "section_boss": "Ruler's Relic",
+      "section_ancient": "Ancient Relic",
+      "craft_btn": "Craft",
+      "craft_no_sf_warn": "Low Soul Fragment (Need {cost})",
+      "craft_pool_empty_warn": "No craftable relics",
+      "craft_btn_title_empty": "No craftable relics (All maxed out)",
+      "craft_btn_title_fmt": "Craft random relic using {cost} Soul Fragments (Owned {sf} SF)",
+      "src_specter": "Specter",
+      "src_wraith": "Wraith",
+      "src_spirit": "Spirit",
+      "src_all": "All Enemies",
+      "src_demon": "Demon",
+      "src_abyssal_boss": "Abyssal Boss",
+      "src_supreme_boss": "Pact Boss",
+      "src_unknown": "Unknown",
+      "bonus_damage": "ATK Increase",
+      "bonus_range": "Range Increase",
+      "bonus_cooldown": "Attack Speed Increase",
+      "bonus_crit_chance": "Crit Chance",
+      "bonus_crit_damage": "Crit Damage",
+      "bonus_slow_strength": "Slow Strength",
+      "bonus_portal_dmg_reduction": "Portal Stability",
+      "bonus_summon_cost_reduction": "Summon Cost Reduction",
+      "bonus_execute_threshold": "Execute Threshold",
+      "bonus_aura_range": "Aura Range",
+      "bonus_sell_refund": "Sell Refund Bonus",
+      "bonus_shrine_mastery": "Shrine Mastery",
+      "bonus_se_max_limit": "SE Max Limit",
+      "bonus_crit_chain": "Chain Lightning Damage",
+      "bonus_portal_heal_chance": "Soul Reflux Chance",
+      "bonus_echo_shot_chance": "Echo Attack Chance",
+      "bonus_combo_damage": "Combo Damage Increase",
+      "bonus_death_save": "Soul Revival Charge",
+      "bonus_surge_interval_reduction": "Abyssal Surge Stacks",
+      "bonus_void_mark_cap": "Void Mark Limit",
+      "bonus_adjacency_damage": "Adjacency Bond Damage",
+      "bonus_ledger_stacks": "Soul Ledger Stacks",
+      "log_ledger_windfall": "Soul Ledger: +{n} SE",
+      "log_revival": "Soul Revival! Portal restored.",
+      "badge_title_fmt": "Owned Types {u} / Total {t}"
+    },
+    "equipment": {
+      "subtitle": "Sacred artifacts gathered from the abyss",
+      "default_title": "GATE OF HELL",
+      "default_subtitle": "SACRED ARMORY",
+      "total_bonus": "Total Equipment Effects",
+      "found_prefix": "Equipment",
+      "sc_row_title": "Rarely obtained on kill. Used for rerolling equipment.",
+      "reroll_label": "Reroll",
+      "reroll_stock_fmt": "Owned {n}",
+      "found_count_fmt": "Found ×{n}",
+      "found_title_new": "Obtained!",
+      "found_title_upgrade": "Enhanced!",
+      "found_title_reroll": "Rerolled!",
+      "found_title_existing": "Rediscovered",
+      "found_effect_label": "Effect",
+      "found_lore": "Even the spirits of the abyss will be blinded by the light of this armament.",
+      "no_sc_warn": "Low Soul Crystal (Need {cost})",
+      "no_equip": "No equipment equipped.",
+      "not_owned_tier": "Not Obtained",
+      "secondary_stat_label": "Random Substat",
+      "secondary_stat_locked": "??? (Highest Grade Only)",
+      "bonus_label": "[Bonus]",
+      "section_weapon": "Weapon",
+      "section_armor": "Armor",
+      "section_accessory": "Accessory",
+      "lore_armory": "Even a broken blade becomes a divine sword in the hands of an exorcist.",
+      "grade_suffix": "Grade"
+    },
+    "game_over": {
+      "title": "Soul Overwhelmed",
+      "msg": "The abyss has claimed another soul... The gates have collapsed, and eternal darkness awaits.",
+      "depth_label": "Reached Depth:",
+      "btn_retry": "Rise again and Purify (Retry)"
+    },
+    "sacrifice": {
+      "header": "[Absolute Taboo: Soul Disposal]",
+      "body": "Do you wish to forcibly break the sacred contract with the guardian?\n\nThe price for returning a soul to the abyss is never light,\nand essence once scattered can never be recalled.\n\nDo you truly wish to banish this guardian into eternal darkness?",
+      "btn_confirm": "Execute Sacrifice",
+      "btn_cancel": "Keep Contract (Cancel)"
+    },
+    "unlock": {
+      "header": "New Class Unlocked!",
+      "resume_hint": "(Click anywhere to resume)"
+    },
+    "pause": {
+      "header": "TIME FROZEN",
+      "body": "The flow of the abyss has briefly stopped.\nContinue the exorcism when you are ready.",
+      "btn_resume": "Resume Exorcism"
+    },
+    "settings": {
+      "header": "[Purification Settings]",
+      "tutorial_label": "Tutorial Guide",
+      "tutorial_desc": "Displays help when discovering new units/systems.",
+      "language_label": "Language",
+      "language_desc": "Changes the game interface language.",
+      "btn_restart": "Stop Current Purification (Restart)",
+      "btn_close": "Close Settings"
+    },
+    "quit": {
+      "header": "[Rejection of Fate]",
+      "body": "Countless souls have already lost their way on this path.\n\nIf even you give up on the exorcism, the remaining light in this world will vanish completely.\nAll purification records until now will be destroyed and can never be restored.\n\nDo you truly wish to give up on this sacred mission?",
+      "btn_confirm": "Flee to Abyss (Stop)",
+      "btn_cancel": "Resist Fate (Continue)"
+    },
+    "tutorial": {
+      "header": "[Exorcism Guide]",
+      "btn_close": "Close Guide",
+      "section": {
+        "basic_title": "Basic Controls",
+        "basic_1": "Drag & drop to change the position of your exorcists.",
+        "basic_2": "Click the bottom cards to summon new exorcists or build shrines.",
+        "units_title": "Units & Shrines",
+        "units_1": "Exorcists automatically attack spirits and can be promoted using SE.",
+        "units_2": "Shrines provide powerful buffs to nearby allies, but cause debuffs when demolished.",
+        "pe_title": "Portal Erosion (PE)",
+        "pe_1": "Erosion increases when evil spirits pass through the portal.",
+        "pe_2": "If erosion reaches 100%, the world ends. Use 'Purge' to stop the erosion."
+      }
+    },
+    "max_units": {
+      "warning_main": "???: Cannot call any more exorcists!",
+      "warning_sub": "(Max Exorcists: 16)"
+    },
+    "summons": {
+      "skeleton": "Skeleton",
+      "ghost": "Specter"
+    },
+    "enemy": {
+      "boss_warning_header": "Omens of Abyss",
+      "boss_warning_cat": "Archdemon Descent",
+      "boss_warning_lore": "A powerful ruler of the abyss is descending. Focus all exorcists' power!",
+      "boss_victory_header": "Abyssal Being Banished",
+      "boss_victory_cat": "Demon Lord Vanquished",
+      "encounter_header": "New Encounter Record",
+      "unknown_boss_name": "Unknown Being",
+      "stage_enemies_incoming": "The spirits are swarming!",
+      "float_time_reversal": "Time Reversal",
+      "float_petrify": "Petrified!",
+      "float_invincible_off": "Invincibility Off!"
+    },
+    "curse": {
+      "form_0_name": "Sleeping Statue",
+      "form_0_desc": "A quietly sleeping statue. It hasn't awakened yet.",
+      "form_1_name": "Cracked Statue",
+      "form_1_desc": "Cracks have started to form. Something is trying to wake up.",
+      "form_2_name": "Awakened Gargoyle",
+      "form_2_desc": "It has opened its eyes. It is watching you.",
+      "form_3_name": "Vigilant Sentry",
+      "form_3_desc": "It has started to spread its wings. It has entered a state of vigilance.",
+      "form_4_name": "Wrathful Awakening",
+      "form_4_desc": "Fully awakened. Flames of wrath burn in its eyes.",
+      "form_5_name": "Corrupted Guardian",
+      "form_5_desc": "Corruption has begun. It is filled with dark power.",
+      "form_6_name": "Demonic Gargoyle",
+      "form_6_desc": "Transformed into a complete demon. Its very existence pollutes the surroundings.",
+      "form_7_name": "Corrupt God Descent",
+      "form_7_desc": "A corrupt god has descended. All holy power is weakening.",
+      "stat_ally_prefix": "Ally",
+      "stat_enemy_prefix": "Enemy",
+      "stat_speed": "Speed",
+      "stat_range": "Range",
+      "stat_damage": "Damage",
+      "stat_none": "None",
+      "enemy_speed_label": "Speed×",
+      "enemy_defense_label": "DEF+"
+    },
+    "pact": {
+      "madness_popup": "Madness Triggered!",
+      "madness_log_on": "Demon Horn: Madness Triggered — Damage Bonus ×2",
+      "madness_log_off": "Demon Horn: Madness Released"
+    }
+  },
+  "shrine_role": {
+    "buff": "Buff",
+    "prob": "Chance",
+    "util": "Utility",
+    "sacred_buff": "Superior Buff",
+    "sacred_util": "Superior Utility",
+    "sacred_prob": "Superior Chance"
+  },
+  "unit_role": {
+    "basic_support": "Basic-Support",
+    "basic_attack": "Basic-Attack",
+    "basic_priest": "Basic-Holy",
+    "basic_melee": "Basic-Melee",
+    "skilled_support": "Skilled-Support",
+    "skilled_attack": "Skilled-Attack",
+    "skilled_special": "Skilled-Special",
+    "attack": "Attack",
+    "support": "Support",
+    "special": "Special"
+  },
+  "unit": {
+    "novice_exorcist": {
+      "name": "Novice Exorcist",
+      "desc": "Attacks single enemy with the power of the sacred book. Exclusive to Support T2 path.",
+      "lore": "A beginner exorcist in lavender robes with short brown hair, emitting light from an open bible."
+    },
+    "apprentice": {
+      "name": "Apprentice Exorcist",
+      "desc": "Fires purified energy bolts to attack a single target.",
+      "lore": "An apprentice exorcist in deep indigo robes with golden vestments, holding a cross-engraved holy tool."
+    },
+    "acolyte_priest": {
+      "name": "Novice Priest",
+      "desc": "Inflicts holy damage on a single enemy with blessing light. Can be promoted to Support T2 like Slow/Insight.",
+      "lore": "A novice priest in white robes with dove feathers, emitting light of blessing."
+    },
+    "acolyte_warrior": {
+      "name": "Novice Warrior",
+      "desc": "Deals melee damage with a consecrated dagger. Can be promoted to Attack T2 like Sword/Monk/Hymn.",
+      "lore": "An agile apprentice warrior in light armor with a consecrated dagger and glowing charms on shoulders."
+    },
+    "chainer": {
+      "name": "Soul Binder",
+      "desc": "Fires spiritual chains to deal damage and reduce enemy movement speed by 30%.",
+      "lore": "A binder in grey robes wrapped in black chains, with blue spiritual energy flowing from the chains."
+    },
+    "talisman": {
+      "name": "Talisman Master",
+      "desc": "Throws exploding talismans to deal area damage at the point of impact.",
+      "lore": "A master in yellow robes with explosive talismans on shoulders and waist, sparks at fingertips."
+    },
+    "monk": {
+      "name": "Mace Monk",
+      "desc": "Strikes with a heavy mace to push evil spirits away from the portal.",
+      "lore": "A sturdy monk in reddish-brown robes carrying a golden mace, with a holy seal on forehead."
+    },
+    "archer": {
+      "name": "Sacred Archer",
+      "desc": "Fires long-range precision arrows that partially ignore enemy defense. [Apprentice Exorcist exclusive]",
+      "lore": "A precision marksman in platinum chainmail with a glowing bowstring and holy runes on arrowheads."
+    },
+    "ice": {
+      "name": "Frost Taoist",
+      "desc": "Chants freezing spells to significantly reduce enemy movement speed for 2 seconds.",
+      "lore": "A frost taoist in blue-white coat with a frost crystal staff, breath condensing coldly."
+    },
+    "fire": {
+      "name": "Fire Mage",
+      "desc": "Burns enemies to deal burn damage equal to 1% of max HP every second.",
+      "lore": "A fire mage in crimson robes with a flame-patterned hood, rolling small embers on palms."
+    },
+    "assassin": {
+      "name": "Shadow Assassin",
+      "desc": "Quickly slashes with twin blades, ignoring all enemy defense. [Apprentice Exorcist exclusive]",
+      "lore": "An agile shadow in a black hood and white mask, holding curved twin blades."
+    },
+    "tracker": {
+      "name": "Soul Tracker",
+      "desc": "Shines a guiding light to expand the attack range of all nearby allies.",
+      "lore": "A hunter-style tracker in a silver cloak with a tracking lantern, eyes glowing blue."
+    },
+    "necromancer": {
+      "name": "Necromancer",
+      "desc": "Summons spiritual energy walls to physically block the path of evil spirits. [Novice Exorcist exclusive]",
+      "lore": "A necromancer in a purple hood with a skull-decorated staff, emitting soul mist from fingertips."
+    },
+    "guardian": {
+      "name": "Shrine Guardian",
+      "desc": "Attacks with holy power, with a 5% chance to instantly banish the target. [Novice Warrior exclusive]",
+      "lore": "A steadfast guardian in white chainmail with a golden cross shield and consecrated sword."
+    },
+    "alchemist": {
+      "name": "Exorcist Alchemist",
+      "desc": "Transmutes enemy essence, with a 15% chance to gain 2 SE on hit. [Novice Exorcist exclusive]",
+      "lore": "An alchemist in a leather apron with a vial belt, holding a bubbling purification flask."
+    },
+    "mirror": {
+      "name": "Mirror Prophet",
+      "desc": "Uses reflection magic to bounce 30% of damage dealt to other nearby enemies. [Novice Exorcist exclusive]",
+      "lore": "A mysterious prophet in silver clothing with a hand mirror, the surface shimmering in rainbow colors."
+    },
+    "knight": {
+      "name": "Exorcist Knight",
+      "desc": "Swings a blessed greatsword to deal balanced physical and holy damage.",
+      "lore": "A knight in bronze plate armor with a consecrated greatsword and a holy cross cloak."
+    },
+    "verse_warrior": {
+      "name": "Scripture Warrior",
+      "desc": "Strikes with holy scripture beads, with a 10% chance to root enemy movement for 1 second. [Novice Warrior exclusive]",
+      "lore": "A warrior in white martial arts robes with rosaries wrapped around hands, striking with scripture beads."
+    },
+    "hymn_blaster": {
+      "name": "Hymn Blaster",
+      "desc": "Rapidly fires explosive hymn waves to deal damage to groups of enemies. [Novice Priest exclusive]",
+      "lore": "A massive blaster in golden priest robes carrying a giant hymn trumpet cannon."
+    },
+    "exorcism_mage": {
+      "name": "Exorcism Mage",
+      "desc": "Concentrates exorcism energy for a powerful single strike. [Novice Priest exclusive]",
+      "lore": "A mage in deep blue robes with a cross staff, gathering condensed white light at fingertips."
+    },
+    "lightning_mage": {
+      "name": "Lightning Mage",
+      "desc": "After striking the first target, lightning chains to one nearby enemy for 50% damage. [Apprentice Exorcist exclusive]",
+      "lore": "A lightning mage in cobalt robes with golden lightning embroidery, blue current flowing from fingertips."
+    },
+    "prayer_herald": {
+      "name": "Prayer Herald",
+      "desc": "Emits prayer waves to increase the attack power of allies in range by 8%. [Novice Exorcist exclusive]",
+      "lore": "A neat young herald in white priest robes holding a golden cross bell."
+    },
+    "relic_keeper": {
+      "name": "Relic Keeper",
+      "desc": "Uses holy relic power to increase the attack speed of allies in range by 10%. [Novice Priest exclusive]",
+      "lore": "A keeper in a platinum chainmail cloak carrying a reliquary on shoulders."
+    },
+    "ward_scribe": {
+      "name": "Ward Scribe",
+      "desc": "Inscribes sealing wards to reduce the movement speed of enemies in range by 15%. [Novice Exorcist exclusive]",
+      "lore": "A scribe in deep blue scholar robes with ward scrolls, inscribing runes at fingertips."
+    },
+    "paladin": {
+      "name": "Paladin",
+      "desc": "Every 5th attack triggers a holy strike that deals 3x damage and stuns.",
+      "lore": "A paladin in platinum full plate armor with a holy hammer and a faint halo."
+    },
+    "crusader": {
+      "name": "Blood Knight",
+      "desc": "Delivers an execution strike, dealing more damage as enemy HP decreases.",
+      "lore": "A blood knight in a crimson cloak with a twin-handed execution sword, bloodstains on the blade."
+    },
+    "midas": {
+      "name": "Golden Midas",
+      "desc": "Coats attacks in gold, gaining a large 15 SE on kill.",
+      "lore": "An incarnation of wealth in a golden mask and gilded armor, scattering gold dust from fingertips."
+    },
+    "philosopher": {
+      "name": "Void Sage",
+      "desc": "Applies a corrosion curse on each hit that permanently reduces enemy defense by 1.",
+      "lore": "An elderly sage in star-patterned black robes with an open book of the void."
+    },
+    "illusion": {
+      "name": "Illusionist",
+      "desc": "Confuses the mind, with a 20% chance to make enemies lose their way and wander.",
+      "lore": "An illusionist in a rainbow veil and mask, with faint afterimages flickering around."
+    },
+    "reflection": {
+      "name": "Master of Reflection",
+      "desc": "Fires crystal shards that bounce between multiple enemies on impact.",
+      "lore": "A master in crystal armor with a polyhedral crystal staff, light scattering into rainbows."
+    },
+    "executor": {
+      "name": "Underworld Executor",
+      "desc": "Shakes the scales of fate, with a 10% chance to return enemies to the starting point.",
+      "lore": "An executor in a black executioner mask holding the scales of fate, in deep purple robes."
+    },
+    "binder": {
+      "name": "Soul Binder",
+      "desc": "Connects the souls of multiple enemies, making them share a portion of damage received.",
+      "lore": "A silent binder in grey-purple robes with soul chains wrapped around both hands."
+    },
+    "grandsealer": {
+      "name": "Grand Sealer",
+      "desc": "Fires sealing talismans that disable the special abilities of enemies.",
+      "lore": "A grand sealer in white clothing with golden embroidery, sealing talismans floating in the air."
+    },
+    "flamemaster": {
+      "name": "Flame Talisman Master",
+      "desc": "Leaves a burning carpet on the ground that deals continuous burn damage.",
+      "lore": "A master in red-black robes with bundles of burning talismans, embers spreading with every step."
+    },
+    "vajra": {
+      "name": "Vajrapani",
+      "desc": "Crits with a holy trident to significantly push back all nearby enemies.",
+      "lore": "A muscular warrior with a golden trident, with a vajra seal glowing on forehead."
+    },
+    "saint": {
+      "name": "Saint of Resonance",
+      "desc": "Rings a holy bell to create a shockwave that stuns all enemies in a small area.",
+      "lore": "A saint in white priest robes carrying a giant holy bell, air vibrating with the sound."
+    },
+    "voidsniper": {
+      "name": "Void Sniper",
+      "desc": "Fires bullets across the entire map to snipe the enemy closest to the portal.",
+      "lore": "A sniper in a black cloak with a long void rifle, a starlight monocle on one eye."
+    },
+    "thousandhand": {
+      "name": "Thousand-Hand Archer",
+      "desc": "Pours down a barrage of arrows on multiple targets simultaneously.",
+      "lore": "A golden archer drawing many bows at once with multiple arms."
+    },
+    "absolutezero": {
+      "name": "Absolute Zero Mage",
+      "desc": "Chance to instantly execute frozen enemies with 20% or less HP.",
+      "lore": "A mage in a blue robe with a frost crystal crown, ice forming at every step."
+    },
+    "permafrost": {
+      "name": "Frost Maiden",
+      "desc": "Summons a continuous blizzard that heavily slows all enemies in a wide area.",
+      "lore": "A maiden in a silver-white dress with a snowflake veil, a blizzard swirling from fingertips."
+    },
+    "hellfire": {
+      "name": "Hellfire Alchemist",
+      "desc": "Burning enemies explode on death, dealing damage to nearby enemies.",
+      "lore": "A mad alchemist in a dark red leather apron holding explosive flasks in both hands."
+    },
+    "phoenix": {
+      "name": "Phoenix Summoner",
+      "desc": "Calls down a phoenix that leaves a high-damage flame path behind the target.",
+      "lore": "A summoner in crimson and golden feather cloak, a small phoenix perched on shoulder."
+    },
+    "abyssal": {
+      "name": "Abyssal Slayer",
+      "desc": "Harvests souls precisely, gaining 1.5x SE on kill.",
+      "lore": "A slayer in black armor with a soul harvesting scythe, purple mist flowing from empty eyes."
+    },
+    "spatial": {
+      "name": "Spatial Slasher",
+      "desc": "Summons spiritual illusions that mimic own attacks to strike multiple enemies.",
+      "lore": "A slasher in silver armor with a curved dimensional blade, cracks remaining where slashed."
+    },
+    "seer": {
+      "name": "Seeker of Truth",
+      "desc": "Emits an aura that reveals stealthy or phase-shifting enemies to all allies.",
+      "lore": "A seeker in deep purple robes with a truth-eye talisman, the third eye on forehead glowing."
+    },
+    "commander": {
+      "name": "Battle Commander",
+      "desc": "Inspires nearby allies to increase their attack speed by 20%.",
+      "lore": "A commander in a red cloak with golden epaulette armor, holding a holy flag high."
+    },
+    "wraithlord": {
+      "name": "Wraith Lord",
+      "desc": "Chance to resurrect killed souls as friendly skeleton soldiers to fight together.",
+      "lore": "A lord in a black crown and tattered wraith cloak, skeleton soldier souls floating around."
+    },
+    "cursedshaman": {
+      "name": "Cursed Shaman",
+      "desc": "Curses enemies to permanently reduce their max HP by 5% on each hit.",
+      "lore": "A dark shaman in a bone mask and feather decorations, holding a black voodoo doll."
+    },
+    "rampart": {
+      "name": "Sacred Rampart",
+      "desc": "Defends the portal, returning reaching enemies to start point with 100% chance (5 charges).",
+      "lore": "A solid rampart in white armor with a giant golden tower shield, motionless and firm."
+    },
+    "judgment": {
+      "name": "Knight of Judgment",
+      "desc": "Strikes down holy light that deals area damage to all enemies around the target.",
+      "lore": "A judge in platinum armor with a holy twin-handed sword, a scale halo floating above head."
+    },
+    "scripture_knight": {
+      "name": "Scripture Knight",
+      "desc": "Swings a sword enhanced with holy scripture to strike all nearby enemies.",
+      "lore": "A knight in platinum armor embedded with scripture beads, swinging a consecrated light blade."
+    },
+    "seal_warrior": {
+      "name": "Seal Warrior",
+      "desc": "30% chance to deliver a holy strike that completely disables all enemy abilities for 3 seconds.",
+      "lore": "A warrior in grey-white armor engraved with sealing talismans, holding a sword wrapped in rosaries."
+    },
+    "tome_cannon": {
+      "name": "Tome Cannon",
+      "desc": "Fires bible shells that strike multiple enemies with a powerful explosion radius.",
+      "lore": "A blaster using a giant open golden bible as a cannon, runes glowing on every page."
+    },
+    "holy_burst": {
+      "name": "Holy Bombardier",
+      "desc": "Summons holy energy shells that deal massive damage to all enemies within impact radius.",
+      "lore": "A bombardier in platinum epaulette armor carrying a giant holy bombardment staff."
+    },
+    "rapid_exorcist": {
+      "name": "Rapid Exorcist",
+      "desc": "Fires purification bolts at ultra-high speed, piercing up to 3 enemies at once.",
+      "lore": "A rapid-fire exorcist in light white priest robes holding twin pistol-type holy tools."
+    },
+    "chain_exorcist": {
+      "name": "Chain Exorcist",
+      "desc": "Exorcism bolts chain to 3 nearby enemies after striking the first target.",
+      "lore": "An exorcist in blue priest robes with a bundle of chain talismans, chain bolts jumping from fingertips."
+    },
+    "psalm_singer": {
+      "name": "Psalm Singer",
+      "desc": "Sings holy psalms to emit a hymn that boosts the attack power of allies in range by 15%.",
+      "lore": "An elegant singer in white choir gowns holding a golden psalm book."
+    },
+    "litany_chanter": {
+      "name": "Litany Chanter",
+      "desc": "Periodically heals allies in range and boosts attack power through continuous litany.",
+      "lore": "A chanter in blue-grey priest robes with rosaries wrapped around hands, constantly chanting prayers."
+    },
+    "relic_guardian": {
+      "name": "Reliquary Guardian",
+      "desc": "Guards a holy relic to reduce the cooldown of allies in range by 15%.",
+      "lore": "A majestic guardian in a golden breastplate holding a reliquary cross."
+    },
+    "rune_crafter": {
+      "name": "Rune Crafter",
+      "desc": "Inscribes holy runes to periodically grant buffs to allies in range.",
+      "lore": "A crafter in a leather apron with a rune chisel and hammer, inscribing glowing runes in the air."
+    },
+    "barrier_master": {
+      "name": "Barrier Master",
+      "desc": "Deploys a powerful barrier to reduce the attack speed of enemies in range by 25%.",
+      "lore": "A calm master in blue-white scholar robes holding a barrier formation fan."
+    },
+    "divine_barrier": {
+      "name": "Divine Barrierist",
+      "desc": "Creates a divine barrier that reduces enemy defense by 20% and suppresses movement speed.",
+      "lore": "A barrierist in a platinum cloak with holy shield talismans, light barriers spreading from palms."
+    },
+    "storm_caller": {
+      "name": "Storm Caller",
+      "desc": "On hit, drops additional lightning on a random enemy in range for 60% damage.",
+      "lore": "A summoner in grey-blue robes with a lightning-patterned hood, holding a floating lightning sphere."
+    },
+    "thunder_judge": {
+      "name": "Thunder Judge",
+      "desc": "Lightning chains up to 3 enemies. Damage reduces to 50% for each chain.",
+      "lore": "A judge in a black cloak with a golden lightning scepter, lightning jumping from eyes."
+    },
+    "transmuter": {
+      "name": "Void Transmuter",
+      "desc": "Completely transmutes spirits, gaining 25 SE on every kill.",
+      "lore": "A transmuter in lead-colored plate armor with an emerald reactor, floating mechanical arms, and antenna crystals."
+    },
+    "oracle": {
+      "name": "Eternal Oracle",
+      "desc": "Fires cosmic projectiles that temporarily stop enemy movement on hit.",
+      "lore": "A cosmic oracle in star-studded indigo robes, with the Eye of Eternity replacing the face and 8 orbiting stars."
+    },
+    "warden": {
+      "name": "Abyssal Warden",
+      "desc": "Periodically opens a black hole to pull all enemies on screen to the center.",
+      "lore": "A warden in black steel armor with purple chains, a sucking black hole core in chest, and a golden key."
+    },
+    "cursed_talisman": {
+      "name": "Cursed High Priest",
+      "desc": "Marks enemies with death. A giant explosion occurs when the marked soul perishes.",
+      "lore": "A high priest in blood-red vestments and deep hood, with a giant flag of the evil eye and floating cursed scrolls."
+    },
+    "asura": {
+      "name": "Hell-Crushing Asura",
+      "desc": "Instantly pours 12 consecutive shockwaves on nearby targets. (Total Damage 5,400)",
+      "lore": "A blood-red demon king with 6 arms holding scimitars and vajras, a golden crest on chest and a ruby in the horn crown."
+    },
+    "piercing_shadow": {
+      "name": "Soul-Piercing Shadow",
+      "desc": "Fires a massive beam of light that pierces through all enemies on its path.",
+      "lore": "A shadow sniper in purple soul armor with 5 orbiting shadow needles, soul light glowing from within the hood."
+    },
+    "cocytus": {
+      "name": "Ruler of Cocytus",
+      "desc": "Uses ultimate frost magic to freeze all enemies on screen for 5 seconds.",
+      "lore": "Ruler in blue priest robes and absolute zero crown, with a giant ice crystal above head and a frost dragon scepter."
+    },
+    "purgatory": {
+      "name": "Eternal Purgatory Flame",
+      "desc": "Burns an entire lane, dealing permanent burn damage to all enemies passing through.",
+      "lore": "A ruler in white armor with holy flame wings and twin torch scepters, 5 fire crowns rising from the head."
+    },
+    "reaper": {
+      "name": "Nightmare Reaper",
+      "desc": "Instantly harvests the soul of the enemy with the highest HP on map. (Absolute Instakill)",
+      "lore": "An incarnation of death in a pitch-black cloak with a purple scythe, 5 souls floating around."
+    },
+    "doom_guide": {
+      "name": "Bringer of Doom",
+      "desc": "Purifies the portal. Enemies reaching the portal restore 5% Erosion instead of dealing damage.",
+      "lore": "A guide in dark wraith robes with the shadow of a ghost ship behind, holding a golden lantern and purple rod."
+    },
+    "forsaken_king": {
+      "name": "King of the Forsaken",
+      "desc": "Summons friendly specters at the start of every stage to fight for allies.",
+      "lore": "A king in purple armor with a golden breastplate and flowing cloak, holding a green glowing cursed greatsword."
+    },
+    "void_gatekeeper": {
+      "name": "Void Gatekeeper",
+      "desc": "Passively seals the gate, reducing all damage taken by Portal Erosion by 50%.",
+      "lore": "A gatekeeper whose body is a giant slate gate, with a swirling cyan portal, floating eyes, and horned helmet."
+    },
+    "eternal_wall": {
+      "name": "Eternal Guardian Wall",
+      "desc": "Emits a powerful stabilizing aura that slows all enemies on map by 80%.",
+      "lore": "An eternal guardian with a giant wall shield and warhammer, a blue cross on chest and battlements on head."
+    },
+    "word_of_god": {
+      "name": "Word of God",
+      "desc": "Releases the final word recorded in the bible, delivering holy judgment to all enemies on screen.",
+      "lore": "An angel in glowing golden armor with feathered wings, a floating giant bible, and a golden halo."
+    },
+    "genesis_strike": {
+      "name": "King of Genesis",
+      "desc": "Strikes all enemies on screen with an explosion of creation energy, with a 40% chance to instakill.",
+      "lore": "A cosmic emperor with a 7-colored gem crown and multi-colored wings, handling spheres of creation."
+    },
+    "exorcism_storm": {
+      "name": "Exorcism Storm",
+      "desc": "Continuously fires infinitely chaining exorcism bolts to attack all enemies on screen simultaneously.",
+      "lore": "An eternal stormcaller in a cyan lightning wing cloak holding storm scepters in both hands, with glowing twin horns."
+    },
+    "divine_choir": {
+      "name": "Divine Choir",
+      "desc": "Spreads holy energy across the entire battlefield through heavenly choir, buffing allies and weakening enemies.",
+      "lore": "A holy conductor with giant golden feathered wings and a vast halo, accompanied by floating ghost singers."
+    },
+    "sacred_reliquary": {
+      "name": "Sacred Reliquary Guardian",
+      "desc": "Summons a sacred reliquary on the battlefield to boost all ally stats and continuously weaken enemies.",
+      "lore": "A reliquary guardian in marble armor and sun halo helmet, holding a floating golden ark between pillars."
+    },
+    "grand_ward": {
+      "name": "Grand Ward Master",
+      "desc": "Spreads a vast ward over the battlefield to greatly weaken all enemy stats and block movement.",
+      "lore": "A master of golden wards with a triple barrier sphere above head and orbiting cyan hexagonal runes."
+    },
+    "thunder_lord": {
+      "name": "Thunder Lord",
+      "desc": "On hit, drops additional lightning on 3 random enemies in range for 40% damage and 25% chance to stun for 0.8s.",
+      "lore": "A thunder lord in dark blue storm cloud armor with a golden lightning spear, a rotating thunder crown, and thunder wings."
+    }
+  },
+  "shrine": {
+    "shrine_might": {
+      "name": "Shrine of Might",
+      "desc": "Increases attack power of nearby allies by 20%.",
+      "demoDesc": "Decreases attack power of all allies on map by 20%.",
+      "lore": "A shrine inhabited by the fighting spirit of ancient warriors. Its energy sharpens nearby weapons."
+    },
+    "shrine_speed": {
+      "name": "Shrine of Speed",
+      "desc": "Increases attack speed of nearby allies by 20%.",
+      "demoDesc": "Decreases attack speed of all allies on map by 20%.",
+      "lore": "A shrine where heavenly winds reside. Its energy makes allies' hand movements dazzlingly fast."
+    },
+    "shrine_range": {
+      "name": "Shrine of Insight",
+      "desc": "Increases attack range of nearby allies by 50.",
+      "demoDesc": "Decreases attack range of all allies on map by 50.",
+      "lore": "A shrine of insight that sees through all things. Provides allies with spiritual vision to see further."
+    },
+    "shrine_wisdom": {
+      "name": "Shrine of Wisdom",
+      "desc": "Increases crit chance of nearby allies by 10%.",
+      "demoDesc": "Decreases crit chance of all allies on map by 10%.",
+      "lore": "A shrine of insight that identifies weaknesses. Helps allies strike the enemy's core accurately."
+    },
+    "shrine_greed": {
+      "name": "Shrine of Greed",
+      "desc": "Nearby allies gain 2 additional SE on kill.",
+      "demoDesc": "SE gained on kill decreases by 2 for all allies on map.",
+      "lore": "A shrine of secret arts that extracts more soul essence. Gain more energy as a reward for purification."
+    },
+    "shrine_purity": {
+      "name": "Shrine of Purity",
+      "desc": "On kill, nearby allies have a 5% chance to purify 1% Portal Erosion.",
+      "demoDesc": "On kill, all allies on map have a 2% chance to increase Portal Erosion by 1%.",
+      "lore": "A shrine of purification that washes away impurity. Constantly flows holy water to keep the ward clean."
+    },
+    "shrine_divine": {
+      "name": "Shrine of Archangel",
+      "desc": "Increases attack power of all allies on map by 30%. (Stackable)",
+      "demoDesc": "Decreases attack power of all allies on map by 30%.",
+      "lore": "A giant shrine inhabited by the protection of an archangel. Its presence gives courage to all exorcists' souls."
+    },
+    "shrine_eternity": {
+      "name": "Shrine of Eternity",
+      "desc": "Decreases movement speed of all enemies on map by 15%.",
+      "demoDesc": "Enemy movement speed returns to normal.",
+      "lore": "A mysterious shrine that even slows the flow of time. Ties down the footsteps of evil spirits."
+    },
+    "shrine_miracle": {
+      "name": "Shrine of Miracle",
+      "desc": "Increases crit damage of all allies on map by 50%.",
+      "demoDesc": "Decreases crit damage of all allies on map by 50%.",
+      "lore": "A shrine where the miracle of purification is realized. Makes allies' attacks destroy the enemy's soul deeper."
+    },
+    "shrine_fervor": {
+      "name": "Shrine of Fervor",
+      "desc": "Increases crit damage of nearby allies by 15%.",
+      "demoDesc": "Decreases crit damage of nearby allies by 15%.",
+      "lore": "A shrine where wrath and passion are condensed into flames. Breathes destructive fire into exorcists' strikes."
+    },
+    "shrine_shadow": {
+      "name": "Shrine of Shadow",
+      "desc": "Increases crit chance of nearby allies by 8%.",
+      "demoDesc": "Decreases crit chance of nearby allies by 8%.",
+      "lore": "A shrine inhabited by the crescent moon shining in the dark. Energy flowing through shadows increases strike precision."
+    },
+    "shrine_harvest": {
+      "name": "Shrine of Harvest",
+      "desc": "Nearby allies gain 3 additional SE on kill.",
+      "demoDesc": "Additional SE gain for nearby allies vanishes.",
+      "lore": "A shrine filled with golden grain. Harvests soul essence more abundantly from exorcism efforts."
+    },
+    "shrine_endurance": {
+      "name": "Shrine of Endurance",
+      "desc": "Increases portal purification effect of nearby allies by 3%.",
+      "demoDesc": "Decreases portal purification effect of nearby allies.",
+      "lore": "A shrine where mountain-like patience is crystallized. Constantly supplies purification energy to guard the ward."
+    }
+  },
+  "enemy_category": {
+    "specter": "SPECTER ENCOUNTER",
+    "wraith": "WRAITH ENCOUNTER",
+    "spirit": "SPIRIT ENCOUNTER",
+    "demon": "DEMON ENCOUNTER",
+    "abyssal_boss": "ABYSSAL BOSS ENCOUNTER",
+    "mini_boss": "MINI BOSS ENCOUNTER"
+  },
+  "enemy_name": {
+    "normal": "Whispering Soul",
+    "mist": "Wandering Mist",
+    "memory": "Faded Memory",
+    "shade": "Flickering Shadow",
+    "tank": "Ironclad Specter",
+    "runner": "Accelerated Shadow",
+    "greedy": "Greedy Poltergeist",
+    "mimic": "Mimic Specter",
+    "dimension": "Dimensional Specter",
+    "deceiver": "Siren of Despair",
+    "boar": "Wild Avenger",
+    "soul_eater": "Soul Eater",
+    "frost": "Cocytus Wanderer",
+    "lightspeed": "Desperate Herald",
+    "frost_outcast": "Frozen Heart",
+    "ember_hatred": "Flame of Hatred",
+    "heavy": "Chain Executor",
+    "lava": "Burning Wrath",
+    "burning": "Regenerator of Pain",
+    "abyssal_acolyte": "Abyssal Acolyte",
+    "gold": "Golden Afterimage",
+    "cerberus": "Cerberus",
+    "charon": "Charon",
+    "beelzebub": "Beelzebub",
+    "lucifer": "Lucifer",
+    "defiled_apprentice": "Defiled Apprentice",
+    "betrayer_blade": "Shadow Betrayer",
+    "cursed_vajra": "Corrupted Monk",
+    "void_piercer": "Betrayer Archer",
+    "echo_soul": "Echo Soul",
+    "hungry_ghost": "Hungry Ghost",
+    "aggrieved": "Aggrieved Soul",
+    "split_soul": "Split Soul",
+    "cursed_ancestor": "Cursed Ancestor",
+    "oblivion_wraith": "Oblivion Wraith",
+    "unrepentant": "Unrepentant Soul",
+    "abyss_sentinel": "Abyss Sentinel",
+    "fear_harvester": "Fear Harvester",
+    "blood_spirit": "Blood Spirit",
+    "shadow_titan": "Shadow Titan",
+    "lava_lord": "Lava Lord",
+    "time_ravager": "Time Ravager",
+    "void_master": "Void Master",
+    "sin_incarnate": "Incarnation of Sin",
+    "corruption_apostle": "Apostle of Corruption",
+    "mini_cerberus": "Mini Cerberus",
+    "mini_charon": "Mini Charon",
+    "mini_beelzebub": "Mini Beelzebub",
+    "mini_lucifer": "Mini Lucifer",
+    "abyssal_overlord": "Abyssal Overlord",
+    "mini_lilith": "Mini Lilith",
+    "lilith": "Lilith",
+    "mini_chronos": "Mini Chronos",
+    "medusa": "Medusa"
+  },
+  "enemy": {
+    "normal": {
+      "name": "Whispering Soul",
+      "desc": "A common soul wandering the abyss.",
+      "effectiveness": "Standard exorcism attacks.",
+      "lore": "A soul that could not let go of its lingering attachments to the living world."
+    },
+    "mist": {
+      "name": "Wandering Mist",
+      "desc": "A spiritual mist.",
+      "effectiveness": "Standard exorcism attacks.",
+      "lore": "Forgotten small sorrows have condensed."
+    },
+    "memory": {
+      "name": "Faded Memory",
+      "desc": "A faint trace.",
+      "effectiveness": "Standard exorcism attacks.",
+      "lore": "An afterimage left by a strong desire to live."
+    },
+    "shade": {
+      "name": "Flickering Shadow",
+      "desc": "A weak but fast spirit.",
+      "effectiveness": "Rapid-fire units.",
+      "lore": "A fragment barely maintaining its existence."
+    },
+    "tank": {
+      "name": "Ironclad Specter",
+      "desc": "A soul hardened by sin.",
+      "effectiveness": "Critical hit units.",
+      "lore": "Heavy sins from life have taken form."
+    },
+    "runner": {
+      "name": "Accelerated Shadow",
+      "desc": "A shadow rushing towards the portal.",
+      "effectiveness": "Slow units.",
+      "lore": "A flame of hatred that burned for a lifetime."
+    },
+    "greedy": {
+      "name": "Greedy Poltergeist",
+      "desc": "Drops a large amount of SE upon death.",
+      "effectiveness": "Irrelevant",
+      "lore": "A soul with a lingering obsession with gold."
+    },
+    "lightspeed": {
+      "name": "Desperate Herald",
+      "desc": "Runs at a very high speed.",
+      "effectiveness": "Shrines and Slow",
+      "lore": "Running with undelivered news."
+    },
+    "echo_soul": {
+      "name": "Echo Soul",
+      "desc": "Moves while leaving its own afterimages.",
+      "effectiveness": "Standard exorcism attacks.",
+      "lore": "An echo of an indelible memory."
+    },
+    "hungry_ghost": {
+      "name": "Hungry Ghost",
+      "desc": "Becomes faster as HP decreases.",
+      "effectiveness": "Focused attacks.",
+      "lore": "An incarnation of unfulfilled desire during life."
+    },
+    "aggrieved": {
+      "name": "Aggrieved Soul",
+      "desc": "Reduces first damage by 90%.",
+      "effectiveness": "Continuous attacks.",
+      "lore": "An unfair death has made it hardened."
+    },
+    "split_soul": {
+      "name": "Split Soul",
+      "desc": "Splits into two remaining spirits upon death.",
+      "effectiveness": "Area attacks.",
+      "lore": "A tragedy where a single soul was split in two."
+    },
+    "cursed_ancestor": {
+      "name": "Cursed Ancestor",
+      "desc": "Weakens the effects of nearby shrines.",
+      "effectiveness": "Ranged units.",
+      "lore": "An ancestral spirit who cast a curse on descendants."
+    },
+    "shadow_wisp": {
+      "name": "Shadow Wisp",
+      "desc": "Remnants of darkness mimicking a form.",
+      "effectiveness": "Standard exorcism attacks.",
+      "lore": "A being that couldn't even become a shadow — the weakest of evil spirits wandering formlessly in the dark."
+    },
+    "cursed_shade": {
+      "name": "Cursed Shade",
+      "desc": "A specter with curse patterns engraved on its body.",
+      "effectiveness": "Standard exorcism attacks.",
+      "lore": "A curse formed from resentment clings to the soul, wandering the world with its weight and envying the living."
+    },
+    "soul_hound": {
+      "name": "Soul Hound",
+      "desc": "Chases the scent of the living souls.",
+      "effectiveness": "Slow units.",
+      "lore": "Hunting instincts remain even after death, constantly chasing the scent of the living souls."
+    },
+    "defiled_apprentice": {
+      "name": "Defiled Apprentice",
+      "desc": "A defiled apprentice.",
+      "effectiveness": "Holy attacks.",
+      "lore": "The price for touching forbidden arts."
+    },
+    "mimic": {
+      "name": "Mimic Specter",
+      "desc": "Sometimes teleports forward.",
+      "effectiveness": "Area attacks.",
+      "lore": "Appears in the form most longed for."
+    },
+    "dimension": {
+      "name": "Dimensional Specter",
+      "desc": "Sometimes becomes immune to attacks.",
+      "effectiveness": "Oracle or Rapid-fire.",
+      "lore": "A recluse wandering between dimensions."
+    },
+    "deceiver": {
+      "name": "Siren of Despair",
+      "desc": "Evades attacks and retreats.",
+      "effectiveness": "Area damage.",
+      "lore": "A master of lies who has never shown its face."
+    },
+    "cursed_vajra": {
+      "name": "Corrupted Monk",
+      "desc": "A corrupted monk.",
+      "effectiveness": "Long-range units.",
+      "lore": "His mace now crushes the living."
+    },
+    "betrayer_blade": {
+      "name": "Shadow Betrayer",
+      "desc": "Stealths periodically.",
+      "effectiveness": "Seeker of Truth",
+      "lore": "A shadow of the blade that stabbed an ally."
+    },
+    "void_piercer": {
+      "name": "Betrayer Archer",
+      "desc": "Evades ranged attacks with a 50% chance.",
+      "effectiveness": "Melee units",
+      "lore": "Abandoned the bow and chose the abyss."
+    },
+    "oblivion_wraith": {
+      "name": "Oblivion Wraith",
+      "desc": "Periodically becomes invincible.",
+      "effectiveness": "Sustained firepower.",
+      "lore": "A being that becomes invincible within oblivion."
+    },
+    "unrepentant": {
+      "name": "Unrepentant Soul",
+      "desc": "Evades ranged attacks with a 60% chance.",
+      "effectiveness": "Melee units.",
+      "lore": "The last pride of one who died without repentance."
+    },
+    "lost_child": {
+      "name": "Lost Child Soul",
+      "desc": "The soul of a child who died while lost.",
+      "effectiveness": "Standard exorcism attacks.",
+      "lore": "The soul of a child who died while lost — still wandering the dark abyss looking for home."
+    },
+    "grave_walker": {
+      "name": "Grave Walker",
+      "desc": "A soul wandering between others' graves.",
+      "effectiveness": "Standard exorcism attacks.",
+      "lore": "Unable to remember its own grave, it wanders between others' graves eternally."
+    },
+    "wailing_mother": {
+      "name": "Wailing Mother",
+      "desc": "The sorrow of losing a child has turned into resentment.",
+      "effectiveness": "Area attacks.",
+      "lore": "The soul of a mother whose sorrow for her lost child turned into resentment, pouring wrath upon all living things."
+    },
+    "boar": {
+      "name": "Wild Avenger",
+      "desc": "Becomes faster near the portal.",
+      "effectiveness": "Knockback.",
+      "lore": "The thirst of a violent hunter."
+    },
+    "soul_eater": {
+      "name": "Soul Eater",
+      "desc": "Speed increases upon taking damage.",
+      "effectiveness": "Powerful single-shot.",
+      "lore": "Hungers for the power of exorcists."
+    },
+    "frost": {
+      "name": "Cocytus Wanderer",
+      "desc": "Increases the speed of nearby enemies.",
+      "effectiveness": "Fire energy.",
+      "lore": "A frozen heart of resentment."
+    },
+    "frost_outcast": {
+      "name": "Frozen Heart",
+      "desc": "Decreases attack speed.",
+      "effectiveness": "Kill outside aura.",
+      "lore": "A heart already frozen before coming to the abyss."
+    },
+    "ember_hatred": {
+      "name": "Flame of Hatred",
+      "desc": "Accelerates nearby enemies upon death.",
+      "effectiveness": "Isolated kill.",
+      "lore": "A flame of hatred that burned for a lifetime."
+    },
+    "abyss_sentinel": {
+      "name": "Abyss Sentinel",
+      "desc": "Continuously recovers a small amount of HP.",
+      "effectiveness": "Stun units.",
+      "lore": "The sentinel who guarded the gates of the abyss."
+    },
+    "fear_harvester": {
+      "name": "Fear Harvester",
+      "desc": "Decreases the attack speed of nearby units.",
+      "effectiveness": "Holy attacks.",
+      "lore": "An evil spirit that feeds on fear."
+    },
+    "blood_spirit": {
+      "name": "Blood Spirit",
+      "desc": "Enrages and increases defense upon taking damage.",
+      "effectiveness": "Powerful strike.",
+      "lore": "An evil spirit formed from blood spilled on the battlefield."
+    },
+    "imp": {
+      "name": "Imp",
+      "desc": "The weakest demon that swarms and causes trouble.",
+      "effectiveness": "Rapid-fire units.",
+      "lore": "The lowest rank of the demon hierarchy — small and weak, but survives through annoying pranks and quick footwork."
+    },
+    "hellspawn": {
+      "name": "Hellspawn",
+      "desc": "A cruel demon newly born in hell.",
+      "effectiveness": "Standard exorcism attacks.",
+      "lore": "A demon newly born in hell — though its power is weak, its cruelty is innate."
+    },
+    "brimstone_fiend": {
+      "name": "Brimstone Fiend",
+      "desc": "A fiend smelling of sulfur with hellfire engraved on its body.",
+      "effectiveness": "Frost attacks.",
+      "lore": "A fiend smelling of sulfur with hellfire engraved on its skin — rumor has it that flesh burns upon approach."
+    },
+    "heavy": {
+      "name": "Chain Executor",
+      "desc": "A sturdy monster.",
+      "effectiveness": "Piercing attacks.",
+      "lore": "An executor bound by the chains he used to use."
+    },
+    "lava": {
+      "name": "Burning Wrath",
+      "desc": "Leaps upon taking frost attacks.",
+      "effectiveness": "Fire attacks.",
+      "lore": "A soul burning with wrath."
+    },
+    "burning": {
+      "name": "Regenerator of Pain",
+      "desc": "Heals upon taking damage.",
+      "effectiveness": "Powerful strike.",
+      "lore": "Pain that has become the driving force of regeneration."
+    },
+    "abyssal_acolyte": {
+      "name": "Abyssal Acolyte",
+      "desc": "Reduces damage on hit.",
+      "effectiveness": "Stun units.",
+      "lore": "Shadow arms pull them in."
+    },
+    "shadow_titan": {
+      "name": "Shadow Titan",
+      "desc": "A giant with massive defense.",
+      "effectiveness": "Piercing attacks.",
+      "lore": "The oldest shadow form in the abyss."
+    },
+    "lava_lord": {
+      "name": "Lava Lord",
+      "desc": "Increases speed of nearby enemies upon taking damage.",
+      "effectiveness": "Frost attacks.",
+      "lore": "A lord of wrath forged from magma."
+    },
+    "time_ravager": {
+      "name": "Time Ravager",
+      "desc": "Decreases the attack speed of all nearby units.",
+      "effectiveness": "Stun units.",
+      "lore": "A being that steals and feeds on time."
+    },
+    "void_master": {
+      "name": "Void Master",
+      "desc": "Has a 20% chance to nullify all damage.",
+      "effectiveness": "Stun units.",
+      "lore": "The void itself has gained a will."
+    },
+    "sin_incarnate": {
+      "name": "Incarnation of Sin",
+      "desc": "Defense increases as more damage is taken.",
+      "effectiveness": "Powerful strike.",
+      "lore": "All the sins of humanity have gathered as one."
+    },
+    "corruption_apostle": {
+      "name": "Apostle of Corruption",
+      "desc": "Spreads curses to adjacent units.",
+      "effectiveness": "Stun units.",
+      "lore": "An apostle spreading corruption."
+    },
+    "gold": {
+      "name": "Golden Afterimage",
+      "desc": "Gives a massive amount of SE.",
+      "effectiveness": "Rapid-fire units.",
+      "lore": "The remnants of a king's shining treasure."
+    },
+    "mini_cerberus": {
+      "name": "Mini Cerberus",
+      "lore": "A small but fierce bridgehead of the abyss.",
+      "reward_name": "Cerberus Tooth Fragment"
+    },
+    "cerberus": {
+      "name": "Cerberus",
+      "lore": "The gatekeeper of fallen souls.",
+      "reward_name": "Cerberus Fang"
+    },
+    "mini_charon": {
+      "name": "Mini Charon",
+      "lore": "Lower boatman — gathers souls.",
+      "reward_name": "Styx Fragment"
+    },
+    "charon": {
+      "name": "Charon",
+      "lore": "The boatman who harvests souls directly.",
+      "reward_name": "Styx Oar"
+    },
+    "mini_beelzebub": {
+      "name": "Mini Beelzebub",
+      "lore": "A smaller form of the Lord of Decay.",
+      "reward_name": "Small Crown of Gluttony"
+    },
+    "beelzebub": {
+      "name": "Beelzebub",
+      "lore": "The Lord of Flies born from decay.",
+      "reward_name": "Crown of Gluttony"
+    },
+    "mini_lucifer": {
+      "name": "Mini Lucifer",
+      "lore": "An incomplete illusion of corruption.",
+      "reward_name": "Small Fallen Angel Feather"
+    },
+    "lucifer": {
+      "name": "Lucifer",
+      "lore": "The one who pulls all light into the abyss.",
+      "reward_name": "Fallen Angel Wings"
+    },
+    "mini_lilith": {
+      "name": "Mini Lilith",
+      "lore": "An illusion sent by the Night Queen.",
+      "reward_name": "Whisper of Night"
+    },
+    "abyssal_overlord": {
+      "name": "Abyssal Overlord",
+      "lore": "An ancient being ruling the abyss.",
+      "reward_name": "Heart of Abyss"
+    },
+    "lilith": {
+      "name": "Lilith",
+      "lore": "The Night Queen reigning over the abyss.",
+      "reward_name": "Night Queen Crown"
+    },
+    "mini_chronos": {
+      "name": "Mini Chronos",
+      "lore": "Flows time backward to reverse wounds.",
+      "reward_name": "Torn Hourglass"
+    },
+    "medusa": {
+      "name": "Medusa",
+      "lore": "Those who meet its gaze turn to stone.",
+      "reward_name": "Gorgon's Gaze"
+    }
+  },
+  "relic": {
+    "cursed_mask": {
+      "name": "Cursed Hannya Mask",
+      "effect": "All ally damage increases by +1% per stack.",
+      "lore": "A mask vibrating with the screams of thousands of forgotten souls."
+    },
+    "spectral_lantern": {
+      "name": "Spectral Lantern",
+      "effect": "All unit attack range increases by +5 per stack.",
+      "lore": "The light of this lantern does not illuminate the path, but reveals the prey."
+    },
+    "stygian_oar": {
+      "name": "Stygian Oar",
+      "effect": "All enemy movement speed decreases by 5% per stack.",
+      "lore": "An oar that controls the speed of the boat crossing the river. Now it slows the time of the living."
+    },
+    "cerberus_fang": {
+      "name": "Cerberus Fang",
+      "effect": "All ally attack power increases by 8% per stack.",
+      "lore": "The sharp teeth of hell's gatekeeper. Grants the power to tear the essence of enemies."
+    },
+    "gluttony_crown": {
+      "name": "Crown of Gluttony",
+      "effect": "Appearance probability of treasure ghosts increases by 2% per stack.",
+      "lore": "A cursed crown that makes one crave for more."
+    },
+    "fallen_wings": {
+      "name": "Fallen Angel Wings",
+      "effect": "Critical hit chance increases by 6% per stack.",
+      "lore": "Pure feathers of darkness. Guides to strike the most vulnerable parts of the soul."
+    },
+    "spectral_chain": {
+      "name": "Chain of the Cursed",
+      "effect": "Slow effects become 2% stronger per stack.",
+      "lore": "The more the enemies resist, the tighter the chain tightens."
+    },
+    "unholy_grail": {
+      "name": "Unholy Grail",
+      "effect": "Portal erosion increases 5% slower per stack.",
+      "lore": "Filled with the tears of those who failed to guard the gate."
+    },
+    "sacred_incense": {
+      "name": "Purifying Incense",
+      "effect": "Summon cost reduction increases by 2 SE per stack.",
+      "lore": "A scent that repels unholy energy. Eases the ritual of summoning."
+    },
+    "execution_mark": {
+      "name": "Executioner's Mark",
+      "effect": "Instantly executes enemies with HP below 1% per stack.",
+      "lore": "For those marked, the judgment of the abyss is an inescapable fate."
+    },
+    "cursed_coin": {
+      "name": "Cursed Gold Coin",
+      "effect": "SE refunded upon selling units increases by 2% per stack.",
+      "lore": "Betrayal has its price, and this coin makes that price a little sweeter."
+    },
+    "abyssal_compass": {
+      "name": "Abyssal Compass",
+      "effect": "All ally attack range increases by +5 per stack.",
+      "lore": "Points in the direction where the abyssal energy flows. Allows capturing enemy locations from further away."
+    },
+    "abyssal_lantern": {
+      "name": "Abyssal Lantern",
+      "effect": "All ally attack power increases by +2% per stack.",
+      "lore": "A lantern that illuminates ally fighting spirit even in the abyssal darkness."
+    },
+    "abyssal_fragment": {
+      "name": "Abyssal Fragment",
+      "effect": "All ally attack speed explodes to 2x for 5 seconds every 30 seconds. Activation cycle -3s per stack (min 15s).",
+      "lore": "A fragment that fell from the Heart of Abyss. Periodically warps surrounding time to accelerate all strikes."
+    },
+    "pitch_black_gem": {
+      "name": "Pitch Black Gem",
+      "effect": "Each attack on an enemy accumulates Void Marks, increasing damage taken by 20% per mark. Max 3 marks + 1 per stack (expires if not attacked for 4s).",
+      "lore": "A gem that absorbs all light. Once engraved, that darkness penetrates deep into the enemy's soul and does not disappear."
+    },
+    "soul_link": {
+      "name": "Soul Link",
+      "effect": "Each ally increases attack power by 5% per stack for each adjacent unit.",
+      "lore": "An invisible bond between exorcists and guardians. The closer they gather, the stronger the soul resonance."
+    },
+    "immortal_remains": {
+      "name": "Immortal Remains",
+      "effect": "Portal erosion increase amount decreases by 5% per stack.",
+      "lore": "The remains of one who rejected death. Strengthens the sacred barrier to resist erosion."
+    },
+    "foresight_eye": {
+      "name": "Eye of Foresight",
+      "effect": "Shrine effect values are strengthened by 15% per stack. (Range expands in cross direction from 1 stack)",
+      "lore": "Beyond the invisible threads of causality, it even draws upon energy that does not exist."
+    },
+    "void_heart": {
+      "name": "Void Heart",
+      "effect": "All ally attack power increases by 12% per stack. Abyssal core energy dwells within exorcists.",
+      "lore": "A heart harvested from the center of the void. Each of its beats adds destructive power to all exorcist attacks."
+    },
+    "ancient_seal": {
+      "name": "Ancient Seal",
+      "effect": "Portal erosion increase amount decreases by 4% per stack. An ancient protection barrier guards the gate.",
+      "lore": "A seal engraved by a great exorcist of the primordial era. Suppresses the infiltration of evil from the source."
+    },
+    "crimson_vial": {
+      "name": "Crimson Vial",
+      "effect": "Summon cost decreases by 3 SE per stack.",
+      "lore": "A bottle containing sacred medicine used in ancient rituals. Relieves the fatigue of the summoning ritual."
+    },
+    "echo_gem": {
+      "name": "Echo Gem",
+      "effect": "Critical hit chance increases by 4% per stack.",
+      "lore": "A gem where the painful echoes of souls have crystallized. Grants the sense to pierce enemy weaknesses."
+    },
+    "whispering_dust": {
+      "name": "Whispering Dust",
+      "effect": "All shrine aura range increases by +3 per stack.",
+      "lore": "Traces of shrine incense ash scattered by the wind. Carries sacred energy far away."
+    },
+    "weeping_charm": {
+      "name": "Weeping Charm",
+      "effect": "SE gained upon killing enemies increases by +1 per stack.",
+      "lore": "A charm soaked with the tears of the bereaved. The resentment of the departed soul returns as a reward."
+    },
+    "demon_horn": {
+      "name": "Demon Horn",
+      "effect": "【Pact】 All ally damage +25% per stack, portal erosion +0.4%/s accumulates every second. Damage bonus doubles above 50% erosion (Madness Triggered).",
+      "lore": "The broken horn of a demon lord. It flows hell's madness to the holder, promising greater power to more corrupted souls. The price is the portal's erosion — your time."
+    },
+    "pestilence_censer": {
+      "name": "Pestilence Censer",
+      "effect": "All enemy max HP decreases by 2% per stack.",
+      "lore": "An incense burner that constantly vomits black smoke. That smoke eats away at everything living."
+    },
+    "chained_obsidian": {
+      "name": "Chained Obsidian",
+      "effect": "All enemy movement speed decreases by 3% per stack.",
+      "lore": "A lump of obsidian wrapped in demonic chains. It even drags down and weighs heavily on the surrounding time."
+    },
+    "infernal_ledger": {
+      "name": "Infernal Ledger",
+      "effect": "+500 SE claimed every 100 kills. Threshold -10 kills per stack (min 50), reward +100 SE.",
+      "lore": "A ledger where all transactions of hell are recorded. Once a certain number of souls gather, the creditor personally claims the reward."
+    },
+    "bleeding_eye": {
+      "name": "Bleeding Eye",
+      "effect": "Instantly executes enemies with HP below 2% per stack.",
+      "lore": "A demonic eye that constantly bleeds tears of blood. Pierces the fate of the weak at a glance."
+    },
+    "oblivion_pendant": {
+      "name": "Oblivion Pendant",
+      "effect": "All shrine aura range increases by +5 per stack.",
+      "lore": "A pendant engraved with the symbol of a forgotten god. Spreads the domain of divinity wider."
+    },
+    "night_queen_crown": {
+      "name": "Crown of the Night Queen",
+      "effect": "Critical hit damage increases by 40% per stack.",
+      "lore": "The black thorn crown that Lilith placed on her head. Her gaze never missed the most fatal spot."
+    },
+    "gorgon_gaze": {
+      "name": "Gorgon's Gaze",
+      "effect": "Slow effects become 6% stronger per stack.",
+      "lore": "A charm inhabited by Medusa's eye. Enemies who face it stiffen as if turned to stone, unable to take even a step."
+    },
+    "chronos_hourglass": {
+      "name": "Hourglass of Chronos",
+      "effect": "All unit attack speed increases by 12% per stack.",
+      "lore": "Remnants of the hourglass that Chronos shattered to pieces. Warps the flow of time to make allies' tempo faster."
+    },
+    "thunder_chain": {
+      "name": "Thunder Chain",
+      "effect": "Upon a critical hit, chain lightning jumps to the nearest enemy, dealing 20% damage. Additional jump +1 per stack (max 5).",
+      "lore": "A chain where Tartarus's lightning flows through souls. Once awakened, the light jumps from soul to soul."
+    },
+    "soul_refluxor": {
+      "name": "Soul Refluxor",
+      "effect": "4% chance per stack on kill to restore portal erosion by the number of stacks.",
+      "lore": "Flows scattered souls back into the gate, filling the cracks from the inside."
+    },
+    "echo_sigil": {
+      "name": "Sigil of Echo",
+      "effect": "6% chance per stack on attack to instantly fire an additional attack. (50% damage)",
+      "lore": "Leaves a memory of a blade swung once cutting twice. The echo never ends just once."
+    },
+    "carnage_pulse": {
+      "name": "Carnage Pulse",
+      "effect": "Successive kills within 2 seconds build a combo increasing all ally damage by 2% per stack. Combo resets if kills stop.",
+      "lore": "The heart beats faster the more enemy blood it drinks, engraving a larger pulse with every strike of the hand."
+    },
+    "soul_resurrection": {
+      "name": "Soul Resurrection",
+      "effect": "The moment portal erosion reaches 100%, reverts erosion to 50% and annihilates all common enemies on screen (once per stack).",
+      "lore": "There are souls that even the abyss failed to harvest just once. The one who defies that strike raises the gate back up."
+    }
+  },
+  "equip_slot": {
+    "mainhand": {
+      "name": "Staff of Doom",
+      "label": "Attack Speed Increase",
+      "lore": "A staff salvaged from the abyss. The screams of evil spirits are engraved within it."
+    },
+    "offhand": {
+      "name": "Forbidden Tome",
+      "label": "Critical Hit Damage",
+      "lore": "A forbidden book that should not be opened. It whispers the secrets of critical hits to the reader."
+    },
+    "scepter": {
+      "name": "Sacred Scepter",
+      "label": "Attack Power Increase",
+      "lore": "A scepter used by a high exorcist. Strikes evil spirits with sacred light."
+    },
+    "bow": {
+      "name": "Soul Bow",
+      "label": "Critical Hit Chance",
+      "lore": "A bowstring woven with soul threads. Pierces enemy weaknesses accurately."
+    },
+    "dagger": {
+      "name": "Silver Dagger",
+      "label": "Attack Speed Increase",
+      "lore": "A dagger swung faster than light. Enables swift successive strikes."
+    },
+    "staff": {
+      "name": "Sage's Staff",
+      "label": "Critical Hit Damage",
+      "lore": "A staff containing long-held wisdom. Maximizes the power of critical strikes."
+    },
+    "helmet": {
+      "name": "Helmet of Punishment",
+      "label": "Attack Power Increase",
+      "lore": "A helmet made by melting the armor of punished evil spirits. Multiplies the wearer's attack power."
+    },
+    "armor": {
+      "name": "Guardian's Sacred Armor",
+      "label": "Portal Damage Reduction",
+      "lore": "Armor cast from celestial materials. Absorbs the impact dealt to the portal."
+    },
+    "pauldrons": {
+      "name": "Steel Pauldrons",
+      "label": "Portal Damage Reduction",
+      "lore": "Firmly crafted shoulder guards. Disperses the impact dealt to the portal."
+    },
+    "greaves": {
+      "name": "Sprinting Greaves",
+      "label": "Range Expansion",
+      "lore": "Leg armor inhabited by the wind's energy. Expands the influence of exorcists."
+    },
+    "gloves": {
+      "name": "Gloves of Retribution",
+      "label": "Critical Hit Chance",
+      "lore": "Gloves that sharpen strikes to the extreme. Increases critical hit chance."
+    },
+    "boots": {
+      "name": "Celestial Boots",
+      "label": "Range Expansion",
+      "lore": "Boots inhabited by celestial energy. Expands the attack range of allies."
+    },
+    "necklace": {
+      "name": "Necklace of Blessing",
+      "label": "SE Gain Bonus",
+      "lore": "A necklace inhabited by a holy blessing. Harvests more SE from purification activities."
+    },
+    "ring": {
+      "name": "Ring of Truth",
+      "label": "Treasure Discovery Chance",
+      "lore": "A ring that helps those who seek the truth. Increases the chance of discovering Golden Afterimages."
+    },
+    "earring": {
+      "name": "Earrings of Wisdom",
+      "label": "Summon Cost Reduction",
+      "lore": "Earrings that clear the mind. Helps call exorcists with less energy."
+    },
+    "bracelet": {
+      "name": "Solar Bracelet",
+      "label": "SE Gain Bonus",
+      "lore": "A bracelet where the solar warmth is felt. Harvests more souls when killing evil spirits."
+    },
+    "belt": {
+      "name": "Exorcist's Belt",
+      "label": "Summon Cost Reduction",
+      "lore": "A belt worn by a veteran exorcist. Reduces unit summon costs."
+    },
+    "cloak": {
+      "name": "Abyssal Cloak",
+      "label": "Slow Effect Enhancement",
+      "lore": "A cloak that freezes evil spirits. Makes binding effects even more powerful."
+    }
+  },
+  "equip_tier": {
+    "1": "Normal",
+    "2": "Sacred",
+    "3": "Legendary",
+    "4": "Hidden Ancient"
+  }
+}

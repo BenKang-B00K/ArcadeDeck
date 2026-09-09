@@ -1,0 +1,99 @@
+[
+  {
+    "id": "gold",
+    "name": "Gold",
+    "value": 1,
+    "weight": 8,
+    "minScore": 0,
+    "palette": {
+      "rim": "#a06010",
+      "light": "#fff1a0",
+      "mid": "#ffcc40",
+      "dark": "#a06010",
+      "emblem": "#7a3008",
+      "emblemChar": "$"
+    }
+  },
+  {
+    "id": "silver",
+    "name": "Silver",
+    "value": 3,
+    "weight": 3,
+    "minScore": 200,
+    "palette": {
+      "rim": "#506070",
+      "light": "#fff",
+      "mid": "#c0d0e0",
+      "dark": "#506070",
+      "emblem": "#203040",
+      "emblemChar": "◇"
+    }
+  },
+  {
+    "id": "gem",
+    "name": "Gem",
+    "value": 8,
+    "weight": 1,
+    "minScore": 600,
+    "palette": {
+      "rim": "#4a1080",
+      "light": "#fff",
+      "mid": "#d080ff",
+      "dark": "#5010a0",
+      "emblem": "#fff",
+      "emblemChar": "✦"
+    },
+    "extra": "gemSparkle"
+  },
+  {
+    "id": "ruby",
+    "name": "Ruby",
+    "value": 4,
+    "weight": 2,
+    "minScore": 0,
+    "palette": {
+      "rim": "#601018",
+      "light": "#ffd8d8",
+      "mid": "#ff3050",
+      "dark": "#601018",
+      "emblem": "#fff",
+      "emblemChar": "♥",
+      "auraRgb": [255, 80, 100]
+    },
+    "extra": "gemSparkle"
+  },
+  {
+    "id": "frost",
+    "name": "Frost",
+    "value": 4,
+    "weight": 2,
+    "minScore": 0,
+    "palette": {
+      "rim": "#1a4870",
+      "light": "#ffffff",
+      "mid": "#88d8ff",
+      "dark": "#1a4870",
+      "emblem": "#0a3858",
+      "emblemChar": "❄",
+      "auraRgb": [120, 220, 255]
+    },
+    "extra": "gemSparkle"
+  },
+  {
+    "id": "chrono",
+    "name": "Chrono",
+    "value": 6,
+    "weight": 1,
+    "minScore": 0,
+    "palette": {
+      "rim": "#5a4010",
+      "light": "#fff8e8",
+      "mid": "#e0c870",
+      "dark": "#7a5818",
+      "emblem": "#3a2a08",
+      "emblemChar": "⚙",
+      "auraRgb": [255, 210, 90]
+    },
+    "extra": "gemSparkle"
+  }
+]

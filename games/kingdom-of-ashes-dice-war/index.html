@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Kingdom of Ashes - Dice War</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="./favicon-192.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 0; background-color: #000; overflow: hidden; touch-action: none; position: fixed; width: 100%; height: 100%; }
+        canvas { display: block; position: absolute; top: 50%; left: 50%; transform-origin: center center; touch-action: none; }
+
+        /* ── Loading Screen ─────────────────────────────────────────── */
+        #loading-screen {
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 50% 110%, rgba(180, 83, 9, 0.35) 0%, transparent 55%),
+                radial-gradient(ellipse at 50% -10%, rgba(76, 29, 149, 0.45) 0%, transparent 60%),
+                radial-gradient(circle at 50% 50%, #0a0511 0%, #000 75%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 0.9s ease;
+            overflow: hidden;
+        }
+        #loading-screen.fade-out { opacity: 0; }
+
+        /* Vignette overlay */
+        #loading-screen::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.85) 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Floating embers — pure CSS, multi-shadow particle field */
+        #loading-screen::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(1.5px 1.5px at 12% 95%, #fbbf24, transparent),
+                radial-gradient(2px 2px at 28% 88%, #f59e0b, transparent),
+                radial-gradient(1px 1px at 45% 92%, #fde68a, transparent),
+                radial-gradient(2px 2px at 62% 90%, #fbbf24, transparent),
+                radial-gradient(1.5px 1.5px at 78% 96%, #f59e0b, transparent),
+                radial-gradient(1px 1px at 88% 88%, #fde68a, transparent),
+                radial-gradient(1.5px 1.5px at 18% 75%, rgba(251,191,36,0.7), transparent),
+                radial-gradient(1px 1px at 38% 70%, rgba(245,158,11,0.6), transparent),
+                radial-gradient(2px 2px at 55% 78%, rgba(251,191,36,0.5), transparent),
+                radial-gradient(1px 1px at 72% 65%, rgba(254,230,138,0.4), transparent),
+                radial-gradient(1.5px 1.5px at 85% 72%, rgba(245,158,11,0.5), transparent),
+                radial-gradient(1px 1px at 8% 55%, rgba(251,191,36,0.3), transparent),
+                radial-gradient(1px 1px at 92% 50%, rgba(254,230,138,0.3), transparent);
+            background-size: 100% 100%;
+            animation: ember-drift 12s linear infinite;
+            pointer-events: none;
+            z-index: 2;
+            opacity: 0.9;
+        }
+        @keyframes ember-drift {
+            0%   { transform: translateY(0)    translateX(0);   opacity: 0.9; }
+            50%  { transform: translateY(-40vh) translateX(8px); opacity: 0.5; }
+            100% { transform: translateY(-80vh) translateX(-8px); opacity: 0; }
+        }
+
+        /* Decorative corner ornaments */
+        .corner-orn {
+            position: absolute;
+            width: clamp(40px, 6vw, 72px);
+            height: clamp(40px, 6vw, 72px);
+            border: 2px solid rgba(251, 191, 36, 0.55);
+            box-shadow: 0 0 16px rgba(251, 191, 36, 0.35), inset 0 0 12px rgba(251,191,36,0.15);
+            z-index: 3;
+            pointer-events: none;
+        }
+        .corner-orn.tl { top: 24px; left: 24px;    border-right: none; border-bottom: none; }
+        .corner-orn.tr { top: 24px; right: 24px;   border-left: none;  border-bottom: none; }
+        .corner-orn.bl { bottom: 24px; left: 24px; border-right: none; border-top: none; }
+        .corner-orn.br { bottom: 24px; right: 24px;border-left: none;  border-top: none; }
+        .corner-orn::after {
+            content: '';
+            position: absolute;
+            width: 8px; height: 8px;
+            background: #fbbf24;
+            box-shadow: 0 0 12px #fbbf24, 0 0 24px rgba(251,191,36,0.6);
+            transform: rotate(45deg);
+        }
+        .corner-orn.tl::after { top: -5px; left: -5px; }
+        .corner-orn.tr::after { top: -5px; right: -5px; }
+        .corner-orn.bl::after { bottom: -5px; left: -5px; }
+        .corner-orn.br::after { bottom: -5px; right: -5px; }
+
+        /* Lift loading content above background layers */
+        #loading-screen > *:not(.corner-orn) { position: relative; z-index: 4; }
+
+        .banner-wrap {
+            position: relative;
+            display: inline-block;
+            line-height: 0;
+        }
+        #loading-screen img {
+            width: auto;
+            max-width: min(680px, 85vw);
+            max-height: min(420px, 45vh);
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 0 32px rgba(124, 58, 237, 0.55));
+        }
+        .banner-title {
+            position: absolute;
+            top: 6%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin: 0;
+            font-family: 'Cinzel', 'Trajan Pro', 'Georgia', serif;
+            font-weight: 900;
+            font-size: clamp(20px, 4.2vw, 44px);
+            letter-spacing: 0.08em;
+            line-height: 1.05;
+            text-align: center;
+            white-space: nowrap;
+            color: #fbbf24;
+            background: linear-gradient(180deg, #fde68a 0%, #fbbf24 45%, #b45309 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow:
+                0 0 18px rgba(251, 191, 36, 0.55),
+                0 2px 6px rgba(0, 0, 0, 0.9);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.95));
+            pointer-events: none;
+            user-select: none;
+            animation: title-pulse 3.5s ease-in-out infinite;
+        }
+        @keyframes title-pulse {
+            0%, 100% { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.95)) drop-shadow(0 0 8px rgba(251,191,36,0.3)); }
+            50%      { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.95)) drop-shadow(0 0 22px rgba(251,191,36,0.7)); }
+        }
+        .banner-title .sub {
+            display: block;
+            font-size: 0.55em;
+            letter-spacing: 0.32em;
+            margin-top: 0.25em;
+            color: #e5e7eb;
+            background: none;
+            -webkit-text-fill-color: #e5e7eb;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.95);
+        }
+
+        /* Decorative divider around progress bar */
+        .divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            margin-top: min(36px, 3.5vh);
+            width: 480px;
+            max-width: 88vw;
+        }
+        .divider .line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(251,191,36,0.7), transparent);
+        }
+        .divider .diamond {
+            width: 8px; height: 8px;
+            background: #fbbf24;
+            transform: rotate(45deg);
+            box-shadow: 0 0 10px #fbbf24, 0 0 18px rgba(251,191,36,0.5);
+        }
+
+        .progress-wrap {
+            width: 420px;
+            max-width: 80vw;
+            height: 8px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(251, 191, 36, 0.25);
+            border-radius: 4px;
+            margin-top: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 12px rgba(124, 58, 237, 0.25), inset 0 0 6px rgba(0,0,0,0.6);
+        }
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #7c3aed 0%, #c026d3 35%, #fbbf24 100%);
+            border-radius: 4px;
+            transition: width 0.15s ease;
+            box-shadow: 0 0 12px rgba(251, 191, 36, 0.6);
+            position: relative;
+        }
+        #progress-bar::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+            animation: progress-shimmer 1.8s linear infinite;
+        }
+        @keyframes progress-shimmer {
+            0%   { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        #loading-pct {
+            color: rgba(255,255,255,0.38);
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 13px;
+            letter-spacing: 0.1em;
+            margin-top: min(10px, 1.5vh);
+            transition: opacity 0.4s ease;
+        }
+
+        #start-btn {
+            margin-top: min(28px, 2.5vh);
+            padding: min(14px, 1.8vh) 56px;
+            background: linear-gradient(135deg, #7c3aed, #4f46e5);
+            color: #fff;
+            font-family: 'Cinzel', 'Segoe UI', sans-serif;
+            font-size: clamp(14px, 2.5vw, 18px);
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            border: 2px solid rgba(251, 191, 36, 0.6);
+            border-radius: 8px;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.5s ease, transform 0.5s ease,
+                        background 0.2s ease, box-shadow 0.2s ease;
+            pointer-events: none;
+            box-shadow: 0 0 22px rgba(124, 58, 237, 0.55), inset 0 0 14px rgba(251,191,36,0.12);
+            text-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+        }
+        #start-btn.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+            animation: btn-glow 2.4s ease-in-out infinite;
+        }
+        @keyframes btn-glow {
+            0%, 100% { box-shadow: 0 0 22px rgba(124, 58, 237, 0.55), inset 0 0 14px rgba(251,191,36,0.12); }
+            50%      { box-shadow: 0 0 36px rgba(251, 191, 36, 0.65), inset 0 0 18px rgba(251,191,36,0.25); }
+        }
+        #start-btn:hover {
+            background: linear-gradient(135deg, #9333ea, #6366f1);
+            box-shadow: 0 0 38px rgba(251, 191, 36, 0.8);
+            border-color: rgba(251, 191, 36, 0.95);
+        }
+        #start-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* ── Rotate-device overlay (portrait mobile) ───────────────── */
+        #rotate-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #0d1117;
+            z-index: 99998;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 24px;
+            font-family: 'Segoe UI', sans-serif;
+            pointer-events: all;
+        }
+        #rotate-overlay .rotate-icon {
+            font-size: 56px;
+            margin-bottom: 20px;
+            display: inline-block;
+            transform: rotate(90deg);
+            animation: wiggle 1.8s ease-in-out infinite;
+        }
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(80deg); }
+            50%       { transform: rotate(100deg); }
+        }
+        #rotate-overlay .rotate-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.05em;
+        }
+        #rotate-overlay .rotate-sub {
+            margin: 10px 0 0;
+            font-size: 13px;
+            color: rgba(255,255,255,0.45);
+            letter-spacing: 0.04em;
+        }
+    </style>
+  <script type="module" crossorigin src="./assets/index-S_ytZZaM.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/Geometry-MFRJ-jpk.js">
+  <link rel="modulepreload" crossorigin href="./assets/GCManagedHash-jMfNVFVu.js">
+  <link rel="modulepreload" crossorigin href="./assets/getTextureBatchBindGroup-BEt_pZuD.js">
+  <link rel="modulepreload" crossorigin href="./assets/ImageSource-BaxsdStY.js">
+  <link rel="modulepreload" crossorigin href="./assets/GraphicsContext-Fy8loagy.js">
+  <link rel="modulepreload" crossorigin href="./assets/Cache--D3xOmv3.js">
+  <link rel="modulepreload" crossorigin href="./assets/Filter-DAlRG84J.js">
+  <link rel="modulepreload" crossorigin href="./assets/RenderTargetSystem-PLlHV4WO.js">
+  <link rel="modulepreload" crossorigin href="./assets/BufferResource-BACA5i3e.js">
+  <link rel="modulepreload" crossorigin href="./assets/CanvasPool-uvdH0Iih.js">
+</head>
+<body>
+    <!-- Loading screen (hidden after assets load) -->
+    <div id="loading-screen">
+        <div class="corner-orn tl"></div>
+        <div class="corner-orn tr"></div>
+        <div class="corner-orn bl"></div>
+        <div class="corner-orn br"></div>
+        <div class="banner-wrap">
+            <img src="./kingdom-of-ashes-banner.png" alt="Kingdom of Ashes - Dice War" />
+            <h1 class="banner-title">Kingdom of Ashes<span class="sub">— Dice War —</span></h1>
+        </div>
+        <div class="divider">
+            <span class="line"></span>
+            <span class="diamond"></span>
+            <span class="line"></span>
+        </div>
+        <div class="progress-wrap">
+            <div id="progress-bar"></div>
+        </div>
+        <div id="loading-pct">Loading... 0%</div>
+        <button id="start-btn">▶ START GAME</button>
+        <button id="lang-btn" onclick="(function(){var k='lang',c=localStorage.getItem(k),n=c==='ko'?'en':'ko';localStorage.setItem(k,n);location.reload();})()" style="margin-top:12px;padding:6px 18px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.55);font-family:'Segoe UI',sans-serif;font-size:12px;border:1px solid rgba(255,255,255,0.18);border-radius:6px;cursor:pointer;letter-spacing:0.08em;">한국어</button>
+    </div>
+
+    <!-- Portrait-mode rotate prompt -->
+    <div id="rotate-overlay">
+        <span class="rotate-icon">📱</span>
+        <p class="rotate-title">화면을 가로로 돌려주세요</p>
+        <p class="rotate-sub" id="rotate-sub">This game is designed for landscape mode</p>
+    </div>
+
+    <div id="app"></div>
+</body>
+</html>

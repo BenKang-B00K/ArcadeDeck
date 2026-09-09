@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>💎 Gem Merge</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Ambient glow blobs -->
+  <div class="blob" style="width:320px;height:320px;background:rgba(108,92,231,0.20);top:-60px;left:-80px;animation-duration:13s;"></div>
+  <div class="blob" style="width:260px;height:260px;background:rgba(0,206,201,0.14);bottom:80px;right:-40px;animation-duration:10s;animation-delay:-4s;"></div>
+  <div class="blob" style="width:220px;height:220px;background:rgba(253,121,168,0.13);top:42%;left:8%;animation-duration:16s;animation-delay:-7s;"></div>
+  <div class="blob" style="width:290px;height:290px;background:rgba(249,202,36,0.09);bottom:-90px;left:35%;animation-duration:12s;animation-delay:-2s;"></div>
+  <div class="blob" style="width:180px;height:180px;background:rgba(46,213,115,0.10);top:20%;right:5%;animation-duration:18s;animation-delay:-9s;"></div>
+
+  <!-- Center layout -->
+  <div id="center-col">
+    <div id="title">💎 GEM MERGE</div>
+
+    <div id="hud">
+      <div class="hud-card"><div class="hud-label">Score</div><div class="hud-value" id="score">0</div></div>
+      <div class="hud-card hud-next">
+        <div class="hud-label">Next</div>
+        <canvas id="next-canvas" width="52" height="52"></canvas>
+      </div>
+      <div class="hud-card"><div class="hud-label">Best</div><div class="hud-value" id="best">0</div></div>
+      <button id="mute-btn" title="음소거 토글">🔊</button>
+      <button id="catalog-btn" title="도감">📚</button>
+    </div>
+
+    <div id="game-area">
+
+      <!-- LEFT panel: gem guide Lv 1–6 -->
+      <aside class="side-panel" id="panel-left">
+        <div class="panel-gem-deco" id="deco-left"></div>
+        <div class="panel-title">GEMS</div>
+        <!-- populated by JS -->
+      </aside>
+
+      <!-- Canvas -->
+      <div id="game-container">
+        <button id="help-btn">?</button>
+        <div id="credit">Created by BenjaminK</div>
+        <!-- Legendary cinematic overlay (shown briefly when Lv11 is created) -->
+        <div id="legendary-cinematic" class="hidden">
+          <div class="lc-gem">💎</div>
+          <div class="lc-text">LEGENDARY GEM</div>
+          <div class="lc-sub">ADDED TO VAULT</div>
+        </div>
+        <div id="overlay" class="hidden">
+          <div id="overlay-box">
+            <h2>GAME OVER</h2>
+            <div class="go-score">점수 &nbsp;<span id="final-score">0</span></div>
+            <button id="restart-btn">RESTART ↺</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT panel: gem guide Lv 7–11 + how-to -->
+      <aside class="side-panel" id="panel-right">
+        <div class="panel-gem-deco" id="deco-right"></div>
+        <div class="panel-title">GEMS</div>
+        <!-- populated by JS -->
+      </aside>
+
+    </div><!-- #game-area -->
+
+    <!-- Persistent Legendary Vault -->
+    <div id="legendary-vault">
+      <span class="vault-label">VAULT</span>
+      <div id="vault-gems"></div>
+    </div>
+
+  </div><!-- #center-col -->
+
+  <!-- Catalog modal -->
+  <div id="catalog-modal" class="modal hidden">
+    <div id="catalog-modal-backdrop"></div>
+    <div id="catalog-modal-box">
+      <button id="catalog-close">✕</button>
+      <div class="panel-title">GEM CATALOG</div>
+      <div id="catalog-list" class="catalog-list"></div>
+    </div>
+  </div>
+
+  <!-- Help modal (small screens) -->
+  <div id="help-modal">
+    <div id="help-modal-backdrop"></div>
+    <div id="help-modal-box">
+      <button id="help-close">✕</button>
+      <div class="help-section">
+        <div class="panel-title">GEMS</div>
+        <div class="help-cols" id="help-gems"></div>
+      </div>
+      <div class="help-section" id="help-how"></div>
+      <div class="help-section" id="help-combo"></div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.4.2/pixi.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "name": "Triangle Battle",
+  "short_name": "Triangle",
+  "description": "삼각형 땅따먹기 전략 게임",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0a0a1a",
+  "theme_color": "#e94560",
+  "orientation": "landscape",
+  "icons": [
+    {
+      "src": "image/main_bg.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

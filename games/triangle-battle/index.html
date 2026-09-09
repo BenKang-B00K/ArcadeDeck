@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#e94560">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="image/main_bg.png">
+<title>Triangle Battle! - 트라이앵글 배틀!</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js');
+    });
+  }
+</script>
+
+<div id="setup-screen">
+  <!-- Floating triangle decorations -->
+  <div class="deco-tri tri-1"></div>
+  <div class="deco-tri tri-2"></div>
+  <div class="deco-tri tri-3"></div>
+  <div class="deco-tri tri-4"></div>
+  <div class="deco-tri tri-5"></div>
+  <div class="deco-tri tri-6"></div>
+
+  <button id="lang-btn" title="한국어 / English">EN / 한</button>
+
+  <div class="title-group">
+    <div class="title-glow"></div>
+    <h1 data-i18n="title"></h1>
+    <p class="subtitle" data-i18n="subtitle"></p>
+  </div>
+
+  <div class="setup-card">
+    <div class="setup-options">
+      <label><span data-i18n="playerCount"></span>
+        <select id="player-count">
+          <option value="2" data-i18n="players2"></option>
+          <option value="3" data-i18n="players3"></option>
+          <option value="4" data-i18n="players4"></option>
+        </select>
+      </label>
+      <div id="name-inputs"></div>
+      <div class="setup-row">
+        <label><span data-i18n="pegCount"></span>
+          <select id="peg-count">
+            <option value="10" data-i18n="pegs10"></option>
+            <option value="15" selected data-i18n="pegs15"></option>
+            <option value="20" data-i18n="pegs20"></option>
+            <option value="25" data-i18n="pegs25"></option>
+          </select>
+        </label>
+        <label><span data-i18n="boardLayout"></span>
+          <select id="board-layout">
+            <option value="random" selected data-i18n="layoutRandom"></option>
+            <option value="circle" data-i18n="layoutCircle"></option>
+            <option value="triangle" data-i18n="layoutTriangle"></option>
+            <option value="square" data-i18n="layoutSquare"></option>
+          </select>
+        </label>
+        <label><span data-i18n="turnTime"></span>
+          <select id="time-limit">
+            <option value="0" data-i18n="unlimited"></option>
+            <option value="10" data-i18n="sec10"></option>
+            <option value="20" selected data-i18n="sec20"></option>
+          </select>
+        </label>
+      </div>
+      <div id="name-error" class="name-error hidden"></div>
+      <button id="start-btn"><span data-i18n="startGame"></span></button>
+    </div>
+  </div>
+
+</div>
+
+<div id="game-screen" class="hidden">
+  <div id="hud-top" class="hud">
+    <div id="player-info-top" class="player-info"></div>
+    <div id="turn-info-top" class="turn-info"></div>
+  </div>
+  <div id="board-container">
+    <canvas id="board"></canvas>
+    <canvas id="minimap"></canvas>
+    <canvas id="minimap-mirror"></canvas>
+    <div id="timer-bar-wrap" class="hidden">
+      <div id="timer-bar"></div>
+    </div>
+    <div id="timer-bar-wrap-mirror" class="hidden">
+      <div id="timer-bar-mirror"></div>
+    </div>
+  </div>
+  <div id="hud-bottom" class="hud hud-mirror">
+    <div id="player-info-bottom" class="player-info"></div>
+    <div id="turn-info-bottom" class="turn-info"></div>
+  </div>
+  <div id="result-overlay" class="hidden">
+    <div id="result-box">
+      <h2 data-i18n="gameOver"></h2>
+      <div id="result-list"></div>
+      <button id="restart-btn"><span data-i18n="playAgain"></span></button>
+    </div>
+  </div>
+</div>
+
+<div id="rotate-notice">
+  <div class="rotate-icon">📱</div>
+  <p data-i18n="rotateLandscape"></p>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>

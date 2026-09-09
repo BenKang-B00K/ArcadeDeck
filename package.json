@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "predeploy": "npm run build",
     "deploy": "firebase deploy --only hosting",
+    "deploy:games": "wrangler pages deploy games --project-name arcadedeck-games --branch main --commit-dirty=true",
     "indexnow": "node scripts/ping-indexnow.js",
     "indexnow:posts": "node scripts/ping-indexnow.js --posts-only",
     "indexnow:all": "node scripts/ping-indexnow.js --all"
@@ -36,6 +37,7 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.48.0",
     "vite": "^7.3.1",
-    "vite-plugin-pwa": "^1.2.0"
+    "vite-plugin-pwa": "^1.2.0",
+    "wrangler": "^4.130.0"
   }
 }

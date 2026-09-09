@@ -1,0 +1,287 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <!-- Mobile: hide browser status/notification bar when added to home screen -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
+    <title>Gate of Hell : 악령들의 귀환</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="css/gameplay.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div id="loading-content">
+            <div id="loading-gate-icon"><svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor" aria-hidden="true"><path d="M6 3h12v3h2v9h-3v3h-2v3h-2v-3h-2v3h-2v-3H7v-3H4V6h2zM9 9v3h2V9zm4 0v3h2V9z"/></svg></div>
+            <div id="loading-title">GATE OF HELL</div>
+            <div id="loading-status">심연의 문을 여는 중...</div>
+            <div id="loading-bar-container">
+                <div id="loading-bar-fill"></div>
+            </div>
+            <div id="loading-percentage">0%</div>
+        </div>
+    </div>
+
+    <!-- Start Screen Overlay -->
+    <div id="start-screen">
+        <div id="start-content">
+            <!-- Language Switcher (title-screen only) -->
+            <div id="lang-switcher-title" class="lang-switcher-title">
+                <button class="lang-tb" data-lang="ko" title="한국어">한국어</button>
+                <button class="lang-tb" data-lang="en" title="English">English</button>
+                <button class="lang-tb" data-lang="ja" title="日本語">日本語</button>
+                <button class="lang-tb" data-lang="sch" title="简体中文">简体中文</button>
+            </div>
+            <h1 class="start-title">Gate<br><span style="font-size: 50px;">of</span><br>Hell</h1>
+            <h2 class="start-subtitle">악령들의 귀환</h2>
+            <div class="start-btn-row">
+                <button id="continue-game-btn" style="display:none;">이어하기</button>
+                <button id="start-game-btn">새 게임</button>
+                <button id="start-tutorial-btn">지침서 (Guide)</button>
+            </div>
+            <!-- Enhanced Start Screen Tutorial Toggle -->
+            <div id="start-tutorial-config">
+                <span class="config-label">초보자 가이드</span>
+                <label class="switch">
+                    <input type="checkbox" id="tutorial-toggle" checked>
+                    <span class="slider round"></span>
+                </label>
+                <span id="start-tutorial-status">ON</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-container">
+        <!-- Global Floating Tooltip -->
+        <div id="global-tooltip" class="floating-tooltip" style="display: none;"></div>
+
+        <!-- 1. Top Panel: Pure Game World (Canvas) -->
+        <div id="top-panel">
+            <div id="frozen-overlay"></div>
+            <div id="start-timer"></div>
+            <!-- Stage banner: title + depth, top-center -->
+            <div id="stage-banner" class="stage-banner">
+                <div class="sb-title" id="sb-title">속삭이는 문</div>
+                <div class="sb-depth">
+                    <span class="sb-depth-label">DEPTH</span>
+                    <span class="sb-depth-num" id="sb-depth">1</span>
+                </div>
+            </div>
+            <!-- Canvas will be injected here by graphics.js -->
+            <!-- Status overlays (always visible on game canvas, no button needed) -->
+            <div id="sleeping-statue-widget">
+                <img id="sleeping-statue-icon" src="images/ui/sleeping_statue.webp" alt="Sleeping Statue" data-form="0" onerror="this.replaceWith(Object.assign(document.createElement('span'),{innerHTML:window.SvgIcons?window.SvgIcons.get('statue'):'',id:'sleeping-statue-icon'}))">
+                <div class="sleeping-statue-info">
+                    <span id="sleeping-statue-name">잠든 석상</span>
+                    <div id="sleeping-statue-stat-rows"></div>
+                </div>
+            </div>
+            <div id="cursed-status-container">
+                <img id="cursed-status-icon" src="images/ui/cursed_status.webp" alt="Curse" data-level="0" onerror="this.replaceWith(Object.assign(document.createElement('span'),{innerHTML:window.SvgIcons?window.SvgIcons.get('moon_dark'):'',id:'cursed-status-icon'}))">
+                <span id="cursed-status" data-level="0">잠든 저주</span>
+                <div id="curse-pe-bar"><div id="curse-pe-fill"></div></div>
+            </div>
+        </div>
+
+        <!-- 2. Bottom Panel: Consolidated UI & HUD -->
+        <div id="bottom-panel">
+            <!-- Gauges Section -->
+            <div id="gauges-grid">
+                <!-- Soul Energy -->
+                <div class="gauge-wrapper" id="se-label" title="소울 에너지 (SE): 유닛 소환 및 강화에 사용 (클릭하여 상세 정보)">
+                    <div class="gauge-info">
+                        <span class="gauge-icon"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M12 2 L13 9 L20 10 L13 13 L14 22 L12 17 L10 22 L11 13 L4 10 L11 9 Z"/></svg></span>
+                    </div>
+                    <div class="gauge-bar se">
+                        <div id="se-gauge-fill"></div>
+                        <span id="se-display-text" class="gauge-count">150 / 1000</span>
+                    </div>
+                </div>
+                <!-- Portal Energy -->
+                <div class="gauge-wrapper" id="pe-label" title="포탈 오염도 (PE): 100% 도달 시 게임 오버 (클릭하여 상세 정보)">
+                    <div class="gauge-info">
+                        <span class="gauge-icon"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M4 4l3 4 5-3 5 3 3-4-1 7 2 5-3 1-1 4-3-3h-4l-3 3-1-4-3-1 2-5zm5 8v2h2v-2zm4 0v2h2v-2z"/></svg></span>
+                    </div>
+                    <div class="gauge-bar pe">
+                        <div id="portal-gauge-fill"></div>
+                        <span id="portal-energy-label" class="gauge-count">0 / 1500</span>
+                    </div>
+                </div>
+                <div class="gauge-wrapper rs" id="rs-label" title="남은 악령 (RS): 스테이지 클리어까지 필요한 처치 수 (클릭하여 상세 정보)">
+                    <div class="gauge-info">
+                        <span class="gauge-icon"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M6 3h12v3h2v9h-3v3h-2v3h-2v-3h-2v3h-2v-3H7v-3H4V6h2zM9 9v3h2V9zm4 0v3h2V9z"/></svg></span>
+                    </div>
+                    <div class="gauge-bar rs">
+                        <div id="rs-gauge-fill"></div>
+                        <span id="enemies-left" class="gauge-count">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="bottom-main-ui">
+                <div id="control-panel">
+                    <div id="tower-card" class="tower-card" style="border-color: #ffd700; color: #ffd700;">
+                        <div id="tower-warning" class="card-warning" style="display: none;">SE 부족</div>
+                        <div class="card-icon"><img src="images/buttons/btn_summon.webp" alt="Summon" onerror="this.replaceWith(Object.assign(document.createElement('span'),{innerHTML:window.SvgIcons?window.SvgIcons.get('mage'):''}))"></div>
+                        <div id="tower-cost-display" class="card-cost">40 SE</div>
+                    </div>
+                    <div id="shrine-card" class="tower-card" style="border-color: #00e5ff; color: #00e5ff;">
+                        <div id="shrine-warning" class="card-warning" style="display: none;">SE 부족</div>
+                        <div class="card-icon"><img src="images/buttons/btn_shrine.webp" alt="Shrine" onerror="this.replaceWith(Object.assign(document.createElement('span'),{innerHTML:window.SvgIcons?window.SvgIcons.get('shrine'):''}))"></div>
+                        <div id="shrine-cost-display" class="card-cost">100 SE</div>
+                    </div>
+                    <div id="purge-card" class="tower-card" style="border-color: #9400d3; color: #9400d3;">
+                        <div id="purge-warning" class="card-warning" style="display: none;">SE 부족</div>
+                        <div class="card-icon"><img src="images/buttons/btn_purge.webp" alt="Purge" onerror="this.replaceWith(Object.assign(document.createElement('span'),{innerHTML:window.SvgIcons?window.SvgIcons.get('flame'):''}))"></div>
+                        <div id="purge-cost-display" class="card-cost">800 SE</div>
+                    </div>
+                    <div id="pact-card" class="tower-card locked" style="border-color: #ff0066; color: #ff0066;">
+                        <div id="pact-penalty-badge" class="pact-penalty-badge">!</div>
+                        <div class="pact-gauge"></div>
+                        <div class="pact-stage-label" id="pact-stage-label">5</div>
+                        <div class="card-icon"><img src="images/buttons/btn_pact.webp" alt="Pact" onerror="this.replaceWith(Object.assign(document.createElement('span'),{innerHTML:window.SvgIcons?window.SvgIcons.get('skull'):''}))"></div>
+                    </div>
+                    <div id="relics-btn" class="tower-card" style="border-color: #ff4500; color: #ff4500;">
+                        <div id="relics-new-badge" class="card-new-badge">NEW</div>
+                        <div id="relics-sf-badge" class="card-cost" title="Soul Fragment — 유물 제작 자원">0 SF</div>
+                        <div class="card-icon"><img src="images/buttons/btn_relics.webp" alt="Relics" onerror="this.replaceWith(Object.assign(document.createElement('span'),{innerHTML:window.SvgIcons?window.SvgIcons.get('urn'):''}))"></div>
+                    </div>
+                    <div id="equip-btn" class="tower-card" style="border-color: #00e5ff; color: #00e5ff;">
+                        <div id="equip-new-badge" class="card-new-badge">NEW</div>
+                        <div id="equip-sc-badge" class="card-cost" title="Soul Crystal — 장비 재계시 자원">0 SC</div>
+                        <div class="card-icon"><img src="images/buttons/btn_equipment.webp" alt="Equipment" onerror="this.replaceWith(Object.assign(document.createElement('span'),{innerHTML:window.SvgIcons?window.SvgIcons.get('sword'):''}))"></div>
+                    </div>
+                    <div id="collections-btn" class="tower-card" style="border-color: #ffd700; color: #ffd700;">
+                        <div id="collections-new-badge" class="card-new-badge">NEW</div>
+                        <div class="card-icon"><img src="images/buttons/btn_collections.webp" alt="Collections" onerror="this.replaceWith(Object.assign(document.createElement('span'),{innerHTML:window.SvgIcons?window.SvgIcons.get('book'):''}))"></div>
+                    </div>
+                    <div id="tba-card" class="tower-card" style="border-color: #444; color: #666;">
+                        <div class="tba-label">TBA</div>
+                    </div>
+                </div>
+
+                <div id="unit-info">
+                    <div class="info-default-text">GATE OF HELL<br>SACRED TABLET</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dynamic Overlay Container (Populated by ui_templates.js) -->
+    <div id="overlay-container"></div>
+
+    <!-- 0. Pixi.js v8 (WebGL/WebGPU renderer) + Filters v6 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/8.1.1/pixi.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pixi-filters@6.0.2/dist/browser/pixi-filters.js"></script>
+
+    <!-- 1. Utilities & Base -->
+    <script src="js/core/event_bus.js"></script>
+    <script src="js/core/object_pool.js"></script>
+    <script src="js/core/logger.js"></script>
+    <script src="js/core/data_loader.js"></script>
+    <script src="js/core/i18n.js"></script>
+    <script src="js/ui/svg_icons.js"></script>
+    <script src="js/ui/ui_templates.js"></script>
+
+    <!-- 2. Data Definitions -->
+    <script src="js/core/game_state.js"></script>
+    <script src="js/core/scene_manager.js"></script>
+
+    <!-- 3. Core State & State Management -->
+    <script src="js/logic/allies.js"></script>
+    <script src="js/logic/save_system.js"></script>
+    <script src="js/logic/enemies.js"></script>
+
+    <!-- 4. Logic Systems -->
+    <script src="js/logic/ability_registry.js"></script>
+    <script src="js/logic/allies_spawning.js"></script>
+    <script src="js/logic/allies_management.js"></script>
+    <script src="js/logic/allies_core_loop.js"></script>
+    <script src="js/logic/enemies_spawning.js"></script>
+    <script src="js/logic/enemies_combat.js"></script>
+    <script src="js/logic/enemies_core_loop.js"></script>
+    <script src="js/logic/relics_system.js"></script>
+    <script src="js/ui/relics_ui.js"></script>
+    <script src="js/logic/equipment_system.js"></script>
+    <script src="js/ui/equipment_ui.js"></script>
+    <script src="js/logic/combat.js"></script>
+    <script src="js/logic/gargoyle_curse.js"></script>
+    <script src="js/logic/curse_pact_system.js"></script>
+    <script src="js/logic/demon_pact_system.js"></script>
+    <script src="js/core/game_engine.js"></script>
+
+    <!-- 5. Graphics Engine & Rendering -->
+    <script src="js/graphics/pixi_app.js"></script>
+    <script src="js/graphics/pixi_texture_cache.js"></script>
+    <script src="js/graphics/graphics.js"></script>
+    <script src="js/graphics/enemies_pix.js"></script>
+    <script src="js/graphics/whispering_spirit_pixi.js"></script>
+    <script src="js/graphics/pix_gargoyle.js"></script>
+    <script src="js/graphics/pix_core.js"></script>
+    <script src="js/graphics/pix_tier1.js"></script>
+    <script src="js/graphics/pix_tier2.js"></script>
+    <script src="js/graphics/pix_tier3.js"></script>
+    <script src="js/graphics/pix_tier3_attack.js"></script>
+    <script src="js/graphics/pix_tier3_support.js"></script>
+    <script src="js/graphics/pix_tier4.js"></script>
+    <script src="js/graphics/pix_lightning.js"></script>
+    <script src="js/graphics/pix_shrine_normal.js"></script>
+    <script src="js/graphics/pix_shrine_sacred.js"></script>
+    <script src="js/graphics/graphics_unit_map.js"></script>
+    <script src="js/graphics/world_road.js"></script>
+    <script src="js/graphics/world_pixi.js"></script>
+    <script src="js/graphics/slots_pixi.js"></script>
+    <script src="js/graphics/slots_vfx_pixi.js"></script>
+    <script src="js/graphics/road_pixi.js"></script>
+    <script src="js/graphics/road_seam_pixi.js"></script>
+    <script src="js/graphics/road_decorations_pixi.js"></script>
+    <script src="js/graphics/world_decorations_pixi.js"></script>
+    <script src="js/graphics/road_vfx_enhancer_pixi.js"></script>
+    <script src="js/graphics/portal_impact_vfx_pixi.js"></script>
+    <script src="js/graphics/spawning_gates_pixi.js"></script>
+    <script src="js/graphics/portal_pixi.js"></script>
+    <script src="js/graphics/lava_road_pixi.js"></script>
+    <script src="js/graphics/shrine_auras_pixi.js"></script>
+    <script src="js/graphics/shrine_vfx_pixi.js"></script>
+    <script src="js/graphics/world_gate.js"></script>
+    <script src="js/graphics/world_portal.js"></script>
+    <script src="js/graphics/graphics_units.js"></script>
+    <script src="js/graphics/units_pixi.js"></script>
+    <script src="js/graphics/summons_pixi.js"></script>
+    <script src="js/graphics/vfx_core.js"></script>
+    <script src="js/graphics/projectile_designs.js"></script>
+    <script src="js/graphics/vfx_combat.js"></script>
+    <script src="js/graphics/vfx_scene.js"></script>
+
+    <!-- 6. Feature Managers -->
+    <script src="js/ui/slots.js"></script>
+    <script src="js/logic/shrines_spawning.js"></script>
+    <script src="js/logic/shrines_effects.js"></script>
+    <script src="js/ui/overlays.js"></script>
+
+    <!-- 7. Interaction & UI Layers -->
+    <script src="js/ui/input_handler.js"></script>
+    <script src="js/ui/hud.js"></script>
+    <script src="js/ui/allies_ui.js"></script>
+    <script src="js/ui/enemies_ui.js"></script>
+    <script src="js/ui/info_panel.js"></script>
+    <script src="js/ui/control_panel.js"></script>
+    <script src="js/logic/collections_ghosts.js"></script>
+    <script src="js/logic/collections_shrines.js"></script>
+    <script src="js/logic/collections_exorcists.js"></script>
+    <script src="js/ui/collections_ui.js"></script>
+
+    <!-- 8. Feedback & Effects -->
+    <script src="js/graphics/attackeffect.js"></script>
+    <script src="js/core/soundeffect.js"></script>
+
+    <!-- 9. Entry Point -->
+    <script src="js/core/script.js"></script>
+</body>
+</html>

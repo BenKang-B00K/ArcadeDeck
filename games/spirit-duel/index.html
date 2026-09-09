@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="screen-orientation" content="landscape">
+<meta name="x5-orientation" content="landscape">
+<title>Spirit Duel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Gowun+Dodum&family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- 회전 안내 (모바일 세로일 때만 표시) -->
+<div class="rotate-overlay" id="rotateOverlay">
+  <div class="rotate-icon">⟳</div>
+  <h2 data-i18n="rotate.title">Rotate Your Device</h2>
+  <p data-i18n="rotate.sub">Spirit Duel plays in landscape</p>
+</div>
+
+<!-- 토글 버튼들은 .wrap 밖으로 빼서 커튼 위에도 보이게 함 -->
+<button class="sound-toggle" id="soundToggle" data-i18n-title="tip.sound" aria-label="sound toggle">
+  <span id="soundIcon">♪</span>
+</button>
+<button class="help-toggle" id="helpToggle" data-i18n-title="tip.help" aria-label="help">?</button>
+<button class="lang-toggle" id="langToggle" data-i18n-title="lang.toggle.title" aria-label="language">
+  <span id="langIcon" data-i18n="lang.toggle">한</span>
+</button>
+
+<div class="wrap">
+  <header>
+    <h1>Spirit Duel</h1>
+    <div class="sub" data-i18n="app.subtitle">SPIRIT DUEL · BEST OF 2</div>
+    <div class="match-score">
+      <div class="mscore mscore-p1">
+        <span class="mname" data-i18n="player.1">Azure Spirit</span>
+        <span class="mpips" id="p1Pips"></span>
+      </div>
+      <div class="round-label" id="roundLabel">ROUND 1</div>
+      <div class="mscore mscore-p2">
+        <span class="mpips" id="p2Pips"></span>
+        <span class="mname" data-i18n="player.2">Amber Spirit</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="players">
+    <div class="player-card p1-card" id="p1Card">
+      <div class="pname" data-i18n="player.1">Azure Spirit</div>
+      <div class="hp-bar" id="p1Hp"></div>
+      <div class="stars-bar" id="p1Stars"></div>
+      <div class="penalty" id="p1Pen"></div>
+    </div>
+    <div class="turn-counter-wrap">
+      <div class="turn-counter" id="turnCounter">TURN 1</div>
+      <div class="expansion-info" id="expansionInfo">Next stardust in 3 turns</div>
+    </div>
+    <div class="player-card p2-card" id="p2Card">
+      <div class="pname" data-i18n="player.2">Amber Spirit</div>
+      <div class="hp-bar" id="p2Hp"></div>
+      <div class="stars-bar" id="p2Stars"></div>
+      <div class="penalty" id="p2Pen"></div>
+    </div>
+  </div>
+
+  <div class="board-frame">
+    <div class="board" id="board">
+      <div class="fx-layer" id="fxLayer"></div>
+    </div>
+  </div>
+
+  <div class="input-panel" id="inputPanel">
+    <div class="input-header">
+      <div class="turn-label" id="turnLabel">Azure Spirit's Turn</div>
+      <div class="slots">
+        <span>① <span class="slot" id="slot1">―</span></span>
+        <span>② <span class="slot" id="slot2">―</span></span>
+        <span id="slot3Wrap" style="display:none;">③ <span class="slot" id="slot3">―</span></span>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="action-btn" data-action="moveL">
+        <span class="action-icon" id="iconAdvance">◀</span>
+        <span class="action-name" data-i18n="action.advance">Advance</span>
+        <span class="action-hint" data-i18n-html="action.hint.advance">1 toward opp.</span>
+      </button>
+      <button class="action-btn" data-action="moveR">
+        <span class="action-icon" id="iconRetreat">▶</span>
+        <span class="action-name" data-i18n="action.retreat">Retreat</span>
+        <span class="action-hint" data-i18n-html="action.hint.retreat">1 toward self</span>
+      </button>
+      <button class="action-btn" data-action="attack">
+        <span class="action-icon">✦</span>
+        <span class="action-name" data-i18n="action.attack">Attack</span>
+        <span class="action-hint" data-i18n-html="action.hint.attack">Adjacent · 1 dmg</span>
+      </button>
+      <button class="action-btn" data-action="block">
+        <span class="action-icon">◈</span>
+        <span class="action-name" data-i18n="action.block">Block</span>
+        <span class="action-hint" data-i18n-html="action.hint.block">Nullify attack</span>
+      </button>
+      <button class="action-btn" data-action="counter">
+        <span class="action-icon">⟁</span>
+        <span class="action-name" data-i18n="action.counter">Counter</span>
+        <span class="action-hint" data-i18n-html="action.hint.counter">Counter · 1 dmg</span>
+      </button>
+      <button class="action-btn action-pierce" data-action="pierce">
+        <span class="action-icon">✹</span>
+        <span class="action-name" data-i18n="action.pierce">Pierce</span>
+        <span class="action-hint" data-i18n-html="action.hint.pierce">★★ Unblockable</span>
+      </button>
+      <button class="action-btn" data-action="ranged">
+        <span class="action-icon">≋</span>
+        <span class="action-name" data-i18n="action.ranged">Ranged</span>
+        <span class="action-hint" data-i18n-html="action.hint.ranged">2-cell range attack</span>
+      </button>
+      <button class="action-btn action-leap" data-action="leap">
+        <span class="action-icon">↷</span>
+        <span class="action-name" data-i18n="action.leap">Leap</span>
+        <span class="action-hint" data-i18n-html="action.hint.leap">Adjacent · 2 slots</span>
+      </button>
+    </div>
+    <div class="controls">
+      <button class="ctrl-btn" id="undoBtn"><span data-i18n="btn.undo">Undo</span> <kbd>⌫</kbd></button>
+      <button class="ctrl-btn primary" id="confirmBtn" disabled><span data-i18n="btn.confirm">Confirm</span> <kbd>⏎</kbd></button>
+    </div>
+  </div>
+</div>
+
+<!-- 핫시트 가림막 -->
+<div class="curtain" id="curtain">
+ <div class="curtain-inner">
+  <div id="curtainDefault">
+    <h2 id="curtainTitle">Pass the Screen</h2>
+    <p id="curtainSub">Hand the device to your opponent</p>
+  </div>
+
+  <div id="curtainSetup" style="display:none; text-align:center;">
+    <p data-i18n="setup.label" style="color:var(--ink-dim); font-size:14px; letter-spacing:0.2em; text-transform:uppercase;">S P I R I T   S E L E C T</p>
+    <div class="setup-mode-select" id="setupModeSelect">
+      <button class="setup-mode-btn active" id="setupModePVP" data-i18n="setup.mode.pvp">Two Players</button>
+      <button class="setup-mode-btn" id="setupModeCPU" data-i18n="setup.mode.cpu">vs CPU</button>
+    </div>
+    <div class="setup-diff-select" id="setupDiffSelect" style="display:none;">
+      <button class="setup-diff-btn active" id="setupDiffNormal" data-i18n="setup.diff.normal">Normal</button>
+      <button class="setup-diff-btn" id="setupDiffAdvanced" data-i18n="setup.diff.advanced">Advanced</button>
+      <button class="setup-diff-btn" id="setupDiffMaster" data-i18n="setup.diff.master">Master</button>
+    </div>
+    <div class="draw-stage" style="margin-top: 24px;">
+      <div class="draw-rune setup-rune p1" id="setupP1" data-pick="1"></div>
+      <div class="draw-vs">·</div>
+      <div class="draw-rune setup-rune p2" id="setupP2" data-pick="2"></div>
+    </div>
+    <div class="setup-labels">
+      <span class="azure" data-i18n="player.1">Azure Spirit</span>
+      <span class="sep">/</span>
+      <span class="amber" data-i18n="player.2">Amber Spirit</span>
+    </div>
+    <p id="setupResult" class="setup-result"></p>
+  </div>
+
+  <div id="curtainDraw" style="display:none; text-align:center;">
+    <p data-i18n="curtain.draw.label" style="color:var(--ink-dim); font-size:14px; letter-spacing:0.2em; text-transform:uppercase;">FIRST PLAYER DRAW</p>
+    <h2 id="drawTitle" style="margin-top:12px;">Which rune will light up first?</h2>
+    <div class="draw-stage">
+      <div class="draw-rune p1" id="drawP1"></div>
+      <div class="draw-vs">vs</div>
+      <div class="draw-rune p2" id="drawP2"></div>
+    </div>
+    <p id="drawResult" style="min-height:24px; color: var(--gold); font-family:'Cormorant Garamond', serif; font-style: italic; font-size: 20px;"></p>
+  </div>
+
+  <div id="curtainReveal" style="display:none; text-align:center;">
+    <p class="reveal-label" data-i18n="curtain.reveal.label">SIMULTANEOUS INTENT</p>
+    <h2 class="reveal-title" data-i18n="curtain.reveal.title">The Spirits Have Chosen</h2>
+    <div class="reveal-stage">
+      <div class="reveal-side">
+        <div class="reveal-spirit p1"></div>
+        <div class="reveal-name azure" data-i18n="player.1">Azure Spirit</div>
+        <div class="reveal-actions" id="revealP1Actions"></div>
+      </div>
+      <div class="reveal-vs">VS</div>
+      <div class="reveal-side">
+        <div class="reveal-spirit p2"></div>
+        <div class="reveal-name amber" data-i18n="player.2">Amber Spirit</div>
+        <div class="reveal-actions" id="revealP2Actions"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="curtainRound" style="display:none; text-align:center;">
+    <div class="round-badge" id="roundBadge">ROUND 1</div>
+    <h2 id="roundWinnerTitle" style="margin-top:4px;">Azure Spirit Wins</h2>
+    <div class="match-score-big">
+      <span class="num p1" id="roundScoreP1">0</span>
+      <span class="dash">—</span>
+      <span class="num p2" id="roundScoreP2">0</span>
+    </div>
+    <p id="roundNextInfo" style="color: var(--ink-dim); font-size: 13px; letter-spacing: 0.2em;">Next round first: ―</p>
+  </div>
+
+  <button class="ctrl-btn primary" id="curtainBtn" data-i18n="btn.ready">Ready</button>
+ </div>
+</div>
+
+<!-- 최종 종료 모달 -->
+<div class="endmodal" id="endmodal">
+ <div class="endmodal-inner">
+  <p class="flourish" data-i18n="end.matchOver">―   M A T C H   O V E R   ―</p>
+  <h2 id="winnerText" data-i18n="end.winner">Winner</h2>
+  <div class="winner-name" id="winnerName"></div>
+  <div class="match-score-big" style="margin-top: 18px;">
+    <span class="num p1" id="finalScoreP1">0</span>
+    <span class="dash">—</span>
+    <span class="num p2" id="finalScoreP2">0</span>
+  </div>
+  <button class="ctrl-btn primary" id="restartBtn" data-i18n="btn.newMatch" style="margin-top: 12px;">New Match</button>
+ </div>
+</div>
+
+<!-- 규칙 모달 -->
+<div class="help-modal" id="helpModal">
+  <div class="help-content">
+    <button class="help-close" id="helpClose" aria-label="close">✕</button>
+    <h2>Spirit Duel</h2>
+
+    <!-- ENGLISH -->
+    <div class="help-locale" data-locale="en">
+      <div class="help-sub">SPIRIT DUEL · RULES</div>
+
+      <h3>Match</h3>
+      <p><strong>Best of 2</strong>, max 5 rounds. HP <strong>4</strong> · <span class="kw-dmg">damage</span> <strong>1</strong>. First player drawn random, alternates each round. <span class="gold-c">Round 3 = Decisive</span> (1:1) — 3 actions/turn instead of 2.</p>
+
+      <h3>Turn</h3>
+      <p>First inputs → second inputs → simultaneous resolution. Pick <strong>2 actions</strong> in order. Each phase: <span class="hl">move first → combat at post-move position</span>.</p>
+
+      <h3>Actions</h3>
+      <ul>
+        <li><span class="kw-advance">Advance</span> / <span class="kw-retreat">Retreat</span> — 1 cell toward / away from opponent</li>
+        <li><span class="kw-attack">Attack</span> — adjacent, 1 <span class="kw-dmg">dmg</span></li>
+        <li><span class="kw-block">Block</span> — <span class="kw-null">nullify</span> <span class="kw-attack">attack</span>/<span class="kw-wave">wave</span>. Success: <span class="kw-star">★ +1</span>. Wasted: opponent gets <span class="kw-star">★</span></li>
+        <li><span class="kw-counter">Counter</span> — reflect <span class="kw-attack">attack</span> for 1 <span class="kw-dmg">dmg</span>. Whiffs if no <span class="kw-attack">attack</span> incoming</li>
+        <li><span class="kw-pierce">Pierce</span> — <span class="gold-c">spends 2 <span class="kw-star">★</span></span>, adjacent 1 <span class="kw-dmg">dmg</span>, <span class="hl">unblockable</span> but counterable</li>
+        <li><span class="kw-wave">Wave</span> — <span class="hl">exactly 2 cells</span>, 1 <span class="kw-dmg">dmg</span>. Blockable + counterable</li>
+        <li><span class="kw-leap">Leap</span> — <span class="hl">adjacent only</span>. Jump over opponent, lands <strong>2 cells past</strong> (or 1 if board edge). <span class="gold-c">Uses 2 slots</span></li>
+      </ul>
+
+      <h3>Combat Matrix</h3>
+      <ul>
+        <li><strong><span class="kw-attack">Attack</span> vs <span class="kw-attack">Attack</span></strong> — both take 1 <span class="kw-dmg">dmg</span></li>
+        <li><strong><span class="kw-attack">Attack</span> vs <span class="kw-block">Block</span></strong> — <span class="kw-block">block</span> wins (<span class="kw-star">★ +1</span> to blocker)</li>
+        <li><strong><span class="kw-attack">Attack</span> vs <span class="kw-counter">Counter</span></strong> — <span class="kw-counter">counter</span> wins, attacker takes 1 <span class="kw-dmg">dmg</span></li>
+        <li><strong><span class="kw-pierce">Pierce</span> vs <span class="kw-block">Block</span></strong> — <span class="kw-pierce">pierce</span> wins, blocker takes 1 <span class="kw-dmg">dmg</span> (no <span class="kw-star">★</span>)</li>
+        <li><strong><span class="kw-pierce">Pierce</span> vs <span class="kw-counter">Counter</span></strong> — <span class="kw-counter">counter</span> wins (<span class="kw-star">★ 2</span> still consumed)</li>
+        <li><strong><span class="kw-wave">Wave</span> vs <span class="kw-block">Block</span> / <span class="kw-counter">Counter</span></strong> — same as <span class="kw-attack">attack</span> matchup</li>
+        <li><strong><span class="kw-block">Block</span> vs <span class="kw-counter">Counter</span></strong> — <span class="kw-counter">counter</span> whiffs, counter user gets -1 action next turn</li>
+        <li>Out of range = miss (atk/<span class="kw-pierce">pierce</span>=1, <span class="kw-wave">wave</span>=2)</li>
+      </ul>
+
+      <h3><span class="kw-star">★ Stars</span> (cap 2)</h3>
+      <ul>
+        <li><span class="kw-block">Block</span> stops an <span class="kw-attack">attack</span> → +1 <span class="kw-star">★</span> to blocker</li>
+        <li><span class="kw-block">Block</span> whiffs (no <span class="kw-attack">attack</span> came) → +1 <span class="kw-star">★</span> to opponent</li>
+        <li><span class="kw-pierce">Pierced</span> block → no <span class="kw-star">★</span> change (just <span class="kw-dmg">damage</span>)</li>
+        <li><strong>Opponent's <span class="kw-star">★</span> shown as ?</strong> — track by memory</li>
+      </ul>
+
+      <h3>Movement</h3>
+      <p>Move resolves before combat. <strong><span class="kw-retreat">Retreat</span> dodges, <span class="kw-advance">advance</span> chases</strong>. Same-cell or swap = <strong>collision</strong>, neither moves. Wall = invalid (action still consumed).</p>
+
+      <h3><span class="kw-stardust">Stardust</span> Zone</h3>
+      <p>Cells <strong>1 / 9</strong> permanent. Stay 3 turns → <strong>HP -1/turn</strong> (turn 1 warn, turn 2 stronger warn, turn 3+ <span class="kw-dmg">damage</span>). Leaving resets.</p>
+      <p><strong>Expansion</strong>: turn 4 → cells 2·8, turn 7 → cells 3·7. Cells <strong>4·5·6 always safe</strong>. New cells follow same warn timing.</p>
+
+      <h3>Shortcuts</h3>
+      <p><kbd>1</kbd>~<kbd>8</kbd> actions · <kbd>⏎</kbd>/<kbd>Space</kbd> confirm · <kbd>⌫</kbd>/<kbd>Esc</kbd> undo · <kbd>M</kbd> mute · <kbd>?</kbd> rules</p>
+    </div>
+
+    <!-- 한국어 -->
+    <div class="help-locale" data-locale="ko">
+      <div class="help-sub">정 령 결 투 · 규 칙</div>
+
+      <h3>매치</h3>
+      <p><strong>2선승제</strong>, 최대 5라운드. HP <strong>4</strong> · <span class="kw-dmg">데미지</span> <strong>1</strong>. 첫 선공 랜덤, 이후 라운드마다 교대. <span class="gold-c">라운드 3 = 결정전</span> (1:1) — 액션 3개/턴.</p>
+
+      <h3>턴 흐름</h3>
+      <p>선공 입력 → 후공 입력 → 동시 처리. 한 턴에 <strong>액션 2개</strong> 순서대로. 각 페이즈: <span class="hl">이동 먼저 → 이동 후 위치로 전투 판정</span>.</p>
+
+      <h3>액션</h3>
+      <ul>
+        <li><span class="kw-advance">전진</span> / <span class="kw-retreat">후퇴</span> — 상대 쪽 / 내 쪽 1칸</li>
+        <li><span class="kw-attack">공격</span> — 인접 1 <span class="kw-dmg">데미지</span></li>
+        <li><span class="kw-block">막기</span> — <span class="kw-attack">공격</span>/<span class="kw-wave">영파</span> <span class="kw-null">무효화</span>. 성공 시 <span class="kw-star">★ +1</span>, 헛 막기 시 상대에게 <span class="kw-star">★</span></li>
+        <li><span class="kw-counter">카운터</span> — <span class="kw-attack">공격</span>을 받아쳐 1 <span class="kw-dmg">데미지</span>. 상대가 <span class="kw-attack">공격</span> 안 하면 헛손질</li>
+        <li><span class="kw-pierce">관통</span> — <span class="gold-c"><span class="kw-star">★ 2개</span> 소모</span>, 인접 1 <span class="kw-dmg">데미지</span>, <span class="hl">막기 불가</span> · <span class="kw-counter">카운터</span> 가능</li>
+        <li><span class="kw-wave">영파</span> — <span class="hl">정확히 2칸</span>, 1 <span class="kw-dmg">데미지</span>. <span class="kw-block">막기</span>/<span class="kw-counter">카운터</span> 가능</li>
+        <li><span class="kw-leap">뛰어넘기</span> — <span class="hl">인접 시만</span>. 상대 너머 <strong>2칸 뒤 착지</strong> (가장자리면 1칸 뒤). <span class="gold-c">슬롯 2개 소모</span></li>
+      </ul>
+
+      <h3>전투 매트릭스</h3>
+      <ul>
+        <li><strong><span class="kw-attack">공격</span> vs <span class="kw-attack">공격</span></strong> — 둘 다 1 <span class="kw-dmg">데미지</span></li>
+        <li><strong><span class="kw-attack">공격</span> vs <span class="kw-block">막기</span></strong> — <span class="kw-block">막기</span> 승 (<span class="kw-star">★ +1</span>)</li>
+        <li><strong><span class="kw-attack">공격</span> vs <span class="kw-counter">카운터</span></strong> — <span class="kw-counter">카운터</span> 승, <span class="kw-attack">공격</span>자 1 <span class="kw-dmg">데미지</span></li>
+        <li><strong><span class="kw-pierce">관통</span> vs <span class="kw-block">막기</span></strong> — <span class="kw-pierce">관통</span> 승, 막는 쪽 1 <span class="kw-dmg">데미지</span> (<span class="kw-star">★</span> 변동 없음)</li>
+        <li><strong><span class="kw-pierce">관통</span> vs <span class="kw-counter">카운터</span></strong> — <span class="kw-counter">카운터</span> 승 (<span class="kw-star">★ 2개</span>는 그대로 소모)</li>
+        <li><strong><span class="kw-wave">영파</span> vs <span class="kw-block">막기</span>/<span class="kw-counter">카운터</span></strong> — <span class="kw-attack">공격</span>과 동일</li>
+        <li><strong><span class="kw-block">막기</span> vs <span class="kw-counter">카운터</span></strong> — <span class="kw-counter">카운터</span> 헛손질, 다음 턴 액션 -1</li>
+        <li>사거리 밖 = 빗나감 (<span class="kw-attack">공격</span>/<span class="kw-pierce">관통</span>=1칸, <span class="kw-wave">영파</span>=2칸)</li>
+      </ul>
+
+      <h3><span class="kw-star">★ 별</span> (제한 2개)</h3>
+      <ul>
+        <li><span class="kw-block">막기</span>가 <span class="kw-attack">공격</span> 막아냄 → 막은 쪽 <span class="kw-star">★ +1</span></li>
+        <li><span class="kw-block">막기</span> 헛침 (상대 <span class="kw-attack">공격</span> 안 함) → 상대 <span class="kw-star">★ +1</span></li>
+        <li><span class="kw-pierce">관통</span>에 뚫림 → <span class="kw-star">★</span> 변동 없음 (<span class="kw-dmg">데미지</span>만)</li>
+        <li><strong>상대 <span class="kw-star">★</span>는 ?로 가려짐</strong> — 기억으로 추론</li>
+      </ul>
+
+      <h3>이동</h3>
+      <p>이동이 전투보다 먼저. <strong><span class="kw-retreat">후퇴</span>로 회피, <span class="kw-advance">전진</span>으로 추격</strong>. 같은 칸 / 자리 바꿈 = <strong>충돌</strong>, 둘 다 못 움직임. 벽 너머는 <span class="kw-null">무효</span> (액션은 소모).</p>
+
+      <h3><span class="kw-stardust">별빛</span> 영역</h3>
+      <p><strong>1·9번 칸</strong> 영구 <span class="kw-stardust">별빛</span>. 3턴 머무르면 <strong>매 턴 HP -1</strong> (1턴 약 경고, 2턴 강 경고, 3턴+ 잠식). 벗어나면 리셋.</p>
+      <p><strong>확장</strong>: 턴 4 → 2·8번, 턴 7 → 3·7번. <strong>4·5·6번 영구 안전</strong>. 새 칸도 동일 경고 타이밍.</p>
+
+      <h3>단축키</h3>
+      <p><kbd>1</kbd>~<kbd>8</kbd> 액션 · <kbd>⏎</kbd>/<kbd>Space</kbd> 입력 완료 · <kbd>⌫</kbd>/<kbd>Esc</kbd> 되돌리기 · <kbd>M</kbd> 음소거 · <kbd>?</kbd> 규칙</p>
+    </div>
+  </div>
+</div>
+
+<script src="i18n.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

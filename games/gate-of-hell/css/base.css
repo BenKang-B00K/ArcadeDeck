@@ -1,0 +1,287 @@
+/* === base_layout.css === */
+/* base_layout.css - Root Layout and Global Resets */
+
+/* ──────────────────────────────────────────────────────────────────
+   Design tokens. Reference these instead of hard-coded literals when
+   adding new UI. Existing literals migrate opportunistically.
+   ────────────────────────────────────────────────────────────────── */
+:root {
+    /* Z-index scale (lowest → highest). */
+    --z-bg:              1;
+    --z-canvas:         10;
+    --z-fx-low:         20;
+    --z-effect-layer:  100;
+    --z-shadow-layer:  140;
+    --z-overlay-fx:    150;   /* frozen/blizzard overlays above canvas */
+    --z-hud-base:      160;   /* HUD tooltips & control panel */
+    --z-timer:        1000;
+    --z-toast:        1800;   /* encounter/boss-warning toasts */
+    --z-modal:        2000;   /* start screen, equip, relics, collections */
+    --z-modal-top:    2500;   /* nested confirms over a modal */
+    --z-loading:      3000;
+    --z-critical:     9999;   /* uppermost — game-over, fatal alerts */
+
+    /* Theme palette — Holy (gold/cyan/green) + Evil (red/purple). */
+    --color-holy-gold:    #ffd700;
+    --color-holy-amber:   #ff4500;
+    --color-cyan-rune:    #00e5ff;
+    --color-good-green:   #00ff88;
+    --color-evil-purple:  #9400d3;
+    --color-evil-violet:  #bf5af2;
+    --color-warning-red:  #ff1744;
+    --color-tier-orange:  #ff9f0a;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+canvas {
+    display: block;
+    max-width: 100%;
+}
+
+body {
+    margin: 5px;
+    background-color: #111;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+}
+
+/* Mobile: hide browser status/notification bar (standalone PWA mode) */
+@media screen and (max-width: 768px) {
+    body {
+        margin: 0;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+        padding-left: env(safe-area-inset-left, 0px);
+        /* Edge panel guard: keeps content away from Edge sidebar */
+        padding-right: env(safe-area-inset-right, 0px);
+    }
+
+    /* Hide Edge browser side panel button overlay if present */
+    #msedge-sidebar-button,
+    .ms-edge-sidebar,
+    [data-edge-sidebar] {
+        display: none !important;
+    }
+}
+
+/* === base_animations.css === */
+/* base_animations.css - Global Keyframe Animations Shared Across Modules */
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes hintPulse {
+    from { opacity: 0.4; }
+    to { opacity: 1; }
+}
+
+@keyframes notifPulse {
+    from { transform: scale(1); box-shadow: 0 0 5px #ff0000; }
+    to { transform: scale(1.2); box-shadow: 0 0 15px #ff4500; }
+}
+
+/* === base_utils.css === */
+/* base_utils.css - Shared UI Utilities and Interaction Rules */
+
+/* Global Drag Prevention */
+img, .enemy, .tower-card, .relic-slot, .equip-slot {
+    -webkit-user-drag: none;
+    user-select: none;
+}
+
+/* Shared UI Components */
+.item-new-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff0000;
+    color: #fff;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 8px #ff0000;
+    z-index: 20;
+    pointer-events: none;
+    animation: notifPulse 1s infinite alternate;
+}
+
+/* === game.css === */
+#game-container {
+    position: relative;
+    /* Fill viewport while preserving 9:16 portrait. Width = smaller of viewport
+       width or the width implied by viewport height. Prevents hardcap on
+       desktop (was max-width: 540px = ~25% of 2160px viewport). */
+    width: min(100vw, calc(100vh * 9 / 16));
+    height: auto;
+    aspect-ratio: 9 / 16;
+    max-height: 100vh;
+    background: #000;
+    margin: auto;
+    overflow: hidden;
+    box-shadow: 0 0 50px rgba(0,0,0,0.8);
+    border: 2px solid #2a2010;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+#top-panel {
+    position: relative;
+    width: 100%;
+    flex: 75; /* 75% height */
+    background: #050505;
+    overflow: hidden;
+    border-bottom: 2px solid #3e2723;
+    flex-shrink: 0;
+}
+
+#bottom-panel {
+    position: relative;
+    width: 100%;
+    flex: 25; /* 25% height */
+    background: #0a0a0a;
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+    border-top: 2px solid #2a2010;
+    flex-shrink: 0;
+    min-height: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+#game-container::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100px;
+    background: linear-gradient(to bottom, rgba(255, 215, 0, 0.05) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 140;
+    opacity: 0.6;
+}
+
+/* ─── Stage banner (top-center) ────────────────────────────────────────── */
+.stage-banner {
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    padding: 2px 10px 3px;
+    background: linear-gradient(180deg, rgba(15,8,4,0.78) 0%, rgba(5,3,2,0.65) 100%);
+    border: 1px solid rgba(255,215,0,0.38);
+    border-radius: 0 0 6px 6px;
+    border-top: none;
+    box-shadow:
+        inset 0 1px 0 rgba(255,215,0,0.15),
+        inset 0 -4px 10px rgba(0,0,0,0.55),
+        0 2px 8px rgba(0,0,0,0.55);
+    z-index: 200;
+    pointer-events: none;
+    user-select: none;
+    min-width: 110px;
+    text-align: center;
+}
+.stage-banner .sb-title {
+    font-family: 'Cinzel', 'Noto Serif KR', serif;
+    font-size: clamp(10px, 1.5vw, 13px);
+    font-weight: 900;
+    color: #f5e7c4;
+    letter-spacing: 1px;
+    text-shadow:
+        0 0 6px rgba(255,180,80,0.5),
+        0 1px 2px rgba(0,0,0,0.95);
+    line-height: 1.1;
+    white-space: nowrap;
+}
+.stage-banner .sb-depth {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-top: 0;
+}
+.stage-banner .sb-depth-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(6px, 0.9vw, 8px);
+    font-weight: 900;
+    letter-spacing: 1.8px;
+    color: #ffd700;
+    opacity: 0.85;
+    text-shadow: 0 0 4px rgba(255,215,0,0.45);
+}
+.stage-banner .sb-depth-num {
+    font-family: 'Cinzel', 'JetBrains Mono', monospace;
+    font-size: clamp(9px, 1.35vw, 12px);
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 6px rgba(255,80,0,0.5), 0 1px 2px rgba(0,0,0,0.95);
+    font-variant-numeric: tabular-nums;
+}
+
+#start-timer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Cinzel', serif;
+    font-size: clamp(24px, 7.4vw, 40px);
+    font-weight: 900;
+    color: #ff0000;
+    text-shadow: 0 0 10px #fff, 0 0 20px #ff0000;
+    z-index: 1000;
+    display: none;
+    pointer-events: none;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    animation: timerPulse 1s infinite alternate;
+    width: 100%;
+    text-align: center;
+}
+
+@keyframes timerPulse {
+    from { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+    to { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+}
+
+#game-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: auto; /* Enable input handling on Canvas */
+    z-index: 4;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+

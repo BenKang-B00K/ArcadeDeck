@@ -1,0 +1,4371 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Tank Battle 1v1</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  .svg-icon svg { width: 100%; height: 100%; display: block; }
+  body {
+    background: #1a1a2e url('bg.png') center / cover no-repeat fixed;
+    color: #eee;
+    font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+  }
+  /* Dim overlay keeps HUD/canvas readable even if bg.png is bright */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(26,26,46,0.45), rgba(26,26,46,0.85));
+    pointer-events: none;
+    z-index: -1;
+  }
+  h1 {
+    font-size: 30px;
+    margin-bottom: 14px;
+    letter-spacing: 3px;
+    color: #f5d742;
+    text-shadow:
+      0 0 10px rgba(245, 215, 66, 0.4),
+      0 2px 4px rgba(0, 0, 0, 0.6);
+    font-weight: 700;
+  }
+  .hud {
+    display: flex;
+    justify-content: space-between;
+    width: 1120px;
+    max-width: 100%;
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+  .player-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 16px;
+    background: linear-gradient(135deg, #2a2a48, #1e1e35);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    min-width: 290px;
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    position: relative;
+  }
+  .player-info.p1 {
+    border-color: #4ade80;
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.4),
+      0 0 14px rgba(74, 222, 128, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+  .player-info.p2 {
+    border-color: #60a5fa;
+    flex-direction: row-reverse;
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.4),
+      0 0 14px rgba(96, 165, 250, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+  .label { font-weight: bold; letter-spacing: 0.5px; }
+  .p1 .label { color: #4ade80; text-shadow: 0 0 6px rgba(74, 222, 128, 0.5); }
+  .p2 .label { color: #60a5fa; text-shadow: 0 0 6px rgba(96, 165, 250, 0.5); }
+  .hp-bar {
+    position: relative;
+    width: 100px; height: 16px;
+    background: linear-gradient(180deg, #2a2a2a, #444);
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow:
+      inset 0 1px 2px rgba(0, 0, 0, 0.6),
+      0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+  .hp-fill {
+    height: 100%;
+    transition: width 0.2s;
+    box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.25);
+  }
+  .hp-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 3px rgba(0,0,0,0.9), 0 0 3px rgba(0,0,0,0.9), 0 1px 0 rgba(0,0,0,0.8);
+    letter-spacing: 0.5px;
+    pointer-events: none;
+  }
+  .p1 .hp-fill { background: linear-gradient(180deg, #6ee79c, #3aae64); }
+  .p2 .hp-fill { background: linear-gradient(180deg, #82baff, #3d7fd0); }
+  .score {
+    font-size: 20px;
+    font-weight: bold;
+    min-width: 22px;
+    text-align: center;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    font-variant-numeric: tabular-nums;
+  }
+  .powerup-slot {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 12px; min-width: 70px; height: 20px;
+    padding: 2px 6px; border-radius: 4px;
+    background: rgba(255,255,255,0.05);
+    opacity: 0; transition: opacity 0.2s;
+  }
+  .powerup-slot.active { opacity: 1; }
+  .powerup-slot .icon { font-size: 14px; }
+  .powerup-slot .timer { flex: 1; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; overflow: hidden; }
+  .powerup-slot .timer-fill { height: 100%; width: 100%; transition: width 0.1s linear; }
+  .weapon-slot {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    min-width: 50px;
+    height: 20px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.05);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .weapon-slot.active { opacity: 1; }
+  .weapon-slot .icon { font-size: 14px; }
+  .weapon-slot .ammo {
+    color: #fff;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+  }
+  canvas {
+    background: #3a3528;
+    border-radius: 10px;
+    display: block;
+    box-shadow:
+      0 12px 40px rgba(0, 0, 0, 0.65),
+      0 0 0 1px rgba(245, 215, 66, 0.18),
+      0 0 30px rgba(245, 215, 66, 0.08);
+  }
+  .controls { margin-top: 16px; display: flex; gap: 30px; font-size: 13px; color: #aaa; }
+  .controls span b { color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.6); }
+  .legend { display: flex; gap: 16px; margin-top: 10px; font-size: 12px; color: #888; }
+  .legend span { display: flex; align-items: center; gap: 4px; }
+  .overlay {
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0.6), rgba(0,0,0,0.85));
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    display: flex; align-items: center; justify-content: center; flex-direction: column;
+    z-index: 10;
+  }
+  .overlay.hidden { display: none; }
+  .overlay h2 {
+    font-size: 52px;
+    margin-bottom: 20px;
+    color: #f5d742;
+    letter-spacing: 2px;
+    text-shadow:
+      0 0 20px rgba(245, 215, 66, 0.5),
+      0 4px 8px rgba(0, 0, 0, 0.7);
+    font-weight: 700;
+  }
+  .overlay p {
+    font-size: 18px;
+    margin-bottom: 24px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
+  }
+  .overlay button {
+    padding: 12px 32px;
+    font-size: 16px;
+    font-weight: bold;
+    background: linear-gradient(180deg, #ffe267, #d4b528);
+    color: #1a1a2e;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
+    letter-spacing: 0.5px;
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.4),
+      0 0 16px rgba(245, 215, 66, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.15);
+  }
+  .overlay button:hover {
+    transform: translateY(-2px) scale(1.04);
+    filter: brightness(1.08);
+    box-shadow:
+      0 6px 18px rgba(0, 0, 0, 0.5),
+      0 0 24px rgba(245, 215, 66, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.15);
+  }
+  .overlay button:active { transform: translateY(0) scale(1.0); filter: brightness(0.95); }
+  .overlay-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+  .overlay button.secondary {
+    background: linear-gradient(180deg, #4a4a6a, #2a2a4a);
+    color: #eee;
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+  }
+  .overlay button.secondary:hover {
+    box-shadow:
+      0 6px 18px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15),
+      inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+  }
+  .overlay button.hidden { display: none; }
+  /* --- Stats modal --- */
+  .stats-modal {
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse at center, rgba(0,0,0,0.7), rgba(0,0,0,0.92));
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 15;
+    padding: 20px;
+  }
+  .stats-modal.hidden { display: none; }
+  .stats-content {
+    background: linear-gradient(160deg, #252542, #15152a);
+    border: 1px solid rgba(245, 215, 66, 0.2);
+    border-radius: 14px;
+    padding: 28px 32px;
+    max-width: 700px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    color: #eee;
+    box-shadow:
+      0 20px 60px rgba(0, 0, 0, 0.7),
+      0 0 40px rgba(245, 215, 66, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+  .stats-content h2 {
+    font-size: 30px;
+    color: #f5d742;
+    margin-bottom: 20px;
+    text-align: center;
+    letter-spacing: 2px;
+    text-shadow: 0 0 14px rgba(245, 215, 66, 0.4), 0 2px 4px rgba(0,0,0,0.6);
+  }
+  .stats-content h3 {
+    font-size: 16px;
+    color: #aaa;
+    margin-top: 24px;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 4px 16px;
+    align-items: center;
+    font-size: 14px;
+  }
+  .stats-grid .stat-row {
+    display: contents;
+  }
+  .stats-grid .stat-label {
+    grid-column: 2;
+    color: #888;
+    font-size: 12px;
+    text-align: center;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+  }
+  .stats-grid .stat-p1 {
+    grid-column: 1;
+    text-align: right;
+    color: #4ade80;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+  }
+  .stats-grid .stat-p2 {
+    grid-column: 3;
+    text-align: left;
+    color: #60a5fa;
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+  }
+  .stats-grid .stat-row.header {
+    font-size: 18px;
+    font-weight: bold;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 10px;
+    margin-bottom: 6px;
+  }
+  .stats-grid .stat-row.header .stat-p1,
+  .stats-grid .stat-row.header .stat-p2 { font-size: 18px; }
+  /* bar showing relative value between p1 and p2 */
+  .stat-bar-wrap {
+    grid-column: 1 / -1;
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+    margin: 2px 0 6px;
+  }
+  .stat-bar-p1 {
+    position: absolute; left: 0; top: 0; height: 100%;
+    background: #4ade80;
+    transition: width 0.3s;
+  }
+  .stat-bar-p2 {
+    position: absolute; right: 0; top: 0; height: 100%;
+    background: #60a5fa;
+    transition: width 0.3s;
+  }
+  .stats-content .stat-leader .stat-p1,
+  .stats-content .stat-leader .stat-p2 {
+    text-shadow: 0 0 8px currentColor;
+  }
+  .stats-maps {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  .stats-map-cell {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+  }
+  .stats-map-cell .map-icon { font-size: 18px; }
+  .stats-map-cell .map-name {
+    flex: 1;
+    color: #ddd;
+    font-weight: bold;
+  }
+  .stats-map-cell .map-score {
+    font-variant-numeric: tabular-nums;
+    font-size: 11px;
+    color: #bbb;
+  }
+  .stats-map-cell .map-score .g { color: #4ade80; }
+  .stats-map-cell .map-score .b { color: #60a5fa; }
+  .stats-map-cell .map-score .d { color: #888; }
+  #statsCloseBtn {
+    display: block;
+    margin: 0 auto;
+    padding: 12px 32px;
+    font-size: 16px;
+    font-weight: bold;
+    background: #f5d742;
+    color: #1a1a2e;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  #statsCloseBtn:hover { transform: scale(1.05); }
+  .roulette-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .roulette-label {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .roulette-viewport {
+    position: relative;
+    width: 360px;
+    height: 90px;
+    background: #252540;
+    border: 2px solid #3a3a5a;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .roulette-viewport::before,
+  .roulette-viewport::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 60px;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .roulette-viewport::before {
+    left: 0;
+    background: linear-gradient(to right, #252540, transparent);
+  }
+  .roulette-viewport::after {
+    right: 0;
+    background: linear-gradient(to left, #252540, transparent);
+  }
+  .roulette-marker {
+    position: absolute;
+    top: -4px; bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    background: #f5d742;
+    z-index: 3;
+    box-shadow: 0 0 8px #f5d742;
+  }
+  .roulette-marker::before,
+  .roulette-marker::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+  }
+  .roulette-marker::before {
+    top: -2px;
+    border-top: 8px solid #f5d742;
+  }
+  .roulette-marker::after {
+    bottom: -2px;
+    border-bottom: 8px solid #f5d742;
+  }
+  .roulette-track {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    will-change: transform;
+  }
+  .roulette-item {
+    flex-shrink: 0;
+    width: 90px;
+    height: 80px;
+    margin: 0 3px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .roulette-item .icon { font-size: 32px; line-height: 1; margin-bottom: 4px; }
+  .roulette-item .name {
+    font-size: 11px;
+    color: #fff;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+  }
+  .roulette-result {
+    font-size: 22px;
+    font-weight: bold;
+    color: #f5d742;
+    margin-top: 12px;
+    min-height: 30px;
+    letter-spacing: 1px;
+    transition: opacity 0.2s;
+  }
+  .roulette-result.pending { opacity: 0.3; color: #888; }
+  .key-hint {
+    margin-top: 16px !important;
+    margin-bottom: 0 !important;
+    font-size: 13px !important;
+    color: #888 !important;
+  }
+  .key-hint kbd {
+    display: inline-block;
+    padding: 2px 7px;
+    background: #333;
+    border: 1px solid #555;
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+    color: #ddd;
+    margin: 0 2px;
+  }
+  .lang-toggle {
+    position: fixed;
+    top: 16px; right: 16px;
+    display: flex;
+    background: #252540;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+    z-index: 20;
+  }
+  .lang-toggle button {
+    background: transparent;
+    color: #aaa;
+    border: none;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .lang-toggle button:hover { color: #fff; }
+  .lang-toggle button.active {
+    background: #f5d742;
+    color: #1a1a2e;
+  }
+  .bot-toggle, .aim-toggle {
+    position: fixed;
+    top: 16px;
+    background: #252540;
+    color: #aaa;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+    z-index: 20;
+  }
+  .bot-toggle { right: 200px; }
+  .aim-toggle { right: 296px; }
+  .bot-toggle:hover, .aim-toggle:hover { color: #fff; }
+  .bot-toggle.active {
+    background: #60a5fa;
+    color: #1a1a2e;
+    box-shadow: 0 0 12px rgba(96, 165, 250, 0.4);
+  }
+  .aim-toggle.active {
+    background: #f5d742;
+    color: #1a1a2e;
+    box-shadow: 0 0 12px rgba(245, 215, 66, 0.4);
+  }
+  .audio-toggle {
+    position: fixed;
+    top: 16px; right: 140px;
+    background: #252540;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    color: #aaa;
+    padding: 6px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    z-index: 20;
+    font-family: inherit;
+    transition: all 0.15s;
+    min-width: 38px;
+  }
+  .audio-toggle:hover { color: #fff; }
+  .audio-toggle.muted { color: #666; }
+  .audio-panel {
+    position: fixed;
+    top: 54px; right: 140px;
+    width: 220px;
+    background: #252540;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 14px 16px;
+    z-index: 19;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+  .audio-panel.open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .audio-panel .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-size: 12px;
+  }
+  .audio-panel .slider-row:last-child { margin-bottom: 0; }
+  .audio-panel .slider-row label {
+    color: #bbb;
+    min-width: 50px;
+    font-weight: bold;
+  }
+  .audio-panel .slider-row input[type=range] {
+    flex: 1;
+    accent-color: #f5d742;
+    cursor: pointer;
+  }
+  .audio-panel .slider-row .value {
+    color: #fff;
+    min-width: 32px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-size: 11px;
+  }
+  .match-info {
+    align-self: center;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .match-info #firstTo { color: #888; font-size: 13px; }
+  .match-info #mapName {
+    color: #f5d742;
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+  }
+  .round-timer {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ddd;
+    font-variant-numeric: tabular-nums;
+    margin-top: 3px;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+  }
+  .round-timer.low {
+    color: #ef4444;
+    animation: timerPulse 0.8s infinite;
+  }
+  @keyframes timerPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+</style>
+</head>
+<body>
+
+<div class="lang-toggle">
+  <button data-lang="ko">한</button>
+  <button data-lang="en" class="active">EN</button>
+</div>
+
+<button class="bot-toggle" id="botToggle" title="Toggle AI opponent (P2)">AI: OFF</button>
+<button class="aim-toggle" id="aimToggle" title="Toggle auto-aim turret">AIM: AUTO</button>
+
+<button class="audio-toggle" id="audioToggle" title="Sound"></button>
+
+<div class="audio-panel" id="audioPanel">
+  <div class="slider-row">
+    <label id="lblMaster">Master</label>
+    <input type="range" id="volMaster" min="0" max="100" value="70">
+    <span class="value" id="volMasterVal">70</span>
+  </div>
+  <div class="slider-row">
+    <label id="lblBgm">BGM</label>
+    <input type="range" id="volBgm" min="0" max="100" value="70">
+    <span class="value" id="volBgmVal">70</span>
+  </div>
+  <div class="slider-row">
+    <label id="lblSfx">SFX</label>
+    <input type="range" id="volSfx" min="0" max="100" value="80">
+    <span class="value" id="volSfxVal">80</span>
+  </div>
+</div>
+
+<h1 id="gameTitle"></h1>
+
+<div class="hud">
+  <div class="player-info p1">
+    <span class="label">P1</span>
+    <div class="hp-bar">
+      <div class="hp-fill" id="hp1"></div>
+      <div class="hp-text" id="hpText1">5 / 5</div>
+    </div>
+    <div class="powerup-slot" id="pu1">
+      <span class="icon"></span>
+      <div class="timer"><div class="timer-fill"></div></div>
+    </div>
+    <div class="weapon-slot" id="wp1">
+      <span class="icon"></span>
+      <span class="ammo"></span>
+    </div>
+    <span class="score" id="score1">0</span>
+  </div>
+  <div class="match-info">
+    <div id="firstTo">First to 3</div>
+    <div id="mapName">—</div>
+    <div id="roundTimer" class="round-timer">1:00</div>
+  </div>
+  <div class="player-info p2">
+    <span class="label">P2</span>
+    <div class="hp-bar">
+      <div class="hp-fill" id="hp2"></div>
+      <div class="hp-text" id="hpText2">5 / 5</div>
+    </div>
+    <div class="powerup-slot" id="pu2">
+      <span class="icon"></span>
+      <div class="timer"><div class="timer-fill"></div></div>
+    </div>
+    <div class="weapon-slot" id="wp2">
+      <span class="icon"></span>
+      <span class="ammo"></span>
+    </div>
+    <span class="score" id="score2">0</span>
+  </div>
+</div>
+
+<canvas id="game" width="1120" height="700"></canvas>
+
+<div class="controls">
+  <span id="p1Controls"></span>
+  <span id="p2Controls"></span>
+</div>
+
+<div class="legend" id="legend">
+</div>
+
+<div class="overlay hidden" id="overlay">
+  <h2 id="overlayTitle">Round end</h2>
+  <p id="overlaySub"></p>
+
+  <div class="roulette-wrap" id="rouletteWrap">
+    <div class="roulette-label" id="rouletteLabel">Next map</div>
+    <div class="roulette-viewport">
+      <div class="roulette-marker"></div>
+      <div class="roulette-track" id="rouletteTrack"></div>
+    </div>
+    <div class="roulette-result" id="rouletteResult">—</div>
+  </div>
+
+  <div class="overlay-buttons">
+    <button id="nextBtn">Next round</button>
+    <button id="statsBtn" class="secondary hidden">통계 보기</button>
+  </div>
+  <p class="key-hint" id="keyHint"></p>
+</div>
+
+<div class="stats-modal hidden" id="statsModal">
+  <div class="stats-content">
+    <h2 id="statsTitle">Match statistics</h2>
+    <div class="stats-grid" id="statsGrid"></div>
+    <h3 id="statsMapsHeader">Results by map</h3>
+    <div class="stats-maps" id="statsMaps"></div>
+    <button id="statsCloseBtn">Close</button>
+  </div>
+</div>
+
+<script>
+// --- i18n ---
+const I18N = {
+  ko: {
+    title: '탱크 배틀',
+    firstTo: '3선승',
+    p1Controls: '<b>P1 (초록):</b> WASD 이동 · <b>G</b> 발사',
+    p2Controls: '<b>P2 (파랑):</b> ←↑↓→ 이동 · <b>/</b> 발사',
+    legend: [
+      { id: 'rapid',  name: '연사' },
+      { id: 'speed',  name: '스피드' },
+      { id: 'triple', name: '산탄' },
+      { id: 'shield', name: '실드' },
+    ],
+    powerup: {
+      rapid:  '연사!',
+      speed:  '스피드!',
+      triple: '산탄!',
+      shield: '실드!',
+      shotgun: '샷건!',
+      homing:  '유도탄!',
+      laser:   '레이저!',
+      pierce:  '관통탄!',
+    },
+    roundWin:  (p) => `${p} 라운드 획득`,
+    matchWin:  (p) => `${p} 승리!`,
+    drawRound: '무승부',
+    drawSub:   '양측 체력 동일 — 점수 변동 없음',
+    scoreLine: (s) => `스코어: ${s.p1} - ${s.p2}`,
+    finalLine: (s) => `최종 스코어: ${s.p1} - ${s.p2}`,
+    nextRound: '다음 라운드',
+    restart:   '다시 시작',
+    nextMap:   '다음 맵',
+    keyHint:   '<kbd>Space</kbd> 또는 <kbd>Enter</kbd>',
+    skipHint:  '<kbd>Space</kbd> / <kbd>Enter</kbd> 로 스킵',
+    audioMaster: '전체',
+    audioBgm:    '배경음',
+    audioSfx:    '효과음',
+    statsBtn:    '통계 보기',
+    statsTitle:  '매치 통계',
+    statsMaps:   '맵별 결과',
+    statsClose:  '닫기',
+    statShots:    '발사',
+    statHits:     '명중',
+    statAccuracy: '명중률',
+    statDamage:   '피격',
+    statShields:  '실드 방어',
+    statBounces:  '벽 튕김',
+    statDistance: '이동 거리',
+    statPowerups: '파워업',
+    statRounds:   '라운드 승',
+    statDraws:    '무승부',
+  },
+  en: {
+    title: 'TANK BATTLE',
+    firstTo: 'First to 3',
+    p1Controls: '<b>P1 (green):</b> WASD to move · <b>G</b> to fire',
+    p2Controls: '<b>P2 (blue):</b> ←↑↓→ to move · <b>/</b> to fire',
+    legend: [
+      { id: 'rapid',  name: 'Rapid' },
+      { id: 'speed',  name: 'Speed' },
+      { id: 'triple', name: 'Triple' },
+      { id: 'shield', name: 'Shield' },
+    ],
+    powerup: {
+      rapid:  'RAPID!',
+      speed:  'SPEED!',
+      triple: 'TRIPLE!',
+      shield: 'SHIELD!',
+      shotgun: 'SHOTGUN!',
+      homing:  'HOMING!',
+      laser:   'LASER!',
+      pierce:  'PIERCE!',
+    },
+    roundWin:  (p) => `${p} wins round`,
+    matchWin:  (p) => `${p} wins!`,
+    drawRound: 'Draw',
+    drawSub:   'HP tied — no score change',
+    scoreLine: (s) => `Score: ${s.p1} - ${s.p2}`,
+    finalLine: (s) => `Final: ${s.p1} - ${s.p2}`,
+    nextRound: 'Next round',
+    restart:   'Restart',
+    nextMap:   'Next map',
+    keyHint:   '<kbd>Space</kbd> or <kbd>Enter</kbd>',
+    skipHint:  'Skip: <kbd>Space</kbd> / <kbd>Enter</kbd>',
+    audioMaster: 'Master',
+    audioBgm:    'BGM',
+    audioSfx:    'SFX',
+    statsBtn:    'View stats',
+    statsTitle:  'Match statistics',
+    statsMaps:   'Results by map',
+    statsClose:  'Close',
+    statShots:    'Shots',
+    statHits:     'Hits',
+    statAccuracy: 'Accuracy',
+    statDamage:   'Damage taken',
+    statShields:  'Shields blocked',
+    statBounces:  'Wall bounces',
+    statDistance: 'Distance',
+    statPowerups: 'Powerups',
+    statRounds:   'Rounds won',
+    statDraws:    'Draws',
+  },
+};
+
+let currentLang = 'en';
+function L() { return I18N[currentLang]; }
+
+function applyLang() {
+  const lang = L();
+  document.getElementById('gameTitle').innerHTML =
+    `${iconHTML('swords', 24)} <span style="vertical-align:middle">${lang.title}</span> ${iconHTML('swords', 24)}`;
+  document.getElementById('firstTo').textContent = lang.firstTo;
+  document.getElementById('p1Controls').innerHTML = lang.p1Controls;
+  document.getElementById('p2Controls').innerHTML = lang.p2Controls;
+  // legend
+  const legendEl = document.getElementById('legend');
+  legendEl.innerHTML = lang.legend.map(l =>
+    `<span>${iconHTML(l.id, 16)} ${l.name}</span>`
+  ).join('');
+  // update button state
+  document.querySelectorAll('.lang-toggle button').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === currentLang);
+  });
+  // re-render any open overlay text
+  if (!document.getElementById('overlay').classList.contains('hidden')) {
+    refreshOverlayText();
+  }
+  // map name refresh
+  updateMapName();
+  // audio panel labels
+  const lblM = document.getElementById('lblMaster');
+  const lblB = document.getElementById('lblBgm');
+  const lblS = document.getElementById('lblSfx');
+  if (lblM) lblM.textContent = lang.audioMaster;
+  if (lblB) lblB.textContent = lang.audioBgm;
+  if (lblS) lblS.textContent = lang.audioSfx;
+  // stats button (if currently visible)
+  const statsBtn = document.getElementById('statsBtn');
+  if (statsBtn) statsBtn.innerHTML = `${iconHTML('stats', 16)} <span style="vertical-align:middle">${lang.statsBtn}</span>`;
+}
+
+function updateMapName() {
+  const el = document.getElementById('mapName');
+  if (!el) return;  // DOM may not be ready before first applyLang call
+  if (!currentMap) { el.textContent = '—'; return; }
+  const name = currentMap.name[currentLang] || currentMap.name.en;
+  el.innerHTML = `${iconHTML(currentMap.id, 16)} <span style="vertical-align:middle">${name}</span>`;
+}
+
+document.querySelectorAll('.lang-toggle button').forEach(b => {
+  b.addEventListener('click', () => {
+    currentLang = b.dataset.lang;
+    applyLang();
+  });
+});
+
+// Track last overlay state so we can re-render on language switch
+let lastOverlay = null;
+function refreshOverlayText() {
+  if (!lastOverlay) return;
+  const lang = L();
+  const { kind, winnerName } = lastOverlay;
+  let title, sub, btnText;
+  if (kind === 'match') {
+    title   = lang.matchWin(winnerName);
+    sub     = lang.finalLine(scores);
+    btnText = lang.restart;
+  } else if (kind === 'draw') {
+    title   = lang.drawRound;
+    sub     = lang.drawSub;
+    btnText = lang.nextRound;
+    document.getElementById('rouletteLabel').textContent = lang.nextMap;
+    if (rouletteState === 'locked' && decidedNextMap) {
+      document.getElementById('rouletteResult').innerHTML =
+        `${iconHTML(decidedNextMap.id, 18)} <span style="vertical-align:middle">${decidedNextMap.name[currentLang] || decidedNextMap.name.en}</span>`;
+    }
+  } else {
+    title   = lang.roundWin(winnerName);
+    sub     = lang.scoreLine(scores);
+    btnText = lang.nextRound;
+    document.getElementById('rouletteLabel').textContent = lang.nextMap;
+    // Re-render the currently-locked-in map name in the current language
+    if (rouletteState === 'locked' && decidedNextMap) {
+      document.getElementById('rouletteResult').innerHTML =
+        `${iconHTML(decidedNextMap.id, 18)} <span style="vertical-align:middle">${decidedNextMap.name[currentLang] || decidedNextMap.name.en}</span>`;
+    }
+  }
+  const titleEl = document.getElementById('overlayTitle');
+  if (kind === 'match') {
+    titleEl.innerHTML = `${iconHTML('trophy', 40)} <span style="vertical-align:middle">${title}</span>`;
+  } else {
+    titleEl.textContent = title;
+  }
+  document.getElementById('overlaySub').textContent = sub;
+  document.getElementById('nextBtn').textContent = btnText;
+  // Key hint depends on current roulette state
+  if ((kind === 'round' || kind === 'draw') && rouletteState === 'spinning') {
+    document.getElementById('keyHint').innerHTML = lang.skipHint;
+  } else {
+    document.getElementById('keyHint').innerHTML = lang.keyHint;
+  }
+}
+
+// --- Audio system (Web Audio synth — no external files) ---
+// Volume graph: source → [per-sound gain] → sfxGain → masterGain → destination
+//                                          bgmGain ─┘
+// Volumes are stored 0..100 in localStorage and applied as gain 0..1 on each GainNode.
+let audioCtx = null;
+let masterGain = null;
+let sfxGain = null;     // all SFX routed here
+let audioMuted = false;  // true when master volume is 0
+
+// Volume state — persisted to localStorage
+const VOLUME_DEFAULTS = { master: 70, bgm: 70, sfx: 80 };
+const volumes = loadVolumes();
+
+function loadVolumes() {
+  const out = { ...VOLUME_DEFAULTS };
+  try {
+    const saved = JSON.parse(localStorage.getItem('tankBattle.volumes'));
+    if (saved && typeof saved === 'object') {
+      for (const k of Object.keys(VOLUME_DEFAULTS)) {
+        const v = Number(saved[k]);
+        if (Number.isFinite(v)) out[k] = Math.max(0, Math.min(100, v));
+      }
+    }
+  } catch (e) {}
+  return out;
+}
+
+function saveVolumes() {
+  try {
+    localStorage.setItem('tankBattle.volumes', JSON.stringify(volumes));
+  } catch (e) {}
+}
+
+function ensureAudio() {
+  if (audioCtx) return;
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    sfxGain = audioCtx.createGain();
+    sfxGain.connect(masterGain);
+    masterGain.connect(audioCtx.destination);
+    applyVolumes();
+  } catch (e) { audioCtx = null; }
+}
+
+// Update gain nodes from `volumes` state. Called on slider change and on init.
+function applyVolumes() {
+  audioMuted = volumes.master === 0;
+  if (!audioCtx) return;
+  // Linear mapping — simple and predictable for a game this size
+  masterGain.gain.value = volumes.master / 100 * 0.5;  // 0.5 headroom so 100% isn't clipped
+  sfxGain.gain.value = volumes.sfx / 100;
+  if (bgmState.bgmGain) {
+    // Keep BGM faded-in/out state (0→1 ramps) compatible with the user's bgm slider
+    // by multiplying through: here we just set it directly; fade transitions handle it too.
+    bgmState.bgmGain.gain.cancelScheduledValues(audioCtx.currentTime);
+    bgmState.bgmGain.gain.setValueAtTime(
+      bgmState.running ? volumes.bgm / 100 * 0.7 : 0,
+      audioCtx.currentTime
+    );
+  }
+}
+
+// Most browsers suspend audio until user interaction — resume on first input
+function resumeAudio() {
+  ensureAudio();
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+}
+window.addEventListener('keydown', resumeAudio, { once: true });
+window.addEventListener('click',   resumeAudio, { once: true });
+
+// Utility: short envelope helper
+function playTone({ freq = 440, type = 'sine', dur = 0.1, vol = 0.3, freqEnd = null, attack = 0.005, delay = 0 }) {
+  if (audioMuted || !audioCtx) return;
+  const t0 = audioCtx.currentTime + delay;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, t0);
+  if (freqEnd !== null) osc.frequency.exponentialRampToValueAtTime(Math.max(freqEnd, 0.01), t0 + dur);
+  gain.gain.setValueAtTime(0, t0);
+  gain.gain.linearRampToValueAtTime(vol, t0 + attack);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  osc.connect(gain).connect(sfxGain);
+  osc.start(t0);
+  osc.stop(t0 + dur + 0.02);
+}
+
+// One reusable noise buffer (~1 s of white noise). Each playback uses a
+// fresh BufferSource but shares the underlying samples, so we don't allocate
+// a fresh ~15k float32 array per explosion.
+let noiseBuffer = null;
+function getNoiseBuffer() {
+  if (noiseBuffer || !audioCtx) return noiseBuffer;
+  const len = Math.floor(audioCtx.sampleRate * 1.0);
+  noiseBuffer = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+  const data = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+  return noiseBuffer;
+}
+
+function playNoise({ dur = 0.15, vol = 0.3, filterFreq = 1000, filterType = 'lowpass', delay = 0 }) {
+  if (audioMuted || !audioCtx) return;
+  const buf = getNoiseBuffer();
+  if (!buf) return;
+  const t0 = audioCtx.currentTime + delay;
+  const src = audioCtx.createBufferSource();
+  src.buffer = buf;
+  // Random offset into the shared buffer so successive plays don't sound identical
+  const maxOffset = Math.max(0, buf.duration - dur - 0.01);
+  const offset = Math.random() * maxOffset;
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = filterType;
+  filter.frequency.value = filterFreq;
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(vol, t0);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  src.connect(filter).connect(gain).connect(sfxGain);
+  src.start(t0, offset, dur + 0.02);
+  src.stop(t0 + dur + 0.02);
+}
+
+// --- Sound effects ---
+const SFX = {
+  fire() {
+    // low punchy thump + short noise crackle
+    playTone({ freq: 180, freqEnd: 40, type: 'square', dur: 0.08, vol: 0.25 });
+    playNoise({ dur: 0.05, vol: 0.15, filterFreq: 2000, filterType: 'highpass' });
+  },
+  hit() {
+    // metallic tick
+    playTone({ freq: 800, freqEnd: 200, type: 'triangle', dur: 0.1, vol: 0.25 });
+    playNoise({ dur: 0.08, vol: 0.12, filterFreq: 3000, filterType: 'highpass' });
+  },
+  explosion() {
+    // low rumble noise
+    playNoise({ dur: 0.35, vol: 0.3, filterFreq: 500, filterType: 'lowpass' });
+    playTone({ freq: 80, freqEnd: 30, type: 'sawtooth', dur: 0.25, vol: 0.2 });
+  },
+  bounce() {
+    // soft high tick — subtle, don't want to spam ears
+    playTone({ freq: 900, type: 'sine', dur: 0.04, vol: 0.06 });
+  },
+  pickup() {
+    // rising 3-note arpeggio (C-E-G)
+    playTone({ freq: 523, type: 'square', dur: 0.08, vol: 0.15, delay: 0 });
+    playTone({ freq: 659, type: 'square', dur: 0.08, vol: 0.15, delay: 0.07 });
+    playTone({ freq: 784, type: 'square', dur: 0.12, vol: 0.18, delay: 0.14 });
+  },
+  shieldBreak() {
+    // glass-shatter-ish: noise + high ping
+    playNoise({ dur: 0.2, vol: 0.2, filterFreq: 4000, filterType: 'bandpass' });
+    playTone({ freq: 2000, freqEnd: 800, type: 'triangle', dur: 0.2, vol: 0.15 });
+  },
+  roundWin() {
+    // quick victory jingle (ascending fifth)
+    playTone({ freq: 523, type: 'square', dur: 0.1, vol: 0.2, delay: 0 });
+    playTone({ freq: 659, type: 'square', dur: 0.1, vol: 0.2, delay: 0.1 });
+    playTone({ freq: 784, type: 'square', dur: 0.2, vol: 0.22, delay: 0.2 });
+  },
+  matchWin() {
+    // fuller fanfare
+    playTone({ freq: 523, type: 'square', dur: 0.12, vol: 0.22, delay: 0 });
+    playTone({ freq: 659, type: 'square', dur: 0.12, vol: 0.22, delay: 0.12 });
+    playTone({ freq: 784, type: 'square', dur: 0.12, vol: 0.22, delay: 0.24 });
+    playTone({ freq: 1047, type: 'square', dur: 0.35, vol: 0.25, delay: 0.36 });
+  },
+  rouletteTick() {
+    // short dry click as each item passes the marker
+    playTone({ freq: 1400, type: 'square', dur: 0.02, vol: 0.08 });
+  },
+  rouletteLock() {
+    // confirmation chime when roulette lands
+    playTone({ freq: 700, type: 'square', dur: 0.08, vol: 0.15, delay: 0 });
+    playTone({ freq: 1050, type: 'square', dur: 0.18, vol: 0.18, delay: 0.07 });
+  },
+  drawRound() {
+    // ambivalent tie sound — two neutral notes, no resolution
+    playTone({ freq: 440, type: 'triangle', dur: 0.2, vol: 0.18, delay: 0 });
+    playTone({ freq: 440, type: 'triangle', dur: 0.3, vol: 0.18, delay: 0.18 });
+  },
+  timeWarning() {
+    // single-beep heartbeat for the final seconds
+    playTone({ freq: 900, type: 'square', dur: 0.07, vol: 0.12 });
+  },
+  countdownTick() {
+    // short mid-high beep for 3-2-1
+    playTone({ freq: 600, type: 'square', dur: 0.12, vol: 0.18 });
+  },
+  countdownGo() {
+    // higher, longer beep to mark GO
+    playTone({ freq: 900, type: 'square', dur: 0.08, vol: 0.2, delay: 0 });
+    playTone({ freq: 1200, type: 'square', dur: 0.22, vol: 0.22, delay: 0.06 });
+  },
+  shotgunFire() {
+    // multi-layered punch: bass thump + mid crack + noise spray
+    playTone({ freq: 140, freqEnd: 50, type: 'square', dur: 0.12, vol: 0.3 });
+    playNoise({ dur: 0.1, vol: 0.25, filterFreq: 1500, filterType: 'highpass' });
+  },
+  laserZap() {
+    // sharp sci-fi laser zap: quick high descending tone
+    playTone({ freq: 2000, freqEnd: 300, type: 'sawtooth', dur: 0.18, vol: 0.2 });
+  },
+};
+
+// --- Audio panel wiring ---
+const audioBtn = document.getElementById('audioToggle');
+const audioPanel = document.getElementById('audioPanel');
+
+// Button: toggle panel open/closed
+audioBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  audioPanel.classList.toggle('open');
+});
+// Click outside panel closes it
+document.addEventListener('click', (e) => {
+  if (!audioPanel.contains(e.target) && e.target !== audioBtn) {
+    audioPanel.classList.remove('open');
+  }
+});
+
+// Slider wiring — each slider updates its `volumes` field, applies to audio graph, persists
+function wireVolumeSlider(id, key) {
+  const slider = document.getElementById(id);
+  const valueEl = document.getElementById(id + 'Val');
+  slider.value = volumes[key];
+  valueEl.textContent = volumes[key];
+  slider.addEventListener('input', () => {
+    const v = parseInt(slider.value, 10);
+    volumes[key] = v;
+    valueEl.textContent = v;
+    applyVolumes();
+    saveVolumes();
+    updateMuteIcon();
+    // If the user raises BGM from 0 and we're in a round with a map, restart it
+    if (key === 'bgm' && v > 0 && !bgmState.running && currentMap && !audioMuted) {
+      startBGM(currentMap.theme || 'brick');
+    }
+    // If master goes to 0, stop BGM to avoid keeping oscillators running silently
+    if (key === 'master' && v === 0) stopBGM(0.1);
+    else if (key === 'master' && v > 0 && !bgmState.running && currentMap) {
+      startBGM(currentMap.theme || 'brick');
+    }
+  });
+}
+wireVolumeSlider('volMaster', 'master');
+wireVolumeSlider('volBgm', 'bgm');
+wireVolumeSlider('volSfx', 'sfx');
+
+function updateMuteIcon() {
+  const muted = volumes.master === 0;
+  audioBtn.innerHTML = iconHTML(muted ? 'audioOff' : 'audioOn', 22);
+  audioBtn.classList.toggle('muted', muted);
+}
+// Initial call deferred to end of script — ICON_SVGS is declared further down.
+
+// --- BGM system: procedural looping ambient per theme ---
+// Each BGM config defines: root note, scale intervals, ostinato pattern, bass drone, instrument types
+// Notes are semitone offsets from the root frequency (in Hz).
+function noteFreq(rootFreq, semitones) {
+  return rootFreq * Math.pow(2, semitones / 12);
+}
+
+const BGM_CONFIGS = {
+  // Fortress — minor, rhythmic, determined
+  brick:      { root: 131, bass: 65,  scale: [0, 3, 5, 7, 8, 10], pattern: [0,3,5,7, 5,3,0,-2], tempo: 110, lead: 'triangle', bassType: 'sine', vol: 0.12 },
+  // Corridor — dorian, cold, reverberant
+  stone:      { root: 147, bass: 73,  scale: [0, 2, 3, 5, 7, 9, 10], pattern: [0,5,3,2, 7,5,3,0], tempo: 90, lead: 'sine', bassType: 'sine', vol: 0.1 },
+  // Pillars — phrygian, exotic
+  sandstone:  { root: 220, bass: 110, scale: [0, 1, 3, 5, 7, 8, 10], pattern: [0,1,3,5, 3,1,0,-1], tempo: 100, lead: 'triangle', bassType: 'sine', vol: 0.1 },
+  // Crossroads — industrial, pounding
+  metal:      { root: 165, bass: 82,  scale: [0, 2, 3, 5, 7, 8, 11], pattern: [0,0,7,7, 3,3,5,5], tempo: 120, lead: 'square', bassType: 'sawtooth', vol: 0.09 },
+  // Maze — mysterious, wandering
+  mossy:      { root: 196, bass: 98,  scale: [0, 2, 4, 5, 7, 9, 10], pattern: [0,4,7,5, 9,7,4,2], tempo: 85, lead: 'sine', bassType: 'sine', vol: 0.11 },
+  // Chambers — warm, folk
+  wood:       { root: 261, bass: 130, scale: [0, 2, 4, 5, 7, 9, 11], pattern: [0,4,7,4, 5,2,0,0], tempo: 105, lead: 'triangle', bassType: 'sine', vol: 0.1 },
+  // Arena — heavy harmonic minor, combat
+  bloodstone: { root: 147, bass: 73,  scale: [0, 2, 3, 5, 7, 8, 11], pattern: [0,3,7,8, 7,5,3,0], tempo: 95, lead: 'sawtooth', bassType: 'square', vol: 0.09 },
+  // Zigzag — locrian, unsettling cold
+  ice:        { root: 247, bass: 123, scale: [0, 1, 3, 5, 6, 8, 10], pattern: [0,3,6,8, 10,6,3,0], tempo: 80, lead: 'sine', bassType: 'sine', vol: 0.1 },
+  // Cyclone — dark, aggressive
+  obsidian:   { root: 185, bass: 92,  scale: [0, 1, 3, 5, 7, 8, 10], pattern: [0,-1,3,5, 7,5,3,-1], tempo: 125, lead: 'sawtooth', bassType: 'square', vol: 0.09 },
+  // Gates — major, regal
+  gold:       { root: 196, bass: 98,  scale: [0, 2, 4, 5, 7, 9, 11], pattern: [0,4,7,12, 11,7,4,0], tempo: 100, lead: 'triangle', bassType: 'sine', vol: 0.11 },
+};
+
+// Link each map theme to its BGM — defaults to theme name (they match)
+let bgmState = {
+  running: false,
+  scheduled: [],       // active oscillators to stop on change
+  timer: null,         // setTimeout for next loop schedule
+  bgmGain: null,       // dedicated gain for BGM (allows fade without affecting SFX)
+  currentTheme: null,
+};
+
+function ensureBGMGain() {
+  if (!audioCtx) ensureAudio();
+  if (!audioCtx) return null;
+  if (!bgmState.bgmGain) {
+    bgmState.bgmGain = audioCtx.createGain();
+    bgmState.bgmGain.gain.value = 0;
+    bgmState.bgmGain.connect(masterGain);
+  }
+  return bgmState.bgmGain;
+}
+
+function scheduleBGMNote(freq, type, startTime, duration, vol) {
+  const osc = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  g.gain.setValueAtTime(0, startTime);
+  g.gain.linearRampToValueAtTime(vol, startTime + 0.02);   // quick attack
+  g.gain.setValueAtTime(vol, startTime + duration * 0.7);  // sustain
+  g.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+  osc.connect(g).connect(bgmState.bgmGain);
+  osc.start(startTime);
+  const stopTime = startTime + duration + 0.05;
+  osc.stop(stopTime);
+  bgmState.scheduled.push({ osc, stopTime });
+}
+
+// Drop oscillators that have already finished playing — keeps scheduled[] bounded.
+function pruneBGMScheduled() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  bgmState.scheduled = bgmState.scheduled.filter(e => e.stopTime > now);
+}
+
+function scheduleBGMLoop(config, loopStartTime) {
+  // One loop = 8 steps of the pattern + bass drone underneath
+  const beatDur = 60 / config.tempo / 2;    // 8th-note step
+  const loopDur = beatDur * config.pattern.length;
+
+  // Lead ostinato
+  for (let i = 0; i < config.pattern.length; i++) {
+    const step = config.pattern[i];
+    const freq = noteFreq(config.root, step);
+    const t = loopStartTime + i * beatDur;
+    scheduleBGMNote(freq, config.lead, t, beatDur * 0.9, config.vol);
+  }
+  // Bass drone — sustained low note across the loop, re-triggered each loop
+  scheduleBGMNote(config.bass, config.bassType, loopStartTime, loopDur, config.vol * 0.7);
+
+  return loopDur;
+}
+
+function startBGM(themeName) {
+  if (audioMuted) return;
+  ensureBGMGain();
+  if (!audioCtx || !bgmState.bgmGain) return;
+  const config = BGM_CONFIGS[themeName];
+  if (!config) return;
+
+  // If already playing the same theme, do nothing
+  if (bgmState.running && bgmState.currentTheme === themeName) return;
+
+  // Crossfade: if something is playing, fade it out first, then start new
+  if (bgmState.running) {
+    stopBGM(0.6);
+    setTimeout(() => startBGM(themeName), 650);
+    return;
+  }
+
+  bgmState.running = true;
+  bgmState.currentTheme = themeName;
+  bgmState.scheduled = [];
+
+  // Fade the BGM gain in — scaled by user's BGM volume setting
+  const now = audioCtx.currentTime;
+  const targetGain = volumes.bgm / 100 * 0.7;
+  bgmState.bgmGain.gain.cancelScheduledValues(now);
+  bgmState.bgmGain.gain.setValueAtTime(bgmState.bgmGain.gain.value, now);
+  bgmState.bgmGain.gain.linearRampToValueAtTime(targetGain, now + 0.8);
+
+  // Schedule the first two loops ahead so there's no gap, then re-schedule on timer
+  let nextLoopStart = audioCtx.currentTime + 0.1;
+  const loopDur = scheduleBGMLoop(config, nextLoopStart);
+  nextLoopStart += loopDur;
+  scheduleBGMLoop(config, nextLoopStart);
+
+  // Keep scheduling new loops ahead of time. Use audio-clock delta so the
+  // setTimeout does not drift away from `nextLoopStart` over many loops.
+  function scheduleNext() {
+    if (!bgmState.running) return;
+    nextLoopStart += loopDur;
+    scheduleBGMLoop(config, nextLoopStart);
+    pruneBGMScheduled();
+    const delayMs = Math.max(50, (nextLoopStart - audioCtx.currentTime - loopDur) * 1000);
+    bgmState.timer = setTimeout(scheduleNext, delayMs);
+  }
+  bgmState.timer = setTimeout(scheduleNext, Math.max(50, (nextLoopStart - audioCtx.currentTime - loopDur) * 1000));
+}
+
+function stopBGM(fadeSec = 0.4) {
+  if (!bgmState.running) return;
+  bgmState.running = false;
+  bgmState.currentTheme = null;
+  if (bgmState.timer) { clearTimeout(bgmState.timer); bgmState.timer = null; }
+
+  if (audioCtx && bgmState.bgmGain) {
+    const now = audioCtx.currentTime;
+    bgmState.bgmGain.gain.cancelScheduledValues(now);
+    bgmState.bgmGain.gain.setValueAtTime(bgmState.bgmGain.gain.value, now);
+    bgmState.bgmGain.gain.linearRampToValueAtTime(0.0001, now + fadeSec);
+  }
+  // Stop all scheduled oscillators slightly after fade completes
+  setTimeout(() => {
+    for (const e of bgmState.scheduled) {
+      try { e.osc.stop(); } catch (err) {}
+    }
+    bgmState.scheduled = [];
+  }, fadeSec * 1000 + 50);
+}
+
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+
+// Map definitions were authored against 800×500. We render at a larger
+// resolution and scale wall/spawn coords by MAP_SCALE at loadMap time.
+const ORIG_W = 800, ORIG_H = 500;
+const MAP_SCALE = W / ORIG_W;
+
+const TANK_SIZE = 28;
+// All speed / time constants below are in units per SECOND (not per frame).
+// Gameplay is delta-time based so it runs identically at any refresh rate.
+const TANK_SPEED = 156 * MAP_SCALE;       // scale movement to match bigger arena
+const ROT_SPEED = 3.6;           // rad/s (was 0.06 rad/frame)
+const BULLET_SPEED = 420 * MAP_SCALE;     // bullets scale too so range feels same
+const BULLET_SIZE = 4;
+const MAX_BULLETS = 3;
+const FIRE_COOLDOWN = 25 / 60;   // seconds
+const MAX_HP = 5;
+const WIN_SCORE = 3;
+const ROUND_TIME = 60;                // seconds (was 60 * 60 frames)
+const LOW_TIME_THRESHOLD = 10;        // seconds (was 10 * 60 frames)
+const COUNTDOWN_STEP_DURATION = 1;    // seconds per step
+const COUNTDOWN_STEPS = ['3', '2', '1', 'GO!'];
+const FREEZE_DURATION = 1;            // seconds of post-round freeze
+
+// --- SVG icon registry (replaces emoji throughout the UI/canvas) ---
+// Each entry is a viewBox 0 0 24 24 SVG markup string. White-on-currentColor
+// where possible so HUD slots can be tinted via CSS color.
+const ICON_SVGS = {
+  // Powerups
+  rapid:    `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2c-1 4-4 5-4 9a4 4 0 0 0 8 0c0-2-1-3-2-4 0 2-1 3-2 3 0-3 2-5 0-8z" fill="#f97316" stroke="#7c2d12" stroke-width="1" stroke-linejoin="round"/></svg>`,
+  speed:    `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13 2 4 14h6l-2 8 11-14h-6l2-6z" fill="#eab308" stroke="#713f12" stroke-width="1" stroke-linejoin="round"/></svg>`,
+  triple:   `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#ec4899" stroke="#831843" stroke-width="1" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="12" cy="18" r="3.5"/></g></svg>`,
+  shield:   `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2 4 5v7c0 5 3 8 8 10 5-2 8-5 8-10V5l-8-3z" fill="#22d3ee" stroke="#155e75" stroke-width="1.2" stroke-linejoin="round"/><path d="M12 7v9" stroke="#fff" stroke-width="1.2"/></svg>`,
+  // Weapons
+  shotgun:  `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#dc2626" stroke="#7f1d1d" stroke-width="0.9"><circle cx="7" cy="8" r="2.5"/><circle cx="12" cy="12" r="2.8"/><circle cx="17" cy="16" r="2.5"/><circle cx="14" cy="6" r="1.8"/><circle cx="6" cy="16" r="1.8"/></g></svg>`,
+  homing:   `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g stroke="#4c1d95" stroke-width="1" stroke-linejoin="round"><path d="M18 4l-9 9-3-1-3 3 5 1 1 5 3-3-1-3 9-9z" fill="#8b5cf6"/><path d="M14 8l2 2" stroke="#fff"/></g></svg>`,
+  laser:    `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 21 21 3" stroke="#06b6d4" stroke-width="3.5" stroke-linecap="round"/><path d="M3 21 21 3" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/><circle cx="21" cy="3" r="2" fill="#06b6d4" stroke="#0e7490" stroke-width="0.8"/></svg>`,
+  pierce:   `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#f59e0b" stroke-width="1.4"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5.5"/><circle cx="12" cy="12" r="2" fill="#f59e0b"/></g></svg>`,
+  // Maps
+  fortress: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#a8a29e" stroke="#44403c" stroke-width="0.9" stroke-linejoin="round"><path d="M3 22V10h3V7h2v3h2V8h2v2h2V7h2v3h3v12z"/><rect x="10" y="14" width="4" height="8" fill="#44403c"/></g></svg>`,
+  corridor: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#9ca3af" stroke="#374151" stroke-width="0.9"><rect x="4" y="4" width="4" height="16"/><rect x="16" y="4" width="4" height="16"/><rect x="3" y="3" width="6" height="2"/><rect x="15" y="3" width="6" height="2"/><rect x="3" y="19" width="6" height="2"/><rect x="15" y="19" width="6" height="2"/></g></svg>`,
+  pillars:  `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#d4a26a" stroke="#78350f" stroke-width="0.8"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="18" r="2.5"/></g></svg>`,
+  crossroads:`<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#94a3b8" stroke="#1e293b" stroke-width="0.9"><rect x="10" y="2" width="4" height="20"/><rect x="2" y="10" width="20" height="4"/></g></svg>`,
+  maze:     `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 4h6v6h-3v8h12" stroke="#84cc16" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 4h6v6h-3v8h12" stroke="#1a2e05" stroke-width="0.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  chambers: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#b45309" stroke="#451a03" stroke-width="0.9"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></g></svg>`,
+  arena:    `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g stroke="#7f1d1d" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"><path d="M5 3l14 14M19 3L5 17" stroke-width="2.5" stroke="#9ca3af"/><circle cx="5" cy="20" r="1.5" fill="#7f1d1d"/><circle cx="19" cy="20" r="1.5" fill="#7f1d1d"/></g></svg>`,
+  zigzag:   `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 4l6 6-6 4 8 6" stroke="#7dd3fc" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 4l6 6-6 4 6 6" stroke="#7dd3fc" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  cyclone:  `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 12m-1 0a1 1 0 0 1 2 0 a1 1 0 0 1 -2 0 M12 12c0-3 3-5 5-3s1 7-3 7-7-3-5-7 7-5 9-1 0 9-4 9-7-4-5-8" fill="none" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+  gates:    `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#fbbf24" stroke="#78350f" stroke-width="0.9"><path d="M4 22V10a8 8 0 0 1 16 0v12z" fill="#fbbf24"/><path d="M9 22v-7a3 3 0 0 1 6 0v7z" fill="#451a03"/><circle cx="12" cy="6" r="1.2" fill="#fff"/></g></svg>`,
+  // Decoratives
+  trophy:   `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#fbbf24" stroke="#78350f" stroke-width="0.9" stroke-linejoin="round"><path d="M7 3h10v5a5 5 0 0 1-10 0z"/><path d="M3 5h4v3a2 2 0 0 1-4 0z M17 5h4v3a2 2 0 0 1-4 0z" fill="#d97706"/><path d="M10 13h4l-1 4h-2z"/><path d="M7 19h10v2H7z"/></g></svg>`,
+  stats:    `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#60a5fa" stroke="#1e3a8a" stroke-width="0.9"><rect x="3" y="13" width="4" height="8"/><rect x="10" y="8" width="4" height="13"/><rect x="17" y="4" width="4" height="17"/></g></svg>`,
+  swords:   `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g stroke="#374151" stroke-width="0.9" stroke-linejoin="round"><path d="M3 3l11 11-2 2L1 5z" fill="#cbd5e1"/><path d="M21 3L10 14l2 2L23 5z" fill="#cbd5e1"/></g></svg>`,
+  audioOn:  `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#eee" stroke="#1a1a2e" stroke-width="0.6" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 8a5 5 0 0 1 0 8M18 5a8 8 0 0 1 0 14" fill="none" stroke="#eee" stroke-width="1.5" stroke-linecap="round"/></g></svg>`,
+  audioOff: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#eee" stroke="#1a1a2e" stroke-width="0.6" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9l6 6M22 9l-6 6" fill="none" stroke="#ef4444" stroke-width="1.8" stroke-linecap="round"/></g></svg>`,
+};
+
+// Pre-bake each SVG into an HTMLImageElement so we can drawImage on canvas.
+const ICON_IMAGES = {};
+(function preloadIcons() {
+  for (const id in ICON_SVGS) {
+    const img = new Image();
+    img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(ICON_SVGS[id]);
+    ICON_IMAGES[id] = img;
+  }
+})();
+
+// HTML inline icon — returns a span containing the SVG, sized via inline style.
+function iconHTML(id, size = 18) {
+  const svg = ICON_SVGS[id];
+  if (!svg) return '';
+  return `<span class="svg-icon" style="display:inline-block;width:${size}px;height:${size}px;vertical-align:middle;line-height:0">${svg}</span>`;
+}
+
+// Canvas: draw centered icon at (cx, cy) at the given pixel size.
+function drawIcon(targetCtx, id, cx, cy, size) {
+  const img = ICON_IMAGES[id];
+  if (!img || !img.complete || !img.naturalWidth) return false;
+  targetCtx.drawImage(img, cx - size/2, cy - size/2, size, size);
+  return true;
+}
+
+const POWERUP_DURATION = 8;           // seconds (was 8 * 60)
+const POWERUP_SPAWN_MIN = 4;          // seconds (was 4 * 60)
+const POWERUP_SPAWN_MAX = 8;          // seconds (was 8 * 60)
+// Buff-type pickups (passive effects while active)
+const BUFF_ITEMS = [
+  { id: 'rapid',  category: 'buff', color: '#f97316' },
+  { id: 'speed',  category: 'buff', color: '#eab308' },
+  { id: 'triple', category: 'buff', color: '#ec4899' },
+  { id: 'shield', category: 'buff', color: '#22d3ee' },
+];
+
+// Weapon pickups (replace default cannon, limited ammo)
+// `ammo` is rounds per pickup. When depleted, tank reverts to default cannon.
+const WEAPON_ITEMS = [
+  { id: 'shotgun', category: 'weapon', color: '#dc2626', ammo: 3 },
+  { id: 'homing',  category: 'weapon', color: '#8b5cf6', ammo: 3 },
+  { id: 'laser',   category: 'weapon', color: '#06b6d4', ammo: 2 },
+  { id: 'pierce',  category: 'weapon', color: '#f59e0b', ammo: 3 },
+];
+
+// Kept as the old name so existing references still work (buff items only)
+const POWERUP_TYPES = BUFF_ITEMS;
+
+// Weighted pool used at spawn time: 70% buff, 30% weapon
+function pickRandomItem() {
+  if (Math.random() < 0.3) {
+    return WEAPON_ITEMS[Math.floor(Math.random() * WEAPON_ITEMS.length)];
+  }
+  return BUFF_ITEMS[Math.floor(Math.random() * BUFF_ITEMS.length)];
+}
+
+const DANGER_DIST = 110 * MAP_SCALE;
+
+// --- Maps ---
+// Each map defines walls + tank spawn positions + display name (both locales).
+const MAPS = [
+  {
+    id: 'fortress',
+    theme: 'brick',
+    name: { ko: '요새', en: 'Fortress' },
+    walls: [
+      {x: 150, y: 100, w: 80, h: 20},
+      {x: 570, y: 100, w: 80, h: 20},
+      {x: 150, y: 380, w: 80, h: 20},
+      {x: 570, y: 380, w: 80, h: 20},
+      {x: 370, y: 60, w: 60, h: 60},
+      {x: 370, y: 380, w: 60, h: 60},
+      {x: 100, y: 230, w: 100, h: 40},
+      {x: 600, y: 230, w: 100, h: 40},
+      {x: 340, y: 220, w: 120, h: 60},
+    ],
+    spawn1: { x: 60, y: 250, angle: 0 },
+    spawn2: { x: 740, y: 250, angle: Math.PI },
+  },
+  {
+    id: 'corridor',
+    theme: 'stone',
+    name: { ko: '회랑', en: 'Corridor' },
+    walls: [
+      // two long horizontal walls creating 3 corridors
+      {x: 100, y: 150, w: 600, h: 20},
+      {x: 100, y: 330, w: 600, h: 20},
+      // midline dividers for cover
+      {x: 380, y: 80, w: 40, h: 40},
+      {x: 380, y: 380, w: 40, h: 40},
+      {x: 380, y: 235, w: 40, h: 30},
+    ],
+    spawn1: { x: 50, y: 250, angle: 0 },
+    spawn2: { x: 750, y: 250, angle: Math.PI },
+  },
+  {
+    id: 'pillars',
+    theme: 'sandstone',
+    name: { ko: '기둥', en: 'Pillars' },
+    walls: [
+      // open field with scattered small pillars (favors speed/evasion)
+      {x: 200, y: 100, w: 40, h: 40},
+      {x: 560, y: 100, w: 40, h: 40},
+      {x: 200, y: 360, w: 40, h: 40},
+      {x: 560, y: 360, w: 40, h: 40},
+      {x: 380, y: 230, w: 40, h: 40},
+      {x: 130, y: 230, w: 40, h: 40},
+      {x: 630, y: 230, w: 40, h: 40},
+      {x: 380, y: 80, w: 40, h: 40},
+      {x: 380, y: 380, w: 40, h: 40},
+    ],
+    spawn1: { x: 50, y: 250, angle: 0 },
+    spawn2: { x: 750, y: 250, angle: Math.PI },
+  },
+  {
+    id: 'crossroads',
+    theme: 'metal',
+    name: { ko: '십자로', en: 'Crossroads' },
+    walls: [
+      // 4 big quadrant blocks leaving a cross-shaped open area
+      {x: 80, y: 80, w: 260, h: 120},
+      {x: 460, y: 80, w: 260, h: 120},
+      {x: 80, y: 300, w: 260, h: 120},
+      {x: 460, y: 300, w: 260, h: 120},
+    ],
+    spawn1: { x: 60, y: 250, angle: 0 },
+    spawn2: { x: 740, y: 250, angle: Math.PI },
+  },
+  {
+    id: 'maze',
+    theme: 'mossy',
+    name: { ko: '미로', en: 'Maze' },
+    walls: [
+      // dense short walls creating tight angle shots and sneaking paths
+      {x: 120, y: 80, w: 20, h: 120},
+      {x: 660, y: 80, w: 20, h: 120},
+      {x: 120, y: 300, w: 20, h: 120},
+      {x: 660, y: 300, w: 20, h: 120},
+      {x: 220, y: 180, w: 100, h: 20},
+      {x: 480, y: 180, w: 100, h: 20},
+      {x: 220, y: 300, w: 100, h: 20},
+      {x: 480, y: 300, w: 100, h: 20},
+      {x: 360, y: 100, w: 80, h: 20},
+      {x: 360, y: 380, w: 80, h: 20},
+      {x: 390, y: 220, w: 20, h: 60},
+    ],
+    spawn1: { x: 50, y: 250, angle: 0 },
+    spawn2: { x: 750, y: 250, angle: Math.PI },
+  },
+  {
+    id: 'chambers',
+    theme: 'wood',
+    name: { ko: '방', en: 'Chambers' },
+    walls: [
+      // four rooms connected by narrow gaps — peekaboo / ambush fights
+      // top horizontal divider with a gap in the middle
+      {x: 0,   y: 240, w: 330, h: 20},
+      {x: 470, y: 240, w: 330, h: 20},
+      // vertical divider with a gap
+      {x: 390, y: 0,   w: 20, h: 160},
+      {x: 390, y: 340, w: 20, h: 160},
+      // corner cover inside each quadrant
+      {x: 150, y: 100, w: 60, h: 20},
+      {x: 590, y: 100, w: 60, h: 20},
+      {x: 150, y: 380, w: 60, h: 20},
+      {x: 590, y: 380, w: 60, h: 20},
+    ],
+    spawn1: { x: 60, y: 120, angle: 0 },
+    spawn2: { x: 740, y: 380, angle: Math.PI },
+  },
+  {
+    id: 'arena',
+    theme: 'bloodstone',
+    name: { ko: '투기장', en: 'Arena' },
+    walls: [
+      // one massive central obstacle — everything else is open for kiting
+      {x: 320, y: 170, w: 160, h: 160},
+      // small corner bumps to break pure straight-line kiting
+      {x: 80,  y: 80,  w: 40, h: 20},
+      {x: 680, y: 80,  w: 40, h: 20},
+      {x: 80,  y: 400, w: 40, h: 20},
+      {x: 680, y: 400, w: 40, h: 20},
+    ],
+    spawn1: { x: 60, y: 60, angle: Math.PI / 4 },
+    spawn2: { x: 740, y: 440, angle: Math.PI + Math.PI / 4 },
+  },
+  {
+    id: 'zigzag',
+    theme: 'ice',
+    name: { ko: '지그재그', en: 'Zigzag' },
+    walls: [
+      // staggered diagonal-feeling walls rewarding bank shots
+      {x: 130, y: 70,  w: 120, h: 20},
+      {x: 550, y: 70,  w: 120, h: 20},
+      {x: 250, y: 180, w: 120, h: 20},
+      {x: 430, y: 180, w: 120, h: 20},
+      {x: 130, y: 300, w: 120, h: 20},
+      {x: 550, y: 300, w: 120, h: 20},
+      {x: 250, y: 410, w: 120, h: 20},
+      {x: 430, y: 410, w: 120, h: 20},
+      // center nub
+      {x: 390, y: 240, w: 20, h: 20},
+    ],
+    spawn1: { x: 60, y: 250, angle: 0 },
+    spawn2: { x: 740, y: 250, angle: Math.PI },
+  },
+  {
+    id: 'cyclone',
+    theme: 'obsidian',
+    name: { ko: '사이클론', en: 'Cyclone' },
+    walls: [
+      // asymmetric walls suggesting rotational flow — aggressive chase rounds
+      {x: 180, y: 100, w: 140, h: 20},
+      {x: 480, y: 380, w: 140, h: 20},
+      {x: 100, y: 180, w: 20, h: 140},
+      {x: 680, y: 180, w: 20, h: 140},
+      {x: 280, y: 230, w: 100, h: 20},
+      {x: 420, y: 250, w: 100, h: 20},
+      {x: 340, y: 150, w: 20, h: 80},
+      {x: 440, y: 270, w: 20, h: 80},
+    ],
+    spawn1: { x: 60, y: 440, angle: -Math.PI / 4 },
+    spawn2: { x: 740, y: 60, angle: Math.PI - Math.PI / 4 },
+  },
+  {
+    id: 'gates',
+    theme: 'gold',
+    name: { ko: '관문', en: 'Gates' },
+    walls: [
+      // two pairs of thin "gate" walls + a center bunker
+      {x: 200, y: 60,  w: 20, h: 140},
+      {x: 200, y: 300, w: 20, h: 140},
+      {x: 580, y: 60,  w: 20, h: 140},
+      {x: 580, y: 300, w: 20, h: 140},
+      // center bunker (L-shape)
+      {x: 360, y: 180, w: 80, h: 20},
+      {x: 360, y: 200, w: 20, h: 100},
+      // outer edge cover
+      {x: 100, y: 235, w: 40, h: 30},
+      {x: 660, y: 235, w: 40, h: 30},
+    ],
+    spawn1: { x: 60, y: 250, angle: 0 },
+    spawn2: { x: 740, y: 250, angle: Math.PI },
+  },
+];
+
+// Current map state
+let walls = MAPS[0].walls;         // mutable pointer — set by loadMap()
+let currentMap = MAPS[0];
+let mapPool = [];                  // remaining unused map IDs for this match
+
+// AI opponent toggle — persisted to localStorage
+let botEnabled = false;
+try { botEnabled = localStorage.getItem('tankBattle.bot') === '1'; } catch (e) {}
+// Auto-aim turret toggle (humans only; AI always auto-aims). Defaults ON.
+let autoAimEnabled = true;
+try {
+  const v = localStorage.getItem('tankBattle.autoAim');
+  if (v !== null) autoAimEnabled = v === '1';
+} catch (e) {}
+
+const scores = {p1: 0, p2: 0};
+
+// --- Stats tracking ---
+// Per-match cumulative stats, reset on match end. mapResults tracks per-map outcomes.
+function makeFreshStats() {
+  return {
+    p1: { shots: 0, hits: 0, damageTaken: 0, shieldsBlocked: 0, distance: 0, bounces: 0,
+          powerups: { rapid: 0, speed: 0, triple: 0, shield: 0,
+                       shotgun: 0, homing: 0, laser: 0, pierce: 0 }, roundsWon: 0 },
+    p2: { shots: 0, hits: 0, damageTaken: 0, shieldsBlocked: 0, distance: 0, bounces: 0,
+          powerups: { rapid: 0, speed: 0, triple: 0, shield: 0,
+                       shotgun: 0, homing: 0, laser: 0, pierce: 0 }, roundsWon: 0 },
+    draws: 0,
+    // per-map outcomes: { mapId: { p1Wins, p2Wins, draws } }
+    mapResults: {},
+  };
+}
+let stats = makeFreshStats();
+
+let tank1, tank2, bullets, particles, winner, roundActive, freezeTimer;
+let powerups, nextPowerupIn;
+let floatingTexts;
+let ghosts;   // motion-trail silhouettes (tanks)
+let roundTimer;
+let countdownTimer;
+let countdownStep;
+let lastTimeWarningSec;  // last whole-second that triggered the countdown beep
+
+function initRound(preDecidedMap = null) {
+  // Use the map decided by roulette (if provided), else pick one now (first round of match)
+  loadMap(preDecidedMap || pickNextMap());
+  const s1 = currentMap.spawn1, s2 = currentMap.spawn2;
+
+  tank1 = { x: s1.x, y: s1.y, angle: s1.angle, turretAngle: s1.angle,
+    color: '#4ade80', light: '#86efac', dark: '#22c55e', stroke: '#166534',
+    hp: MAX_HP, cooldown: 0, id: 'p1',
+    up: 'w', down: 's', left: 'a', right: 'd', fire: 'g',
+    powerup: null, powerupTime: 0, hitFlash: 0,
+    weapon: null, ammo: 0 };
+  tank2 = { x: s2.x, y: s2.y, angle: s2.angle, turretAngle: s2.angle,
+    color: '#60a5fa', light: '#93c5fd', dark: '#3b82f6', stroke: '#1e40af',
+    hp: MAX_HP, cooldown: 0, id: 'p2',
+    up: 'arrowup', down: 'arrowdown', left: 'arrowleft', right: 'arrowright', fire: '/',
+    powerup: null, powerupTime: 0, hitFlash: 0,
+    weapon: null, ammo: 0,
+    ai: botEnabled };
+  bullets = []; particles = []; powerups = []; floatingTexts = []; ghosts = [];
+  nextPowerupIn = 2;   // seconds until first powerup (was 120 frames)
+  winner = null; roundActive = true; freezeTimer = 0;
+  roundTimer = ROUND_TIME;
+  countdownStep = 0;
+  countdownTimer = COUNTDOWN_STEP_DURATION;
+  lastTimeWarningSec = -1;   // track last full-second that played warning beep
+  SFX.countdownTick();  // play first tick immediately on round start
+  updateHUD();
+  updateMapName();
+}
+
+const keys = {};
+window.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  keys[k] = true;
+  if (['arrowup','arrowdown','arrowleft','arrowright',' ','/'].includes(k)) e.preventDefault();
+});
+window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+// Drop all held keys when window loses focus — otherwise alt-tab can leave a
+// tank driving itself forever.
+window.addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
+
+function rectsOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
+  return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+}
+function tankCollidesAt(x, y) {
+  const half = TANK_SIZE / 2;
+  if (x - half < 0 || x + half > W || y - half < 0 || y + half > H) return true;
+  for (const w of walls) if (rectsOverlap(x-half, y-half, TANK_SIZE, TANK_SIZE, w.x, w.y, w.w, w.h)) return true;
+  return false;
+}
+function pointInRect(px, py, r) { return px >= r.x && px <= r.x + r.w && py >= r.y && py <= r.y + r.h; }
+function tanksOverlap(x, y, other) {
+  const half = TANK_SIZE / 2;
+  return rectsOverlap(x-half, y-half, TANK_SIZE, TANK_SIZE, other.x-half, other.y-half, TANK_SIZE, TANK_SIZE);
+}
+
+function spawnPowerup() {
+  for (let attempt = 0; attempt < 30; attempt++) {
+    const x = 40 + Math.random() * (W - 80);
+    const y = 40 + Math.random() * (H - 80);
+    const size = 24;
+    let blocked = false;
+    for (const w of walls) {
+      if (rectsOverlap(x-size/2-8, y-size/2-8, size+16, size+16, w.x, w.y, w.w, w.h)) { blocked = true; break; }
+    }
+    if (blocked) continue;
+    if (Math.hypot(x - tank1.x, y - tank1.y) < 60) continue;
+    if (Math.hypot(x - tank2.x, y - tank2.y) < 60) continue;
+    let tooClose = false;
+    for (const p of powerups) if (Math.hypot(x - p.x, y - p.y) < 60) { tooClose = true; break; }
+    if (tooClose) continue;
+    const type = pickRandomItem();
+    powerups.push({ x, y, type, spawnTime: 0 });
+    return;
+  }
+}
+
+function updatePowerups(dt) {
+  nextPowerupIn -= dt;
+  if (nextPowerupIn <= 0 && powerups.length < 2) {
+    spawnPowerup();
+    nextPowerupIn = POWERUP_SPAWN_MIN + Math.random() * (POWERUP_SPAWN_MAX - POWERUP_SPAWN_MIN);
+  }
+  for (const p of powerups) p.spawnTime += dt;
+  for (const t of [tank1, tank2]) {
+    for (let i = powerups.length - 1; i >= 0; i--) {
+      const p = powerups[i];
+      if (Math.hypot(p.x - t.x, p.y - t.y) < TANK_SIZE/2 + 12) {
+        if (p.type.category === 'weapon') {
+          t.weapon = p.type.id;
+          t.ammo = p.type.ammo;
+        } else {
+          t.powerup = p.type.id;
+          t.powerupTime = POWERUP_DURATION;
+        }
+        if (stats[t.id].powerups[p.type.id] !== undefined) {
+          stats[t.id].powerups[p.type.id]++;
+        }
+        spawnPickupBurst(p.x, p.y, p.type.color);
+        spawnFloatingText(t, L().powerup[p.type.id] || p.type.id.toUpperCase(), p.type.id, p.type.color);
+        SFX.pickup();
+        powerups.splice(i, 1);
+      }
+    }
+  }
+  for (const t of [tank1, tank2]) {
+    if (t.powerup) {
+      t.powerupTime -= dt;
+      if (t.powerupTime <= 0) t.powerup = null;
+    }
+    if (t.hitFlash > 0) t.hitFlash -= dt;
+  }
+}
+
+function getSpeedFor(t) { return t.powerup === 'speed' ? TANK_SPEED * 1.6 : TANK_SPEED; }
+function getCooldownFor(t) { return t.powerup === 'rapid' ? FIRE_COOLDOWN * 0.45 : FIRE_COOLDOWN; }
+
+function fireBullet(t, angleOffset = 0) {
+  const muzzleDist = TANK_SIZE / 2 + 4;
+  const a = t.turretAngle + angleOffset;
+  bullets.push({
+    x: t.x + Math.cos(a) * muzzleDist,
+    y: t.y + Math.sin(a) * muzzleDist,
+    vx: Math.cos(a) * BULLET_SPEED, vy: Math.sin(a) * BULLET_SPEED,
+    owner: t.id, bounces: 1, life: 3   // seconds (was 180 frames)
+  });
+}
+
+// Has line-of-sight between (ax,ay) and (bx,by) — no wall obstructs the segment.
+function hasLOS(ax, ay, bx, by) {
+  const dist = Math.hypot(bx - ax, by - ay);
+  const steps = Math.max(2, Math.ceil(dist / 10));
+  const stepX = (bx - ax) / steps, stepY = (by - ay) / steps;
+  for (let i = 1; i < steps; i++) {
+    const px = ax + stepX * i, py = ay + stepY * i;
+    for (const w of walls) {
+      if (px >= w.x && px <= w.x + w.w && py >= w.y && py <= w.y + w.h) return false;
+    }
+  }
+  return true;
+}
+
+// AI controller for an enemy tank. Returns intent {dx, dy, fire} consumed by
+// updateTank — same shape as keyboard input.
+function runAI(t, other, dt) {
+  // Track opponent velocity (rough — from prev pos delta) for target lead.
+  if (other._prevX === undefined) { other._prevX = other.x; other._prevY = other.y; }
+  const ovx = (other.x - other._prevX) / Math.max(dt, 0.001);
+  const ovy = (other.y - other._prevY) / Math.max(dt, 0.001);
+  other._prevX = other.x; other._prevY = other.y;
+
+  // Lead target: predict where opponent will be when bullet arrives.
+  const dist = Math.hypot(other.x - t.x, other.y - t.y);
+  const travelT = dist / BULLET_SPEED;
+  const leadX = other.x + ovx * travelT * 0.7;   // 0.7 = imperfect prediction
+  const leadY = other.y + ovy * travelT * 0.7;
+  const aimAngle = Math.atan2(leadY - t.y, leadX - t.x);
+
+  // Movement decision: keep medium range, strafe if LOS, dodge incoming.
+  const losDirect = hasLOS(t.x, t.y, other.x, other.y);
+  let moveAngle = aimAngle;
+  const IDEAL_MIN = 180 * MAP_SCALE;
+  const IDEAL_MAX = 320 * MAP_SCALE;
+  if (losDirect) {
+    if (dist < IDEAL_MIN) moveAngle = aimAngle + Math.PI;        // back off
+    else if (dist > IDEAL_MAX) moveAngle = aimAngle;             // close in
+    else {
+      // strafe perpendicular — alternate every ~1.5s for unpredictable motion
+      const phase = Math.floor(performance.now() / 1500) % 2;
+      moveAngle = aimAngle + (phase ? Math.PI/2 : -Math.PI/2);
+    }
+  } else {
+    // No LOS — move toward opponent to find one
+    moveAngle = aimAngle;
+  }
+
+  // Bullet dodge: if any non-owned bullet is heading at us within DANGER_DIST,
+  // veer perpendicular to its velocity.
+  for (const b of bullets) {
+    if (b.owner === t.id) continue;
+    const bd = Math.hypot(b.x - t.x, b.y - t.y);
+    if (bd > DANGER_DIST) continue;
+    const tx = t.x - b.x, ty = t.y - b.y;
+    const dot = (tx * b.vx + ty * b.vy) / (bd * Math.hypot(b.vx, b.vy));
+    if (dot > 0.5) {
+      moveAngle = Math.atan2(b.vy, b.vx) + Math.PI/2;
+      break;
+    }
+  }
+
+  // Pickup magnet — head toward nearest powerup if close-ish and not in danger
+  let closestP = null, closestPd = Infinity;
+  for (const p of powerups) {
+    const pd = Math.hypot(p.x - t.x, p.y - t.y);
+    if (pd < closestPd) { closestPd = pd; closestP = p; }
+  }
+  if (closestP && closestPd < 240 * MAP_SCALE) {
+    moveAngle = Math.atan2(closestP.y - t.y, closestP.x - t.x);
+  }
+
+  // Fire when LOS clear AND turret already pointing close to the aim direction
+  // (turret angle is auto-updated each frame by updateTurret).
+  const facingDiff = Math.abs(((t.turretAngle - aimAngle + Math.PI) % (Math.PI * 2)) - Math.PI);
+  const canFire = losDirect && facingDiff < 0.12;
+
+  return {
+    dx: Math.cos(moveAngle),
+    dy: Math.sin(moveAngle),
+    fire: canFire,
+  };
+}
+
+// Smoothly rotate t.turretAngle toward the desired aim direction.
+// TURRET_ROT_SPEED is faster than chassis rotation — the turret swivels quickly.
+const TURRET_ROT_SPEED = 12;    // rad/s — fast enough to track strafing enemy
+function updateTurret(t, targetAngle, dt) {
+  let diff = targetAngle - t.turretAngle;
+  while (diff > Math.PI) diff -= Math.PI * 2;
+  while (diff < -Math.PI) diff += Math.PI * 2;
+  const step = TURRET_ROT_SPEED * dt;
+  if (Math.abs(diff) < step) t.turretAngle = targetAngle;
+  else t.turretAngle += Math.sign(diff) * step;
+}
+
+function updateTank(t, other, dt) {
+  if (!roundActive) return;
+  let dx = 0, dy = 0, fireBtn = false;
+  if (t.ai) {
+    const intent = runAI(t, other, dt);
+    dx = intent.dx; dy = intent.dy; fireBtn = intent.fire;
+  } else {
+    if (keys[t.up]) dy -= 1;
+    if (keys[t.down]) dy += 1;
+    if (keys[t.left]) dx -= 1;
+    if (keys[t.right]) dx += 1;
+    fireBtn = !!keys[t.fire];
+  }
+  // Velocity tracker (EMA-smoothed) — runs every frame regardless of toggle so
+  // _lastX never goes stale and toggling auto-aim back on doesn't jump turret.
+  if (other._lastX === undefined) {
+    other._lastX = other.x; other._lastY = other.y;
+    other._smoothVX = 0; other._smoothVY = 0;
+  }
+  const instVX = (other.x - other._lastX) / Math.max(dt, 0.001);
+  const instVY = (other.y - other._lastY) / Math.max(dt, 0.001);
+  other._lastX = other.x; other._lastY = other.y;
+  // Exponential moving average — alpha 0.18 = ~5-frame smoothing
+  other._smoothVX = other._smoothVX * 0.82 + instVX * 0.18;
+  other._smoothVY = other._smoothVY * 0.82 + instVY * 0.18;
+
+  // Turret aim. AI always auto-aims at the enemy. Human auto-aims only when
+  // the global autoAimEnabled toggle is on; otherwise the turret stays locked
+  // to the chassis (manual aim — point body at target to shoot it).
+  if (t.ai || autoAimEnabled) {
+    const distToOther = Math.hypot(other.x - t.x, other.y - t.y);
+    const travelT = distToOther / BULLET_SPEED;
+    // Modest lead: enemies zigzag, so over-prediction makes turret chase empty
+    // space. Cap lead distance to a fraction of range so we don't aim wildly
+    // off when an enemy briefly bursts in one direction.
+    const leadFactor = t.ai ? 0.35 : 0.4;
+    let leadDX = other._smoothVX * travelT * leadFactor;
+    let leadDY = other._smoothVY * travelT * leadFactor;
+    const leadMag = Math.hypot(leadDX, leadDY);
+    const maxLead = Math.min(distToOther * 0.5, 90 * MAP_SCALE);
+    if (leadMag > maxLead) {
+      const k = maxLead / leadMag;
+      leadDX *= k; leadDY *= k;
+    }
+    const aimToward = Math.atan2(other.y + leadDY - t.y, other.x + leadDX - t.x);
+    updateTurret(t, aimToward, dt);
+  } else {
+    // Manual aim: turret rigidly follows chassis.
+    t.turretAngle = t.angle;
+  }
+
+  if (dx !== 0 || dy !== 0) {
+    // Chassis always rotates toward movement direction (treads point forward).
+    const targetAngle = Math.atan2(dy, dx);
+    let diff = targetAngle - t.angle;
+    while (diff > Math.PI) diff -= Math.PI * 2;
+    while (diff < -Math.PI) diff += Math.PI * 2;
+    const rotStep = ROT_SPEED * dt;
+    if (Math.abs(diff) < rotStep) t.angle = targetAngle;
+    else t.angle += Math.sign(diff) * rotStep;
+    const speed = getSpeedFor(t);
+    const len = Math.hypot(dx, dy);
+    const mvx = (dx / len) * speed * dt;
+    const mvy = (dy / len) * speed * dt;
+    const beforeX = t.x, beforeY = t.y;
+    if (!tankCollidesAt(t.x + mvx, t.y) && !tanksOverlap(t.x + mvx, t.y, other)) t.x += mvx;
+    if (!tankCollidesAt(t.x, t.y + mvy) && !tanksOverlap(t.x, t.y + mvy, other)) t.y += mvy;
+    // Accumulate actual distance traveled (accounts for wall sliding)
+    const moved = Math.hypot(t.x - beforeX, t.y - beforeY);
+    stats[t.id].distance += moved;
+    // Spawn ghost trail when the tank actually moved this frame. Throttle by
+    // distance so faster movement (speed powerup) spawns more ghosts naturally.
+    t.ghostAccum = (t.ghostAccum || 0) + moved;
+    if (t.ghostAccum >= 7) {
+      t.ghostAccum = 0;
+      ghosts.push({
+        x: beforeX, y: beforeY, angle: t.angle,
+        color: t.color, dark: t.dark,
+        life: 0.35, maxLife: 0.35
+      });
+    }
+    // Tread marks on battle canvas (persist for round)
+    t.treadAccum = (t.treadAccum || 0) + moved;
+    if (t.treadAccum >= 4) {
+      t.treadAccum = 0;
+      paintTreadMarks(t);
+    }
+  } else {
+    t.ghostAccum = 0;
+  }
+  if (t.cooldown > 0) t.cooldown -= dt;
+  if (fireBtn && t.cooldown <= 0) {
+    fireWeapon(t);
+  }
+}
+
+// Dispatch fire action based on currently held weapon (or default cannon).
+function fireWeapon(t) {
+  const weapon = t.weapon;
+  if (weapon === 'shotgun') {
+    fireShotgun(t);
+  } else if (weapon === 'homing') {
+    fireHoming(t);
+  } else if (weapon === 'laser') {
+    fireLaser(t);
+  } else if (weapon === 'pierce') {
+    firePierce(t);
+  } else {
+    // Default cannon (no weapon equipped) — uses triple buff if active
+    const activeCount = bullets.filter(b => b.owner === t.id).length;
+    const maxBullets = t.powerup === 'triple' ? MAX_BULLETS + 2 : MAX_BULLETS;
+    if (activeCount >= maxBullets) return;
+    if (t.powerup === 'triple') {
+      fireBullet(t, -0.22); fireBullet(t, 0); fireBullet(t, 0.22);
+      stats[t.id].shots += 3;
+    } else {
+      fireBullet(t, 0);
+      stats[t.id].shots++;
+    }
+    t.cooldown = getCooldownFor(t);
+    spawnMuzzleFlash(t);
+    addShake(2.5);
+    SFX.fire();
+  }
+}
+
+function fireShotgun(t) {
+  // 5 pellets in a fan, short range (shorter bullet life)
+  const angles = [-0.35, -0.18, 0, 0.18, 0.35];
+  const ta = t.turretAngle;
+  for (const a of angles) {
+    const muzzleDist = TANK_SIZE / 2 + 4;
+    bullets.push({
+      x: t.x + Math.cos(ta) * muzzleDist,
+      y: t.y + Math.sin(ta) * muzzleDist,
+      vx: Math.cos(ta + a) * (BULLET_SPEED * 1.1),
+      vy: Math.sin(ta + a) * (BULLET_SPEED * 1.1),
+      owner: t.id,
+      bounces: 0,        // shotgun pellets don't bounce
+      life: 0.67,        // seconds (was 40 frames)
+      kind: 'shotgun',
+    });
+  }
+  stats[t.id].shots += 5;
+  t.ammo--;
+  if (t.ammo <= 0) { t.weapon = null; }
+  t.cooldown = FIRE_COOLDOWN * 1.4;
+  spawnMuzzleFlash(t);
+  SFX.shotgunFire();
+}
+
+function fireHoming(t) {
+  // Homing missile — weaker turn rate so it's not perfect tracking
+  const muzzleDist = TANK_SIZE / 2 + 4;
+  const ta = t.turretAngle;
+  bullets.push({
+    x: t.x + Math.cos(ta) * muzzleDist,
+    y: t.y + Math.sin(ta) * muzzleDist,
+    vx: Math.cos(ta) * (BULLET_SPEED * 0.75),
+    vy: Math.sin(ta) * (BULLET_SPEED * 0.75),
+    owner: t.id,
+    bounces: 0,
+    life: 4,             // seconds (was 240 frames)
+    kind: 'homing',
+    turnRate: 3.3,       // rad/s (was 0.055 rad/frame × 60)
+  });
+  stats[t.id].shots++;
+  t.ammo--;
+  if (t.ammo <= 0) { t.weapon = null; }
+  t.cooldown = FIRE_COOLDOWN * 1.3;
+  spawnMuzzleFlash(t);
+  addShake(3);
+  SFX.fire();
+}
+
+function firePierce(t) {
+  // Pierce bullet — punches through one wall
+  const muzzleDist = TANK_SIZE / 2 + 4;
+  const ta = t.turretAngle;
+  bullets.push({
+    x: t.x + Math.cos(ta) * muzzleDist,
+    y: t.y + Math.sin(ta) * muzzleDist,
+    vx: Math.cos(ta) * (BULLET_SPEED * 1.2),
+    vy: Math.sin(ta) * (BULLET_SPEED * 1.2),
+    owner: t.id,
+    bounces: 0,          // no bouncing
+    life: 3.33,          // seconds (was 200 frames)
+    kind: 'pierce',
+    wallPierces: 1,
+    piercedWallSet: new Set(),
+  });
+  stats[t.id].shots++;
+  t.ammo--;
+  if (t.ammo <= 0) { t.weapon = null; }
+  t.cooldown = getCooldownFor(t);
+  spawnMuzzleFlash(t);
+  addShake(3);
+  SFX.fire();
+}
+
+function fireLaser(t) {
+  // Laser — instant beam scan from tank, hits first tank/wall along the line
+  // Implemented as a short-lived visual "bullet" entity at the hit point
+  const ta = t.turretAngle;
+  const startX = t.x + Math.cos(ta) * (TANK_SIZE / 2 + 4);
+  const startY = t.y + Math.sin(ta) * (TANK_SIZE / 2 + 4);
+  const dx = Math.cos(ta);
+  const dy = Math.sin(ta);
+  const maxDist = 900;
+  const step = 3;
+  let endX = startX, endY = startY, hitTank = null;
+  for (let d = 0; d < maxDist; d += step) {
+    const x = startX + dx * d;
+    const y = startY + dy * d;
+    if (x < 0 || x > W || y < 0 || y > H) { endX = x; endY = y; break; }
+    let wallHit = false;
+    for (const w of walls) {
+      if (pointInRect(x, y, w)) { endX = x; endY = y; wallHit = true; break; }
+    }
+    if (wallHit) break;
+    // hit opponent tank?
+    const half = TANK_SIZE / 2;
+    for (const other of [tank1, tank2]) {
+      if (other.id === t.id) continue;
+      if (x > other.x - half && x < other.x + half && y > other.y - half && y < other.y + half) {
+        hitTank = other;
+        endX = x; endY = y;
+        break;
+      }
+    }
+    if (hitTank) break;
+    endX = x; endY = y;
+  }
+  stats[t.id].shots++;
+  if (hitTank) {
+    stats[t.id].hits++;
+    if (hitTank.powerup === 'shield') {
+      hitTank.powerup = null; hitTank.powerupTime = 0;
+      spawnShieldBreak(hitTank.x, hitTank.y);
+      SFX.shieldBreak();
+      stats[hitTank.id].shieldsBlocked++;
+    } else {
+      hitTank.hp--;
+      hitTank.hitFlash = 0.2;   // seconds (was 12 frames)
+      stats[hitTank.id].damageTaken++;
+      spawnExplosion(endX, endY, hitTank.color);
+      spawnHitVignette(hitTank.x, hitTank.y);
+      if (hitTank.hp <= 0) {
+        SFX.explosion();
+        addShake(14);
+        slowmoTimer = 0.55;
+        endRound(hitTank === tank1 ? 'p2' : 'p1');
+      } else {
+        SFX.hit();
+        addShake(6);
+      }
+    }
+  }
+  // Create visual laser entity
+  particles.push({
+    laser: true,
+    x1: startX, y1: startY, x2: endX, y2: endY,
+    color: t.color,
+    life: 0.3, maxLife: 0.3,  // seconds (was 18 frames)
+    x: 0, y: 0, vx: 0, vy: 0, size: 0,
+  });
+  t.ammo--;
+  if (t.ammo <= 0) { t.weapon = null; }
+  t.cooldown = FIRE_COOLDOWN * 1.6;
+  addShake(4);
+  SFX.fire();
+  SFX.laserZap();
+}
+
+function updateBullets(dt) {
+  for (let i = bullets.length - 1; i >= 0; i--) {
+    const b = bullets[i];
+    b.life -= dt;
+    if (b.life <= 0) { bullets.splice(i, 1); continue; }
+
+    // Trail particle — spawn based on cumulative trail timer (time-based, not frame-based)
+    b.trailTimer = (b.trailTimer || 0) + dt;
+    const trailInterval = b.kind === 'pierce' ? 0.016    // every ~1 frame @ 60fps
+                        : b.kind === 'shotgun' ? 0.05    // every 3 frames
+                        : 0.033;                          // every 2 frames
+    if (b.trailTimer >= trailInterval) {
+      b.trailTimer = 0;
+      if (b.kind === 'homing') {
+        particles.push({
+          x: b.x, y: b.y, vx: 0, vy: 0,
+          life: 0.23, maxLife: 0.23, size: 3,
+          color: b.owner === 'p1' ? '#86efac' : '#93c5fd',
+        });
+      } else if (b.kind === 'pierce') {
+        particles.push({
+          x: b.x, y: b.y, vx: 0, vy: 0,
+          life: 0.17, maxLife: 0.17, size: 2,
+          color: '#fbbf24',
+        });
+      } else if (b.kind === 'shotgun') {
+        particles.push({
+          x: b.x, y: b.y, vx: 0, vy: 0,
+          life: 0.13, maxLife: 0.13, size: 1,
+          color: '#fca5a5',
+        });
+      } else {
+        particles.push({
+          x: b.x, y: b.y, vx: 0, vy: 0,
+          life: 0.17, maxLife: 0.17, size: 2,
+          color: b.owner === 'p1' ? '#86efac' : '#93c5fd',
+        });
+      }
+    }
+
+    // Homing missile: adjust velocity toward opponent tank
+    if (b.kind === 'homing') {
+      const target = b.owner === 'p1' ? tank2 : tank1;
+      const targetAngle = Math.atan2(target.y - b.y, target.x - b.x);
+      const currentAngle = Math.atan2(b.vy, b.vx);
+      let diff = targetAngle - currentAngle;
+      while (diff > Math.PI) diff -= Math.PI * 2;
+      while (diff < -Math.PI) diff += Math.PI * 2;
+      const maxTurn = b.turnRate * dt;
+      const turn = Math.max(-maxTurn, Math.min(maxTurn, diff));
+      const newAngle = currentAngle + turn;
+      const speed = Math.hypot(b.vx, b.vy);
+      b.vx = Math.cos(newAngle) * speed;
+      b.vy = Math.sin(newAngle) * speed;
+    }
+
+    // Velocity integration with dt
+    let nx = b.x + b.vx * dt, ny = b.y + b.vy * dt;
+    const hitX = nx < BULLET_SIZE || nx > W - BULLET_SIZE;
+    const hitY = ny < BULLET_SIZE || ny > H - BULLET_SIZE;
+    if (hitX || hitY) {
+      if (b.bounces > 0) {
+        // Spark at impact point — pick the actual edge being hit
+        const sx = hitX ? (nx < BULLET_SIZE ? 0 : W) : nx;
+        const sy = hitY ? (ny < BULLET_SIZE ? 0 : H) : ny;
+        spawnRicochetSparks(sx, sy, b.vx, b.vy);
+        addShake(2);
+        if (hitX) b.vx = -b.vx;
+        if (hitY) b.vy = -b.vy;
+        b.bounces--;
+        nx = b.x + b.vx * dt;
+        ny = b.y + b.vy * dt;
+        SFX.bounce();
+        stats[b.owner].bounces++;
+      } else {
+        bullets.splice(i, 1);
+        continue;
+      }
+    }
+    let removed = false;
+    for (const w of walls) {
+      if (pointInRect(nx, ny, w)) {
+        // Pierce: punch through one wall
+        if (b.kind === 'pierce' && b.wallPierces > 0 && !b.piercedWallSet.has(w)) {
+          b.wallPierces--;
+          b.piercedWallSet.add(w);
+          // Step through the wall using a small fixed sub-dt so wall thickness is respected
+          const subDt = 0.016;  // ~1 frame step
+          const exitSteps = 20;
+          let px = nx, py = ny;
+          for (let s = 0; s < exitSteps; s++) {
+            px += b.vx * subDt;
+            py += b.vy * subDt;
+            if (!pointInRect(px, py, w)) break;
+          }
+          nx = px; ny = py;
+          // Particle puff at entry
+          for (let p = 0; p < 6; p++) {
+            const a = Math.random() * Math.PI * 2;
+            const s = 60 + Math.random() * 120;   // px/s (was 1-3 px/frame × 60)
+            particles.push({
+              x: b.x, y: b.y,
+              vx: Math.cos(a)*s, vy: Math.sin(a)*s,
+              life: 0.33, maxLife: 0.33,  // seconds (was 20 frames)
+              size: 2, color: '#fbbf24'
+            });
+          }
+          break;
+        }
+        if (b.bounces > 0) {
+          spawnRicochetSparks(b.x, b.y, b.vx, b.vy);
+          addShake(2);
+          const prevInX = b.x >= w.x && b.x <= w.x + w.w;
+          const prevInY = b.y >= w.y && b.y <= w.y + w.h;
+          if (!prevInX) b.vx = -b.vx;
+          if (!prevInY) b.vy = -b.vy;
+          b.bounces--;
+          nx = b.x + b.vx * dt; ny = b.y + b.vy * dt;
+          SFX.bounce();
+          stats[b.owner].bounces++;
+        } else { bullets.splice(i, 1); removed = true; }
+        break;
+      }
+    }
+    if (removed) continue;
+    b.x = nx; b.y = ny;
+    for (const t of [tank1, tank2]) {
+      const half = TANK_SIZE / 2;
+      if (b.x > t.x - half && b.x < t.x + half && b.y > t.y - half && b.y < t.y + half) {
+        if (b.owner !== t.id) stats[b.owner].hits++;
+        if (t.powerup === 'shield') {
+          t.powerup = null; t.powerupTime = 0;
+          spawnShieldBreak(t.x, t.y);
+          SFX.shieldBreak();
+          stats[t.id].shieldsBlocked++;
+        } else {
+          t.hp--;
+          t.hitFlash = 0.13;   // seconds (was 8 frames)
+          stats[t.id].damageTaken++;
+          spawnExplosion(b.x, b.y, t.color);
+          spawnHitVignette(t.x, t.y);
+          if (t.hp <= 0) {
+            SFX.explosion();
+            addShake(14);
+            slowmoTimer = 0.55;
+            endRound(t === tank1 ? 'p2' : 'p1');
+          } else {
+            SFX.hit();
+            addShake(6);
+          }
+        }
+        bullets.splice(i, 1);
+        updateHUD();
+        break;
+      }
+    }
+  }
+}
+
+function spawnExplosion(x, y, color) {
+  for (let i = 0; i < 18; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const s = 60 + Math.random() * 180;   // px/s (was 1-4 px/frame × 60)
+    const life = 0.5 + Math.random() * 0.33;   // seconds (was 30-50 frames)
+    particles.push({ x, y, vx: Math.cos(a)*s, vy: Math.sin(a)*s, life, maxLife: life, size: 2+Math.random()*2, color });
+  }
+  // Bright additive flash core for "BOOM" feel
+  for (let i = 0; i < 6; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const s = 30 + Math.random() * 60;
+    particles.push({ x, y, vx: Math.cos(a)*s, vy: Math.sin(a)*s, life: 0.2, maxLife: 0.2, size: 5, color: '#fff7d0', glow: true });
+  }
+  // Scorch mark stays on ground
+  paintScorch(x, y);
+}
+
+function spawnMuzzleFlash(t) {
+  const ta = t.turretAngle;
+  const mx = t.x + Math.cos(ta)*(TANK_SIZE/2+4);
+  const my = t.y + Math.sin(ta)*(TANK_SIZE/2+4);
+  // Sparks
+  for (let i = 0; i < 8; i++) {
+    const a = ta + (Math.random()-0.5)*0.7;
+    const s = 150 + Math.random() * 180;
+    const life = 0.18 + Math.random() * 0.14;
+    particles.push({ x: mx, y: my, vx: Math.cos(a)*s, vy: Math.sin(a)*s, life, maxLife: life, size: 2, color: '#ffd966' });
+  }
+  // Bright additive blob at muzzle for big "POP"
+  particles.push({ x: mx, y: my, vx: 0, vy: 0, life: 0.1, maxLife: 0.1, size: 9, color: '#fff7d0', glow: true });
+  // Cone-shaped flame jet
+  for (let i = 0; i < 4; i++) {
+    const a = ta + (Math.random()-0.5)*0.35;
+    const s = 220 + Math.random() * 80;
+    particles.push({ x: mx, y: my, vx: Math.cos(a)*s, vy: Math.sin(a)*s, life: 0.12, maxLife: 0.12, size: 4, color: '#ffb84a', glow: true });
+  }
+}
+
+// --- BATTLE FEEL: screen shake, slow-mo, hit vignettes, ricochet sparks, scorch marks ---
+let screenShake = { mag: 0, time: 0 };
+let slowmoTimer = 0;
+let hitVignettes = [];
+
+function addShake(mag) {
+  if (mag > screenShake.mag) screenShake.mag = mag;
+  screenShake.time = Math.max(screenShake.time, 0.22);
+}
+function updateShake(dt) {
+  if (screenShake.time > 0) {
+    screenShake.time -= dt;
+    if (screenShake.time <= 0) { screenShake.mag = 0; screenShake.time = 0; }
+    else screenShake.mag *= Math.pow(0.001, dt);  // exponential decay
+  }
+}
+function spawnHitVignette(x, y) {
+  hitVignettes.push({ x, y, life: 0.45, maxLife: 0.45 });
+}
+function updateHitVignettes(dt) {
+  for (let i = hitVignettes.length - 1; i >= 0; i--) {
+    hitVignettes[i].life -= dt;
+    if (hitVignettes[i].life <= 0) hitVignettes.splice(i, 1);
+  }
+}
+function spawnRicochetSparks(x, y, vx, vy) {
+  const back = Math.atan2(-vy, -vx);
+  for (let i = 0; i < 7; i++) {
+    const a = back + (Math.random()-0.5) * Math.PI * 0.9;
+    const s = 100 + Math.random() * 200;
+    particles.push({ x, y, vx: Math.cos(a)*s, vy: Math.sin(a)*s, life: 0.22, maxLife: 0.22, size: 1.6, color: '#fde047', glow: true });
+  }
+}
+
+// Offscreen canvas accumulates tread marks + scorch marks for the round.
+const battleCanvas = document.createElement('canvas');
+battleCanvas.width = W; battleCanvas.height = H;
+const bctx = battleCanvas.getContext('2d');
+function clearBattleCanvas() { bctx.clearRect(0, 0, W, H); }
+
+function paintTreadMarks(t) {
+  bctx.save();
+  bctx.translate(t.x, t.y);
+  bctx.rotate(t.angle);
+  bctx.fillStyle = 'rgba(0, 0, 0, 0.10)';
+  const S = TANK_SIZE;
+  // Two short dark streaks at tread offsets
+  bctx.fillRect(-S/2, -S/2 - 1, 4, 2);
+  bctx.fillRect(-S/2, S/2 - 1, 4, 2);
+  bctx.restore();
+}
+
+function paintScorch(x, y) {
+  const r = 22 + Math.random() * 8;
+  const grad = bctx.createRadialGradient(x, y, 0, x, y, r);
+  grad.addColorStop(0, 'rgba(0, 0, 0, 0.55)');
+  grad.addColorStop(0.6, 'rgba(20, 10, 5, 0.3)');
+  grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  bctx.fillStyle = grad;
+  bctx.beginPath();
+  bctx.arc(x, y, r, 0, Math.PI * 2);
+  bctx.fill();
+}
+function spawnPickupBurst(x, y, color) {
+  for (let i = 0; i < 20; i++) {
+    const a = (i / 20) * Math.PI * 2;
+    const s = 120 + Math.random() * 120;   // px/s
+    particles.push({ x, y, vx: Math.cos(a)*s, vy: Math.sin(a)*s, life: 0.42, maxLife: 0.42, size: 3, color });
+  }
+}
+function spawnShieldBreak(x, y) {
+  for (let i = 0; i < 24; i++) {
+    const a = (i / 24) * Math.PI * 2;
+    particles.push({ x, y, vx: Math.cos(a)*240, vy: Math.sin(a)*240, life: 0.33, maxLife: 0.33, size: 3, color: '#22d3ee' });
+  }
+}
+function updateParticles(dt) {
+  // Velocity-based drag: equivalent to multiplying by 0.94 per frame at 60fps
+  // 0.94^60 ≈ 0.024, so decay factor per second is ~0.024; use Math.pow for frame-rate independence
+  const drag = Math.pow(0.94, dt * 60);
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    p.vx *= drag; p.vy *= drag;
+    p.life -= dt;
+    if (p.life <= 0) particles.splice(i, 1);
+  }
+}
+
+function updateGhosts(dt) {
+  for (let i = ghosts.length - 1; i >= 0; i--) {
+    ghosts[i].life -= dt;
+    if (ghosts[i].life <= 0) ghosts.splice(i, 1);
+  }
+}
+
+// Render motion-trail silhouettes. Cheap rounded-rect chassis at the captured
+// pose, alpha derived from remaining life.
+function drawGhosts() {
+  const S = TANK_SIZE;
+  const half = S / 2;
+  for (const g of ghosts) {
+    const a = Math.max(0, g.life / g.maxLife);
+    ctx.save();
+    ctx.globalAlpha = a * 0.35;
+    ctx.translate(g.x, g.y);
+    ctx.rotate(g.angle);
+    ctx.fillStyle = g.color;
+    ctx.fillRect(-half + 1, -half + 2, S - 2, S - 4);
+    ctx.fillStyle = g.dark;
+    ctx.fillRect(-half + 1, -half + 2, S - 2, 2);
+    ctx.restore();
+  }
+  ctx.globalAlpha = 1;
+}
+
+// --- Floating text (pickup announcement) ---
+const FLOAT_LIFE = 1.25;   // seconds (was 75 frames)
+function spawnFloatingText(tank, label, iconId, color) {
+  floatingTexts.push({
+    tank,
+    label, iconId, color,
+    offsetY: -TANK_SIZE/2 - 12,
+    life: FLOAT_LIFE,
+    maxLife: FLOAT_LIFE,
+  });
+}
+
+function updateFloatingTexts(dt) {
+  for (let i = floatingTexts.length - 1; i >= 0; i--) {
+    const f = floatingTexts[i];
+    f.offsetY -= 33 * dt;     // drift upward at 33 px/s (was 0.55 px/frame × 60)
+    f.life -= dt;
+    if (f.life <= 0) floatingTexts.splice(i, 1);
+  }
+}
+
+function drawFloatingTexts() {
+  for (const f of floatingTexts) {
+    const t = f.progress = 1 - f.life / f.maxLife;
+    // pop-in scale: grow fast from 0.6 → 1.1 → settle to 1
+    let scale;
+    if (t < 0.15) scale = 0.6 + (t / 0.15) * 0.5;         // 0.6 → 1.1
+    else if (t < 0.25) scale = 1.1 - ((t - 0.15) / 0.1) * 0.1; // 1.1 → 1.0
+    else scale = 1.0;
+    // alpha: full for first 70%, fade last 30%
+    const alpha = t < 0.7 ? 1 : 1 - (t - 0.7) / 0.3;
+
+    const x = f.tank.x;
+    const y = f.tank.y + f.offsetY;
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(x, y);
+    ctx.scale(scale, scale);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+
+    ctx.font = 'bold 16px "Segoe UI", "Malgun Gothic", sans-serif';
+    // Measure label so we can lay icon+text symmetrically around origin
+    const labelW = ctx.measureText(f.label).width;
+    const iconSize = 18;
+    const gap = 4;
+    const totalW = iconSize + gap + labelW;
+    const labelX = -totalW / 2 + iconSize + gap + labelW / 2;
+    const iconX = -totalW / 2 + iconSize / 2;
+
+    // Text with dark outline for readability
+    ctx.strokeStyle = 'rgba(20, 12, 8, 0.95)';
+    ctx.lineWidth = 4;
+    ctx.lineJoin = 'round';
+    ctx.strokeText(f.label, labelX, 0);
+    ctx.fillStyle = f.color;
+    ctx.fillText(f.label, labelX, 0);
+
+    drawIcon(ctx, f.iconId, iconX, 0, iconSize);
+
+    ctx.restore();
+  }
+}
+
+// Raycast for aim line — stops at wall, enemy, or canvas edge
+function castAimRay(t, other) {
+  const step = 3;
+  const maxDist = 500;
+  const a = t.turretAngle;
+  let x = t.x + Math.cos(a) * (TANK_SIZE/2 + 2);
+  let y = t.y + Math.sin(a) * (TANK_SIZE/2 + 2);
+  const dx = Math.cos(a) * step;
+  const dy = Math.sin(a) * step;
+  for (let d = 0; d < maxDist; d += step) {
+    x += dx; y += dy;
+    if (x < 0 || x > W || y < 0 || y > H) return { x, y, onTarget: false };
+    for (const w of walls) if (pointInRect(x, y, w)) return { x, y, onTarget: false };
+    const half = TANK_SIZE / 2;
+    if (x > other.x - half && x < other.x + half && y > other.y - half && y < other.y + half) {
+      return { x, y, onTarget: true };
+    }
+  }
+  return { x, y, onTarget: false };
+}
+
+function drawTank(t) {
+  // ground shadow (stays below tank, doesn't rotate with it — light from top)
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+  ctx.beginPath();
+  ctx.ellipse(t.x + 3, t.y + 5, TANK_SIZE/2 + 3, TANK_SIZE/3, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // shield bubble (above shadow, below tank)
+  if (t.powerup === 'shield') {
+    const pulse = 1 + Math.sin(Date.now() / 150) * 0.08;
+    ctx.strokeStyle = 'rgba(34, 211, 238, 0.4)';
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, (TANK_SIZE/2 + 6) * pulse, 0, Math.PI*2);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(34, 211, 238, 0.9)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+  if (t.powerup === 'speed') {
+    ctx.fillStyle = 'rgba(234, 179, 8, 0.2)';
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, TANK_SIZE/2 + 5, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  ctx.save();
+  ctx.translate(t.x, t.y);
+  ctx.rotate(t.angle);
+
+  const S = TANK_SIZE;
+  const half = S / 2;
+  const flash = t.hitFlash > 0;
+  const bodyColor = flash ? '#fff' : t.color;
+  const lightColor = flash ? '#fff' : t.light;
+  const darkColor = flash ? '#ddd' : t.dark;
+  const strokeColor = flash ? '#888' : t.stroke;
+
+  // --- Treads (caterpillar tracks) ---
+  // Tank-relative: "forward" is +x direction. Treads run along +x on top and bottom (left/right of barrel axis).
+  const treadW = S + 2;
+  const treadH = 6;
+  // top tread (one side)
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillRect(-half - 1, -half - 2, treadW, treadH);
+  // bottom tread
+  ctx.fillRect(-half - 1, half - 4, treadW, treadH);
+
+  // tread links (little ridges)
+  ctx.fillStyle = '#3a3a3a';
+  const linkCount = 7;
+  const linkSpacing = treadW / linkCount;
+  for (let i = 0; i < linkCount; i++) {
+    const lx = -half - 1 + i * linkSpacing + 1;
+    ctx.fillRect(lx, -half - 2, linkSpacing - 2, 1);
+    ctx.fillRect(lx, -half - 2 + treadH - 1, linkSpacing - 2, 1);
+    ctx.fillRect(lx, half - 4, linkSpacing - 2, 1);
+    ctx.fillRect(lx, half - 4 + treadH - 1, linkSpacing - 2, 1);
+  }
+  // tread highlight
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+  ctx.fillRect(-half - 1, -half - 2, treadW, 1);
+  ctx.fillRect(-half - 1, half - 4, treadW, 1);
+
+  // --- Body (between treads) ---
+  const bodyTop = -half + 2;
+  const bodyBot = half - 2;
+  const bodyH = bodyBot - bodyTop;
+
+  // body base (darker)
+  ctx.fillStyle = darkColor;
+  ctx.fillRect(-half + 1, bodyTop, S - 2, bodyH);
+  // body top half lit (lighter) — "sun" is from the tank's forward-left (up-left in screen)
+  // but since tank rotates, we use the tank-relative "top" edge (negative y in local space)
+  ctx.fillStyle = bodyColor;
+  ctx.fillRect(-half + 1, bodyTop, S - 2, bodyH / 2);
+  // top edge highlight strip
+  ctx.fillStyle = lightColor;
+  ctx.fillRect(-half + 1, bodyTop, S - 2, 2);
+  // bottom edge shadow
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+  ctx.fillRect(-half + 1, bodyBot - 2, S - 2, 2);
+
+  // body outline
+  ctx.strokeStyle = strokeColor;
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(-half + 1, bodyTop, S - 2, bodyH);
+
+  // front plate detail (small rectangle at front)
+  ctx.fillStyle = darkColor;
+  ctx.fillRect(half - 4, bodyTop + 2, 3, bodyH - 4);
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(half - 4, bodyTop + 2, 3, bodyH - 4);
+
+  // --- Turret + Barrel (rotates independently of chassis for auto-aim) ---
+  // Apply the turret's extra rotation relative to the chassis we're already
+  // rotated into. This lets the cannon swivel toward the enemy while the
+  // tank body still faces movement direction.
+  ctx.rotate(t.turretAngle - t.angle);
+  const turretR = S / 3;
+  // turret shadow (offset slightly back to suggest height)
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+  ctx.beginPath();
+  ctx.arc(1, 1, turretR + 0.5, 0, Math.PI*2);
+  ctx.fill();
+  // turret base (darker ring)
+  ctx.fillStyle = strokeColor;
+  ctx.beginPath();
+  ctx.arc(0, 0, turretR, 0, Math.PI*2);
+  ctx.fill();
+  // turret top (lighter)
+  ctx.fillStyle = darkColor;
+  ctx.beginPath();
+  ctx.arc(0, 0, turretR - 1.5, 0, Math.PI*2);
+  ctx.fill();
+  // turret highlight (upper-left crescent — in tank-local, forward is +x so highlight at -y side)
+  ctx.fillStyle = lightColor;
+  ctx.beginPath();
+  ctx.arc(-1, -1.5, turretR - 3, Math.PI, 0, false);
+  ctx.fill();
+
+  // rivets on turret (3 small dots around the rim)
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+  const rivetPositions = [
+    [Math.cos(Math.PI * 0.75), Math.sin(Math.PI * 0.75)],
+    [Math.cos(Math.PI * 1.25), Math.sin(Math.PI * 1.25)],
+    [Math.cos(Math.PI * 1.75), Math.sin(Math.PI * 1.75)],
+    [Math.cos(Math.PI * 0.25), Math.sin(Math.PI * 0.25)],
+  ];
+  for (const [rx, ry] of rivetPositions) {
+    ctx.beginPath();
+    ctx.arc(rx * (turretR - 2.5), ry * (turretR - 2.5), 1, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  // --- Barrel ---
+  const barrelLen = S/2 + 7;
+  const barrelBaseW = 7;  // chunkier at turret
+  const barrelTipW = 5;
+  // barrel shadow
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+  ctx.fillRect(2, -barrelBaseW/2 + 1, barrelLen, barrelBaseW);
+  // barrel main
+  ctx.fillStyle = '#2a2a2a';
+  ctx.beginPath();
+  ctx.moveTo(2, -barrelBaseW/2);
+  ctx.lineTo(barrelLen - 3, -barrelTipW/2);
+  ctx.lineTo(barrelLen - 3, barrelTipW/2);
+  ctx.lineTo(2, barrelBaseW/2);
+  ctx.closePath();
+  ctx.fill();
+  // barrel top highlight
+  ctx.fillStyle = '#4a4a4a';
+  ctx.beginPath();
+  ctx.moveTo(2, -barrelBaseW/2);
+  ctx.lineTo(barrelLen - 3, -barrelTipW/2);
+  ctx.lineTo(barrelLen - 3, -barrelTipW/2 + 1);
+  ctx.lineTo(2, -barrelBaseW/2 + 1);
+  ctx.closePath();
+  ctx.fill();
+  // muzzle band (ring at the tip)
+  ctx.fillStyle = '#1a1a1a';
+  ctx.fillRect(barrelLen - 5, -barrelBaseW/2 - 0.5, 3, barrelBaseW + 1);
+  // muzzle opening (dark dot at the very tip)
+  ctx.fillStyle = '#000';
+  ctx.fillRect(barrelLen - 2, -barrelTipW/2 + 1, 2, barrelTipW - 2);
+
+  ctx.restore();
+}
+
+// HP pips above the tank — segmented bar showing current/max HP
+function drawTankHP(t) {
+  if (t.hp <= 0) return;
+  const pipW = 6;       // width of each pip
+  const pipH = 4;       // height
+  const gap = 1;        // gap between pips
+  const totalW = MAX_HP * pipW + (MAX_HP - 1) * gap;
+  const startX = t.x - totalW / 2;
+  const y = t.y - TANK_SIZE / 2 - 11;
+
+  // background row (empty pips)
+  for (let i = 0; i < MAX_HP; i++) {
+    const px = startX + i * (pipW + gap);
+    // dark outline
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.fillRect(px - 1, y - 1, pipW + 2, pipH + 2);
+    // empty slot
+    ctx.fillStyle = 'rgba(40, 40, 40, 0.85)';
+    ctx.fillRect(px, y, pipW, pipH);
+  }
+  // filled pips (current HP)
+  const filledColor = t.hp <= 2 ? '#ef4444' : t.color;
+  const highlightColor = t.hp <= 2 ? '#fca5a5' : t.light;
+  for (let i = 0; i < t.hp; i++) {
+    const px = startX + i * (pipW + gap);
+    ctx.fillStyle = filledColor;
+    ctx.fillRect(px, y, pipW, pipH);
+    // 1px top highlight for pop
+    ctx.fillStyle = highlightColor;
+    ctx.fillRect(px, y, pipW, 1);
+  }
+}
+
+function drawAimLine(t, other) {
+  const hit = castAimRay(t, other);
+  const startX = t.x + Math.cos(t.turretAngle) * (TANK_SIZE/2 + 2);
+  const startY = t.y + Math.sin(t.turretAngle) * (TANK_SIZE/2 + 2);
+
+  ctx.save();
+  ctx.setLineDash([3, 7]);
+  ctx.lineDashOffset = -Date.now() / 50;
+  if (hit.onTarget) {
+    ctx.strokeStyle = '#ef4444';
+    ctx.globalAlpha = 0.9;
+    ctx.lineWidth = 2;
+  } else {
+    ctx.strokeStyle = t.color;
+    ctx.globalAlpha = 0.3;
+    ctx.lineWidth = 1.5;
+  }
+  ctx.beginPath();
+  ctx.moveTo(startX, startY);
+  ctx.lineTo(hit.x, hit.y);
+  ctx.stroke();
+  if (hit.onTarget) {
+    ctx.setLineDash([]);
+    ctx.globalAlpha = 0.9;
+    ctx.fillStyle = '#ef4444';
+    ctx.beginPath();
+    ctx.arc(hit.x, hit.y, 5, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawPowerups() {
+  for (const p of powerups) {
+    if (!p.type) continue;  // defensive: skip malformed pickups
+    // spawnTime is in seconds now — scale frequencies accordingly
+    const bob = Math.sin((p.spawnTime * 3) + p.x * 0.05) * 3;
+    const scale = Math.min(1, p.spawnTime * 3);   // full scale at ~0.33s
+    const pulseRing = 14 + Math.sin(p.spawnTime * 4) * 3;
+    ctx.save();
+    ctx.translate(p.x, p.y + bob);
+    ctx.scale(scale, scale);
+    ctx.fillStyle = p.type.color + '33';
+    ctx.beginPath();
+    ctx.arc(0, 0, 22, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = p.type.color;
+    ctx.globalAlpha = 0.5;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, 0, pulseRing + 4, 0, Math.PI*2);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = p.type.color;
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, 0, 14, 0, Math.PI*2);
+    ctx.fill();
+    ctx.stroke();
+    drawIcon(ctx, p.type.id, 0, 0, 18);
+    ctx.restore();
+  }
+}
+
+// pre-bake each wall to its own canvas so we don't recompute bricks every frame
+// --- Theme palettes: each defines wall color scheme + ground color ---
+// Wall fields: brick, mortar, highlight, shadow, border, baseFill (behind brick gaps)
+// Ground fields: canvasBg, dotColor, hatchColor
+const THEMES = {
+  brick: {
+    pattern: 'brick', accent: '#f5d742',
+    baseFill: '#6b4f3a',
+    brickRGB: [107, 79, 58],
+    mortar:    'rgba(40, 28, 20, 0.55)',
+    highlight: 'rgba(255, 220, 170, 0.22)',
+    shadow:    'rgba(0, 0, 0, 0.4)',
+    border:    'rgba(30, 20, 14, 0.9)',
+    canvasBg:  '#3a3528',
+    dotColor:  'rgba(255, 230, 180, 0.05)',
+    hatchColor:'rgba(0, 0, 0, 0.06)',
+  },
+  stone: {
+    pattern: 'brick', accent: '#9aa3b2',
+    baseFill: '#5e5e63',
+    brickRGB: [100, 100, 108],
+    mortar:    'rgba(25, 25, 30, 0.6)',
+    highlight: 'rgba(220, 220, 230, 0.22)',
+    shadow:    'rgba(0, 0, 0, 0.45)',
+    border:    'rgba(20, 20, 25, 0.9)',
+    canvasBg:  '#2e2e34',
+    dotColor:  'rgba(200, 200, 215, 0.05)',
+    hatchColor:'rgba(0, 0, 0, 0.07)',
+  },
+  sandstone: {
+    pattern: 'block', accent: '#f0c98b',
+    baseFill: '#b08858',
+    brickRGB: [188, 148, 98],
+    mortar:    'rgba(90, 60, 30, 0.5)',
+    highlight: 'rgba(255, 240, 200, 0.25)',
+    shadow:    'rgba(60, 35, 10, 0.4)',
+    border:    'rgba(80, 50, 20, 0.85)',
+    canvasBg:  '#4a3e28',
+    dotColor:  'rgba(255, 220, 160, 0.06)',
+    hatchColor:'rgba(120, 80, 40, 0.06)',
+  },
+  metal: {
+    pattern: 'plate', accent: '#7fb6e0',
+    baseFill: '#4a5268',
+    brickRGB: [78, 86, 108],
+    mortar:    'rgba(15, 20, 30, 0.65)',
+    highlight: 'rgba(180, 200, 230, 0.3)',
+    shadow:    'rgba(0, 0, 0, 0.5)',
+    border:    'rgba(10, 15, 25, 0.9)',
+    canvasBg:  '#1f252e',
+    dotColor:  'rgba(150, 180, 220, 0.05)',
+    hatchColor:'rgba(0, 0, 0, 0.08)',
+  },
+  mossy: {
+    pattern: 'brick', accent: '#85c47b',
+    baseFill: '#4a5a3a',
+    brickRGB: [82, 100, 65],
+    mortar:    'rgba(25, 35, 20, 0.6)',
+    highlight: 'rgba(180, 220, 140, 0.22)',
+    shadow:    'rgba(0, 10, 0, 0.45)',
+    border:    'rgba(15, 25, 10, 0.9)',
+    canvasBg:  '#2a3525',
+    dotColor:  'rgba(180, 220, 140, 0.05)',
+    hatchColor:'rgba(0, 20, 0, 0.07)',
+    moss: true,
+  },
+  wood: {
+    pattern: 'plank', accent: '#e8a85a',
+    baseFill: '#7a5230',
+    brickRGB: [130, 88, 52],
+    mortar:    'rgba(50, 30, 15, 0.5)',
+    highlight: 'rgba(255, 210, 160, 0.22)',
+    shadow:    'rgba(30, 15, 5, 0.45)',
+    border:    'rgba(40, 22, 8, 0.9)',
+    canvasBg:  '#3d2b1a',
+    dotColor:  'rgba(255, 200, 140, 0.05)',
+    hatchColor:'rgba(40, 20, 10, 0.07)',
+  },
+  bloodstone: {
+    pattern: 'block', accent: '#e06b6b',
+    baseFill: '#5c2828',
+    brickRGB: [98, 48, 48],
+    mortar:    'rgba(30, 10, 10, 0.6)',
+    highlight: 'rgba(240, 180, 170, 0.2)',
+    shadow:    'rgba(0, 0, 0, 0.5)',
+    border:    'rgba(25, 8, 8, 0.9)',
+    canvasBg:  '#2a1515',
+    dotColor:  'rgba(240, 180, 170, 0.05)',
+    hatchColor:'rgba(0, 0, 0, 0.08)',
+  },
+  ice: {
+    pattern: 'ice', accent: '#a8d8ff',
+    baseFill: '#5a7890',
+    brickRGB: [130, 170, 200],
+    mortar:    'rgba(30, 60, 90, 0.55)',
+    highlight: 'rgba(230, 245, 255, 0.35)',
+    shadow:    'rgba(15, 35, 60, 0.4)',
+    border:    'rgba(20, 40, 65, 0.85)',
+    canvasBg:  '#1f3044',
+    dotColor:  'rgba(200, 230, 255, 0.07)',
+    hatchColor:'rgba(100, 150, 200, 0.06)',
+  },
+  obsidian: {
+    pattern: 'gloss', accent: '#a07ec0',
+    baseFill: '#2a2028',
+    brickRGB: [48, 38, 48],
+    mortar:    'rgba(0, 0, 5, 0.7)',
+    highlight: 'rgba(140, 100, 170, 0.18)',
+    shadow:    'rgba(0, 0, 0, 0.55)',
+    border:    'rgba(0, 0, 0, 0.95)',
+    canvasBg:  '#150f18',
+    dotColor:  'rgba(160, 120, 180, 0.05)',
+    hatchColor:'rgba(0, 0, 0, 0.1)',
+  },
+  gold: {
+    pattern: 'plate', accent: '#ffd966',
+    baseFill: '#a8842a',
+    brickRGB: [180, 140, 50],
+    mortar:    'rgba(80, 55, 15, 0.5)',
+    highlight: 'rgba(255, 240, 160, 0.3)',
+    shadow:    'rgba(70, 45, 5, 0.4)',
+    border:    'rgba(80, 55, 10, 0.85)',
+    canvasBg:  '#4a3818',
+    dotColor:  'rgba(255, 220, 140, 0.06)',
+    hatchColor:'rgba(100, 70, 20, 0.06)',
+  },
+};
+
+// Deterministic noise — same world position always returns same value.
+function hashNoise(x, y) {
+  return Math.abs(Math.sin(x * 12.9898 + y * 78.233) * 43758.5453) % 1;
+}
+
+// Brick / block masonry pattern. cellW/cellH tune block size.
+function paintBrick(g, w, T, cellW, cellH) {
+  const rows = Math.ceil(w.h / cellH) + 1;
+  const cols = Math.ceil(w.w / cellW) + 2;
+  const [br, bg, bb] = T.brickRGB;
+  for (let r = 0; r < rows; r++) {
+    const y = r * cellH;
+    const offset = (r % 2) * (cellW / 2);
+    for (let c2 = -1; c2 < cols; c2++) {
+      const x = c2 * cellW - offset;
+      const seed = hashNoise(x + w.x, y + w.y);
+      const v = Math.floor(seed * 18) - 9;
+      g.fillStyle = `rgb(${br + v}, ${bg + v}, ${bb + v})`;
+      g.fillRect(x, y, cellW - 1, cellH - 1);
+    }
+  }
+  g.fillStyle = T.mortar;
+  for (let r = 0; r < rows; r++) {
+    const y = r * cellH;
+    g.fillRect(0, y + cellH - 1, w.w, 1);
+    const offset = (r % 2) * (cellW / 2);
+    for (let c2 = -1; c2 < cols; c2++) {
+      const x = c2 * cellW - offset;
+      g.fillRect(x + cellW - 1, y, 1, cellH);
+    }
+  }
+}
+
+// Vertical wood plank pattern with grain streaks + knots.
+function paintPlank(g, w, T) {
+  const PLANK_W = 14;
+  const [br, bg, bb] = T.brickRGB;
+  const cols = Math.ceil(w.w / PLANK_W);
+  for (let c2 = 0; c2 < cols; c2++) {
+    const x = c2 * PLANK_W;
+    const seed = hashNoise(x + w.x, w.y);
+    const v = Math.floor(seed * 22) - 11;
+    g.fillStyle = `rgb(${br + v}, ${bg + v}, ${bb + v})`;
+    g.fillRect(x, 0, PLANK_W - 1, w.h);
+    // plank gap
+    g.fillStyle = T.mortar;
+    g.fillRect(x + PLANK_W - 1, 0, 1, w.h);
+    // grain streaks
+    g.fillStyle = T.shadow;
+    for (let s = 0; s < 3; s++) {
+      const sy = Math.floor(hashNoise(x + s, w.y + s * 13) * w.h);
+      g.fillRect(x + 1, sy, PLANK_W - 3, 1);
+    }
+    // occasional knot
+    if (seed > 0.78) {
+      const ky = Math.floor(hashNoise(x, w.y + 7) * (w.h - 4)) + 2;
+      g.fillStyle = `rgba(30, 15, 5, 0.5)`;
+      g.beginPath();
+      g.arc(x + PLANK_W / 2, ky, 2, 0, Math.PI * 2);
+      g.fill();
+    }
+  }
+}
+
+// Riveted metal plate pattern. Large square panels with rivet dots at corners.
+function paintPlate(g, w, T) {
+  const PLATE = 32;
+  const [br, bg, bb] = T.brickRGB;
+  // base diagonal sheen
+  const grad = g.createLinearGradient(0, 0, w.w, w.h);
+  grad.addColorStop(0, T.highlight);
+  grad.addColorStop(0.4, 'rgba(0,0,0,0)');
+  grad.addColorStop(1, T.shadow);
+  for (let py = 0; py < w.h; py += PLATE) {
+    for (let px = 0; px < w.w; px += PLATE) {
+      const seed = hashNoise(px + w.x, py + w.y);
+      const v = Math.floor(seed * 14) - 7;
+      g.fillStyle = `rgb(${br + v}, ${bg + v}, ${bb + v})`;
+      g.fillRect(px, py, PLATE - 1, PLATE - 1);
+    }
+  }
+  // plate seams
+  g.fillStyle = T.mortar;
+  for (let py = PLATE - 1; py < w.h; py += PLATE) g.fillRect(0, py, w.w, 1);
+  for (let px = PLATE - 1; px < w.w; px += PLATE) g.fillRect(px, 0, 1, w.h);
+  // rivets
+  for (let py = 4; py < w.h - 2; py += PLATE) {
+    for (let px = 4; px < w.w - 2; px += PLATE) {
+      g.fillStyle = T.shadow;
+      g.beginPath(); g.arc(px + 1, py + 1, 1.5, 0, Math.PI*2); g.fill();
+      g.fillStyle = T.highlight;
+      g.beginPath(); g.arc(px, py, 1.2, 0, Math.PI*2); g.fill();
+    }
+  }
+  // overlay sheen
+  g.fillStyle = grad;
+  g.fillRect(0, 0, w.w, w.h);
+}
+
+// Smooth ice with branching cracks + frost speckle.
+function paintIce(g, w, T) {
+  // soft gradient base
+  const grad = g.createLinearGradient(0, 0, 0, w.h);
+  grad.addColorStop(0, '#9cc4dc');
+  grad.addColorStop(0.5, T.baseFill);
+  grad.addColorStop(1, '#3d5870');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, w.w, w.h);
+  // crack lines — deterministic per wall
+  g.strokeStyle = 'rgba(220, 240, 255, 0.55)';
+  g.lineWidth = 1;
+  const crackCount = Math.max(2, Math.floor((w.w * w.h) / 600));
+  for (let i = 0; i < crackCount; i++) {
+    const sx = hashNoise(w.x + i, w.y) * w.w;
+    const sy = hashNoise(w.x, w.y + i * 7) * w.h;
+    g.beginPath();
+    g.moveTo(sx, sy);
+    let cx = sx, cy = sy;
+    const segs = 3 + Math.floor(hashNoise(i, i+1) * 3);
+    for (let s = 0; s < segs; s++) {
+      cx += (hashNoise(i, s) - 0.5) * 18;
+      cy += (hashNoise(i + 1, s) - 0.5) * 18;
+      g.lineTo(cx, cy);
+    }
+    g.stroke();
+  }
+  // frost specks
+  g.fillStyle = 'rgba(255, 255, 255, 0.4)';
+  for (let i = 0; i < w.w * w.h / 40; i++) {
+    const sx = hashNoise(i, w.x) * w.w;
+    const sy = hashNoise(w.y, i) * w.h;
+    g.fillRect(sx, sy, 1, 1);
+  }
+}
+
+// Polished obsidian — glossy black with subtle purple gleam streaks.
+function paintGloss(g, w, T) {
+  // dark base gradient (top-lit)
+  const grad = g.createLinearGradient(0, 0, 0, w.h);
+  grad.addColorStop(0, '#3a2e3a');
+  grad.addColorStop(0.4, T.baseFill);
+  grad.addColorStop(1, '#0e080e');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, w.w, w.h);
+  // diagonal reflective streaks
+  g.fillStyle = T.highlight;
+  for (let i = 0; i < 3; i++) {
+    const y = (w.h / 4) * (i + 0.5);
+    g.save();
+    g.translate(0, y);
+    g.rotate(-0.3);
+    g.fillRect(-w.w, 0, w.w * 3, 1);
+    g.restore();
+  }
+  // micro-facets
+  for (let i = 0; i < w.w * w.h / 60; i++) {
+    const sx = hashNoise(i, w.x) * w.w;
+    const sy = hashNoise(w.y, i) * w.h;
+    const a = hashNoise(i + 1, sy) * 0.15;
+    g.fillStyle = `rgba(180, 140, 200, ${a})`;
+    g.fillRect(sx, sy, 1, 1);
+  }
+}
+
+// Moss splatter overlay (for mossy theme)
+function paintMossOverlay(g, w) {
+  for (let i = 0; i < w.w * w.h / 25; i++) {
+    const sx = hashNoise(i, w.x + 3) * w.w;
+    const sy = hashNoise(w.y + 5, i) * w.h;
+    const seed = hashNoise(sx, sy);
+    if (seed > 0.6) {
+      g.fillStyle = `rgba(${110 + seed * 40 | 0}, ${160 + seed * 30 | 0}, 80, ${0.15 + seed * 0.2})`;
+      g.fillRect(sx, sy, 2, 2);
+    }
+  }
+}
+
+function bakeWall(w, themeName = 'brick') {
+  const T = THEMES[themeName] || THEMES.brick;
+  const c = document.createElement('canvas');
+  c.width = w.w; c.height = w.h;
+  const g = c.getContext('2d');
+
+  g.fillStyle = T.baseFill;
+  g.fillRect(0, 0, w.w, w.h);
+
+  switch (T.pattern) {
+    case 'plank': paintPlank(g, w, T); break;
+    case 'plate': paintPlate(g, w, T); break;
+    case 'ice':   paintIce(g, w, T); break;
+    case 'gloss': paintGloss(g, w, T); break;
+    case 'block': paintBrick(g, w, T, 28, 14); break;
+    case 'brick':
+    default:      paintBrick(g, w, T, 20, 10); break;
+  }
+  if (T.moss) paintMossOverlay(g, w);
+
+  // edge lighting — top + left highlight, bottom + right shadow
+  g.fillStyle = T.highlight;
+  g.fillRect(0, 0, w.w, 2);
+  g.fillRect(0, 0, 2, w.h);
+  g.fillStyle = T.shadow;
+  g.fillRect(0, w.h - 2, w.w, 2);
+  g.fillRect(w.w - 2, 0, 2, w.h);
+  // outer definition border
+  g.strokeStyle = T.border;
+  g.lineWidth = 1;
+  g.strokeRect(0.5, 0.5, w.w - 1, w.h - 1);
+
+  return c;
+}
+
+let wallCanvases = walls.map(w => bakeWall(w, 'brick'));
+
+// Load a map by config object — updates walls, spawn positions, theme, and re-bakes textures
+function loadMap(map) {
+  currentMap = map;
+  // Walls + spawns are authored in 800×500 space — scale to live canvas size.
+  const s = MAP_SCALE;
+  walls = map.walls.map(w => ({ x: w.x * s, y: w.y * s, w: w.w * s, h: w.h * s }));
+  currentMap = {
+    ...map,
+    spawn1: { ...map.spawn1, x: map.spawn1.x * s, y: map.spawn1.y * s },
+    spawn2: { ...map.spawn2, x: map.spawn2.x * s, y: map.spawn2.y * s },
+  };
+  const themeName = map.theme || 'brick';
+  wallCanvases = walls.map(w => bakeWall(w, themeName));
+  bakeGround(themeName);
+  paintDecorations(themeName, walls, currentMap.spawn1, currentMap.spawn2);
+  clearBattleCanvas();   // wipe tread + scorch marks for new round
+  canvas.style.background = (THEMES[themeName] || THEMES.brick).canvasBg;
+  // Start/switch BGM to match the new theme
+  if (!audioMuted) startBGM(themeName);
+}
+
+// Pick next map from the remaining pool. Refills pool when exhausted (match end or all 5 used).
+function pickNextMap() {
+  if (mapPool.length === 0) {
+    mapPool = MAPS.map(m => m.id);
+  }
+  const idx = Math.floor(Math.random() * mapPool.length);
+  const chosenId = mapPool.splice(idx, 1)[0];
+  return MAPS.find(m => m.id === chosenId);
+}
+
+function drawWalls() {
+  // Soft drop shadow with feathered falloff
+  ctx.save();
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
+  ctx.shadowBlur = 6;
+  ctx.shadowOffsetX = 3;
+  ctx.shadowOffsetY = 4;
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+  for (const w of walls) {
+    ctx.fillRect(w.x, w.y, w.w, w.h);
+  }
+  ctx.restore();
+  for (let i = 0; i < walls.length; i++) {
+    ctx.drawImage(wallCanvases[i], walls[i].x, walls[i].y);
+  }
+}
+
+function drawBullets() {
+  for (const b of bullets) {
+    if (b.kind === 'homing') {
+      // Missile with triangular body
+      const ang = Math.atan2(b.vy, b.vx);
+      ctx.save();
+      ctx.translate(b.x, b.y);
+      ctx.rotate(ang);
+      ctx.fillStyle = b.owner === 'p1' ? '#bbf7d0' : '#bfdbfe';
+      ctx.beginPath();
+      ctx.moveTo(6, 0);
+      ctx.lineTo(-4, -3);
+      ctx.lineTo(-4, 3);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = b.owner === 'p1' ? '#166534' : '#1e40af';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.restore();
+    } else if (b.kind === 'pierce') {
+      // Elongated bright bullet with trail hint
+      const ang = Math.atan2(b.vy, b.vx);
+      ctx.save();
+      ctx.translate(b.x, b.y);
+      ctx.rotate(ang);
+      ctx.fillStyle = 'rgba(251, 191, 36, 0.4)';
+      ctx.fillRect(-10, -3, 16, 6);
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(-6, -2, 10, 4);
+      ctx.fillStyle = '#fef3c7';
+      ctx.fillRect(-2, -1, 6, 2);
+      ctx.restore();
+    } else if (b.kind === 'shotgun') {
+      // Small red-orange pellet
+      ctx.fillStyle = 'rgba(220, 38, 38, 0.3)';
+      ctx.beginPath(); ctx.arc(b.x, b.y, BULLET_SIZE * 1.5, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#fca5a5';
+      ctx.beginPath(); ctx.arc(b.x, b.y, BULLET_SIZE * 0.8, 0, Math.PI*2); ctx.fill();
+    } else {
+      // Default round bullet
+      ctx.fillStyle = b.owner === 'p1' ? 'rgba(74,222,128,0.3)' : 'rgba(96,165,250,0.3)';
+      ctx.beginPath(); ctx.arc(b.x, b.y, BULLET_SIZE * 2, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = b.owner === 'p1' ? '#bbf7d0' : '#bfdbfe';
+      ctx.beginPath(); ctx.arc(b.x, b.y, BULLET_SIZE, 0, Math.PI*2); ctx.fill();
+    }
+  }
+}
+
+function drawParticles() {
+  for (const p of particles) {
+    if (p.laser) {
+      // Laser beam: bright core + glow
+      const alpha = p.life / p.maxLife;
+      ctx.save();
+      ctx.globalAlpha = alpha * 0.4;
+      ctx.strokeStyle = p.color;
+      ctx.lineWidth = 10;
+      ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(p.x1, p.y1); ctx.lineTo(p.x2, p.y2); ctx.stroke();
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(p.x1, p.y1); ctx.lineTo(p.x2, p.y2); ctx.stroke();
+      ctx.restore();
+      continue;
+    }
+    const a = Math.max(0, p.life / (p.maxLife || 1));
+    if (p.glow) {
+      // Additive radial blob — bright, soft-edged
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = a;
+      const r = p.size * 2.2;
+      const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
+      grad.addColorStop(0, p.color);
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+      continue;
+    }
+    ctx.globalAlpha = a;
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x - p.size/2, p.y - p.size/2, p.size, p.size);
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawHitVignettes() {
+  for (const v of hitVignettes) {
+    const a = v.life / v.maxLife;
+    const grad = ctx.createRadialGradient(v.x, v.y, 30, v.x, v.y, 260);
+    grad.addColorStop(0, `rgba(239, 68, 68, 0)`);
+    grad.addColorStop(0.55, `rgba(239, 68, 68, ${a * 0.35})`);
+    grad.addColorStop(1, `rgba(120, 10, 10, ${a * 0.55})`);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, H);
+  }
+}
+
+// pre-render ground texture once to an offscreen canvas (perf)
+const groundCanvas = document.createElement('canvas');
+groundCanvas.width = W;
+groundCanvas.height = H;
+
+function bakeGround(themeName = 'brick') {
+  const T = THEMES[themeName] || THEMES.brick;
+  const gctx = groundCanvas.getContext('2d');
+  gctx.clearRect(0, 0, W, H);
+
+  // Theme-tinted base wash (slight lift from solid canvasBg)
+  const base = gctx.createRadialGradient(W/2, H/2, 80, W/2, H/2, Math.max(W, H));
+  base.addColorStop(0, T.dotColor.replace(/[\d.]+\)$/, '0.12)'));
+  base.addColorStop(1, 'rgba(0,0,0,0)');
+  gctx.fillStyle = base;
+  gctx.fillRect(0, 0, W, H);
+
+  // Theme-specific accent under the dots
+  if (themeName === 'ice') {
+    // faint snow drift streaks
+    gctx.strokeStyle = 'rgba(220, 240, 255, 0.04)';
+    gctx.lineWidth = 2;
+    for (let i = 0; i < 6; i++) {
+      gctx.beginPath();
+      gctx.moveTo(Math.random() * W, Math.random() * H);
+      gctx.bezierCurveTo(
+        Math.random()*W, Math.random()*H,
+        Math.random()*W, Math.random()*H,
+        Math.random()*W, Math.random()*H
+      );
+      gctx.stroke();
+    }
+  } else if (themeName === 'sandstone') {
+    // sand ripple lines
+    gctx.strokeStyle = 'rgba(255, 220, 160, 0.05)';
+    for (let y = 30; y < H; y += 18 + (Math.sin(y*0.1)*4)) {
+      gctx.beginPath();
+      gctx.moveTo(0, y);
+      for (let x = 0; x < W; x += 20) {
+        gctx.lineTo(x, y + Math.sin(x * 0.05 + y * 0.1) * 2);
+      }
+      gctx.stroke();
+    }
+  } else if (themeName === 'metal' || themeName === 'gold') {
+    // diamond-plate hint
+    gctx.strokeStyle = T.hatchColor;
+    gctx.lineWidth = 1;
+    for (let i = -H; i < W; i += 24) {
+      gctx.beginPath();
+      gctx.moveTo(i, 0); gctx.lineTo(i + H, H);
+      gctx.moveTo(i + H, 0); gctx.lineTo(i, H);
+      gctx.stroke();
+    }
+  } else {
+    // default diagonal hatch
+    gctx.strokeStyle = T.hatchColor;
+    gctx.lineWidth = 1;
+    for (let i = -H; i < W; i += 60) {
+      gctx.beginPath();
+      gctx.moveTo(i, 0);
+      gctx.lineTo(i + H, H);
+      gctx.stroke();
+    }
+  }
+
+  // Pseudo-random dot speckle (deterministic so it doesn't twinkle on rebake)
+  gctx.fillStyle = T.dotColor;
+  for (let x = 10; x < W; x += 20) {
+    for (let y = 10; y < H; y += 20) {
+      const seed = Math.abs(Math.sin(x * 0.7 + y * 1.3)) % 1;
+      if (seed > 0.6) gctx.fillRect(x, y, 2, 2);
+    }
+  }
+
+  // Edge vignette — pulls focus to center, hides hard canvas edge
+  const vg = gctx.createRadialGradient(W/2, H/2, Math.min(W, H) * 0.35, W/2, H/2, Math.max(W, H) * 0.7);
+  vg.addColorStop(0, 'rgba(0,0,0,0)');
+  vg.addColorStop(1, 'rgba(0,0,0,0.45)');
+  gctx.fillStyle = vg;
+  gctx.fillRect(0, 0, W, H);
+
+  // Soft inner border highlight
+  gctx.strokeStyle = T.highlight;
+  gctx.lineWidth = 1;
+  gctx.strokeRect(1, 1, W - 2, H - 2);
+}
+bakeGround('brick');
+
+// --- Map decorations (cosmetic clutter painted into groundCanvas) ---
+// Each drawer paints a small sprite at (x, y). All draw to the ground canvas
+// so they cost zero per-frame and never block bullets/movement.
+const DECOR_DRAWERS = {
+  crate(g, x, y, s) {
+    g.save(); g.translate(x, y); g.rotate((s - 0.5) * 0.4);
+    g.fillStyle = '#7c4f1d'; g.fillRect(-8, -8, 16, 16);
+    g.fillStyle = 'rgba(255,210,140,0.18)'; g.fillRect(-8, -8, 16, 2);
+    g.strokeStyle = '#2a1606'; g.lineWidth = 1;
+    g.strokeRect(-8, -8, 16, 16);
+    g.beginPath(); g.moveTo(-8, 0); g.lineTo(8, 0);
+    g.moveTo(0, -8); g.lineTo(0, 8); g.stroke();
+    g.restore();
+  },
+  sandbag(g, x, y, s) {
+    g.save(); g.translate(x, y); g.rotate((s - 0.5) * 0.3);
+    g.fillStyle = '#a08a5a';
+    g.beginPath(); g.ellipse(0, 0, 11, 5, 0, 0, Math.PI*2); g.fill();
+    g.strokeStyle = '#4a3a18'; g.lineWidth = 0.9; g.stroke();
+    g.strokeStyle = 'rgba(0,0,0,0.35)';
+    g.beginPath(); g.moveTo(-7, -1); g.quadraticCurveTo(0, 2, 7, -1); g.stroke();
+    g.restore();
+  },
+  barrel(g, x, y, s) {
+    g.save(); g.translate(x, y);
+    g.fillStyle = '#3a3a3a';
+    g.beginPath(); g.ellipse(0, 0, 7, 8, 0, 0, Math.PI*2); g.fill();
+    g.strokeStyle = '#111'; g.lineWidth = 1; g.stroke();
+    g.strokeStyle = '#888'; g.lineWidth = 0.7;
+    g.beginPath(); g.ellipse(0, -2, 6.5, 1.5, 0, 0, Math.PI*2); g.stroke();
+    g.beginPath(); g.ellipse(0,  2, 6.5, 1.5, 0, 0, Math.PI*2); g.stroke();
+    if (s > 0.5) {
+      g.fillStyle = '#fbbf24'; g.font = 'bold 5px sans-serif';
+      g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText('!', 0, 0);
+    }
+    g.restore();
+  },
+  bone(g, x, y, s) {
+    g.save(); g.translate(x, y); g.rotate(s * Math.PI * 2);
+    g.fillStyle = '#e0d8c0'; g.strokeStyle = '#5a4a20'; g.lineWidth = 0.7;
+    g.beginPath();
+    g.arc(-6, -1.5, 2, 0, Math.PI*2);
+    g.arc(-6,  1.5, 2, 0, Math.PI*2);
+    g.arc( 6, -1.5, 2, 0, Math.PI*2);
+    g.arc( 6,  1.5, 2, 0, Math.PI*2);
+    g.fill(); g.stroke();
+    g.fillRect(-6, -1.5, 12, 3);
+    g.beginPath(); g.moveTo(-6, -1.5); g.lineTo(6, -1.5);
+    g.moveTo(-6, 1.5); g.lineTo(6, 1.5); g.stroke();
+    g.restore();
+  },
+  skull(g, x, y, s) {
+    g.save(); g.translate(x, y); g.rotate((s - 0.5) * 0.4);
+    g.fillStyle = '#ebe0c8'; g.strokeStyle = '#3a2812'; g.lineWidth = 0.9;
+    g.beginPath(); g.arc(0, -1, 5.5, Math.PI, 0); g.lineTo(3, 3); g.lineTo(-3, 3); g.closePath();
+    g.fill(); g.stroke();
+    g.fillStyle = '#000';
+    g.beginPath(); g.arc(-2, -1, 1.4, 0, Math.PI*2); g.fill();
+    g.beginPath(); g.arc( 2, -1, 1.4, 0, Math.PI*2); g.fill();
+    g.fillRect(-0.7, 1, 1.4, 2);
+    g.restore();
+  },
+  grass(g, x, y, s) {
+    g.save(); g.translate(x, y);
+    g.strokeStyle = '#3f6b25'; g.lineWidth = 1.4; g.lineCap = 'round';
+    for (let i = -3; i <= 3; i += 2) {
+      g.beginPath();
+      g.moveTo(i, 4);
+      g.lineTo(i + (s - 0.5) * 3, -4);
+      g.stroke();
+    }
+    g.strokeStyle = '#5a9a35'; g.lineWidth = 0.8;
+    for (let i = -2; i <= 2; i += 2) {
+      g.beginPath(); g.moveTo(i, 4); g.lineTo(i, -3); g.stroke();
+    }
+    g.restore();
+  },
+  mushroom(g, x, y, s) {
+    g.save(); g.translate(x, y);
+    g.fillStyle = '#fff'; g.fillRect(-1.5, -1, 3, 4);
+    g.strokeStyle = '#444'; g.lineWidth = 0.5; g.strokeRect(-1.5, -1, 3, 4);
+    g.fillStyle = '#dc2626';
+    g.beginPath(); g.ellipse(0, -2, 5, 3.5, 0, Math.PI, 0); g.fill();
+    g.strokeStyle = '#7f1d1d'; g.stroke();
+    g.fillStyle = '#fff';
+    g.beginPath(); g.arc(-1.5, -3, 0.7, 0, Math.PI*2); g.fill();
+    g.beginPath(); g.arc( 1.8, -2.3, 0.5, 0, Math.PI*2); g.fill();
+    g.restore();
+  },
+  rock(g, x, y, s) {
+    g.save(); g.translate(x, y); g.rotate(s * Math.PI);
+    g.fillStyle = '#6e6e6e'; g.strokeStyle = '#2a2a2a'; g.lineWidth = 0.9;
+    g.beginPath();
+    g.moveTo(-6, 2); g.lineTo(-4, -3); g.lineTo(2, -4);
+    g.lineTo(5, 0); g.lineTo(3, 3); g.lineTo(-3, 4); g.closePath();
+    g.fill(); g.stroke();
+    g.fillStyle = 'rgba(255,255,255,0.18)';
+    g.beginPath(); g.moveTo(-4, -3); g.lineTo(0, -2); g.lineTo(-3, -1); g.closePath(); g.fill();
+    g.restore();
+  },
+  snowpile(g, x, y, s) {
+    g.save(); g.translate(x, y);
+    g.fillStyle = 'rgba(240, 250, 255, 0.85)';
+    g.beginPath(); g.ellipse(0, 1, 11, 4, 0, 0, Math.PI*2); g.fill();
+    g.fillStyle = 'rgba(255,255,255,0.7)';
+    g.beginPath(); g.ellipse(-2, -1, 5, 2.5, 0, 0, Math.PI*2); g.fill();
+    g.fillStyle = 'rgba(255,255,255,1)';
+    for (let i = 0; i < 3; i++) {
+      const sx = (s - 0.5 + i * 0.3) * 8;
+      g.fillRect(sx, -2 + i, 1, 1);
+    }
+    g.restore();
+  },
+  crystal(g, x, y, s) {
+    g.save(); g.translate(x, y); g.rotate((s - 0.5) * 0.6);
+    g.fillStyle = '#a78bfa'; g.strokeStyle = '#3a1a6e'; g.lineWidth = 0.8;
+    g.beginPath();
+    g.moveTo(0, -8); g.lineTo(4, 0); g.lineTo(2, 5); g.lineTo(-2, 5); g.lineTo(-4, 0); g.closePath();
+    g.fill(); g.stroke();
+    g.fillStyle = 'rgba(255,255,255,0.55)';
+    g.beginPath(); g.moveTo(0, -8); g.lineTo(1, -1); g.lineTo(-1, -1); g.closePath(); g.fill();
+    // glow tint underneath
+    const glow = g.createRadialGradient(0, 0, 0, 0, 0, 14);
+    glow.addColorStop(0, 'rgba(167, 139, 250, 0.25)');
+    glow.addColorStop(1, 'rgba(167, 139, 250, 0)');
+    g.fillStyle = glow;
+    g.beginPath(); g.arc(0, 0, 14, 0, Math.PI*2); g.fill();
+    g.restore();
+  },
+  coin(g, x, y, s) {
+    g.save(); g.translate(x, y);
+    g.fillStyle = '#fbbf24'; g.strokeStyle = '#78350f'; g.lineWidth = 0.7;
+    g.beginPath(); g.arc(0, 0, 3, 0, Math.PI*2); g.fill(); g.stroke();
+    g.fillStyle = 'rgba(255,255,255,0.55)';
+    g.beginPath(); g.arc(-0.8, -0.8, 0.8, 0, Math.PI*2); g.fill();
+    // optional cluster
+    if (s > 0.5) {
+      g.fillStyle = '#fbbf24'; g.strokeStyle = '#78350f';
+      g.beginPath(); g.arc(3, 1, 2.5, 0, Math.PI*2); g.fill(); g.stroke();
+      g.beginPath(); g.arc(-2, 2, 2.2, 0, Math.PI*2); g.fill(); g.stroke();
+    }
+    g.restore();
+  },
+  crater(g, x, y, s) {
+    const r = 10 + s * 6;
+    const grad = g.createRadialGradient(x, y, 0, x, y, r);
+    grad.addColorStop(0, 'rgba(0, 0, 0, 0.55)');
+    grad.addColorStop(0.7, 'rgba(0, 0, 0, 0.18)');
+    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    g.fillStyle = grad;
+    g.beginPath(); g.arc(x, y, r, 0, Math.PI*2); g.fill();
+    // dark rim crack
+    g.strokeStyle = 'rgba(0,0,0,0.4)'; g.lineWidth = 0.8;
+    g.beginPath(); g.arc(x, y, r * 0.6, 0, Math.PI*2); g.stroke();
+  },
+  sword(g, x, y, s) {
+    g.save(); g.translate(x, y); g.rotate(0.7 + (s - 0.5) * 0.6);
+    g.strokeStyle = '#3a3a3a'; g.lineWidth = 1.2;
+    g.fillStyle = '#cbd5e1';
+    g.beginPath();
+    g.moveTo(0, -9); g.lineTo(1.5, 4); g.lineTo(-1.5, 4); g.closePath();
+    g.fill(); g.stroke();
+    g.fillStyle = '#7a4a18';
+    g.fillRect(-1.2, 4, 2.4, 3);
+    g.fillStyle = '#fbbf24';
+    g.fillRect(-3, 3, 6, 1.2);
+    g.restore();
+  },
+  plank(g, x, y, s) {
+    g.save(); g.translate(x, y); g.rotate(s * Math.PI);
+    g.fillStyle = '#5a3a18'; g.fillRect(-9, -2, 18, 4);
+    g.strokeStyle = '#2a1606'; g.lineWidth = 0.7;
+    g.strokeRect(-9, -2, 18, 4);
+    g.fillStyle = '#000';
+    g.fillRect(-7, -1, 1, 1); g.fillRect(6, 0, 1, 1);
+    g.restore();
+  },
+};
+
+const THEME_DECORATIONS = {
+  brick:      ['crate', 'sandbag', 'crate', 'crater', 'sandbag', 'rock'],
+  stone:      ['bone', 'rock', 'crater', 'rock', 'bone'],
+  sandstone:  ['rock', 'sandbag', 'bone', 'rock', 'crater'],
+  metal:      ['barrel', 'crate', 'barrel', 'crater', 'plank'],
+  mossy:      ['grass', 'mushroom', 'grass', 'rock', 'grass', 'mushroom'],
+  wood:       ['crate', 'plank', 'crate', 'plank', 'barrel'],
+  bloodstone: ['skull', 'bone', 'skull', 'crater', 'sword', 'bone'],
+  ice:        ['snowpile', 'rock', 'snowpile', 'snowpile', 'crystal'],
+  obsidian:   ['crystal', 'rock', 'crystal', 'crater', 'skull'],
+  gold:       ['coin', 'coin', 'crate', 'coin', 'crystal'],
+};
+
+function paintDecorations(themeName, mapWalls, spawn1, spawn2) {
+  const types = THEME_DECORATIONS[themeName];
+  if (!types || types.length === 0) return;
+  const gctx = groundCanvas.getContext('2d');
+  // Deterministic LCG seeded by theme + wall count → same map looks the same.
+  let seed = themeName.length * 131 + mapWalls.length * 17 + 97;
+  function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+  const WALL_PAD = 14;
+  const SPAWN_CLEAR = 70;
+  const target = 38;
+  let placed = 0;
+  for (let i = 0; i < 400 && placed < target; i++) {
+    const x = 22 + rnd() * (W - 44);
+    const y = 22 + rnd() * (H - 44);
+    let blocked = false;
+    for (const w of mapWalls) {
+      if (x > w.x - WALL_PAD && x < w.x + w.w + WALL_PAD &&
+          y > w.y - WALL_PAD && y < w.y + w.h + WALL_PAD) { blocked = true; break; }
+    }
+    if (blocked) continue;
+    if (spawn1 && Math.hypot(x - spawn1.x, y - spawn1.y) < SPAWN_CLEAR) continue;
+    if (spawn2 && Math.hypot(x - spawn2.x, y - spawn2.y) < SPAWN_CLEAR) continue;
+    const type = types[Math.floor(rnd() * types.length)];
+    DECOR_DRAWERS[type](gctx, x, y, rnd());
+    placed++;
+  }
+}
+
+function drawGrid() {
+  ctx.drawImage(groundCanvas, 0, 0);
+}
+
+function drawDangerHalo(t) {
+  let danger = 0;
+  for (const b of bullets) {
+    if (b.owner === t.id) continue;
+    const dist = Math.hypot(b.x - t.x, b.y - t.y);
+    if (dist < DANGER_DIST) {
+      const tx = t.x - b.x, ty = t.y - b.y;
+      const dot = (tx * b.vx + ty * b.vy) / (dist * BULLET_SPEED);
+      if (dot > 0.3) danger = Math.max(danger, 1 - dist / DANGER_DIST);
+    }
+  }
+  if (danger > 0) {
+    const pulse = 0.5 + Math.sin(Date.now() / 80) * 0.25;
+    const alpha = danger * pulse;
+    const grad = ctx.createRadialGradient(t.x, t.y, 25, t.x, t.y, 130);
+    grad.addColorStop(0, `rgba(239, 68, 68, 0)`);
+    grad.addColorStop(0.7, `rgba(239, 68, 68, ${alpha * 0.35})`);
+    grad.addColorStop(1, `rgba(239, 68, 68, 0)`);
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, 130, 0, Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.save();
+  // Screen shake — random sub-pixel translate, decays each frame
+  if (screenShake.mag > 0.1) {
+    const sx = (Math.random() - 0.5) * screenShake.mag;
+    const sy = (Math.random() - 0.5) * screenShake.mag;
+    ctx.translate(sx, sy);
+  }
+  drawGrid();
+  ctx.drawImage(battleCanvas, 0, 0);   // tread marks + scorch under everything
+  drawWalls();
+  drawPowerups();
+  if (roundActive) {
+    drawAimLine(tank1, tank2);
+    drawAimLine(tank2, tank1);
+  }
+  drawDangerHalo(tank1);
+  drawDangerHalo(tank2);
+  drawGhosts();
+  drawBullets();
+  drawTank(tank1);
+  drawTank(tank2);
+  drawTankHP(tank1);
+  drawTankHP(tank2);
+  drawParticles();
+  drawFloatingTexts();
+  ctx.restore();
+  // Hit vignette is NOT shaken — full-screen overlay, drawn last over the shake
+  drawHitVignettes();
+  drawCountdown();
+}
+
+function drawCountdown() {
+  if (!roundActive || countdownTimer <= 0) return;
+  if (countdownStep >= COUNTDOWN_STEPS.length) return;
+
+  const text = COUNTDOWN_STEPS[countdownStep];
+  const isGo = countdownStep === COUNTDOWN_STEPS.length - 1;
+
+  // Progress through the current step (0 at start, 1 at end)
+  const t = 1 - countdownTimer / COUNTDOWN_STEP_DURATION;
+
+  // Scale animation: pop in big, settle to 1, optional fade at end
+  let scale;
+  if (t < 0.15) scale = 2.0 - (t / 0.15) * 1.0;       // 2.0 → 1.0 (pop in)
+  else if (t > 0.7) scale = 1.0 + (t - 0.7) * 0.6;     // slowly grow as fading
+  else scale = 1.0;
+
+  // Alpha — full for most of the step, fade last 30%
+  const alpha = t < 0.7 ? 1 : Math.max(0, 1 - (t - 0.7) / 0.3);
+
+  // Semi-transparent darkening during countdown so the numbers pop
+  ctx.fillStyle = `rgba(0, 0, 0, ${0.35 * alpha})`;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.translate(W / 2, H / 2);
+  ctx.scale(scale, scale);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  const fontSize = isGo ? 96 : 120;
+  ctx.font = `bold ${fontSize}px "Segoe UI", "Malgun Gothic", sans-serif`;
+
+  // Outline (thick dark stroke)
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.9)';
+  ctx.lineWidth = 10;
+  ctx.lineJoin = 'round';
+  ctx.strokeText(text, 0, 0);
+
+  // Fill — GO is yellow (action!), numbers are white
+  ctx.fillStyle = isGo ? '#f5d742' : '#ffffff';
+  ctx.fillText(text, 0, 0);
+
+  ctx.restore();
+}
+
+function updateHUD() {
+  updateHPBar(tank1, 'hp1', 'hpText1');
+  updateHPBar(tank2, 'hp2', 'hpText2');
+  document.getElementById('score1').textContent = scores.p1;
+  document.getElementById('score2').textContent = scores.p2;
+  updatePowerupSlot('pu1', tank1);
+  updatePowerupSlot('pu2', tank2);
+  updateWeaponSlot('wp1', tank1);
+  updateWeaponSlot('wp2', tank2);
+  updateRoundTimer();
+}
+
+function updateWeaponSlot(elId, t) {
+  const el = document.getElementById(elId);
+  if (!el) return;   // DOM not ready / element missing
+  if (!t.weapon) { el.classList.remove('active'); return; }
+  const weapon = WEAPON_ITEMS.find(w => w.id === t.weapon);
+  if (!weapon) { el.classList.remove('active'); return; }
+  el.classList.add('active');
+  const iconEl = el.querySelector('.icon');
+  const ammoEl = el.querySelector('.ammo');
+  if (iconEl) iconEl.innerHTML = iconHTML(weapon.id, 16);
+  if (ammoEl) ammoEl.textContent = '×' + t.ammo;
+  el.style.color = weapon.color;
+}
+
+function updateRoundTimer() {
+  const el = document.getElementById('roundTimer');
+  if (!el) return;
+  const secs = Math.max(0, Math.ceil(roundTimer));   // roundTimer is seconds now
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  el.textContent = `${m}:${s.toString().padStart(2, '0')}`;
+  el.classList.toggle('low', roundActive && roundTimer <= LOW_TIME_THRESHOLD);
+}
+
+function updateHPBar(t, fillId, textId) {
+  const hp = Math.max(0, t.hp);
+  const fill = document.getElementById(fillId);
+  const text = document.getElementById(textId);
+  fill.style.width = (hp / MAX_HP * 100) + '%';
+  text.textContent = hp + ' / ' + MAX_HP;
+  // low HP warning color (≤ 2)
+  if (hp <= 2 && hp > 0) {
+    fill.style.background = '#ef4444';
+  } else {
+    fill.style.background = ''; // revert to CSS default (p1 green / p2 blue)
+  }
+}
+
+function updatePowerupSlot(elId, t) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (!t.powerup) { el.classList.remove('active'); return; }
+  const type = POWERUP_TYPES.find(p => p.id === t.powerup);
+  if (!type) { el.classList.remove('active'); return; }
+  el.classList.add('active');
+  const iconEl = el.querySelector('.icon');
+  if (iconEl) iconEl.innerHTML = iconHTML(type.id, 16);
+  const pct = (t.powerupTime / POWERUP_DURATION) * 100;
+  const fill = el.querySelector('.timer-fill');
+  if (fill) {
+    fill.style.width = pct + '%';
+    fill.style.background = type.color;
+  }
+}
+
+function endRound(winnerId) {
+  // winnerId: 'p1' | 'p2' | 'draw'
+  if (!roundActive) return;
+  roundActive = false;
+  winner = winnerId;
+
+  // Record per-map outcome for stats
+  const mapId = currentMap ? currentMap.id : 'unknown';
+  if (!stats.mapResults[mapId]) {
+    stats.mapResults[mapId] = { p1Wins: 0, p2Wins: 0, draws: 0 };
+  }
+
+  if (winnerId === 'p1') {
+    scores.p1++;
+    stats.p1.roundsWon++;
+    stats.mapResults[mapId].p1Wins++;
+  } else if (winnerId === 'p2') {
+    scores.p2++;
+    stats.p2.roundsWon++;
+    stats.mapResults[mapId].p2Wins++;
+  } else { // draw
+    stats.draws++;
+    stats.mapResults[mapId].draws++;
+  }
+
+  updateHUD();
+  freezeTimer = FREEZE_DURATION;
+}
+
+// --- Roulette state ---
+// Flow:
+//   Round ends → showOverlay('round', ...) → startRoulette(decidedMap) kicks in
+//   User presses Space/Enter:
+//     - during spin → skip (snap to decided)
+//     - after spin (or on match overlay) → advance to next round
+let decidedNextMap = null;    // the map that roulette is committing to
+let rouletteState = 'idle';   // 'idle' | 'spinning' | 'locked'
+let rouletteAnim = null;      // raf id
+let rouletteLastItemIdx = -1; // for tick sfx
+
+function showOverlay(kind, winnerName) {
+  lastOverlay = { kind, winnerName };
+  const lang = L();
+  const overlayEl = document.getElementById('overlay');
+  const rouletteWrap = document.getElementById('rouletteWrap');
+  const nextBtn = document.getElementById('nextBtn');
+  const statsBtn = document.getElementById('statsBtn');
+  const keyHintEl = document.getElementById('keyHint');
+
+  let title, sub, btnText;
+  if (kind === 'match') {
+    title   = lang.matchWin(winnerName);
+    sub     = lang.finalLine(scores);
+    btnText = lang.restart;
+    // No roulette on match end — next match will re-roll from full pool
+    rouletteWrap.style.display = 'none';
+    decidedNextMap = null;
+    rouletteState = 'idle';
+    keyHintEl.innerHTML = lang.keyHint;
+    nextBtn.disabled = false;
+    nextBtn.style.opacity = '1';
+    // Show the stats button on match end
+    statsBtn.classList.remove('hidden');
+    statsBtn.innerHTML = `${iconHTML('stats', 16)} <span style="vertical-align:middle">${lang.statsBtn}</span>`;
+    // Match is over — quiet the BGM to let the victory fanfare breathe
+    stopBGM(1.2);
+  } else if (kind === 'draw') {
+    title   = lang.drawRound;
+    sub     = lang.drawSub;
+    btnText = lang.nextRound;
+    rouletteWrap.style.display = 'flex';
+    document.getElementById('rouletteLabel').textContent = lang.nextMap;
+    decidedNextMap = pickNextMap();
+    nextBtn.disabled = true;
+    nextBtn.style.opacity = '0.5';
+    keyHintEl.innerHTML = lang.skipHint;
+    statsBtn.classList.add('hidden');
+    startRoulette(decidedNextMap);
+  } else { // 'round'
+    title   = lang.roundWin(winnerName);
+    sub     = lang.scoreLine(scores);
+    btnText = lang.nextRound;
+    rouletteWrap.style.display = 'flex';
+    document.getElementById('rouletteLabel').textContent = lang.nextMap;
+    // Decide next map NOW (pulls from pool so it's committed fairly)
+    decidedNextMap = pickNextMap();
+    // Disable the "next round" button while spinning; re-enable when locked
+    nextBtn.disabled = true;
+    nextBtn.style.opacity = '0.5';
+    keyHintEl.innerHTML = lang.skipHint;
+    statsBtn.classList.add('hidden');
+    startRoulette(decidedNextMap);
+  }
+  document.getElementById('overlayTitle').textContent = title;
+  document.getElementById('overlaySub').textContent = sub;
+  nextBtn.textContent = btnText;
+  overlayEl.classList.remove('hidden');
+}
+
+// Build the roulette track DOM: the decided map lands exactly under the marker.
+// We stage N filler items + decided item + tail items, then animate scroll from 0 to the landing offset.
+const ROULETTE_ITEM_W = 96; // 90 + 2*3 margin
+const ROULETTE_VIEWPORT_W = 360;
+
+function buildRouletteItems(decidedMap) {
+  // Pool for display = [decided] + all other maps (shuffled) — we'll repeat until enough items
+  const pool = [decidedMap, ...MAPS.filter(m => m.id !== decidedMap.id)];
+  // We want at least ~25 items flying past for visual momentum
+  const items = [];
+  while (items.length < 30) {
+    // Shuffle each cycle so item order isn't the same every time
+    const shuffled = [...pool].sort(() => Math.random() - 0.5);
+    items.push(...shuffled);
+  }
+  // Place the decided map at a specific "landing index" so the final translate looks clean
+  const landingIdx = 22 + Math.floor(Math.random() * 4); // 22..25
+  // Remove any pre-existing decided map at that slot to replace deliberately
+  items[landingIdx] = decidedMap;
+  return { items, landingIdx };
+}
+
+function renderRouletteTrack(items) {
+  const track = document.getElementById('rouletteTrack');
+  track.style.transition = 'none';
+  track.style.transform = 'translateX(0)';
+  track.innerHTML = items.map(m => {
+    const T = THEMES[m.theme] || THEMES.brick;
+    return `<div class="roulette-item" style="background:${T.canvasBg}; border-color:${T.border};">
+      ${iconHTML(m.id, 32)}
+      <span class="name">${m.name[currentLang] || m.name.en}</span>
+    </div>`;
+  }).join('');
+}
+
+function startRoulette(decidedMap) {
+  cancelRouletteAnim();
+  const { items, landingIdx } = buildRouletteItems(decidedMap);
+  renderRouletteTrack(items);
+
+  // Calculate final transform: land the decidedMap center on the marker (viewport center)
+  const itemCenter = landingIdx * ROULETTE_ITEM_W + ROULETTE_ITEM_W / 2;
+  const viewportCenter = ROULETTE_VIEWPORT_W / 2;
+  const finalOffset = -(itemCenter - viewportCenter);
+
+  // Animate manually with RAF so we can play tick SFX at each item pass + skip easily
+  const track = document.getElementById('rouletteTrack');
+  const resultEl = document.getElementById('rouletteResult');
+  resultEl.classList.add('pending');
+  resultEl.textContent = '—';
+
+  const DURATION = 2800;  // ms
+  const startTime = performance.now();
+  rouletteState = 'spinning';
+  rouletteLastItemIdx = -1;
+
+  function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
+
+  function tick(now) {
+    if (rouletteState !== 'spinning') return;  // was skipped → handled elsewhere
+    const t = Math.min(1, (now - startTime) / DURATION);
+    const eased = easeOutQuart(t);
+    const currentOffset = finalOffset * eased;
+    track.style.transform = `translateX(${currentOffset}px)`;
+
+    // Which item is currently under the marker? play click when it changes
+    const centerLocalX = -currentOffset + viewportCenter;
+    const idxUnderMarker = Math.floor(centerLocalX / ROULETTE_ITEM_W);
+    if (idxUnderMarker !== rouletteLastItemIdx && t < 1) {
+      rouletteLastItemIdx = idxUnderMarker;
+      SFX.rouletteTick();
+    }
+
+    if (t >= 1) {
+      finishRoulette(decidedMap);
+    } else {
+      rouletteAnim = requestAnimationFrame(tick);
+    }
+  }
+  rouletteAnim = requestAnimationFrame(tick);
+}
+
+function finishRoulette(decidedMap) {
+  rouletteState = 'locked';
+  const resultEl = document.getElementById('rouletteResult');
+  resultEl.classList.remove('pending');
+  resultEl.innerHTML = `${iconHTML(decidedMap.id, 18)} <span style="vertical-align:middle">${decidedMap.name[currentLang] || decidedMap.name.en}</span>`;
+  SFX.rouletteLock();
+  // Enable the continue button
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.disabled = false;
+  nextBtn.style.opacity = '1';
+  // Swap the hint to the "proceed" hint
+  document.getElementById('keyHint').innerHTML = L().keyHint;
+}
+
+function cancelRouletteAnim() {
+  if (rouletteAnim) { cancelAnimationFrame(rouletteAnim); rouletteAnim = null; }
+}
+
+function skipRoulette() {
+  if (rouletteState !== 'spinning') return;
+  cancelRouletteAnim();
+  // Snap track instantly to final position
+  const { items, landingIdx } = buildRouletteItems(decidedNextMap);
+  renderRouletteTrack(items);
+  const itemCenter = landingIdx * ROULETTE_ITEM_W + ROULETTE_ITEM_W / 2;
+  const finalOffset = -(itemCenter - ROULETTE_VIEWPORT_W / 2);
+  const track = document.getElementById('rouletteTrack');
+  // give it a brief deceleration even on skip so it feels intentional, not instant
+  track.style.transition = 'transform 0.25s cubic-bezier(0.2, 0.9, 0.3, 1)';
+  track.style.transform = `translateX(${finalOffset}px)`;
+  setTimeout(() => finishRoulette(decidedNextMap), 250);
+}
+
+// --- Stats modal ---
+function buildStatRow(label, v1, v2, higherIsBetter = true, fmt = null) {
+  // Returns HTML for a stat row with values and a comparison bar.
+  // v1/v2 are raw numbers; fmt(n) optionally formats display strings (e.g. "45%").
+  const n1 = Number(v1) || 0;
+  const n2 = Number(v2) || 0;
+  const total = n1 + n2;
+  const pct1 = total > 0 ? (n1 / total * 100) : 50;
+  const pct2 = total > 0 ? (n2 / total * 100) : 50;
+  let leaderClass = '';
+  if (n1 !== n2) {
+    const p1Leads = higherIsBetter ? n1 > n2 : n1 < n2;
+    leaderClass = p1Leads ? 'stat-leader-p1' : 'stat-leader-p2';
+  }
+  const disp1 = fmt ? fmt(n1) : n1;
+  const disp2 = fmt ? fmt(n2) : n2;
+  return `
+    <div class="stat-row ${leaderClass === 'stat-leader-p1' ? 'stat-leader' : ''}">
+      <span class="stat-p1">${disp1}</span>
+      <span class="stat-label">${label}</span>
+      <span class="stat-p2 ${leaderClass === 'stat-leader-p2' ? 'stat-leader' : ''}" style="${leaderClass === 'stat-leader-p2' ? 'text-shadow:0 0 8px currentColor;' : ''}">${disp2}</span>
+    </div>
+    <div class="stat-bar-wrap">
+      <div class="stat-bar-p1" style="width: ${pct1}%"></div>
+      <div class="stat-bar-p2" style="width: ${pct2}%"></div>
+    </div>`;
+}
+
+function showStatsModal() {
+  const lang = L();
+  document.getElementById('statsTitle').textContent = lang.statsTitle;
+  document.getElementById('statsMapsHeader').textContent = lang.statsMaps;
+  document.getElementById('statsCloseBtn').textContent = lang.statsClose;
+
+  const p1 = stats.p1, p2 = stats.p2;
+  const acc1 = p1.shots > 0 ? Math.round(p1.hits / p1.shots * 100) : 0;
+  const acc2 = p2.shots > 0 ? Math.round(p2.hits / p2.shots * 100) : 0;
+  const dist1 = Math.round(p1.distance);
+  const dist2 = Math.round(p2.distance);
+
+  const powerupsTotal1 = Object.values(p1.powerups).reduce((a,b) => a+b, 0);
+  const powerupsTotal2 = Object.values(p2.powerups).reduce((a,b) => a+b, 0);
+
+  // Build grid HTML
+  const grid = document.getElementById('statsGrid');
+  grid.innerHTML = `
+    <div class="stat-row header">
+      <span class="stat-p1">P1</span>
+      <span class="stat-label">${lang.statRounds}</span>
+      <span class="stat-p2">P2</span>
+    </div>
+    ${buildStatRow(lang.statRounds, p1.roundsWon, p2.roundsWon)}
+    ${buildStatRow(lang.statShots, p1.shots, p2.shots)}
+    ${buildStatRow(lang.statHits, p1.hits, p2.hits)}
+    ${buildStatRow(lang.statAccuracy, acc1, acc2, true, n => n + '%')}
+    ${buildStatRow(lang.statDamage, p1.damageTaken, p2.damageTaken, false)}
+    ${buildStatRow(lang.statShields, p1.shieldsBlocked, p2.shieldsBlocked)}
+    ${buildStatRow(lang.statBounces, p1.bounces, p2.bounces)}
+    ${buildStatRow(lang.statDistance, dist1, dist2, true, n => n + 'px')}
+    ${buildStatRow(lang.statPowerups, powerupsTotal1, powerupsTotal2)}
+  `;
+
+  // Build map results grid
+  const mapsEl = document.getElementById('statsMaps');
+  const mapIds = Object.keys(stats.mapResults);
+  if (mapIds.length === 0) {
+    mapsEl.innerHTML = `<div style="color:#666; grid-column: 1 / -1; text-align: center;">—</div>`;
+  } else {
+    mapsEl.innerHTML = mapIds.map(id => {
+      const map = MAPS.find(m => m.id === id);
+      if (!map) return '';
+      const r = stats.mapResults[id];
+      const name = map.name[currentLang] || map.name.en;
+      const scoreParts = [];
+      if (r.p1Wins > 0) scoreParts.push(`<span class="g">${r.p1Wins}</span>`);
+      if (r.p2Wins > 0) scoreParts.push(`<span class="b">${r.p2Wins}</span>`);
+      if (r.draws > 0) scoreParts.push(`<span class="d">=${r.draws}</span>`);
+      return `
+        <div class="stats-map-cell" style="border-left: 3px solid ${THEMES[map.theme].border};">
+          <span class="map-icon">${iconHTML(map.id, 18)}</span>
+          <span class="map-name">${name}</span>
+          <span class="map-score">${scoreParts.join(' / ')}</span>
+        </div>`;
+    }).join('');
+  }
+
+  document.getElementById('statsModal').classList.remove('hidden');
+}
+
+function hideStatsModal() {
+  document.getElementById('statsModal').classList.add('hidden');
+}
+
+// Wire up stats modal buttons
+document.getElementById('statsBtn').addEventListener('click', showStatsModal);
+document.getElementById('statsCloseBtn').addEventListener('click', hideStatsModal);
+document.getElementById('statsModal').addEventListener('click', (e) => {
+  // Click outside content closes
+  if (e.target.id === 'statsModal') hideStatsModal();
+});
+
+function advanceFromOverlay() {
+  const overlayEl = document.getElementById('overlay');
+  if (overlayEl.classList.contains('hidden')) return;
+
+  // If roulette is still spinning, skip instead of proceeding
+  if (rouletteState === 'spinning') {
+    skipRoulette();
+    return;
+  }
+
+  overlayEl.classList.add('hidden');
+  hideStatsModal();  // also close stats if it was open on match end
+  lastOverlay = null;
+  // Match ended — reset scores AND map pool so next match starts fresh
+  if (scores.p1 >= WIN_SCORE || scores.p2 >= WIN_SCORE) {
+    scores.p1 = 0; scores.p2 = 0;
+    mapPool = [];
+    decidedNextMap = null;
+    stats = makeFreshStats();
+  }
+  // Pass the decided map (if any) to initRound so it uses the roulette result
+  initRound(decidedNextMap);
+  decidedNextMap = null;
+  rouletteState = 'idle';
+}
+
+document.getElementById('nextBtn').addEventListener('click', advanceFromOverlay);
+
+// Space / Enter handles both skip-during-spin and advance-after-lock
+// Esc closes the stats modal if open
+window.addEventListener('keydown', (e) => {
+  const statsModalEl = document.getElementById('statsModal');
+  const statsOpen = !statsModalEl.classList.contains('hidden');
+
+  if (e.key === 'Escape' && statsOpen) {
+    e.preventDefault();
+    hideStatsModal();
+    return;
+  }
+
+  if (e.key === ' ' || e.key === 'Enter') {
+    // Don't advance overlay if the stats modal is on top of it
+    if (statsOpen) return;
+    const overlayEl = document.getElementById('overlay');
+    if (!overlayEl.classList.contains('hidden')) {
+      e.preventDefault();
+      advanceFromOverlay();
+    }
+  }
+});
+
+// Main game loop — delta-time based, frame-rate independent.
+// Every update function takes dt (seconds since last frame) so gameplay runs
+// at the same speed on 60Hz, 144Hz, 240Hz displays.
+let lastFrameTime = 0;   // timestamp (ms) of previous rAF callback
+let rafId = 0;
+
+function loop(now) {
+  // Compute delta time in SECONDS. First frame uses 1/60 as a safe fallback.
+  let rawDt;
+  if (lastFrameTime === 0) {
+    rawDt = 1 / 60;
+  } else {
+    rawDt = (now - lastFrameTime) / 1000;
+  }
+  lastFrameTime = now;
+  // Clamp dt to avoid huge jumps (tab backgrounded, debugger pause, etc.)
+  // 0.1s cap means the worst case is a 100ms "skip" rather than teleporting.
+  if (rawDt > 0.1) rawDt = 0.1;
+
+  // BATTLE: slow-mo on kill — gameplay dt is scaled, but screen-shake/UI use rawDt.
+  let dt = rawDt;
+  if (slowmoTimer > 0) {
+    slowmoTimer -= rawDt;
+    dt = rawDt * 0.25;
+  }
+
+  updateShake(rawDt);
+  updateHitVignettes(rawDt);
+
+  if (roundActive) {
+    if (countdownTimer > 0) {
+      // Countdown phase: freeze gameplay, tick the countdown by seconds
+      countdownTimer -= dt;
+      if (countdownTimer <= 0) {
+        countdownStep++;
+        if (countdownStep < COUNTDOWN_STEPS.length) {
+          countdownTimer = COUNTDOWN_STEP_DURATION;
+          if (countdownStep === COUNTDOWN_STEPS.length - 1) SFX.countdownGo();
+          else SFX.countdownTick();
+        } else {
+          countdownTimer = 0;   // stop counting; gameplay unlocks next frame
+        }
+      }
+    } else {
+      updateTank(tank1, tank2, dt);
+      updateTank(tank2, tank1, dt);
+      updateBullets(dt);
+      updatePowerups(dt);
+      // Tick down round timer (now in seconds)
+      roundTimer -= dt;
+      // Beep once per whole second crossing during the last LOW_TIME_THRESHOLD seconds
+      const currentSec = Math.ceil(roundTimer);
+      if (roundTimer > 0 && roundTimer <= LOW_TIME_THRESHOLD && currentSec !== lastTimeWarningSec) {
+        SFX.timeWarning();
+        lastTimeWarningSec = currentSec;
+      }
+      if (roundTimer <= 0) {
+        if (tank1.hp > tank2.hp) endRound('p1');
+        else if (tank2.hp > tank1.hp) endRound('p2');
+        else endRound('draw');
+      }
+    }
+    updateHUD();
+  }
+  updateParticles(dt);
+  updateGhosts(dt);
+  updateFloatingTexts(dt);
+  draw();
+  if (!roundActive && freezeTimer > 0) {
+    freezeTimer -= dt;
+    if (freezeTimer <= 0) {
+      freezeTimer = 0;
+      if (scores.p1 >= WIN_SCORE) { SFX.matchWin(); showOverlay('match', 'P1'); }
+      else if (scores.p2 >= WIN_SCORE) { SFX.matchWin(); showOverlay('match', 'P2'); }
+      else if (winner === 'draw') { SFX.drawRound(); showOverlay('draw'); }
+      else { SFX.roundWin(); showOverlay('round', winner === 'p1' ? 'P1' : 'P2'); }
+    }
+  }
+  rafId = requestAnimationFrame(loop);
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+  } else if (!rafId) {
+    lastFrameTime = 0;   // reset dt so we don't accumulate hidden-time
+    rafId = requestAnimationFrame(loop);
+  }
+});
+
+updateMuteIcon();   // deferred — ICON_SVGS now in scope
+
+// --- AI opponent toggle ---
+(function wireBotToggle() {
+  const btn = document.getElementById('botToggle');
+  if (!btn) return;
+  function refresh() {
+    btn.textContent = 'AI: ' + (botEnabled ? 'ON' : 'OFF');
+    btn.classList.toggle('active', botEnabled);
+    if (tank2) tank2.ai = botEnabled;
+  }
+  btn.addEventListener('click', () => {
+    botEnabled = !botEnabled;
+    try { localStorage.setItem('tankBattle.bot', botEnabled ? '1' : '0'); } catch (e) {}
+    refresh();
+  });
+  refresh();
+})();
+
+// --- Auto-aim toggle ---
+(function wireAimToggle() {
+  const btn = document.getElementById('aimToggle');
+  if (!btn) return;
+  function refresh() {
+    btn.textContent = 'AIM: ' + (autoAimEnabled ? 'AUTO' : 'MANUAL');
+    btn.classList.toggle('active', autoAimEnabled);
+  }
+  btn.addEventListener('click', () => {
+    autoAimEnabled = !autoAimEnabled;
+    try { localStorage.setItem('tankBattle.autoAim', autoAimEnabled ? '1' : '0'); } catch (e) {}
+    refresh();
+  });
+  refresh();
+})();
+
+applyLang();
+initRound();
+rafId = requestAnimationFrame(loop);
+</script>
+
+</body>
+</html>

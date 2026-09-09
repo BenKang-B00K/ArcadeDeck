@@ -1,0 +1,139 @@
+/* === units_controls.css === */
+/* units_controls.css - UI Buttons for Unit Upgrades and Management in the Info Panel */
+
+/* Demolish/Shrine-demo unique hazard pattern animation */
+.info-sacrifice-btn.shrine-demo {
+    position: relative;
+    overflow: hidden;
+}
+
+.info-sacrifice-btn.shrine-demo::before {
+    content: "";
+    position: absolute;
+    top: 0; left: -100%; width: 200%; height: 100%;
+    background: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,140,0,0.1) 5px, rgba(255,140,0,0.1) 10px);
+    pointer-events: none;
+    transition: left 0.5s;
+}
+
+.info-sacrifice-btn.shrine-demo:hover::before {
+    left: 0;
+}
+
+@keyframes dangerFlicker {
+    0% { opacity: 0.8; box-shadow: 0 0 5px #f00; }
+    50% { opacity: 1; box-shadow: 0 0 15px #f00; }
+    100% { opacity: 0.8; box-shadow: 0 0 5px #f00; }
+}
+
+/* === units_vfx.css === */
+/* units_vfx.css - Specialized Visual Effects for Units (Drag Ghosts, Aura Effects, etc.) */
+
+/* [User Request] Drag Follow Visual */
+.drag-ghost {
+    pointer-events: none !important;
+    z-index: 9999 !important;
+    position: fixed !important;
+    font-size: 32px;
+    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.6)) brightness(1.2);
+    animation: ghostFloat 0.8s infinite alternate ease-in-out;
+}
+
+@keyframes ghostFloat {
+    from { transform: translate(-50%, -50%) scale(1.2); }
+    to { transform: translate(-50%, -55%) scale(1.3); }
+}
+
+/* === enemies_base.css === */
+/* enemies_base.css - DOM Hitbox Layer for Enemy Units (Visuals are Canvas-based) */
+
+.enemy {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    pointer-events: auto;
+    cursor: help;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px; /* Logical size for click area */
+    height: 40px;
+    
+    /* Hide DOM visual elements completely */
+    color: transparent !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-size: 0 !important;
+}
+
+.enemy.boss { 
+    z-index: 100; 
+    width: 120px; 
+    height: 120px; 
+}
+
+/* === enemies_ui.css === */
+/* enemies_ui.css - HUD and Overlay components for Enemy-related events */
+
+/* Boss Warning Toast (right side, red/orange theme) */
+.boss-warn-toast {
+    border-color: rgba(255, 50, 0, 0.6) !important;
+    border-left-color: #ff2200 !important;
+    background: linear-gradient(135deg, #0d0000 80%, #1a0500) !important;
+    box-shadow: 0 4px 20px rgba(255, 40, 0, 0.5), inset 0 0 12px rgba(0,0,0,0.6) !important;
+    animation: bossWarnPulse 0.6s ease-out, encounterSlideIn 0.35s cubic-bezier(0.23,1,0.32,1) forwards !important;
+}
+.boss-warn-toast .encounter-toast-header { color: #ff4400 !important; }
+.boss-warn-toast .encounter-toast-cat    { color: #ff6622 !important; border-color: rgba(255,60,0,0.3) !important; }
+
+/* Boss Victory Toast (left side, gold/fire theme) */
+.boss-victory-toast {
+    border-color: rgba(255, 180, 0, 0.6) !important;
+    border-right-color: #ffaa00 !important;
+    background: linear-gradient(135deg, #0d0800 80%, #1a1000) !important;
+    box-shadow: 0 4px 24px rgba(255, 160, 0, 0.5), inset 0 0 12px rgba(0,0,0,0.6) !important;
+}
+.boss-victory-toast .encounter-toast-header { color: #ffcc00 !important; }
+.boss-victory-toast .encounter-toast-cat    { color: #ffaa44 !important; border-color: rgba(255,160,0,0.3) !important; }
+
+@keyframes bossWarnPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(255,40,0,0.7); }
+    50%  { box-shadow: 0 0 0 10px rgba(255,40,0,0); }
+    100% { box-shadow: 0 4px 20px rgba(255,40,0,0.5); }
+}
+
+/* === effects.css === */
+/* effects.css - Canvas Overlay & UI Layer Effects only */
+
+#frozen-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle, rgba(0, 229, 255, 0.1) 0%, rgba(0, 150, 255, 0.4) 100%);
+    z-index: 150; /* Above Canvas, below top HUD */
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1s ease;
+    mix-blend-mode: screen;
+}
+
+#frozen-overlay::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    /* Oversize so transform translation never exposes a gap edge. */
+    width: calc(100% + 100px);
+    height: calc(100% + 200px);
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><path d="M50 0 L50 100 M0 50 L100 50 M25 25 L75 75 M75 25 L25 75" stroke="rgba(255,255,255,0.2)" stroke-width="2"/></svg>');
+    opacity: 0.3;
+    animation: snowFall 10s linear infinite;
+    will-change: transform;
+}
+
+@keyframes snowFall {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(-100px, -200px, 0); }
+}
+
+/* Range indicators are now handled via Canvas graphics_units.js natively for 60fps performance. */
+

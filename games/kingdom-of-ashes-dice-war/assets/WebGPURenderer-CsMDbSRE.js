@@ -1,0 +1,1 @@
+import"./Geometry-MFRJ-jpk.js";import{n as e}from"./index-S_ytZZaM.js";export{e as WebGPURenderer};

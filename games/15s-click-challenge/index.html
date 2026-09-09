@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>15s Click Challenge</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preload" as="image" href="body_bg.webp" media="(min-width: 901px)">
+  <link rel="preload" as="image" href="body_bg-1280.webp" media="(max-width: 900px)">
+</head>
+<body>
+  <div class="container">
+    <div class="toolbar" role="toolbar" aria-label="Game controls">
+      <button type="button" id="records-toggle" class="tb-btn" title="Records &amp; Achievements" aria-label="Records and achievements">&#127942;</button>
+      <button type="button" id="guide-toggle" class="tb-btn" title="How to Play" aria-label="How to play">?</button>
+      <button type="button" id="sound-toggle" class="tb-btn" title="Toggle Sound" aria-label="Toggle sound" aria-pressed="false">🔊</button>
+    </div>
+    <div class="header">
+      <h1 class="title"><span class="title-accent">15s</span> Click Challenge</h1>
+      <p class="subtitle">Tap the glowing target before time runs out</p>
+    </div>
+
+    <div id="guide-overlay" class="guide-overlay" role="dialog" aria-modal="true" aria-labelledby="guide-overlay-title" aria-hidden="true">
+      <div class="guide-card">
+        <div id="guide-overlay-title" class="guide-title">How to Play</div>
+        <ul class="guide-quick">
+          <li>Tap the <span class="hl-target">glowing target</span> before <strong>15s</strong> runs out</li>
+          <li>Hit = <strong>+1</strong> · Miss = <strong>−0.5s</strong></li>
+          <li>Chain hits within <strong>1.5s</strong> for a combo</li>
+          <li>Clear the round to level up — fail drops you to the last checkpoint</li>
+        </ul>
+        <button type="button" id="guide-close" class="guide-close">Got it!</button>
+      </div>
+    </div>
+
+    <div id="records-overlay" class="guide-overlay" role="dialog" aria-modal="true" aria-labelledby="records-overlay-title" aria-hidden="true">
+      <div class="guide-card records-card">
+        <div id="records-overlay-title" class="guide-title">Records</div>
+        <div class="guide-section">
+          <div class="guide-subtitle">Top 5</div>
+          <ol id="top5-list" class="top5-list"></ol>
+        </div>
+        <div class="guide-section">
+          <div class="guide-subtitle">Achievements</div>
+          <div id="achievements-list" class="achievements-list"></div>
+        </div>
+        <button type="button" id="records-close" class="guide-close">Close</button>
+      </div>
+    </div>
+
+    <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"></div>
+
+    <section class="hud" aria-label="Game stats">
+      <div class="hud-item hud-level">
+        <div class="hud-icon">&#9670;</div>
+        <div class="hud-body"><div class="label">LEVEL</div><div class="value"><span id="level" class="hud-value">1</span></div></div>
+      </div>
+      <div class="hud-item hud-score">
+        <div class="hud-icon">&#9733;</div>
+        <div class="hud-body"><div class="label">SCORE</div><div class="value"><span id="score" class="hud-value">0</span></div></div>
+      </div>
+      <div class="hud-item hud-time">
+        <div class="hud-icon">&#9202;</div>
+        <div class="hud-body"><div class="label">TIME</div><div class="value"><span id="time" class="hud-value">15</span><span class="unit">s</span></div></div>
+      </div>
+      <div class="hud-item hud-high">
+        <div class="hud-icon">&#9813;</div>
+        <div class="hud-body"><div class="label">BEST</div><div class="value"><span id="highscore" class="hud-value">0</span></div></div>
+      </div>
+    </section>
+
+    <div class="game-wrap">
+      <canvas id="game" role="img" aria-label="Click target playfield"></canvas>
+      <div id="start-overlay" class="game-overlay">
+        <button type="button" id="start" class="big-start">Start</button>
+        <div id="countdown" class="countdown" aria-live="assertive" style="display:none">2</div>
+      </div>
+      <div id="result-overlay" class="game-overlay" role="dialog" aria-modal="true" aria-labelledby="result-title" aria-hidden="true" style="display:none">
+        <div class="result-card">
+          <div id="result-title" class="result-title"></div>
+          <div id="result-msg" class="result-msg"></div>
+          <div id="result-score" class="result-score"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"
+          integrity="sha384-46Oo18A61vfMErbleKnm7no+MU4xWkCYAHfFjdeBgYnq5437neF0hgpBaX/YM8fu"
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer"
+          defer></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

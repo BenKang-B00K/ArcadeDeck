@@ -1,0 +1,1665 @@
+{
+  "meta": {
+    "code": "sch",
+    "name": "Simplified Chinese",
+    "endonym": "简体中文"
+  },
+  "ui": {
+    "start": {
+      "subtitle": "恶灵们的回归",
+      "btn_continue": "继续游戏",
+      "btn_new": "新游戏",
+      "btn_tutorial": "指南 (Guide)",
+      "tutorial_label": "新手指南",
+      "status_on": "ON",
+      "status_off": "OFF"
+    },
+    "loading": {
+      "title": "GATE OF HELL",
+      "status": "深渊之门开启中...",
+      "subtitle": "GATE OF HELL CHRONICLES",
+      "msg_0": "深渊之门开启中...",
+      "msg_1": "正在提取灵魂本质...",
+      "msg_2": "正在整理驱魔圣典...",
+      "msg_3": "正在记录恶灵之名...",
+      "msg_4": "正在封印深渊气息...",
+      "msg_5": "正在鉴定古代遗物...",
+      "msg_6": "正在点亮圣所灯火...",
+      "ready": "准备就绪！",
+      "error": "深渊之门已关闭 (加载失败)"
+    },
+    "hud": {
+      "sleeping_statue": "沉睡的石像",
+      "cursed_status": "沉睡的诅咒",
+      "stage_name_default": "低语之门",
+      "depth": "Depth",
+      "se_tooltip": "灵魂能量 (SE): 用于召唤和强化单位 (点击查看详情)",
+      "pe_tooltip": "传送门污染度 (PE): 达到 100% 时游戏结束 (点击查看详情)",
+      "rs_tooltip": "剩余恶灵 (RS): 通关所需的击杀数 (点击查看详情)",
+      "curse_lv_prefix": "深渊诅咒",
+      "curse_lv1": "深渊诅咒 第1阶段",
+      "curse_lv2": "深渊诅咒 第2阶段",
+      "curse_lv3": "深渊诅咒 第3阶段",
+      "curse_tooltip_title_active": "深渊诅咒",
+      "curse_tooltip_title_dormant": "沉睡的诅咒",
+      "curse_tooltip_desc_active": "传送门污染度过高，触发了古代诅咒。请通过净化降低污染度。",
+      "curse_tooltip_desc_dormant": "诅咒尚未苏醒。污染度超过 30% 时激活。",
+      "curse_stat_lv1": "第1阶段 (30%↑)",
+      "curse_stat_lv2": "第2阶段 (50%↑)",
+      "curse_stat_lv3": "第3阶段 (75%↑)",
+      "curse_stat_lv1_val": "全体友军攻速 -5%",
+      "curse_stat_lv2_val": "全体友军攻速 -10%",
+      "curse_stat_lv3_val": "全体友军攻速 -20%",
+      "se_tooltip_title": "灵魂能量 (SE)",
+      "se_tooltip_desc": "召唤驱魔师和建立圣所所需的灵力能量。",
+      "se_gain_method": "击杀恶灵",
+      "se_gain_label": "获取方法",
+      "pe_tooltip_title": "传送门污染度 (PE)",
+      "pe_tooltip_desc": "恶灵通过传送门时积累的污染值。达到 100% 时游戏结束。",
+      "pe_purge_method": "使用净化 (Purge) 功能",
+      "pe_purge_label": "净化方法",
+      "rs_tooltip_title": "剩余恶灵 (RS)",
+      "rs_tooltip_desc": "清除当前关卡所需击杀的恶灵总量。",
+      "rs_progress_label": "进度",
+      "rs_progress_val": "击杀时减少",
+      "gargoyle_atk_speed": "攻击速度",
+      "gargoyle_atk_range": "攻击射程",
+      "gargoyle_atk_damage": "攻击伤害",
+      "gargoyle_se_gain": "SE 获取",
+      "gargoyle_no_debuff": "无",
+      "se_short": "SE 不足",
+      "stage_countdown_enemies": "恶灵们正在涌来！",
+      "stage_banner_title": "低语之门"
+    },
+    "controls": {
+      "se_short": "SE 不足",
+      "sf_tooltip": "Soul Fragment — 遗物制作资源",
+      "sc_tooltip": "Soul Crystal — 装备重洗资源",
+      "new_badge": "NEW",
+      "tba": "TBA",
+      "btn_pause": "暂停",
+      "btn_resume": "继续",
+      "summon_title": "召唤",
+      "summon_desc": "随机召唤一名驱魔学徒或驱魔见习生。",
+      "shrine_title": "神圣圣所",
+      "shrine_desc": "放置在专用槽位中，为周围友军提供强大的攻击力加成。",
+      "purge_title": "空间净化",
+      "purge_desc": "立即清除 50% 的传送门污染度。请在危机时刻使用。",
+      "relics_title": "遗物",
+      "relics_desc": "在净化过程中获得的宝物，永久强化全体友军。",
+      "equip_title": "装备",
+      "equip_desc": "装备后可大幅提升特定属性的古代武具。",
+      "equip_manage_title": "神圣装备库",
+      "equip_manage_desc": "管理并强化在深渊中获得的圣物武具。",
+      "equip_lore": "即便是折断的刀刃，在驱魔师手中也能成为斩杀恶灵的神剑。",
+      "collections_title": "图鉴",
+      "collections_desc": "查看至今为止遭遇的恶灵和友军的详细记录。",
+      "pact_title": "诅咒契约",
+      "pact_unlock_fmt": "在第 {stage} 关解锁。",
+      "pact_ready": "准备召唤",
+      "pact_cooldown_fmt": "再次使用需等待 {cur}/{cd} 关",
+      "pact_desc_fmt": "立即召唤一名首领级灵魂。击杀后必得遗物。每 {cd} 关可使用 1 次。若超过 {grace} 关未召唤，将累积惩罚。",
+      "pact_penalty_fmt": "无视惩罚: 敌人生命值 +{hp}%, SE −{se}%",
+      "tba_title": "待定",
+      "tba_desc": "新功能即将推出。",
+      "relics_cost_fmt": "普通 {n} · 顶级 {s} SF"
+    },
+    "info_panel": {
+      "default_title": "GATE OF HELL",
+      "default_subtitle": "SACRED TABLET",
+      "lore_default": "深渊记录板分析灵魂本质，照亮净化之路。",
+      "hint_touch": "▾ 触摸单位或敌人 ▾",
+      "shrine_scope_local": "近战",
+      "shrine_scope_global": "全局",
+      "shrine_buffed_fmt": "强化 {n} 人",
+      "shrine_demolish_btn": "拆除圣所",
+      "unit_role_default": "驱魔师",
+      "unit_promote_t1": "灵魂觉醒",
+      "unit_promote_t2": "超越觉醒",
+      "unit_promote_t3": "传奇晋升",
+      "unit_corrupt_btn": "堕落",
+      "unit_corrupt_full_btn": "堕落 (Corrupted)",
+      "unit_instakill_disp": "即死",
+      "unit_global_range_disp": "全局",
+      "enemy_desc_unknown": "深渊中真面目不明的存在。",
+      "enemy_flavor": "它的本质在记录板上短暂停留...",
+      "slot_warning_title": "无法放置",
+      "slot_warning_flavor": "这里是不允许灵魂和谐的位置。",
+      "slot_sacred_only": "神圣圣所专用槽位。",
+      "slot_shrine_only": "圣所专用槽位。",
+      "slot_unit_only": "驱魔师专用槽位。",
+      "enemy_lore_unknown": "没有关于此灵魂的记录。",
+      "shrine_badge": "圣所",
+      "shrine_demo_prefix": "拆除时",
+      "sacred_slot_only_log": "这里只能放置神圣圣所 (Tier 2)。"
+    },
+    "modal": {
+      "close": "关闭"
+    },
+    "collections": {
+      "subtitle": "深渊中的所有存在都将铭刻在此记录板上",
+      "default_title": "GATE OF HELL",
+      "default_subtitle": "CHRONICLES",
+      "tab_ghosts": "邪恶存在",
+      "tab_exorcists": "驱魔师系谱",
+      "tab_shrines": "圣所",
+      "ghost_locked": "尚未遭遇",
+      "ghost_locked_lore": "隐藏在深渊深处的存在。",
+      "shrine_sacred_label": "神圣圣所",
+      "shrine_normal_label": "普通圣所",
+      "shrine_range_global": "全局",
+      "shrine_range_local": "周围",
+      "shrine_stat_range": "范围",
+      "shrine_stat_role": "角色",
+      "shrine_stat_effect": "效果",
+      "shrine_stat_demolish": "拆除",
+      "ghost_stat_hp": "生命值",
+      "ghost_stat_def": "防御",
+      "ghost_stat_reward": "奖励",
+      "ghost_stat_kills": "击杀",
+      "section": {
+        "specter": "亡灵",
+        "wraith": "恶灵",
+        "spirit": "冤魂",
+        "demon": "恶魔",
+        "abyssal_boss": "首领",
+        "mini_boss": "精英首领",
+        "treasure": "奇异点",
+        "buff": "增益圣所",
+        "prob": "概率圣所",
+        "util": "辅助圣所",
+        "sacred": "神圣圣所"
+      },
+      "exo": {
+        "family_suffix": "系谱",
+        "family_subtitle": {
+          "novice_exorcist": "支援型系列",
+          "apprentice": "攻击型系列",
+          "acolyte_priest": "神圣型系列",
+          "acolyte_warrior": "近战型系列"
+        },
+        "tier": {
+          "1": "基础",
+          "2": "熟练",
+          "3": "高级",
+          "4": "传奇"
+        },
+        "tier_label": {
+          "1": "TIER  I",
+          "2": "TIER  II",
+          "3": "TIER  III",
+          "4": "TIER  IV"
+        },
+        "units_count_format": "{n} 个单位 · 5→10→5"
+      }
+    },
+    "detail": {
+      "lbl_attack": "攻击力",
+      "lbl_dps": "DPS",
+      "lbl_range": "射程",
+      "lbl_cooldown": "冷却时间",
+      "lbl_role": "角色",
+      "lbl_effect": "效果",
+      "lbl_demolish": "拆除",
+      "lbl_hp": "生命值",
+      "lbl_defense": "防御",
+      "lbl_reward": "奖励",
+      "lbl_kills": "击杀",
+      "lbl_ability": "能力",
+      "lbl_range_type": "范围",
+      "sub_damage": "伤害",
+      "sub_dps": "每秒",
+      "sub_distance": "距离",
+      "sub_per_sec": "每秒",
+      "sub_passive": "被动",
+      "sub_instakill": "即死",
+      "sub_global": "全局",
+      "tag_passive": "被动",
+      "tag_instakill": "即死",
+      "tag_global": "全局",
+      "shrine_normal": "普通圣所",
+      "shrine_sacred": "神圣圣所",
+      "shrine_range_local": "周围",
+      "shrine_range_global": "全局",
+      "danger": {
+        "extreme": "极度危险",
+        "high": "危险",
+        "caution": "注意",
+        "minor": "轻微",
+        "low": "低"
+      }
+    },
+    "relics": {
+      "float_surge": "深渊加速！",
+      "float_revival": "灵魂复活！",
+      "float_ledger_suffix": " SE 到账！",
+      "subtitle": "从深渊深处获得的受诅咒遗物",
+      "default_title": "GATE OF HELL",
+      "default_subtitle": "RELIC VAULT",
+      "sf_tooltip": "Soul Fragment — 遗物制作资源",
+      "count_tooltip": "持有遗物数",
+      "total_bonus": "遗物总加成",
+      "found_title": "发现遗物！",
+      "effect_label": "效果",
+      "source_label": "来源",
+      "owned_fmt": "持有 ×{n}",
+      "not_owned": "未获得",
+      "section_normal": "普通遗物",
+      "section_supreme": "顶级遗物",
+      "section_boss": "支配者遗物",
+      "section_ancient": "古代遗物",
+      "craft_btn": "制作",
+      "craft_no_sf_warn": "Soul Fragment 不足 (需要 {cost})",
+      "craft_pool_empty_warn": "无可制作的遗物",
+      "craft_btn_title_empty": "无可制作的遗物 (已全部达到最大层数)",
+      "craft_btn_title_fmt": "消耗 {cost} Soul Fragment 随机制作遗物 (持有 {sf} SF)",
+      "src_specter": "亡灵",
+      "src_wraith": "怨魂",
+      "src_spirit": "灵魂",
+      "src_all": "所有敌人",
+      "src_demon": "恶魔",
+      "src_abyssal_boss": "深渊首领",
+      "src_supreme_boss": "契约首领",
+      "src_unknown": "未知",
+      "bonus_damage": "攻击力增加",
+      "bonus_range": "射程增加",
+      "bonus_cooldown": "攻击速度增加",
+      "bonus_crit_chance": "暴击率",
+      "bonus_crit_damage": "暴击伤害",
+      "bonus_slow_strength": "减速效果强化",
+      "bonus_portal_dmg_reduction": "传送门稳定性",
+      "bonus_summon_cost_reduction": "召唤费用降低",
+      "bonus_execute_threshold": "斩杀阈值",
+      "bonus_aura_range": "范围扩张",
+      "bonus_sell_refund": "出售返还奖励",
+      "bonus_shrine_mastery": "圣所精通",
+      "bonus_se_max_limit": "SE 上限扩张",
+      "bonus_crit_chain": "连锁闪电伤害",
+      "bonus_portal_heal_chance": "灵魂回流概率",
+      "bonus_echo_shot_chance": "残响攻击概率",
+      "bonus_combo_damage": "连击伤害增加",
+      "bonus_death_save": "灵魂复活充能",
+      "bonus_surge_interval_reduction": "深渊加速层数",
+      "bonus_void_mark_cap": "虚空标记上限",
+      "bonus_adjacency_damage": "相邻羁绊伤害",
+      "bonus_ledger_stacks": "灵魂账单层数",
+      "log_ledger_windfall": "灵魂账单: +{n} SE",
+      "log_revival": "灵魂复活！传送门修复。",
+      "badge_title_fmt": "持有种类 {u} / 共 {t} 个"
+    },
+    "equipment": {
+      "subtitle": "从深渊中回收的神圣圣物",
+      "default_title": "GATE OF HELL",
+      "default_subtitle": "SACRED ARMORY",
+      "total_bonus": "装备总效果",
+      "found_prefix": "装备",
+      "sc_row_title": "击杀敌人时稀有获得。用于装备重洗。",
+      "reroll_label": "重洗 (Reroll)",
+      "reroll_stock_fmt": "持有 {n}",
+      "found_count_fmt": "获得 ×{n}",
+      "found_title_new": "获得！",
+      "found_title_upgrade": "强化！",
+      "found_title_reroll": "已重洗！",
+      "found_title_existing": "再次发现",
+      "found_effect_label": "效果",
+      "found_lore": "即便是深渊的恶灵，在这些武具的光芒面前也会双目失明。",
+      "no_sc_warn": "Soul Crystal 不足 (需要 {cost})",
+      "no_equip": "未穿戴装备。",
+      "not_owned_tier": "未获得",
+      "secondary_stat_label": "随机副属性",
+      "secondary_stat_locked": "??? (仅限最高等级)",
+      "bonus_label": "[奖励]",
+      "section_weapon": "武器",
+      "section_armor": "防具",
+      "section_accessory": "饰品",
+      "lore_armory": "即便是折断的刀刃，在驱魔师手中也能成为斩杀恶灵的神剑。",
+      "grade_suffix": "等级"
+    },
+    "game_over": {
+      "title": "灵魂已被吞噬",
+      "msg": "深渊又收走了一个灵魂... 大门已经崩塌，永恒的黑暗在等待。",
+      "depth_label": "到达深度:",
+      "btn_retry": "再次站起来净化 (重试)"
+    },
+    "sacrifice": {
+      "header": "[绝对禁忌: 灵魂废弃]",
+      "body": "是否要强制切断与守护者的神圣契约？\n\n将灵魂归还深渊的代价绝非轻微，\n一旦散去的本质将永远无法再次召唤。\n\n真的要将这名守护者放逐到永恒的黑暗中吗？",
+      "btn_confirm": "执行堕落",
+      "btn_cancel": "维持契约 (取消)"
+    },
+    "unlock": {
+      "header": "解锁新职业！",
+      "resume_hint": "(点击任意处继续)"
+    },
+    "pause": {
+      "header": "TIME FROZEN",
+      "body": "深渊的流动暂时停止了。\n准备好后请再次开始驱魔。",
+      "btn_resume": "继续驱魔 (Resume)"
+    },
+    "settings": {
+      "header": "[净化设置]",
+      "tutorial_label": "新手教学",
+      "tutorial_desc": "发现新单位/系统时显示帮助信息。",
+      "language_label": "语言 (Language)",
+      "language_desc": "更改游戏界面语言。",
+      "btn_restart": "中止当前净化 (重新开始)",
+      "btn_close": "关闭设置"
+    },
+    "quit": {
+      "header": "[命运的拒绝]",
+      "body": "已经有无数灵魂在这条道路上迷失了方向。\n\n如果你也放弃驱魔，这个世界上留下的光芒将彻底消失。\n至今为止的所有净化记录都将消失，且无法恢复。\n\n真的要放弃这个神圣的任务吗？",
+      "btn_confirm": "逃向深渊 (中止)",
+      "btn_cancel": "反抗命运 (继续)"
+    },
+    "tutorial": {
+      "header": "[驱魔指南]",
+      "btn_close": "关闭指南",
+      "section": {
+        "basic_title": "基本操作",
+        "basic_1": "可以通过拖放更改驱魔师的位置。",
+        "basic_2": "点击下方卡片召唤新的驱魔师或建造圣所。",
+        "units_title": "单位 & 圣所",
+        "units_1": "驱魔师会自动攻击恶灵，消耗 SE 可以进行转职。",
+        "units_2": "圣所为周围友军提供强大的增益，但拆除时会产生减益。",
+        "pe_title": "传送门污染度 (PE)",
+        "pe_1": "当恶灵通过传送门时，污染度会上升。",
+        "pe_2": "污染度达到 100% 时世界将毁灭。请使用“净化”功能阻止污染。"
+      }
+    },
+    "max_units": {
+      "warning_main": "???: 无法召唤更多驱魔师！",
+      "warning_sub": "(最大驱魔师人数: 16)"
+    },
+    "summons": {
+      "skeleton": "骷髅",
+      "ghost": "亡灵"
+    },
+    "enemy": {
+      "boss_warning_header": "深渊征兆",
+      "boss_warning_cat": "魔神降临",
+      "boss_warning_lore": "强大的深渊支配者即将降临。请集中所有驱魔师的力量！",
+      "boss_victory_header": "放逐深渊存在",
+      "boss_victory_cat": "魔王消灭",
+      "encounter_header": "新遭遇记录",
+      "unknown_boss_name": "未知的存在",
+      "stage_enemies_incoming": "恶灵们正在涌来！",
+      "float_time_reversal": "时间倒流",
+      "float_petrify": "石化！",
+      "float_invincible_off": "无敌解除！"
+    },
+    "curse": {
+      "form_0_name": "沉睡的石像",
+      "form_0_desc": "静静沉睡的石像。尚未苏醒。",
+      "form_1_name": "裂纹石像",
+      "form_1_desc": "开始出现裂纹。有什么东西正要醒来。",
+      "form_2_name": "睁眼的石像鬼",
+      "form_2_desc": "睁开了眼睛。正在注视着你。",
+      "form_3_name": "警惕的守卫",
+      "form_3_desc": "开始展开翅膀。进入了警惕状态。",
+      "form_4_name": "愤怒觉醒",
+      "form_4_desc": "完全觉醒。愤怒之火在眼中燃烧。",
+      "form_5_name": "堕落守护者",
+      "form_5_desc": "堕落开始了。充满了黑暗力量。",
+      "form_6_name": "恶魔石像鬼",
+      "form_6_desc": "完全变身为恶魔。仅凭存在就会污染周围环境。",
+      "form_7_name": "堕落神降临",
+      "form_7_desc": "堕落神已降临。所有神圣力量都在减弱。",
+      "stat_ally_prefix": "友军",
+      "stat_enemy_prefix": "敌人",
+      "stat_speed": "速度",
+      "stat_range": "射程",
+      "stat_damage": "伤害",
+      "stat_none": "无",
+      "enemy_speed_label": "速度×",
+      "enemy_defense_label": "防御+"
+    },
+    "pact": {
+      "madness_popup": "疯狂发作！",
+      "madness_log_on": "恶魔之角: 疯狂发作 — 伤害倍率 ×2",
+      "madness_log_off": "恶魔之角: 疯狂解除"
+    }
+  },
+  "shrine_role": {
+    "buff": "增益",
+    "prob": "概率",
+    "util": "辅助",
+    "sacred_buff": "上位增益",
+    "sacred_util": "上位辅助",
+    "sacred_prob": "上位概率"
+  },
+  "unit_role": {
+    "basic_support": "基础-支援型",
+    "basic_attack": "基础-攻击型",
+    "basic_priest": "基础-神圣型",
+    "basic_melee": "基础-近接型",
+    "skilled_support": "熟练支援型",
+    "skilled_attack": "熟练攻击型",
+    "skilled_special": "熟练特殊型",
+    "attack": "攻击",
+    "support": "支援",
+    "special": "特殊"
+  },
+  "unit": {
+    "novice_exorcist": {
+      "name": "驱魔学徒",
+      "desc": "利用圣经的力量攻击单个敌人。支援型 T2 路径专用。",
+      "lore": "穿着淡紫色学生长袍，褐色短发，双手展开圣经发出光芒的初级驱魔师。"
+    },
+    "apprentice": {
+      "name": "驱魔见习生",
+      "desc": "发射经过净化的能量弹攻击单个目标。",
+      "lore": "穿着深靛蓝色长袍，配以金色披肩，手持刻有十字勋章圣具的见习驱魔师。"
+    },
+    "acolyte_priest": {
+      "name": "修道司祭",
+      "desc": "利用祝福之光对单个敌人造成神圣伤害。可以晋升为减速、洞察等支援系 T2。",
+      "lore": "穿着白色司祭服，披着鸽子羽毛，散发着祝福之光的修道司祭。"
+    },
+    "acolyte_warrior": {
+      "name": "修道战士",
+      "desc": "利用经过祝圣的短剑进行近战打击。可以晋升为剑士、僧侣、赞歌等攻击系 T2。",
+      "lore": "穿着轻甲，手持祝圣短剑的敏捷见习战士，肩部的神圣符咒闪烁着光芒。"
+    },
+    "chainer": {
+      "name": "灵魂束缚者",
+      "desc": "发射灵能锁链对敌人造成伤害，并降低其 30% 的移动速度。",
+      "lore": "穿着缠绕着黑色锁链的灰色长袍，锁链中流淌着蓝色灵气的束缚者。"
+    },
+    "talisman": {
+      "name": "符咒师",
+      "desc": "投掷爆炸符咒，对冲击点造成范围伤害。",
+      "lore": "穿着黄色道袍，肩部和腰部缠绕着爆炸符咒的术士，指尖跳动着火种。"
+    },
+    "monk": {
+      "name": "铁锤僧侣",
+      "desc": "利用沉重的铁锤进行打击，将恶灵从传送门推开。",
+      "lore": "穿着红褐色袈裟，背负金色铁锤的健壮僧侣，额头印有神圣印记。"
+    },
+    "archer": {
+      "name": "神圣弓箭手",
+      "desc": "射出能够无视敌人部分防御的长距离精密箭矢。[仅限驱魔见习生]",
+      "lore": "穿着白金锁子甲，手持闪耀弓弦，每支箭头上都刻有神圣卢恩的精密射手。"
+    },
+    "ice": {
+      "name": "冰结道士",
+      "desc": "吟唱冰结咒语，在 2 秒内大幅降低敌人的移动速度。",
+      "lore": "穿着青白色外套，手持冰晶法杖，呼出的气息都会冷凝结冰的冰结道士。"
+    },
+    "fire": {
+      "name": "火炎法师",
+      "desc": "点燃敌人，每秒造成相当于最大生命值 1% 的烧伤伤害。",
+      "lore": "穿着深红长袍，戴着火焰花纹头巾，在掌心转动小火种的火焰法师。"
+    },
+    "assassin": {
+      "name": "暗影刺客",
+      "desc": "利用双剑进行快速乱舞，并无视敌人的所有防御。[仅限驱魔见习生]",
+      "lore": "穿着黑色兜帽，戴着白色面具，双手各持一把弯曲双剑的敏捷暗影。"
+    },
+    "tracker": {
+      "name": "灵魂追踪者",
+      "desc": "照亮引导之光，扩展周围所有友军的攻击射程。",
+      "lore": "穿着银色披风，手持追踪灯火的猎人风追踪者，双眼闪烁着青色光芒。"
+    },
+    "necromancer": {
+      "name": "降灵术师",
+      "desc": "召唤灵能墙，从物理上阻断恶灵的进路。[仅限驱魔学徒]",
+      "lore": "穿着紫色兜帽，手持骷髅装饰法杖，指尖喷出灵魂迷雾的降灵术师。"
+    },
+    "guardian": {
+      "name": "圣所守护者",
+      "desc": "利用神圣力量进行攻击，并有 5% 的概率直接放逐目标。[仅限修道战士]",
+      "lore": "穿着白色锁子甲，手持金色十字盾和祝圣剑的坚定守护者。"
+    },
+    "alchemist": {
+      "name": "驱魔炼金术师",
+      "desc": "转换敌人的本质，打击时有 15% 的概率获得 2 SE。[仅限驱魔学徒]",
+      "lore": "穿着皮裙，系着玻璃瓶腰带，一手拿着咕嘟冒泡的净化烧瓶的炼金术师。"
+    },
+    "mirror": {
+      "name": "镜之预言者",
+      "desc": "使用反射魔法，将造成伤害的 30% 反弹给周围的其他敌人。[仅限驱魔学徒]",
+      "lore": "穿着银色服饰，手持手镜的神秘预言者，镜面闪烁着虹色光芒。"
+    },
+    "knight": {
+      "name": "驱魔骑士",
+      "desc": "挥舞受祝福的大剑，均衡地造成物理伤害和神圣伤害。",
+      "lore": "穿着青铜板甲，手持祝圣大剑，肩上披着神圣十字斗篷的骑士。"
+    },
+    "verse_warrior": {
+      "name": "圣句战士",
+      "desc": "利用神圣圣句珠进行近战打击，并有 10% 的概率封印敌人移动 1 秒。[仅限修道战士]",
+      "lore": "穿着白色武术服，手上缠绕着念珠，利用圣句珠进行近战打击的战士。"
+    },
+    "hymn_blaster": {
+      "name": "赞歌炮手",
+      "desc": "快速发射爆炸性的赞美波动，对敌方群体造成伤害。[仅限修道司祭]",
+      "lore": "穿着金色司祭服，背负巨大圣歌号角炮的魁梧炮手。"
+    },
+    "exorcism_mage": {
+      "name": "驱魔大法师",
+      "desc": "凝聚集中的驱魔能量，发动强大的单体打击。[仅限修道司祭]",
+      "lore": "穿着深蓝色长袍，手持十字法杖，指尖凝聚着浓缩白光的法师。"
+    },
+    "lightning_mage": {
+      "name": "雷电术士",
+      "desc": "雷击命中首个目标后，会连跳至周围 1 名敌人造成 50% 伤害。[仅限驱魔见习生]",
+      "lore": "穿着钴蓝色长袍，绣有金色雷电图案，指尖流淌着蓝色电流的雷电术士。"
+    },
+    "prayer_herald": {
+      "name": "祷告使者",
+      "desc": "发出祷告波动，增加范围内友军 8% 的攻击力。[仅限驱魔学徒]",
+      "lore": "穿着白色司祭服，拿着金色十字钟的端庄年轻使者。"
+    },
+    "relic_keeper": {
+      "name": "遗物守护者",
+      "desc": "利用神圣遗物的力量，增加范围内友军 10% 的攻击速度。[仅限修道司祭]",
+      "lore": "穿着白金锁子甲斗篷，肩负圣物箱的守护者。"
+    },
+    "ward_scribe": {
+      "name": "结界书记官",
+      "desc": "刻画封印结界，降低范围内敌人 15% 的移动速度。[仅限驱魔学徒]",
+      "lore": "穿着深蓝色学者服，手持结界卷轴，指尖刻画卢恩文字的书记官。"
+    },
+    "paladin": {
+      "name": "圣骑士",
+      "desc": "每 5 次攻击发动一次神圣重击，造成 3 倍伤害并使其昏迷。",
+      "lore": "穿着白金全身板甲，手持神圣战锤，脑后隐约浮现光环的圣骑士。"
+    },
+    "crusader": {
+      "name": "血骑士",
+      "desc": "发动处决一击，敌人的生命值越低造成的伤害越高。",
+      "lore": "披着血色斗篷，手持双手处决剑，剑身上刻有凝固血迹的血骑士。"
+    },
+    "midas": {
+      "name": "黄金米达斯",
+      "desc": "为攻击镀金，击杀时可获得大量的 15 SE。",
+      "lore": "戴着黄金面具，穿着镀金铠甲，指尖撒下黄金粉末的财富化身。"
+    },
+    "philosopher": {
+      "name": "虚空贤者",
+      "desc": "每次打击都会施加腐蚀诅咒，永久降低敌人 1 点防御。",
+      "lore": "穿着星纹黑色长袍，展开虚空之书的戴眼镜老贤者。"
+    },
+    "illusion": {
+      "name": "幻术师",
+      "desc": "混淆神志，有 20% 的概率使敌人迷失方向，四处徘徊。",
+      "lore": "戴着虹色面纱和面具的幻术师，周围环绕着模糊的残像。"
+    },
+    "reflection": {
+      "name": "反射大师",
+      "desc": "命中时发射在多个敌人之间弹跳的水晶碎片。",
+      "lore": "穿着水晶铠甲，手持多面水晶法杖，光线散射成彩虹的大师。"
+    },
+    "executor": {
+      "name": "冥界执法者",
+      "desc": "拨动命运天平，有 10% 的概率将敌人送回起点。",
+      "lore": "戴着黑色刽子手面具，手持命运天平，穿着深紫色长袍的执法者。"
+    },
+    "binder": {
+      "name": "灵魂缚法者",
+      "desc": "连接多个敌人的灵魂，使其共享受到的部分伤害。",
+      "lore": "穿着灰紫色长袍，双手缠绕着灵魂锁链的沉默缚法者。"
+    },
+    "grandsealer": {
+      "name": "大封印师",
+      "desc": "发射能使敌人特殊能力失效的封印符咒。",
+      "lore": "穿着绣有金线的白色服饰，封印符咒在空中飘浮的大封印师。"
+    },
+    "flamemaster": {
+      "name": "火符大师",
+      "desc": "在地面留下燃烧的地毯，造成持续的烧伤伤害。",
+      "lore": "穿着赤黑道袍，带着成捆燃烧符咒的大师，每一步都会留下余火。"
+    },
+    "vajra": {
+      "name": "金刚力士",
+      "desc": "利用神圣三叉戟造成暴击，大幅击退周围所有敌人。",
+      "lore": "拥有健硕的上半身，手持金色三叉戟，额头金刚印记闪烁的力士。"
+    },
+    "saint": {
+      "name": "振动圣者",
+      "desc": "敲响神圣之钟，制造冲击波使小范围内的所有敌人昏迷。",
+      "lore": "穿着白色司祭服，背负巨型圣钟的圣者，空气随着钟声而振动。"
+    },
+    "voidsniper": {
+      "name": "虚空狙击手",
+      "desc": "发射横穿整个地图的子弹，狙击离传送门最近的敌人。",
+      "lore": "披着黑色斗篷，背着长款虚空步枪的狙击手，一只眼睛戴着星光单片镜。"
+    },
+    "thousandhand": {
+      "name": "千手弓箭手",
+      "desc": "同时对多个目标降下无数箭矢洗礼。",
+      "lore": "利用多条手臂同时拉动多张弓的金色千手弓箭手。"
+    },
+    "absolutezero": {
+      "name": "绝对零度法师",
+      "desc": "攻击时，有概率直接处决生命值低于 20% 的被冰冻敌人。",
+      "lore": "戴着冰结晶王冠，穿着深蓝色长袍，每一步都会结冰的法师。"
+    },
+    "permafrost": {
+      "name": "冰结处女",
+      "desc": "召唤持续性暴风雪，大幅降低大范围内所有敌人的移动速度。",
+      "lore": "穿着白银礼服，戴着雪花面纱，指尖挥舞着暴风雪的处女。"
+    },
+    "hellfire": {
+      "name": "地狱火炼金师",
+      "desc": "燃烧的敌人在死亡时会发生爆炸，对周围敌人造成伤害。",
+      "lore": "穿着黑红皮裙，双手各持一个爆炸烧瓶的疯狂炼金术师。"
+    },
+    "phoenix": {
+      "name": "不死鸟召唤师",
+      "desc": "召唤不死鸟，在目标后方留下高伤害的火焰路径。",
+      "lore": "披着深红与金色羽毛斗篷，肩上停着一只小不死鸟的召唤师。"
+    },
+    "abyssal": {
+      "name": "深渊屠杀者",
+      "desc": "精准收割灵魂，击杀时可获得 1.5 倍的 SE。",
+      "lore": "穿着黑色铠甲，手持灵魂收割镰，空洞的瞳孔中流淌着紫色雾气的屠杀者。"
+    },
+    "spatial": {
+      "name": "空间剪切者",
+      "desc": "召唤模仿自身攻击的灵能幻影，同时打击多名敌人。",
+      "lore": "穿着银色铠甲，手持弯曲次元剑，被斩之处留下裂缝的剪切者。"
+    },
+    "seer": {
+      "name": "真理探求者",
+      "desc": "发出光环，向所有友军暴露潜行或相位变换中的敌人。",
+      "lore": "穿着深紫色长袍，带着真理之眼符咒，额头第三只眼闪烁的探求者。"
+    },
+    "commander": {
+      "name": "战场指挥官",
+      "desc": "鼓舞周围友军，使其攻击速度增加 20%。",
+      "lore": "披着红斗篷，穿着金色肩甲铠甲，高举神圣军旗的指挥官。"
+    },
+    "wraithlord": {
+      "name": "亡灵领主",
+      "desc": "击杀时有一定概率将其灵魂复活为友军骷髅兵，并肩作战。",
+      "lore": "戴着黑色王冠，披着破旧亡灵斗篷，周围漂浮着骷髅兵灵魂的领主。"
+    },
+    "cursedshaman": {
+      "name": "受诅咒的萨满",
+      "desc": "对敌人施加诅咒，每次打击永久降低其最大生命值的 5%。",
+      "lore": "戴着骨质面具和羽毛装饰，手中拿着黑色诅咒人偶的黑暗萨满。"
+    },
+    "rampart": {
+      "name": "神圣城垒",
+      "desc": "防御传送门，100% 概率将到达的敌人送回起点 (5 次充能)。",
+      "lore": "手持巨大的金色塔盾，穿着白色铠甲，纹丝不动的坚固城垒。"
+    },
+    "judgment": {
+      "name": "审判骑士",
+      "desc": "降下神圣之光，对目标周围的所有敌人造成范围伤害。",
+      "lore": "穿着白金铠甲，手持神圣双手剑，头顶漂浮着天平光环的审判者。"
+    },
+    "scripture_knight": {
+      "name": "圣句骑士",
+      "desc": "挥舞经过圣句强化的剑，对周围所有敌人进行范围打击。",
+      "lore": "穿着镶嵌着圣句珠的白金铠甲，挥舞祝圣光剑的骑士。"
+    },
+    "seal_warrior": {
+      "name": "封印战士",
+      "desc": "30% 概率发动神圣打击，完全封印敌人所有能力 3 秒。",
+      "lore": "穿着刻有封印符咒的灰白色铠甲，手持缠绕着念珠之刀的战士。"
+    },
+    "tome_cannon": {
+      "name": "圣典大炮",
+      "desc": "发射圣典炮弹，以强大的爆炸半径同时重击多数敌人。",
+      "lore": "展开巨大的金色圣典作为大炮使用的炮手，每一页卢恩文字都在闪烁。"
+    },
+    "holy_burst": {
+      "name": "神圣炮击师",
+      "desc": "召唤造成巨大伤害的神圣能量炮弹，重击冲击半径内的所有敌人。",
+      "lore": "穿着白金肩甲铠甲，背负巨大神圣炮击杖的炮击师。"
+    },
+    "rapid_exorcist": {
+      "name": "速攻驱魔师",
+      "desc": "以超高速连续发射净化弹，一次性贯穿最多 3 名敌人。",
+      "lore": "穿着轻便的白色司祭服，手持双枪型净化法器的速射驱魔师。"
+    },
+    "chain_exorcist": {
+      "name": "连锁驱魔师",
+      "desc": "驱魔弹在打击首个敌人后，会连锁至周围的 3 名敌人。",
+      "lore": "穿着蓝色司祭服，带着成捆连锁符咒，指尖跳动连锁弹的驱魔师。"
+    },
+    "psalm_singer": {
+      "name": "诗篇歌手",
+      "desc": "歌唱神圣诗篇，发出圣歌使范围内友军的攻击力强化 15%。",
+      "lore": "穿着白色合唱团长袍，手持金色诗篇书的优雅歌手。"
+    },
+    "litany_chanter": {
+      "name": "连祷咏唱者",
+      "desc": "通过持续的连祷，周期性地恢复范围内友军并强化攻击力。",
+      "lore": "穿着青灰色司祭服，手上缠绕着念珠，不断吟唱祷告的咏唱者。"
+    },
+    "relic_guardian": {
+      "name": "圣物守护者",
+      "desc": "守护神圣圣物，使范围内友军的冷却时间降低 15%。",
+      "lore": "穿着金色胸甲，拿着圣物十字架的威严守护者。"
+    },
+    "rune_crafter": {
+      "name": "卢恩雕刻师",
+      "desc": "刻画神圣卢恩，周期性地为范围内友军赋予强化效果。",
+      "lore": "穿着皮裙，拿着卢恩凿子和锤子，在空中刻画闪耀卢恩的雕刻师。"
+    },
+    "barrier_master": {
+      "name": "结界大师",
+      "desc": "展开强大的结界，使范围内敌人的攻击速度降低 25%。",
+      "lore": "穿着青白学者服，拿着结界阵扇子的沉着大师。"
+    },
+    "divine_barrier": {
+      "name": "神圣屏障师",
+      "desc": "施放神圣屏障，降低敌人 20% 的防御并抑制移动速度。",
+      "lore": "披着白金斗篷，带着神圣盾符咒，掌心展开光之屏障的屏障师。"
+    },
+    "storm_caller": {
+      "name": "风暴召唤师",
+      "desc": "打击时对射程内的随机敌人落下额外的雷电，造成 60% 的伤害。",
+      "lore": "穿着青灰色长袍，戴着雷电花纹头巾，拿着漂浮雷球的召唤师。"
+    },
+    "thunder_judge": {
+      "name": "雷鸣审判者",
+      "desc": "雷电最多连锁 3 名敌人。每次连锁伤害降低至 50%。",
+      "lore": "披着黑色斗篷，持金色雷电权杖，双眼闪烁雷电的审判者。"
+    },
+    "transmuter": {
+      "name": "虚空炼成师",
+      "desc": "完全炼成恶灵，每次击杀获得 25 SE。",
+      "lore": "穿着铅色板甲，流淌着翡翠反应炉能量，拥有浮动机械臂和天线晶体的炼成师。"
+    },
+    "oracle": {
+      "name": "永恒先知",
+      "desc": "发射能在打击时暂时停止敌人行动的宇宙投射体。",
+      "lore": "穿着绣有星星的靛蓝色长袍。永恒之眼取代了面部，8 颗星星绕轨道运行的宇宙先知。"
+    },
+    "warden": {
+      "name": "深渊看守",
+      "desc": "周期性开启黑洞，将屏幕上的所有敌人吸引至中央。",
+      "lore": "穿着黑色钢甲，缠绕着紫色锁链，胸前有吸入式黑洞核心，手持金钥匙的深渊看守。"
+    },
+    "cursed_talisman": {
+      "name": "受诅咒的教团长",
+      "desc": "为敌人刻上死亡烙印。当被标记的灵魂消亡时会发生巨大爆炸。",
+      "lore": "穿着血色祭服，戴着深兜帽，率领着刻有邪眼的巨旗和漂浮诅咒卷轴的教团长。"
+    },
+    "asura": {
+      "name": "碎狱阿修罗",
+      "desc": "瞬间对周围目标倾泻 12 次连击波。(总伤害 5,400)",
+      "lore": "6 条手臂分别拿着弯刀和金刚杵的血色魔王，胸前印有金色纹章，金色角冠中央镶嵌着红宝石。"
+    },
+    "piercing_shadow": {
+      "name": "贯魂之影",
+      "desc": "发射贯穿路径上所有敌人的巨大光束。",
+      "lore": "穿着紫色灵魂铠甲，5 枚影针绕轨道运行，兜帽下透出灵魂眼光的黑暗狙击手。"
+    },
+    "cocytus": {
+      "name": "科基托斯支配者",
+      "desc": "使用终极冰结魔法，使屏幕上所有敌人的时间停止 5 秒。",
+      "lore": "穿着蓝色司祭服，戴着绝对零度 5 尖王冠，头顶悬浮着巨型冰晶，手持冰龙权杖的支配者。"
+    },
+    "purgatory": {
+      "name": "永恒炼狱之火",
+      "desc": "烧毁整条路径，对经过的所有敌人造成永久性烧伤伤害。",
+      "lore": "穿着白金铠甲，拥有神圣火焰之翼和两柄火炬权杖，头顶升起 5 个火焰王冠。"
+    },
+    "reaper": {
+      "name": "梦魇收割者",
+      "desc": "立即收割当前地图上生命值最高的敌人灵魂。(绝对即死)",
+      "lore": "穿着漆黑斗篷，手持紫色死神镰刀的兜帽骷髅，5 个灵魂在周围漂浮的死亡化身。"
+    },
+    "doom_guide": {
+      "name": "毁灭引导者",
+      "desc": "净化传送门。到达传送门的敌人不仅不会造成伤害，反而会恢复 5% 的传送门污染度。",
+      "lore": "穿着阴暗亡灵长袍，背负幽灵船阴影，手持金色灯笼和紫色净化棒的引导者。"
+    },
+    "forsaken_king": {
+      "name": "被抛弃者之王",
+      "desc": "每关开始时召唤会为友军作战的友好亡灵。",
+      "lore": "穿着紫色王者铠甲，配以金色胸板和飘扬的斗篷，手持诅咒绿光大剑和 5 尖红宝石王冠。"
+    },
+    "void_gatekeeper": {
+      "name": "虚空守门人",
+      "desc": "被动封印大门，使传送门污染度受到的所有伤害降低 50%。",
+      "lore": "巨大的板岩门本身就是身体，拥有旋转的青色维度门和漂浮的眼睛、角盔的守门人。"
+    },
+    "eternal_wall": {
+      "name": "永恒守护墙",
+      "desc": "散发出强大的稳定光环，使地图上的所有敌人减速 80%。",
+      "lore": "手持巨大的城墙盾和战锤，胸部有蓝色光十字，头顶城垛的永恒守护者。"
+    },
+    "word_of_god": {
+      "name": "神之御言",
+      "desc": "释放圣经中记录的最终御言，对屏幕内的所有敌人降下神圣审判。",
+      "lore": "穿着闪耀的金色铠甲，拥有天使羽翼，携带着悬浮巨型圣经和头顶金色光环的天使。"
+    },
+    "genesis_strike": {
+      "name": "创世之王",
+      "desc": "利用蕴含宇宙创造能量的爆炸重击屏幕内所有敌人，并有 40% 的概率即死。",
+      "lore": "戴着 7 色虹色宝石王冠，拥有多色创造之翼，双手间掌控着全色创造球的宇宙皇帝。"
+    },
+    "exorcism_storm": {
+      "name": "驱魔风暴",
+      "desc": "不断发射无限连锁的驱魔弹，同时攻击屏幕上的所有敌人。",
+      "lore": "穿着青色雷电翼斗篷，双手各持风暴权杖，闪烁着双雷电角的永恒风暴师。"
+    },
+    "divine_choir": {
+      "name": "神圣合唱团",
+      "desc": "通过天籁般的合唱将神圣能量传播到整个战场，强化友军并弱化敌人。",
+      "lore": "拥有巨大的金色羽翼和广阔的光环，率领着两旁漂浮着音符的幽灵歌手的神圣指挥者。"
+    },
+    "sacred_reliquary": {
+      "name": "圣物圣所守护者",
+      "desc": "在战场上召唤圣物圣所，强化友军的所有属性并对敌人施加持续的弱化。",
+      "lore": "在神庙柱子之间托起悬浮金色圣柜的，穿着大理石铠甲和太阳光环头盔的圣物守护者。"
+    },
+    "grand_ward": {
+      "name": "大结界师",
+      "desc": "在战场上展开广阔的结界，大幅弱化范围内所有敌人的属性并封锁其行动。",
+      "lore": "头顶悬浮着三重结界球和绕轨道运行的青色六角卢恩，手持金色结界的大结界师。"
+    },
+    "thunder_lord": {
+      "name": "雷鸣君主",
+      "desc": "打击时对射程内的随机 3 名敌人落下额外雷电，各造成 40% 伤害，并有 25% 概率使其昏迷 0.8 秒。",
+      "lore": "穿着深蓝色雷云铠甲，手持金色雷枪，头顶旋转的雷鸣王冠，背负雷电之翼的雷鸣君主。"
+    }
+  },
+  "shrine": {
+    "shrine_might": {
+      "name": "力量圣所",
+      "desc": "增加周围友军 20% 的攻击力。",
+      "demoDesc": "降低地图全体友军 20% 的攻击力。",
+      "lore": "寄宿着古代战士斗志的圣所。其气息能让周围的武器变得更加锋利。"
+    },
+    "shrine_speed": {
+      "name": "加速圣所",
+      "desc": "增加周围友军 20% 的攻击速度。",
+      "demoDesc": "降低地图全体友军 20% 的攻击速度。",
+      "lore": "天界之风停留的圣所。这里的气息能让友军的动作变得快如闪电。"
+    },
+    "shrine_range": {
+      "name": "洞察圣所",
+      "desc": "增加周围友军 50 点攻击射程。",
+      "demoDesc": "降低地图全体友军 50 点攻击射程。",
+      "lore": "洞察万物的慧眼圣所。为友军提供能看得更远的灵能视野。"
+    },
+    "shrine_wisdom": {
+      "name": "智慧圣所",
+      "desc": "增加周围友军 10% 的暴击率。",
+      "demoDesc": "降低地图全体友军 10% 的暴击率。",
+      "lore": "洞悉弱点的洞察圣所。帮助友军精准打击敌人的核心部位。"
+    },
+    "shrine_greed": {
+      "name": "贪婪圣所",
+      "desc": "周围友军击杀敌人时额外获得 2 SE。",
+      "demoDesc": "地图全体友军击杀敌人时获得的 SE 减少 2。",
+      "lore": "能提取更多灵魂本质的秘术圣所。作为净化的代价，获得更多的能量。"
+    },
+    "shrine_purity": {
+      "name": "纯洁圣所",
+      "desc": "周围友军击杀敌人时有 5% 的概率净化 1% 的传送门污染度。",
+      "demoDesc": "地图全体友军击杀敌人时有 2% 的概率增加 1% 的传送门污染度。",
+      "lore": "洗净不洁的净化圣所。通过不断流出的圣水保持结界的清洁。"
+    },
+    "shrine_divine": {
+      "name": "大天使圣所",
+      "desc": "增加地图全体友军 30% 的攻击力。(可叠加)",
+      "demoDesc": "降低地图全体友军 30% 的攻击力。",
+      "lore": "寄宿着大天使加护的巨型圣所。它的存在本身就能为所有驱魔师的灵魂注入勇气。"
+    },
+    "shrine_eternity": {
+      "name": "永恒圣所",
+      "desc": "降低地图全体敌人 15% 的移动速度。",
+      "demoDesc": "敌人的移动速度恢复原状。",
+      "lore": "甚至能让时间流动变慢的神秘圣所。沉重地束缚着恶灵们的脚步。"
+    },
+    "shrine_miracle": {
+      "name": "奇迹圣所",
+      "desc": "增加地图全体友军 50% 的暴击伤害。",
+      "demoDesc": "降低地图全体友军 50% 的暴击伤害。",
+      "lore": "实现净化奇迹的圣所。使友军的攻击更深刻地破坏敌人的灵魂。"
+    },
+    "shrine_fervor": {
+      "name": "热忱圣所",
+      "desc": "增加周围友军 15% 的暴击伤害。",
+      "demoDesc": "降低周围友军 15% 的暴击伤害。",
+      "lore": "愤怒与激情凝聚成火焰的圣所。为驱魔师的一击注入毁灭性的火焰。"
+    },
+    "shrine_shadow": {
+      "name": "暗影圣所",
+      "desc": "增加周围友军 8% 的暴击率。",
+      "demoDesc": "降低周围友军 8% 的暴击率。",
+      "lore": "寄宿着在黑暗中闪耀的新月的圣所。顺着阴影流动的气息提高了攻击的精准度。"
+    },
+    "shrine_harvest": {
+      "name": "收割圣所",
+      "desc": "周围友军击杀敌人时额外获得 3 SE。",
+      "demoDesc": "周围友军的额外 SE 获取效果消失。",
+      "lore": "充满了金色谷物的圣所。从驱魔的努力中更丰盛地收获灵魂精华。"
+    },
+    "shrine_endurance": {
+      "name": "坚韧圣所",
+      "desc": "增加周围友军 3% 的传送门净化效果。",
+      "demoDesc": "降低周围友军的传送门净化效果。",
+      "lore": "如泰山般的坚韧结晶而成的圣所。不断供应守护结界的净化气息。"
+    }
+  },
+  "enemy_category": {
+    "specter": "遭遇亡灵 (SPECTER ENCOUNTER)",
+    "wraith": "遭遇恶灵 (WRAITH ENCOUNTER)",
+    "spirit": "遭遇怨灵 (SPIRIT ENCOUNTER)",
+    "demon": "遭遇恶魔 (DEMON ENCOUNTER)",
+    "abyssal_boss": "遭遇深渊首领 (ABYSSAL BOSS ENCOUNTER)",
+    "mini_boss": "遭遇精英首领 (MINI BOSS ENCOUNTER)"
+  },
+  "enemy_name": {
+    "normal": "低语之魂",
+    "mist": "游荡之雾",
+    "memory": "褪色的记忆",
+    "shade": "闪烁之影",
+    "tank": "铁甲亡灵",
+    "runner": "加速之影",
+    "greedy": "贪婪的喧闹鬼",
+    "mimic": "拟态亡灵",
+    "dimension": "次元移动亡灵",
+    "deceiver": "绝望塞壬",
+    "boar": "荒野复仇者",
+    "soul_eater": "噬魂者",
+    "frost": "科基托斯流浪者",
+    "lightspeed": "拼死的使者",
+    "frost_outcast": "冰封之心",
+    "ember_hatred": "憎恨之火",
+    "heavy": "铁链执行者",
+    "lava": "炽热之愤",
+    "burning": "痛苦重生者",
+    "abyssal_acolyte": "深渊追随者",
+    "gold": "黄金残像",
+    "cerberus": "刻耳柏洛斯",
+    "charon": "卡戎",
+    "beelzebub": "别西卜",
+    "lucifer": "路西法",
+    "defiled_apprentice": "堕落的学徒",
+    "betrayer_blade": "暗影背叛者",
+    "cursed_vajra": "堕落僧侣",
+    "void_piercer": "背叛之弓",
+    "echo_soul": "回响之魂",
+    "hungry_ghost": "饿鬼",
+    "aggrieved": "冤魂",
+    "split_soul": "分裂之魂",
+    "cursed_ancestor": "受诅咒的先祖",
+    "oblivion_wraith": "遗忘亡灵",
+    "unrepentant": "不悔改者",
+    "abyss_sentinel": "深渊守卫",
+    "fear_harvester": "恐惧收割者",
+    "blood_spirit": "鲜血精灵",
+    "shadow_titan": "暗影巨人",
+    "lava_lord": "熔岩领主",
+    "time_ravager": "时间掠夺者",
+    "void_master": "虚空主宰",
+    "sin_incarnate": "罪恶化身",
+    "corruption_apostle": "堕落使徒",
+    "mini_cerberus": "小刻耳柏洛斯",
+    "mini_charon": "小卡戎",
+    "mini_beelzebub": "小别西卜",
+    "mini_lucifer": "小路西法",
+    "abyssal_overlord": "深渊君主",
+    "mini_lilith": "小莉莉丝",
+    "lilith": "莉莉丝",
+    "mini_chronos": "小克罗诺斯",
+    "medusa": "美杜莎"
+  },
+  "enemy": {
+    "normal": {
+      "name": "低语之魂",
+      "desc": "在深渊中徘徊的普通灵魂。",
+      "effectiveness": "标准驱魔攻击。",
+      "lore": "无法割舍现世执念的灵魂。"
+    },
+    "mist": {
+      "name": "游荡之雾",
+      "desc": "灵能之雾。",
+      "effectiveness": "标准驱魔攻击。",
+      "lore": "被遗忘的微小悲伤凝结而成。"
+    },
+    "memory": {
+      "name": "褪色的记忆",
+      "desc": "微弱的痕迹。",
+      "effectiveness": "标准驱魔攻击。",
+      "lore": "想要生存的强烈欲望留下的残像。"
+    },
+    "shade": {
+      "name": "闪烁之影",
+      "desc": "虽然弱小但动作敏捷的灵体。",
+      "effectiveness": "速射型单位。",
+      "lore": "勉强维持存在的碎片。"
+    },
+    "tank": {
+      "name": "铁甲亡灵",
+      "desc": "因罪恶而变得坚硬的灵魂。",
+      "effectiveness": "暴击型单位。",
+      "lore": "生前沉重的罪孽具象化而成。"
+    },
+    "runner": {
+      "name": "加速之影",
+      "desc": "冲向传送门的影子。",
+      "effectiveness": "减速型单位。",
+      "lore": "燃烧了一生的憎恨之火。"
+    },
+    "greedy": {
+      "name": "贪婪的喧闹鬼",
+      "desc": "击杀时掉落大量 SE。",
+      "effectiveness": "无关",
+      "lore": "对黄金怀有执念的灵魂。"
+    },
+    "lightspeed": {
+      "name": "拼死的使者",
+      "desc": "以极快的速度疾驰。",
+      "effectiveness": "圣所及减速",
+      "lore": "怀抱着未能传达的消息奔跑。"
+    },
+    "echo_soul": {
+      "name": "回响之魂",
+      "desc": "移动时会留下自身的残像。",
+      "effectiveness": "标准驱魔攻击。",
+      "lore": "无法抹去的记忆回响。"
+    },
+    "hungry_ghost": {
+      "name": "饿鬼",
+      "desc": "生命值越低速度越快。",
+      "effectiveness": "集中攻击。",
+      "lore": "生前未能满足的欲望化身。"
+    },
+    "aggrieved": {
+      "name": "冤魂",
+      "desc": "使首次受到的伤害降低 90%。",
+      "effectiveness": "持续攻击。",
+      "lore": "冤屈的死亡使其变得坚韧。"
+    },
+    "split_soul": {
+      "name": "分裂之魂",
+      "desc": "死亡时分裂成两个残魂。",
+      "effectiveness": "范围攻击。",
+      "lore": "一个灵魂被劈成两半的悲剧。"
+    },
+    "cursed_ancestor": {
+      "name": "受诅咒的先祖",
+      "desc": "削弱周围圣所的效果。",
+      "effectiveness": "远程单位。",
+      "lore": "对后代施加诅咒的先祖灵魂。"
+    },
+    "shadow_wisp": {
+      "name": "暗影漂浮体",
+      "desc": "黑暗残余模仿出的形状。",
+      "effectiveness": "标准驱魔攻击。",
+      "lore": "连影子都算不上的存在 — 无形中在黑暗里徘徊的最弱恶灵。"
+    },
+    "cursed_shade": {
+      "name": "受诅咒的亡灵",
+      "desc": "身体上刻有诅咒纹样的亡灵。",
+      "effectiveness": "标准驱魔攻击。",
+      "lore": "由怨念形成的诅咒紧贴灵魂，以其重量在世间徘徊并嫉妒生者。"
+    },
+    "soul_hound": {
+      "name": "灵魂追踪者",
+      "desc": "追踪生者灵魂的气味。",
+      "effectiveness": "减速型单位。",
+      "lore": "死后仍保留着狩猎本能，不断追踪着生者的灵魂气味。"
+    },
+    "defiled_apprentice": {
+      "name": "堕落的学徒",
+      "desc": "堕落的驱魔学徒。",
+      "effectiveness": "神圣攻击。",
+      "lore": "触碰禁忌术法的代价。"
+    },
+    "mimic": {
+      "name": "拟态亡灵",
+      "desc": "偶尔会向前瞬间移动。",
+      "effectiveness": "范围攻击。",
+      "lore": "以最渴望的形象出现。"
+    },
+    "dimension": {
+      "name": "次元移动亡灵",
+      "desc": "有时会免疫攻击。",
+      "effectiveness": "先知或速射型。",
+      "lore": "在次元之间游荡的隐士。"
+    },
+    "deceiver": {
+      "name": "绝望塞壬",
+      "desc": "回避攻击并后退。",
+      "effectiveness": "范围伤害。",
+      "lore": "从未露面过的谎言大师。"
+    },
+    "cursed_vajra": {
+      "name": "堕落僧侣",
+      "desc": "堕落的武僧。",
+      "effectiveness": "远程单位。",
+      "lore": "他的铁锤现在用来粉碎生者。"
+    },
+    "betrayer_blade": {
+      "name": "暗影背叛者",
+      "desc": "每隔一定周期进入隐身状态。",
+      "effectiveness": "真理探求者",
+      "lore": "刺伤友军的利刃阴影。"
+    },
+    "void_piercer": {
+      "name": "背叛之弓",
+      "desc": "有 50% 的概率回避远程攻击。",
+      "effectiveness": "近战单位",
+      "lore": "抛弃长弓选择了深渊。"
+    },
+    "oblivion_wraith": {
+      "name": "遗忘亡灵",
+      "desc": "周期性进入无敌状态。",
+      "effectiveness": "持续火力。",
+      "lore": "在遗忘中变得无敌的存在。"
+    },
+    "unrepentant": {
+      "name": "不悔改者",
+      "desc": "有 60% 的概率回避远程攻击。",
+      "effectiveness": "近战单位。",
+      "lore": "至死不肯悔改者的最后傲慢。"
+    },
+    "lost_child": {
+      "name": "迷路之魂",
+      "desc": "迷路而死的孩子灵魂。",
+      "effectiveness": "标准驱魔攻击。",
+      "lore": "迷路而死的孩子灵魂 — 至今仍在黑暗深渊中寻找回家的路。"
+    },
+    "grave_walker": {
+      "name": "墓地徘徊者",
+      "desc": "在他人坟墓间徘徊的灵魂。",
+      "effectiveness": "标准驱魔攻击。",
+      "lore": "连自己的坟墓都记不得，永远在他人坟墓间徘徊。"
+    },
+    "wailing_mother": {
+      "name": "恸哭之母",
+      "desc": "失子之痛化为了怨恨。",
+      "effectiveness": "范围攻击。",
+      "lore": "失子之痛化为怨恨，向所有生灵倾泻愤怒的母亲之魂。"
+    },
+    "boar": {
+      "name": "荒野复仇者",
+      "desc": "在传送门附近会变快。",
+      "effectiveness": "击退。",
+      "lore": "暴虐猎人的渴求。"
+    },
+    "soul_eater": {
+      "name": "噬魂者",
+      "desc": "受到伤害时速度提升。",
+      "effectiveness": "强力单发。",
+      "lore": "渴求着驱魔师的力量。"
+    },
+    "frost": {
+      "name": "科基托斯流浪者",
+      "desc": "提升周围敌人的速度。",
+      "effectiveness": "火能。",
+      "lore": "冰封的怨恨之心。"
+    },
+    "frost_outcast": {
+      "name": "冰封之心",
+      "desc": "降低攻击速度。",
+      "effectiveness": "在光环外击杀。",
+      "lore": "来到深渊前心已经冰封。"
+    },
+    "ember_hatred": {
+      "name": "憎恨之火",
+      "desc": "死亡时加速周围敌人。",
+      "effectiveness": "孤立击杀。",
+      "lore": "燃烧了一生的憎恨之火。"
+    },
+    "abyss_sentinel": {
+      "name": "深渊守卫",
+      "desc": "持续恢复少量生命值。",
+      "effectiveness": "眩晕单位。",
+      "lore": "曾守卫深渊大门的守卫。"
+    },
+    "fear_harvester": {
+      "name": "恐惧收割者",
+      "desc": "降低周围单位的攻击速度。",
+      "effectiveness": "神圣攻击。",
+      "lore": "以恐惧为食的恶灵。"
+    },
+    "blood_spirit": {
+      "name": "鲜血精灵",
+      "desc": "受到伤害会进入激怒状态并增加防御。",
+      "effectiveness": "强力打击。",
+      "lore": "战场上的鲜血凝聚而成的恶灵。"
+    },
+    "imp": {
+      "name": "杂鱼小鬼",
+      "desc": "成群结队出没并爱捣乱的最弱小恶魔。",
+      "effectiveness": "速射型单位。",
+      "lore": "恶魔阶级的最底层 — 虽小且弱，但凭恶作剧和敏捷的身手生存。"
+    },
+    "hellspawn": {
+      "name": "地狱之子",
+      "desc": "地狱中刚诞生的残忍恶魔。",
+      "effectiveness": "标准驱魔攻击。",
+      "lore": "地狱中刚诞生的恶魔 — 虽力量微弱，但残忍是其天性。"
+    },
+    "brimstone_fiend": {
+      "name": "硫磺恶鬼",
+      "desc": "散发着硫磺味且身上刻有地狱之火的恶鬼。",
+      "effectiveness": "冷气攻击。",
+      "lore": "散发着硫磺味且皮肤刻有地狱火的恶鬼 — 传闻靠近会被灼伤。"
+    },
+    "heavy": {
+      "name": "铁链执行者",
+      "desc": "坚韧的怪兽。",
+      "effectiveness": "穿透攻击。",
+      "lore": "被自己曾使用的锁链束缚的执行者。"
+    },
+    "lava": {
+      "name": "炽热之愤",
+      "desc": "受到冷气攻击时会跳跃。",
+      "effectiveness": "火焰攻击。",
+      "lore": "因愤怒而燃烧的灵魂。"
+    },
+    "burning": {
+      "name": "痛苦重生者",
+      "desc": "受到伤害时会恢复。",
+      "effectiveness": "强力打击。",
+      "lore": "痛苦成为了重生的动力。"
+    },
+    "abyssal_acolyte": {
+      "name": "深渊追随者",
+      "desc": "打击时会削减伤害。",
+      "effectiveness": "眩晕单位。",
+      "lore": "暗影之手正在拉扯他们。"
+    },
+    "shadow_titan": {
+      "name": "暗影巨人",
+      "desc": "拥有巨大防御力的巨人。",
+      "effectiveness": "穿透攻击。",
+      "lore": "深渊中最古老的黑暗形态。"
+    },
+    "lava_lord": {
+      "name": "熔岩领主",
+      "desc": "受到伤害时提升周围敌人的速度。",
+      "effectiveness": "冷气攻击。",
+      "lore": "由岩浆筑成的愤怒之王。"
+    },
+    "time_ravager": {
+      "name": "时间掠夺者",
+      "desc": "降低周围所有单位的攻击速度。",
+      "effectiveness": "眩晕单位。",
+      "lore": "窃取并吞噬时间的存在。"
+    },
+    "void_master": {
+      "name": "虚空主宰",
+      "desc": "有 20% 的概率无视所有伤害。",
+      "effectiveness": "眩晕单位。",
+      "lore": "虚空本身拥有了意志。"
+    },
+    "sin_incarnate": {
+      "name": "罪恶化身",
+      "desc": "受到的伤害越多防御越高。",
+      "effectiveness": "强力打击。",
+      "lore": "人类的所有罪恶汇聚在了一起。"
+    },
+    "corruption_apostle": {
+      "name": "堕落使徒",
+      "desc": "向邻近单位传播诅咒。",
+      "effectiveness": "眩晕单位。",
+      "lore": "传播堕落的使者。"
+    },
+    "gold": {
+      "name": "黄金残像",
+      "desc": "提供大量 SE。",
+      "effectiveness": "速射型单位。",
+      "lore": "闪耀的王者宝藏残余。"
+    },
+    "mini_cerberus": {
+      "name": "小刻耳柏洛斯",
+      "lore": "虽小但凶猛的深渊桥头堡。",
+      "reward_name": "刻耳柏洛斯之牙碎片"
+    },
+    "cerberus": {
+      "name": "刻耳柏洛斯",
+      "lore": "堕落灵魂的门卫。",
+      "reward_name": "刻耳柏洛斯之牙"
+    },
+    "mini_charon": {
+      "name": "小卡戎",
+      "lore": "下级船夫 — 收集灵魂。",
+      "reward_name": "斯提克斯碎片"
+    },
+    "charon": {
+      "name": "卡戎",
+      "lore": "直接收割灵魂的船夫。",
+      "reward_name": "斯提克斯之桨"
+    },
+    "mini_beelzebub": {
+      "name": "小别西卜",
+      "lore": "体型较小的腐败君主。",
+      "reward_name": "小暴食王冠"
+    },
+    "beelzebub": {
+      "name": "别西卜",
+      "lore": "从腐败中诞生的蝇之王。",
+      "reward_name": "暴食王冠"
+    },
+    "mini_lucifer": {
+      "name": "小路西法",
+      "lore": "不完全的堕落幻影。",
+      "reward_name": "小堕天使羽毛"
+    },
+    "lucifer": {
+      "name": "路西法",
+      "lore": "将所有光芒吸向深渊之人。",
+      "reward_name": "堕天使之翼"
+    },
+    "mini_lilith": {
+      "name": "小莉莉丝",
+      "lore": "暗夜女王派出的幻影。",
+      "reward_name": "暗夜低语"
+    },
+    "abyssal_overlord": {
+      "name": "深渊君主",
+      "lore": "统治深渊的古代存在。",
+      "reward_name": "深渊之心"
+    },
+    "lilith": {
+      "name": "莉莉丝",
+      "lore": "君临深渊之上的暗夜女王。",
+      "reward_name": "暗夜女王王冠"
+    },
+    "mini_chronos": {
+      "name": "小克罗诺斯",
+      "lore": "让时间倒流以逆转伤口。",
+      "reward_name": "破碎的沙漏"
+    },
+    "medusa": {
+      "name": "美杜莎",
+      "lore": "凡是被其视线触及者皆会石化。",
+      "reward_name": "戈耳工之视"
+    }
+  },
+  "relic": {
+    "cursed_mask": {
+      "name": "受诅咒的般若面具",
+      "effect": "每层使所有友军造成的伤害增加 +1%。",
+      "lore": "因数千个被遗忘灵魂的尖叫而振动的面具。"
+    },
+    "spectral_lantern": {
+      "name": "亡灵灯笼",
+      "effect": "每层使所有单位的攻击射程增加 +5。",
+      "lore": "这盏灯的光芒不是为了照亮道路，而是为了照出猎物。"
+    },
+    "stygian_oar": {
+      "name": "斯提克斯河之桨",
+      "effect": "每层使所有敌人的移动速度降低 5%。",
+      "lore": "调节渡河船只速度的桨。现在它减缓了生者的时间。"
+    },
+    "cerberus_fang": {
+      "name": "刻耳柏洛斯之牙",
+      "effect": "每层使所有友军的攻击力增加 8%。",
+      "lore": "地狱门卫的锋利牙齿。赋予撕裂敌人本质的力量。"
+    },
+    "gluttony_crown": {
+      "name": "暴食王冠",
+      "effect": "每层使宝藏幽灵的出现概率增加 2%。",
+      "lore": "令人渴求更多的受诅咒王冠。"
+    },
+    "fallen_wings": {
+      "name": "堕天使之翼",
+      "effect": "每层使暴击率增加 6%。",
+      "lore": "纯粹的黑暗羽毛。引导你打击灵魂最脆弱的部位。"
+    },
+    "spectral_chain": {
+      "name": "受诅咒者之链",
+      "effect": "每层使减速效果强化 2%。",
+      "lore": "敌人反抗越激烈，锁链就束缚越紧。"
+    },
+    "unholy_grail": {
+      "name": "不洁圣杯",
+      "effect": "每层使传送门污染度的增长速度降低 5%。",
+      "lore": "盛满了未能守住大门者的泪水。"
+    },
+    "sacred_incense": {
+      "name": "净化香炉",
+      "effect": "每层使召唤费用降低效果增加 2 SE。",
+      "lore": "驱散不洁气息的香味。让召唤仪式变得更加容易。"
+    },
+    "execution_mark": {
+      "name": "执行者烙印",
+      "effect": "立即处决生命值低于 1% (每层) 的敌人。",
+      "lore": "对于被打上烙印的人来说，深渊的审判是无可逃避的命运。"
+    },
+    "cursed_coin": {
+      "name": "受诅咒的金币",
+      "effect": "每层使出售单位时返还的 SE 增加 2%。",
+      "lore": "背叛是有代价的，而这枚硬币让代价变得稍微甜美了一些。"
+    },
+    "abyssal_compass": {
+      "name": "深渊罗盘",
+      "effect": "每层使所有友军的攻击射程增加 +5。",
+      "lore": "指向深渊气息流动的方向。让你能从更远的地方捕捉敌人的位置。"
+    },
+    "abyssal_lantern": {
+      "name": "深渊灯火",
+      "effect": "每层使所有友军的攻击力增加 +2%。",
+      "lore": "即便在深渊的黑暗中也能点亮友军斗志的灯火。"
+    },
+    "abyssal_fragment": {
+      "name": "深渊碎片",
+      "effect": "每 30 秒使所有友军的攻击速度爆发至 2 倍，持续 5 秒。每层缩短 3 秒发动周期 (最低 15 秒)。",
+      "lore": "从深渊之心掉落的碎片。周期性地扭曲周围时间以加速所有打击。"
+    },
+    "pitch_black_gem": {
+      "name": "漆黑宝石",
+      "effect": "攻击敌人时累积虚空标记，每个标记增加 20% 受到的伤害。最大 3 个标记 + 每层 1 个 (4 秒不攻击则消失)。",
+      "lore": "吸收所有光芒的宝石。一旦刻下，那份黑暗便会深入敌人的灵魂且不会消失。"
+    },
+    "soul_link": {
+      "name": "灵魂之链",
+      "effect": "每名友军根据相邻单位数增加 5% (每层) 的攻击力。",
+      "lore": "驱魔师与守护者之间无形的纽带。聚集得越近，灵魂的共鸣就越强。"
+    },
+    "immortal_remains": {
+      "name": "不朽遗骸",
+      "effect": "每层使传送门污染度增加量降低 5%。",
+      "lore": "拒绝死亡者的遗骨。强化神圣结界以抵抗污染。"
+    },
+    "foresight_eye": {
+      "name": "远见之眼",
+      "effect": "每层使圣所的效果数值强化 15% (1 层起向十字方向扩展)。",
+      "lore": "超越因果关系的无形之线，甚至能借用不存在的气息。"
+    },
+    "void_heart": {
+      "name": "虚空之心",
+      "effect": "每层使所有友军的攻击力增加 12%。深渊的核心能量寄宿在驱魔师身上。",
+      "lore": "从虚空中心采集的心脏。它的每一次跳动都为所有驱魔师的攻击注入毁灭性的力量。"
+    },
+    "ancient_seal": {
+      "name": "古代封印",
+      "effect": "每层使传送门污染度增加量降低 4%。古代守护结界护卫着大门。",
+      "lore": "太古时代伟大驱魔师刻下的封印。从根源上抑制恶意的渗透。"
+    },
+    "crimson_vial": {
+      "name": "朱红药瓶",
+      "effect": "每层使召唤费用降低 3 SE。",
+      "lore": "装有古代仪式中所用神圣药品的瓶子。减轻召唤仪式的疲劳。"
+    },
+    "echo_gem": {
+      "name": "回响宝石",
+      "effect": "每层使暴击率增加 4%。",
+      "lore": "灵魂们痛苦的回响结晶而成的宝石。赋予看穿敌人弱点的感官。"
+    },
+    "whispering_dust": {
+      "name": "低语尘埃",
+      "effect": "每层使所有圣所的光环范围增加 +3。",
+      "lore": "圣所香炉灰烬随风散去的痕迹。将神圣气息传向远方。"
+    },
+    "weeping_charm": {
+      "name": "啜泣护符",
+      "effect": "每层使击杀敌人时获得的 SE 增加 +1。",
+      "lore": "渗入了遗属泪水的护符。离去灵魂的怨恨转化为了奖励。"
+    },
+    "demon_horn": {
+      "name": "恶魔之角",
+      "effect": "【契约】每层使所有友军伤害增加 +25%，每秒累积 +0.4%/s 传送门污染。污染度 50% 以上时伤害加成翻倍 (疯狂发作)。",
+      "lore": "恶魔领主的断角。为持有者灌注地狱的疯狂，灵魂越污染则承诺的力量越强大。代价是传送门的蚕食 — 你的时间。"
+    },
+    "pestilence_censer": {
+      "name": "瘟疫香炉",
+      "effect": "每层使所有敌人的最大生命值降低 2%。",
+      "lore": "不断吐出黑烟的香炉。那股烟雾侵蚀着一切生灵。"
+    },
+    "chained_obsidian": {
+      "name": "受缚黑曜石",
+      "effect": "每层使所有敌人的移动速度降低 3%。",
+      "lore": "被恶魔之链缠绕的黑曜石块。甚至能将周围的时间拉低并使其变得沉重。"
+    },
+    "infernal_ledger": {
+      "name": "地狱账本",
+      "effect": "每 100 击杀索取 +500 SE。每层使阈值 -10 击杀 (最低 50)，奖励 +100 SE。",
+      "lore": "记录了地狱所有交易的账本。当灵魂达到一定数量时，债权人会亲自来索取奖励。"
+    },
+    "bleeding_eye": {
+      "name": "流血之眼",
+      "effect": "立即处决生命值低于 2% (每层) 的敌人。",
+      "lore": "不断流下血泪的恶魔之眼。一眼看穿弱者的命运。"
+    },
+    "oblivion_pendant": {
+      "name": "遗忘吊坠",
+      "effect": "每层使所有圣所的光环范围增加 +5。",
+      "lore": "刻有被遗忘神灵象征的吊坠。更广阔地展开神圣领域。"
+    },
+    "night_queen_crown": {
+      "name": "暗夜女王王冠",
+      "effect": "每层使暴击伤害量增加 40%。",
+      "lore": "莉莉丝戴在头上的黑色荆棘王冠。她的视线从未错过最致命的部位。"
+    },
+    "gorgon_gaze": {
+      "name": "戈耳工之视",
+      "effect": "每层使减速效果强化 6%。",
+      "lore": "寄宿着美杜莎瞳孔的护符。直视它的敌人会像石化般僵硬，一步也迈不出去。"
+    },
+    "chronos_hourglass": {
+      "name": "时间沙漏",
+      "effect": "每层使所有单位的攻击速度增加 12%。",
+      "lore": "克罗诺斯击碎的沙漏残骸。扭曲时间的流动以使友军的节奏快上一拍。"
+    },
+    "thunder_chain": {
+      "name": "雷鸣锁链",
+      "effect": "触发暴击时，连锁闪电会跳向最近的敌人造成 20% 的伤害。每层增加 +1 次跳跃 (最高 5 次)。",
+      "lore": "塔尔塔罗斯的雷电顺着灵魂流动的锁链。一旦苏醒的光芒便会在灵魂间跳跃。"
+    },
+    "soul_refluxor": {
+      "name": "灵魂回流器",
+      "effect": "击杀敌人时每层有 4% 的概率恢复相当于层数的传送门污染度。",
+      "lore": "将散去的灵魂重新引向大门，从内部修补裂缝。"
+    },
+    "echo_sigil": {
+      "name": "残响印记",
+      "effect": "攻击时每层有 6% 的概率立即发动额外攻击 (造成 50% 伤害)。",
+      "lore": "留下了挥一次刀却被斩两次的记忆。残响永远不会只结束一次。"
+    },
+    "carnage_pulse": {
+      "name": "屠杀脉动",
+      "effect": "2 秒内连续击杀可累积连击，每层使所有友军伤害增加 2%。击杀中断则连击重置。",
+      "lore": "心脏在饮下敌人鲜血时会跳动得更快，在指尖的每一击中铭刻更大的脉动。"
+    },
+    "soul_resurrection": {
+      "name": "灵魂复活",
+      "effect": "当传送门污染度达到 100% 时，将污染度回退至 50% 并消灭屏幕上所有普通敌人 (每层限 1 次)。",
+      "lore": "有些灵魂连深渊也无法收割哪怕一次。违抗那一击的人让大门重新矗立。"
+    }
+  },
+  "equip_slot": {
+    "mainhand": {
+      "name": "毁灭之杖",
+      "label": "攻击速度增加",
+      "lore": "从深渊中捞出的法杖。恶灵的尖叫被铭刻其中。"
+    },
+    "offhand": {
+      "name": "禁忌魔导书",
+      "label": "暴击伤害",
+      "lore": "不可开启的禁书。向阅读者低语着暴击的秘诀。"
+    },
+    "scepter": {
+      "name": "神圣权杖",
+      "label": "攻击力增加",
+      "lore": "高级驱魔师曾使用的权杖。用神圣之光重击恶灵。"
+    },
+    "bow": {
+      "name": "灵魂之弓",
+      "label": "暴击率",
+      "lore": "用灵魂之丝编织的弓弦。精准贯穿敌人的弱点。"
+    },
+    "dagger": {
+      "name": "银色短刀",
+      "label": "攻击速度增加",
+      "lore": "挥动速度快过光影的短刀。使迅捷的连击成为可能。"
+    },
+    "staff": {
+      "name": "贤者之杖",
+      "label": "暴击伤害",
+      "lore": "蕴含着长久智慧的法杖。将致命一击的威力发挥到极致。"
+    },
+    "helmet": {
+      "name": "惩罚头盔",
+      "label": "攻击力增加",
+      "lore": "熔化了受惩恶灵的铠甲制成的头盔。使穿戴者的攻击力翻倍。"
+    },
+    "armor": {
+      "name": "守护者圣铠",
+      "label": "传送门伤害降低",
+      "lore": "用天界材料铸造的铠甲。吸收对传送门造成的冲击。"
+    },
+    "pauldrons": {
+      "name": "钢铁肩甲",
+      "label": "传送门伤害降低",
+      "lore": "制作坚固的护肩。分散对传送门造成的冲击。"
+    },
+    "greaves": {
+      "name": "疾走护腿",
+      "label": "范围扩张",
+      "lore": "寄宿着风之气息的腿甲。扩大驱魔师们的影响力。"
+    },
+    "gloves": {
+      "name": "惩戒手套",
+      "label": "暴击率",
+      "lore": "使打击变得极致犀利的手套。提升暴击概率。"
+    },
+    "boots": {
+      "name": "天界之靴",
+      "label": "范围扩张",
+      "lore": "寄宿着天界气息的靴子。扩大友军的攻击范围。"
+    },
+    "necklace": {
+      "name": "祝福项链",
+      "label": "SE 获取奖励",
+      "lore": "寄宿着神圣祝福的项链。在净化活动中收获更多的 SE。"
+    },
+    "ring": {
+      "name": "真理之戒",
+      "label": "宝藏发现概率",
+      "lore": "帮助真理探求者的戒指。提升黄金残像的发现概率。"
+    },
+    "earring": {
+      "name": "智慧耳环",
+      "label": "召唤费用降低",
+      "lore": "令人神清气爽的耳环。帮助以更少的能量召唤驱魔师。"
+    },
+    "bracelet": {
+      "name": "太阳手镯",
+      "label": "SE 获取奖励",
+      "lore": "能感受到太阳温暖的手镯。击杀恶灵时能收割更多的灵魂。"
+    },
+    "belt": {
+      "name": "驱魔师腰带",
+      "label": "召唤费用降低",
+      "lore": "身经百战的驱魔师曾佩戴的腰带。降低单位召唤费用。"
+    },
+    "cloak": {
+      "name": "深渊斗篷",
+      "label": "减速效果强化",
+      "lore": "令恶灵冻结的斗篷。使束缚效果变得更加强大。"
+    }
+  },
+  "equip_tier": {
+    "1": "普通",
+    "2": "神圣",
+    "3": "传奇",
+    "4": "隐藏古代"
+  }
+}

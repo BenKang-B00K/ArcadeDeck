@@ -1,0 +1,1442 @@
+{
+    "config": {
+        "towerCost": 30,
+        "towerCostIncrement": 5,
+        "shrineCost": 100,
+        "shrineCostIncrement": 50,
+        "jobChangeCost": 200,
+        "maxTowers": 28,
+        "maxTier1Shrines": 8,
+        "maxTier2Shrines": 6
+    },
+    "unitTypes": [
+        {
+            "type": "novice_exorcist",
+            "name": "수련생 퇴마사",
+            "role": "기본-지원형",
+            "tier": 1,
+            "icon": "",
+            "damage": 30,
+            "range": 260,
+            "cooldown": 700,
+            "desc": "신성한 책의 힘으로 단일 적을 공격합니다. 지원형 T2 경로 전용.",
+            "lore": "라벤더빛 학생 로브에 갈색 단발머리, 양손에 펼친 성서로 빛을 발하는 초심 퇴마사.",
+            "upgrades": [
+                "necromancer",
+                "alchemist",
+                "mirror",
+                "prayer_herald",
+                "ward_scribe"
+            ]
+        },
+        {
+            "type": "apprentice",
+            "name": "견습 퇴마사",
+            "role": "기본-공격형",
+            "tier": 1,
+            "icon": "",
+            "damage": 32,
+            "range": 275,
+            "cooldown": 650,
+            "desc": "정화된 에너지 볼트를 발사하여 단일 대상을 공격합니다.",
+            "lore": "짙은 인디고 로브에 황금 수단, 십자 문장이 새겨진 성구를 짚은 견습 퇴마사.",
+            "upgrades": [
+                "chainer",
+                "fire",
+                "archer",
+                "assassin",
+                "lightning_mage"
+            ]
+        },
+        {
+            "type": "acolyte_priest",
+            "name": "수련 사제",
+            "role": "기본-지원형",
+            "tier": 1,
+            "icon": "",
+            "damage": 28,
+            "range": 290,
+            "cooldown": 750,
+            "desc": "축복의 빛으로 단일 적에게 신성 피해를 입힙니다. 둔화·통찰 등 지원 계열 T2로 승급할 수 있습니다.",
+            "lore": "흰 사제복에 비둘기 깃을 두르고 축복의 빛을 발하는 수련 사제.",
+            "upgrades": [
+                "ice",
+                "tracker",
+                "relic_keeper",
+                "exorcism_mage",
+                "hymn_blaster"
+            ]
+        },
+        {
+            "type": "acolyte_warrior",
+            "name": "수련 전사",
+            "role": "기본-근접형",
+            "tier": 1,
+            "icon": "",
+            "damage": 38,
+            "range": 220,
+            "cooldown": 580,
+            "desc": "축성된 단검으로 근접 타격을 가합니다. 검·승려·찬가 등 공격 계열 T2로 승급할 수 있습니다.",
+            "lore": "가벼운 갑주에 축성된 단검을 든 민첩한 견습 전사, 어깨에 신성한 부적이 빛납니다.",
+            "upgrades": [
+                "monk",
+                "talisman",
+                "knight",
+                "verse_warrior",
+                "guardian"
+            ]
+        },
+        {
+            "type": "chainer",
+            "name": "영혼의 결박자",
+            "role": "숙련된 지원형",
+            "tier": 2,
+            "icon": "",
+            "damage": 52,
+            "range": 370,
+            "cooldown": 650,
+            "desc": "영적인 사슬을 발사하여 적에게 피해를 주고 이동 속도를 30% 감소시킵니다.",
+            "lore": "검은 사슬을 휘감은 회색 로브, 사슬에서 푸른 영기가 흐르는 결박자.",
+            "upgrades": [
+                "executor",
+                "binder"
+            ]
+        },
+        {
+            "type": "talisman",
+            "name": "부적술사",
+            "role": "숙련된 공격형",
+            "tier": 2,
+            "icon": "",
+            "damage": 70,
+            "range": 340,
+            "cooldown": 950,
+            "desc": "폭발하는 부적을 던져 충격 지점에 범위 피해를 입힙니다.",
+            "lore": "황색 도복에 폭발 부적을 어깨와 허리에 두른 술사, 손끝에 불씨가 피어남.",
+            "upgrades": [
+                "grandsealer",
+                "flamemaster"
+            ]
+        },
+        {
+            "type": "monk",
+            "name": "철퇴 승려",
+            "role": "숙련된 지원형",
+            "tier": 2,
+            "icon": "",
+            "damage": 79,
+            "range": 285,
+            "cooldown": 800,
+            "desc": "무거운 철퇴로 타격하여 악령을 포탈에서 멀리 밀쳐냅니다.",
+            "lore": "적갈색 가사에 황금 철퇴를 짊어진 다부진 승려, 이마에 신성 인장.",
+            "upgrades": [
+                "vajra",
+                "saint"
+            ]
+        },
+        {
+            "type": "archer",
+            "name": "신성한 궁수",
+            "role": "숙련된 특수형",
+            "tier": 2,
+            "icon": "",
+            "damage": 113,
+            "range": 750,
+            "cooldown": 1000,
+            "desc": "적의 방어력을 일부 무시하는 장거리 정밀 화살을 쏩니다. [견습 퇴마사 전용]",
+            "lore": "백금 사슬 갑주에 빛나는 활시위, 화살촉마다 성스러운 룬이 새겨진 정밀 사수.",
+            "upgrades": [
+                "voidsniper",
+                "thousandhand"
+            ]
+        },
+        {
+            "type": "ice",
+            "name": "빙결 도사",
+            "role": "숙련된 지원형",
+            "tier": 2,
+            "icon": "",
+            "damage": 61,
+            "range": 370,
+            "cooldown": 650,
+            "desc": "빙결 주문을 외워 2초 동안 적의 이동 속도를 크게 감소시킵니다.",
+            "lore": "청백색 외투에 서리 결정 지팡이, 입김이 차갑게 응결되는 빙결 도사.",
+            "upgrades": [
+                "absolutezero",
+                "permafrost"
+            ]
+        },
+        {
+            "type": "fire",
+            "name": "화염 마법사",
+            "role": "숙련된 공격형",
+            "tier": 2,
+            "icon": "",
+            "damage": 50,
+            "range": 340,
+            "cooldown": 650,
+            "desc": "적을 불태워 매초 최대 체력의 1%만큼 화상 피해를 입힙니다.",
+            "lore": "진홍 로브에 불꽃 무늬 두건, 손바닥 위 작은 불씨를 굴리는 화염 마법사.",
+            "upgrades": [
+                "hellfire",
+                "phoenix"
+            ]
+        },
+        {
+            "type": "assassin",
+            "name": "그림자 암살자",
+            "role": "숙련된 특수형",
+            "tier": 2,
+            "icon": "",
+            "damage": 47,
+            "range": 280,
+            "cooldown": 300,
+            "desc": "쌍검으로 빠르게 난도질하며 적의 모든 방어력을 무시합니다. [견습 퇴마사 전용]",
+            "lore": "검은 후드와 백색 가면, 양손에 휘어진 쌍검을 쥔 민첩한 그림자.",
+            "upgrades": [
+                "abyssal",
+                "spatial"
+            ]
+        },
+        {
+            "type": "tracker",
+            "name": "영혼 추적자",
+            "role": "숙련된 지원형",
+            "tier": 2,
+            "icon": "",
+            "damage": 50,
+            "range": 310,
+            "cooldown": 650,
+            "desc": "인도하는 빛을 비추어 주변 모든 아군의 공격 사거리를 확장합니다.",
+            "lore": "은빛 망토에 추적의 등불을 든 사냥꾼풍 추적자, 두 눈동자가 푸르게 빛남.",
+            "upgrades": [
+                "seer",
+                "commander"
+            ]
+        },
+        {
+            "type": "necromancer",
+            "name": "강령술사",
+            "role": "숙련된 특수형",
+            "tier": 2,
+            "icon": "",
+            "damage": 83,
+            "range": 340,
+            "cooldown": 800,
+            "desc": "영적인 에너지 벽을 소환하여 악령들의 진로를 물리적으로 차단합니다. [수련생 퇴마사 전용]",
+            "lore": "보랏빛 후드에 해골 장식 지팡이, 손끝에 영혼의 안개를 뿜는 강령술사.",
+            "upgrades": [
+                "wraithlord",
+                "cursedshaman"
+            ]
+        },
+        {
+            "type": "guardian",
+            "name": "성소 수호자",
+            "role": "숙련된 특수형",
+            "tier": 2,
+            "icon": "",
+            "damage": 97,
+            "range": 340,
+            "cooldown": 1000,
+            "desc": "신성한 힘으로 공격하며, 5% 확률로 대상을 즉시 추방합니다. [수련 전사 전용]",
+            "lore": "백색 사슬 갑주에 황금 십자 방패, 축성된 검을 든 굳건한 수호자.",
+            "upgrades": [
+                "rampart",
+                "judgment"
+            ]
+        },
+        {
+            "type": "alchemist",
+            "name": "퇴마 연금술사",
+            "role": "숙련된 특수형",
+            "tier": 2,
+            "icon": "",
+            "damage": 65,
+            "range": 310,
+            "cooldown": 800,
+            "desc": "적의 본질을 변환하여, 타격 시 15% 확률로 2 SE를 획득합니다. [수련생 퇴마사 전용]",
+            "lore": "가죽 앞치마에 유리병 벨트, 한 손에 보글거리는 정화 플라스크를 든 연금술사.",
+            "upgrades": [
+                "midas",
+                "philosopher"
+            ]
+        },
+        {
+            "type": "mirror",
+            "name": "거울 예언자",
+            "role": "숙련된 특수형",
+            "tier": 2,
+            "icon": "",
+            "damage": 70,
+            "range": 370,
+            "cooldown": 800,
+            "desc": "반사 마법을 사용하여 입힌 피해의 30%를 주변의 다른 적에게 튕깁니다. [수련생 퇴마사 전용]",
+            "lore": "은빛 의복에 손거울을 든 신비로운 예언자, 거울 면이 무지갯빛으로 일렁임.",
+            "upgrades": [
+                "illusion",
+                "reflection"
+            ]
+        },
+        {
+            "type": "knight",
+            "name": "퇴마 기사",
+            "role": "숙련된 공격형",
+            "tier": 2,
+            "icon": "",
+            "damage": 83,
+            "range": 310,
+            "cooldown": 650,
+            "desc": "축복받은 대검을 휘둘러 물리 피해와 신성 피해를 균형 있게 입힙니다.",
+            "lore": "청동 판금 갑주에 축성된 대검, 어깨에 신성 십자 망토를 두른 기사.",
+            "upgrades": [
+                "paladin",
+                "crusader"
+            ]
+        },
+        {
+            "type": "verse_warrior",
+            "name": "성구 전사",
+            "role": "숙련된 공격형",
+            "tier": 2,
+            "icon": "",
+            "damage": 74,
+            "range": 290,
+            "cooldown": 700,
+            "desc": "신성한 성구 구슬로 근접 타격을 가하며, 10% 확률로 적의 이동을 1초간 봉인합니다. [수련 전사 전용]",
+            "lore": "흰 무복에 묵주를 휘감은 손, 성구 구슬로 근접 타격을 가하는 전사.",
+            "upgrades": [
+                "scripture_knight",
+                "seal_warrior"
+            ]
+        },
+        {
+            "type": "hymn_blaster",
+            "name": "찬가 포격수",
+            "role": "숙련된 공격형",
+            "tier": 2,
+            "icon": "",
+            "damage": 54,
+            "range": 430,
+            "cooldown": 550,
+            "desc": "폭발하는 찬송의 파동을 빠르게 발사하여 적 무리에게 피해를 입힙니다. [수련 사제 전용]",
+            "lore": "황금 사제복에 거대한 성가 나팔포를 짊어진 우람한 포격수.",
+            "upgrades": [
+                "tome_cannon",
+                "holy_burst"
+            ]
+        },
+        {
+            "type": "exorcism_mage",
+            "name": "퇴마 마법사",
+            "role": "숙련된 공격형",
+            "tier": 2,
+            "icon": "",
+            "damage": 68,
+            "range": 360,
+            "cooldown": 800,
+            "desc": "집중된 퇴마 에너지를 모아 강력한 단일 타격을 가합니다. [수련 사제 전용]",
+            "lore": "짙은 청색 로브에 십자 지팡이, 손끝에 응축된 백광을 모으는 마법사.",
+            "upgrades": [
+                "rapid_exorcist",
+                "chain_exorcist"
+            ]
+        },
+        {
+            "type": "lightning_mage",
+            "name": "번개술사",
+            "role": "숙련된 공격형",
+            "tier": 2,
+            "icon": "",
+            "damage": 59,
+            "range": 360,
+            "cooldown": 700,
+            "desc": "번개 일격으로 첫 대상 타격 후 주변 적 1명에게 50% 피해로 연쇄됩니다. [견습 퇴마사 전용]",
+            "lore": "코발트 로브에 황금 번개 자수, 손끝에서 푸른 전류가 흘러내리는 번개술사.",
+            "upgrades": [
+                "storm_caller",
+                "thunder_judge"
+            ]
+        },
+        {
+            "type": "paladin",
+            "name": "성기사",
+            "role": "공격",
+            "tier": 3,
+            "icon": "",
+            "damage": 221,
+            "range": 380,
+            "cooldown": 650,
+            "desc": "매 5번째 공격마다 3배의 피해를 입히고 기절시키는 신성한 강타를 발동합니다.",
+            "lore": "백금 풀플레이트 갑주에 거룩한 망치, 후광이 흐릿하게 비치는 성기사.",
+            "upgrades": [
+                "eternal_wall"
+            ]
+        },
+        {
+            "type": "crusader",
+            "name": "혈기사",
+            "role": "공격",
+            "tier": 3,
+            "icon": "",
+            "damage": 298,
+            "range": 350,
+            "cooldown": 950,
+            "desc": "처형의 일격을 가하며, 적의 체력이 낮을수록 더 큰 피해를 입힙니다.",
+            "lore": "핏빛 망토에 양손 처형검, 검신에 응고된 핏자국이 새겨진 혈기사.",
+            "upgrades": [
+                "eternal_wall"
+            ]
+        },
+        {
+            "type": "midas",
+            "name": "황금의 미다스",
+            "role": "특수",
+            "tier": 3,
+            "icon": "",
+            "damage": 191,
+            "range": 350,
+            "cooldown": 800,
+            "desc": "공격에 황금을 입혀, 처치 시 대량의 15 SE를 획득합니다.",
+            "lore": "황금 가면에 도금 갑주, 손끝에 황금 가루를 흩뿌리는 부의 화신.",
+            "upgrades": [
+                "transmuter"
+            ]
+        },
+        {
+            "type": "philosopher",
+            "name": "공허의 현자",
+            "role": "특수",
+            "tier": 3,
+            "icon": "",
+            "damage": 234,
+            "range": 380,
+            "cooldown": 1000,
+            "desc": "타격 시마다 적의 방어력을 영구적으로 1 감소시키는 부식 저주를 겁니다.",
+            "lore": "별무늬 검은 로브에 공허의 책을 펼친 안경 쓴 노년의 현자.",
+            "upgrades": [
+                "transmuter"
+            ]
+        },
+        {
+            "type": "illusion",
+            "name": "환영술사",
+            "role": "특수",
+            "tier": 3,
+            "icon": "",
+            "damage": 179,
+            "range": 410,
+            "cooldown": 800,
+            "desc": "정신을 혼미하게 하여, 20% 확률로 적이 갈 길을 잃고 방황하게 만듭니다.",
+            "lore": "무지갯빛 베일에 가면을 쓴 환영술사, 주위에 잔상이 흐릿하게 어른거림.",
+            "upgrades": [
+                "oracle"
+            ]
+        },
+        {
+            "type": "reflection",
+            "name": "반사의 거장",
+            "role": "특수",
+            "tier": 3,
+            "icon": "",
+            "damage": 213,
+            "range": 440,
+            "cooldown": 1000,
+            "desc": "충격 시 여러 적 사이를 튕겨 다니는 수정 파편을 발사합니다.",
+            "lore": "수정 갑주에 다면 수정 지팡이, 빛이 산란되어 무지개로 흩어지는 거장.",
+            "upgrades": [
+                "oracle"
+            ]
+        },
+        {
+            "type": "executor",
+            "name": "명계의 집행자",
+            "role": "특수",
+            "tier": 3,
+            "icon": "",
+            "damage": 200,
+            "range": 440,
+            "cooldown": 650,
+            "desc": "운명의 천칭을 흔들어, 10% 확률로 적을 시작 지점으로 되돌려 보냅니다.",
+            "lore": "검은 형리 가면에 운명의 천칭을 들고 짙은 보랏빛 도포를 입은 집행자.",
+            "upgrades": [
+                "warden"
+            ]
+        },
+        {
+            "type": "binder",
+            "name": "영혼의 속박자",
+            "role": "지원",
+            "tier": 3,
+            "icon": "",
+            "damage": 166,
+            "range": 410,
+            "cooldown": 650,
+            "desc": "여러 적의 영혼을 연결하여, 한 명이 받는 피해의 일부를 공유하게 합니다.",
+            "lore": "회보랏빛 로브에 영혼의 사슬을 양손에 휘감은 침묵의 속박자.",
+            "upgrades": [
+                "warden"
+            ]
+        },
+        {
+            "type": "grandsealer",
+            "name": "대봉인사",
+            "role": "지원",
+            "tier": 3,
+            "icon": "",
+            "damage": 174,
+            "range": 380,
+            "cooldown": 1000,
+            "desc": "적의 특수 능력을 무력화하는 봉인 부적을 발사합니다.",
+            "lore": "황금 자수가 박힌 백색 의복, 봉인 부적이 공중에 떠도는 대봉인사.",
+            "upgrades": [
+                "cursed_talisman"
+            ]
+        },
+        {
+            "type": "flamemaster",
+            "name": "화염 부적 마스터",
+            "role": "공격",
+            "tier": 3,
+            "icon": "",
+            "damage": 208,
+            "range": 380,
+            "cooldown": 1000,
+            "desc": "지면에 지속적인 화상 피해를 입히는 불타는 카펫을 남깁니다.",
+            "lore": "적흑 도복에 불타는 부적 다발, 발걸음마다 잔불이 번지는 마스터.",
+            "upgrades": [
+                "cursed_talisman"
+            ]
+        },
+        {
+            "type": "vajra",
+            "name": "금강역사",
+            "role": "특수",
+            "tier": 3,
+            "icon": "",
+            "damage": 289,
+            "range": 285,
+            "cooldown": 800,
+            "desc": "신성한 삼지창으로 치명타를 가해 주변 모든 적을 크게 밀쳐냅니다.",
+            "lore": "근육질 상체에 황금 삼지창, 이마에 금강 인장이 빛나는 역사.",
+            "upgrades": [
+                "asura"
+            ]
+        },
+        {
+            "type": "saint",
+            "name": "진동의 성자",
+            "role": "지원",
+            "tier": 3,
+            "icon": "",
+            "damage": 259,
+            "range": 285,
+            "cooldown": 1000,
+            "desc": "성스러운 종을 울려 좁은 범위 내의 모든 적을 기절시키는 충격파를 만듭니다.",
+            "lore": "백색 사제복에 거대한 성종을 짊어진 성자, 종소리에 공기가 진동함.",
+            "upgrades": [
+                "asura"
+            ]
+        },
+        {
+            "type": "voidsniper",
+            "name": "공허의 저격수",
+            "role": "공격",
+            "tier": 3,
+            "icon": "",
+            "damage": 446,
+            "range": 9999,
+            "cooldown": 1300,
+            "globalRange": true,
+            "desc": "맵 전체를 가로질러 포탈에 가장 가까운 적을 저격하는 탄환을 발사합니다.",
+            "lore": "검은 망토에 긴 공허 라이플을 멘 저격수, 한쪽 눈에 별빛 단안경.",
+            "upgrades": [
+                "piercing_shadow"
+            ]
+        },
+        {
+            "type": "thousandhand",
+            "name": "천수궁수",
+            "role": "공격",
+            "tier": 3,
+            "icon": "",
+            "damage": 196,
+            "range": 780,
+            "cooldown": 1000,
+            "desc": "여러 대상에게 동시에 수많은 화살 세례를 퍼붓습니다.",
+            "lore": "다중 팔로 수많은 활을 동시에 당기는 황금빛 천수궁수.",
+            "upgrades": [
+                "piercing_shadow"
+            ]
+        },
+        {
+            "type": "absolutezero",
+            "name": "절대영도 마법사",
+            "role": "특수",
+            "tier": 3,
+            "icon": "",
+            "damage": 191,
+            "range": 410,
+            "cooldown": 650,
+            "desc": "공격 시 체력이 20% 이하인 빙결된 적을 즉시 처단할 확률이 있습니다.",
+            "lore": "빙결 결정 왕관에 새파란 로브, 발자국마다 얼음이 어는 마법사.",
+            "upgrades": [
+                "cocytus"
+            ]
+        },
+        {
+            "type": "permafrost",
+            "name": "빙결 처녀",
+            "role": "지원",
+            "tier": 3,
+            "icon": "",
+            "damage": 149,
+            "range": 410,
+            "cooldown": 650,
+            "desc": "넓은 범위 내의 모든 적을 크게 둔화시키는 지속적인 눈보라를 소환합니다.",
+            "lore": "백은 드레스에 눈송이 면사포, 손끝에서 눈보라가 휘몰아치는 처녀.",
+            "upgrades": [
+                "cocytus"
+            ]
+        },
+        {
+            "type": "hellfire",
+            "name": "지옥불 연금술사",
+            "role": "공격",
+            "tier": 3,
+            "icon": "",
+            "damage": 179,
+            "range": 380,
+            "cooldown": 650,
+            "desc": "불타는 적이 죽을 때 폭발하여 주변 적들에게 피해를 입힙니다.",
+            "lore": "검붉은 가죽 앞치마에 폭발 플라스크를 양손에 든 광기 어린 연금술사.",
+            "upgrades": [
+                "purgatory"
+            ]
+        },
+        {
+            "type": "phoenix",
+            "name": "불사조 소환사",
+            "role": "공격",
+            "tier": 3,
+            "icon": "",
+            "damage": 327,
+            "range": 530,
+            "cooldown": 1300,
+            "desc": "대상 뒤에 고데미지 화염 경로를 남기는 불사조를 불러내립니다.",
+            "lore": "진홍과 황금 깃털 망토, 어깨에 작은 불사조가 앉은 소환사.",
+            "upgrades": [
+                "purgatory"
+            ]
+        },
+        {
+            "type": "abyssal",
+            "name": "심연의 학살자",
+            "role": "특수",
+            "tier": 3,
+            "icon": "",
+            "damage": 166,
+            "range": 285,
+            "cooldown": 320,
+            "desc": "정밀하게 영혼을 수확하여, 처치 시 1.5배의 SE를 획득합니다.",
+            "lore": "검은 갑주에 영혼 수확 낫, 텅 빈 눈동자에 보랏빛 안개가 흐르는 학살자.",
+            "upgrades": [
+                "reaper"
+            ]
+        },
+        {
+            "type": "spatial",
+            "name": "공간 절단자",
+            "role": "공격",
+            "tier": 3,
+            "icon": "",
+            "damage": 153,
+            "range": 350,
+            "cooldown": 320,
+            "desc": "자신의 공격을 흉내 내는 영적 환영을 소환하여 동시에 여러 적을 타격합니다.",
+            "lore": "은빛 갑주에 휘어진 차원 검, 베인 자리에 균열이 남는 절단자.",
+            "upgrades": [
+                "reaper"
+            ]
+        },
+        {
+            "type": "seer",
+            "name": "진실의 탐구자",
+            "role": "지원",
+            "tier": 3,
+            "icon": "",
+            "damage": 123,
+            "range": 400,
+            "cooldown": 650,
+            "desc": "은신하거나 위상 변화 중인 적을 모든 아군에게 노출시키는 오라를 발산합니다.",
+            "lore": "짙은 자색 로브에 진실의 눈동자 부적, 이마의 세 번째 눈이 빛나는 탐구자.",
+            "upgrades": [
+                "doom_guide"
+            ]
+        },
+        {
+            "type": "commander",
+            "name": "전장 사령관",
+            "role": "지원",
+            "tier": 3,
+            "icon": "",
+            "damage": 123,
+            "range": 350,
+            "cooldown": 550,
+            "desc": "주변 아군들을 고취시켜 그들의 공격 속도를 20% 증가시킵니다.",
+            "lore": "붉은 망토에 황금 견장 갑주, 신성한 군기를 높이 든 사령관.",
+            "upgrades": [
+                "doom_guide"
+            ]
+        },
+        {
+            "type": "wraithlord",
+            "name": "망령 군주",
+            "role": "지원",
+            "tier": 3,
+            "icon": "",
+            "damage": 221,
+            "range": 380,
+            "cooldown": 800,
+            "desc": "처치 시 일정 확률로 그 영혼을 아군 해골 병사로 부활시켜 함께 싸우게 합니다.",
+            "lore": "검은 왕관에 너덜한 망령 망토, 주위에 해골 병사 영혼이 떠도는 군주.",
+            "upgrades": [
+                "forsaken_king"
+            ]
+        },
+        {
+            "type": "cursedshaman",
+            "name": "저주받은 주술사",
+            "role": "지원",
+            "tier": 3,
+            "icon": "",
+            "damage": 196,
+            "range": 380,
+            "cooldown": 1000,
+            "desc": "적에게 저주를 걸어, 타격 시마다 최대 체력을 영구적으로 5%씩 감소시킵니다.",
+            "lore": "뼈 가면과 깃털 장식, 검은 저주 인형을 손에 쥔 어두운 주술사.",
+            "upgrades": [
+                "forsaken_king"
+            ]
+        },
+        {
+            "type": "rampart",
+            "name": "신성한 성벽",
+            "role": "지원",
+            "tier": 3,
+            "icon": "",
+            "damage": 242,
+            "range": 350,
+            "cooldown": 1000,
+            "desc": "포탈을 방어하며, 도달한 적을 100% 확률로 시작 지점으로 되돌립니다 (5회 충전).",
+            "lore": "거대한 황금 타워실드에 백색 갑주, 미동도 없는 견고한 성벽.",
+            "upgrades": [
+                "void_gatekeeper"
+            ]
+        },
+        {
+            "type": "judgment",
+            "name": "심판의 기사",
+            "role": "공격",
+            "tier": 3,
+            "icon": "",
+            "damage": 336,
+            "range": 380,
+            "cooldown": 1000,
+            "desc": "대상 주변의 모든 적에게 범위 피해를 입히는 신성한 빛을 내리꽂습니다.",
+            "lore": "백금 갑주에 거룩한 양손검, 머리 위에 천칭 후광이 떠도는 심판자.",
+            "upgrades": [
+                "void_gatekeeper"
+            ]
+        },
+        {
+            "type": "transmuter",
+            "name": "공허의 연성사",
+            "role": "특수",
+            "tier": 4,
+            "icon": "",
+            "damage": 680,
+            "range": 410,
+            "cooldown": 650,
+            "desc": "악령을 완전히 연성하여, 처치 시마다 25 SE를 획득합니다.",
+            "lore": "납빛 LEGO 갑주에 에메랄드 반응로가 흐르고, 부유하는 기계 팔과 안테나 결정을 가진 연성사."
+        },
+        {
+            "type": "oracle",
+            "name": "영원의 선지자",
+            "role": "특수",
+            "tier": 4,
+            "icon": "",
+            "damage": 920,
+            "range": 470,
+            "cooldown": 800,
+            "desc": "타격 시 적의 움직임을 일시적으로 정지시키는 우주적 투사체를 발사합니다.",
+            "lore": "별이 박힌 인디고 로브, 영원의 눈이 얼굴을 대신하며 8개의 별이 궤도를 도는 우주적 선지자."
+        },
+        {
+            "type": "warden",
+            "name": "심연의 간수",
+            "role": "지원",
+            "tier": 4,
+            "icon": "",
+            "damage": 1200,
+            "range": 560,
+            "cooldown": 5000,
+            "desc": "주기적으로 블랙홀을 열어 화면 상의 모든 적을 중앙으로 끌어당깁니다.",
+            "lore": "검은 강철 갑주에 보라 사슬을 두르고, 가슴에 빨려드는 블랙홀 코어와 황금 열쇠를 든 심연의 간수."
+        },
+        {
+            "type": "cursed_talisman",
+            "name": "저주받은 교단장",
+            "role": "공격",
+            "tier": 4,
+            "icon": "",
+            "damage": 1480,
+            "range": 440,
+            "cooldown": 800,
+            "desc": "적에게 죽음의 표식을 새깁니다. 표식된 영혼이 소멸할 때 거대한 폭발이 일어납니다.",
+            "lore": "핏빛 제의와 깊은 후드, 사악한 눈을 새긴 거대 깃발과 떠다니는 저주 두루마리를 거느린 교단장."
+        },
+        {
+            "type": "asura",
+            "name": "지옥을 부수는 아수라",
+            "role": "공격",
+            "tier": 4,
+            "icon": "",
+            "damage": 360,
+            "range": 350,
+            "cooldown": 500,
+            "desc": "주변 대상에게 순식간에 12번의 연격파를 퍼붓습니다. (총합 데미지 4,320)",
+            "lore": "6개의 팔에 시미터와 바즈라를 든 핏빛 마왕, 가슴에 황금 문장과 황금 뿔관 중앙에 루비."
+        },
+        {
+            "type": "piercing_shadow",
+            "name": "영혼을 꿰뚫는 그림자",
+            "role": "공격",
+            "tier": 4,
+            "icon": "",
+            "damage": 3400,
+            "range": 9999,
+            "cooldown": 2600,
+            "globalRange": true,
+            "desc": "경로 상의 모든 적을 관통하는 거대한 빛의 줄기를 발사합니다.",
+            "lore": "보라빛 영혼 갑주에 5개의 그림자 침이 궤도를 도는, 후드 속 영혼 안광의 어둠 저격수."
+        },
+        {
+            "type": "cocytus",
+            "name": "코키토스의 지배자",
+            "role": "특수",
+            "tier": 4,
+            "icon": "",
+            "damage": 600,
+            "range": 560,
+            "cooldown": 10000,
+            "desc": "5초 동안 화면 상의 모든 적의 시간을 멈추는 궁극의 빙결 마법을 사용합니다.",
+            "lore": "푸른 사제복과 절대영도의 5첨 왕관, 머리 위에 떠 있는 거대 얼음 결정과 빙룡 셉터의 지배자."
+        },
+        {
+            "type": "purgatory",
+            "name": "영원한 연옥의 불길",
+            "role": "공격",
+            "tier": 4,
+            "icon": "",
+            "damage": 760,
+            "range": 440,
+            "cooldown": 1000,
+            "desc": "지면 한 줄을 통째로 태워, 그 위를 지나는 모든 적에게 영구적인 화상 피해를 줍니다.",
+            "lore": "백상아 갑주에 신성 화염의 날개와 두 자루 횃불 셉터, 정수리에서 솟는 5개의 불꽃 왕관."
+        },
+        {
+            "type": "reaper",
+            "name": "나이트메어 리퍼",
+            "role": "특수",
+            "tier": 4,
+            "icon": "",
+            "damage": 99999,
+            "range": 0,
+            "cooldown": 3000,
+            "instakill": true,
+            "globalTarget": true,
+            "desc": "현재 맵에서 체력이 가장 높은 적의 영혼을 즉시 거두어갑니다. (절대 즉사)",
+            "lore": "칠흑 망토에 보라 사신낫을 든 두건 속 해골, 5개의 영혼이 주위를 떠도는 죽음의 화신."
+        },
+        {
+            "type": "doom_guide",
+            "name": "파멸의 인도자",
+            "role": "특수",
+            "tier": 4,
+            "icon": "",
+            "damage": 1080,
+            "range": 440,
+            "cooldown": 500,
+            "desc": "포탈을 정화합니다. 포탈에 도달한 적은 피해 대신 포탈 오염도를 5% 회복시킵니다.",
+            "lore": "어두운 망령 로브와 유령선의 그림자를 등진 채, 황금 등불과 보라 정화봉을 든 인도자."
+        },
+        {
+            "type": "forsaken_king",
+            "name": "버림받은 자들의 왕",
+            "role": "지원",
+            "tier": 4,
+            "icon": "",
+            "damage": 1320,
+            "range": 440,
+            "cooldown": 650,
+            "desc": "매 스테이지 시작 시 아군을 위해 싸워줄 우호적인 망령들을 소환합니다.",
+            "lore": "보라빛 왕의 갑주에 황금 가슴판과 휘날리는 망토, 저주 녹광의 대검과 5첨 루비 왕관."
+        },
+        {
+            "type": "void_gatekeeper",
+            "name": "공허의 문지기",
+            "role": "지원",
+            "tier": 4,
+            "icon": "",
+            "damage": 0,
+            "range": 0,
+            "cooldown": 0,
+            "passive": true,
+            "desc": "패시브로 문을 봉인하여, 포탈 오염도에 입는 모든 피해를 50% 감소시킵니다.",
+            "lore": "거대한 슬레이트 게이트 자체가 몸이며, 회오리치는 시안 차원문과 떠 있는 눈, 뿔 투구의 문지기."
+        },
+        {
+            "type": "eternal_wall",
+            "name": "영원의 수호벽",
+            "role": "지원",
+            "tier": 4,
+            "icon": "",
+            "damage": 1800,
+            "range": 440,
+            "cooldown": 1300,
+            "desc": "강력한 안정화 오라를 내뿜어 맵 상의 모든 적을 80% 둔화시킵니다.",
+            "lore": "거대한 성벽 방패와 전쟁망치, 흉부에 푸른 빛 십자, 성가퀴를 머리에 얹은 영원의 수호자."
+        },
+        {
+            "type": "scripture_knight",
+            "name": "성구 기사",
+            "role": "공격",
+            "tier": 3,
+            "icon": "",
+            "damage": 242,
+            "range": 320,
+            "cooldown": 650,
+            "desc": "신성한 성구로 강화된 검을 휘둘러 주변 모든 적에게 범위 타격을 가합니다.",
+            "lore": "성구 구슬이 박힌 백금 갑주에 축성된 광검을 휘두르는 기사.",
+            "upgrades": [
+                "word_of_god"
+            ]
+        },
+        {
+            "type": "seal_warrior",
+            "name": "봉인 전사",
+            "role": "지원",
+            "tier": 3,
+            "icon": "",
+            "damage": 268,
+            "range": 300,
+            "cooldown": 800,
+            "desc": "30% 확률로 적의 모든 능력을 3초간 완전히 봉인하는 신성한 타격을 가합니다.",
+            "lore": "봉인 부적이 새겨진 회백색 갑주, 묵주를 휘감은 칼을 쥔 전사.",
+            "upgrades": [
+                "word_of_god"
+            ]
+        },
+        {
+            "type": "tome_cannon",
+            "name": "성서 대포",
+            "role": "공격",
+            "tier": 3,
+            "icon": "",
+            "damage": 208,
+            "range": 440,
+            "cooldown": 500,
+            "desc": "강력한 폭발 반경으로 다수의 적을 동시에 강타하는 성서 포탄을 발사합니다.",
+            "lore": "거대한 황금 성서를 펼쳐 대포로 사용하는 포격수, 페이지마다 룬이 빛남.",
+            "upgrades": [
+                "genesis_strike"
+            ]
+        },
+        {
+            "type": "holy_burst",
+            "name": "신성 폭격사",
+            "role": "공격",
+            "tier": 3,
+            "icon": "",
+            "damage": 361,
+            "range": 380,
+            "cooldown": 1300,
+            "desc": "막대한 피해를 입히는 신성 에너지 포탄을 소환하여 충격 반경 내 모든 적을 강타합니다.",
+            "lore": "백금 견장 갑주에 거대한 신성 폭격 지팡이를 짊어진 폭격사.",
+            "upgrades": [
+                "genesis_strike"
+            ]
+        },
+        {
+            "type": "rapid_exorcist",
+            "name": "속성 퇴마사",
+            "role": "공격",
+            "tier": 3,
+            "icon": "",
+            "damage": 157,
+            "range": 550,
+            "cooldown": 340,
+            "desc": "초고속으로 정화 볼트를 연속 발사하며 한 번에 최대 3명의 적을 관통합니다.",
+            "lore": "가벼운 백색 사제복에 쌍권총형 정화 마도구를 든 속사 퇴마사.",
+            "upgrades": [
+                "exorcism_storm"
+            ]
+        },
+        {
+            "type": "chain_exorcist",
+            "name": "연쇄 퇴마사",
+            "role": "공격",
+            "tier": 3,
+            "icon": "",
+            "damage": 183,
+            "range": 500,
+            "cooldown": 380,
+            "desc": "퇴마 볼트가 첫 번째 적을 타격한 후 주변 3명의 적에게 연쇄됩니다.",
+            "lore": "푸른 사제복에 연쇄 부적 묶음, 손끝에서 연쇄 볼트가 튀는 퇴마사.",
+            "upgrades": [
+                "exorcism_storm"
+            ]
+        },
+        {
+            "type": "word_of_god",
+            "name": "신의 말씀",
+            "role": "특수",
+            "tier": 4,
+            "icon": "",
+            "damage": 2280,
+            "range": 410,
+            "cooldown": 2000,
+            "desc": "성서에 기록된 최종 말씀을 해방하여, 화면 내 모든 적에게 신성한 심판을 내립니다.",
+            "lore": "빛나는 황금 갑주에 천사 깃털 날개, 부유하는 거대 성서와 머리 위 황금 후광의 천사."
+        },
+        {
+            "type": "genesis_strike",
+            "name": "천지창조의 왕",
+            "role": "공격",
+            "tier": 4,
+            "icon": "",
+            "damage": 3400,
+            "range": 440,
+            "cooldown": 2600,
+            "desc": "우주 창조의 에너지를 담은 폭발로 화면 내 모든 적을 강타하고 40% 확률로 즉사시킵니다.",
+            "lore": "7색 무지개 보석 왕관에 다색 창조 날개, 손 사이에 모든 색의 창조구를 다루는 우주적 황제."
+        },
+        {
+            "type": "exorcism_storm",
+            "name": "퇴마의 폭풍",
+            "role": "공격",
+            "tier": 4,
+            "icon": "",
+            "damage": 1080,
+            "range": 620,
+            "cooldown": 800,
+            "desc": "무한히 연쇄되는 퇴마 볼트를 끊임없이 발사하여 화면의 모든 적을 동시에 공격합니다.",
+            "lore": "시안 번개 날개 망토, 양손에 폭풍 셉터를 들고 트윈 번개 뿔이 빛나는 영원한 폭풍사."
+        },
+        {
+            "type": "prayer_herald",
+            "name": "기도 전령",
+            "role": "숙련된 지원형",
+            "tier": 2,
+            "icon": "",
+            "damage": 34,
+            "range": 290,
+            "cooldown": 1200,
+            "desc": "기도의 파동을 발산하여 범위 내 아군의 공격력을 8% 증가시킵니다. [수련생 퇴마사 전용]",
+            "lore": "흰 사제복에 황금 십자 종을 든 단정한 어린 전령.",
+            "upgrades": [
+                "psalm_singer",
+                "litany_chanter"
+            ]
+        },
+        {
+            "type": "relic_keeper",
+            "name": "유물 수호자",
+            "role": "숙련된 지원형",
+            "tier": 2,
+            "icon": "",
+            "damage": 38,
+            "range": 270,
+            "cooldown": 1300,
+            "desc": "신성한 유물의 힘으로 범위 내 아군의 공격 속도를 10% 증가시킵니다. [수련 사제 전용]",
+            "lore": "백금 사슬 망토에 성유물 함을 어깨에 짊어진 수호자.",
+            "upgrades": [
+                "relic_guardian",
+                "rune_crafter"
+            ]
+        },
+        {
+            "type": "ward_scribe",
+            "name": "결계 서기",
+            "role": "숙련된 지원형",
+            "tier": 2,
+            "icon": "",
+            "damage": 50,
+            "range": 330,
+            "cooldown": 1050,
+            "desc": "봉인 결계를 새겨 범위 내 적의 이동 속도를 15% 감소시킵니다. [수련생 퇴마사 전용]",
+            "lore": "짙은 청색 학자복에 결계 두루마리, 손끝에 룬을 새기는 서기.",
+            "upgrades": [
+                "barrier_master",
+                "divine_barrier"
+            ]
+        },
+        {
+            "type": "psalm_singer",
+            "name": "시편 가수",
+            "role": "지원",
+            "tier": 3,
+            "icon": "",
+            "damage": 94,
+            "range": 330,
+            "cooldown": 1000,
+            "desc": "신성한 시편을 노래하며 범위 내 아군의 공격력을 15% 강화하는 성가를 발산합니다.",
+            "lore": "백색 합창단 가운에 황금 시편서를 든 우아한 가수.",
+            "upgrades": [
+                "divine_choir"
+            ]
+        },
+        {
+            "type": "litany_chanter",
+            "name": "연도 창자",
+            "role": "지원",
+            "tier": 3,
+            "icon": "",
+            "damage": 85,
+            "range": 380,
+            "cooldown": 1300,
+            "desc": "지속적인 연도를 통해 범위 내 아군을 주기적으로 회복시키고 공격력을 강화합니다.",
+            "lore": "청회색 사제복에 묵주를 휘감은 손, 끊임없이 기도를 읊는 창자.",
+            "upgrades": [
+                "divine_choir"
+            ]
+        },
+        {
+            "type": "relic_guardian",
+            "name": "성유물 수호자",
+            "role": "지원",
+            "tier": 3,
+            "icon": "",
+            "damage": 102,
+            "range": 310,
+            "cooldown": 1100,
+            "desc": "성스러운 유물을 수호하며 범위 내 아군의 쿨다운을 15% 감소시킵니다.",
+            "lore": "황금 흉갑에 성유물 십자를 든 위엄 있는 수호자.",
+            "upgrades": [
+                "sacred_reliquary"
+            ]
+        },
+        {
+            "type": "rune_crafter",
+            "name": "룬 조각가",
+            "role": "지원",
+            "tier": 3,
+            "icon": "",
+            "damage": 98,
+            "range": 330,
+            "cooldown": 1000,
+            "desc": "신성한 룬을 새겨 주기적으로 범위 내 아군에게 강화 효과를 부여합니다.",
+            "lore": "가죽 앞치마에 룬 끌과 망치, 공중에 빛나는 룬을 새기는 조각가.",
+            "upgrades": [
+                "sacred_reliquary"
+            ]
+        },
+        {
+            "type": "barrier_master",
+            "name": "결계 마스터",
+            "role": "지원",
+            "tier": 3,
+            "icon": "",
+            "damage": 106,
+            "range": 370,
+            "cooldown": 1050,
+            "desc": "강력한 결계를 전개하여 범위 내 적의 공격 속도를 25% 감소시킵니다.",
+            "lore": "청백 학자복에 결계진 부채를 든 침착한 마스터.",
+            "upgrades": [
+                "grand_ward"
+            ]
+        },
+        {
+            "type": "divine_barrier",
+            "name": "신성한 방벽사",
+            "role": "지원",
+            "tier": 3,
+            "icon": "",
+            "damage": 111,
+            "range": 350,
+            "cooldown": 900,
+            "desc": "신성한 방벽을 쳐 적의 방어력을 20% 감소시키고 이동 속도를 억제합니다.",
+            "lore": "백금 망토에 신성 방패 부적, 손바닥에서 빛 장벽이 펼쳐지는 방벽사.",
+            "upgrades": [
+                "grand_ward"
+            ]
+        },
+        {
+            "type": "divine_choir",
+            "name": "신성한 합창단",
+            "role": "지원",
+            "tier": 4,
+            "icon": "",
+            "damage": 1000,
+            "range": 470,
+            "cooldown": 1000,
+            "desc": "천상의 합창으로 전장 전체에 신성한 에너지를 퍼뜨려 아군을 강화하고 적을 약화시킵니다.",
+            "lore": "거대한 황금 깃털 날개와 광활한 후광, 음표가 떠도는 양옆의 유령 가수를 거느린 신성한 지휘자."
+        },
+        {
+            "type": "sacred_reliquary",
+            "name": "성물 성소 수호자",
+            "role": "지원",
+            "tier": 4,
+            "icon": "",
+            "damage": 1200,
+            "range": 420,
+            "cooldown": 800,
+            "desc": "전장에 성물 성소를 소환하여 아군의 모든 능력치를 강화하고 적에게 지속적인 약화를 가합니다.",
+            "lore": "사원 기둥 사이에 부유하는 황금 성궤를 받든, 대리석 갑주와 태양 후광 투구의 성물 수호자."
+        },
+        {
+            "type": "grand_ward",
+            "name": "대결계사",
+            "role": "지원",
+            "tier": 4,
+            "icon": "",
+            "damage": 1480,
+            "range": 520,
+            "cooldown": 650,
+            "desc": "광대한 결계를 전장에 펼쳐 범위 내 모든 적의 능력치를 크게 약화시키고 이동을 봉쇄합니다.",
+            "lore": "머리 위에 떠 있는 3중 결계 구체와 궤도를 도는 시안 육각 룬, 황금 결계의 대결계사."
+        },
+        {
+            "type": "storm_caller",
+            "name": "폭풍 소환사",
+            "role": "공격",
+            "tier": 3,
+            "icon": "",
+            "damage": 187,
+            "range": 410,
+            "cooldown": 800,
+            "desc": "타격 시 사거리 내 무작위 적에게 추가 번개 낙뢰를 떨어뜨려 60% 피해를 입힙니다.",
+            "lore": "청회색 로브에 번개 무늬 두건, 손에 떠도는 뇌구를 쥔 소환사.",
+            "upgrades": [
+                "thunder_lord"
+            ]
+        },
+        {
+            "type": "thunder_judge",
+            "name": "천둥의 심판자",
+            "role": "공격",
+            "tier": 3,
+            "icon": "",
+            "damage": 217,
+            "range": 380,
+            "cooldown": 700,
+            "desc": "번개가 최대 3명의 적에게 연쇄됩니다. 연쇄마다 피해가 50%로 감소합니다.",
+            "lore": "검은 망토에 황금 번개 왕홀, 눈에서 번개가 튀는 심판자.",
+            "upgrades": [
+                "thunder_lord"
+            ]
+        },
+        {
+            "type": "thunder_lord",
+            "name": "천둥의 군주",
+            "role": "공격",
+            "tier": 4,
+            "icon": "",
+            "damage": 1320,
+            "range": 500,
+            "cooldown": 650,
+            "desc": "타격 시 사거리 내 무작위 적 3명에게 추가 낙뢰를 떨어뜨려 각 40% 피해와 25% 확률로 0.8초간 기절시킵니다.",
+            "lore": "검푸른 폭풍 구름 갑주에 황금 번개창, 머리 위 회전하는 천둥 왕관과 등 뒤 우레 날개의 천둥 군주."
+        }
+    ],
+    "shrineTypes": [
+        {
+            "type": "shrine_might",
+            "name": "힘의 성소",
+            "icon": "",
+            "role": "버프",
+            "tier": 1,
+            "bonus": {
+                "type": "damage",
+                "value": 0.2
+            },
+            "desc": "주변 아군의 공격력을 20% 증가시킵니다.",
+            "demoDesc": "맵 전체 아군의 공격력을 20% 감소시킵니다.",
+            "lore": "고대 전사들의 투지가 깃든 성소입니다. 그 기운은 주변의 무기를 더욱 날카롭게 벼려줍니다."
+        },
+        {
+            "type": "shrine_speed",
+            "name": "가속의 성소",
+            "icon": "",
+            "role": "버프",
+            "tier": 1,
+            "bonus": {
+                "type": "speed",
+                "value": 0.2
+            },
+            "desc": "주변 아군의 공격 속도를 20% 증가시킵니다.",
+            "demoDesc": "맵 전체 아군의 공격 속도를 20% 감소시킵니다.",
+            "lore": "천상의 바람이 머무는 성소입니다. 이곳의 기운은 아군들의 손놀림을 눈부시게 빠르게 만듭니다."
+        },
+        {
+            "type": "shrine_range",
+            "name": "통찰의 성소",
+            "icon": "",
+            "role": "버프",
+            "tier": 1,
+            "bonus": {
+                "type": "range",
+                "value": 50
+            },
+            "desc": "주변 아군의 공격 사거리를 50만큼 증가시킵니다.",
+            "demoDesc": "맵 전체 아군의 공격 사거리를 50만큼 감소시킵니다.",
+            "lore": "만물을 꿰뚫어 보는 혜안의 성소입니다. 아군들에게 더 먼 곳을 볼 수 있는 영적인 시야를 제공합니다."
+        },
+        {
+            "type": "shrine_wisdom",
+            "name": "지혜의 성소",
+            "icon": "",
+            "role": "확률",
+            "tier": 1,
+            "bonus": {
+                "type": "crit_chance",
+                "value": 0.1
+            },
+            "desc": "주변 아군의 치명타 확률을 10% 증가시킵니다.",
+            "demoDesc": "맵 전체 아군의 치명타 확률을 10% 감소시킵니다.",
+            "lore": "약점을 파악하는 통찰의 성소입니다. 아군들이 적의 핵심부를 정확히 타격하도록 돕습니다."
+        },
+        {
+            "type": "shrine_greed",
+            "name": "탐욕의 성소",
+            "icon": "",
+            "role": "유틸리티",
+            "tier": 1,
+            "bonus": {
+                "type": "se_gain",
+                "value": 2
+            },
+            "desc": "주변 아군이 적 처치 시 2 SE를 추가로 획득합니다.",
+            "demoDesc": "적 처치 시 획득하는 SE가 맵 전체 아군에게 2 감소합니다.",
+            "lore": "영혼의 본질을 더 많이 추출해내는 비술의 성소입니다. 정화의 대가로 더 많은 에너지를 얻습니다."
+        },
+        {
+            "type": "shrine_purity",
+            "name": "순결의 성소",
+            "icon": "",
+            "role": "유틸리티",
+            "tier": 1,
+            "bonus": {
+                "type": "pe_recovery",
+                "value": 0.05
+            },
+            "desc": "주변 아군이 적 처치 시 5% 확률로 포탈 오염도를 1% 정화합니다.",
+            "demoDesc": "맵 전체 아군이 적 처치 시 2% 확률로 포탈 오염도가 1% 증가합니다.",
+            "lore": "부정함을 씻어내는 정화의 성소입니다. 끊임없이 흘러나오는 성수로 결계를 깨끗이 유지합니다."
+        },
+        {
+            "type": "shrine_divine",
+            "name": "대천사의 성소",
+            "icon": "",
+            "role": "상위 버프",
+            "tier": 2,
+            "rangeType": "all",
+            "bonus": {
+                "type": "damage",
+                "value": 0.3
+            },
+            "desc": "맵 전체 아군의 공격력을 30% 증가시킵니다. (중첩 가능)",
+            "demoDesc": "맵 전체 아군의 공격력을 30% 감소시킵니다.",
+            "lore": "대천사의 가호가 깃든 거대한 성소입니다. 그 존재만으로도 모든 퇴마사들의 영혼에 용기를 불어넣습니다."
+        },
+        {
+            "type": "shrine_eternity",
+            "name": "영겁의 성소",
+            "icon": "",
+            "role": "상위 유틸리티",
+            "tier": 2,
+            "rangeType": "all",
+            "bonus": {
+                "type": "time_slow",
+                "value": 0.15
+            },
+            "desc": "맵 전체 모든 적의 이동 속도를 15% 감소시킵니다.",
+            "demoDesc": "적들의 이동 속도가 원래대로 돌아옵니다.",
+            "lore": "시간의 흐름조차 둔화시키는 신비한 성소입니다. 악령들의 발걸음을 무겁게 묶어둡니다."
+        },
+        {
+            "type": "shrine_miracle",
+            "name": "기적의 성소",
+            "icon": "",
+            "role": "상위 확률",
+            "tier": 2,
+            "rangeType": "all",
+            "bonus": {
+                "type": "crit_damage",
+                "value": 0.5
+            },
+            "desc": "맵 전체 아군의 치명타 피해량을 50% 증가시킵니다.",
+            "demoDesc": "맵 전체 아군의 치명타 피해량을 50% 감소시킵니다.",
+            "lore": "정화의 기적이 실현되는 성소입니다. 아군들의 공격이 적의 영혼을 더욱 깊숙이 파괴하도록 만듭니다."
+        },
+        {
+            "type": "shrine_fervor",
+            "name": "열정의 성소",
+            "icon": "",
+            "role": "확률",
+            "tier": 1,
+            "bonus": {
+                "type": "crit_damage",
+                "value": 0.15
+            },
+            "desc": "주변 아군의 치명타 피해량을 15% 증가시킵니다.",
+            "demoDesc": "주변 아군의 치명타 피해량이 15% 감소합니다.",
+            "lore": "분노와 열정이 불꽃으로 응결된 성소입니다. 퇴마사들의 일격에 파괴적인 화염을 불어넣습니다."
+        },
+        {
+            "type": "shrine_shadow",
+            "name": "그림자의 성소",
+            "icon": "",
+            "role": "확률",
+            "tier": 1,
+            "bonus": {
+                "type": "crit_chance",
+                "value": 0.08
+            },
+            "desc": "주변 아군의 치명타 확률을 8% 증가시킵니다.",
+            "demoDesc": "주변 아군의 치명타 확률이 8% 감소합니다.",
+            "lore": "어둠 속에서 빛나는 초승달이 깃든 성소입니다. 그림자를 타고 흐르는 기운이 일격의 정확성을 높입니다."
+        },
+        {
+            "type": "shrine_harvest",
+            "name": "수확의 성소",
+            "icon": "",
+            "role": "유틸리티",
+            "tier": 1,
+            "bonus": {
+                "type": "se_gain",
+                "value": 3
+            },
+            "desc": "주변 아군이 적 처치 시 SE를 3 추가 획득합니다.",
+            "demoDesc": "주변 아군의 SE 추가 획득이 사라집니다.",
+            "lore": "황금빛 곡식으로 가득 찬 성소입니다. 퇴마의 노력에서 영혼 정수를 더욱 풍성히 수확합니다."
+        },
+        {
+            "type": "shrine_endurance",
+            "name": "인내의 성소",
+            "icon": "",
+            "role": "유틸리티",
+            "tier": 1,
+            "bonus": {
+                "type": "pe_recovery",
+                "value": 0.03
+            },
+            "desc": "주변 아군의 포탈 정화 효과를 3% 증가시킵니다.",
+            "demoDesc": "주변 아군의 포탈 정화 효과가 감소합니다.",
+            "lore": "태산 같은 인내심이 결정화된 성소입니다. 결계를 지키는 정화의 기운을 끊임없이 공급합니다."
+        }
+    ]
+}

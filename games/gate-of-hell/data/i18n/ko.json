@@ -1,0 +1,1665 @@
+{
+  "meta": {
+    "code": "ko",
+    "name": "한국어",
+    "endonym": "한국어"
+  },
+  "ui": {
+    "start": {
+      "subtitle": "악령들의 귀환",
+      "btn_continue": "이어하기",
+      "btn_new": "새 게임",
+      "btn_tutorial": "지침서 (Guide)",
+      "tutorial_label": "초보자 가이드",
+      "status_on": "ON",
+      "status_off": "OFF"
+    },
+    "loading": {
+      "title": "GATE OF HELL",
+      "status": "심연의 문을 여는 중...",
+      "subtitle": "GATE OF HELL CHRONICLES",
+      "msg_0": "심연의 문을 여는 중...",
+      "msg_1": "영혼의 본질을 추출하는 중...",
+      "msg_2": "퇴마의 성서들을 정리하는 중...",
+      "msg_3": "악령들의 이름을 기록하는 중...",
+      "msg_4": "심연의 기운을 봉인하는 중...",
+      "msg_5": "고대의 유물을 감별하는 중...",
+      "msg_6": "성소의 등불을 밝히는 중...",
+      "ready": "준비 완료!",
+      "error": "심연의 문이 닫혔습니다 (로딩 실패)"
+    },
+    "hud": {
+      "sleeping_statue": "잠든 석상",
+      "cursed_status": "잠든 저주",
+      "stage_name_default": "속삭이는 문",
+      "depth": "Depth",
+      "se_tooltip": "소울 에너지 (SE): 유닛 소환 및 강화에 사용 (클릭하여 상세 정보)",
+      "pe_tooltip": "포탈 오염도 (PE): 100% 도달 시 게임 오버 (클릭하여 상세 정보)",
+      "rs_tooltip": "남은 악령 (RS): 스테이지 클리어까지 필요한 처치 수 (클릭하여 상세 정보)",
+      "curse_lv_prefix": "심연의 저주",
+      "curse_lv1": "심연의 저주 1단계",
+      "curse_lv2": "심연의 저주 2단계",
+      "curse_lv3": "심연의 저주 3단계",
+      "curse_tooltip_title_active": "심연의 저주",
+      "curse_tooltip_title_dormant": "잠든 저주",
+      "curse_tooltip_desc_active": "포탈 오염도가 높아져 고대의 저주가 발현되었습니다. 정화하여 오염도를 낮추십시오.",
+      "curse_tooltip_desc_dormant": "저주가 아직 깨어나지 않았습니다. 오염도가 30%를 넘으면 활성화됩니다.",
+      "curse_stat_lv1": "1단계 (30%↑)",
+      "curse_stat_lv2": "2단계 (50%↑)",
+      "curse_stat_lv3": "3단계 (75%↑)",
+      "curse_stat_lv1_val": "전체 아군 공속 -5%",
+      "curse_stat_lv2_val": "전체 아군 공속 -10%",
+      "curse_stat_lv3_val": "전체 아군 공속 -20%",
+      "se_tooltip_title": "소울 에너지 (SE)",
+      "se_tooltip_desc": "퇴마사를 소환하고 성소를 건립하는 데 필요한 영적인 에너지입니다.",
+      "se_gain_method": "악령 처치",
+      "se_gain_label": "획득 방법",
+      "pe_tooltip_title": "포탈 오염도 (PE)",
+      "pe_tooltip_desc": "악령들이 포탈을 통과할 때 쌓이는 오염 수치입니다. 100% 도달 시 게임 오버.",
+      "pe_purge_method": "정화(Purge) 기능 사용",
+      "pe_purge_label": "정화 방법",
+      "rs_tooltip_title": "남은 악령 (RS)",
+      "rs_tooltip_desc": "현재 스테이지를 클리어하기 위해 처치해야 할 악령의 총량입니다.",
+      "rs_progress_label": "진행도",
+      "rs_progress_val": "처치 시 감소",
+      "gargoyle_atk_speed": "공격 속도",
+      "gargoyle_atk_range": "공격 사거리",
+      "gargoyle_atk_damage": "공격 피해",
+      "gargoyle_se_gain": "SE 획득",
+      "gargoyle_no_debuff": "없음",
+      "se_short": "SE 부족",
+      "stage_countdown_enemies": "악령들이 몰려옵니다!",
+      "stage_banner_title": "속삭이는 문"
+    },
+    "controls": {
+      "se_short": "SE 부족",
+      "sf_tooltip": "Soul Fragment — 유물 제작 자원",
+      "sc_tooltip": "Soul Crystal — 장비 재계시 자원",
+      "new_badge": "NEW",
+      "tba": "TBA",
+      "btn_pause": "일시정지",
+      "btn_resume": "재개",
+      "summon_title": "소환",
+      "summon_desc": "수련생 퇴마사 또는 견습 퇴마사 중 하나를 무작위로 소환합니다.",
+      "shrine_title": "성스러운 성소",
+      "shrine_desc": "전용 슬롯에 배치하여 주변 아군에게 강력한 공격력 버프를 제공합니다.",
+      "purge_title": "공간 정화",
+      "purge_desc": "즉시 포탈 오염도를 50% 제거합니다. 위기 상황에서 사용하십시오.",
+      "relics_title": "유물",
+      "relics_desc": "정화 중 획득한 보물로 아군 전체를 영구 강화합니다.",
+      "equip_title": "장비",
+      "equip_desc": "장착 시 특정 능력치를 대폭 상승시키는 고대의 무구입니다.",
+      "equip_manage_title": "신성한 장비고",
+      "equip_manage_desc": "심연에서 획득한 성스러운 무구들을 관리하고 강화합니다.",
+      "equip_lore": "부러진 칼날도 퇴마사의 손에 들리면 악령을 베는 신검이 될 것입니다.",
+      "collections_title": "도감",
+      "collections_desc": "지금까지 조우한 악령들과 아군들의 상세 기록을 확인합니다.",
+      "pact_title": "저주의 계약",
+      "pact_unlock_fmt": "스테이지 {stage}에 해금됩니다.",
+      "pact_ready": "소환 준비 완료",
+      "pact_cooldown_fmt": "재사용까지 {cur}/{cd} 스테이지",
+      "pact_desc_fmt": "즉시 보스급 영혼을 소환합니다. 사냥 시 유물을 보장합니다. 재사용 {cd}스테이지마다 1회. {grace}스테이지 이상 소환하지 않으면 패널티가 누적됩니다.",
+      "pact_penalty_fmt": "무시 패널티: 적 체력 +{hp}%, SE −{se}%",
+      "tba_title": "미정",
+      "tba_desc": "새로운 기능이 곧 추가됩니다.",
+      "relics_cost_fmt": "일반 {n} · 최상위 {s} SF"
+    },
+    "info_panel": {
+      "default_title": "GATE OF HELL",
+      "default_subtitle": "SACRED TABLET",
+      "lore_default": "심연의 기록판은 영혼의 본질을 분석하여 정화의 길을 밝힙니다.",
+      "hint_touch": "▾ 유닛 또는 적을 터치 ▾",
+      "shrine_scope_local": "근접",
+      "shrine_scope_global": "전역",
+      "shrine_buffed_fmt": "{n}명 강화",
+      "shrine_demolish_btn": "성소 철거",
+      "unit_role_default": "퇴마사",
+      "unit_promote_t1": "영혼 각성",
+      "unit_promote_t2": "초월 각성",
+      "unit_promote_t3": "전설 승급",
+      "unit_corrupt_btn": "타락",
+      "unit_corrupt_full_btn": "타락 (Corrupted)",
+      "unit_instakill_disp": "즉사",
+      "unit_global_range_disp": "전역",
+      "enemy_desc_unknown": "심연의 정체를 알 수 없는 존재입니다.",
+      "enemy_flavor": "그의 본질이 기록판에 잠시 머뭅니다...",
+      "slot_warning_title": "배치 불가",
+      "slot_warning_flavor": "이곳은 영혼의 조화가 허락되지 않은 자리입니다.",
+      "slot_sacred_only": "성스러운 성소 전용 슬롯입니다.",
+      "slot_shrine_only": "성소 전용 슬롯입니다.",
+      "slot_unit_only": "퇴마사 전용 슬롯입니다.",
+      "enemy_lore_unknown": "이 영혼에 대한 기록이 없습니다.",
+      "shrine_badge": "성소",
+      "shrine_demo_prefix": "철거 시",
+      "sacred_slot_only_log": "Only 성스러운 성소 (Tier 2) can be placed here."
+    },
+    "modal": {
+      "close": "닫기"
+    },
+    "collections": {
+      "subtitle": "심연의 모든 존재가 이 기록판에 새겨진다",
+      "default_title": "GATE OF HELL",
+      "default_subtitle": "CHRONICLES",
+      "tab_ghosts": "악의 존재",
+      "tab_exorcists": "퇴마사 계보",
+      "tab_shrines": "성소",
+      "ghost_locked": "아직 조우하지 않음",
+      "ghost_locked_lore": "심연 깊은 곳에 숨어있는 존재입니다.",
+      "shrine_sacred_label": "성스러운 성소",
+      "shrine_normal_label": "일반 성소",
+      "shrine_range_global": "전역",
+      "shrine_range_local": "주변",
+      "shrine_stat_range": "범위",
+      "shrine_stat_role": "역할",
+      "shrine_stat_effect": "효과",
+      "shrine_stat_demolish": "철거",
+      "ghost_stat_hp": "체력",
+      "ghost_stat_def": "방어",
+      "ghost_stat_reward": "보상",
+      "ghost_stat_kills": "처치",
+      "section": {
+        "specter": "망령",
+        "wraith": "악령",
+        "spirit": "원혼",
+        "demon": "악마",
+        "abyssal_boss": "보스",
+        "mini_boss": "미니 보스",
+        "treasure": "특이점",
+        "buff": "버프 성소",
+        "prob": "확률 성소",
+        "util": "유틸 성소",
+        "sacred": "성스러운 성소"
+      },
+      "exo": {
+        "family_suffix": "계보",
+        "family_subtitle": {
+          "novice_exorcist": "지원형 계열",
+          "apprentice": "공격형 계열",
+          "acolyte_priest": "신성형 계열",
+          "acolyte_warrior": "근접형 계열"
+        },
+        "tier": {
+          "1": "기본",
+          "2": "숙련",
+          "3": "상급",
+          "4": "전설"
+        },
+        "tier_label": {
+          "1": "TIER  I",
+          "2": "TIER  II",
+          "3": "TIER  III",
+          "4": "TIER  IV"
+        },
+        "units_count_format": "{n} units · 5→10→5"
+      }
+    },
+    "detail": {
+      "lbl_attack": "공격력",
+      "lbl_dps": "DPS",
+      "lbl_range": "사거리",
+      "lbl_cooldown": "쿨다운",
+      "lbl_role": "역할",
+      "lbl_effect": "효과",
+      "lbl_demolish": "철거",
+      "lbl_hp": "체력",
+      "lbl_defense": "방어",
+      "lbl_reward": "보상",
+      "lbl_kills": "처치",
+      "lbl_ability": "능력",
+      "lbl_range_type": "범위",
+      "sub_damage": "데미지",
+      "sub_dps": "초당",
+      "sub_distance": "거리",
+      "sub_per_sec": "초마다",
+      "sub_passive": "패시브",
+      "sub_instakill": "즉사",
+      "sub_global": "전역",
+      "tag_passive": "패시브",
+      "tag_instakill": "즉사",
+      "tag_global": "전역",
+      "shrine_normal": "일반 성소",
+      "shrine_sacred": "성스러운 성소",
+      "shrine_range_local": "주변",
+      "shrine_range_global": "전역",
+      "danger": {
+        "extreme": "극위험",
+        "high": "위험",
+        "caution": "주의",
+        "minor": "경미",
+        "low": "낮음"
+      }
+    },
+    "relics": {
+      "float_surge": "심연 가속!",
+      "float_revival": "영혼 부활!",
+      "float_ledger_suffix": " SE 청구!",
+      "subtitle": "심연 깊은 곳에서 거두어낸 저주받은 유물",
+      "default_title": "GATE OF HELL",
+      "default_subtitle": "RELIC VAULT",
+      "sf_tooltip": "Soul Fragment — 유물 제작 자원",
+      "count_tooltip": "보유 유물 수",
+      "total_bonus": "총 유물 보너스",
+      "found_title": "유물 발견!",
+      "effect_label": "효과",
+      "source_label": "출처",
+      "owned_fmt": "보유 ×{n}",
+      "not_owned": "미획득",
+      "section_normal": "일반 유물",
+      "section_supreme": "최상위 유물",
+      "section_boss": "지배자의 유물",
+      "section_ancient": "고대 유물",
+      "craft_btn": "제작",
+      "craft_no_sf_warn": "Soul Fragment 부족 (필요 {cost})",
+      "craft_pool_empty_warn": "제작 가능한 유물 없음",
+      "craft_btn_title_empty": "제작 가능한 유물 없음 (모두 최대 중첩)",
+      "craft_btn_title_fmt": "Soul Fragment {cost} 소모하여 무작위 유물 제작 (보유 {sf} SF)",
+      "src_specter": "망령",
+      "src_wraith": "원혼",
+      "src_spirit": "영혼",
+      "src_all": "모든 적",
+      "src_demon": "악마",
+      "src_abyssal_boss": "심연의 보스",
+      "src_supreme_boss": "계약의 보스",
+      "src_unknown": "알 수 없음",
+      "bonus_damage": "공격력 증가",
+      "bonus_range": "사거리 증가",
+      "bonus_cooldown": "공격 속도 증가",
+      "bonus_crit_chance": "치명타 확률",
+      "bonus_crit_damage": "치명타 피해량",
+      "bonus_slow_strength": "둔화 효과 강화",
+      "bonus_portal_dmg_reduction": "포탈 안정성",
+      "bonus_summon_cost_reduction": "소환 비용 절감",
+      "bonus_execute_threshold": "처형 임계치",
+      "bonus_aura_range": "범위 확장",
+      "bonus_sell_refund": "판매 환급 보너스",
+      "bonus_shrine_mastery": "성소 통달",
+      "bonus_se_max_limit": "SE 최대치 확장",
+      "bonus_crit_chain": "사슬 번개 피해",
+      "bonus_portal_heal_chance": "영혼 환류 확률",
+      "bonus_echo_shot_chance": "잔향 공격 확률",
+      "bonus_combo_damage": "콤보 피해 증가",
+      "bonus_death_save": "영혼 부활 충전",
+      "bonus_surge_interval_reduction": "심연 가속 중첩",
+      "bonus_void_mark_cap": "공허 표식 한도",
+      "bonus_adjacency_damage": "인접 결속 피해",
+      "bonus_ledger_stacks": "영혼 청구서 중첩",
+      "log_ledger_windfall": "영혼 청구서: +{n} SE",
+      "log_revival": "영혼 부활! 포탈 복원.",
+      "badge_title_fmt": "보유 종류 {u} / 총 {t}개"
+    },
+    "equipment": {
+      "subtitle": "심연에서 거두어들인 성스러운 유물",
+      "default_title": "GATE OF HELL",
+      "default_subtitle": "SACRED ARMORY",
+      "total_bonus": "총 장비 효과",
+      "found_prefix": "장비",
+      "sc_row_title": "적 처치 시 드물게 획득. 장비 재계시에 사용.",
+      "reroll_label": "재계시 (Reroll)",
+      "reroll_stock_fmt": "보유 {n}",
+      "found_count_fmt": "획득 ×{n}",
+      "found_title_new": "획득!",
+      "found_title_upgrade": "강화!",
+      "found_title_reroll": "재계시!",
+      "found_title_existing": "재발견",
+      "found_effect_label": "효과",
+      "found_lore": "심연의 악령들조차 이 무구의 빛 앞에서는 눈을 멀게 될 것입니다.",
+      "no_sc_warn": "Soul Crystal 부족 (필요 {cost})",
+      "no_equip": "장착된 장비가 없습니다.",
+      "not_owned_tier": "미획득",
+      "secondary_stat_label": "랜덤 보조 스탯",
+      "secondary_stat_locked": "??? (최고 등급 한정)",
+      "bonus_label": "[보너스]",
+      "section_weapon": "무기",
+      "section_armor": "방어구",
+      "section_accessory": "장신구",
+      "lore_armory": "부러진 칼날도 퇴마사의 손에 들리면 악령을 베는 신검이 될 것입니다.",
+      "grade_suffix": "등급"
+    },
+    "game_over": {
+      "title": "영혼이 잠식되었습니다",
+      "msg": "심연이 또 다른 영혼을 거두어갔습니다... 문은 무너졌고, 영원한 어둠이 기다립니다.",
+      "depth_label": "도달한 Depth:",
+      "btn_retry": "다시 일어나 정화하기 (재도전)"
+    },
+    "sacrifice": {
+      "header": "[절대 금기: 영혼의 파기]",
+      "body": "수호자와의 성스러운 계약을 강제로 끊으려 합니까?\n\n영혼을 심연으로 돌려보내는 대가는 결코 가볍지 않으며,\n한번 흩어진 본질은 결코 다시 불러올 수 없습니다.\n\n정말로 이 수호자를 영원한 어둠 속으로 추방하시겠습니까?",
+      "btn_confirm": "타락 집행",
+      "btn_cancel": "계약 유지 (취소)"
+    },
+    "unlock": {
+      "header": "새로운 클래스 해금!",
+      "resume_hint": "(아무 곳이나 클릭하여 재개)"
+    },
+    "pause": {
+      "header": "TIME FROZEN",
+      "body": "심연의 흐름이 잠시 멈추었습니다.\n준비가 되면 다시 퇴마를 시작하십시오.",
+      "btn_resume": "퇴마 재개 (Resume)"
+    },
+    "settings": {
+      "header": "[정화 설정]",
+      "tutorial_label": "튜토리얼 가이드",
+      "tutorial_desc": "새로운 유닛/시스템 발견 시 도움말을 표시합니다.",
+      "language_label": "언어 (Language)",
+      "language_desc": "게임 인터페이스 언어를 변경합니다.",
+      "btn_restart": "현재 정화 중단 (재시작)",
+      "btn_close": "설정 닫기"
+    },
+    "quit": {
+      "header": "[운명의 거부]",
+      "body": "이미 수많은 영혼이 이 길 위에서 길을 잃었습니다.\n\n당신마저 퇴마를 포기한다면, 이 세상에 남은 빛은 완전히 사라질 것입니다.\n지금까지의 모든 정화 기록이 소멸되며, 다시는 되돌릴 수 없습니다.\n\n정말로 이 성스러운 임무를 포기하시겠습니까?",
+      "btn_confirm": "심연으로 도망 (중단)",
+      "btn_cancel": "운명에 저항 (계속)"
+    },
+    "tutorial": {
+      "header": "[퇴마 지침서]",
+      "btn_close": "지침서 닫기",
+      "section": {
+        "basic_title": "기본 조작",
+        "basic_1": "드래그 & 드롭으로 퇴마사의 위치를 변경할 수 있습니다.",
+        "basic_2": "하단 카드를 클릭하여 새로운 퇴마사를 소환하거나 성소를 건설합니다.",
+        "units_title": "유닛 & 성소",
+        "units_1": "퇴마사는 자동으로 악령을 공격하며, SE를 소모해 전직할 수 있습니다.",
+        "units_2": "성소는 주변 아군에게 강력한 버프를 제공하지만, 철거 시 디버프가 발생합니다.",
+        "pe_title": "포탈 오염도 (PE)",
+        "pe_1": "악령이 포탈을 통과하면 오염도가 상승합니다.",
+        "pe_2": "오염도가 100%가 되면 세상이 멸망합니다. '정화' 기능을 사용해 오염을 막으세요."
+      }
+    },
+    "max_units": {
+      "warning_main": "???: 더 이상 퇴마사를 부를 수 없다!",
+      "warning_sub": "(최대 퇴마사 인원: 16)"
+    },
+    "summons": {
+      "skeleton": "해골",
+      "ghost": "망령"
+    },
+    "enemy": {
+      "boss_warning_header": "심연의 징조",
+      "boss_warning_cat": "마신 강림",
+      "boss_warning_lore": "강력한 심연의 지배자가 강림합니다. 모든 퇴마사의 힘을 집중하십시오!",
+      "boss_victory_header": "심연의 존재 추방",
+      "boss_victory_cat": "마왕 소멸",
+      "encounter_header": "새 조우 기록",
+      "unknown_boss_name": "알 수 없는 존재",
+      "stage_enemies_incoming": "악령들이 몰려옵니다!",
+      "float_time_reversal": "시간역행",
+      "float_petrify": "석화!",
+      "float_invincible_off": "무적 해제!"
+    },
+    "curse": {
+      "form_0_name": "잠든 석상",
+      "form_0_desc": "고요히 잠든 석상입니다. 아직 깨어나지 않았습니다.",
+      "form_1_name": "균열된 석상",
+      "form_1_desc": "균열이 생기기 시작했습니다. 무언가가 깨어나려 합니다.",
+      "form_2_name": "눈뜬 가고일",
+      "form_2_desc": "눈을 떴습니다. 당신을 주시하고 있습니다.",
+      "form_3_name": "경계하는 파수꾼",
+      "form_3_desc": "날개를 펼치기 시작했습니다. 경계 태세에 들어갔습니다.",
+      "form_4_name": "분노의 각성",
+      "form_4_desc": "완전히 각성했습니다. 분노의 불꽃이 눈에 타오릅니다.",
+      "form_5_name": "타락한 수호자",
+      "form_5_desc": "타락이 시작되었습니다. 어둠의 힘으로 가득 차 있습니다.",
+      "form_6_name": "악마의 가고일",
+      "form_6_desc": "완전한 악마로 변신했습니다. 그 존재만으로 주변을 오염시킵니다.",
+      "form_7_name": "타락신 강림",
+      "form_7_desc": "타락신이 강림했습니다. 모든 신성한 힘이 약화되고 있습니다.",
+      "stat_ally_prefix": "아군",
+      "stat_enemy_prefix": "적",
+      "stat_speed": "속도",
+      "stat_range": "사거리",
+      "stat_damage": "피해",
+      "stat_none": "없음",
+      "enemy_speed_label": "속도×",
+      "enemy_defense_label": "방어+"
+    },
+    "pact": {
+      "madness_popup": "광기 발현!",
+      "madness_log_on": "악마의 뿔: 광기 발현 — 데미지 보너스 ×2",
+      "madness_log_off": "악마의 뿔: 광기 해제"
+    }
+  },
+  "shrine_role": {
+    "buff": "버프",
+    "prob": "확률",
+    "util": "유틸리티",
+    "sacred_buff": "상위 버프",
+    "sacred_util": "상위 유틸리티",
+    "sacred_prob": "상위 확률"
+  },
+  "unit_role": {
+    "basic_support": "기본-지원형",
+    "basic_attack": "기본-공격형",
+    "basic_priest": "기본-지원형",
+    "basic_melee": "기본-근접형",
+    "skilled_support": "숙련된 지원형",
+    "skilled_attack": "숙련된 공격형",
+    "skilled_special": "숙련된 특수형",
+    "attack": "공격",
+    "support": "지원",
+    "special": "특수"
+  },
+  "unit": {
+    "novice_exorcist": {
+      "name": "수련생 퇴마사",
+      "desc": "신성한 책의 힘으로 단일 적을 공격합니다. 지원형 T2 경로 전용.",
+      "lore": "라벤더빛 학생 로브에 갈색 단발머리, 양손에 펼친 성서로 빛을 발하는 초심 퇴마사."
+    },
+    "apprentice": {
+      "name": "견습 퇴마사",
+      "desc": "정화된 에너지 볼트를 발사하여 단일 대상을 공격합니다.",
+      "lore": "짙은 인디고 로브에 황금 수단, 십자 문장이 새겨진 성구를 짚은 견습 퇴마사."
+    },
+    "acolyte_priest": {
+      "name": "수련 사제",
+      "desc": "축복의 빛으로 단일 적에게 신성 피해를 입힙니다. 둔화·통찰 등 지원 계열 T2로 승급할 수 있습니다.",
+      "lore": "흰 사제복에 비둘기 깃을 두르고 축복의 빛을 발하는 수련 사제."
+    },
+    "acolyte_warrior": {
+      "name": "수련 전사",
+      "desc": "축성된 단검으로 근접 타격을 가합니다. 검·승려·찬가 등 공격 계열 T2로 승급할 수 있습니다.",
+      "lore": "가벼운 갑주에 축성된 단검을 든 민첩한 견습 전사, 어깨에 신성한 부적이 빛납니다."
+    },
+    "chainer": {
+      "name": "영혼의 결박자",
+      "desc": "영적인 사슬을 발사하여 적에게 피해를 주고 이동 속도를 30% 감소시킵니다.",
+      "lore": "검은 사슬을 휘감은 회색 로브, 사슬에서 푸른 영기가 흐르는 결박자."
+    },
+    "talisman": {
+      "name": "부적술사",
+      "desc": "폭발하는 부적을 던져 충격 지점에 범위 피해를 입힙니다.",
+      "lore": "황색 도복에 폭발 부적을 어깨와 허리에 두른 술사, 손끝에 불씨가 피어남."
+    },
+    "monk": {
+      "name": "철퇴 승려",
+      "desc": "무거운 철퇴로 타격하여 악령을 포탈에서 멀리 밀쳐냅니다.",
+      "lore": "적갈색 가사에 황금 철퇴를 짊어진 다부진 승려, 이마에 신성 인장."
+    },
+    "archer": {
+      "name": "신성한 궁수",
+      "desc": "적의 방어력을 일부 무시하는 장거리 정밀 화살을 쏩니다. [견습 퇴마사 전용]",
+      "lore": "백금 사슬 갑주에 빛나는 활시위, 화살촉마다 성스러운 룬이 새겨진 정밀 사수."
+    },
+    "ice": {
+      "name": "빙결 도사",
+      "desc": "빙결 주문을 외워 2초 동안 적의 이동 속도를 크게 감소시킵니다.",
+      "lore": "청백색 외투에 서리 결정 지팡이, 입김이 차갑게 응결되는 빙결 도사."
+    },
+    "fire": {
+      "name": "화염 마법사",
+      "desc": "적을 불태워 매초 최대 체력의 1%만큼 화상 피해를 입힙니다.",
+      "lore": "진홍 로브에 불꽃 무늬 두건, 손바닥 위 작은 불씨를 굴리는 화염 마법사."
+    },
+    "assassin": {
+      "name": "그림자 암살자",
+      "desc": "쌍검으로 빠르게 난도질하며 적의 모든 방어력을 무시합니다. [견습 퇴마사 전용]",
+      "lore": "검은 후드와 백색 가면, 양손에 휘어진 쌍검을 쥔 민첩한 그림자."
+    },
+    "tracker": {
+      "name": "영혼 추적자",
+      "desc": "인도하는 빛을 비추어 주변 모든 아군의 공격 사거리를 확장합니다.",
+      "lore": "은빛 망토에 추적의 등불을 든 사냥꾼풍 추적자, 두 눈동자가 푸르게 빛남."
+    },
+    "necromancer": {
+      "name": "강령술사",
+      "desc": "영적인 에너지 벽을 소환하여 악령들의 진로를 물리적으로 차단합니다. [수련생 퇴마사 전용]",
+      "lore": "보랏빛 후드에 해골 장식 지팡이, 손끝에 영혼의 안개를 뿜는 강령술사."
+    },
+    "guardian": {
+      "name": "성소 수호자",
+      "desc": "신성한 힘으로 공격하며, 5% 확률로 대상을 즉시 추방합니다. [수련 전사 전용]",
+      "lore": "백색 사슬 갑주에 황금 십자 방패, 축성된 검을 든 굳건한 수호자."
+    },
+    "alchemist": {
+      "name": "퇴마 연금술사",
+      "desc": "적의 본질을 변환하여, 타격 시 15% 확률로 2 SE를 획득합니다. [수련생 퇴마사 전용]",
+      "lore": "가죽 앞치마에 유리병 벨트, 한 손에 보글거리는 정화 플라스크를 든 연금술사."
+    },
+    "mirror": {
+      "name": "거울 예언자",
+      "desc": "반사 마법을 사용하여 입힌 피해의 30%를 주변의 다른 적에게 튕깁니다. [수련생 퇴마사 전용]",
+      "lore": "은빛 의복에 손거울을 든 신비로운 예언자, 거울 면이 무지갯빛으로 일렁임."
+    },
+    "knight": {
+      "name": "퇴마 기사",
+      "desc": "축복받은 대검을 휘둘러 물리 피해와 신성 피해를 균형 있게 입힙니다.",
+      "lore": "청동 판금 갑주에 축성된 대검, 어깨에 신성 십자 망토를 두른 기사."
+    },
+    "verse_warrior": {
+      "name": "성구 전사",
+      "desc": "신성한 성구 구슬로 근접 타격을 가하며, 10% 확률로 적의 이동을 1초간 봉인합니다. [수련 전사 전용]",
+      "lore": "흰 무복에 묵주를 휘감은 손, 성구 구슬로 근접 타격을 가하는 전사."
+    },
+    "hymn_blaster": {
+      "name": "찬가 포격수",
+      "desc": "폭발하는 찬송의 파동을 빠르게 발사하여 적 무리에게 피해를 입힙니다. [수련 사제 전용]",
+      "lore": "황금 사제복에 거대한 성가 나팔포를 짊어진 우람한 포격수."
+    },
+    "exorcism_mage": {
+      "name": "퇴마 마법사",
+      "desc": "집중된 퇴마 에너지를 모아 강력한 단일 타격을 가합니다. [수련 사제 전용]",
+      "lore": "짙은 청색 로브에 십자 지팡이, 손끝에 응축된 백광을 모으는 마법사."
+    },
+    "lightning_mage": {
+      "name": "번개술사",
+      "desc": "번개 일격으로 첫 대상 타격 후 주변 적 1명에게 50% 피해로 연쇄됩니다. [견습 퇴마사 전용]",
+      "lore": "코발트 로브에 황금 번개 자수, 손끝에서 푸른 전류가 흘러내리는 번개술사."
+    },
+    "prayer_herald": {
+      "name": "기도 전령",
+      "desc": "기도의 파동을 발산하여 범위 내 아군의 공격력을 8% 증가시킵니다. [수련생 퇴마사 전용]",
+      "lore": "흰 사제복에 황금 십자 종을 든 단정한 어린 전령."
+    },
+    "relic_keeper": {
+      "name": "유물 수호자",
+      "desc": "신성한 유물의 힘으로 범위 내 아군의 공격 속도를 10% 증가시킵니다. [수련 사제 전용]",
+      "lore": "백금 사슬 망토에 성유물 함을 어깨에 짊어진 수호자."
+    },
+    "ward_scribe": {
+      "name": "결계 서기",
+      "desc": "봉인 결계를 새겨 범위 내 적의 이동 속도를 15% 감소시킵니다. [수련생 퇴마사 전용]",
+      "lore": "짙은 청색 학자복에 결계 두루마리, 손끝에 룬을 새기는 서기."
+    },
+    "paladin": {
+      "name": "성기사",
+      "desc": "매 5번째 공격마다 3배의 피해를 입히고 기절시키는 신성한 강타를 발동합니다.",
+      "lore": "백금 풀플레이트 갑주에 거룩한 망치, 후광이 흐릿하게 비치는 성기사."
+    },
+    "crusader": {
+      "name": "혈기사",
+      "desc": "처형의 일격을 가하며, 적의 체력이 낮을수록 더 큰 피해를 입힙니다.",
+      "lore": "핏빛 망토에 양손 처형검, 검신에 응고된 핏자국이 새겨진 혈기사."
+    },
+    "midas": {
+      "name": "황금의 미다스",
+      "desc": "공격에 황금을 입혀, 처치 시 대량의 15 SE를 획득합니다.",
+      "lore": "황금 가면에 도금 갑주, 손끝에 황금 가루를 흩뿌리는 부의 화신."
+    },
+    "philosopher": {
+      "name": "공허의 현자",
+      "desc": "타격 시마다 적의 방어력을 영구적으로 1 감소시키는 부식 저주를 겁니다.",
+      "lore": "별무늬 검은 로브에 공허의 책을 펼친 안경 쓴 노년의 현자."
+    },
+    "illusion": {
+      "name": "환영술사",
+      "desc": "정신을 혼미하게 하여, 20% 확률로 적이 갈 길을 잃고 방황하게 만듭니다.",
+      "lore": "무지갯빛 베일에 가면을 쓴 환영술사, 주위에 잔상이 흐릿하게 어른거림."
+    },
+    "reflection": {
+      "name": "반사의 거장",
+      "desc": "충격 시 여러 적 사이를 튕겨 다니는 수정 파편을 발사합니다.",
+      "lore": "수정 갑주에 다면 수정 지팡이, 빛이 산란되어 무지개로 흩어지는 거장."
+    },
+    "executor": {
+      "name": "명계의 집행자",
+      "desc": "운명의 천칭을 흔들어, 10% 확률로 적을 시작 지점으로 되돌려 보냅니다.",
+      "lore": "검은 형리 가면에 운명의 천칭을 들고 짙은 보랏빛 도포를 입은 집행자."
+    },
+    "binder": {
+      "name": "영혼의 속박자",
+      "desc": "여러 적의 영혼을 연결하여, 한 명이 받는 피해의 일부를 공유하게 합니다.",
+      "lore": "회보랏빛 로브에 영혼의 사슬을 양손에 휘감은 침묵의 속박자."
+    },
+    "grandsealer": {
+      "name": "대봉인사",
+      "desc": "적의 특수 능력을 무력화하는 봉인 부적을 발사합니다.",
+      "lore": "황금 자수가 박힌 백색 의복, 봉인 부적이 공중에 떠도는 대봉인사."
+    },
+    "flamemaster": {
+      "name": "화염 부적 마스터",
+      "desc": "지면에 지속적인 화상 피해를 입히는 불타는 카펫을 남깁니다.",
+      "lore": "적흑 도복에 불타는 부적 다발, 발걸음마다 잔불이 번지는 마스터."
+    },
+    "vajra": {
+      "name": "금강역사",
+      "desc": "신성한 삼지창으로 치명타를 가해 주변 모든 적을 크게 밀쳐냅니다.",
+      "lore": "근육질 상체에 황금 삼지창, 이마에 금강 인장이 빛나는 역사."
+    },
+    "saint": {
+      "name": "진동의 성자",
+      "desc": "성스러운 종을 울려 좁은 범위 내의 모든 적을 기절시키는 충격파를 만듭니다.",
+      "lore": "백색 사제복에 거대한 성종을 짊어진 성자, 종소리에 공기가 진동함."
+    },
+    "voidsniper": {
+      "name": "공허의 저격수",
+      "desc": "맵 전체를 가로질러 포탈에 가장 가까운 적을 저격하는 탄환을 발사합니다.",
+      "lore": "검은 망토에 긴 공허 라이플을 멘 저격수, 한쪽 눈에 별빛 단안경."
+    },
+    "thousandhand": {
+      "name": "천수궁수",
+      "desc": "여러 대상에게 동시에 수많은 화살 세례를 퍼붓습니다.",
+      "lore": "다중 팔로 수많은 활을 동시에 당기는 황금빛 천수궁수."
+    },
+    "absolutezero": {
+      "name": "절대영도 마법사",
+      "desc": "공격 시 체력이 20% 이하인 빙결된 적을 즉시 처단할 확률이 있습니다.",
+      "lore": "빙결 결정 왕관에 새파란 로브, 발자국마다 얼음이 어는 마법사."
+    },
+    "permafrost": {
+      "name": "빙결 처녀",
+      "desc": "넓은 범위 내의 모든 적을 크게 둔화시키는 지속적인 눈보라를 소환합니다.",
+      "lore": "백은 드레스에 눈송이 면사포, 손끝에서 눈보라가 휘몰아치는 처녀."
+    },
+    "hellfire": {
+      "name": "지옥불 연금술사",
+      "desc": "불타는 적이 죽을 때 폭발하여 주변 적들에게 피해를 입힙니다.",
+      "lore": "검붉은 가죽 앞치마에 폭발 플라스크를 양손에 든 광기 어린 연금술사."
+    },
+    "phoenix": {
+      "name": "불사조 소환사",
+      "desc": "대상 뒤에 고데미지 화염 경로를 남기는 불사조를 불러내립니다.",
+      "lore": "진홍과 황금 깃털 망토, 어깨에 작은 불사조가 앉은 소환사."
+    },
+    "abyssal": {
+      "name": "심연의 학살자",
+      "desc": "정밀하게 영혼을 수확하여, 처치 시 1.5배의 SE를 획득합니다.",
+      "lore": "검은 갑주에 영혼 수확 낫, 텅 빈 눈동자에 보랏빛 안개가 흐르는 학살자."
+    },
+    "spatial": {
+      "name": "공간 절단자",
+      "desc": "자신의 공격을 흉내 내는 영적 환영을 소환하여 동시에 여러 적을 타격합니다.",
+      "lore": "은빛 갑주에 휘어진 차원 검, 베인 자리에 균열이 남는 절단자."
+    },
+    "seer": {
+      "name": "진실의 탐구자",
+      "desc": "은신하거나 위상 변화 중인 적을 모든 아군에게 노출시키는 오라를 발산합니다.",
+      "lore": "짙은 자색 로브에 진실의 눈동자 부적, 이마의 세 번째 눈이 빛나는 탐구자."
+    },
+    "commander": {
+      "name": "전장 사령관",
+      "desc": "주변 아군들을 고취시켜 그들의 공격 속도를 20% 증가시킵니다.",
+      "lore": "붉은 망토에 황금 견장 갑주, 신성한 군기를 높이 든 사령관."
+    },
+    "wraithlord": {
+      "name": "망령 군주",
+      "desc": "처치 시 일정 확률로 그 영혼을 아군 해골 병사로 부활시켜 함께 싸우게 합니다.",
+      "lore": "검은 왕관에 너덜한 망령 망토, 주위에 해골 병사 영혼이 떠도는 군주."
+    },
+    "cursedshaman": {
+      "name": "저주받은 주술사",
+      "desc": "적에게 저주를 걸어, 타격 시마다 최대 체력을 영구적으로 5%씩 감소시킵니다.",
+      "lore": "뼈 가면과 깃털 장식, 검은 저주 인형을 손에 쥔 어두운 주술사."
+    },
+    "rampart": {
+      "name": "신성한 성벽",
+      "desc": "포탈을 방어하며, 도달한 적을 100% 확률로 시작 지점으로 되돌립니다 (5회 충전).",
+      "lore": "거대한 황금 타워실드에 백색 갑주, 미동도 없는 견고한 성벽."
+    },
+    "judgment": {
+      "name": "심판의 기사",
+      "desc": "대상 주변의 모든 적에게 범위 피해를 입히는 신성한 빛을 내리꽂습니다.",
+      "lore": "백금 갑주에 거룩한 양손검, 머리 위에 천칭 후광이 떠도는 심판자."
+    },
+    "scripture_knight": {
+      "name": "성구 기사",
+      "desc": "신성한 성구로 강화된 검을 휘둘러 주변 모든 적에게 범위 타격을 가합니다.",
+      "lore": "성구 구슬이 박힌 백금 갑주에 축성된 광검을 휘두르는 기사."
+    },
+    "seal_warrior": {
+      "name": "봉인 전사",
+      "desc": "30% 확률로 적의 모든 능력을 3초간 완전히 봉인하는 신성한 타격을 가합니다.",
+      "lore": "봉인 부적이 새겨진 회백색 갑주, 묵주를 휘감은 칼을 쥔 전사."
+    },
+    "tome_cannon": {
+      "name": "성서 대포",
+      "desc": "강력한 폭발 반경으로 다수의 적을 동시에 강타하는 성서 포탄을 발사합니다.",
+      "lore": "거대한 황금 성서를 펼쳐 대포로 사용하는 포격수, 페이지마다 룬이 빛남."
+    },
+    "holy_burst": {
+      "name": "신성 폭격사",
+      "desc": "막대한 피해를 입히는 신성 에너지 포탄을 소환하여 충격 반경 내 모든 적을 강타합니다.",
+      "lore": "백금 견장 갑주에 거대한 신성 폭격 지팡이를 짊어진 폭격사."
+    },
+    "rapid_exorcist": {
+      "name": "속성 퇴마사",
+      "desc": "초고속으로 정화 볼트를 연속 발사하며 한 번에 최대 3명의 적을 관통합니다.",
+      "lore": "가벼운 백색 사제복에 쌍권총형 정화 마도구를 든 속사 퇴마사."
+    },
+    "chain_exorcist": {
+      "name": "연쇄 퇴마사",
+      "desc": "퇴마 볼트가 첫 번째 적을 타격한 후 주변 3명의 적에게 연쇄됩니다.",
+      "lore": "푸른 사제복에 연쇄 부적 묶음, 손끝에서 연쇄 볼트가 튀는 퇴마사."
+    },
+    "psalm_singer": {
+      "name": "시편 가수",
+      "desc": "신성한 시편을 노래하며 범위 내 아군의 공격력을 15% 강화하는 성가를 발산합니다.",
+      "lore": "백색 합창단 가운에 황금 시편서를 든 우아한 가수."
+    },
+    "litany_chanter": {
+      "name": "연도 창자",
+      "desc": "지속적인 연도를 통해 범위 내 아군을 주기적으로 회복시키고 공격력을 강화합니다.",
+      "lore": "청회색 사제복에 묵주를 휘감은 손, 끊임없이 기도를 읊는 창자."
+    },
+    "relic_guardian": {
+      "name": "성유물 수호자",
+      "desc": "성스러운 유물을 수호하며 범위 내 아군의 쿨다운을 15% 감소시킵니다.",
+      "lore": "황금 흉갑에 성유물 십자를 든 위엄 있는 수호자."
+    },
+    "rune_crafter": {
+      "name": "룬 조각가",
+      "desc": "신성한 룬을 새겨 주기적으로 범위 내 아군에게 강화 효과를 부여합니다.",
+      "lore": "가죽 앞치마에 룬 끌과 망치, 공중에 빛나는 룬을 새기는 조각가."
+    },
+    "barrier_master": {
+      "name": "결계 마스터",
+      "desc": "강력한 결계를 전개하여 범위 내 적의 공격 속도를 25% 감소시킵니다.",
+      "lore": "청백 학자복에 결계진 부채를 든 침착한 마스터."
+    },
+    "divine_barrier": {
+      "name": "신성한 방벽사",
+      "desc": "신성한 방벽을 쳐 적의 방어력을 20% 감소시키고 이동 속도를 억제합니다.",
+      "lore": "백금 망토에 신성 방패 부적, 손바닥에서 빛 장벽이 펼쳐지는 방벽사."
+    },
+    "storm_caller": {
+      "name": "폭풍 소환사",
+      "desc": "타격 시 사거리 내 무작위 적에게 추가 번개 낙뢰를 떨어뜨려 60% 피해를 입힙니다.",
+      "lore": "청회색 로브에 번개 무늬 두건, 손에 떠도는 뇌구를 쥔 소환사."
+    },
+    "thunder_judge": {
+      "name": "천둥의 심판자",
+      "desc": "번개가 최대 3명의 적에게 연쇄됩니다. 연쇄마다 피해가 50%로 감소합니다.",
+      "lore": "검은 망토에 황금 번개 왕홀, 눈에서 번개가 튀는 심판자."
+    },
+    "transmuter": {
+      "name": "공허의 연성사",
+      "desc": "악령을 완전히 연성하여, 처치 시마다 25 SE를 획득합니다.",
+      "lore": "납빛 LEGO 갑주에 에메랄드 반응로가 흐르고, 부유하는 기계 팔과 안테나 결정을 가진 연성사."
+    },
+    "oracle": {
+      "name": "영원의 선지자",
+      "desc": "타격 시 적의 움직임을 일시적으로 정지시키는 우주적 투사체를 발사합니다.",
+      "lore": "별이 박힌 인디고 로브, 영원의 눈이 얼굴을 대신하며 8개의 별이 궤도를 도는 우주적 선지자."
+    },
+    "warden": {
+      "name": "심연의 간수",
+      "desc": "주기적으로 블랙홀을 열어 화면 상의 모든 적을 중앙으로 끌어당깁니다.",
+      "lore": "검은 강철 갑주에 보라 사슬을 두르고, 가슴에 빨려드는 블랙홀 코어와 황금 열쇠를 든 심연의 간수."
+    },
+    "cursed_talisman": {
+      "name": "저주받은 교단장",
+      "desc": "적에게 죽음의 표식을 새깁니다. 표식된 영혼이 소멸할 때 거대한 폭발이 일어납니다.",
+      "lore": "핏빛 제의와 깊은 후드, 사악한 눈을 새긴 거대 깃발과 떠다니는 저주 두루마리를 거느린 교단장."
+    },
+    "asura": {
+      "name": "지옥을 부수는 아수라",
+      "desc": "주변 대상에게 순식간에 12번의 연격파를 퍼붓습니다. (총합 데미지 5,400)",
+      "lore": "6개의 팔에 시미터와 바즈라를 든 핏빛 마왕, 가슴에 황금 문장과 황금 뿔관 중앙에 루비."
+    },
+    "piercing_shadow": {
+      "name": "영혼을 꿰뚫는 그림자",
+      "desc": "경로 상의 모든 적을 관통하는 거대한 빛의 줄기를 발사합니다.",
+      "lore": "보라빛 영혼 갑주에 5개의 그림자 침이 궤도를 도는, 후드 속 영혼 안광의 어둠 저격수."
+    },
+    "cocytus": {
+      "name": "코키토스의 지배자",
+      "desc": "5초 동안 화면 상의 모든 적의 시간을 멈추는 궁극의 빙결 마법을 사용합니다.",
+      "lore": "푸른 사제복과 절대영도의 5첨 왕관, 머리 위에 떠 있는 거대 얼음 결정과 빙룡 셉터의 지배자."
+    },
+    "purgatory": {
+      "name": "영원한 연옥의 불길",
+      "desc": "지면 한 줄을 통째로 태워, 그 위를 지나는 모든 적에게 영구적인 화상 피해를 줍니다.",
+      "lore": "백상아 갑주에 신성 화염의 날개와 두 자루 횃불 셉터, 정수리에서 솟는 5개의 불꽃 왕관."
+    },
+    "reaper": {
+      "name": "나이트메어 리퍼",
+      "desc": "현재 맵에서 체력이 가장 높은 적의 영혼을 즉시 거두어갑니다. (절대 즉사)",
+      "lore": "칠흑 망토에 보라 사신낫을 든 두건 속 해골, 5개의 영혼이 주위를 떠도는 죽음의 화신."
+    },
+    "doom_guide": {
+      "name": "파멸의 인도자",
+      "desc": "포탈을 정화합니다. 포탈에 도달한 적은 피해 대신 포탈 오염도를 5% 회복시킵니다.",
+      "lore": "어두운 망령 로브와 유령선의 그림자를 등진 채, 황금 등불과 보라 정화봉을 든 인도자."
+    },
+    "forsaken_king": {
+      "name": "버림받은 자들의 왕",
+      "desc": "매 스테이지 시작 시 아군을 위해 싸워줄 우호적인 망령들을 소환합니다.",
+      "lore": "보라빛 왕의 갑주에 황금 가슴판과 휘날리는 망토, 저주 녹광의 대검과 5첨 루비 왕관."
+    },
+    "void_gatekeeper": {
+      "name": "공허의 문지기",
+      "desc": "패시브로 문을 봉인하여, 포탈 오염도에 입는 모든 피해를 50% 감소시킵니다.",
+      "lore": "거대한 슬레이트 게이트 자체가 몸이며, 회오리치는 시안 차원문과 떠 있는 눈, 뿔 투구의 문지기."
+    },
+    "eternal_wall": {
+      "name": "영원의 수호벽",
+      "desc": "강력한 안정화 오라를 내뿜어 맵 상의 모든 적을 80% 둔화시킵니다.",
+      "lore": "거대한 성벽 방패와 전쟁망치, 흉부에 푸른 빛 십자, 성가퀴를 머리에 얹은 영원의 수호자."
+    },
+    "word_of_god": {
+      "name": "신의 말씀",
+      "desc": "성서에 기록된 최종 말씀을 해방하여, 화면 내 모든 적에게 신성한 심판을 내립니다.",
+      "lore": "빛나는 황금 갑주에 천사 깃털 날개, 부유하는 거대 성서와 머리 위 황금 후광의 천사."
+    },
+    "genesis_strike": {
+      "name": "천지창조의 왕",
+      "desc": "우주 창조의 에너지를 담은 폭발로 화면 내 모든 적을 강타하고 40% 확률로 즉사시킵니다.",
+      "lore": "7색 무지개 보석 왕관에 다색 창조 날개, 손 사이에 모든 색의 창조구를 다루는 우주적 황제."
+    },
+    "exorcism_storm": {
+      "name": "퇴마의 폭풍",
+      "desc": "무한히 연쇄되는 퇴마 볼트를 끊임없이 발사하여 화면의 모든 적을 동시에 공격합니다.",
+      "lore": "시안 번개 날개 망토, 양손에 폭풍 셉터를 들고 트윈 번개 뿔이 빛나는 영원한 폭풍사."
+    },
+    "divine_choir": {
+      "name": "신성한 합창단",
+      "desc": "천상의 합창으로 전장 전체에 신성한 에너지를 퍼뜨려 아군을 강화하고 적을 약화시킵니다.",
+      "lore": "거대한 황금 깃털 날개와 광활한 후광, 음표가 떠도는 양옆의 유령 가수를 거느린 신성한 지휘자."
+    },
+    "sacred_reliquary": {
+      "name": "성물 성소 수호자",
+      "desc": "전장에 성물 성소를 소환하여 아군의 모든 능력치를 강화하고 적에게 지속적인 약화를 가합니다.",
+      "lore": "사원 기둥 사이에 부유하는 황금 성궤를 받든, 대리석 갑주와 태양 후광 투구의 성물 수호자."
+    },
+    "grand_ward": {
+      "name": "대결계사",
+      "desc": "광대한 결계를 전장에 펼쳐 범위 내 모든 적의 능력치를 크게 약화시키고 이동을 봉쇄합니다.",
+      "lore": "머리 위에 떠 있는 3중 결계 구체와 궤도를 도는 시안 육각 룬, 황금 결계의 대결계사."
+    },
+    "thunder_lord": {
+      "name": "천둥의 군주",
+      "desc": "타격 시 사거리 내 무작위 적 3명에게 추가 낙뢰를 떨어뜨려 각 40% 피해와 25% 확률로 0.8초간 기절시킵니다.",
+      "lore": "검푸른 폭풍 구름 갑주에 황금 번개창, 머리 위 회전하는 천둥 왕관과 등 뒤 우레 날개의 천둥 군주."
+    }
+  },
+  "shrine": {
+    "shrine_might": {
+      "name": "힘의 성소",
+      "desc": "주변 아군의 공격력을 20% 증가시킵니다.",
+      "demoDesc": "맵 전체 아군의 공격력을 20% 감소시킵니다.",
+      "lore": "고대 전사들의 투지가 깃든 성소입니다. 그 기운은 주변의 무기를 더욱 날카롭게 벼려줍니다."
+    },
+    "shrine_speed": {
+      "name": "가속의 성소",
+      "desc": "주변 아군의 공격 속도를 20% 증가시킵니다.",
+      "demoDesc": "맵 전체 아군의 공격 속도를 20% 감소시킵니다.",
+      "lore": "천상의 바람이 머무는 성소입니다. 이곳의 기운은 아군들의 손놀림을 눈부시게 빠르게 만듭니다."
+    },
+    "shrine_range": {
+      "name": "통찰의 성소",
+      "desc": "주변 아군의 공격 사거리를 50만큼 증가시킵니다.",
+      "demoDesc": "맵 전체 아군의 공격 사거리를 50만큼 감소시킵니다.",
+      "lore": "만물을 꿰뚫어 보는 혜안의 성소입니다. 아군들에게 더 먼 곳을 볼 수 있는 영적인 시야를 제공합니다."
+    },
+    "shrine_wisdom": {
+      "name": "지혜의 성소",
+      "desc": "주변 아군의 치명타 확률을 10% 증가시킵니다.",
+      "demoDesc": "맵 전체 아군의 치명타 확률을 10% 감소시킵니다.",
+      "lore": "약점을 파악하는 통찰의 성소입니다. 아군들이 적의 핵심부를 정확히 타격하도록 돕습니다."
+    },
+    "shrine_greed": {
+      "name": "탐욕의 성소",
+      "desc": "주변 아군이 적 처치 시 2 SE를 추가로 획득합니다.",
+      "demoDesc": "적 처치 시 획득하는 SE가 맵 전체 아군에게 2 감소합니다.",
+      "lore": "영혼의 본질을 더 많이 추출해내는 비술의 성소입니다. 정화의 대가로 더 많은 에너지를 얻습니다."
+    },
+    "shrine_purity": {
+      "name": "순결의 성소",
+      "desc": "주변 아군이 적 처치 시 5% 확률로 포탈 오염도를 1% 정화합니다.",
+      "demoDesc": "맵 전체 아군이 적 처치 시 2% 확률로 포탈 오염도가 1% 증가합니다.",
+      "lore": "부정함을 씻어내는 정화의 성소입니다. 끊임없이 흘러나오는 성수로 결계를 깨끗이 유지합니다."
+    },
+    "shrine_divine": {
+      "name": "대천사의 성소",
+      "desc": "맵 전체 아군의 공격력을 30% 증가시킵니다. (중첩 가능)",
+      "demoDesc": "맵 전체 아군의 공격력을 30% 감소시킵니다.",
+      "lore": "대천사의 가호가 깃든 거대한 성소입니다. 그 존재만으로도 모든 퇴마사들의 영혼에 용기를 불어넣습니다."
+    },
+    "shrine_eternity": {
+      "name": "영겁의 성소",
+      "desc": "맵 전체 모든 적의 이동 속도를 15% 감소시킵니다.",
+      "demoDesc": "적들의 이동 속도가 원래대로 돌아옵니다.",
+      "lore": "시간의 흐름조차 둔화시키는 신비한 성소입니다. 악령들의 발걸음을 무겁게 묶어둡니다."
+    },
+    "shrine_miracle": {
+      "name": "기적의 성소",
+      "desc": "맵 전체 아군의 치명타 피해량을 50% 증가시킵니다.",
+      "demoDesc": "맵 전체 아군의 치명타 피해량을 50% 감소시킵니다.",
+      "lore": "정화의 기적이 실현되는 성소입니다. 아군들의 공격이 적의 영혼을 더욱 깊숙이 파괴하도록 만듭니다."
+    },
+    "shrine_fervor": {
+      "name": "열정의 성소",
+      "desc": "주변 아군의 치명타 피해량을 15% 증가시킵니다.",
+      "demoDesc": "주변 아군의 치명타 피해량이 15% 감소합니다.",
+      "lore": "분노와 열정이 불꽃으로 응결된 성소입니다. 퇴마사들의 일격에 파괴적인 화염을 불어넣습니다."
+    },
+    "shrine_shadow": {
+      "name": "그림자의 성소",
+      "desc": "주변 아군의 치명타 확률을 8% 증가시킵니다.",
+      "demoDesc": "주변 아군의 치명타 확률이 8% 감소합니다.",
+      "lore": "어둠 속에서 빛나는 초승달이 깃든 성소입니다. 그림자를 타고 흐르는 기운이 일격의 정확성을 높입니다."
+    },
+    "shrine_harvest": {
+      "name": "수확의 성소",
+      "desc": "주변 아군이 적 처치 시 SE를 3 추가 획득합니다.",
+      "demoDesc": "주변 아군의 SE 추가 획득이 사라집니다.",
+      "lore": "황금빛 곡식으로 가득 찬 성소입니다. 퇴마의 노력에서 영혼 정수를 더욱 풍성히 수확합니다."
+    },
+    "shrine_endurance": {
+      "name": "인내의 성소",
+      "desc": "주변 아군의 포탈 정화 효과를 3% 증가시킵니다.",
+      "demoDesc": "주변 아군의 포탈 정화 효과가 감소합니다.",
+      "lore": "태산 같은 인내심이 결정화된 성소입니다. 결계를 지키는 정화의 기운을 끊임없이 공급합니다."
+    }
+  },
+  "enemy_category": {
+    "specter": "SPECTER ENCOUNTER",
+    "wraith": "WRAITH ENCOUNTER",
+    "spirit": "SPIRIT ENCOUNTER",
+    "demon": "DEMON ENCOUNTER",
+    "abyssal_boss": "ABYSSAL BOSS ENCOUNTER",
+    "mini_boss": "MINI BOSS ENCOUNTER"
+  },
+  "enemy_name": {
+    "normal": "속삭이는 영혼",
+    "mist": "방랑하는 안개",
+    "memory": "빛바랜 기억",
+    "shade": "깜빡이는 그림자",
+    "tank": "철갑 망령",
+    "runner": "가속된 그림자",
+    "greedy": "탐욕스러운 폴터가이스트",
+    "mimic": "미믹 망령",
+    "dimension": "차원 이동 망령",
+    "deceiver": "절망의 세이렌",
+    "boar": "야생의 복수자",
+    "soul_eater": "소울 이터",
+    "frost": "코키토스 방랑자",
+    "lightspeed": "필사적인 전령",
+    "frost_outcast": "얼어붙은 마음",
+    "ember_hatred": "증오의 불꽃",
+    "heavy": "쇠사슬 집행자",
+    "lava": "불타는 분노",
+    "burning": "고통의 재생자",
+    "abyssal_acolyte": "심연의 추종자",
+    "gold": "황금의 잔상",
+    "cerberus": "케르베로스",
+    "charon": "카론",
+    "beelzebub": "바알세불",
+    "lucifer": "루시퍼",
+    "defiled_apprentice": "타락한 수련생",
+    "betrayer_blade": "그림자 배신자",
+    "cursed_vajra": "타락한 승려",
+    "void_piercer": "배신한 궁수",
+    "echo_soul": "메아리 영혼",
+    "hungry_ghost": "굶주린 유령",
+    "aggrieved": "원통한 자",
+    "split_soul": "분열된 영혼",
+    "cursed_ancestor": "저주받은 선조",
+    "oblivion_wraith": "망각의 망령",
+    "unrepentant": "속죄하지 못한 자",
+    "abyss_sentinel": "심연의 파수꾼",
+    "fear_harvester": "공포의 수확자",
+    "blood_spirit": "피의 정령",
+    "shadow_titan": "그림자 거인",
+    "lava_lord": "용암 군주",
+    "time_ravager": "시간 약탈자",
+    "void_master": "공허의 지배자",
+    "sin_incarnate": "죄악의 화신",
+    "corruption_apostle": "타락의 전도사",
+    "mini_cerberus": "미니 케르베로스",
+    "mini_charon": "미니 카론",
+    "mini_beelzebub": "미니 바알세불",
+    "mini_lucifer": "미니 루시퍼",
+    "abyssal_overlord": "심연의 군주",
+    "mini_lilith": "미니 릴리스",
+    "lilith": "릴리스",
+    "mini_chronos": "미니 크로노스",
+    "medusa": "메두사"
+  },
+  "enemy": {
+    "normal": {
+      "name": "속삭이는 영혼",
+      "desc": "심연을 떠도는 평범한 영혼입니다.",
+      "effectiveness": "표준 퇴마 공격.",
+      "lore": "이승의 미련을 버리지 못한 영혼입니다."
+    },
+    "mist": {
+      "name": "방랑하는 안개",
+      "desc": "영적인 안개입니다.",
+      "effectiveness": "표준 퇴마 공격.",
+      "lore": "잊혀진 작은 슬픔들이 응축되었습니다."
+    },
+    "memory": {
+      "name": "빛바랜 기억",
+      "desc": "희미한 흔적입니다.",
+      "effectiveness": "표준 퇴마 공격.",
+      "lore": "살고자 했던 강력한 욕망이 남긴 잔상입니다."
+    },
+    "shade": {
+      "name": "깜빡이는 그림자",
+      "desc": "약하지만 빠른 영입니다.",
+      "effectiveness": "속사형 유닛.",
+      "lore": "존재를 간신히 유지하고 있는 파편입니다."
+    },
+    "tank": {
+      "name": "철갑 망령",
+      "desc": "죄악으로 단단해진 영혼입니다.",
+      "effectiveness": "치명타 유닛.",
+      "lore": "생전의 무거운 죄가 형상화되었습니다."
+    },
+    "runner": {
+      "name": "가속된 그림자",
+      "desc": "포탈을 향해 돌진하는 그림자입니다.",
+      "effectiveness": "둔화 유닛.",
+      "lore": "평생을 태웠던 증오의 불꽃입니다."
+    },
+    "greedy": {
+      "name": "탐욕스러운 폴터가이스트",
+      "desc": "처치 시 다량의 SE를 드랍합니다.",
+      "effectiveness": "무관",
+      "lore": "금을 향한 집착이 남은 영혼입니다."
+    },
+    "lightspeed": {
+      "name": "필사적인 전령",
+      "desc": "매우 빠른 속도로 질주합니다.",
+      "effectiveness": "성소 및 둔화",
+      "lore": "전달하지 못한 소식을 안고 달립니다."
+    },
+    "echo_soul": {
+      "name": "메아리 영혼",
+      "desc": "자신의 잔상을 남기며 이동합니다.",
+      "effectiveness": "표준 퇴마 공격.",
+      "lore": "지워지지 않는 기억의 메아리입니다."
+    },
+    "hungry_ghost": {
+      "name": "굶주린 유령",
+      "desc": "HP가 감소할수록 빨라집니다.",
+      "effectiveness": "집중 공격.",
+      "lore": "살아생전 채우지 못한 욕망의 화신입니다."
+    },
+    "aggrieved": {
+      "name": "원통한 자",
+      "desc": "첫 피해를 90% 감소시킵니다.",
+      "effectiveness": "지속 공격.",
+      "lore": "억울한 죽음이 그를 단단하게 만들었습니다."
+    },
+    "split_soul": {
+      "name": "분열된 영혼",
+      "desc": "사망 시 두 개의 잔혼으로 분열합니다.",
+      "effectiveness": "범위 공격.",
+      "lore": "하나의 영혼이 둘로 쪼개진 비극입니다."
+    },
+    "cursed_ancestor": {
+      "name": "저주받은 선조",
+      "desc": "주변 성소의 효과를 약화시킵니다.",
+      "effectiveness": "원거리 유닛.",
+      "lore": "후손에게 저주를 내린 조상의 혼령입니다."
+    },
+    "shadow_wisp": {
+      "name": "그림자 부유체",
+      "desc": "어둠의 잔재가 형상을 흉내 낸 것입니다.",
+      "effectiveness": "표준 퇴마 공격.",
+      "lore": "그림자조차 되지 못한 존재 — 형태 없이 어둠을 떠도는 악령의 최약체입니다."
+    },
+    "cursed_shade": {
+      "name": "저주받은 망령",
+      "desc": "저주 문양이 몸에 새겨진 망령입니다.",
+      "effectiveness": "표준 퇴마 공격.",
+      "lore": "원한으로 형성된 저주가 영혼에 달라붙어, 그 무게로 세상을 떠돌며 산 자를 시기합니다."
+    },
+    "soul_hound": {
+      "name": "영혼 추적자",
+      "desc": "살아있는 자의 영혼 냄새를 쫓습니다.",
+      "effectiveness": "둔화 유닛.",
+      "lore": "죽은 후에도 사냥 본능이 남아, 산 자의 영혼 냄새를 따라 끊임없이 쫓아옵니다."
+    },
+    "defiled_apprentice": {
+      "name": "타락한 수련생",
+      "desc": "타락한 수련생입니다.",
+      "effectiveness": "신성 공격.",
+      "lore": "금지된 술법에 손을 댄 대가입니다."
+    },
+    "mimic": {
+      "name": "미믹 망령",
+      "desc": "가끔 앞으로 순간이동합니다.",
+      "effectiveness": "범위 공격.",
+      "lore": "가장 갈망하는 모습으로 나타납니다."
+    },
+    "dimension": {
+      "name": "차원 이동 망령",
+      "desc": "공격에 면역이 되기도 합니다.",
+      "effectiveness": "선지자 또는 속사형.",
+      "lore": "차원 사이를 떠도는 은둔자입니다."
+    },
+    "deceiver": {
+      "name": "절망의 세이렌",
+      "desc": "공격을 회피하고 물러납니다.",
+      "effectiveness": "범위 피해.",
+      "lore": "얼굴을 보인 적 없는 거짓말의 명수입니다."
+    },
+    "cursed_vajra": {
+      "name": "타락한 승려",
+      "desc": "타락한 승려입니다.",
+      "effectiveness": "장거리 유닛.",
+      "lore": "그의 철퇴는 이제 산 자를 부숩니다."
+    },
+    "betrayer_blade": {
+      "name": "그림자 배신자",
+      "desc": "일정 주기마다 은신합니다.",
+      "effectiveness": "진실의 탐구자",
+      "lore": "아군을 찌른 칼날의 그림자입니다."
+    },
+    "void_piercer": {
+      "name": "배신한 궁수",
+      "desc": "원거리 공격을 50% 확률로 회피합니다.",
+      "effectiveness": "근접 유닛",
+      "lore": "활을 버리고 심연을 택했습니다."
+    },
+    "oblivion_wraith": {
+      "name": "망각의 망령",
+      "desc": "주기적으로 무적 상태가 됩니다.",
+      "effectiveness": "지속 화력.",
+      "lore": "망각 속에서 무적이 되는 존재입니다."
+    },
+    "unrepentant": {
+      "name": "속죄하지 못한 자",
+      "desc": "원거리 공격을 60% 확률로 회피합니다.",
+      "effectiveness": "근접 유닛.",
+      "lore": "회개 없이 죽은 자의 마지막 오만입니다."
+    },
+    "lost_child": {
+      "name": "미아 영혼",
+      "desc": "길을 잃은 채 죽은 아이의 영혼입니다.",
+      "effectiveness": "표준 퇴마 공격.",
+      "lore": "길을 잃은 채 죽은 아이의 영혼 — 아직도 집을 찾아 어두운 심연을 헤맵니다."
+    },
+    "grave_walker": {
+      "name": "묘지 배회자",
+      "desc": "다른 이의 무덤 사이를 떠도는 영혼입니다.",
+      "effectiveness": "표준 퇴마 공격.",
+      "lore": "자신의 무덤조차 기억하지 못한 채, 다른 이의 무덤 사이를 영원히 배회합니다."
+    },
+    "wailing_mother": {
+      "name": "통곡하는 어미",
+      "desc": "자식을 잃은 슬픔이 원한으로 변했습니다.",
+      "effectiveness": "범위 공격.",
+      "lore": "자식을 잃은 슬픔이 원한으로 변해, 살아있는 모든 것에 분노를 쏟아내는 어미의 혼입니다."
+    },
+    "boar": {
+      "name": "야생의 복수자",
+      "desc": "포탈 근처에서 빨라집니다.",
+      "effectiveness": "밀쳐내기.",
+      "lore": "폭력적인 사냥꾼의 갈증입니다."
+    },
+    "soul_eater": {
+      "name": "소울 이터",
+      "desc": "피해 시 속도가 증가합니다.",
+      "effectiveness": "강력한 단발.",
+      "lore": "퇴마사의 힘을 굶주립니다."
+    },
+    "frost": {
+      "name": "코키토스 방랑자",
+      "desc": "주변 적의 속도를 높입니다.",
+      "effectiveness": "화염 에너지.",
+      "lore": "얼어붙은 원망의 심장입니다."
+    },
+    "frost_outcast": {
+      "name": "얼어붙은 마음",
+      "desc": "공격 속도를 감소시킵니다.",
+      "effectiveness": "오라 밖 처치.",
+      "lore": "심연에 오기 전 이미 얼어붙은 마음입니다."
+    },
+    "ember_hatred": {
+      "name": "증오의 불꽃",
+      "desc": "죽을 때 주변 적을 가속합니다.",
+      "effectiveness": "고립 처치.",
+      "lore": "평생을 태웠던 증오의 불꽃입니다."
+    },
+    "abyss_sentinel": {
+      "name": "심연의 파수꾼",
+      "desc": "지속적으로 HP를 소량 회복합니다.",
+      "effectiveness": "기절 유닛.",
+      "lore": "심연의 문을 지키던 파수꾼입니다."
+    },
+    "fear_harvester": {
+      "name": "공포의 수확자",
+      "desc": "주변 유닛의 공격 속도를 감소시킵니다.",
+      "effectiveness": "신성 공격.",
+      "lore": "공포를 먹고 자라는 악령입니다."
+    },
+    "blood_spirit": {
+      "name": "피의 정령",
+      "desc": "피해를 입으면 격노하여 방어력이 증가합니다.",
+      "effectiveness": "강력한 일격.",
+      "lore": "전쟁터에서 흘린 피가 응집된 악령입니다."
+    },
+    "imp": {
+      "name": "잔챙이 악마",
+      "desc": "떼로 몰려다니며 성가시게 구는 최약체 악마입니다.",
+      "effectiveness": "속사형 유닛.",
+      "lore": "악마 계급의 최하층 — 작고 약하지만 성가신 장난과 기민한 발놀림으로 살아남습니다."
+    },
+    "hellspawn": {
+      "name": "지옥의 자식",
+      "desc": "지옥에서 갓 태어난 잔인한 악마입니다.",
+      "effectiveness": "표준 퇴마 공격.",
+      "lore": "지옥에서 갓 태어난 악마 — 힘은 미약하나 잔인함만큼은 타고난 천성입니다."
+    },
+    "brimstone_fiend": {
+      "name": "유황 악귀",
+      "desc": "유황 냄새를 풍기며 지옥의 불을 몸에 새긴 악귀입니다.",
+      "effectiveness": "냉기 공격.",
+      "lore": "유황 냄새를 풍기며 지옥의 불을 피부에 새긴 악귀 — 다가서면 살이 탄다는 소문이 있습니다."
+    },
+    "heavy": {
+      "name": "쇠사슬 집행자",
+      "desc": "단단한 괴수입니다.",
+      "effectiveness": "관통 공격.",
+      "lore": "자신이 사용하던 사슬에 묶인 집행자입니다."
+    },
+    "lava": {
+      "name": "불타는 분노",
+      "desc": "냉기 공격 시 도약합니다.",
+      "effectiveness": "화염 공격.",
+      "lore": "분노로 불타오르는 영혼입니다."
+    },
+    "burning": {
+      "name": "고통의 재생자",
+      "desc": "피해 시 회복합니다.",
+      "effectiveness": "강력한 일격.",
+      "lore": "재생의 원동력이 된 고통입니다."
+    },
+    "abyssal_acolyte": {
+      "name": "심연의 추종자",
+      "desc": "타격 시 데미지를 깎습니다.",
+      "effectiveness": "기절 유닛.",
+      "lore": "그림자 팔이 그들을 끌어당깁니다."
+    },
+    "shadow_titan": {
+      "name": "그림자 거인",
+      "desc": "막대한 방어력을 가진 거인입니다.",
+      "effectiveness": "관통 공격.",
+      "lore": "심연에서 가장 오래된 어둠의 형상입니다."
+    },
+    "lava_lord": {
+      "name": "용암 군주",
+      "desc": "피해 시 주변 적의 속도를 증가시킵니다.",
+      "effectiveness": "냉기 공격.",
+      "lore": "마그마로 빚어진 분노의 제왕입니다."
+    },
+    "time_ravager": {
+      "name": "시간 약탈자",
+      "desc": "주변 모든 유닛의 공격 속도를 감소시킵니다.",
+      "effectiveness": "기절 유닛.",
+      "lore": "시간을 훔쳐 먹는 존재입니다."
+    },
+    "void_master": {
+      "name": "공허의 지배자",
+      "desc": "20% 확률로 모든 피해를 무효화합니다.",
+      "effectiveness": "기절 유닛.",
+      "lore": "공허 그 자체가 의지를 가진 것입니다."
+    },
+    "sin_incarnate": {
+      "name": "죄악의 화신",
+      "desc": "피해를 입을수록 방어력이 증가합니다.",
+      "effectiveness": "강력한 일격.",
+      "lore": "인류의 모든 죄악이 하나로 모였습니다."
+    },
+    "corruption_apostle": {
+      "name": "타락의 전도사",
+      "desc": "인접 유닛에게 저주를 퍼뜨립니다.",
+      "effectiveness": "기절 유닛.",
+      "lore": "타락을 전파하는 사도입니다."
+    },
+    "gold": {
+      "name": "황금의 잔상",
+      "desc": "막대한 SE를 줍니다.",
+      "effectiveness": "속사형 유닛.",
+      "lore": "반짝이는 왕의 보물 잔재입니다."
+    },
+    "mini_cerberus": {
+      "name": "미니 케르베로스",
+      "lore": "작지만 사나운 심연의 교두보.",
+      "reward_name": "케르베로스의 이빨 파편"
+    },
+    "cerberus": {
+      "name": "케르베로스",
+      "lore": "타락한 영혼들의 문지기입니다.",
+      "reward_name": "케르베로스의 송곳니"
+    },
+    "mini_charon": {
+      "name": "미니 카론",
+      "lore": "하급 사공 — 영혼을 끌어모읍니다.",
+      "reward_name": "스틱스 조각"
+    },
+    "charon": {
+      "name": "카론",
+      "lore": "직접 영혼을 수확하는 사공입니다.",
+      "reward_name": "스틱스 노"
+    },
+    "mini_beelzebub": {
+      "name": "미니 바알세불",
+      "lore": "더 작은 형태의 부패 군주.",
+      "reward_name": "작은 폭식의 왕관"
+    },
+    "beelzebub": {
+      "name": "바알세불",
+      "lore": "부패에서 태어난 파리의 왕입니다.",
+      "reward_name": "폭식의 왕관"
+    },
+    "mini_lucifer": {
+      "name": "미니 루시퍼",
+      "lore": "불완전한 타락의 환영.",
+      "reward_name": "작은 타락천사의 깃털"
+    },
+    "lucifer": {
+      "name": "루시퍼",
+      "lore": "모든 빛을 심연으로 끄는 자입니다.",
+      "reward_name": "타락천사의 날개"
+    },
+    "mini_lilith": {
+      "name": "미니 릴리스",
+      "lore": "밤의 여왕이 보낸 환영입니다.",
+      "reward_name": "밤의 속삭임"
+    },
+    "abyssal_overlord": {
+      "name": "심연의 군주",
+      "lore": "심연을 통치하는 고대의 존재.",
+      "reward_name": "심연의 심장"
+    },
+    "lilith": {
+      "name": "릴리스",
+      "lore": "심연 위에 군림하는 밤의 여왕입니다.",
+      "reward_name": "밤의 여왕 왕관"
+    },
+    "mini_chronos": {
+      "name": "미니 크로노스",
+      "lore": "시간을 거꾸로 흘려 상처를 되돌립니다.",
+      "reward_name": "찢긴 모래시계"
+    },
+    "medusa": {
+      "name": "메두사",
+      "lore": "그 시선에 닿은 자는 돌이 됩니다.",
+      "reward_name": "고르곤의 시선"
+    }
+  },
+  "relic": {
+    "cursed_mask": {
+      "name": "저주받은 한냐 가면",
+      "effect": "모든 아군의 피해량이 중첩당 +1% 증가합니다.",
+      "lore": "수천 명의 잊혀진 영혼들의 비명으로 진동하는 가면입니다."
+    },
+    "spectral_lantern": {
+      "name": "망령 등불",
+      "effect": "모든 유닛의 공격 사거리가 중첩당 +5 증가합니다.",
+      "lore": "이 등불의 빛은 길을 비추는 것이 아니라, 사냥감을 드러냅니다."
+    },
+    "stygian_oar": {
+      "name": "스틱스강의 노",
+      "effect": "모든 적의 이동 속도가 중첩당 5% 감소합니다.",
+      "lore": "강을 건너는 배의 속도를 조절하는 노입니다. 이제는 산 자의 시간을 늦춥니다."
+    },
+    "cerberus_fang": {
+      "name": "케르베로스의 송곳니",
+      "effect": "모든 아군의 공격력이 중첩당 8% 증가합니다.",
+      "lore": "지옥의 문지기의 날카로운 이빨입니다. 적의 본질을 찢는 힘을 줍니다."
+    },
+    "gluttony_crown": {
+      "name": "대식의 왕관",
+      "effect": "보물 유령의 출현 확률이 중첩당 2% 증가합니다.",
+      "lore": "더 많은 것을 갈구하게 만드는 저주받은 왕관입니다."
+    },
+    "fallen_wings": {
+      "name": "타락천사의 날개",
+      "effect": "치명타 확률이 중첩당 6% 증가합니다.",
+      "lore": "순수한 어둠의 깃털입니다. 영혼의 가장 취약한 부분을 타격하도록 인도합니다."
+    },
+    "spectral_chain": {
+      "name": "저주받은 자의 사슬",
+      "effect": "둔화 효과가 중첩당 2% 더 강력해집니다.",
+      "lore": "적들이 저항할수록 사슬은 더 단단히 조여옵니다."
+    },
+    "unholy_grail": {
+      "name": "부정 시종",
+      "effect": "포탈 오염도가 중첩당 5% 더 천천히 증가합니다.",
+      "lore": "문을 지키지 못한 자들의 눈물로 채워져 있습니다."
+    },
+    "sacred_incense": {
+      "name": "정화의 향로",
+      "effect": "소환 비용 절감 효과가 중첩당 2 SE 증가합니다.",
+      "lore": "부정한 기운을 밀어내는 향기입니다. 소환의 의식을 수월하게 합니다."
+    },
+    "execution_mark": {
+      "name": "처형자의 낙인",
+      "effect": "체력이 중첩당 1% 이하인 적을 즉시 처형합니다.",
+      "lore": "낙인이 찍힌 자들에게 심연의 심판은 피할 수 없는 운명입니다."
+    },
+    "cursed_coin": {
+      "name": "저주받은 금화",
+      "effect": "유닛 판매 시 환급받는 SE가 중첩당 2% 증가합니다.",
+      "lore": "배신에는 대가가 따르며, 이 동전은 그 대가를 조금 더 달콤하게 만듭니다."
+    },
+    "abyssal_compass": {
+      "name": "심연의 나침반",
+      "effect": "모든 아군의 공격 사거리가 중첩당 +5 증가합니다.",
+      "lore": "심연의 기운이 흐르는 방향을 가리킵니다. 적의 위치를 더 멀리서 포착할 수 있게 해줍니다."
+    },
+    "abyssal_lantern": {
+      "name": "심연의 등불",
+      "effect": "모든 아군의 공격력이 중첩당 +2% 증가합니다.",
+      "lore": "심연의 어둠 속에서도 아군의 투지를 밝혀주는 등불입니다."
+    },
+    "abyssal_fragment": {
+      "name": "심연의 파편",
+      "effect": "30초마다 5초간 모든 아군의 공격 속도가 2배로 폭발합니다. 중첩당 발동 주기 -3초 (최소 15초).",
+      "lore": "심연의 심장에서 떨어져 나온 조각입니다. 주기적으로 주변의 시간을 일그러뜨려 모든 일격을 가속시킵니다."
+    },
+    "pitch_black_gem": {
+      "name": "칠흑의 보석",
+      "effect": "적을 공격할 때마다 공허 표식이 누적되어 받는 피해가 표식당 20% 증가합니다. 최대 표식 3개 + 중첩당 1개 (4초간 미공격 시 소멸).",
+      "lore": "모든 빛을 흡수하는 보석입니다. 그 어둠은 한 번 새겨지면 적의 영혼 깊숙이 파고들어 사라지지 않습니다."
+    },
+    "soul_link": {
+      "name": "영혼의 고리",
+      "effect": "각 아군은 인접한 유닛 수당 공격력이 중첩당 5% 증가합니다.",
+      "lore": "퇴마사와 수호자 사이의 보이지 않는 결속입니다. 가까이 모일수록 영혼의 공명이 강해집니다."
+    },
+    "immortal_remains": {
+      "name": "불멸의 유해",
+      "effect": "포탈 오염도 증가량이 중첩당 5% 감소합니다.",
+      "lore": "죽음을 거부하는 자의 유골입니다. 성스러운 결계를 강화하여 오염에 저항합니다."
+    },
+    "foresight_eye": {
+      "name": "선견지명의 눈",
+      "effect": "성소의 효과 수치가 중첩당 15% 강화됩니다. (1중첩부터 십자 방향 확장)",
+      "lore": "인과 관계의 보이지 않는 실을 넘어, 존재하지 않는 기운마저 끌어다 씁니다."
+    },
+    "void_heart": {
+      "name": "공허의 심장",
+      "effect": "모든 아군의 공격력이 중첩당 12% 증가합니다. 심연의 핵심 에너지가 퇴마사들에게 깃듭니다.",
+      "lore": "공허의 중심에서 채취된 심장입니다. 그 박동 하나하나가 모든 퇴마사의 공격에 파괴적인 힘을 실어줍니다."
+    },
+    "ancient_seal": {
+      "name": "고대의 봉인",
+      "effect": "포탈 오염도 증가량이 중첩당 4% 감소합니다. 고대의 보호 결계가 문을 수호합니다.",
+      "lore": "태고 시대의 위대한 퇴마사가 새긴 봉인입니다. 악의 침투 자체를 근원에서 억제합니다."
+    },
+    "crimson_vial": {
+      "name": "주홍 약병",
+      "effect": "소환 비용이 중첩당 3 SE 감소합니다.",
+      "lore": "고대 의식에서 사용된 신성한 약품이 담긴 병입니다. 소환 의식의 피로를 덜어줍니다."
+    },
+    "echo_gem": {
+      "name": "메아리의 보석",
+      "effect": "치명타 확률이 중첩당 4% 증가합니다.",
+      "lore": "영혼들의 고통스러운 메아리가 결정화된 보석입니다. 적의 취약점을 꿰뚫는 감각을 부여합니다."
+    },
+    "whispering_dust": {
+      "name": "속삭이는 먼지",
+      "effect": "모든 성소의 오라 범위가 중첩당 +3 증가합니다.",
+      "lore": "성소의 향로 재가 바람에 흩날린 흔적입니다. 신성한 기운을 멀리까지 실어 나릅니다."
+    },
+    "weeping_charm": {
+      "name": "흐느끼는 부적",
+      "effect": "적 처치 시 얻는 SE가 중첩당 +1 증가합니다.",
+      "lore": "유족의 눈물이 스며든 부적입니다. 떠난 영혼의 한이 보상으로 돌아옵니다."
+    },
+    "demon_horn": {
+      "name": "악마의 뿔",
+      "effect": "【계약】 모든 아군 데미지 중첩당 +25%, 매초 포탈 오염 +0.4%/s 누적. 오염도 50% 이상에서 데미지 보너스 2배 (광기 발현).",
+      "lore": "악마 군주의 부러진 뿔. 손에 쥔 자에게 지옥의 광기를 흘려보내며, 오염된 영혼일수록 더 큰 힘을 약속합니다. 대가는 포탈의 잠식 — 당신의 시간."
+    },
+    "pestilence_censer": {
+      "name": "역병의 향로",
+      "effect": "모든 적의 최대 체력이 중첩당 2% 감소합니다.",
+      "lore": "끊임없이 검은 연기를 토해내는 향로입니다. 그 연기는 살아있는 모든 것을 좀먹습니다."
+    },
+    "chained_obsidian": {
+      "name": "속박된 흑요석",
+      "effect": "모든 적의 이동 속도가 중첩당 3% 감소합니다.",
+      "lore": "악마의 사슬이 휘감긴 흑요석 덩어리입니다. 주변의 시간마저 끌어내려 무겁게 만듭니다."
+    },
+    "infernal_ledger": {
+      "name": "지옥의 장부",
+      "effect": "100킬마다 +500 SE 청구. 중첩당 임계치 -10킬 (최소 50), 보상 +100 SE.",
+      "lore": "지옥의 모든 거래가 기록된 장부입니다. 일정 수의 영혼이 모이면 채권자가 직접 보상을 청구해옵니다."
+    },
+    "bleeding_eye": {
+      "name": "피흘리는 눈",
+      "effect": "체력이 중첩당 2% 이하인 적을 즉시 처형합니다.",
+      "lore": "끊임없이 피눈물을 흘리는 악마의 눈동자입니다. 약자의 운명을 한눈에 꿰뚫어봅니다."
+    },
+    "oblivion_pendant": {
+      "name": "망각의 펜던트",
+      "effect": "모든 성소의 오라 범위가 중첩당 +5 증가합니다.",
+      "lore": "잊혀진 신의 상징이 새겨진 펜던트입니다. 신성의 영역을 더 넓게 펼칩니다."
+    },
+    "night_queen_crown": {
+      "name": "밤의 여왕 왕관",
+      "effect": "치명타 피해량이 중첩당 40% 증가합니다.",
+      "lore": "릴리스가 머리에 얹었던 검은 가시 왕관입니다. 그녀의 시선은 가장 치명적인 곳을 결코 빗나가지 않았습니다."
+    },
+    "gorgon_gaze": {
+      "name": "고르곤의 시선",
+      "effect": "둔화 효과가 중첩당 6% 더 강력해집니다.",
+      "lore": "메두사의 눈동자가 깃든 부적입니다. 마주친 적은 돌이 된 듯 굳어 한 발자국조차 떼지 못합니다."
+    },
+    "chronos_hourglass": {
+      "name": "시간의 모래시계",
+      "effect": "모든 유닛의 공격 속도가 중첩당 12% 증가합니다.",
+      "lore": "크로노스가 산산이 부순 모래시계의 잔해입니다. 흐르는 시간을 비틀어 아군의 한 박자를 빠르게 합니다."
+    },
+    "thunder_chain": {
+      "name": "천둥의 사슬",
+      "effect": "치명타 발생 시, 가장 가까운 적에게 사슬 번개가 튀어 피해의 20%를 입힙니다. 중첩당 추가 도약 +1 (최대 5).",
+      "lore": "타르타로스의 번개가 영혼을 타고 흐르는 사슬입니다. 한 번 깨어난 빛은 영혼에서 영혼으로 도약합니다."
+    },
+    "soul_refluxor": {
+      "name": "영혼 환류기",
+      "effect": "적 처치 시 중첩당 4% 확률로 포탈 오염도가 중첩 수만큼 회복됩니다.",
+      "lore": "흩어진 영혼을 다시 문으로 흘려보내, 균열을 안에서부터 메웁니다."
+    },
+    "echo_sigil": {
+      "name": "잔향의 인장",
+      "effect": "공격 시 중첩당 6% 확률로 즉시 추가 공격이 발사됩니다. (피해 50%)",
+      "lore": "한 번 휘두른 칼이 두 번 베이는 기억을 남깁니다. 잔향은 결코 한 번에 끝나지 않습니다."
+    },
+    "carnage_pulse": {
+      "name": "학살의 박동",
+      "effect": "2초 내 연속 처치마다 모든 아군 피해량이 중첩당 2% 증가하는 콤보가 쌓입니다. 처치가 끊기면 콤보 초기화.",
+      "lore": "심장은 적의 피를 마실수록 더 빠르게 뛰며, 손끝의 일격마다 더 큰 박동을 새깁니다."
+    },
+    "soul_resurrection": {
+      "name": "영혼 부활",
+      "effect": "포탈 오염도가 100%에 도달하는 순간, 중첩당 1회에 한해 오염도를 50%로 되돌리고 화면 위 일반 적을 모두 소멸시킵니다.",
+      "lore": "심연조차 단 한 번은 거두지 못한 영혼이 있습니다. 그 일격을 거역하는 자가 문을 다시 일으켜 세웁니다."
+    }
+  },
+  "equip_slot": {
+    "mainhand": {
+      "name": "파멸의 지팡이",
+      "label": "공격 속도 증가",
+      "lore": "심연에서 건져낸 지팡이. 악령의 비명이 그 안에 새겨져 있습니다."
+    },
+    "offhand": {
+      "name": "금단의 마법서",
+      "label": "치명타 피해량",
+      "lore": "열어서는 안 될 금서. 읽는 자에게 치명타의 비법을 속삭입니다."
+    },
+    "scepter": {
+      "name": "성스러운 홀",
+      "label": "공격력 증가",
+      "lore": "고위 퇴마사가 사용하던 홀. 성스러운 빛으로 악령을 강타합니다."
+    },
+    "bow": {
+      "name": "영혼의 활",
+      "label": "치명타 확률",
+      "lore": "영혼의 실로 엮은 시위. 적의 약점을 정확히 꿰뚫습니다."
+    },
+    "dagger": {
+      "name": "은빛 단도",
+      "label": "공격 속도 증가",
+      "lore": "빛보다 빠르게 휘둘러지는 단도. 신속한 연격이 가능해집니다."
+    },
+    "staff": {
+      "name": "현자의 지팡이",
+      "label": "치명타 피해량",
+      "lore": "오랜 지혜가 담긴 지팡이. 치명적인 일격의 위력을 극대화합니다."
+    },
+    "helmet": {
+      "name": "징벌의 투구",
+      "label": "공격력 증가",
+      "lore": "징벌받은 악령의 갑주를 녹여 만든 투구. 착용자의 공격력을 배가시킵니다."
+    },
+    "armor": {
+      "name": "수호자의 성갑",
+      "label": "포탈 데미지 감소",
+      "lore": "천계의 재료로 주조된 갑옷. 포탈에 가해지는 충격을 흡수합니다."
+    },
+    "pauldrons": {
+      "name": "강철 어깨갑주",
+      "label": "포탈 데미지 감소",
+      "lore": "견고하게 제작된 어깨 보호대. 포탈에 가해지는 충격을 분산시킵니다."
+    },
+    "greaves": {
+      "name": "질주하는 각반",
+      "label": "범위 확장",
+      "lore": "바람의 기운이 깃든 다리 갑옷. 퇴마사들의 영향력을 넓혀줍니다."
+    },
+    "gloves": {
+      "name": "응징의 장갑",
+      "label": "치명타 확률",
+      "lore": "일격을 극한으로 날카롭게 하는 장갑. 치명타 확률을 높여줍니다."
+    },
+    "boots": {
+      "name": "천상의 장화",
+      "label": "범위 확장",
+      "lore": "천상의 기운이 깃든 장화. 아군들의 공격 범위를 넓혀줍니다."
+    },
+    "necklace": {
+      "name": "축복의 목걸이",
+      "label": "SE 획득 보너스",
+      "lore": "신성한 축복이 깃든 목걸이. 정화 활동에서 더 많은 SE를 수확합니다."
+    },
+    "ring": {
+      "name": "진리의 반지",
+      "label": "보물 발견 확률",
+      "lore": "진리를 탐구하는 자를 돕는 반지. 황금의 잔상 발견 확률을 높입니다."
+    },
+    "earring": {
+      "name": "지혜의 귀걸이",
+      "label": "소환 비용 절감",
+      "lore": "정신을 맑게 해주는 귀걸이. 더 적은 에너지로 퇴마사를 부를 수 있게 돕습니다."
+    },
+    "bracelet": {
+      "name": "태양의 팔찌",
+      "label": "SE 획득 보너스",
+      "lore": "태양의 온기가 느껴지는 팔찌. 악령을 처치할 때 더 많은 영혼을 수확합니다."
+    },
+    "belt": {
+      "name": "퇴마사의 허리띠",
+      "label": "소환 비용 절감",
+      "lore": "백전노장의 퇴마사가 착용했던 허리띠. 유닛 소환 비용을 절감합니다."
+    },
+    "cloak": {
+      "name": "심연의 망토",
+      "label": "감속 효과 강화",
+      "lore": "악령을 얼어붙게 하는 망토. 속박 효과를 더욱 강력하게 만듭니다."
+    }
+  },
+  "equip_tier": {
+    "1": "일반",
+    "2": "성스러운",
+    "3": "전설의",
+    "4": "숨겨진 고대"
+  }
+}

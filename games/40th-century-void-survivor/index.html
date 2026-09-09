@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="manifest" href="./manifest.json" />
+    <title>40th Century: Void Survivor</title>
+    <style>
+      body { 
+        margin: 0; 
+        overflow: hidden; 
+        background: #000; 
+        height: 100vh;
+        width: 100vw;
+        touch-action: none;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      canvas { 
+        display: block; 
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+      /* 세로 모드일 때 가로 전환 안내 */
+      #rotate-notice {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: #000;
+        color: #fff;
+        font-family: sans-serif;
+        font-size: 1.2rem;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 16px;
+        z-index: 9999;
+        text-align: center;
+      }
+      #rotate-notice span { font-size: 3rem; }
+      @media (orientation: portrait) {
+        #rotate-notice { display: flex; }
+        #app { display: none; }
+      }
+    </style>
+    <script type="module" crossorigin src="./assets/js/index-CXpUdUhC.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/js/rolldown-runtime-C6DSFE5D.js">
+    <link rel="modulepreload" crossorigin href="./assets/js/vendor-CeFe20HN.js">
+    <link rel="modulepreload" crossorigin href="./assets/js/vendor-pixi-giY9gfwS.js">
+    <link rel="modulepreload" crossorigin href="./assets/js/vendor-matter-v3VZ5dfQ.js">
+  </head>
+  <body>
+    <div id="rotate-notice">
+      <span>📱</span>
+      <p>Please rotate your device to landscape mode</p>
+    </div>
+    <div id="app"></div>
+  </body>
+</html>

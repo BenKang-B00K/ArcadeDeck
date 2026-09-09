@@ -71,3 +71,6 @@ coverage/
 
 # Local Firestore export (contains player nicknames)
 leaderboards-backup.json
+
+# wrangler local state
+.wrangler/

@@ -374,5 +374,38 @@
     "isOriginal": true,
     "badge": "NEW",
     "autoFullscreen": false
+  },
+  {
+    "id": "27",
+    "slug": "kingdom-of-ashes-fallen-era",
+    "language": "KO/EN",
+    "thumbnail": "images/kingdom-of-ashes-fallen-era.webp",
+    "genres": [
+      "Roguelike",
+      "Strategy",
+      "RPG"
+    ],
+    "gameUrl": "https://arcadedeck-games.pages.dev/kingdom-of-ashes-fallen-era/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "isOriginal": true,
+    "badge": "NEW",
+    "steamUrl": "https://store.steampowered.com/app/4732700/Kingdom_of_Ashes__Fallen_Era/"
+  },
+  {
+    "id": "28",
+    "slug": "barrack-defense",
+    "language": "EN",
+    "thumbnail": "images/barrack-defense.webp",
+    "genres": [
+      "Tower Defense",
+      "Strategy",
+      "Survival"
+    ],
+    "gameUrl": "https://arcadedeck-games.pages.dev/barrack-defense/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "isOriginal": true,
+    "badge": "NEW"
   }
 ]

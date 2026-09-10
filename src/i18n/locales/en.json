@@ -45,6 +45,10 @@
     "homeNicknameCancel": "Cancel",
     "homeNicknameChangeAria": "Click to change nickname",
     "homeNicknameLabel": "Game Nickname",
+    "homeNicknameBanned": "Inappropriate language detected. Please choose a different nickname.",
+    "homeNickPrefix": "Playing as",
+    "homeRandomGame": "Surprise me",
+    "homeGenresAria": "Game genres",
     "homeSearchPlaceholder": "Search...",
     "homeSearchAriaLabel": "Search games",
     "homeSearchClearAria": "Clear search",
@@ -138,6 +142,7 @@
     "playerCloseFullscreen": "Close Fullscreen",
     "playerLoadingGame": "Loading game...",
     "playerPlayNow": "Play Now",
+    "playerSteam": "Full version on Steam",
     "viewLong": "Long",
     "viewShort": "Short",
     "viewToggleAria": "Switch view mode",
@@ -174,7 +179,6 @@
     "seoHomeTitle": "ArcadeDeck | The Ultimate Free Browser Games Platform",
     "seoHomeDescription": "Play the best free online browser games on ArcadeDeck. High-quality Action, RPG, Strategy, and Idle games. No downloads, just pure fun!",
     "siteAlternateName": "ArcadeDeck — Free Browser Games",
-    "breadcrumbHome": "Home",
     "genreNotFoundTitle": "Genre not found",
     "genreBackHome": "← Browse all games",
     "genrePageHeading": "{genre} Games",
@@ -1200,6 +1204,146 @@
         { "name": "ComboChain", "text": "Best combo is the tiebreaker, so don't get complacent once you're tall. I lost a top-10 spot to someone the same height because my combo was trash. Chase the clean chain even when height feels safe.", "badge": "Strategy" },
         { "name": "RhythmTap", "text": "Stop reacting and start tapping on the beat. The speed is constant, so it's a rhythm game pretending to be a stacking game. Once it clicked I stopped panicking on every block." },
         { "name": "NarrowLedge", "text": "One greedy drop leaves you a sliver and the run is basically over. Protect your width like it's the actual score, because narrow platforms kill more runs than tower height ever does." }
+      ]
+    },
+    "27": {
+      "title": "Kingdom of Ashes - Fallen Era",
+      "description": "A deep single-player roguelike deck-builder — draft a deck run by run, chain elemental resonances, and push a branching map of battles, shrines and bosses through a kingdom burned to ash.",
+      "fullDescription": "\n      Kingdom of Ashes - Fallen Era is a turn-based roguelike deck-builder set in Alea, a kingdom the Dicefall left in cinders. You do not bring a deck to a run — you build one inside it. Every run opens on a small signature core plus a draft you make yourself, so the same hero plays differently every time depending on what the draft offers and what you are brave enough to skip.\n      Combat is turn-based and mana-driven. Cards carry elements — fire, ice, lightning, shadow, blood, nature, holy and more — and playing them in the right order triggers Resonance, the game's core combo layer. Stack the elements a card wants and a single turn snowballs; stack them wrong and you spend a turn setting up a hit that never lands. Block, burn, bleed, freeze and curse all interact, and the enemy telegraphs its intent so every decision is yours to read.\n      Between fights you choose a path through a branching map: elite gauntlets, shops, rests, shrines, merge nodes, army waves and treasure caches. Each branch trades safety for power. Beyond the run itself sits the meta layer — ash currency, a forge shop, hero mastery levels, ascension tiers that raise the difficulty ceiling and a bestiary that fills in as you meet what lives out there. Losing a run is how you get stronger for the next one.\n      The web edition ships two heroes: the Knight, the balanced all-elements opener, and the Inquisitor, a punishing bleed-and-holy build that rewards aggression. Both play the full campaign — same map, same relics, same bosses, same ascension ladder. The complete 41-hero roster and the DLC packs live in the Steam release.\n      The kingdom is already ash. What you build on the way down is the only thing that survives it.\n    ",
+      "controls": "Mouse Click: Play a card, choose a map node, pick rewards / Click an enemy: Target it / Spacebar: Continue or end the current step / Escape: Back or close a panel / F or Alt+Enter: Toggle fullscreen. Mouse-driven throughout — no dragging, no twitch inputs.",
+      "tips": "Read the enemy intent before you spend a single mana — the whole fight is planned around what is coming next turn, not what is on the board now. Draft narrow: a deck that does one element well beats a deck that dabbles in four, because Resonance only pays when the elements line up. Skipping a reward card is a real move — a thin deck draws its best cards more often, and every filler card you add is a turn you did not have them. Spend gold on removing a bad card before you spend it on adding a good one. Losing is progression: ash, mastery levels and forge upgrades all carry into the next run, so a dead run still moved you forward.",
+      "lore": "\n      Alea was a kingdom that settled its arguments by roll. Every law, every succession, every border was decided by the dice, and for a long age that was enough. Then came the Dicefall — the throw that came up wrong, and kept coming up wrong, until the spires burned and the ash covered the fields.\n      What survived did not survive whole. Knights kept their oaths to a crown that no longer sits anywhere. Inquisitors kept their fire and lost the thing it was meant to purify. The elements themselves came loose from the order that once held them, and now they answer to whoever can put them in the right sequence.\n      You descend into the fallen era carrying nothing but what you can draft on the way down. The kingdom will not be saved. But something is still down there deciding the rolls, and it can be reached.\n    ",
+      "features": [
+        "Turn-Based Roguelike Deck-Builder",
+        "In-Run Drafting — No Fixed Deck",
+        "Elemental Resonance Combo System",
+        "Branching Map: Elites, Shops, Shrines, Army Waves",
+        "Relics, Curses, Potions and Card Upgrades",
+        "Persistent Meta: Ash, Forge, Hero Mastery",
+        "Ascension Tiers for Escalating Difficulty",
+        "Two Playable Heroes on Web (Knight, Inquisitor)",
+        "7 Languages Including English and Korean"
+      ],
+      "objectives": "Descend through a branching map of turn-based card battles, drafting and upgrading a deck as you go, chaining elemental Resonance to break through elites and bosses — and banking ash, mastery and forge upgrades from every run, win or lose, to push the next one deeper.",
+      "controlsTable": [
+        { "key": "Mouse Click", "action": "Play a card, pick a map node, choose a reward" },
+        { "key": "Click Enemy", "action": "Select the target for a card that needs one" },
+        { "key": "Spacebar", "action": "Continue / advance the current step" },
+        { "key": "Escape", "action": "Back out of a panel or modal" },
+        { "key": "F  /  Alt+Enter", "action": "Toggle fullscreen" }
+      ],
+      "faq": [
+        { "q": "Which heroes can I play on the web?", "a": "Two: the Knight and the Inquisitor. The Knight is the balanced opener — a bit of every element, forgiving drafts, good for learning Resonance. The Inquisitor trades safety for pressure with bleed and holy damage. Both play the entire campaign: same map, same relics, same bosses, same ascension ladder. The full 41-hero roster and the expansion packs are part of the Steam release." },
+        { "q": "How does the deck work — do I keep it between runs?", "a": "No. Each run starts from a small signature core plus the cards you draft at the start, and everything after that is won, bought or upgraded during the run. When the run ends the deck is gone. What carries over is the meta layer: ash, hero mastery levels, forge shop upgrades and your unlocked ascension tier." },
+        { "q": "What is Resonance?", "a": "The combo layer. Cards carry elements, and playing them in the sequence a card is looking for triggers a bonus effect on top of its printed one. It is why a focused two-element deck usually beats a pile of individually stronger cards — the payoff is in the ordering, not the raw numbers." },
+        { "q": "Is losing a run a total loss?", "a": "No. Ash, mastery experience and codex progress are awarded on every run, including failed ones, and they buy permanent forge upgrades that make the next attempt stronger. A run that dies on floor two still moves the meta forward." },
+        { "q": "Does my progress save?", "a": "Yes — progress is stored in your browser's local storage for this site, and an in-progress run can be resumed. Clearing your browser data or playing in a private window will wipe it, and it does not follow you to another device or browser." },
+        { "q": "Does it work on a phone?", "a": "It runs, but it is built for a mouse and a wide screen — the card hand, relic tray and map are laid out for desktop. Play it on a computer, or in landscape fullscreen at minimum." }
+      ]
+    },
+    "28": {
+      "title": "Barrack Defense",
+      "description": "A wave-based defense game where you build barracks instead of towers — seven unit types train and fight on their own while you hold the Center Command against endless waves of ground and air attackers.",
+      "fullDescription": "\n      Barrack Defense is a defense game with no towers in it. What you place are barracks, and what fights for you are the units they train — soldiers, archers, knights, rogues, brutes, bombardiers and falconers that walk out on their own, pick their own targets and hold the ground you gave them. Your job is deciding what gets built, where it stands, and what it costs you.\n      Every barrack is also a building with hit points, so placement is a wall as much as a factory. Push production out toward a lane and it soaks the first hit; tuck it behind the keep and it survives but arrives late. Rams and gargoyles come specifically for your barracks, hitting them for double, so a defense that never loses a building is a defense that was probably built too far back.\n      Combat runs on real numbers: armor mitigates physical damage, pierce halves it, magic ignores it entirely. A rogue's fast four-damage flurry bounces off a tank's plate while a brute's single twenty-damage swing goes straight through. Bleed, slow and burn stack on top. Every enemy that arrives is a question about which of your seven types answers it, and the answer changes as the roster grows.\n      Waves come in two phases — an eight-second build countdown with no enemies on the field, then the assault itself, arriving down one lane early and splitting across more roads as the run deepens. Bosses land every fifth wave, mega-bosses every tenth, and from wave ten on they bring their own air escort. There is no final wave. The run ends when the Center Command falls, and the only question is how far you got.\n    ",
+      "controls": "Left Click: Place the selected barrack / Right Click: Repair a damaged barrack, or sell one at full HP for a 50% refund / 1–7: Pick a barrack type / 8: Pick the Frontier / U: Upgrade the selected type / Space: Pause / F: Cycle 1× / 2× / 3× speed / M: Mute / R: Restart the run.",
+      "tips": "Buy your first upgrade before your fourth barrack — a Lv.2 type out-produces a second building of the same type for less gold. Keep one Falconer or Archer up before wave 6; imps fly straight past a wall of ground-only melee and the keep has no answer of its own. Armor is the whole puzzle: send brutes and bombardiers at tanks and rams, rogues at swarms, and never expect a rogue to chew through plate. Right-click repairs cost a fraction of a rebuild, so patch a damaged barrack during the build phase instead of watching it die on the next push. When gold outpaces your buildable ring, plant a Frontier and start a second front rather than stacking everything on the keep.",
+      "lore": "\n      The Center Command was never meant to be a fortress. It was a muster hall — the place where the kingdom's levies were counted, fed and sent north. The walls it has now were added in a hurry, by people who already knew the north had stopped sending anything back.\n      What comes down the roads now does not negotiate and does not besiege in any way the old manuals describe. Rams walk past armed defenders to break the training halls instead, and the things with wings do not use the roads at all. Whoever is directing them understands that an army you cannot replace is an army already beaten.\n      So the muster hall musters. Barracks go up in the mud around it, turn out whoever they can train in the minutes they are given, and those recruits walk out to meet the road. Some of them come back. The hall keeps counting.\n    ",
+      "features": [
+        "Barracks That Train Units, Not Towers",
+        "7 Unit Types With Distinct Damage Roles",
+        "Armor, Pierce & Magic Damage Math",
+        "Ground + Air Enemy Waves",
+        "Destructible, Repairable Barracks",
+        "Endless Waves With Boss & Mega-Boss Cadence",
+        "Per-Type Upgrades With No Level Cap",
+        "PC Only"
+      ],
+      "objectives": "Spend gold on barracks that train units automatically, matching your production to each wave’s mix of armored, swarming and flying attackers, and keep the Center Command standing for as many endless waves as you can — the run is scored on the wave you reach and the score you bank along the way.",
+      "controlsTable": [
+        {
+          "key": "Left Click",
+          "action": "Place the selected barrack inside the buildable ring"
+        },
+        {
+          "key": "Right Click",
+          "action": "Repair a damaged barrack, or sell a full-HP one for 50% back"
+        },
+        {
+          "key": "1 – 7",
+          "action": "Select barrack type (Soldier, Archer, Knight, Rogue, Brute, Bombardier, Falconer)"
+        },
+        {
+          "key": "8",
+          "action": "Select the Frontier — extends where you can build"
+        },
+        {
+          "key": "U",
+          "action": "Upgrade the selected type: +25% damage and HP, faster spawns"
+        },
+        {
+          "key": "Space",
+          "action": "Pause and resume"
+        },
+        {
+          "key": "F",
+          "action": "Cycle game speed: 1× / 2× / 3×"
+        },
+        {
+          "key": "M",
+          "action": "Mute or unmute"
+        },
+        {
+          "key": "R",
+          "action": "Restart the run"
+        }
+      ],
+      "faq": [
+        {
+          "q": "How is this different from a normal tower defense?",
+          "a": "Your buildings never attack. A barrack trains a unit on its own timer, and that unit walks out, finds the nearest enemy it can hit and fights there until it dies or the enemy does. You control what gets produced and where it is produced from — not who shoots what. It also means your production line is on the battlefield: barracks have hit points and can be destroyed."
+        },
+        {
+          "q": "Which barrack type should I build first?",
+          "a": "Soldiers at 40 gold are the cheapest way to get bodies on the field, and bodies are what keep enemies away from the keep early. Add an Archer or Falconer before wave 6 — that is when flying imps arrive, and ground-only types cannot touch them. From there, build toward what the wave preview shows: brutes and bombardiers for armored pushes, rogues for swarms."
+        },
+        {
+          "q": "What does armor actually do?",
+          "a": "Armor mitigates incoming physical damage as a fraction, so it blunts many small hits far harder than a few big ones. Pierce damage halves the target’s armor and magic damage ignores it completely. That is why a rogue’s 4-damage flurry bounces off a 24-armor tank while a brute’s 20-damage swing lands nearly in full, and why bombardiers are the reliable answer to a clustered, armored wave."
+        },
+        {
+          "q": "Can I repair a barrack that is nearly destroyed?",
+          "a": "Yes — right-click a damaged barrack to repair it back to full for a share of its cost, scaled to how much health is missing. Right-clicking a barrack at full health sells it instead for a 50% refund, which is the cheap way to reshape a lane between waves."
+        },
+        {
+          "q": "Is there a final wave?",
+          "a": "No. The waves keep coming and keep scaling, with a boss every fifth wave and a mega-boss every tenth, plus extra attack lanes opening as the run gets deeper. The run ends when the Center Command reaches zero health, and your best wave and best score are saved in your browser between sessions."
+        },
+        {
+          "q": "Does it work on a phone?",
+          "a": "It loads and the layout stacks, but it is built for a mouse and a wide screen — placement precision, right-click repair and the barrack panel all assume a desktop. Play it on a PC for the intended experience."
+        }
+      ],
+      "featuredComments": [
+        {
+          "name": "LaneWarden",
+          "text": "Took me three runs to realize the barracks are the wall. Now I put a knight hall on the lane on purpose and let it soak the first ram while the archers behind it work. Completely different game once that clicks.",
+          "badge": "Top Tip"
+        },
+        {
+          "name": "PlateBreaker",
+          "text": "Stop sending rogues at tanks. Armor eats small hits — that is the entire lesson. Brutes and bombardiers for anything armored, rogues only for the swarm waves.",
+          "badge": "Strategy"
+        },
+        {
+          "name": "SkyWatch",
+          "text": "Wave 6 imps ended about ten of my runs before I understood they fly. One falconer hall built early and the whole air problem goes away for the next few waves.",
+          "badge": "Veteran"
+        },
+        {
+          "name": "MusterHall",
+          "text": "The muster-hall framing is doing a lot of quiet work here. The keep is not a fortress, it is a place that counts people and sends them out — and the enemies specifically hunt the halls that replace them.",
+          "badge": "Lore"
+        }
       ]
     },
     "_comment": "Per-game canonical English. Translators mirror this in {lang}.json."

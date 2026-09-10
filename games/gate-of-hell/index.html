@@ -9,6 +9,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#000000">
     <title>Gate of Hell : 악령들의 귀환</title>
+    <script>document.documentElement.dataset.fs = localStorage.getItem('goh_font_scale') || 'medium';</script>
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/modals.css">
@@ -38,7 +39,7 @@
                 <button class="lang-tb" data-lang="ja" title="日本語">日本語</button>
                 <button class="lang-tb" data-lang="sch" title="简体中文">简体中文</button>
             </div>
-            <h1 class="start-title">Gate<br><span style="font-size: 50px;">of</span><br>Hell</h1>
+            <h1 class="start-title">Gate<br><span style="font-size: calc(50px * var(--fs));">of</span><br>Hell</h1>
             <h2 class="start-subtitle">악령들의 귀환</h2>
             <div class="start-btn-row">
                 <button id="continue-game-btn" style="display:none;">이어하기</button>
@@ -79,7 +80,6 @@
                 <img id="sleeping-statue-icon" src="images/ui/sleeping_statue.webp" alt="Sleeping Statue" data-form="0" onerror="this.replaceWith(Object.assign(document.createElement('span'),{innerHTML:window.SvgIcons?window.SvgIcons.get('statue'):'',id:'sleeping-statue-icon'}))">
                 <div class="sleeping-statue-info">
                     <span id="sleeping-statue-name">잠든 석상</span>
-                    <div id="sleeping-statue-stat-rows"></div>
                 </div>
             </div>
             <div id="cursed-status-container">
@@ -97,6 +97,7 @@
                 <div class="gauge-wrapper" id="se-label" title="소울 에너지 (SE): 유닛 소환 및 강화에 사용 (클릭하여 상세 정보)">
                     <div class="gauge-info">
                         <span class="gauge-icon"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M12 2 L13 9 L20 10 L13 13 L14 22 L12 17 L10 22 L11 13 L4 10 L11 9 Z"/></svg></span>
+                        <span class="gauge-abbr">SE</span>
                     </div>
                     <div class="gauge-bar se">
                         <div id="se-gauge-fill"></div>
@@ -107,6 +108,7 @@
                 <div class="gauge-wrapper" id="pe-label" title="포탈 오염도 (PE): 100% 도달 시 게임 오버 (클릭하여 상세 정보)">
                     <div class="gauge-info">
                         <span class="gauge-icon"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M4 4l3 4 5-3 5 3 3-4-1 7 2 5-3 1-1 4-3-3h-4l-3 3-1-4-3-1 2-5zm5 8v2h2v-2zm4 0v2h2v-2z"/></svg></span>
+                        <span class="gauge-abbr">PE</span>
                     </div>
                     <div class="gauge-bar pe">
                         <div id="portal-gauge-fill"></div>
@@ -116,6 +118,7 @@
                 <div class="gauge-wrapper rs" id="rs-label" title="남은 악령 (RS): 스테이지 클리어까지 필요한 처치 수 (클릭하여 상세 정보)">
                     <div class="gauge-info">
                         <span class="gauge-icon"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true"><path d="M6 3h12v3h2v9h-3v3h-2v3h-2v-3h-2v3h-2v-3H7v-3H4V6h2zM9 9v3h2V9zm4 0v3h2V9z"/></svg></span>
+                        <span class="gauge-abbr">RS</span>
                     </div>
                     <div class="gauge-bar rs">
                         <div id="rs-gauge-fill"></div>
@@ -161,8 +164,9 @@
                         <div id="collections-new-badge" class="card-new-badge">NEW</div>
                         <div class="card-icon"><img src="images/buttons/btn_collections.webp" alt="Collections" onerror="this.replaceWith(Object.assign(document.createElement('span'),{innerHTML:window.SvgIcons?window.SvgIcons.get('book'):''}))"></div>
                     </div>
-                    <div id="tba-card" class="tower-card" style="border-color: #444; color: #666;">
-                        <div class="tba-label">TBA</div>
+                    <div id="settings-btn" class="tower-card" style="border-color: #b0b8c4; color: #d8dde6;">
+                        <div class="card-icon"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11 1h2l1 3 2 1 3-1 1 2-2 2 1 2 3 1v2l-3 1-1 2 2 2-1 2-3-1-2 1-1 3h-2l-1-3-2-1-3 1-1-2 2-2-1-2-3-1v-2l3-1 1-2-2-2 1-2 3 1 2-1zm1 6a5 5 0 100 10 5 5 0 000-10z"/></svg></div>
+                        <div class="card-cost">MENU</div>
                     </div>
                 </div>
 
@@ -184,8 +188,8 @@
     <script src="js/core/event_bus.js"></script>
     <script src="js/core/object_pool.js"></script>
     <script src="js/core/logger.js"></script>
-    <script src="js/core/data_loader.js"></script>
     <script src="js/core/i18n.js"></script>
+    <script src="js/core/data_loader.js"></script>
     <script src="js/ui/svg_icons.js"></script>
     <script src="js/ui/ui_templates.js"></script>
 
@@ -218,11 +222,17 @@
 
     <!-- 5. Graphics Engine & Rendering -->
     <script src="js/graphics/pixi_app.js"></script>
-    <script src="js/graphics/pixi_texture_cache.js"></script>
     <script src="js/graphics/graphics.js"></script>
-    <script src="js/graphics/enemies_pix.js"></script>
+    <script src="js/graphics/enemies_pix_core.js"></script>
+    <script src="js/graphics/enemies_pix_specter.js"></script>
+    <script src="js/graphics/enemies_pix_wraith.js"></script>
+    <script src="js/graphics/enemies_pix_spirit.js"></script>
+    <script src="js/graphics/enemies_pix_demon.js"></script>
+    <script src="js/graphics/enemies_pix_boss.js"></script>
+    <script src="js/graphics/enemies_pix_registry.js"></script>
+    <script src="js/graphics/enemy_finish_pixi.js"></script>
     <script src="js/graphics/whispering_spirit_pixi.js"></script>
-    <script src="js/graphics/pix_gargoyle.js"></script>
+    <script src="js/ui/gargoyle_widget.js"></script>
     <script src="js/graphics/pix_core.js"></script>
     <script src="js/graphics/pix_tier1.js"></script>
     <script src="js/graphics/pix_tier2.js"></script>
@@ -232,6 +242,7 @@
     <script src="js/graphics/pix_tier4.js"></script>
     <script src="js/graphics/pix_lightning.js"></script>
     <script src="js/graphics/pix_shrine_normal.js"></script>
+    <script src="js/graphics/pix_shrine_extra.js"></script>
     <script src="js/graphics/pix_shrine_sacred.js"></script>
     <script src="js/graphics/graphics_unit_map.js"></script>
     <script src="js/graphics/world_road.js"></script>
@@ -246,7 +257,6 @@
     <script src="js/graphics/portal_impact_vfx_pixi.js"></script>
     <script src="js/graphics/spawning_gates_pixi.js"></script>
     <script src="js/graphics/portal_pixi.js"></script>
-    <script src="js/graphics/lava_road_pixi.js"></script>
     <script src="js/graphics/shrine_auras_pixi.js"></script>
     <script src="js/graphics/shrine_vfx_pixi.js"></script>
     <script src="js/graphics/world_gate.js"></script>

@@ -72,14 +72,19 @@ function initInputHandlers() {
 
     _installUxHygiene(canvas);
 
+    // Touch devices fire compatibility mouse events after a tap; drop those.
+    let _lastTouchTs = 0;
+    const _afterTouch = () => (Date.now() - _lastTouchTs) < 500;
+
     // Mouse Listeners
-    canvas.addEventListener('mousedown', handleMouseDown);
+    canvas.addEventListener('mousedown', (e) => { if (!_afterTouch()) handleMouseDown(e); });
     window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('mouseup', (e) => { if (!_afterTouch()) handleMouseUp(e); });
     canvas.addEventListener('mouseleave', () => { hoveredTower = null; });
 
     // Touch Listeners (Mobile Support)
     canvas.addEventListener('touchstart', (e) => {
+        _lastTouchTs = Date.now();
         handleMouseDown(e);
         // Note: Don't preventDefault here to allow clicking buttons,
         // but we will prevent it during drag in handleMouseMove.
@@ -91,8 +96,21 @@ function initInputHandlers() {
     }, { passive: false });
 
     window.addEventListener('touchend', (e) => {
+        _lastTouchTs = Date.now();
         handleMouseUp(e);
     }, { passive: false });
+
+    // Sacred Tablet selection is sticky now, so it needs an explicit "click
+    // away". Empty-board clicks are handled in handleMouseDown; this covers the
+    // rest of the page. The tablet itself is exempt — its promote / demolish
+    // buttons read window.lastInspectedTower when pressed.
+    document.addEventListener('pointerdown', (e) => {
+        if (!window.lastInspectedTower && !window.lastInspectedEnemy) return;
+        const el = e.target;
+        if (el === canvas) return;
+        if (el && el.closest && el.closest('#unit-info')) return;
+        if (typeof resetInfoPanel === 'function') resetInfoPanel();
+    });
 
     // Drop drag state on any scene transition.
     if (window.EventBus && window.SCENE_EVENTS) {

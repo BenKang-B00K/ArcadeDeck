@@ -102,6 +102,14 @@
       "pact_penalty_fmt": "无视惩罚: 敌人生命值 +{hp}%, SE −{se}%",
       "tba_title": "待定",
       "tba_desc": "新功能即将推出。",
+      "settings_desc": "暂停 · 教程 · 重新开始",
+      "summon_cost_label": "召唤费用",
+      "shrine_cost_label": "建造费用",
+      "purge_cost_label": "净化费用",
+      "badge_new": "NEW",
+      "badge_existing": "已拥有",
+      "badge_upgrade": "强化",
+      "badge_reroll": "重洗",
       "relics_cost_fmt": "普通 {n} · 顶级 {s} SF"
     },
     "info_panel": {
@@ -109,6 +117,7 @@
       "default_subtitle": "SACRED TABLET",
       "lore_default": "深渊记录板分析灵魂本质，照亮净化之路。",
       "hint_touch": "▾ 触摸单位或敌人 ▾",
+      "hint_select": "▾ 触摸槽位查看详情 ▾",
       "shrine_scope_local": "近战",
       "shrine_scope_global": "全局",
       "shrine_buffed_fmt": "强化 {n} 人",
@@ -131,7 +140,16 @@
       "enemy_lore_unknown": "没有关于此灵魂的记录。",
       "shrine_badge": "圣所",
       "shrine_demo_prefix": "拆除时",
-      "sacred_slot_only_log": "这里只能放置神圣圣所 (Tier 2)。"
+      "sacred_slot_only_log": "这里只能放置神圣圣所 (Tier 2)。",
+      "tip_cost_label": "消耗",
+      "tip_result_label": "结果",
+      "tip_result_random": "{n}种中随机",
+      "tip_cost_short": "SE不足。",
+      "tip_promote_desc_random": "消耗灵魂能量，随机觉醒为更高阶的驱魔师。",
+      "tip_promote_desc_fixed": "消耗灵魂能量，晋升为指定的高阶驱魔师。",
+      "tip_sacrifice_title": "堕落",
+      "tip_sacrifice_desc": "将此守护者送回深渊，空出格位并回收部分灵魂能量。无法撤销。",
+      "tip_refund_label": "回收"
     },
     "modal": {
       "close": "关闭"
@@ -285,12 +303,14 @@
       "bonus_ledger_stacks": "灵魂账单层数",
       "log_ledger_windfall": "灵魂账单: +{n} SE",
       "log_revival": "灵魂复活！传送门修复。",
-      "badge_title_fmt": "持有种类 {u} / 共 {t} 个"
+      "badge_title_fmt": "持有种类 {u} / 共 {t} 个",
+      "tip_no_relics": "尚未获得遗物。"
     },
     "equipment": {
       "subtitle": "从深渊中回收的神圣圣物",
       "default_title": "GATE OF HELL",
       "default_subtitle": "SACRED ARMORY",
+      "sc_label": "灵魂水晶",
       "total_bonus": "装备总效果",
       "found_prefix": "装备",
       "sc_row_title": "击杀敌人时稀有获得。用于装备重洗。",
@@ -307,13 +327,16 @@
       "no_equip": "未穿戴装备。",
       "not_owned_tier": "未获得",
       "secondary_stat_label": "随机副属性",
-      "secondary_stat_locked": "??? (仅限最高等级)",
+      "secondary_stat_locked": "??? (古代品级以上)",
       "bonus_label": "[奖励]",
       "section_weapon": "武器",
       "section_armor": "防具",
       "section_accessory": "饰品",
       "lore_armory": "即便是折断的刀刃，在驱魔师手中也能成为斩杀恶灵的神剑。",
-      "grade_suffix": "等级"
+      "grade_suffix": "等级",
+      "droprate_title": "品级掉落率",
+      "droprate_one_in": "1 / {n}",
+      "droprate_note": "每次击杀的概率。首领为10倍。★ = 奖励属性数量。"
     },
     "game_over": {
       "title": "灵魂已被吞噬",
@@ -343,7 +366,16 @@
       "language_label": "语言 (Language)",
       "language_desc": "更改游戏界面语言。",
       "btn_restart": "中止当前净化 (重新开始)",
-      "btn_close": "关闭设置"
+      "btn_close": "关闭设置",
+      "sfx_label": "音效",
+      "sfx_desc": "播放战斗和界面音效。",
+      "fontsize_label": "字体大小",
+      "fontsize_desc": "调整界面文字大小。",
+      "fontsize_small": "小",
+      "fontsize_medium": "中",
+      "fontsize_large": "大",
+      "volume_label": "音效音量",
+      "volume_desc": "调整音效的播放音量。"
     },
     "quit": {
       "header": "[命运的拒绝]",
@@ -939,6 +971,54 @@
       "desc": "增加周围友军 3% 的传送门净化效果。",
       "demoDesc": "降低周围友军的传送门净化效果。",
       "lore": "如泰山般的坚韧结晶而成的圣所。不断供应守护结界的净化气息。"
+    },
+    "shrine_valor": {
+      "name": "勇猛圣所",
+      "desc": "使周围友军攻击力提升15%。",
+      "demoDesc": "使周围友军攻击力降低15%。",
+      "lore": "圣战中倒下的骑士们的誓言沉睡于此。绝不后退的勇气凝于驱魔师的剑锋。"
+    },
+    "shrine_tempest": {
+      "name": "暴风圣所",
+      "desc": "使周围友军攻击速度提升25%。",
+      "demoDesc": "使周围友军攻击速度降低25%。",
+      "lore": "囚禁着永不停息暴风的圣所。狂风催动友军的连击。"
+    },
+    "shrine_horizon": {
+      "name": "地平圣所",
+      "desc": "使周围友军攻击射程提升35。",
+      "demoDesc": "使周围友军攻击射程降低35。",
+      "lore": "照亮世界尽头的灯塔圣所。连遥远地平线外的恶灵也尽收眼底。"
+    },
+    "shrine_fortune": {
+      "name": "幸运圣所",
+      "desc": "使周围友军暴击率提升12%。",
+      "demoDesc": "使周围友军暴击率降低12%。",
+      "lore": "命运骰子停驻的圣所。将偏向友军的概率天平赠予众人。"
+    },
+    "shrine_ruin": {
+      "name": "毁灭圣所",
+      "desc": "使周围友军暴击伤害提升25%。",
+      "demoDesc": "使周围友军暴击伤害降低25%。",
+      "lore": "以坍塌大教堂的残骸筑成的圣所。毁灭的记忆在每一击中复苏。"
+    },
+    "shrine_omen": {
+      "name": "凶兆圣所",
+      "desc": "使周围友军暴击伤害提升12%。",
+      "demoDesc": "使周围友军暴击伤害降低12%。",
+      "lore": "预告灾祸的黑鸟栖息的圣所。恶灵将提前目睹自己的终结。"
+    },
+    "shrine_tithe": {
+      "name": "奉献圣所",
+      "desc": "周围友军击杀敌人时额外获得4点SE。",
+      "demoDesc": "周围友军的额外SE获取消失。",
+      "lore": "由信徒奉献堆积而成的圣所。献上的信仰化作灵魂精华回流。"
+    },
+    "shrine_solace": {
+      "name": "安息圣所",
+      "desc": "使周围友军的传送门净化效果提升4%。",
+      "demoDesc": "使周围友军的传送门净化效果降低。",
+      "lore": "疲惫灵魂最终安歇的圣所。宁静的安息缓缓弥合结界的创伤。"
     }
   },
   "enemy_category": {
@@ -1660,6 +1740,8 @@
     "1": "普通",
     "2": "神圣",
     "3": "传奇",
-    "4": "隐藏古代"
+    "4": "古代",
+    "5": "神话",
+    "6": "超越"
   }
 }

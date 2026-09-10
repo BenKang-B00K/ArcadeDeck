@@ -157,6 +157,30 @@ function initPauseAndSettings() {
         };
     }
 
+    // Font scale (small/medium/large). One --fs token on <html> drives every
+    // font-size in the app; index.html applies the stored value before paint.
+    const fsSwitcher = document.getElementById('fontsize-switcher');
+    if (fsSwitcher) {
+        const paintFs = () => {
+            const cur = document.documentElement.dataset.fs;
+            fsSwitcher.querySelectorAll('[data-fs-set]').forEach(b => b.classList.toggle('active', b.dataset.fsSet === cur));
+        };
+        fsSwitcher.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-fs-set]');
+            if (!btn) return;
+            document.documentElement.dataset.fs = btn.dataset.fsSet;
+            localStorage.setItem('goh_font_scale', btn.dataset.fsSet);
+            // Chrome doesn't re-resolve `font-size: calc(... * var(--fs))` on form
+            // controls when only the custom property changes — buttons keep their
+            // old size until something forces a full style recalc.
+            document.body.style.display = 'none';
+            void document.body.offsetHeight;
+            document.body.style.display = '';
+            paintFs();
+        });
+        paintFs();
+    }
+
     if (restartBtnTop && quitModal && quitConfirm && quitCancel) {
         restartBtnTop.onclick = () => {
             if (window.SceneManager) {
@@ -256,6 +280,7 @@ function initGameOver() {
 }
 
 function showGameOver(stageReached) {
+    if (typeof playSFX === 'function') playSFX('gameover');
     if (window.SceneManager) {
         SceneManager.change(SCENES.GAME_OVER, { stage: stageReached });
     } else {

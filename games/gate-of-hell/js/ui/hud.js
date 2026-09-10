@@ -65,17 +65,22 @@ function updateGauges() {
     }
     if (peStatus) {
         const _T = window.t || ((k, f) => f);
-        if (peRatio >= 0.75) { peStatus.textContent = `${_T('ui.hud.curse_lv3', '심연의 저주 3단계')} (${pePct}%)`; peStatus.setAttribute('data-level', '3'); }
-        else if (peRatio >= 0.5) { peStatus.textContent = `${_T('ui.hud.curse_lv2', '심연의 저주 2단계')} (${pePct}%)`; peStatus.setAttribute('data-level', '2'); }
-        else if (peRatio >= 0.3) { peStatus.textContent = `${_T('ui.hud.curse_lv1', '심연의 저주 1단계')} (${pePct}%)`; peStatus.setAttribute('data-level', '1'); }
-        else { peStatus.textContent = _T('ui.hud.cursed_status', '잠든 저주'); peStatus.setAttribute('data-level', '0'); }
+        // Short form only: the full "심연의 저주 N단계 (pct%)" string (~85px) overflowed the
+        // 56px widget and covered the shrine slot beside it. Full name lives in the tooltip.
+        const lvl = peRatio >= 0.75 ? 3 : peRatio >= 0.5 ? 2 : peRatio >= 0.3 ? 1 : 0;
+        peStatus.textContent = lvl ? `Lv.${lvl} ${pePct}%` : _T('ui.hud.cursed_status', '잠든 저주');
+        peStatus.setAttribute('data-level', String(lvl));
     }
+    const peBar = document.querySelector('.gauge-bar.pe');
+    if (peBar) peBar.classList.toggle('danger', peRatio >= 0.75);
 }
 
 function updateStageInfo() {
     _initHud();
     const { stageBannerDepth, enemiesLeft: enemiesLeftLabel, rsFill } = _hud;
     if (stageBannerDepth) stageBannerDepth.innerText = window.stage;
+    const banner = document.getElementById('stage-banner');
+    if (banner) banner.classList.toggle('boss', window.stage % 10 === 0);
 
     if (enemiesLeftLabel) {
         const killed = window.stageKilledCount || 0;
@@ -150,7 +155,7 @@ function initHUD() {
         });
     }
 
-    const showTooltip = (targetEl, title, text, stats = []) => {
+    const showTooltip = (targetEl, title, text, stats = [], opts = {}) => {
         if (!tooltip || !gameContainer) return;
 
         tooltip.style.visibility = 'hidden';
@@ -169,23 +174,28 @@ function initHUD() {
         // Lock width for curse/gargoyle widgets so both render identical size
         const fixedWidthTargets = ['cursed-status-container', 'sleeping-statue-widget', 'rs-label'];
         tooltip.classList.toggle('fixed-width', fixedWidthTargets.includes(targetEl.id));
+        // Set before the measure below, so the wider box is positioned correctly.
+        tooltip.classList.toggle('wide', !!opts.wide);
 
         const rect = targetEl.getBoundingClientRect();
         const gameRect = gameContainer.getBoundingClientRect();
-        const tooltipRect = tooltip.getBoundingClientRect();
+        // Layout size, not the client rect: tooltipPop starts at scale(0.9), so a
+        // rect measured here reads 10% small and the edge clamp lets the box hang out.
+        const tipW = tooltip.offsetWidth;
+        const tipH = tooltip.offsetHeight;
 
         let x = (rect.left + rect.width / 2) - gameRect.left;
         let y = rect.top - gameRect.top - 8;
         tooltip.classList.remove('bottom-mode');
         let transformStr = 'translate(-50%, -100%)';
 
-        if (y - tooltipRect.height < 0) {
+        if (y - tipH < 0) {
             y = rect.bottom - gameRect.top + 8;
             tooltip.classList.add('bottom-mode');
             transformStr = 'translate(-50%, 0%)';
         }
 
-        const halfWidth = tooltipRect.width / 2;
+        const halfWidth = tipW / 2;
         if (x - halfWidth < 10) x = halfWidth + 10;
         if (x + halfWidth > gameRect.width - 10) x = gameRect.width - halfWidth - 10;
 
@@ -194,6 +204,19 @@ function initHUD() {
         tooltip.style.transform = transformStr;
 
         tooltip.style.visibility = 'visible';
+    };
+
+    // Click-toggle: a second tap on the same trigger closes the tooltip.
+    const toggleTooltip = (el, getData) => {
+        if (tooltip && tooltip.style.display === 'block' && window._lastTooltipTarget === el) {
+            tooltip.style.display = 'none';
+            window._lastTooltipTarget = null;
+            return;
+        }
+        const d = getData();
+        if (!d) return;
+        showTooltip(el, d.title, d.desc, d.stats);
+        window._lastTooltipTarget = el;
     };
 
     // Listeners for HUD Elements
@@ -219,24 +242,13 @@ function initHUD() {
             };
         };
 
-        peStatusContainer.onclick = (e) => {
-            e.stopPropagation();
-            const tooltip = document.getElementById('global-tooltip');
-            if (tooltip.style.display === 'block' && window._lastTooltipTarget === peStatusContainer) {
-                tooltip.style.display = 'none';
-                window._lastTooltipTarget = null;
-            } else {
-                const data = getCurseTooltip();
-                showTooltip(peStatusContainer, data.title, data.desc, data.stats);
-                window._lastTooltipTarget = peStatusContainer;
-            }
-        };
+        peStatusContainer.onclick = (e) => { e.stopPropagation(); toggleTooltip(peStatusContainer, getCurseTooltip); };
     }
 
     const sleepingStatueWidget = document.getElementById('sleeping-statue-widget');
     if (sleepingStatueWidget) {
-        const showSleepingStatueTooltip = () => {
-            if (typeof getGargoyleForm !== 'function') return;
+        const getSleepingStatueTooltip = () => {
+            if (typeof getGargoyleForm !== 'function') return null;
             const form = getGargoyleForm();
             const d = form.debuffs;
             const _Tg = window.t || ((k, f) => f);
@@ -247,29 +259,21 @@ function initHUD() {
                 { label: _Tg('ui.hud.gargoyle_atk_damage', "공격 피해"), val: d.damage  < 0 ? `${Math.round(d.damage  * 100)}%` : _noDebuff },
                 { label: _Tg('ui.hud.gargoyle_se_gain', "SE 획득"),  val: d.seGain  < 0 ? `${Math.round(d.seGain  * 100)}%` : _noDebuff }
             ];
-            showTooltip(sleepingStatueWidget, `${window.SvgIcons ? window.SvgIcons.get('statue') : ''} ${form.name}`, form.desc, stats);
+            return { title: `${window.SvgIcons ? window.SvgIcons.get('statue') : ''} ${form.name}`, desc: form.desc, stats };
         };
-        sleepingStatueWidget.onclick = (e) => {
-            e.stopPropagation();
-            const tooltip = document.getElementById('global-tooltip');
-            if (tooltip.style.display === 'block' && window._lastTooltipTarget === sleepingStatueWidget) {
-                tooltip.style.display = 'none';
-                window._lastTooltipTarget = null;
-            } else {
-                showSleepingStatueTooltip();
-                window._lastTooltipTarget = sleepingStatueWidget;
-            }
-        };
+        sleepingStatueWidget.onclick = (e) => { e.stopPropagation(); toggleTooltip(sleepingStatueWidget, getSleepingStatueTooltip); };
     }
 
     const seLabel = document.getElementById('se-label');
     if (seLabel) {
         seLabel.onclick = (e) => {
             e.stopPropagation();
-            const _Ts = window.t || ((k, f) => f);
-            showTooltip(seLabel, `${window.SvgIcons ? window.SvgIcons.get('spark') : ''} ${_Ts('ui.hud.se_tooltip_title', '소울 에너지 (SE)')}`, _Ts('ui.hud.se_tooltip_desc', "퇴마사를 소환하고 성소를 건립하는 데 필요한 영적인 에너지입니다."), [
-                { label: _Ts('ui.hud.se_gain_label', "획득 방법"), val: _Ts('ui.hud.se_gain_method', "악령 처치") }
-            ]);
+            const _T = window.t || ((k, f) => f);
+            toggleTooltip(seLabel, () => ({
+                title: `${window.SvgIcons ? window.SvgIcons.get('spark') : ''} ${_T('ui.hud.se_tooltip_title', '소울 에너지 (SE)')}`,
+                desc: _T('ui.hud.se_tooltip_desc', "퇴마사를 소환하고 성소를 건립하는 데 필요한 영적인 에너지입니다."),
+                stats: [{ label: _T('ui.hud.se_gain_label', "획득 방법"), val: _T('ui.hud.se_gain_method', "악령 처치") }]
+            }));
         };
     }
 
@@ -277,10 +281,12 @@ function initHUD() {
     if (peLabel) {
         peLabel.onclick = (e) => {
             e.stopPropagation();
-            const _Tp = window.t || ((k, f) => f);
-            showTooltip(peLabel, `${window.SvgIcons ? window.SvgIcons.get('demon_face') : ''} ${_Tp('ui.hud.pe_tooltip_title', '포탈 오염도 (PE)')}`, _Tp('ui.hud.pe_tooltip_desc', "악령들이 포탈을 통과할 때 쌓이는 오염 수치입니다. 100% 도달 시 게임 오버."), [
-                { label: _Tp('ui.hud.pe_purge_label', "정화 방법"), val: _Tp('ui.hud.pe_purge_method', "정화(Purge) 기능 사용") }
-            ]);
+            const _T = window.t || ((k, f) => f);
+            toggleTooltip(peLabel, () => ({
+                title: `${window.SvgIcons ? window.SvgIcons.get('demon_face') : ''} ${_T('ui.hud.pe_tooltip_title', '포탈 오염도 (PE)')}`,
+                desc: _T('ui.hud.pe_tooltip_desc', "악령들이 포탈을 통과할 때 쌓이는 오염 수치입니다. 100% 도달 시 게임 오버."),
+                stats: [{ label: _T('ui.hud.pe_purge_label', "정화 방법"), val: _T('ui.hud.pe_purge_method', "정화(Purge) 기능 사용") }]
+            }));
         };
     }
 
@@ -288,10 +294,12 @@ function initHUD() {
     if (rsLabel) {
         rsLabel.onclick = (e) => {
             e.stopPropagation();
-            const _Tr = window.t || ((k, f) => f);
-            showTooltip(rsLabel, `${window.SvgIcons ? window.SvgIcons.get('skull') : ''} ${_Tr('ui.hud.rs_tooltip_title', '남은 악령 (RS)')}`, _Tr('ui.hud.rs_tooltip_desc', "현재 스테이지를 클리어하기 위해 처치해야 할 악령의 총량입니다."), [
-                { label: _Tr('ui.hud.rs_progress_label', "진행도"), val: _Tr('ui.hud.rs_progress_val', "처치 시 감소") }
-            ]);
+            const _T = window.t || ((k, f) => f);
+            toggleTooltip(rsLabel, () => ({
+                title: `${window.SvgIcons ? window.SvgIcons.get('skull') : ''} ${_T('ui.hud.rs_tooltip_title', '남은 악령 (RS)')}`,
+                desc: _T('ui.hud.rs_tooltip_desc', "현재 스테이지를 클리어하기 위해 처치해야 할 악령의 총량입니다."),
+                stats: [{ label: _T('ui.hud.rs_progress_label', "진행도"), val: _T('ui.hud.rs_progress_val', "처치 시 감소") }]
+            }));
         };
     }
 
@@ -300,6 +308,40 @@ function initHUD() {
             tooltip.style.display = 'none';
         }
     });
+
+    // Relics / Sacred Armory cards: hover shows the running total of every
+    // active effect, so the player can check it without opening the panel.
+    const bindTotalsTip = (id, titleKey, titleFallback, getLines, emptyKey, emptyFallback) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('mouseenter', () => {
+            const _T = window.t || ((k, f) => f);
+            const lines = (typeof getLines === 'function') ? getLines() : [];
+            showTooltip(
+                el,
+                _T(titleKey, titleFallback),
+                lines.length ? '' : _T(emptyKey, emptyFallback),
+                lines,
+                { wide: true }
+            );
+        });
+        el.addEventListener('mouseleave', () => { if (window.hideTooltip) window.hideTooltip(); });
+    };
+    bindTotalsTip('relics-btn', 'ui.relics.total_bonus', '총 유물 보너스',
+        () => (typeof window.getRelicBonusLines === 'function' ? window.getRelicBonusLines() : []),
+        'ui.relics.tip_no_relics', '획득한 유물이 없습니다.');
+    bindTotalsTip('equip-btn', 'ui.equipment.total_bonus', '총 장비 효과',
+        () => (typeof window.getEquipBonusLines === 'function' ? window.getEquipBonusLines({ byStat: true }) : []),
+        'ui.equipment.no_equip', '장착된 장비가 없습니다.');
+
+    // Exported so other panels (e.g. the Sacred Tablet buttons) reuse this one
+    // tooltip instead of growing a second implementation.
+    window.showTooltip = showTooltip;
+    window.hideTooltip = () => {
+        if (!tooltip) return;
+        tooltip.style.display = 'none';
+        window._lastTooltipTarget = null;
+    };
 
     // Initial sync
     if (typeof updateGauges === 'function') updateGauges();

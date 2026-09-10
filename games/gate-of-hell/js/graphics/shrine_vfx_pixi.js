@@ -34,12 +34,32 @@ const SHRINE_VFX_COLORS = {
     shrine_shadow:    { glow: 0x8888FF, p1: 0x4040AA, p2: 0xAAAAFF },
     shrine_harvest:   { glow: 0xFFD700, p1: 0xDAA520, p2: 0xFFEE44 },
     shrine_endurance: { glow: 0x00BFA5, p1: 0x4DB6AC, p2: 0x80CBC4 },
+    shrine_valor:     { glow: 0xC62828, p1: 0xE53935, p2: 0xFFCDD2 },
+    shrine_tempest:   { glow: 0x4DD0E1, p1: 0x00ACC1, p2: 0xB2EBF2 },
+    shrine_horizon:   { glow: 0xFFB74D, p1: 0xFF9800, p2: 0xFFE0B2 },
+    shrine_fortune:   { glow: 0x66BB6A, p1: 0x2E7D32, p2: 0xFFF176 },
+    shrine_ruin:      { glow: 0xB71C1C, p1: 0xE64A19, p2: 0xFF8A65 },
+    shrine_omen:      { glow: 0x5E35B1, p1: 0x311B92, p2: 0xB39DDB },
+    shrine_tithe:     { glow: 0xFFC107, p1: 0xC0A060, p2: 0xFFF8E1 },
+    shrine_solace:    { glow: 0x81C784, p1: 0xA5D6A7, p2: 0xE8F5E9 },
     shrine_divine:    { glow: 0xFFD700, p1: 0xFFF9C4, p2: 0xFFFFFF },
     shrine_eternity:  { glow: 0x7B1FA2, p1: 0x4A148C, p2: 0x00B8D4 },
     shrine_miracle:   { glow: 0xFFFFFF, p1: 0xFF1744, p2: 0xD500F9 },
 };
 
 const SHRINE_DEFAULT_COLOR = { glow: 0xFFD700, p1: 0xFFD700, p2: 0xFFFFFF };
+
+/* New T1 shrines reuse an existing emitter shape, tinted by their own palette. */
+const SHRINE_VFX_ALIAS = {
+    shrine_valor:   'shrine_might',
+    shrine_tempest: 'shrine_speed',
+    shrine_horizon: 'shrine_range',
+    shrine_fortune: 'shrine_greed',
+    shrine_ruin:    'shrine_fervor',
+    shrine_omen:    'shrine_shadow',
+    shrine_tithe:   'shrine_harvest',
+    shrine_solace:  'shrine_purity',
+};
 
 if (window.EventBus && window.GAME_EVENTS) {
     EventBus.on(GAME_EVENTS.PIXI_RESET, () => {
@@ -135,7 +155,7 @@ function renderPixiShrineVfx() {
         const cx   = shrine.lx;
         const cy   = shrine.ly;
         const cols = _colorFor(shrine);
-        const type = shrine.data.type;
+        const type = SHRINE_VFX_ALIAS[shrine.data.type] || shrine.data.type;
         const isT2 = shrine.data.tier === 2;
 
         // ── Universal ground halo ────────────────────────────────────────

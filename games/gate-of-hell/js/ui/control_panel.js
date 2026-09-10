@@ -1,5 +1,7 @@
 /* control_panel.js - Bottom Action Hub: state + event listeners */
 
+const PURGE_COST = window.PURGE_COST || 800;
+
 /* ─── State sync / visual feedback ──────────────────────────────────────── */
 function updateSummonButtonState() {
     const tc = document.getElementById('tower-card'), tw = document.getElementById('tower-warning'), tcd = document.getElementById('tower-cost-display');
@@ -13,7 +15,7 @@ function updateSummonButtonState() {
 
     if (tcd) tcd.innerText = `${finalTowerCost} SE`;
     if (sscd) sscd.innerText = `${finalShrineCost} SE`;
-    if (pscd) pscd.innerText = `800 SE`;
+    if (pscd) pscd.innerText = `${PURGE_COST} SE`;
 
     const currentMoney = window.money || 0;
 
@@ -30,7 +32,7 @@ function updateSummonButtonState() {
 
     check(tc, tw, finalTowerCost);
     check(sc, ssw, finalShrineCost);
-    check(pc, psw, 800);
+    check(pc, psw, PURGE_COST);
 
     // Sync NEW badges based on existing notification flags or unseen collections
     const rBadge = document.getElementById('relics-new-badge');
@@ -70,6 +72,13 @@ function flashResourceError(type) {
 
 /* ─── Click & hover listeners ───────────────────────────────────────────── */
 function initControlPanel() {
+    // GameScene.enter re-runs this on every restart: listeners bind once, state still re-syncs.
+    if (window._controlPanelInitialized) {
+        if (typeof updateSummonButtonState === 'function') updateSummonButtonState();
+        if (typeof updatePactCardUI === 'function') updatePactCardUI();
+        return;
+    }
+    window._controlPanelInitialized = true;
     const T = window.t || ((k, f) => f);
 
     // 1. Summon Unit Card
@@ -82,7 +91,7 @@ function initControlPanel() {
             if (typeof updateInfo === 'function') {
                 updateInfo(`
                     <div class="unit-info-title" style="color:#ffd700;">${window.SvgIcons ? window.SvgIcons.get('dice') : ''} ${T('ui.controls.summon_title', '소환')}</div>
-                    <div class="unit-info-badge" style="background:rgba(255,215,0,0.1); border-color:rgba(255,215,0,0.2); color:#ffd700;">Summon Cost: ${cost} SE</div>
+                    <div class="unit-info-badge" style="background:rgba(255,215,0,0.1); border-color:rgba(255,215,0,0.2); color:#ffd700;">${T('ui.controls.summon_cost_label', '소환 비용')}: ${cost} SE</div>
                     <div class="unit-info-desc">${T('ui.controls.summon_desc', '수련생 퇴마사 또는 견습 퇴마사 중 하나를 무작위로 소환합니다.')}</div>
                 `);
             }
@@ -98,7 +107,7 @@ function initControlPanel() {
             if (typeof updateInfo === 'function') {
                 updateInfo(`
                     <div class="unit-info-title" style="color:#00e5ff;">${window.SvgIcons ? window.SvgIcons.get('shrine') : ''} ${T('ui.controls.shrine_title', '성스러운 성소')}</div>
-                    <div class="unit-info-badge" style="background:rgba(0,229,255,0.1); border-color:rgba(0,229,255,0.2); color:#00e5ff;">Build Cost: ${cost} SE</div>
+                    <div class="unit-info-badge" style="background:rgba(0,229,255,0.1); border-color:rgba(0,229,255,0.2); color:#00e5ff;">${T('ui.controls.shrine_cost_label', '건설 비용')}: ${cost} SE</div>
                     <div class="unit-info-desc">${T('ui.controls.shrine_desc', '전용 슬롯에 배치하여 주변 아군에게 강력한 공격력 버프를 제공합니다.')}</div>
                 `);
             }
@@ -113,26 +122,12 @@ function initControlPanel() {
             if (typeof updateInfo === 'function') {
                 updateInfo(`
                     <div class="unit-info-title" style="color:#9400d3;">${window.SvgIcons ? window.SvgIcons.get('flame') : ''} ${T('ui.controls.purge_title', '공간 정화')}</div>
-                    <div class="unit-info-badge" style="background:rgba(148,0,211,0.1); border-color:rgba(148,0,211,0.2); color:#9400d3;">Purge Cost: 800 SE</div>
+                    <div class="unit-info-badge" style="background:rgba(148,0,211,0.1); border-color:rgba(148,0,211,0.2); color:#9400d3;">${T('ui.controls.purge_cost_label', '정화 비용')}: ${PURGE_COST} SE</div>
                     <div class="unit-info-desc">${T('ui.controls.purge_desc', '즉시 포탈 오염도를 50% 제거합니다. 위기 상황에서 사용하십시오.')}</div>
                 `);
             }
         });
-        purgeCard.onclick = () => {
-            if (window.money >= 800) {
-                window.money -= 800;
-                window.portalEnergy = Math.max(0, window.portalEnergy - (window.maxPortalEnergy * 0.5));
-
-                if (typeof updateSummonButtonState === 'function') updateSummonButtonState();
-                if (typeof GameLogger !== 'undefined') GameLogger.success("Portal Purged!");
-
-                if (typeof spawnPurgeEffect === 'function') {
-                    spawnPurgeEffect(window.LOGICAL_WIDTH / 2, window.LOGICAL_HEIGHT);
-                }
-            } else {
-                if (typeof flashResourceError === 'function') flashResourceError('se');
-            }
-        };
+        purgeCard.onclick = () => { if (typeof purgePortal === 'function') purgePortal(); };
     }
 
     // 4. Utility Systems (Relics, Equipment, Collections)
@@ -211,14 +206,14 @@ function initControlPanel() {
         };
     }
 
-    // 6. TBA placeholder
-    const tbaCard = document.getElementById('tba-card');
-    if (tbaCard) {
-        tbaCard.addEventListener('mouseenter', () => {
+    // 6. Settings card (click handler lives in overlays.js initPauseAndSettings)
+    const settingsCard = document.getElementById('settings-btn');
+    if (settingsCard) {
+        settingsCard.addEventListener('mouseenter', () => {
             if (typeof updateInfo === 'function') {
                 updateInfo(`
-                    <div class="unit-info-title" style="color:#888;">? ${T('ui.controls.tba_title', '미정')}</div>
-                    <div class="unit-info-desc">${T('ui.controls.tba_desc', '새로운 기능이 곧 추가됩니다.')}</div>
+                    <div class="unit-info-title" style="color:#d8dde6;">${window.SvgIcons ? window.SvgIcons.get('gear') : ''} ${T('ui.settings.header', '[정화 설정]')}</div>
+                    <div class="unit-info-desc">${T('ui.controls.settings_desc', '일시정지 · 튜토리얼 · 재시작')}</div>
                 `);
             }
         });

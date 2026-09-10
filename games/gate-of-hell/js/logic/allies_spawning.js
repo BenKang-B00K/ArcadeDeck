@@ -34,6 +34,7 @@ function summonTower(targetSlot) {
     }
 
     if (typeof GameLogger !== 'undefined') GameLogger.success(`Summoned: ${unitData.name}`);
+    if (typeof playSFX === 'function') playSFX('summon');
 
     targetSlot.isOccupied = true;
 
@@ -73,3 +74,25 @@ function summonUnitAuto() {
 // Global Exports
 window.summonTower = summonTower;
 window.summonUnit = summonUnitAuto;
+
+/* ─── Portal purge (control-panel action) ───────────────────────────────── */
+window.PURGE_COST = 800;
+
+/**
+ * Spends SE to remove 50% of current portal energy.
+ * @returns {boolean} true if the purge was performed.
+ */
+function purgePortal() {
+    const cost = window.PURGE_COST;
+    if ((window.money || 0) < cost) {
+        if (typeof flashResourceError === 'function') flashResourceError('se');
+        return false;
+    }
+    window.money -= cost;
+    window.portalEnergy = Math.max(0, window.portalEnergy - (window.maxPortalEnergy * 0.5));
+    if (typeof updateSummonButtonState === 'function') updateSummonButtonState();
+    if (typeof GameLogger !== 'undefined') GameLogger.success("Portal Purged!");
+    if (typeof spawnPurgeEffect === 'function') spawnPurgeEffect(window.LOGICAL_WIDTH / 2, window.LOGICAL_HEIGHT);
+    return true;
+}
+window.purgePortal = purgePortal;

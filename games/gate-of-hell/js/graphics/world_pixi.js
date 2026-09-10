@@ -1,8 +1,7 @@
 /* world_pixi.js — Pure-PIXI static world sprites (crowd, center gargoyle).
  *
  * Uses PIXI.Sprite.from(url) which handles async texture loading internally.
- * Sprites attach to bgLayer / worldLayer. Procedural fallbacks in world_road.js
- * still run when these sprites are absent.
+ * Sprites attach to bgLayer / worldLayer.
  */
 
 let _wpInitialized = false;

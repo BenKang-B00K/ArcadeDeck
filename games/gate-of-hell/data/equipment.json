@@ -1,28 +1,180 @@
 {
-    "equipmentTiers": [
-        { "id": 1, "prefix": "일반", "dropRate": 0.015 },
-        { "id": 2, "prefix": "성스러운", "dropRate": 0.007 },
-        { "id": 3, "prefix": "전설의", "dropRate": 0.002 },
-        { "id": 4, "prefix": "숨겨진 고대", "dropRate": 0.0005 }
-    ],
-    "equipmentSlots": {
-        "mainhand": { "name": "파멸의 지팡이", "icon": "", "stat": "cooldown", "label": "공격 속도 증가", "category": "weapon", "lore": "심연에서 건져낸 지팡이. 악령의 비명이 그 안에 새겨져 있습니다." },
-        "offhand": { "name": "금단의 마법서", "icon": "", "stat": "crit_damage", "label": "치명타 피해량", "category": "weapon", "lore": "열어서는 안 될 금서. 읽는 자에게 치명타의 비법을 속삭입니다." },
-        "scepter": { "name": "성스러운 홀", "icon": "", "stat": "damage", "label": "공격력 증가", "category": "weapon", "lore": "고위 퇴마사가 사용하던 홀. 성스러운 빛으로 악령을 강타합니다." },
-        "bow": { "name": "영혼의 활", "icon": "", "stat": "crit_chance", "label": "치명타 확률", "category": "weapon", "lore": "영혼의 실로 엮은 시위. 적의 약점을 정확히 꿰뚫습니다." },
-        "dagger": { "name": "은빛 단도", "icon": "", "stat": "cooldown", "label": "공격 속도 증가", "category": "weapon", "lore": "빛보다 빠르게 휘둘러지는 단도. 신속한 연격이 가능해집니다." },
-        "staff": { "name": "현자의 지팡이", "icon": "", "stat": "crit_damage", "label": "치명타 피해량", "category": "weapon", "lore": "오랜 지혜가 담긴 지팡이. 치명적인 일격의 위력을 극대화합니다." },
-        "helmet": { "name": "징벌의 투구", "icon": "", "stat": "damage", "label": "공격력 증가", "category": "armor", "lore": "징벌받은 악령의 갑주를 녹여 만든 투구. 착용자의 공격력을 배가시킵니다." },
-        "armor": { "name": "수호자의 성갑", "icon": "", "stat": "portal_dmg_reduction", "label": "포탈 데미지 감소", "category": "armor", "lore": "천계의 재료로 주조된 갑옷. 포탈에 가해지는 충격을 흡수합니다." },
-        "pauldrons": { "name": "강철 어깨갑주", "icon": "", "stat": "portal_dmg_reduction", "label": "포탈 데미지 감소", "category": "armor", "lore": "견고하게 제작된 어깨 보호대. 포탈에 가해지는 충격을 분산시킵니다." },
-        "greaves": { "name": "질주하는 각반", "icon": "", "stat": "aura_range", "label": "범위 확장", "category": "armor", "lore": "바람의 기운이 깃든 다리 갑옷. 퇴마사들의 영향력을 넓혀줍니다." },
-        "gloves": { "name": "응징의 장갑", "icon": "", "stat": "crit_chance", "label": "치명타 확률", "category": "armor", "lore": "일격을 극한으로 날카롭게 하는 장갑. 치명타 확률을 높여줍니다." },
-        "boots": { "name": "천상의 장화", "icon": "", "stat": "aura_range", "label": "범위 확장", "category": "armor", "lore": "천상의 기운이 깃든 장화. 아군들의 공격 범위를 넓혀줍니다." },
-        "necklace": { "name": "축복의 목걸이", "icon": "", "stat": "se_gain", "label": "SE 획득 보너스", "category": "accessory", "lore": "신성한 축복이 깃든 목걸이. 정화 활동에서 더 많은 SE를 수확합니다." },
-        "ring": { "name": "진리의 반지", "icon": "", "stat": "treasure_chance", "label": "보물 발견 확률", "category": "accessory", "lore": "진리를 탐구하는 자를 돕는 반지. 황금의 잔상 발견 확률을 높입니다." },
-        "earring": { "name": "지혜의 귀걸이", "icon": "", "stat": "summon_cost_reduction", "label": "소환 비용 절감", "category": "accessory", "lore": "정신을 맑게 해주는 귀걸이. 더 적은 에너지로 퇴마사를 부를 수 있게 돕습니다." },
-        "bracelet": { "name": "태양의 팔찌", "icon": "", "stat": "se_gain", "label": "SE 획득 보너스", "category": "accessory", "lore": "태양의 온기가 느껴지는 팔찌. 악령을 처치할 때 더 많은 영혼을 수확합니다." },
-        "belt": { "name": "퇴마사의 허리띠", "icon": "", "stat": "summon_cost_reduction", "label": "소환 비용 절감", "category": "accessory", "lore": "백전노장의 퇴마사가 착용했던 허리띠. 유닛 소환 비용을 절감합니다." },
-        "cloak": { "name": "심연의 망토", "icon": "", "stat": "slow_strength", "label": "감속 효과 강화", "category": "accessory", "lore": "악령을 얼어붙게 하는 망토. 속박 효과를 더욱 강력하게 만듭니다." }
+  "equipmentTiers": [
+    {
+      "id": 1,
+      "prefix": "일반",
+      "dropRate": 0.015
+    },
+    {
+      "id": 2,
+      "prefix": "성스러운",
+      "dropRate": 0.007
+    },
+    {
+      "id": 3,
+      "prefix": "전설의",
+      "dropRate": 0.002
+    },
+    {
+      "id": 4,
+      "prefix": "고대",
+      "dropRate": 0.0005
+    },
+    {
+      "id": 5,
+      "prefix": "신화의",
+      "dropRate": 0.00015
+    },
+    {
+      "id": 6,
+      "prefix": "초월의",
+      "dropRate": 4e-05
     }
+  ],
+  "equipmentSlots": {
+    "mainhand": {
+      "name": "파멸의 지팡이",
+      "icon": "",
+      "stat": "cooldown",
+      "label": "공격 속도 증가",
+      "category": "weapon",
+      "lore": "심연에서 건져낸 지팡이. 악령의 비명이 그 안에 새겨져 있습니다."
+    },
+    "offhand": {
+      "name": "금단의 마법서",
+      "icon": "",
+      "stat": "crit_damage",
+      "label": "치명타 피해량",
+      "category": "weapon",
+      "lore": "열어서는 안 될 금서. 읽는 자에게 치명타의 비법을 속삭입니다."
+    },
+    "scepter": {
+      "name": "성스러운 홀",
+      "icon": "",
+      "stat": "damage",
+      "label": "공격력 증가",
+      "category": "weapon",
+      "lore": "고위 퇴마사가 사용하던 홀. 성스러운 빛으로 악령을 강타합니다."
+    },
+    "bow": {
+      "name": "영혼의 활",
+      "icon": "",
+      "stat": "crit_chance",
+      "label": "치명타 확률",
+      "category": "weapon",
+      "lore": "영혼의 실로 엮은 시위. 적의 약점을 정확히 꿰뚫습니다."
+    },
+    "dagger": {
+      "name": "은빛 단도",
+      "icon": "",
+      "stat": "cooldown",
+      "label": "공격 속도 증가",
+      "category": "weapon",
+      "lore": "빛보다 빠르게 휘둘러지는 단도. 신속한 연격이 가능해집니다."
+    },
+    "staff": {
+      "name": "현자의 지팡이",
+      "icon": "",
+      "stat": "crit_damage",
+      "label": "치명타 피해량",
+      "category": "weapon",
+      "lore": "오랜 지혜가 담긴 지팡이. 치명적인 일격의 위력을 극대화합니다."
+    },
+    "helmet": {
+      "name": "징벌의 투구",
+      "icon": "",
+      "stat": "damage",
+      "label": "공격력 증가",
+      "category": "armor",
+      "lore": "징벌받은 악령의 갑주를 녹여 만든 투구. 착용자의 공격력을 배가시킵니다."
+    },
+    "armor": {
+      "name": "수호자의 성갑",
+      "icon": "",
+      "stat": "portal_dmg_reduction",
+      "label": "포탈 데미지 감소",
+      "category": "armor",
+      "lore": "천계의 재료로 주조된 갑옷. 포탈에 가해지는 충격을 흡수합니다."
+    },
+    "pauldrons": {
+      "name": "강철 어깨갑주",
+      "icon": "",
+      "stat": "portal_dmg_reduction",
+      "label": "포탈 데미지 감소",
+      "category": "armor",
+      "lore": "견고하게 제작된 어깨 보호대. 포탈에 가해지는 충격을 분산시킵니다."
+    },
+    "greaves": {
+      "name": "질주하는 각반",
+      "icon": "",
+      "stat": "aura_range",
+      "label": "범위 확장",
+      "category": "armor",
+      "lore": "바람의 기운이 깃든 다리 갑옷. 퇴마사들의 영향력을 넓혀줍니다."
+    },
+    "gloves": {
+      "name": "응징의 장갑",
+      "icon": "",
+      "stat": "crit_chance",
+      "label": "치명타 확률",
+      "category": "armor",
+      "lore": "일격을 극한으로 날카롭게 하는 장갑. 치명타 확률을 높여줍니다."
+    },
+    "boots": {
+      "name": "천상의 장화",
+      "icon": "",
+      "stat": "aura_range",
+      "label": "범위 확장",
+      "category": "armor",
+      "lore": "천상의 기운이 깃든 장화. 아군들의 공격 범위를 넓혀줍니다."
+    },
+    "necklace": {
+      "name": "축복의 목걸이",
+      "icon": "",
+      "stat": "se_gain",
+      "label": "SE 획득 보너스",
+      "category": "accessory",
+      "lore": "신성한 축복이 깃든 목걸이. 정화 활동에서 더 많은 SE를 수확합니다."
+    },
+    "ring": {
+      "name": "진리의 반지",
+      "icon": "",
+      "stat": "treasure_chance",
+      "label": "보물 발견 확률",
+      "category": "accessory",
+      "lore": "진리를 탐구하는 자를 돕는 반지. 황금의 잔상 발견 확률을 높입니다."
+    },
+    "earring": {
+      "name": "지혜의 귀걸이",
+      "icon": "",
+      "stat": "summon_cost_reduction",
+      "label": "소환 비용 절감",
+      "category": "accessory",
+      "lore": "정신을 맑게 해주는 귀걸이. 더 적은 에너지로 퇴마사를 부를 수 있게 돕습니다."
+    },
+    "bracelet": {
+      "name": "태양의 팔찌",
+      "icon": "",
+      "stat": "se_gain",
+      "label": "SE 획득 보너스",
+      "category": "accessory",
+      "lore": "태양의 온기가 느껴지는 팔찌. 악령을 처치할 때 더 많은 영혼을 수확합니다."
+    },
+    "belt": {
+      "name": "퇴마사의 허리띠",
+      "icon": "",
+      "stat": "summon_cost_reduction",
+      "label": "소환 비용 절감",
+      "category": "accessory",
+      "lore": "백전노장의 퇴마사가 착용했던 허리띠. 유닛 소환 비용을 절감합니다."
+    },
+    "cloak": {
+      "name": "심연의 망토",
+      "icon": "",
+      "stat": "slow_strength",
+      "label": "감속 효과 강화",
+      "category": "accessory",
+      "lore": "악령을 얼어붙게 하는 망토. 속박 효과를 더욱 강력하게 만듭니다."
+    }
+  }
 }

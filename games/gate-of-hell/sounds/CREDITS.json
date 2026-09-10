@@ -1,0 +1,140 @@
+[
+  {
+    "key": "atk_arrow",
+    "pixabay_id": 101936,
+    "title": "Bow Release (Bow and Arrow) 4",
+    "url": "https://cdn.pixabay.com/audio/2022/03/24/audio_92f13fce0d.mp3"
+  },
+  {
+    "key": "atk_slash",
+    "pixabay_id": 185432,
+    "title": "Sword Slash and Swing",
+    "url": "https://cdn.pixabay.com/audio/2024/01/11/audio_f5a8065509.mp3"
+  },
+  {
+    "key": "atk_magic",
+    "pixabay_id": 190272,
+    "title": "Magical Spell Cast",
+    "url": "https://cdn.pixabay.com/audio/2024/02/08/audio_ac6b5e1dd2.mp3"
+  },
+  {
+    "key": "atk_flame",
+    "pixabay_id": 179125,
+    "title": "Fireball Whoosh 1",
+    "url": "https://cdn.pixabay.com/audio/2023/11/30/audio_689d3968ce.mp3"
+  },
+  {
+    "key": "atk_ice",
+    "pixabay_id": 511310,
+    "title": "Glass Cracking",
+    "url": "https://cdn.pixabay.com/audio/2026/03/30/audio_f5fc23a5ad.mp3"
+  },
+  {
+    "key": "atk_bolt",
+    "pixabay_id": 474055,
+    "title": "Zap Hit",
+    "url": "https://cdn.pixabay.com/audio/2026/01/26/audio_61a08fa904.mp3"
+  },
+  {
+    "key": "atk_holy",
+    "pixabay_id": 293423,
+    "title": "Magic Church Bell",
+    "url": "https://cdn.pixabay.com/audio/2025/01/27/audio_635da4c822.mp3"
+  },
+  {
+    "key": "atk_dark",
+    "pixabay_id": 99828,
+    "title": "Magic_Spell_03",
+    "url": "https://cdn.pixabay.com/audio/2022/03/24/audio_f8acc8e8d6.mp3"
+  },
+  {
+    "key": "atk_item",
+    "pixabay_id": 148459,
+    "title": "Magical Whoosh",
+    "url": "https://cdn.pixabay.com/audio/2023/05/01/audio_a05bd24253.mp3"
+  },
+  {
+    "key": "hit",
+    "pixabay_id": 352458,
+    "title": "Combat Impact",
+    "url": "https://cdn.pixabay.com/audio/2025/05/31/audio_9345bfe4b3.mp3"
+  },
+  {
+    "key": "crit",
+    "pixabay_id": 515256,
+    "title": "Hard Heavy Impact",
+    "url": "https://cdn.pixabay.com/audio/2026/04/06/audio_e64b6942ee.mp3"
+  },
+  {
+    "key": "death",
+    "pixabay_id": 80161,
+    "title": "Poof",
+    "url": "https://cdn.pixabay.com/audio/2022/03/15/audio_84baeabac5.mp3"
+  },
+  {
+    "key": "boss_death",
+    "pixabay_id": 454857,
+    "title": "Epic Cinematic Explosion",
+    "url": "https://cdn.pixabay.com/audio/2025/12/21/audio_6e1baff3e7.mp3"
+  },
+  {
+    "key": "wave",
+    "pixabay_id": 90137,
+    "title": "teleport",
+    "url": "https://cdn.pixabay.com/audio/2022/03/15/audio_4a7e80f9a2.mp3"
+  },
+  {
+    "key": "boss_spawn",
+    "pixabay_id": 6985,
+    "title": "Monster Roar",
+    "url": "https://cdn.pixabay.com/audio/2021/08/09/audio_87617cc55e.mp3"
+  },
+  {
+    "key": "portal_hit",
+    "pixabay_id": 425132,
+    "title": "Impactful damage",
+    "url": "https://cdn.pixabay.com/audio/2025/10/24/audio_b864cc9e3b.mp3"
+  },
+  {
+    "key": "gameover",
+    "pixabay_id": 417465,
+    "title": "Game Over",
+    "url": "https://cdn.pixabay.com/audio/2025/10/08/audio_836ffccdef.mp3"
+  },
+  {
+    "key": "summon",
+    "pixabay_id": 40997,
+    "title": "Stand Summon Effect",
+    "url": "https://cdn.pixabay.com/audio/2022/03/10/audio_4fda89d45f.mp3"
+  },
+  {
+    "key": "promote",
+    "pixabay_id": 326133,
+    "title": "Level Up 05",
+    "url": "https://cdn.pixabay.com/audio/2025/04/11/audio_3933ad0008.mp3"
+  },
+  {
+    "key": "sacrifice",
+    "pixabay_id": 47176,
+    "title": "PuffOfSmoke",
+    "url": "https://cdn.pixabay.com/audio/2022/03/10/audio_b38996ce56.mp3"
+  },
+  {
+    "key": "ui_click",
+    "pixabay_id": 43196,
+    "title": "UI click",
+    "url": "https://cdn.pixabay.com/audio/2022/03/10/audio_1f6d9a0355.mp3"
+  },
+  {
+    "key": "reward",
+    "pixabay_id": 540190,
+    "title": "Coin Collect (3)",
+    "url": "https://cdn.pixabay.com/audio/2026/05/24/audio_98942bdcaa.mp3"
+  },
+  {
+    "key": "relic",
+    "pixabay_id": 289722,
+    "title": "Unlock stinger",
+    "url": "https://cdn.pixabay.com/audio/2025/01/19/audio_3e4b9172c4.mp3"
+  }
+]

@@ -34,7 +34,7 @@ function _buildShrineItem(shrine) {
         const tierBadge = document.createElement('div');
         tierBadge.className = 'shrine-tier-badge';
         tierBadge.innerText = 'T2';
-        tierBadge.style.cssText = 'position:absolute;top:2px;right:2px;font-size:7px;font-weight:900;color:#ffd700;background:rgba(0,0,0,0.7);padding:1px 3px;border-radius:3px;border:1px solid rgba(255,215,0,0.5);';
+        tierBadge.style.cssText = 'position:absolute;top:2px;right:2px;font-size: calc(7px * var(--fs));font-weight:900;color:#ffd700;background:rgba(0,0,0,0.7);padding:1px 3px;border-radius:3px;border:1px solid rgba(255,215,0,0.5);';
         item.appendChild(tierBadge);
         item.style.border = '1px solid rgba(255,215,0,0.4)';
         item.style.boxShadow = '0 0 6px rgba(255,215,0,0.15)';
@@ -44,7 +44,7 @@ function _buildShrineItem(shrine) {
     const nameBadge = document.createElement('div');
     nameBadge.className = 'shrine-name-badge';
     nameBadge.innerText = window.tShrine ? window.tShrine(shrine.type, 'name', shrine.name || shrine.type) : (shrine.name || shrine.type);
-    nameBadge.style.cssText = `font-size:7px;color:${roleMeta.color};font-weight:bold;text-align:center;line-height:1.1;padding:1px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;`;
+    nameBadge.style.cssText = `font-size: calc(7px * var(--fs));color:${roleMeta.color};font-weight:bold;text-align:center;line-height:1.1;padding:1px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;`;
     item.appendChild(nameBadge);
 
     item.onclick = () => {

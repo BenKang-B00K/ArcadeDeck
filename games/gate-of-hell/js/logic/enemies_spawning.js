@@ -58,6 +58,7 @@ function spawnWave() {
     if (window.currentStageSpawned >= window.totalStageEnemies && !window.isBossStage) return;
     if (window.isBossStage && window.bossSpawned && window.currentStageSpawned >= window.totalStageEnemies) return;
     if (window.isBossStage && !window.bossSpawned) { spawnBoss(); window.bossSpawned = true; }
+    if (typeof playSFX === 'function') playSFX('wave');
     
     let min = 1, max = 3;
     if (window.stage >= 40) { min = 3; max = 5; }
@@ -90,6 +91,7 @@ function spawnWave() {
  * Spawns a boss unit based on the current stage.
  */
 function spawnBoss() {
+    if (typeof playSFX === 'function') playSFX('boss_spawn');
     const data = bossData[window.stage] || { name: "Boss", type: "cerberus", hp: 3000, speed: 0.1, size: 60, icon: '' };
     if (typeof recordUnlock === 'function') recordUnlock(data.type, true);
 
@@ -298,6 +300,10 @@ function _createEnemyObject(selected, spawnSide = 'center') {
         materializing: isSide,
         materializeDuration: 1500,
         spawnTime: Date.now(),   // for materialize fade-in effect
+        // Spawn shield: untargetable + immune while the materialize fade-in plays,
+        // so an enemy cannot be killed before it has visually finished forming.
+        invincible: true,
+        spawnInvulnUntil: Date.now() + 1500,
         spawnSide,
         swayPhase: Math.random() * Math.PI * 2,
         swaySpeed: 0.02 + Math.random() * 0.03,

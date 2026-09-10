@@ -16,15 +16,17 @@ function handleKillReward(tower, target) {
 /* ─── Damage text VFX ───────────────────────────────────────────────────── */
 function createDamageText(target, amount, isCrit) {
     if (!target) return;
-    const lx = (target.x / 100) * LOGICAL_WIDTH;
-    const ly = target.y;
+    const lx = (target.x / 100) * LOGICAL_WIDTH + (Math.random() - 0.5) * 24; // jitter so stacked hits don't overlap
+    const ly = target.y - 10;
     const color = isCrit ? '#ff4500' : '#fff';
-    const size = isCrit ? 24 : 18;
+    // Bigger numbers → bigger text (18px at <10 dmg, ~28px at 10k)
+    const mag  = Math.max(0, Math.log10(Math.max(1, amount)) - 1);
+    const size = Math.round((isCrit ? 26 : 18) + mag * 3);
 
     if (typeof spawnFloatingText === 'function') {
-        spawnFloatingText(Math.round(amount), lx, ly, color, size);
+        spawnFloatingText(Math.round(amount), lx, ly, color, size, { punch: isCrit ? 1.5 : 1.0 });
         if (isCrit) {
-            spawnFloatingText("CRITICAL", lx, ly - 25, "#ff0000", 14);
+            spawnFloatingText("CRITICAL", lx, ly - 25, "#ff0000", 14, { punch: 1.3 });
         }
     }
 }
@@ -137,7 +139,7 @@ function handleHit(tower, target) {
         tower.isStunned = true;
         tower.stunEndTime = Math.max(tower.stunEndTime || 0, Date.now() + 1000);
     }
-    if (target.type === 'void_piercer' && tower.range > 150 && Math.random() < 0.5) return;
+    if (target.type === 'void_piercer' && (tower.range + (tower.rangeBonus || 0)) > 150 && Math.random() < 0.5) return;
     if (target.type === 'mimic' && Math.random() < 0.2) { target.y += 40; }
     if (target.type === 'deceiver' && Math.random() < 0.2) { target.y = Math.max(0, target.y - 40); return; }
     if (target.type === 'dimension' && Math.random() < 0.15) return;
@@ -182,6 +184,7 @@ function handleHit(tower, target) {
     }
 
     const finalDmg = tower.data.damage * finalDamageMultiplier;
+    if (typeof playSFX === 'function') playSFX(isCritShot ? 'crit' : 'hit');
     applyDamage(target, finalDmg, tower, false, false, isCritShot);
 
     // Relic: thunder_chain — crit arcs to nearest live enemies.
@@ -240,6 +243,7 @@ function rollEchoShot(tower, target, baseDmg) {
 
 function shoot(tower, target) {
     tower.lastShot = Date.now();
+    if (typeof sfxAttack === 'function') sfxAttack(tower.data.type);
     if (typeof spawnProjectile === 'function') spawnProjectile(tower, target);
     else setTimeout(() => { if (target && target.hp > 0) handleHit(tower, target); }, 200);
 }

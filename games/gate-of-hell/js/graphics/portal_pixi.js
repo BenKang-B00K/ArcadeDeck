@@ -59,7 +59,7 @@ function _bakePortalFrames() {
             window.globalAnimTimer = fakeT / 1000;
 
             drawPortal();
-            frames.push(PIXI.Texture.from(off));
+            frames.push(pixelTexture(off));
         }
         _portalFrames = frames;
         console.log(`[portal_pixi] Baked ${frames.length} frames.`);

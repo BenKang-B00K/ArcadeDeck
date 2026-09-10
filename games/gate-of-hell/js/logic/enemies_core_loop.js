@@ -66,6 +66,22 @@ function updateEnemyMovement(nowTime) {
 
     for (let i = window.enemies.length - 1; i >= 0; i--) {
         const enemy = window.enemies[i];
+
+        // Drop the spawn shield once the materialize fade-in has played out.
+        if (enemy.spawnInvulnUntil && nowTime >= enemy.spawnInvulnUntil) {
+            enemy.spawnInvulnUntil = 0;
+            enemy.invincible = false;
+            // Small "fully formed" pop so the moment the enemy becomes killable reads.
+            const slx = (enemy.x / 100) * L_WIDTH;
+            if (typeof spawnHitEffect === 'function') {
+                spawnHitEffect(slx, enemy.y, '#c77dff', 26);
+                spawnHitEffect(slx, enemy.y, '#ffffff', 14);
+            }
+            if (typeof spawnParticles === 'function') {
+                spawnParticles(slx, enemy.y, '#9400d3', 5, { speed: 1.6, gravity: 0.02, size: 2 });
+            }
+        }
+
         if (window.isTimeFrozen && !enemy.isBoss) continue;
         if (enemy.isStunned && !enemy.isBoss) continue;
 

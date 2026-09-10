@@ -1,32 +1,44 @@
-/* shrine_auras_pixi.js — Pure-Pixi shrine aura rendering.
+/* shrine_auras_pixi.js — Pure-Pixi shrine → unit link rendering.
  *
- * Per shrine:
- *   - thread Graphics (bezier curves to affected units, additive blend)
- *   - unit-ground-glow Graphics (faint ellipse under affected units)
+ * One Graphics per shrine, on worldLayer (above the slot frames, below the unit
+ * bodies) holding a "conduit": a shallow ground-level arc from the shrine base
+ * to each buffed unit's base, drawn as a train of beads flowing shrine → unit.
  *
- * Sparkle particles dropped (cosmetic). Color: gold (T2) or cyan (T1).
- * Range circle removed — buff scope is row+side, not radial.
+ * Beads, not a hairline: the board renders at ~0.58 CSS scale, so a 1px world
+ * stroke lands on half a screen pixel and shimmers. Round beads stay crisp.
+ *
+ * Global (tier-2 / rangeType 'all') shrines draw NO conduit — one line per unit
+ * from an all-board buff is 28 crossing threads and reads as noise. Their scope
+ * is shown per-unit by the shrine sigil in units_pixi.js.
+ *
+ * Per-unit "affected" marker (the floating sigil) lives in units_pixi.js.
  */
 
-const _shrineActive = new Map(); // shrine → { threads, unitGlows }
+const SHRINE_LINK_COLOR = 0x9FE8FF; // pale holy ice — deliberately lighter than
+                                    // the cooldown hex's 0x00E5FF so the two
+                                    // indicators never read as the same thing
+const SHRINE_LINK_Y     = 40;  // below slot centre: runs along the unit's base
+const SHRINE_LINK_SAG   = 8;   // arc droop, keeps parallel links from merging
+const SHRINE_LINK_BEADS = 9;
+
+const _shrineActive = new Map(); // shrine → { threads }
 const _shrineThreadPool  = [];
-const _shrineUnitGlowPool= [];
 
 if (window.EventBus && window.GAME_EVENTS) {
     EventBus.on(GAME_EVENTS.PIXI_RESET, () => {
         _shrineActive.clear();
         _shrineThreadPool.length = 0;
-        _shrineUnitGlowPool.length = 0;
     });
 }
 
-function _acquireShrineThreads()  { let g=_shrineThreadPool.pop()||new PIXI.Graphics(); g.blendMode='add'; g.visible=true; if(window.worldLayer)window.worldLayer.addChild(g); return g; }
-function _acquireShrineUnitGlow() { let g=_shrineUnitGlowPool.pop()||new PIXI.Graphics(); g.visible=true; if(window.worldLayer)window.worldLayer.addChild(g); return g; }
+function _acquireShrineThreads() { let g=_shrineThreadPool.pop()||new PIXI.Graphics(); g.blendMode='add'; g.visible=true; if(window.worldLayer)window.worldLayer.addChild(g); return g; }
 
 function _releaseShrineRecord(record) {
-    if (!record) return;
-    if (record.threads)  { record.threads.clear();  record.threads.visible=false;  if(record.threads.parent)record.threads.parent.removeChild(record.threads); _shrineThreadPool.push(record.threads); }
-    if (record.unitGlows){ record.unitGlows.clear();record.unitGlows.visible=false;if(record.unitGlows.parent)record.unitGlows.parent.removeChild(record.unitGlows); _shrineUnitGlowPool.push(record.unitGlows); }
+    if (!record || !record.threads) return;
+    record.threads.clear();
+    record.threads.visible = false;
+    if (record.threads.parent) record.threads.parent.removeChild(record.threads);
+    _shrineThreadPool.push(record.threads);
 }
 
 function gcPixiShrineAuras() {
@@ -44,52 +56,52 @@ function renderPixiShrineAuras() {
     if (typeof window.towers === 'undefined') return;
     gcPixiShrineAuras();
 
-    const time  = window.globalAnimTimer || 0;
-    const pulse = (Math.sin(time * 0.5) + 1) / 2;
+    const time = window.globalAnimTimer || 0;
 
     window.towers.forEach(shrine => {
         if (!shrine.isShrine) return;
-        const isSuperior = shrine.data.tier === 2;
-        const color = isSuperior ? 0xFFD700 : 0x00E5FF;
-        const mastery = (typeof getRelicBonus === 'function') ? getRelicBonus('shrine_mastery') : 0;
-        const isGlobal = shrine.data.rangeType === 'all';
-        const shrineArea = shrine.currentSlot ? shrine.currentSlot.area : null;
-        const shrineRow  = shrine.currentSlot ? Math.floor(shrine.currentSlot.index / 3) : -1;
-        const rowSpan    = (mastery > 0) ? 1 : 0;
 
         let record = _shrineActive.get(shrine);
         if (!record) {
-            record = { threads: _acquireShrineThreads(), unitGlows: _acquireShrineUnitGlow() };
+            record = { threads: _acquireShrineThreads() };
             _shrineActive.set(shrine, record);
         }
+        const g = record.threads;
+        g.clear(); // clear before the early-outs below, or a shrine that stops
+                   // linking (demolished, promoted to global) keeps stale geometry
 
-        // Threads + per-unit ground glow
-        record.threads.clear();
-        record.unitGlows.clear();
+        if (shrine.data.rangeType === 'all' || !shrine.currentSlot) return;
+
+        const mastery = (typeof getRelicBonus === 'function') ? getRelicBonus('shrine_mastery') : 0;
+        const area    = shrine.currentSlot.area;
+        const row     = Math.floor(shrine.currentSlot.index / 3);
+        const rowSpan = (mastery > 0) ? 1 : 0;
+        const sx = shrine.lx, sy = shrine.ly + SHRINE_LINK_Y;
+
         window.towers.forEach(unit => {
-            if (unit.isShrine || unit === shrine) return;
-            let affected = false;
-            if (isGlobal) affected = true;
-            else if (unit.currentSlot && shrineArea) {
-                if (unit.currentSlot.area === shrineArea) {
-                    const unitRow = Math.floor(unit.currentSlot.index / 3);
-                    affected = Math.abs(unitRow - shrineRow) <= rowSpan;
-                }
+            if (unit.isShrine || unit === shrine || !unit.currentSlot) return;
+            if (unit.currentSlot.area !== area) return;
+            if (Math.abs(Math.floor(unit.currentSlot.index / 3) - row) > rowSpan) return;
+
+            const ux = unit.lx, uy = unit.ly + SHRINE_LINK_Y;
+            const cx = (sx + ux) / 2, cy = (sy + uy) / 2 + SHRINE_LINK_SAG;
+            // quadratic bezier sample
+            const at = t => { const m = 1 - t; return [m*m*sx + 2*m*t*cx + t*t*ux,
+                                                       m*m*sy + 2*m*t*cy + t*t*uy]; };
+
+            // faint continuous path so the route still reads between beads
+            g.moveTo(sx, sy).quadraticCurveTo(cx, cy, ux, uy)
+             .stroke({ color: SHRINE_LINK_COLOR, alpha: 0.12, width: 3 });
+
+            // beads flow shrine → unit; per-unit phase so parallel links desync
+            const phase = unit.lx * 0.013 + unit.ly * 0.007;
+            for (let i = 0; i < SHRINE_LINK_BEADS; i++) {
+                const u = ((i / SHRINE_LINK_BEADS) + time * 0.12 + phase) % 1;
+                const [px, py] = at(u);
+                const env = Math.sin(Math.PI * u); // fat mid-span, tapers into both ends
+                g.circle(px, py, 1.5 + 1.7 * env).fill({ color: SHRINE_LINK_COLOR, alpha: 0.75 * env });
+                if (i % 3 === 0) g.circle(px, py, 0.9 + 0.7 * env).fill({ color: 0xFFFFFF, alpha: 0.6 * env });
             }
-            if (!affected) return;
-
-            // Bezier thread (additive). Use solid color stroke — approximates the original 0.6-alpha-fading gradient.
-            record.threads.moveTo(shrine.lx, shrine.ly)
-                .quadraticCurveTo(
-                    (shrine.lx + unit.lx) / 2,
-                    (shrine.ly + unit.ly) / 2 - 40,
-                    unit.lx, unit.ly
-                );
-            record.threads.stroke({ color, alpha: 0.5, width: 1 + pulse });
-
-            // Halo ring above head (was: ground glow below feet)
-            record.unitGlows.ellipse(unit.lx, unit.ly - 22, 25, 10)
-                .fill({ color, alpha: 0.05 + 0.1 * pulse });
         });
     });
 }

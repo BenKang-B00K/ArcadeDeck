@@ -9,33 +9,32 @@ function drawUnitAuras(cx, cy, tower) {
     const pulse = (Math.sin(time * 2) + 1) / 2;
     ctx.save();
 
-    // Angel ring shrine buff indicator — floats above head, no ground glow
+    // "Shrine affected" sigil — ctx2d mirror of units_pixi.js. Diamond, not a
+    // ring: straight edges survive the board's downscale where an ellipse mushes.
     if (!tower.isShrine && (tower.shrineHaloTier1 || tower.shrineHaloTier2)) {
-        // T2 (global/sacred) = gold; T1 = cyan. Matches shrine_auras_pixi.js.
-        const [r, g, b] = tower.shrineHaloTier2 ? [255, 215, 0] : [0, 229, 255];
-
-        // Floating position: gentle sine bob
-        const floatY = cy - 22 + Math.sin(time * 1.4 + cx * 0.03) * 1.8;
-        const shimmer = 0.72 + Math.sin(time * 0.9 + cx * 0.025) * 0.18;
+        // T2 (global/sacred) = pale gold; T1 = pale ice. Matches units_pixi.js.
+        const [r, g, b] = tower.shrineHaloTier2 ? [255, 217, 138] : [159, 232, 255];
+        const floatY = cy - 80 + Math.sin(time * 1.5 + cx * 0.03) * 2.0;
+        const shimmer = 0.78 + Math.sin(time * 1.1 + cx * 0.02) * 0.18;
+        const w = 8, h = 11;
+        const diamond = (rw, rh) => {
+            ctx.beginPath();
+            ctx.moveTo(cx, floatY - rh); ctx.lineTo(cx + rw, floatY);
+            ctx.lineTo(cx, floatY + rh); ctx.lineTo(cx - rw, floatY);
+            ctx.closePath();
+        };
 
         ctx.save();
-        ctx.globalCompositeOperation = 'source-over';
-
-        // Outer soft bloom around ring
-        ctx.strokeStyle = `rgba(${r},${g},${b},${0.18 + Math.sin(time * 1.1) * 0.06})`;
-        ctx.lineWidth = 6;
-        ctx.beginPath(); ctx.ellipse(cx, floatY, 11, 4, 0, 0, Math.PI * 2); ctx.stroke();
-
-        // Main halo ring (solid)
+        // soft bloom behind the mark
+        ctx.fillStyle = `rgba(${r},${g},${b},${0.10 + 0.05 * shimmer})`;
+        ctx.beginPath(); ctx.arc(cx, floatY, h * 1.05, 0, Math.PI * 2); ctx.fill();
+        // diamond outline
         ctx.strokeStyle = `rgba(${r},${g},${b},${shimmer})`;
-        ctx.lineWidth = 2.5;
-        ctx.beginPath(); ctx.ellipse(cx, floatY, 10, 3.5, 0, 0, Math.PI * 2); ctx.stroke();
-
-        // Inner highlight arc (top-front, catches "light")
-        ctx.strokeStyle = `rgba(255,255,255,${0.55 + Math.sin(time * 1.2) * 0.15})`;
-        ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.ellipse(cx, floatY, 9, 3, 0, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke();
-
+        ctx.lineWidth = 2.2;
+        diamond(w, h); ctx.stroke();
+        // white-hot core
+        ctx.fillStyle = `rgba(255,255,255,${0.5 + 0.3 * shimmer})`;
+        diamond(w * 0.42, h * 0.42); ctx.fill();
         ctx.restore();
     }
 

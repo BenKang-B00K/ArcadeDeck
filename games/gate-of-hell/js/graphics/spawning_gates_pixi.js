@@ -51,7 +51,7 @@ function _bakeGateFrames() {
             Date.now   = () => fakeT;
 
             _drawSummoningCircle(SZ / 2, SZ / 2, R, fakeT / 1000);
-            frames.push(PIXI.Texture.from(off));
+            frames.push(pixelTexture(off));
         }
         _gateFrames = frames;
         console.log(`[gates_pixi] Baked ${frames.length} frames.`);

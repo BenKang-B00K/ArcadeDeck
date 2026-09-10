@@ -126,10 +126,8 @@ const SHAPE = {
         g.moveTo(10, 0).lineTo(4, -4).lineTo(4, 4).closePath().fill({ color: c2 });
         g.moveTo(-14, 0).lineTo(-18, -3).lineTo(-18, 3).closePath().fill({ color: c1, alpha: 0.8 });
     },
-    hex(g, c1, c2, t) {
+    hex(g, c1, c2) {
         const r = 7;
-        const rot = (t || 0) * 0.005;
-        g.rotation = rot; // additive on top of projectile rotation? actually g already rotated. Skip.
         g.moveTo(r, 0);
         for (let i = 1; i <= 6; i++) {
             const a = (i / 6) * Math.PI * 2;
@@ -266,13 +264,22 @@ function _drawProjectile(gfx, type, animT) {
     fn(gfx, d.c1, d.c2, animT);
 }
 
+// Symmetric shapes spin in flight instead of pointing at the target.
+const PROJ_SPIN_KINDS = { hex: 1, star: 1, coin: 1, shard: 1, crystal: 1, cross: 1, paper: 1, starburst: 1, skull: 1, bottle: 1, crown: 1, note: 1 };
+
 // ── Trail rendering on a shared Graphics ────────────────────────────────────────
 function _drawTrails(gfx, activeProjs) {
     gfx.clear();
+    const animT = window.globalAnimTimer || 0;
     activeProjs.forEach(function(p) {
+        const d = (p.tower && p.tower.data) ? (PROJ_DESIGN[p.tower.data.type] || DEFAULT_DESIGN) : DEFAULT_DESIGN;
+        // Pulsing additive halo under the projectile (cheap glow, no filter)
+        const hx = p.x + (p.ox || 0), hy = p.y + (p.oy || 0);
+        const pulse = 1 + Math.sin(animT * 4 + hx * 0.05) * 0.2;
+        gfx.circle(hx, hy, 14 * pulse).fill({ color: d.c1, alpha: 0.18 });
+        gfx.circle(hx, hy, 8 * pulse).fill({ color: d.c2, alpha: 0.22 });
         const t = p.trail;
         if (!t || t.length < 2) return;
-        const d = (p.tower && p.tower.data) ? (PROJ_DESIGN[p.tower.data.type] || DEFAULT_DESIGN) : DEFAULT_DESIGN;
         const style = d.trail || 'glow';
         const len = t.length;
         for (let i = 1; i < len; i++) {
@@ -297,5 +304,6 @@ function _drawTrails(gfx, activeProjs) {
 }
 
 window.PROJ_DESIGN     = PROJ_DESIGN;
+window.PROJ_SPIN_KINDS = PROJ_SPIN_KINDS;
 window.drawProjectileFx = _drawProjectile;
 window.drawProjectileTrails = _drawTrails;

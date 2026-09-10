@@ -34,7 +34,7 @@
     pointer-events: none !important;
     z-index: 9999 !important;
     position: fixed !important;
-    font-size: 32px;
+    font-size: calc(32px * var(--fs));
     filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.6)) brightness(1.2);
     animation: ghostFloat 0.8s infinite alternate ease-in-out;
 }

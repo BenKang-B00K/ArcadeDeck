@@ -35,6 +35,10 @@ function updateLoadingProgress(percent, status) {
  * Loads all JSON data files with cache-busting and progress reporting.
  */
 async function loadGameData() {
+    // i18n.js loads before this file; wait for the language pack so loading text is localized.
+    if (window.I18n && typeof window.I18n.init === 'function') {
+        try { await window.I18n.init(); } catch (_) { /* fall back to Korean strings */ }
+    }
     const _t = (k, f) => (window.t ? window.t(k, f) : f);
     const loadingMessages = [
         _t('ui.loading.msg_0', "심연의 문을 여는 중..."),

@@ -32,7 +32,7 @@ window.UITemplates.collections = () => {
                     </div>
                 </div>
                 <div id="col-info-pane">
-                    <div class="info-default-text"><span data-i18n="ui.collections.default_title">${T('ui.collections.default_title','GATE OF HELL')}</span><br><span data-i18n="ui.collections.default_subtitle">${T('ui.collections.default_subtitle','CHRONICLES')}</span></div>
+                    <div class="info-default-text" data-hint="${T('ui.info_panel.hint_select', '▾ 슬롯을 터치하여 상세 보기 ▾')}"><span data-i18n="ui.collections.default_title">${T('ui.collections.default_title','GATE OF HELL')}</span><br><span data-i18n="ui.collections.default_subtitle">${T('ui.collections.default_subtitle','CHRONICLES')}</span></div>
                 </div>
             </div>
         </div>
@@ -60,7 +60,7 @@ window.UITemplates.relics = () => {
                     </div>
                 </div>
                 <div id="relic-info-pane">
-                    <div class="info-default-text">${T('ui.relics.default_title', 'GATE OF HELL')}<br>${T('ui.relics.default_subtitle', 'RELIC VAULT')}</div>
+                    <div class="info-default-text" data-hint="${T('ui.info_panel.hint_select', '▾ 슬롯을 터치하여 상세 보기 ▾')}">${T('ui.relics.default_title', 'GATE OF HELL')}<br>${T('ui.relics.default_subtitle', 'RELIC VAULT')}</div>
                 </div>
             </div>
         </div>
@@ -71,11 +71,13 @@ window.UITemplates.relics = () => {
 window.UITemplates.equipment = () => {
     const T = window.t || ((k, f) => f);
     const closeIcon = window.SvgIcons ? window.SvgIcons.get('close_x') : 'X';
+    const chartIcon = window.SvgIcons ? window.SvgIcons.get('chart') : '#';
     return `
     <div id="equip-overlay" class="overlay-base" style="display: none;">
         <div id="equip-content">
             <div id="equip-header">
                 <div id="equip-subtitle">${T('ui.equipment.subtitle', '심연에서 거두어들인 성스러운 유물')}</div>
+                <button id="equip-droprate-btn" title="${T('ui.equipment.droprate_title', '등급별 드랍률')}" aria-label="${T('ui.equipment.droprate_title', '등급별 드랍률')}">${chartIcon}</button>
                 <button id="close-equip">${closeIcon}</button>
             </div>
             <div id="equip-body">
@@ -86,7 +88,7 @@ window.UITemplates.equipment = () => {
                     </div>
                 </div>
                 <div id="equip-info-pane">
-                    <div class="info-default-text">${T('ui.equipment.default_title', 'GATE OF HELL')}<br>${T('ui.equipment.default_subtitle', 'SACRED ARMORY')}</div>
+                    <div class="info-default-text" data-hint="${T('ui.info_panel.hint_select', '▾ 슬롯을 터치하여 상세 보기 ▾')}">${T('ui.equipment.default_title', 'GATE OF HELL')}<br>${T('ui.equipment.default_subtitle', 'SACRED ARMORY')}</div>
                 </div>
             </div>
         </div>
@@ -167,6 +169,8 @@ window.UITemplates.settings = () => {
     const T = window.t || ((k, f) => f);
     const gearIcon = window.SvgIcons ? window.SvgIcons.get('gear') : '';
     const refreshIcon = window.SvgIcons ? window.SvgIcons.get('refresh') : '';
+    const savedVol = parseFloat(localStorage.getItem('goh_sfx_volume'));
+    const volPct = Math.round((isNaN(savedVol) ? 0.6 : savedVol) * 100);
     return `
     <div id="settings-modal" class="overlay-base" style="display: none;">
         <div id="settings-content">
@@ -181,6 +185,35 @@ window.UITemplates.settings = () => {
                         <input type="checkbox" id="tutorial-toggle" checked>
                         <span class="slider round"></span>
                     </label>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-info">
+                        <span class="settings-label">${T('ui.settings.sfx_label', '효과음')}</span>
+                        <span class="settings-desc">${T('ui.settings.sfx_desc', '전투 및 인터페이스 효과음을 재생합니다.')}</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="sfx-toggle" ${(localStorage.getItem('goh_sfx_enabled') !== 'false') ? 'checked' : ''}>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-info">
+                        <span class="settings-label">${T('ui.settings.volume_label', '효과음 크기')}</span>
+                        <span class="settings-desc">${T('ui.settings.volume_desc', '효과음 재생 음량을 조절합니다.')}</span>
+                    </div>
+                    <div class="sfx-volume-ctrl">
+                        <input type="range" id="sfx-volume" class="sfx-range" min="0" max="100" step="5" value="${volPct}">
+                        <span id="sfx-volume-val">${volPct}%</span>
+                    </div>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-info">
+                        <span class="settings-label">${T('ui.settings.fontsize_label', '글씨 크기')}</span>
+                        <span class="settings-desc">${T('ui.settings.fontsize_desc', '인터페이스 글씨 크기를 조절합니다.')}</span>
+                    </div>
+                    <div class="lang-switcher" id="fontsize-switcher">
+                        ${['small', 'medium', 'large'].map(sz => `<button class="lang-btn" data-fs-set="${sz}">${T('ui.settings.fontsize_' + sz, sz.toUpperCase())}</button>`).join('')}
+                    </div>
                 </div>
                 <div class="info-divider" style="margin: 15px 0;"></div>
                 <div class="settings-action-row">

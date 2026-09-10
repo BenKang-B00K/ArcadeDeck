@@ -92,8 +92,9 @@ function startColInfoResetTimer() {
 function resetColInfo() {
     const infoPane = document.getElementById('col-info-pane');
     if (infoPane) {
+        const T = window.t || ((k, f) => f);
         infoPane.innerHTML = `
-            <div class="info-default-text">GATE OF HELL<br>CHRONICLES</div>
+            <div class="info-default-text" data-hint="${T('ui.info_panel.hint_select', '▾ 슬롯을 터치하여 상세 보기 ▾')}">${T('ui.collections.default_title', 'GATE OF HELL')}<br>${T('ui.collections.default_subtitle', 'CHRONICLES')}</div>
         `;
     }
 }

@@ -102,6 +102,14 @@
       "pact_penalty_fmt": "無視ペナルティ: 敵の体力 +{hp}%, SE −{se}%",
       "tba_title": "未定",
       "tba_desc": "新しい機能が近日追加されます。",
+      "settings_desc": "一時停止 · チュートリアル · 再開始",
+      "summon_cost_label": "召喚コスト",
+      "shrine_cost_label": "建設コスト",
+      "purge_cost_label": "浄化コスト",
+      "badge_new": "NEW",
+      "badge_existing": "所持済",
+      "badge_upgrade": "強化",
+      "badge_reroll": "再啓示",
       "relics_cost_fmt": "一般 {n} · 最上位 {s} SF"
     },
     "info_panel": {
@@ -109,6 +117,7 @@
       "default_subtitle": "SACRED TABLET",
       "lore_default": "深淵の記録板は霊魂の本質を分析し、浄化の道を照らします。",
       "hint_touch": "▾ ユニットまたは敵をタッチ ▾",
+      "hint_select": "▾ スロットをタッチして詳細表示 ▾",
       "shrine_scope_local": "近接",
       "shrine_scope_global": "全域",
       "shrine_buffed_fmt": "{n}名を強化",
@@ -131,7 +140,16 @@
       "enemy_lore_unknown": "この霊魂に関する記録がありません。",
       "shrine_badge": "聖所",
       "shrine_demo_prefix": "撤去時",
-      "sacred_slot_only_log": "ここには聖なる聖所 (Tier 2) のみが配置可能です。"
+      "sacred_slot_only_log": "ここには聖なる聖所 (Tier 2) のみが配置可能です。",
+      "tip_cost_label": "コスト",
+      "tip_result_label": "結果",
+      "tip_result_random": "{n}種からランダム",
+      "tip_cost_short": "SEが不足しています。",
+      "tip_promote_desc_random": "ソウルエナジーを消費し、より高位の退魔師へランダムに覚醒します。",
+      "tip_promote_desc_fixed": "ソウルエナジーを消費し、指定された上位の退魔師へ昇級します。",
+      "tip_sacrifice_title": "堕落",
+      "tip_sacrifice_desc": "この守護者を深淵へ還し、枠を空けてソウルエナジーを一部回収します。取り消せません。",
+      "tip_refund_label": "回収"
     },
     "modal": {
       "close": "閉じる"
@@ -285,12 +303,14 @@
       "bonus_ledger_stacks": "霊魂請求書スタック",
       "log_ledger_windfall": "霊魂請求書: +{n} SE",
       "log_revival": "霊魂復活！ ポータル復元。",
-      "badge_title_fmt": "保有種類 {u} / 合計 {t}個"
+      "badge_title_fmt": "保有種類 {u} / 合計 {t}個",
+      "tip_no_relics": "獲得した遺物がありません。"
     },
     "equipment": {
       "subtitle": "深淵から回収された聖なる遺物",
       "default_title": "GATE OF HELL",
       "default_subtitle": "SACRED ARMORY",
+      "sc_label": "ソウルクリスタル",
       "total_bonus": "合計装備効果",
       "found_prefix": "装備",
       "sc_row_title": "敵の討伐時に稀に獲得。装備の再啓示に使用。",
@@ -307,13 +327,16 @@
       "no_equip": "装着されている装備がありません。",
       "not_owned_tier": "未獲得",
       "secondary_stat_label": "ランダム補助ステータス",
-      "secondary_stat_locked": "??? (最高等級限定)",
+      "secondary_stat_locked": "??? (古代等級以上)",
       "bonus_label": "[ボーナス]",
       "section_weapon": "武器",
       "section_armor": "防具",
       "section_accessory": "アクセサリー",
       "lore_armory": "折れた刃も退魔師の手に握られれば、悪霊を斬る神剣となるでしょう。",
-      "grade_suffix": "等級"
+      "grade_suffix": "等級",
+      "droprate_title": "等級別ドロップ率",
+      "droprate_one_in": "1 / {n}",
+      "droprate_note": "敵撃破ごとの確率。ボスは10倍。★ = ボーナススタット数。"
     },
     "game_over": {
       "title": "霊魂が侵食されました",
@@ -343,7 +366,16 @@
       "language_label": "言語 (Language)",
       "language_desc": "ゲームインターフェースの言語を変更します。",
       "btn_restart": "現在の浄化を中断 (再起動)",
-      "btn_close": "設定を閉じる"
+      "btn_close": "設定を閉じる",
+      "sfx_label": "効果音",
+      "sfx_desc": "戦闘およびインターフェースの効果音を再生します。",
+      "fontsize_label": "文字サイズ",
+      "fontsize_desc": "インターフェースの文字サイズを調節します。",
+      "fontsize_small": "小",
+      "fontsize_medium": "中",
+      "fontsize_large": "大",
+      "volume_label": "効果音の音量",
+      "volume_desc": "効果音の再生音量を調整します。"
     },
     "quit": {
       "header": "[運命の拒絶]",
@@ -939,6 +971,54 @@
       "desc": "周囲の味方のポータル浄化効果を3%増加させます。",
       "demoDesc": "周囲の味方のポータル浄化効果が減少します。",
       "lore": "泰山のような忍耐心が結晶化された聖所です。結界を守る浄化の気運を絶えず供給します。"
+    },
+    "shrine_valor": {
+      "name": "勇猛の聖所",
+      "desc": "周囲の味方の攻撃力を15%増加させます。",
+      "demoDesc": "周囲の味方の攻撃力が15%減少します。",
+      "lore": "聖戦で倒れた騎士たちの誓いが眠る聖所です。退かぬ勇気が退魔師たちの剣先に宿ります。"
+    },
+    "shrine_tempest": {
+      "name": "嵐の聖所",
+      "desc": "周囲の味方の攻撃速度を25%増加させます。",
+      "demoDesc": "周囲の味方の攻撃速度が25%減少します。",
+      "lore": "決して止まぬ嵐が閉じ込められた聖所です。吹き荒れる風が味方の連撃を駆り立てます。"
+    },
+    "shrine_horizon": {
+      "name": "地平の聖所",
+      "desc": "周囲の味方の攻撃射程を35増加させます。",
+      "demoDesc": "周囲の味方の攻撃射程が35減少します。",
+      "lore": "世界の果てを照らす灯台の聖所です。遥かな地平の彼方の悪霊までも視界に収めます。"
+    },
+    "shrine_fortune": {
+      "name": "幸運の聖所",
+      "desc": "周囲の味方のクリティカル率を12%増加させます。",
+      "demoDesc": "周囲の味方のクリティカル率が12%減少します。",
+      "lore": "運命の賽が止まった聖所です。味方に傾いた確率の天秤を授けます。"
+    },
+    "shrine_ruin": {
+      "name": "破滅の聖所",
+      "desc": "周囲の味方のクリティカルダメージを25%増加させます。",
+      "demoDesc": "周囲の味方のクリティカルダメージが25%減少します。",
+      "lore": "崩れ落ちた大聖堂の残骸で建てられた聖所です。破滅の記憶が一撃ごとに蘇ります。"
+    },
+    "shrine_omen": {
+      "name": "凶兆の聖所",
+      "desc": "周囲の味方のクリティカルダメージを12%増加させます。",
+      "demoDesc": "周囲の味方のクリティカルダメージが12%減少します。",
+      "lore": "災いを告げる黒鳥が宿る聖所です。悪霊たちは自らの最期を先に見せられます。"
+    },
+    "shrine_tithe": {
+      "name": "奉献の聖所",
+      "desc": "周囲の味方が敵撃破時にSEを4追加獲得します。",
+      "demoDesc": "周囲の味方のSE追加獲得が失われます。",
+      "lore": "信徒たちの奉献が積み重なって出来た聖所です。捧げられた信仰が魂の精髄となって還ります。"
+    },
+    "shrine_solace": {
+      "name": "安息の聖所",
+      "desc": "周囲の味方のポータル浄化効果を4%増加させます。",
+      "demoDesc": "周囲の味方のポータル浄化効果が減少します。",
+      "lore": "疲れた魂が最後に憩う聖所です。静かな安息が結界の傷をゆっくりと癒やします。"
     }
   },
   "enemy_category": {
@@ -1660,6 +1740,8 @@
     "1": "一般",
     "2": "聖なる",
     "3": "伝説の",
-    "4": "隠された古代"
+    "4": "古代",
+    "5": "神話の",
+    "6": "超越の"
   }
 }

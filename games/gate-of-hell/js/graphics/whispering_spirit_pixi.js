@@ -89,6 +89,14 @@ const PIXI_ENEMY_REGISTRY = {
 
 const PIXI_ENEMY_BAKE_BASE_T = 1_000_000;
 
+/* Bake scratch canvases are drawn oversized, then cropped to the art's real
+ * bounds. Registry `size` values are hand-tuned guesses and two of them clipped
+ * their own sprite (defiled_apprentice, frost_outcast) because the art reaches
+ * further up than down while the canvas is centred. Measuring beats guessing,
+ * and cropping the dead margin also cuts texture memory. */
+const BAKE_OVERSCAN = 64;   // scratch margin; covers every clipped type with room to spare
+const BAKE_PAD      = 20;   // kept in the final texture so bloom/aura are not cut off
+
 /** Per-type runtime state: { textures, bakeFailed, pool, active(Map enemy→record) } */
 const _pixiEnemyState = new Map();
 
@@ -114,35 +122,132 @@ function _bakePixiEnemyFrames(type) {
     }
 
     const origCtx = window.ctx;
-    const origNow = Date.now;
     const frames = [];
+    // Even size keeps pEnemy's Math.round() phase identical to the old bake.
+    const scratchSize = cfg.size + BAKE_OVERSCAN * 2;
+    const origin = scratchSize / 2;
 
     try {
+        // ── Pass 1: draw every frame onto oversized scratch canvases ────────
+        // A parallel emissive canvas rides along: draw fns that use pEnemyGlow
+        // paint into it, letting the finishing pass bloom exactly what the art
+        // declares instead of guessing from luminance. Fns still on plain p()
+        // leave it empty and fall back to the heuristic.
+        const scratches = [], emissives = [];
+        const canEmit = typeof setEnemyEmissiveTarget === 'function';
         for (let i = 0; i < cfg.frames; i++) {
             const off = document.createElement('canvas');
-            off.width  = cfg.size;
-            off.height = cfg.size;
-            const offCtx = off.getContext('2d');
+            off.width  = scratchSize;
+            off.height = scratchSize;
+            const offCtx = off.getContext('2d', { willReadFrequently: true });
             offCtx.imageSmoothingEnabled = false;
+
+            const em = document.createElement('canvas');
+            em.width = em.height = scratchSize;
+            const emCtx = em.getContext('2d', { willReadFrequently: true });
+            emCtx.imageSmoothingEnabled = false;
 
             const fakeT = PIXI_ENEMY_BAKE_BASE_T + (i / cfg.frames) * cfg.cycleMs;
             window.ctx = offCtx;
-            Date.now   = () => fakeT;
+            if (canEmit) setEnemyEmissiveTarget(emCtx);
+            // Draw fns animate off Date.now(); stub it to walk the cycle.
+            // Keep the swap as tight as possible — it is global state.
+            const origNow = Date.now;
+            Date.now = () => fakeT;
+            try { drawFn(origin, origin, null); }
+            finally { Date.now = origNow; if (canEmit) setEnemyEmissiveTarget(null); }
 
-            drawFn(cfg.size / 2, cfg.size / 2, null);
-            frames.push(PIXI.Texture.from(off));
+            scratches.push(off);
+            emissives.push(em);
         }
+
+        // ── Pass 2: union alpha bounding box across all frames ──────────────
+        const box = _measureAlphaBounds(scratches, scratchSize);
+        const crop = box
+            ? {
+                x: Math.max(0, box.x0 - BAKE_PAD),
+                y: Math.max(0, box.y0 - BAKE_PAD),
+                w: Math.min(scratchSize, box.x1 + BAKE_PAD) - Math.max(0, box.x0 - BAKE_PAD),
+                h: Math.min(scratchSize, box.y1 + BAKE_PAD) - Math.max(0, box.y0 - BAKE_PAD)
+              }
+            : { x: origin - cfg.size / 2, y: origin - cfg.size / 2, w: cfg.size, h: cfg.size };
+
+        // ── Pass 3: crop each frame, then run the shared finishing pass ─────
+        const style = (typeof enemyVfxStyle === 'function') ? enemyVfxStyle(type) : null;
+        for (let i = 0; i < cfg.frames; i++) {
+            const out = document.createElement('canvas');
+            out.width  = crop.w;
+            out.height = crop.h;
+            const oc = out.getContext('2d', { willReadFrequently: true });
+            oc.imageSmoothingEnabled = false;
+            oc.drawImage(scratches[i], -crop.x, -crop.y);
+            // Bloom / rim light / outline / aura — the lighting the draw fns lack.
+            if (style && typeof finishEnemyFrame === 'function') {
+                let emCrop = null;
+                if (_hasInk(emissives[i], scratchSize)) {
+                    emCrop = document.createElement('canvas');
+                    emCrop.width  = crop.w;
+                    emCrop.height = crop.h;
+                    const ec = emCrop.getContext('2d', { willReadFrequently: true });
+                    ec.imageSmoothingEnabled = false;
+                    ec.drawImage(emissives[i], -crop.x, -crop.y);
+                }
+                finishEnemyFrame(out, style, 2, type, emCrop);
+            }
+            frames.push(pixelTexture(out));
+        }
+
+        // Anchor that keeps the original draw origin fixed, so every existing
+        // position / shadow / HP-bar offset in renderPixiEnemy stays valid.
+        st.anchor = { x: (origin - crop.x) / crop.w, y: (origin - crop.y) / crop.h };
+        st.crop = crop;
         st.textures = frames;
-        console.log(`[pixi_enemy] Baked ${frames.length} frames for "${type}".`);
+        console.log(`[pixi_enemy] Baked ${frames.length} frames for "${type}" `
+                  + `(${crop.w}x${crop.h}, was ${cfg.size}x${cfg.size}).`);
     } catch (err) {
         console.error(`[pixi_enemy] bake failed for "${type}":`, err);
         st.bakeFailed = true;
         st.textures = null;
     } finally {
         window.ctx = origCtx;
-        Date.now   = origNow;
     }
     return st.textures;
+}
+
+/** True if any pixel on this canvas is non-transparent. */
+function _hasInk(canvas, size) {
+    const d = canvas.getContext('2d').getImageData(0, 0, size, size).data;
+    for (let i = 3; i < d.length; i += 16) if (d[i]) return true;   // stride 4px
+    return false;
+}
+
+/**
+ * Union bounding box of non-transparent pixels across every baked frame.
+ * Stacks all frames into one canvas so this costs a single getImageData, and
+ * steps by 2 because every enemy draw fn uses S = 2.0 — each art pixel is a
+ * 2x2 block, so stride 2 is exact, not an approximation.
+ * Returns {x0,y0,x1,y1} (x1/y1 exclusive) or null if every frame is empty.
+ */
+function _measureAlphaBounds(canvases, size) {
+    const acc = document.createElement('canvas');
+    acc.width = acc.height = size;
+    const ac = acc.getContext('2d', { willReadFrequently: true });
+    for (const c of canvases) ac.drawImage(c, 0, 0);
+
+    const d = ac.getImageData(0, 0, size, size).data;
+    let x0 = size, y0 = size, x1 = 0, y1 = 0, any = false;
+    for (let y = 0; y < size; y += 2) {
+        const row = y * size;
+        for (let x = 0; x < size; x += 2) {
+            if (d[(row + x) * 4 + 3] < 8) continue;
+            any = true;
+            if (x < x0) x0 = x;
+            if (x + 2 > x1) x1 = x + 2;
+            if (y < y0) y0 = y;
+            if (y + 2 > y1) y1 = y + 2;
+        }
+    }
+    return any ? { x0, y0, x1, y1 } : null;
 }
 
 function _acquireSprite(type) {
@@ -156,15 +261,23 @@ function _acquireSprite(type) {
         sprite.textures = frames; // safety; pool is per-type so usually unchanged
     } else {
         sprite = new PIXI.AnimatedSprite(frames);
-        sprite.anchor.set(0.5, 0.5);
-        sprite.animationSpeed = 0.10;
         sprite.loop = true;
+        // Snap to whole pixels — sprites sit at fractional x/y (percent-x + sine
+        // float), and subpixel sampling smears 2x pixel art across texels.
+        sprite.roundPixels = true;
     }
+    // Crop moved the art's midpoint; this anchor puts the original draw origin
+    // back under sprite.x/y so callers need no offset changes.
+    if (st.anchor) sprite.anchor.set(st.anchor.x, st.anchor.y);
+    else sprite.anchor.set(0.5, 0.5);
+    // Play the baked cycle at the rate it was authored for. Frames span cfg.cycleMs,
+    // and AnimatedSprite advances animationSpeed frames per 60fps tick.
+    const cfg = PIXI_ENEMY_REGISTRY[type];
+    sprite.animationSpeed = cfg.frames / ((cfg.cycleMs / 1000) * 60);
     sprite.visible = true;
     sprite.alpha   = 1;
     sprite.scale.set(1, 1);
     sprite.tint    = 0xFFFFFF;
-    sprite.filters = null;
     sprite.play();
     window.entityLayer.addChild(sprite);
     return sprite;
@@ -186,6 +299,7 @@ if (window.EventBus && window.GAME_EVENTS) {
             if (state.active && typeof state.active.clear === 'function') state.active.clear();
             if (Array.isArray(state.pool)) state.pool.length = 0;
         }
+        _dying.length = 0;
         _shadowPool.length = 0;
         _hpBarPool.length = 0;
         _glowPool.length = 0;
@@ -259,8 +373,7 @@ function _releaseSprite(type, record) {
     if (sprite) {
         sprite.stop();
         sprite.visible = false;
-        sprite.filters = null;
-        if (sprite.parent) sprite.parent.removeChild(sprite);
+            if (sprite.parent) sprite.parent.removeChild(sprite);
         _getEnemyState(type).pool.push(sprite);
     }
     if (shadow) {
@@ -339,7 +452,46 @@ function _releaseInvincAura(record) {
     }
 }
 
-/** Per-frame GC. Releases sprites whose enemies are dead or removed. */
+/* Death dissolve. Enemies used to pop out of existence the frame after they
+ * died — only the particle burst sold the kill. Rather than keeping dead
+ * entries alive in window.enemies (which combat, targeting, status effects,
+ * wave counting and relics all iterate), the sprite's ownership is transferred
+ * to this list at GC time and animated to completion here. Nothing in
+ * enemies_combat.js or enemies_ui.js has to change. */
+const _dying = [];
+const DEATH_MS = 260;
+
+function _startDeathFade(type, record) {
+    const s = record.sprite;
+    record.sprite = null;          // _releaseSprite guards on `if (sprite)`
+    _releaseSprite(type, record);  // hp bar / glow / shadow / aura recycle now
+    if (!s) return;
+    s.stop();
+    _dying.push({ type, sprite: s, t0: Date.now(), y0: s.y, a0: s.alpha,
+                  sx: s.scale.x, sy: s.scale.y });
+}
+
+function _updateDeathFades() {
+    const now = Date.now();
+    for (let i = _dying.length - 1; i >= 0; i--) {
+        const d = _dying[i];
+        const k = (now - d.t0) / DEATH_MS;
+        if (k >= 1) {
+            d.sprite.visible = false;
+            if (d.sprite.parent) d.sprite.parent.removeChild(d.sprite);
+            _getEnemyState(d.type).pool.push(d.sprite);
+            _dying.splice(i, 1);
+            continue;
+        }
+        d.sprite.alpha = d.a0 * (1 - k) * (1 - k);            // ease-out fade
+        d.sprite.y     = d.y0 - 14 * k;                       // spirit rises
+        d.sprite.scale.set(d.sx * (1 + 0.18 * k), d.sy * (1 + 0.18 * k));
+        const r = 255 - ((90 * k) | 0), g = 255 - ((170 * k) | 0);
+        d.sprite.tint = (r << 16) | (g << 8) | r;             // drain toward violet
+    }
+}
+
+/** Per-frame GC. Hands dead enemies' sprites to the dissolve, recycles the rest. */
 function gcPixiEnemySprites() {
     const list = window.enemies;
     if (!list) return;
@@ -351,11 +503,12 @@ function gcPixiEnemySprites() {
     for (const [type, st] of _pixiEnemyState) {
         for (const [enemy, record] of st.active) {
             if (!live.has(enemy)) {
-                _releaseSprite(type, record);
+                _startDeathFade(type, record);
                 st.active.delete(enemy);
             }
         }
     }
+    _updateDeathFades();
 }
 
 /** Returns true if this enemy.type is handled by the Pixi sprite path. */
@@ -388,19 +541,20 @@ function renderPixiEnemy(enemy, lx, floatY, spawnFade, mScale, ly, isBoss) {
     sprite.alpha = enemy.isStealthed ? 0.4 * spawnFade : spawnFade;
 
     const hitFlash = enemy.lastHitTime && (Date.now() - enemy.lastHitTime < 80);
-    const stunned  = !!enemy.isStunned;
-    const slowed   = enemy.speed < enemy.baseSpeed;
 
-    if (hitFlash || stunned || slowed) {
-        if (!record.filter) record.filter = new PIXI.ColorMatrixFilter();
-        const cm = record.filter;
-        cm.reset();
-        if (hitFlash) { cm.brightness(2.2, true); cm.contrast(1.6, true); }
-        if (stunned)  { cm.desaturate(); cm.brightness(1.5, true); }
-        if (slowed)   { cm.hue(90, true); }
-        sprite.filters = [cm];
-    } else if (sprite.filters) {
-        sprite.filters = null;
+    // Status colour via tint, not a ColorMatrixFilter. A filtered sprite gets its
+    // own render pass and framebuffer and drops out of the batch, so a blizzard
+    // slowing 30 enemies used to cost 30 passes. tint is a vertex attribute and
+    // batches. It can only darken, so the BRIGHT half of the hit flash is carried
+    // by the additive glow sprite below.
+    sprite.tint = hitFlash                        ? 0xFFD0D0
+                : enemy.isStunned                 ? 0xFFF0A0
+                : (enemy.speed < enemy.baseSpeed) ? 0x88CCFF
+                : 0xFFFFFF;
+
+    // Red outline while this enemy is the Sacred Tablet's current subject.
+    if (typeof markSelectionOutline === 'function') {
+        markSelectionOutline(sprite, window.lastInspectedEnemy === enemy);
     }
 
     // ── Shadow ellipse (worldLayer, below sprite) ───────────────────────
@@ -441,11 +595,17 @@ function renderPixiEnemy(enemy, lx, floatY, spawnFade, mScale, ly, isBoss) {
     }
 
     // ── Status glow (worldLayer, additive blend) ────────────────────────
-    let glowColor = null, glowAlpha = 0;
-    if (enemy.isBurning)            { glowColor = 0xFF4500; glowAlpha = 0.4; }
+    // Default is no longer "off": every enemy sits in a faint additive halo tinted
+    // to its own art (ENEMY_GLOW_TINT, derived at bake time). This is the true
+    // additive glow the baked-in aura cannot be, since the body must blend normally.
+    const tintTable = window.ENEMY_GLOW_TINT;
+    let glowColor = (tintTable && tintTable[enemy.type]) || 0x6A3AA0;
+    let glowAlpha = isBoss ? 0.30 : 0.18;
+    if (hitFlash)                   { glowColor = 0xFFFFFF; glowAlpha = 0.85; }
+    else if (enemy.isBurning)       { glowColor = 0xFF4500; glowAlpha = 0.4; }
     else if (enemy.isStunned)       { glowColor = 0xFFFFFF; glowAlpha = 0.3; }
     else if (enemy.speed < enemy.baseSpeed) { glowColor = 0x00E5FF; glowAlpha = 0.3; }
-    else if (isBoss)                { glowColor = 0xFF0000; glowAlpha = 0.2; }
+    else if (isBoss)                { glowColor = 0xFF0000; glowAlpha = 0.28; }
     if (glowColor !== null) {
         if (!record.glow) record.glow = _acquireGlow();
         const gl = record.glow;
@@ -549,6 +709,8 @@ function renderWhisperingSpiritPixi(enemy, lx, floatY, spawnFade, mScale) {
 }
 function releaseWhisperingSpritePixi(enemy) { return releasePixiEnemy(enemy); }
 
+// Shared with the codex thumbnail baker in pix_core.js, which crops the same way.
+window.measureSpriteAlphaBounds   = _measureAlphaBounds;
 window.PIXI_ENEMY_REGISTRY        = PIXI_ENEMY_REGISTRY;
 window.isPixiEnemyType            = isPixiEnemyType;
 window.renderPixiEnemy            = renderPixiEnemy;

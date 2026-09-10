@@ -102,6 +102,14 @@
       "pact_penalty_fmt": "Ignore Penalty: Enemy HP +{hp}%, SE −{se}%",
       "tba_title": "TBA",
       "tba_desc": "New features coming soon.",
+      "settings_desc": "Pause · Tutorial · Restart",
+      "summon_cost_label": "Summon Cost",
+      "shrine_cost_label": "Build Cost",
+      "purge_cost_label": "Purge Cost",
+      "badge_new": "NEW",
+      "badge_existing": "OWNED",
+      "badge_upgrade": "UPGRADE",
+      "badge_reroll": "REROLL",
       "relics_cost_fmt": "Normal {n} · Supreme {s} SF"
     },
     "info_panel": {
@@ -109,6 +117,7 @@
       "default_subtitle": "SACRED TABLET",
       "lore_default": "The Abyssal Tablet analyzes soul essence to light the path of purification.",
       "hint_touch": "▾ Touch Unit or Enemy ▾",
+      "hint_select": "▾ Touch a slot for details ▾",
       "shrine_scope_local": "Local",
       "shrine_scope_global": "Global",
       "shrine_buffed_fmt": "{n} buffed",
@@ -131,7 +140,16 @@
       "enemy_lore_unknown": "There is no record of this soul.",
       "shrine_badge": "Shrine",
       "shrine_demo_prefix": "On Demolish",
-      "sacred_slot_only_log": "Only Sacred Shrine (Tier 2) can be placed here."
+      "sacred_slot_only_log": "Only Sacred Shrine (Tier 2) can be placed here.",
+      "tip_cost_label": "Cost",
+      "tip_result_label": "Result",
+      "tip_result_random": "Random of {n}",
+      "tip_cost_short": "Not enough SE.",
+      "tip_promote_desc_random": "Spends Soul Energy to awaken into a random higher-tier exorcist.",
+      "tip_promote_desc_fixed": "Spends Soul Energy to promote into the designated higher exorcist.",
+      "tip_sacrifice_title": "Sacrifice",
+      "tip_sacrifice_desc": "Returns this guardian to the abyss, freeing the slot and refunding some Soul Energy. Cannot be undone.",
+      "tip_refund_label": "Refund"
     },
     "modal": {
       "close": "Close"
@@ -285,12 +303,14 @@
       "bonus_ledger_stacks": "Soul Ledger Stacks",
       "log_ledger_windfall": "Soul Ledger: +{n} SE",
       "log_revival": "Soul Revival! Portal restored.",
-      "badge_title_fmt": "Owned Types {u} / Total {t}"
+      "badge_title_fmt": "Owned Types {u} / Total {t}",
+      "tip_no_relics": "No relics obtained yet."
     },
     "equipment": {
       "subtitle": "Sacred artifacts gathered from the abyss",
       "default_title": "GATE OF HELL",
       "default_subtitle": "SACRED ARMORY",
+      "sc_label": "Soul Crystal",
       "total_bonus": "Total Equipment Effects",
       "found_prefix": "Equipment",
       "sc_row_title": "Rarely obtained on kill. Used for rerolling equipment.",
@@ -307,13 +327,16 @@
       "no_equip": "No equipment equipped.",
       "not_owned_tier": "Not Obtained",
       "secondary_stat_label": "Random Substat",
-      "secondary_stat_locked": "??? (Highest Grade Only)",
+      "secondary_stat_locked": "??? (Ancient grade or higher)",
       "bonus_label": "[Bonus]",
       "section_weapon": "Weapon",
       "section_armor": "Armor",
       "section_accessory": "Accessory",
       "lore_armory": "Even a broken blade becomes a divine sword in the hands of an exorcist.",
-      "grade_suffix": "Grade"
+      "grade_suffix": "Grade",
+      "droprate_title": "Drop Rate by Grade",
+      "droprate_one_in": "1 in {n}",
+      "droprate_note": "Chance per enemy killed. Bosses roll 10x. ★ = bonus stat slots."
     },
     "game_over": {
       "title": "Soul Overwhelmed",
@@ -343,7 +366,16 @@
       "language_label": "Language",
       "language_desc": "Changes the game interface language.",
       "btn_restart": "Stop Current Purification (Restart)",
-      "btn_close": "Close Settings"
+      "btn_close": "Close Settings",
+      "sfx_label": "Sound Effects",
+      "sfx_desc": "Plays combat and interface sound effects.",
+      "fontsize_label": "Font Size",
+      "fontsize_desc": "Adjusts the interface text size.",
+      "fontsize_small": "SMALL",
+      "fontsize_medium": "MEDIUM",
+      "fontsize_large": "LARGE",
+      "volume_label": "Sound Effect Volume",
+      "volume_desc": "Adjusts the playback volume of sound effects."
     },
     "quit": {
       "header": "[Rejection of Fate]",
@@ -939,6 +971,54 @@
       "desc": "Increases portal purification effect of nearby allies by 3%.",
       "demoDesc": "Decreases portal purification effect of nearby allies.",
       "lore": "A shrine where mountain-like patience is crystallized. Constantly supplies purification energy to guard the ward."
+    },
+    "shrine_valor": {
+      "name": "Shrine of Valor",
+      "desc": "Increases attack power of nearby allies by 15%.",
+      "demoDesc": "Decreases attack power of nearby allies by 15%.",
+      "lore": "A shrine where the oaths of knights fallen in holy war lie sleeping. Courage that never retreats rides on the exorcists' blades."
+    },
+    "shrine_tempest": {
+      "name": "Shrine of Tempest",
+      "desc": "Increases attack speed of nearby allies by 25%.",
+      "demoDesc": "Decreases attack speed of nearby allies by 25%.",
+      "lore": "A shrine imprisoning a storm that never subsides. The raging wind drives allies' strikes into relentless chains."
+    },
+    "shrine_horizon": {
+      "name": "Shrine of Horizon",
+      "desc": "Increases attack range of nearby allies by 35.",
+      "demoDesc": "Decreases attack range of nearby allies by 35.",
+      "lore": "A lighthouse shrine that illuminates the end of the world. It captures even the spirits beyond the distant horizon."
+    },
+    "shrine_fortune": {
+      "name": "Shrine of Fortune",
+      "desc": "Increases crit chance of nearby allies by 12%.",
+      "demoDesc": "Decreases crit chance of nearby allies by 12%.",
+      "lore": "A shrine where the dice of fate came to rest. It gifts allies a scale of probability tilted in their favor."
+    },
+    "shrine_ruin": {
+      "name": "Shrine of Ruin",
+      "desc": "Increases crit damage of nearby allies by 25%.",
+      "demoDesc": "Decreases crit damage of nearby allies by 25%.",
+      "lore": "A shrine raised from the rubble of a collapsed cathedral. The memory of ruin awakens with every strike."
+    },
+    "shrine_omen": {
+      "name": "Shrine of Omen",
+      "desc": "Increases crit damage of nearby allies by 12%.",
+      "demoDesc": "Decreases crit damage of nearby allies by 12%.",
+      "lore": "A shrine inhabited by a black bird that foretells disaster. Evil spirits are shown their own end in advance."
+    },
+    "shrine_tithe": {
+      "name": "Shrine of Tithe",
+      "desc": "Nearby allies gain 4 additional SE on kill.",
+      "demoDesc": "Additional SE gain for nearby allies vanishes.",
+      "lore": "A shrine built from the accumulated tithes of the faithful. Offered devotion returns as soul essence."
+    },
+    "shrine_solace": {
+      "name": "Shrine of Solace",
+      "desc": "Increases portal purification effect of nearby allies by 4%.",
+      "demoDesc": "Decreases portal purification effect of nearby allies.",
+      "lore": "A shrine where weary souls rest at last. Its quiet solace slowly closes the wounds of the ward."
     }
   },
   "enemy_category": {
@@ -1660,6 +1740,8 @@
     "1": "Normal",
     "2": "Sacred",
     "3": "Legendary",
-    "4": "Hidden Ancient"
+    "4": "Ancient",
+    "5": "Mythic",
+    "6": "Transcendent"
   }
 }

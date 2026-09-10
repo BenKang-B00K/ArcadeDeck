@@ -38,6 +38,9 @@ function drawShrineNormal(cx, cy, tower) {
     p(-13,  6, '#FFE082',  1,  1);
     p( 12,  6, '#FFE082',  1,  1);
 
+    // Second-wave T1 shrines live in pix_shrine_extra.js (keeps this file small).
+    if (typeof drawShrineExtraTop === 'function' && drawShrineExtraTop(cx, cy, type, S, pulse, now)) return;
+
     // ── TYPE-SPECIFIC STRUCTURES ─────────────────────────────────────────
 
     if (type === 'shrine_might') {

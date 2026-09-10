@@ -83,24 +83,38 @@ function _ensureCombatGfx() {
     vfxLayer.addChild(_chainGfx);
 }
 
+// Kinds that fly in a lobbed arc instead of a straight homing line.
+const ARC_KINDS = { bottle: 1, coin: 1, paper: 1, note: 1, feather: 1, skull: 1, scythe: 1, crown: 1 };
+
 function spawnProjectile(tower, target) {
     if (!window.Pools) return;
     const p    = Pools.projectiles.get();
     p.x        = tower.lx;
     p.y        = tower.ly;
+    p.sx       = tower.lx;
+    p.sy       = tower.ly;
     p.target   = target;
     p.tower    = tower;
     p.speed    = 12;
     p.life     = 1.0;
     p.angle    = 0;
+    p.ox = 0; p.oy = 0;
+    p.travelled = 0;
+    const d = (window.PROJ_DESIGN && tower.data) ? window.PROJ_DESIGN[tower.data.type] : null;
+    p.arc  = (d && ARC_KINDS[d.kind]) ? (Math.random() < 0.5 ? -1 : 1) : 0;
     if (!p.trail) p.trail = [];
     p.trail.length = 0;
+    // Muzzle flash in the projectile's own colour
+    if (d && typeof spawnHitEffect === 'function') {
+        spawnHitEffect(tower.lx, tower.ly, '#' + d.c1.toString(16).padStart(6, '0'), 10);
+    }
 }
 
 function updateProjectiles() {
     if (!window.Pools || !Pools.projectiles) return;
     const active = Pools.projectiles.active;
     const L_W = window.LOGICAL_WIDTH || 1080;
+    const dtf = window.dt || 1;
 
     for (let i = active.length - 1; i >= 0; i--) {
         const p = active[i];
@@ -117,6 +131,7 @@ function updateProjectiles() {
         }
 
         if (tx === undefined || ty === undefined) {
+            p.target = null; p.tower = null; // drop refs so pooled slots don't pin dead entities
             Pools.projectiles.releaseAt(i);
             continue;
         }
@@ -124,20 +139,31 @@ function updateProjectiles() {
         const dx = tx - p.x;
         const dy = ty - p.y;
         const distSq = dx * dx + dy * dy;
-        const speed = p.speed || 12;
+        // Accelerate over flight: launches slow, arrives fast.
+        const total = p.travelled + Math.sqrt(distSq);
+        const prog  = total > 0 ? p.travelled / total : 1;
+        const speed = (7 + 11 * prog) * dtf;
 
         if (distSq <= speed * speed) {
             if (p.target && p.target.hp > 0 && typeof handleHit === 'function') {
                 handleHit(p.tower, p.target);
             }
+            p.target = null; p.tower = null; // drop refs so pooled slots don't pin dead entities
             Pools.projectiles.releaseAt(i);
         } else {
             const dist = Math.sqrt(distSq);
-            p.x += (dx / dist) * speed;
-            p.y += (dy / dist) * speed;
+            const ux = dx / dist, uy = dy / dist;
+            p.x += ux * speed;
+            p.y += uy * speed;
+            p.travelled += speed;
             p.angle = Math.atan2(dy, dx);
+            // Lobbed arc: perpendicular sine offset, zero at both ends.
+            if (p.arc) {
+                const amp = Math.min(70, total * 0.22) * p.arc * Math.sin(prog * Math.PI);
+                p.ox = -uy * amp; p.oy = ux * amp;
+            }
             if (!p.trail) p.trail = [];
-            p.trail.push({ x: p.x, y: p.y });
+            p.trail.push({ x: p.x + p.ox, y: p.y + p.oy });
             if (p.trail.length > TRAIL_MAX) p.trail.shift();
         }
     }
@@ -172,10 +198,12 @@ function drawProjectiles() {
             _activeProj.set(p, gfx);
         }
         gfx.clear();
-        gfx.x        = p.x;
-        gfx.y        = p.y;
-        gfx.rotation = p.angle || 0;
+        gfx.x        = p.x + p.ox;
+        gfx.y        = p.y + p.oy;
         const type = (p.tower && p.tower.data) ? p.tower.data.type : 'default';
+        const spin = window.PROJ_SPIN_KINDS && window.PROJ_DESIGN && window.PROJ_DESIGN[type]
+            && window.PROJ_SPIN_KINDS[window.PROJ_DESIGN[type].kind];
+        gfx.rotation = spin ? animT * 3 : (p.angle || 0);
         if (typeof window.drawProjectileFx === 'function') {
             window.drawProjectileFx(gfx, type, animT);
         }
@@ -190,8 +218,10 @@ function spawnPromotionBurst(lx, ly, tier) {
     if (typeof spawnHitEffect === 'function') {
         spawnHitEffect(lx, ly, (tier === 4) ? '#9400d3' : '#ffd700', 40);
         if (typeof spawnParticles === 'function') {
-            spawnParticles(lx, ly, (tier === 4) ? '#9400d3' : '#ffd700', 4);
+            spawnParticles(lx, ly, (tier === 4) ? '#9400d3' : '#ffd700', 14, { speed: 3.5, gravity: 0.03, size: 4 });
+            spawnParticles(lx, ly, '#ffffff', 6, { speed: 5, gravity: 0.01, size: 2 });
         }
+        if (typeof addScreenShake === 'function') addScreenShake(tier === 4 ? 8 : 4);
     } else if (typeof spawnParticles === 'function') {
         spawnParticles(lx, ly, (tier === 4) ? '#9400d3' : '#ffd700', 20);
     }
@@ -201,7 +231,7 @@ function updatePromotionBursts() {
     if (!window.Pools || !Pools.promotionBursts) return;
     const active = Pools.promotionBursts.active;
     for (let i = active.length - 1; i >= 0; i--) {
-        active[i].life -= 0.025;
+        active[i].life -= 0.025 * (window.dt || 1);
         if (active[i].life <= 0) Pools.promotionBursts.releaseAt(i);
     }
 }
@@ -257,13 +287,14 @@ function spawnPurgeEffect(lx, ly) {
         spawnParticles(px, py, '#00e5ff', 20);
     }
     if (typeof spawnGlitchEffect === 'function') spawnGlitchEffect(30);
+    if (typeof addScreenShake === 'function') addScreenShake(18);
 }
 
 function updatePurgeEffects() {
     if (!window.Pools || !Pools.purgeEffects) return;
     const active = Pools.purgeEffects.active;
     for (let i = active.length - 1; i >= 0; i--) {
-        active[i].life -= 0.012;
+        active[i].life -= 0.012 * (window.dt || 1);
         if (active[i].life <= 0) Pools.purgeEffects.releaseAt(i);
     }
 }
@@ -334,7 +365,7 @@ function updateBanishEffects() {
     if (!window.Pools || !Pools.banishEffects) return;
     const active = Pools.banishEffects.active;
     for (let i = active.length - 1; i >= 0; i--) {
-        active[i].life -= 0.02;
+        active[i].life -= 0.02 * (window.dt || 1);
         if (active[i].life <= 0) Pools.banishEffects.releaseAt(i);
     }
 }
@@ -379,7 +410,7 @@ function updateSummonCircles() {
     if (!window.Pools || !Pools.summonCircles) return;
     const active = Pools.summonCircles.active;
     for (let i = active.length - 1; i >= 0; i--) {
-        active[i].life -= 0.025; // Faster duration
+        active[i].life -= 0.025 * (window.dt || 1); // Faster duration
         active[i].rot  += 0.05;
         if (active[i].life <= 0) Pools.summonCircles.releaseAt(i);
     }

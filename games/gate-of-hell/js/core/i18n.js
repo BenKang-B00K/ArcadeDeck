@@ -51,7 +51,13 @@ window.I18n = (function () {
         }
     }
 
-    async function init() {
+    let _initPromise = null;
+    function init() {
+        // Idempotent: data_loader.js and script.js both await this.
+        return _initPromise || (_initPromise = _init());
+    }
+
+    async function _init() {
         const saved = localStorage.getItem(STORAGE_KEY);
         const lang = SUPPORTED.includes(saved) ? saved : DEFAULT_LANG;
         fallbackMap = await _fetchLang(DEFAULT_LANG);

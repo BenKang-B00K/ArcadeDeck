@@ -26,14 +26,14 @@ function performJobChange(ntStr, fromInfo = false) {
         // Weighted random for T1→T2 (common=10, uncommon=8, rare=5)
         // Special T2 (rare, exclusive per T1 type):
         //   novice_exorcist only: necromancer, alchemist, mirror, verse_warrior, hymn_blaster, exorcism_mage
-        //   apprentice only: archer, assassin, guardian
+        //   apprentice only: archer, assassin, guardian, lightning_mage
         const T2_WEIGHTS = {
             chainer: 10, talisman: 10, monk: 10, ice: 10, tracker: 10, // common (shared)
             fire: 8, knight: 8,                                          // uncommon (shared)
             necromancer: 5, alchemist: 5, mirror: 5,                    // rare (novice exclusive — special)
             verse_warrior: 5, hymn_blaster: 5, exorcism_mage: 5,       // rare (novice exclusive — attack)
             prayer_herald: 5, relic_keeper: 5, ward_scribe: 5,         // rare (novice exclusive — support)
-            archer: 5, assassin: 5, guardian: 5                         // rare (apprentice exclusive)
+            archer: 5, assassin: 5, guardian: 5, lightning_mage: 5      // rare (apprentice exclusive)
         };
         const totalW = possibleUpgrades.reduce((s, t) => s + (T2_WEIGHTS[t] || 8), 0);
         let rand = Math.random() * totalW;
@@ -57,6 +57,7 @@ function performJobChange(ntStr, fromInfo = false) {
     if (typeof spawnPromotionBurst === 'function') {
         spawnPromotionBurst(tower.lx, tower.ly, nt.tier);
     }
+    if (typeof playSFX === 'function') playSFX('promote');
 
     if (typeof GameLogger !== 'undefined') GameLogger.info(`Job Change: ${tower.data.name} -> ${nt.name}`);
     tower.data = nt; tower.range = nt.range; tower.cooldown = nt.cooldown; tower.spentSE += cost;
@@ -109,6 +110,7 @@ function confirmSacrifice(t) {
  */
 function executeSacrifice(t) {
     if (typeof GameLogger !== 'undefined') GameLogger.warn(`Sacrificed: ${t.data.name}`);
+    if (typeof playSFX === 'function') playSFX('sacrifice');
     const s = t.currentSlot;
     if (s) s.isOccupied = false;
 

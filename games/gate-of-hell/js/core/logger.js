@@ -1,5 +1,7 @@
 /* js/logger.js - Responsive QA Logging System with Abyss Aesthetic */
 
+const _escapeHtml = (v) => String(v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
 const GameLogger = {
     logs: [],
     maxLogs: 50,
@@ -140,7 +142,7 @@ const GameLogger = {
             if (log.type === 'debug') color = '#9400d3';
             return `<div style="border-bottom: 1px solid #1a1a1a; padding-bottom: 3px; line-height: 1.3; font-size: 0.95em;">
                 <span style="color:#555; font-size:0.85em; font-family:monospace;">[${log.timestamp}]</span> 
-                <span style="color:${color};">${log.message}</span>
+                <span style="color:${color};">${_escapeHtml(log.message)}</span>
             </div>`;
         }).join('');
         content.scrollTop = 0;

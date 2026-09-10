@@ -27,7 +27,7 @@ function resetGameState() {
     window.towerCost = 30;
     window.shrineCost = 100;
     window.damageMultiplier = 1.0;
-    window.treasureChance = 0.01;
+    window.treasureChance = 0.005; // keep in sync with game_state.js initial value
     window.maxMoney = 1000; 
     
     window.isTimeFrozen = false;

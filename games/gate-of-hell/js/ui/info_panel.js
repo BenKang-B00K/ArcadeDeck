@@ -1,8 +1,10 @@
 /* js/ui/info_panel.js - Unified Info Panel Management for Units, Enemies, and Shrines */
 
 let infoResetTimer = null;
+let infoSyncTimer = null;
 window.infoPanelLockedUntil = 0;
 window.lastInspectedTower = null;
+window.lastInspectedEnemy = null;
 
 const TIER_COLORS = { 1: "#ffffff", 2: "#00e5ff", 3: "#bf5af2", 4: "#ff9f0a" };
 const ENEMY_TIER_COLORS = { 1: "#ff4500", 2: "#ff0000", 3: "#9400d3", 4: "#1a0a1a" };
@@ -41,6 +43,128 @@ function getEffectiveDPS(tower) {
     return effAtk * fireRate;
 }
 
+/** Number of units a shrine is currently buffing (recomputed live). */
+function countShrineBuffed(tower) {
+    if (!window.towers) return 0;
+    const data = tower.data || {};
+    const mastery = (typeof getRelicBonus === 'function') ? getRelicBonus('shrine_mastery') : 0;
+    const rowSpan = (mastery > 0) ? 1 : 0;
+    const isGlobal = data.rangeType === 'all';
+    const shrineArea = tower.currentSlot ? tower.currentSlot.area : null;
+    const shrineRow  = tower.currentSlot ? Math.floor(tower.currentSlot.index / 3) : -1;
+    let n = 0;
+    window.towers.forEach(t => {
+        if (t.isShrine || t === tower) return;
+        if (isGlobal) { n++; return; }
+        if (!t.currentSlot || !shrineArea) return;
+        if (t.currentSlot.area !== shrineArea) return;
+        if (Math.abs(Math.floor(t.currentSlot.index / 3) - shrineRow) <= rowSpan) n++;
+    });
+    return n;
+}
+
+/**
+ * Every volatile stat cell for a unit, as ready-to-inject HTML.
+ * Shared by the initial render and the live sync so the two cannot drift.
+ */
+function unitStatDisplays(tower) {
+    const data = tower.data || {};
+    const _Tu = window.t || ((k, f) => f);
+    const isPassive = !!data.passive;
+
+    const baseDmg  = data.damage || 0;
+    const bonusDmg = Math.round(baseDmg * ((window.damageMultiplier || 1) * (1 + (tower.damageBonus || 0)) - 1));
+    const baseAS   = (data.cooldown > 0) ? (1000 / data.cooldown) : 0;
+    const bonusAS  = baseAS * (tower.speedBonus || 0);
+
+    const relicCountFor = (t) => (typeof countRelicStacks === 'function') ? countRelicStacks(t) : 0;
+
+    const dpsRaw    = getEffectiveDPS(tower);
+    const dmgRelics = relicCountFor('damage');
+
+    const critChance = (typeof computeCritChance === 'function') ? computeCritChance(tower) : 0.05;
+    const critMult   = (typeof computeCritMult   === 'function') ? computeCritMult(tower)   : 2.0;
+    const critPct    = Math.round(critChance * 100);
+    const critRelics = relicCountFor('crit_chance');
+    const cdRelics   = relicCountFor('crit_damage');
+    const critRelicChip = (critRelics + cdRelics) > 0 ? ` <span class="st-stat-sub">⚛${critRelics + cdRelics}</span>` : '';
+
+    return {
+        atk: isPassive ? '—' : (data.instakill ? _Tu('ui.info_panel.unit_instakill_disp', '즉사') : `${baseDmg}${bonusChip(bonusDmg)}`),
+        spd: isPassive ? '—' : `${baseAS.toFixed(1)}${bonusChip(bonusAS, true)}`,
+        rng: isPassive ? '—' : (data.globalRange ? _Tu('ui.info_panel.unit_global_range_disp', '전역') : `${data.range}${bonusChip(tower.rangeBonus || 0)}`),
+        dps: (dpsRaw == null) ? '—' : `${formatShort(dpsRaw)}${dmgRelics > 0 ? `<span class="st-stat-sub">⚛${dmgRelics}</span>` : ''}`,
+        // "/100%" overflowed the 3-col cell; the cap lives in the title instead.
+        crit: isPassive ? '—' : `${critPct}%${critRelicChip}`,
+        kil: String(tower.kills || 0),
+        dpsTitle:  (dpsRaw == null) ? '' : `${dpsRaw.toFixed(1)} dps · ${dmgRelics} damage relic${dmgRelics === 1 ? '' : 's'}`,
+        critTitle: isPassive ? '' : `${critPct}% / 100% cap · x${critMult.toFixed(2)} on crit · ${critRelics} chance + ${cdRelics} damage relics`
+    };
+}
+
+/* ─── Live sync ─────────────────────────────────────────────────── */
+// The panel used to render once on click, so kills, DPS, relic-driven crit,
+// shrine buff counts, promote affordability and enemy HP all froze on screen.
+// Patch just the volatile leaf nodes: a full re-render would restart the fade
+// animation and rebuild the buttons out from under a press.
+function syncInfoPanel() {
+    const d = document.getElementById('unit-info');
+    if (!d) return stopInfoSync();
+    const mode = d.dataset.infoMode;
+
+    if (mode === 'enemy') {
+        const e = window.lastInspectedEnemy;
+        if (!e || !window.enemies || window.enemies.indexOf(e) < 0) return resetInfoPanel();
+        const cur = Math.floor(e.hp || 0);
+        const max = Math.floor(e.maxHp || 1);
+        const fill = document.getElementById('st-hp-fill');
+        const text = document.getElementById('st-hp-text');
+        if (fill) fill.style.width = `${Math.max(0, Math.min(100, (cur / max) * 100))}%`;
+        if (text) text.innerHTML = `${window.SvgIcons ? window.SvgIcons.get('heart') : ''} ${cur} / ${max}`;
+        return;
+    }
+
+    const tower = window.lastInspectedTower;
+    if (!tower || !window.towers || window.towers.indexOf(tower) < 0) return resetInfoPanel();
+
+    if (mode === 'shrine') {
+        const c = document.getElementById('st-shrine-count');
+        if (c) {
+            const _Ti = window.t || ((k, f) => f);
+            c.innerHTML = `${window.SvgIcons ? window.SvgIcons.get('broadcast') : ''} ${_Ti('ui.info_panel.shrine_buffed_fmt', '{n}명 강화').replace('{n}', countShrineBuffed(tower))}`;
+        }
+        return;
+    }
+
+    if (mode !== 'unit') return;
+    const v = unitStatDisplays(tower);
+    ['atk', 'spd', 'rng', 'dps', 'crit', 'kil'].forEach(k => {
+        const el = document.getElementById(`st-v-${k}`);
+        if (!el) return;
+        if (el.innerHTML !== v[k]) el.innerHTML = v[k];
+    });
+    const dpsEl  = document.getElementById('st-v-dps');
+    const critEl = document.getElementById('st-v-crit');
+    if (dpsEl)  dpsEl.title  = v.dpsTitle;
+    if (critEl) critEl.title = v.critTitle;
+
+    const btn = document.getElementById('st-promote-btn');
+    if (btn) {
+        const canAfford = (window.money || 0) >= Number(btn.dataset.cost || 0);
+        btn.classList.toggle('cant-afford', !canAfford);
+    }
+}
+
+function startInfoSync() {
+    if (infoSyncTimer) return;
+    infoSyncTimer = setInterval(syncInfoPanel, 250);
+}
+
+function stopInfoSync() {
+    if (infoSyncTimer) clearInterval(infoSyncTimer);
+    infoSyncTimer = null;
+}
+
 /**
  * Resets the Info Panel to its default "Sacred Tablet" state.
  */
@@ -48,6 +172,9 @@ function resetInfoPanel() {
     const d = document.getElementById('unit-info');
     if (!d) return;
 
+    stopInfoSync();
+    clearInfoResetTimer();
+    delete d.dataset.infoMode;
     d.classList.remove('inspecting');
     d.style.removeProperty('--inspect-color');
     d.style.removeProperty('--inspect-shadow');
@@ -66,11 +193,17 @@ function resetInfoPanel() {
         </div>
     `;
     window.lastInspectedTower = null;
+    window.lastInspectedEnemy = null;
 }
 
 /**
  * Starts a timer to return the panel to its default state after inactivity.
  */
+function clearInfoResetTimer() {
+    if (infoResetTimer) clearTimeout(infoResetTimer);
+    infoResetTimer = null;
+}
+
 function startInfoResetTimer(delay = 8000) {
     if (infoResetTimer) clearTimeout(infoResetTimer);
     infoResetTimer = setTimeout(() => {
@@ -95,6 +228,7 @@ function showUnitInfo(tower) {
     if (!d) return;
 
     window.lastInspectedTower = tower;
+    window.lastInspectedEnemy = null;
     const data = tower.data;
     if (!data) return;
 
@@ -108,22 +242,7 @@ function showUnitInfo(tower) {
     let body = "";
 
     if (tower.isShrine) {
-        let buffedCount = 0;
-        if (window.towers) {
-            const mastery = (typeof getRelicBonus === 'function') ? getRelicBonus('shrine_mastery') : 0;
-            const rowSpan = (mastery > 0) ? 1 : 0;
-            const isGlobal = data.rangeType === 'all';
-            const shrineArea = tower.currentSlot ? tower.currentSlot.area : null;
-            const shrineRow  = tower.currentSlot ? Math.floor(tower.currentSlot.index / 3) : -1;
-            window.towers.forEach(t => {
-                if (t.isShrine || t === tower) return;
-                if (isGlobal) { buffedCount++; return; }
-                if (!t.currentSlot || !shrineArea) return;
-                if (t.currentSlot.area !== shrineArea) return;
-                const unitRow = Math.floor(t.currentSlot.index / 3);
-                if (Math.abs(unitRow - shrineRow) <= rowSpan) buffedCount++;
-            });
-        }
+        const buffedCount = countShrineBuffed(tower);
         const _Ti = window.t || ((k, f) => f);
         const scopeLbl = data.rangeType === 'all' ? _Ti('ui.info_panel.shrine_scope_global', '전역') : _Ti('ui.info_panel.shrine_scope_local', '근접');
 
@@ -139,7 +258,7 @@ function showUnitInfo(tower) {
                     </div>
                     <div class="st-meta">
                         <span class="st-tag scope">${scopeLbl}</span>
-                        <span class="st-tag count">${window.SvgIcons ? window.SvgIcons.get('broadcast') : ''} ${_Ti('ui.info_panel.shrine_buffed_fmt', '{n}명 강화').replace('{n}', buffedCount)}</span>
+                        <span class="st-tag count" id="st-shrine-count">${window.SvgIcons ? window.SvgIcons.get('broadcast') : ''} ${_Ti('ui.info_panel.shrine_buffed_fmt', '{n}명 강화').replace('{n}', buffedCount)}</span>
                     </div>
                 </div>
             </div>
@@ -150,34 +269,8 @@ function showUnitInfo(tower) {
             </div>
         `;
     } else {
-        const baseDmg = data.damage || 0;
-        const bonusDmg = Math.round(baseDmg * ((window.damageMultiplier || 1) * (1 + (tower.damageBonus || 0)) - 1));
-        const baseAS = (data.cooldown > 0) ? (1000 / data.cooldown) : 0;
-        const bonusAS = baseAS * (tower.speedBonus || 0);
-        const bonusRange = (tower.rangeBonus || 0);
-
         const _Tu = window.t || ((k, f) => f);
-        const isPassive = !!data.passive;
-        const dmgDisplay = isPassive ? '—' : (data.instakill ? _Tu('ui.info_panel.unit_instakill_disp', '즉사') : `${baseDmg}${bonusChip(bonusDmg)}`);
-        const spdDisplay = isPassive ? '—' : `${baseAS.toFixed(1)}${bonusChip(bonusAS, true)}`;
-        const rngDisplay = isPassive ? '—' : (data.globalRange ? _Tu('ui.info_panel.unit_global_range_disp', '전역') : `${data.range}${bonusChip(bonusRange)}`);
-
-        const relicCountFor = (t) => (typeof countRelicStacks === 'function') ? countRelicStacks(t) : 0;
-
-        const dpsRaw     = getEffectiveDPS(tower);
-        const dmgRelics  = relicCountFor('damage');
-        const dpsDisplay = (dpsRaw == null) ? '—' : formatShort(dpsRaw);
-        const dpsSub     = (dpsRaw == null) ? '' : (dmgRelics > 0 ? `<span class="st-stat-sub">⚛${dmgRelics}</span>` : '');
-        const dpsTitle   = (dpsRaw == null) ? '' : `${dpsRaw.toFixed(1)} dps · ${dmgRelics} damage relic${dmgRelics === 1 ? '' : 's'}`;
-
-        const critChance  = (typeof computeCritChance === 'function') ? computeCritChance(tower) : 0.05;
-        const critMult    = (typeof computeCritMult   === 'function') ? computeCritMult(tower)   : 2.0;
-        const critPct     = Math.round(critChance * 100);
-        const critRelics  = relicCountFor('crit_chance');
-        const cdRelics    = relicCountFor('crit_damage');
-        const critRelicChip = (critRelics + cdRelics) > 0 ? ` <span class="st-stat-sub">⚛${critRelics + cdRelics}</span>` : '';
-        const critDisplay = isPassive ? '—' : `${critPct}<span class="st-stat-sub">/100%</span>${critRelicChip}`;
-        const critTitle   = isPassive ? '' : `${critPct}% / 100% cap · x${critMult.toFixed(2)} on crit · ${critRelics} chance + ${cdRelics} damage relics`;
+        const v = unitStatDisplays(tower);
 
         let actionHtml = "";
         if (data.upgrades && data.upgrades.length > 0) {
@@ -188,16 +281,18 @@ function showUnitInfo(tower) {
             const targetType = data.tier === 3 ? data.upgrades[0] : 'random';
             actionHtml = `
                 <div class="st-action-row">
-                    <button class="${btnClass}" onclick="window.performJobChange('${targetType}', true)">
+                    <button id="st-promote-btn" data-cost="${cost}" data-target="${targetType}" class="${btnClass}" onclick="window.performJobChange('${targetType}', true)"
+                            onmouseenter="window.showTabletBtnTip(this, 'promote')" onmouseleave="window.hideTooltip && window.hideTooltip()">
                         <span class="st-btn-lbl">${label}</span>
-                        <span class="st-btn-sub" style="color:${canAfford ? '#00e5ff' : '#ff5252'}">${cost} SE</span>
                     </button>
-                    <button class="st-btn demolish" onclick="window.confirmSacrifice(window.lastInspectedTower)">${_Tu('ui.info_panel.unit_corrupt_btn', '타락')}</button>
+                    <button class="st-btn demolish" onclick="window.confirmSacrifice(window.lastInspectedTower)"
+                            onmouseenter="window.showTabletBtnTip(this, 'sacrifice')" onmouseleave="window.hideTooltip && window.hideTooltip()">${_Tu('ui.info_panel.unit_corrupt_btn', '타락')}</button>
                 </div>`;
         } else {
             actionHtml = `
                 <div class="st-action-row">
-                    <button class="st-btn demolish full" onclick="window.confirmSacrifice(window.lastInspectedTower)">${_Tu('ui.info_panel.unit_corrupt_full_btn', '타락 (Corrupted)')}</button>
+                    <button class="st-btn demolish full" onclick="window.confirmSacrifice(window.lastInspectedTower)"
+                            onmouseenter="window.showTabletBtnTip(this, 'sacrifice')" onmouseleave="window.hideTooltip && window.hideTooltip()">${_Tu('ui.info_panel.unit_corrupt_full_btn', '타락 (Corrupted)')}</button>
                 </div>`;
         }
 
@@ -214,19 +309,25 @@ function showUnitInfo(tower) {
                 </div>
             </div>
             <div class="st-stat-grid">
-                <div class="st-stat"><div class="st-stat-ic atk">${STAT_ICONS.atk}</div><div class="st-stat-body"><div class="st-stat-lbl">ATK</div><div class="st-stat-val">${dmgDisplay}</div></div></div>
-                <div class="st-stat"><div class="st-stat-ic spd">${STAT_ICONS.spd}</div><div class="st-stat-body"><div class="st-stat-lbl">SPD</div><div class="st-stat-val">${spdDisplay}</div></div></div>
-                <div class="st-stat"><div class="st-stat-ic rng">${STAT_ICONS.rng}</div><div class="st-stat-body"><div class="st-stat-lbl">RNG</div><div class="st-stat-val">${rngDisplay}</div></div></div>
-                <div class="st-stat"><div class="st-stat-ic dps">${STAT_ICONS.dps}</div><div class="st-stat-body"><div class="st-stat-lbl">DPS</div><div class="st-stat-val" title="${dpsTitle}">${dpsDisplay}${dpsSub}</div></div></div>
-                <div class="st-stat"><div class="st-stat-ic crit">${STAT_ICONS.crit}</div><div class="st-stat-body"><div class="st-stat-lbl">CRIT</div><div class="st-stat-val" title="${critTitle}">${critDisplay}</div></div></div>
-                <div class="st-stat"><div class="st-stat-ic kil">${STAT_ICONS.kil}</div><div class="st-stat-body"><div class="st-stat-lbl">KIL</div><div class="st-stat-val">${tower.kills || 0}</div></div></div>
+                <div class="st-stat"><div class="st-stat-ic atk">${STAT_ICONS.atk}</div><div class="st-stat-body"><div class="st-stat-lbl">ATK</div><div class="st-stat-val" id="st-v-atk">${v.atk}</div></div></div>
+                <div class="st-stat"><div class="st-stat-ic spd">${STAT_ICONS.spd}</div><div class="st-stat-body"><div class="st-stat-lbl">SPD</div><div class="st-stat-val" id="st-v-spd">${v.spd}</div></div></div>
+                <div class="st-stat"><div class="st-stat-ic rng">${STAT_ICONS.rng}</div><div class="st-stat-body"><div class="st-stat-lbl">RNG</div><div class="st-stat-val" id="st-v-rng">${v.rng}</div></div></div>
+                <div class="st-stat"><div class="st-stat-ic dps">${STAT_ICONS.dps}</div><div class="st-stat-body"><div class="st-stat-lbl">DPS</div><div class="st-stat-val" id="st-v-dps" title="${v.dpsTitle}">${v.dps}</div></div></div>
+                <div class="st-stat"><div class="st-stat-ic crit">${STAT_ICONS.crit}</div><div class="st-stat-body"><div class="st-stat-lbl">CRIT</div><div class="st-stat-val" id="st-v-crit" title="${v.critTitle}">${v.crit}</div></div></div>
+                <div class="st-stat"><div class="st-stat-ic kil">${STAT_ICONS.kil}</div><div class="st-stat-body"><div class="st-stat-lbl">KIL</div><div class="st-stat-val" id="st-v-kil">${v.kil}</div></div></div>
             </div>
             ${actionHtml}
         `;
     }
 
     d.innerHTML = `<div class="st-shell">${tabletCorners()}${body}</div>`;
-    startInfoResetTimer();
+    d.dataset.infoMode = tower.isShrine ? 'shrine' : 'unit';
+    startInfoSync();
+    // Selection is sticky: the tablet holds this unit until something else is
+    // picked or the board is clicked. A pending timer from a relic/equipment
+    // popup would otherwise wipe the selection mid-inspection.
+    clearInfoResetTimer();
+    window.infoPanelLockedUntil = 0;
 }
 
 /**
@@ -246,6 +347,8 @@ function showEnemyInfo(enemy) {
 
     const nameColor = ENEMY_TIER_COLORS[tier] || "#ff4500";
 
+    window.lastInspectedEnemy = enemy;
+    window.lastInspectedTower = null;
     d.classList.add('inspecting');
     d.style.setProperty('--inspect-color', nameColor);
     d.style.setProperty('--inspect-shadow', nameColor + '44');
@@ -264,14 +367,68 @@ function showEnemyInfo(enemy) {
                 </div>
             </div>
             <div class="st-hp-bar">
-                <div class="st-hp-fill" style="width:${hpPct}%;background:linear-gradient(90deg,${nameColor},#ff1744);"></div>
-                <div class="st-hp-text">${window.SvgIcons ? window.SvgIcons.get('heart') : ''} ${curHp} / ${maxHp}</div>
+                <div class="st-hp-fill" id="st-hp-fill" style="width:${hpPct}%;background:linear-gradient(90deg,${nameColor},#ff1744);"></div>
+                <div class="st-hp-text" id="st-hp-text">${window.SvgIcons ? window.SvgIcons.get('heart') : ''} ${curHp} / ${maxHp}</div>
             </div>
             <div class="st-lore-box evil" style="border-left-color:${nameColor};">${_eDesc}</div>
             <div class="st-flavor">"${_Te('ui.info_panel.enemy_flavor', '그의 본질이 기록판에 잠시 머뭅니다...')}"</div>
         </div>
     `;
-    startInfoResetTimer(5000);
+    d.dataset.infoMode = 'enemy';
+    startInfoSync();
+    clearInfoResetTimer(); // sticky selection — see showUnitInfo
+}
+
+/**
+ * Hover tooltip for the tablet's action buttons. Numbers are read at hover time
+ * so they track SE, relic refund bonuses and promotions without a re-render.
+ * Reuses the HUD's single global tooltip rather than adding another one.
+ */
+function showTabletBtnTip(el, kind) {
+    if (typeof window.showTooltip !== 'function') return;
+    const _T = window.t || ((k, f) => f);
+    const tower = window.lastInspectedTower;
+    if (!tower || !tower.data) return;
+
+    if (kind === 'sacrifice') {
+        // Mirrors executeSacrifice(): flat refund by tier, scaled by sell_refund relics.
+        const tier = tower.data.tier || 1;
+        const refundBase = (tier === 1) ? 15 : (tier === 2) ? 100 : 300;
+        const bonus = (typeof getRelicBonus === 'function') ? getRelicBonus('sell_refund') : 0;
+        const refund = Math.floor(refundBase * (1.0 + bonus));
+        return window.showTooltip(
+            el,
+            _T('ui.info_panel.tip_sacrifice_title', '타락'),
+            _T('ui.info_panel.tip_sacrifice_desc', '이 수호자를 심연으로 되돌려 자리를 비우고 소울 에너지를 일부 회수합니다. 되돌릴 수 없습니다.'),
+            [{ label: _T('ui.info_panel.tip_refund_label', '회수'), val: `+${refund} SE` }],
+            { wide: true }
+        );
+    }
+
+    const cost = Number(el.dataset.cost || 0);
+    const target = el.dataset.target || 'random';
+    const stats = [{ label: _T('ui.info_panel.tip_cost_label', '비용'), val: `${cost} SE` }];
+
+    let desc;
+    if (target === 'random') {
+        const n = (tower.data.upgrades || []).length;
+        desc = _T('ui.info_panel.tip_promote_desc_random', '소울 에너지를 소모해 더 높은 등급의 퇴마사로 무작위 각성합니다.');
+        stats.push({
+            label: _T('ui.info_panel.tip_result_label', '결과'),
+            val: _T('ui.info_panel.tip_result_random', '{n}종 중 무작위').replace('{n}', n)
+        });
+    } else {
+        const nt = (window.unitTypes || []).find(u => u.type === target);
+        const name = window.tUnit ? window.tUnit(target, 'name', (nt && nt.name) || target) : ((nt && nt.name) || target);
+        desc = _T('ui.info_panel.tip_promote_desc_fixed', '소울 에너지를 소모해 지정된 상위 퇴마사로 승급합니다.');
+        stats.push({ label: _T('ui.info_panel.tip_result_label', '결과'), val: name });
+    }
+
+    if ((window.money || 0) < cost) {
+        desc += ' ' + _T('ui.info_panel.tip_cost_short', 'SE가 부족합니다.');
+    }
+
+    window.showTooltip(el, el.textContent.trim(), desc, stats);
 }
 
 /**
@@ -283,6 +440,8 @@ function showSlotWarning(msg) {
 
     window.infoPanelLockedUntil = Date.now() + 3000;
 
+    stopInfoSync();
+    delete d.dataset.infoMode;
     d.classList.add('inspecting');
     d.style.setProperty('--inspect-color', '#ff1744');
     d.style.setProperty('--inspect-shadow', 'rgba(255,23,68,0.4)');
@@ -304,6 +463,9 @@ function showSlotWarning(msg) {
 // Global Exports
 window.resetInfoPanel = resetInfoPanel;
 window.startInfoResetTimer = startInfoResetTimer;
+window.clearInfoResetTimer = clearInfoResetTimer;
 window.showUnitInfo = showUnitInfo;
 window.showEnemyInfo = showEnemyInfo;
 window.showSlotWarning = showSlotWarning;
+window.syncInfoPanel   = syncInfoPanel;
+window.showTabletBtnTip = showTabletBtnTip;

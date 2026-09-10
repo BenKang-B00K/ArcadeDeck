@@ -6,18 +6,20 @@
 function summonShrine() {
     if (!window.logicalSlots) return;
 
-    const currentShrines = towers.filter(t => t.isShrine).length;
-    const maxShrines = window.maxTier1Shrines || 14;
-    if (currentShrines >= maxShrines) {
-        if (typeof GameLogger !== 'undefined') GameLogger.warn(`Limit Reached: Max Shrines (${maxShrines})`);
+    // Tier-2 (sacred) shrines: 15% roll, only into bottom-row tier-2 slots, own cap.
+    const hasRoom = (tier) => {
+        const cap   = (tier === 2) ? (window.maxTier2Shrines || 6) : (window.maxTier1Shrines || 8);
+        const built = towers.filter(t => t.isShrine && (t.data.tier || 1) === tier).length;
+        const free  = window.logicalSlots.some(s => s.type === 'shrine' && !s.isOccupied && (s.tier || 1) === tier);
+        return built < cap && free;
+    };
+    const tier2Data  = shrineTypes.filter(s => s.tier === 2);
+    const targetTier = (tier2Data.length > 0 && Math.random() < 0.15 && hasRoom(2)) ? 2 : 1;
+    if (targetTier === 1 && !hasRoom(1)) {
+        if (typeof GameLogger !== 'undefined') GameLogger.warn('No empty shrine slots or shrine limit reached');
         return;
     }
-
-    const emptySlots = window.logicalSlots.filter(s => s.type === 'shrine' && !s.isOccupied && s.tier !== 2);
-    if (emptySlots.length === 0) {
-        if (typeof GameLogger !== 'undefined') GameLogger.warn('No empty shrine slots!');
-        return;
-    }
+    const emptySlots = window.logicalSlots.filter(s => s.type === 'shrine' && !s.isOccupied && (s.tier || 1) === targetTier);
 
     const relicReduce = (typeof getRelicBonus === 'function') ? getRelicBonus('summon_cost_reduction') : 0;
     const equipReduce = (typeof getEquipBonus === 'function') ? getEquipBonus('summon_cost_reduction') : 0;
@@ -29,9 +31,8 @@ function summonShrine() {
         return;
     }
 
-    // Only tier 1 shrines
-    const tier1Data = shrineTypes.filter(s => s.tier === 1);
-    const chosenData = tier1Data[Math.floor(Math.random() * tier1Data.length)];
+    const tierData   = (targetTier === 2) ? tier2Data : shrineTypes.filter(s => s.tier === 1);
+    const chosenData = tierData[Math.floor(Math.random() * tierData.length)];
 
     money -= finalShrineCost;
     window.shrineCost += window.shrineCostIncrement;

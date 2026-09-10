@@ -119,81 +119,9 @@ function drawLightPillars() {
     });
 }
 
-// Shrine Auras remain on proxy canvas (complex gradients + bezier threads)
-function drawShrineAuras() {
-    if (typeof towers === 'undefined') return;
-    const time  = globalAnimTimer;
-    const pulse = (Math.sin(time * 0.5) + 1) / 2;
-
-    towers.filter(function(t) { return t.isShrine; }).forEach(function(shrine) {
-        const isSuperior = shrine.data.tier === 2;
-        const color      = isSuperior ? '255, 215, 0' : '0, 229, 255';
-        const mastery    = (typeof getRelicBonus === 'function') ? getRelicBonus('shrine_mastery') : 0;
-        const range      = (mastery > 0) ? 120 : 80;
-        const isGlobal   = shrine.data.rangeType === 'all';
-
-        ctx.save();
-
-        if (!isGlobal) {
-            ctx.beginPath();
-            ctx.arc(shrine.lx, shrine.ly, range, 0, Math.PI * 2);
-            const grad = ctx.createRadialGradient(shrine.lx, shrine.ly, 0, shrine.lx, shrine.ly, range);
-            grad.addColorStop(0, 'rgba(' + color + ', ' + (0.1 * pulse) + ')');
-            grad.addColorStop(1, 'transparent');
-            ctx.fillStyle = grad; ctx.fill();
-            ctx.strokeStyle = 'rgba(' + color + ', ' + (0.15 + 0.15 * pulse) + ')';
-            ctx.setLineDash([10, 5]); ctx.stroke();
-        }
-
-        for (let i = 0; i < 3; i++) {
-            const px    = shrine.lx + Math.sin(time + i) * 30;
-            const py    = shrine.ly - ((time * 30 + i * 40) % 80);
-            const pAlpha = 1 - ((time * 30 + i * 40) % 80) / 80;
-            ctx.fillStyle = 'rgba(' + color + ', ' + (pAlpha * 0.4) + ')';
-            ctx.font = '10px Arial';
-            ctx.fillText(isSuperior ? '\u2727' : '\u00b7', px, py);
-        }
-
-        towers.forEach(function(unit) {
-            if (unit.isShrine || unit === shrine) return;
-            let isAffected = false;
-            if (isGlobal) {
-                isAffected = true;
-            } else {
-                const rangeSq = range * range;
-                const dx = unit.lx - shrine.lx;
-                const dy = unit.ly - shrine.ly;
-                if ((dx * dx + dy * dy) < rangeSq) isAffected = true;
-            }
-            if (isAffected) {
-                ctx.beginPath();
-                ctx.moveTo(shrine.lx, shrine.ly);
-                ctx.quadraticCurveTo((shrine.lx + unit.lx) / 2, (shrine.ly + unit.ly) / 2 - 40, unit.lx, unit.ly);
-                const tg = ctx.createLinearGradient(shrine.lx, shrine.ly, unit.lx, unit.ly);
-                tg.addColorStop(0, 'rgba(' + color + ', 0.6)');
-                tg.addColorStop(0.5, 'transparent');
-                tg.addColorStop(1, 'transparent');
-                ctx.strokeStyle = tg;
-                ctx.lineWidth = 1 + pulse;
-                ctx.globalCompositeOperation = 'screen';
-                ctx.stroke();
-                ctx.globalCompositeOperation = 'source-over';
-
-                ctx.beginPath();
-                ctx.ellipse(unit.lx, unit.ly + 20, 25, 10, 0, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(' + color + ', ' + (0.05 + 0.1 * pulse) + ')';
-                ctx.fill();
-            }
-        });
-
-        ctx.restore();
-    });
-}
-
 window.spawnGlitchEffect  = spawnGlitchEffect;
 window.updateStageFlashes = updateStageFlashes;
 window.drawStageFlashes   = drawStageFlashes;
 window.spawnLightPillar   = spawnLightPillar;
 window.updateLightPillars = updateLightPillars;
 window.drawLightPillars   = drawLightPillars;
-window.drawShrineAuras    = drawShrineAuras;

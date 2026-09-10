@@ -27,7 +27,7 @@ function _buildGhostItem({ enemy, cat }) {
             item.appendChild(cvs);
         } else {
             const ph = document.createElement('div');
-            ph.style.cssText = 'font-size:18px;opacity:0.25;';
+            ph.style.cssText = 'font-size: calc(18px * var(--fs));opacity:0.25;';
             ph.innerHTML = window.SvgIcons ? window.SvgIcons.get('enemy_placeholder') : '?';
             item.appendChild(ph);
         }
@@ -37,12 +37,12 @@ function _buildGhostItem({ enemy, cat }) {
         const dangerBadge = document.createElement('div');
         if (isBoss) {
             dangerBadge.innerText = 'BOSS';
-            dangerBadge.style.cssText = 'position:absolute;top:3px;right:3px;font-size:10px;font-weight:900;color:#ffd700;background:rgba(0,0,0,0.82);padding:2px 5px;border-radius:4px;border:1px solid rgba(255,215,0,0.65);letter-spacing:0.5px;text-shadow:0 0 4px rgba(255,215,0,0.55);';
+            dangerBadge.style.cssText = 'position:absolute;top:3px;right:3px;font-size: calc(10px * var(--fs));font-weight:900;color:#ffd700;background:rgba(0,0,0,0.82);padding:2px 5px;border-radius:4px;border:1px solid rgba(255,215,0,0.65);letter-spacing:0.5px;text-shadow:0 0 4px rgba(255,215,0,0.55);';
         } else {
             const d = enemy.danger || 0;
             const dc = d >= 9 ? '#ff2244' : d >= 7 ? '#ff6622' : d >= 5 ? '#ffaa00' : d >= 3 ? '#88cc44' : '#66aaff';
             dangerBadge.innerText = `D:${d}`;
-            dangerBadge.style.cssText = `position:absolute;top:3px;right:3px;font-size:10px;font-weight:900;color:${dc};background:rgba(0,0,0,0.82);padding:2px 5px;border-radius:4px;border:1px solid ${dc}77;letter-spacing:0.5px;text-shadow:0 0 3px ${dc}66;`;
+            dangerBadge.style.cssText = `position:absolute;top:3px;right:3px;font-size: calc(10px * var(--fs));font-weight:900;color:${dc};background:rgba(0,0,0,0.82);padding:2px 5px;border-radius:4px;border:1px solid ${dc}77;letter-spacing:0.5px;text-shadow:0 0 3px ${dc}66;`;
         }
         item.appendChild(dangerBadge);
 
@@ -50,7 +50,7 @@ function _buildGhostItem({ enemy, cat }) {
         const catMeta = GHOST_CAT_META[cat] || { color: '#888', label: cat };
         const nameBadge = document.createElement('div');
         nameBadge.innerText = isUnlocked ? (window.tEnemy ? window.tEnemy(enemy.type, 'name', enemy.name || enemy.type) : (enemy.name || enemy.type)) : '???';
-        nameBadge.style.cssText = `font-size:7px;color:${catMeta.color};font-weight:bold;text-align:center;line-height:1.1;padding:1px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;`;
+        nameBadge.style.cssText = `font-size: calc(7px * var(--fs));color:${catMeta.color};font-weight:bold;text-align:center;line-height:1.1;padding:1px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;`;
         item.appendChild(nameBadge);
 
         // Boss: golden border
@@ -88,9 +88,9 @@ function _buildGhostItem({ enemy, cat }) {
                     if (infoPane) {
                         infoPane.innerHTML = `
                             <div style="color:#555;text-align:center;padding:20px;">
-                                <div style="font-size:40px;margin-bottom:8px;opacity:0.4;">?</div>
-                                <div style="font-size:16px;color:#666;">${T('ui.collections.ghost_locked', '아직 조우하지 않음')}</div>
-                                <div style="font-size:11px;margin-top:8px;opacity:0.4;">"${T('ui.collections.ghost_locked_lore', '심연 깊은 곳에 숨어있는 존재입니다.')}"</div>
+                                <div style="font-size: calc(40px * var(--fs));margin-bottom:8px;opacity:0.4;">?</div>
+                                <div style="font-size: calc(16px * var(--fs));color:#666;">${T('ui.collections.ghost_locked', '아직 조우하지 않음')}</div>
+                                <div style="font-size: calc(11px * var(--fs));margin-top:8px;opacity:0.4;">"${T('ui.collections.ghost_locked_lore', '심연 깊은 곳에 숨어있는 존재입니다.')}"</div>
                             </div>
                         `;
                     }

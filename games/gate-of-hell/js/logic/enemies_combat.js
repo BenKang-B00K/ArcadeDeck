@@ -7,10 +7,14 @@ function handleEnemyDeath(target, killer = null) {
     if (target.hp > 0) return;
     const idx = window.enemies.indexOf(target);
     if (idx > -1) {
+        if (typeof playSFX === 'function') playSFX(target.isBoss ? 'boss_death' : 'death');
         if (typeof GameLogger !== 'undefined') GameLogger.success(`Defeated: ${target.data?.name || target.type}`);
         if (!window.killCounts) window.killCounts = {};
         window.killCounts[target.type] = (window.killCounts[target.type] || 0) + 1;
         window.stageKilledCount = (window.stageKilledCount || 0) + 1;
+        // stageKilledCount is a plain global, so the RS gauge only refreshed on the
+        // next spawn without this — it froze once a stage finished spawning.
+        if (window.EventBus) EventBus.emit(GAME_EVENTS.ENEMIES_COUNT_CHANGED);
 
         if (target.isCursedMark) spawnDeathExplosion(target, '#2e003e', 30, 0.5); 
         if (target.isHellfireBurn) spawnDeathExplosion(target, '#ff4500', 25, 30, true);
@@ -22,6 +26,7 @@ function handleEnemyDeath(target, killer = null) {
             const lx = (target.x / 100) * LOGICAL_WIDTH;
             const ly = target.y;
             spawnSoulEssence(lx, ly);
+            if (typeof spawnDeathBurst === 'function') spawnDeathBurst(lx, ly, !!target.isBoss);
         }
 
         window.enemies.splice(idx, 1);

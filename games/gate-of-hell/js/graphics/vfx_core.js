@@ -1,4 +1,4 @@
-﻿/* vfx_core.js — Core VFX: Particles, Floating Texts, Soul Essences, Item Drops
+/* vfx_core.js — Core VFX: Particles, Floating Texts, Soul Essences, Item Drops
  * Rendering: PIXI.Graphics (particles), SVG-rasterized PIXI.Sprite pool (floating texts),
  *            PIXI.Text pools (souls/drops).
  */
@@ -25,27 +25,39 @@ function _ensureParticleGfx() {
     vfxLayer.addChild(_particleGfx);
 }
 
-function spawnParticles(x, y, color, count = 12) {
+function spawnParticles(x, y, color, count = 12, opts) {
     if (!window.Pools) return;
+    const speed   = (opts && opts.speed)    !== undefined ? opts.speed    : 2.2;
+    const gravity = (opts && opts.gravity)  !== undefined ? opts.gravity  : 0.05;
+    const friction= (opts && opts.friction) !== undefined ? opts.friction : 0.95;
+    const sizeMax = (opts && opts.size)     !== undefined ? opts.size     : 3;
     for (let i = 0; i < count; i++) {
-        const p = Pools.particles.get();
+        const p   = Pools.particles.get();
+        const ang = Math.random() * Math.PI * 2;
+        const spd = speed * (0.4 + Math.random() * 0.9);
         p.x = x; p.y = y;
-        p.vx = (Math.random() - 0.5) * 3;
-        p.vy = (Math.random() - 0.5) * 3 - 1;
+        p.vx = Math.cos(ang) * spd;
+        p.vy = Math.sin(ang) * spd - speed * 0.4; // slight upward bias
+        p.g  = gravity;
+        p.fr = friction;
         p.color = color;
-        p.size  = Math.random() * 2 + 1;
+        p.size  = Math.random() * (sizeMax - 1) + 1;
         p.life  = 1.0;
-        p.decay = 0.008 + Math.random() * 0.012;
+        p.decay = 0.012 + Math.random() * 0.018;
     }
 }
 
 function updateParticles() {
     if (!window.Pools) return;
+    const d = window.dt || 1;
     const active = Pools.particles.active;
     for (let i = active.length - 1; i >= 0; i--) {
         const p = active[i];
-        p.x += p.vx; p.y += p.vy;
-        p.life -= p.decay;
+        p.x += p.vx * d; p.y += p.vy * d;
+        p.vy += (p.g || 0) * d;
+        const fr = Math.pow(p.fr || 1, d);
+        p.vx *= fr; p.vy *= fr;
+        p.life -= p.decay * d;
         if (p.life <= 0) Pools.particles.releaseAt(i);
     }
 }
@@ -55,9 +67,9 @@ function drawParticles() {
     if (!_particleGfx || !window.Pools) return;
     _particleGfx.clear();
     Pools.particles.active.forEach(p => {
+        const sz = Math.max(1, Math.ceil(p.size * (0.4 + p.life * 0.6))); // shrink as it dies
         _particleGfx
-            .rect(Math.floor(p.x), Math.floor(p.y),
-                  Math.ceil(p.size), Math.ceil(p.size))
+            .rect(Math.floor(p.x), Math.floor(p.y), sz, sz)
             .fill({ color: cssColorToHex(p.color), alpha: Math.max(0, p.life) });
     });
 }
@@ -129,8 +141,9 @@ function _acquireText(text, color, size) {
     return s;
 }
 
-function spawnFloatingText(text, lx, ly, color = '#fff', size = 18) {
+function spawnFloatingText(text, lx, ly, color = '#fff', size = 18, opts) {
     if (!window.Pools) return;
+    const punch = (opts && opts.punch) || 1.0;   // >1 = harder pop-in (crits)
     const ft   = Pools.floatingTexts.get();
     ft.text    = text;
     ft.lx      = lx;
@@ -138,14 +151,19 @@ function spawnFloatingText(text, lx, ly, color = '#fff', size = 18) {
     ft.color   = color;
     ft.size    = size;
     ft.life    = 1.0;
-    ft.vx      = (Math.random() - 0.5) * 1.5;
-    ft.vy      = -1.0 - Math.random() * 1.0;
+    ft.age     = 0;
+    ft.punch   = punch;
+    ft.vx      = (Math.random() - 0.5) * 2.0;
+    ft.vy      = -2.4 - Math.random() * 1.2;     // launch up, gravity pulls into an arc
+    ft.rot     = (Math.random() - 0.5) * 0.25 * (punch - 0.5);
     ft._pSprite = null;
     if (window.textLayer) {
         const s   = _acquireText(text, color, size);
         s.x       = lx;
         s.y       = ly;
         s.alpha   = 1.0;
+        s.rotation = 0;
+        s.scale.set(0.2);
         ft._pSprite = s;
         textLayer.addChild(s);
     }
@@ -153,16 +171,28 @@ function spawnFloatingText(text, lx, ly, color = '#fff', size = 18) {
 
 function updateFloatingTexts() {
     if (!window.Pools) return;
+    const d = window.dt || 1;
     const active = Pools.floatingTexts.active;
     for (let i = active.length - 1; i >= 0; i--) {
         const ft = active[i];
-        ft.lx += ft.vx;
-        ft.ly += ft.vy;
-        ft.life -= 0.02;
+        ft.age  += d;
+        ft.lx   += ft.vx * d;
+        ft.ly   += ft.vy * d;
+        ft.vy   += 0.08 * d;                       // gravity → arc
+        ft.vx   *= Math.pow(0.97, d);
+        ft.life -= 0.018 * d;
         if (ft._pSprite) {
-            ft._pSprite.x     = ft.lx;
-            ft._pSprite.y     = ft.ly;
-            ft._pSprite.alpha = Math.max(0, ft.life);
+            const sp = ft._pSprite;
+            sp.x = ft.lx;
+            sp.y = ft.ly;
+            // pop-in: overshoot to punch*1.5 over ~6 frames, settle to 1
+            const t  = Math.min(1, ft.age / 6);
+            const ov = ft.punch * 1.5;
+            const sc = t < 0.6 ? 0.2 + (ov - 0.2) * (t / 0.6) : ov + (1 - ov) * ((t - 0.6) / 0.4);
+            sp.scale.set(sc);
+            sp.rotation = ft.rot * (1 - t);
+            // hold full alpha, fade over last 40%
+            sp.alpha = ft.life > 0.4 ? 1 : Math.max(0, ft.life / 0.4);
         }
         if (ft.life <= 0) {
             if (ft._pSprite) {
@@ -325,8 +355,9 @@ function updateHitEffects() {
     const active = Pools.hitEffects.active;
     for (let i = active.length - 1; i >= 0; i--) {
         const h = active[i];
-        h.life -= 0.12; // Very fast fade
-        h.radius += (h.maxRadius - h.radius) * 0.4;
+        const d = window.dt || 1;
+        h.life -= 0.12 * d; // Very fast fade
+        h.radius += (h.maxRadius - h.radius) * Math.min(1, 0.4 * d);
         if (h.life <= 0) Pools.hitEffects.releaseAt(i);
     }
 }
@@ -342,7 +373,35 @@ function drawHitEffects() {
     });
 }
 
+// ── Death Burst (enemy kill) ─────────────────────────────────────────────────
+function spawnDeathBurst(lx, ly, isBoss) {
+    const k = isBoss ? 3 : 1;
+    spawnHitEffect(lx, ly, '#fff', isBoss ? 90 : 28);
+    spawnHitEffect(lx, ly, isBoss ? '#ff1744' : '#9400d3', isBoss ? 60 : 18);
+    // Evil theme: purple/crimson debris + white sparks
+    spawnParticles(lx, ly, '#9400d3', 8 * k, { speed: 3.2, size: 4 });
+    spawnParticles(lx, ly, '#c62828', 5 * k, { speed: 2.4, size: 3 });
+    spawnParticles(lx, ly, '#ffffff', 4 * k, { speed: 4.5, size: 2, gravity: 0.02 });
+    if (isBoss) addScreenShake(14);
+}
+
+// ── Screen Shake (offsets pixi stage; DOM HUD unaffected) ────────────────────
+let _shake = 0;
+function addScreenShake(amount) { _shake = Math.min(24, Math.max(_shake, amount)); }
+function applyScreenShake() {
+    if (!window.pixiApp || !pixiApp.stage) return;
+    if (_shake < 0.3) { _shake = 0; pixiApp.stage.position.set(0, 0); return; }
+    // Whole-pixel offsets only — a fractional stage position pushes every
+    // sprite off the texel grid and undoes their roundPixels snapping.
+    pixiApp.stage.position.set(Math.round((Math.random() - 0.5) * 2 * _shake),
+                               Math.round((Math.random() - 0.5) * 2 * _shake));
+    _shake *= Math.pow(0.82, window.dt || 1);
+}
+
 // ── Window Exports ────────────────────────────────────────────────────────────
+window.spawnDeathBurst    = spawnDeathBurst;
+window.addScreenShake     = addScreenShake;
+window.applyScreenShake   = applyScreenShake;
 window.spawnParticles     = spawnParticles;
 window.updateParticles    = updateParticles;
 window.drawParticles      = drawParticles;

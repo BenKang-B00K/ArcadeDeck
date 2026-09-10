@@ -45,6 +45,7 @@ const PIXI_UNIT_REGISTRY = {
     'prayer_herald':    { drawFn: 'drawPrayerHerald',     size: 130, frames: 8, cycleMs: 2400 },
     'relic_keeper':     { drawFn: 'drawRelicKeeper',      size: 130, frames: 8, cycleMs: 2400 },
     'ward_scribe':      { drawFn: 'drawWardScribe',       size: 130, frames: 8, cycleMs: 2400 },
+    'lightning_mage':   { drawFn: 'drawLightningMage',    size: 130, frames: 8, cycleMs: 2400 },
 
     // ── Tier 3 — Attack Path ───────────────────────────────────────────
     'paladin':          { drawFn: 'drawPaladin',          size: 140, frames: 8, cycleMs: 2400 },
@@ -59,6 +60,8 @@ const PIXI_UNIT_REGISTRY = {
     'holy_burst':       { drawFn: 'drawHolyBurst',        size: 140, frames: 8, cycleMs: 2400 },
     'rapid_exorcist':   { drawFn: 'drawRapidExorcist',    size: 140, frames: 8, cycleMs: 2400 },
     'chain_exorcist':   { drawFn: 'drawChainExorcist',    size: 140, frames: 8, cycleMs: 2400 },
+    'storm_caller':     { drawFn: 'drawStormCaller',      size: 140, frames: 8, cycleMs: 2400 },
+    'thunder_judge':    { drawFn: 'drawThunderJudge',     size: 140, frames: 8, cycleMs: 2400 },
 
     // ── Tier 3 — Support Path ──────────────────────────────────────────
     'executor':         { drawFn: 'drawExecutor',         size: 140, frames: 8, cycleMs: 2400 },
@@ -110,15 +113,33 @@ const PIXI_UNIT_REGISTRY = {
     'divine_choir':     { drawFn: 'drawDivineChoir',      size: 160, frames: 8, cycleMs: 2400 },
     'sacred_reliquary': { drawFn: 'drawSacredReliquary',  size: 160, frames: 8, cycleMs: 2400 },
     'grand_ward':       { drawFn: 'drawGrandWard',        size: 160, frames: 8, cycleMs: 2400 },
+    'thunder_lord':     { drawFn: 'drawThunderLord',      size: 160, frames: 8, cycleMs: 2400 },
 };
 
 const PIXI_UNIT_BAKE_BASE_T = 2_000_000;
 const UNIT_ATTACK_WINDOW_MS = 350; // matches drawApprentice etc. (350ms isAttacking)
-const UNIT_RENDER_SCALE     = 0.75; // base scale applied to T1 reference size
-const UNIT_REF_BAKE_SIZE    = 110;  // T1 bake size; all tiers normalize to this display size
-const UNIT_Y_OFFSET         = -14;  // lift sprite to fit slot (shadow stays at ground)
+// Every pix_*.js draws at S=2.0, so a bake holds 2 canvas px per art pixel.
+// Keep the display scale at or above 0.5 — below that nearest sampling drops art
+// rows outright (the old per-tier normalization ran at 0.55–0.64 of a bake that
+// was already 1.2 px per art pixel, which ate 1px details and shimmered as the
+// idle bob moved the sprite). 0.5 is the low end and the other exact ratio:
+// one art pixel per screen pixel, so nothing is dropped or doubled.
+const UNIT_RENDER_SCALE      = 0.50; // units only — shrines stay 1:1
+const UNIT_ART_FOOT          = 66;   // art reaches ~66px below the draw centre at 1:1
+const UNIT_ART_HEAD          = 63;   // …and ~63px above it
+const UNIT_Y_OFFSET          = -6;   // sprite centre vs slot centre
+const SHRINE_T1_Y_OFFSET     = -31;  // shrine art sits high in its bake canvas
+const SHRINE_T2_Y_OFFSET     = -45;
 const UNIT_COOLDOWN_Y_OFFSET = -14; // lift cooldown hex outline above slot center
-const _pixiUnitState  = new Map(); // type → { idleTex, attackTex, bakeFailed, pool, active(Map tower→record) }
+// Shrine-buff sigil tints. T2 (global/sacred) = pale gold, T1 = pale ice;
+// T1 matches SHRINE_LINK_COLOR in shrine_auras_pixi.js.
+const SHRINE_SIGIL_T1 = 0x9FE8FF;
+const SHRINE_SIGIL_T2 = 0xFFD98A;
+// UNIT_ prefixed: every js/ file shares one global scope, and
+// whispering_spirit_pixi.js already owns BAKE_PAD / BAKE_OVERSCAN.
+const UNIT_BAKE_SCRATCH      = 400; // oversized bake canvas; tallest sprite is 245px
+const UNIT_BAKE_PAD          = 4;   // guard band so a glow edge never touches the texture border
+const _pixiUnitState  = new Map(); // type → { idleTex, attackTex, anchor, bakeFailed, pool, active(Map tower→record) }
 const _unitShadowPool    = [];
 const _unitCooldownPool  = [];
 const _unitSelectionPool = [];
@@ -163,7 +184,7 @@ function _ensureUnitGlowTexture() {
 function _getUnitState(type) {
     let st = _pixiUnitState.get(type);
     if (!st) {
-        st = { idleTex: null, attackTex: null, bakeFailed: false, pool: [], active: new Map() };
+        st = { idleTex: null, attackTex: null, anchor: null, bakeFailed: false, pool: [], active: new Map() };
         _pixiUnitState.set(type, st);
     }
     return st;
@@ -185,36 +206,116 @@ function _synthBakeTower(type, attacking) {
     };
 }
 
-function _bakeOneSet(type, cfg, drawFn, attacking) {
+/* Twelve ally draw fns read performance.now() instead of Date.now() (see
+ * drawDivineChoir, drawGrandWard, drawPsalmSinger...). Stubbing only Date.now
+ * left those on the real wall clock, where `now - tower.lastShot` came out
+ * NEGATIVE against the synthetic lastShot near 2_000_000 — so `isAtk` was true
+ * for every one of them and they baked their attack pose into the idle
+ * texture, flat 58x56 burst rect and all. Freeze both clocks together. */
+function _withBakeClock(t, fn) {
+    const origDate = Date.now;
+    const origPerf = performance.now;
+    Date.now = () => t;
+    performance.now = () => t;
+    try { return fn(); }
+    finally { Date.now = origDate; performance.now = origPerf; }
+}
+
+/** Run one draw call into `ctx2d` with the draw centre at (cx, cy). */
+function _drawBakeFrame(drawFn, ctx2d, synth, cx, cy) {
+    if (drawFn.length >= 4) drawFn(ctx2d, synth, cx, cy, true);
+    else                    drawFn(cx, cy, synth);
+}
+
+/**
+ * Draw one pose's whole cycle onto oversized scratch canvases.
+ * Returns { frames, emissives } — the emissive twin carries every pixel the art
+ * drew under `lighter`/`screen`, so the finishing pass blooms exactly what the
+ * artist marked as glowing instead of guessing from luminance.
+ */
+function _drawScratchSet(type, cfg, drawFn, attacking) {
     const origCtx = window.ctx;
     const origNow = Date.now;
-    const frames = [];
     const synth = _synthBakeTower(type, attacking);
-
+    const frames = [], emissives = [];
+    const canEmit = typeof setUnitEmissiveTarget === 'function';
     try {
         for (let i = 0; i < cfg.frames; i++) {
             const off = document.createElement('canvas');
-            off.width  = cfg.size;
-            off.height = cfg.size;
-            const offCtx = off.getContext('2d');
+            off.width = off.height = UNIT_BAKE_SCRATCH;
+            const offCtx = off.getContext('2d', { willReadFrequently: true });
             offCtx.imageSmoothingEnabled = false;
 
-            const fakeT = PIXI_UNIT_BAKE_BASE_T + (i / cfg.frames) * cfg.cycleMs;
-            window.ctx = offCtx;
-            Date.now   = () => fakeT;
+            const em = document.createElement('canvas');
+            em.width = em.height = UNIT_BAKE_SCRATCH;
+            const emCtx = em.getContext('2d', { willReadFrequently: true });
+            emCtx.imageSmoothingEnabled = false;
 
-            if (drawFn.length >= 4) {
-                drawFn(offCtx, synth, cfg.size / 2, cfg.size / 2, true);
-            } else {
-                drawFn(cfg.size / 2, cfg.size / 2, synth);
+            window.ctx = offCtx;
+            if (canEmit) setUnitEmissiveTarget(emCtx);
+            try {
+                _withBakeClock(PIXI_UNIT_BAKE_BASE_T + (i / cfg.frames) * cfg.cycleMs, () =>
+                    _drawBakeFrame(drawFn, offCtx, synth, UNIT_BAKE_SCRATCH / 2, UNIT_BAKE_SCRATCH / 2));
+            } finally {
+                if (canEmit) setUnitEmissiveTarget(null);
             }
-            frames.push(PIXI.Texture.from(off));
+            frames.push(off);
+            emissives.push(em);
         }
     } finally {
         window.ctx = origCtx;
         Date.now   = origNow;
     }
-    return frames;
+    return { frames: frames, emissives: emissives };
+}
+
+/** Union of two {x0,y0,x1,y1} boxes; either may be null. */
+function _unionBounds(a, b) {
+    if (!a) return b;
+    if (!b) return a;
+    return {
+        x0: Math.min(a.x0, b.x0), y0: Math.min(a.y0, b.y0),
+        x1: Math.max(a.x1, b.x1), y1: Math.max(a.y1, b.y1),
+    };
+}
+
+/** True if any pixel on this canvas region carries alpha. */
+function _emHasInk(c2d, w, h) {
+    const d = c2d.getImageData(0, 0, w, h).data;
+    for (let i = 3; i < d.length; i += 16) if (d[i]) return true;
+    return false;
+}
+
+/**
+ * Crop scratch frames to `crop`, run the shared finishing pass, and turn them
+ * into nearest-filtered textures. The finishing pass is what gives a sprite its
+ * dimensionality — rim light on the upper-left of every mass, bloom on the
+ * declared emissive pixels, a dark outline behind the art.
+ */
+function _cropToTextures(set, crop, isShrine) {
+    const style = (typeof allyVfxStyle === 'function') ? allyVfxStyle(isShrine) : null;
+    return set.frames.map((src, i) => {
+        const out = document.createElement('canvas');
+        out.width  = crop.w;
+        out.height = crop.h;
+        const oc = out.getContext('2d', { willReadFrequently: true });
+        oc.imageSmoothingEnabled = false;
+        oc.drawImage(src, -crop.x, -crop.y);
+
+        if (style && typeof finishSpriteFrame === 'function') {
+            // Always non-null, even when empty: passing null would opt this frame
+            // into the luminance heuristic, which cannot tell an ivory pauldron
+            // highlight from an actual light source.
+            const emCrop = document.createElement('canvas');
+            emCrop.width = crop.w; emCrop.height = crop.h;
+            const ec = emCrop.getContext('2d', { willReadFrequently: true });
+            ec.imageSmoothingEnabled = false;
+            const emSrc = set.emissives && set.emissives[i];
+            if (emSrc) ec.drawImage(emSrc, -crop.x, -crop.y);
+            finishSpriteFrame(out, style, 2, null, emCrop);
+        }
+        return pixelTexture(out);
+    });
 }
 
 function _bakePixiUnitFrames(type) {
@@ -229,14 +330,45 @@ function _bakePixiUnitFrames(type) {
     }
 
     try {
-        st.idleTex   = _bakeOneSet(type, cfg, drawFn, false);
-        st.attackTex = _bakeOneSet(type, cfg, drawFn, true);
-        console.log(`[pixi_unit] Baked idle+attack frames (${st.idleTex.length}×2) for "${type}".`);
+        // Same three-pass bake the enemies use: draw oversized, measure the union
+        // alpha box, crop to it. The registry's fixed square clipped 78 of 86
+        // sprites — halos, wings and light beams reach ~170px above the draw
+        // centre, well past a 140px canvas. Idle and attack share one crop so the
+        // texture swap can't shift the sprite.
+        const idle   = _drawScratchSet(type, cfg, drawFn, false);
+        const attack = _drawScratchSet(type, cfg, drawFn, true);
+        const isShrine = (typeof type === 'string' && type.indexOf('shrine_') === 0);
+        const origin = UNIT_BAKE_SCRATCH / 2;
+        // Measure each pose separately and union the results: the shared helper
+        // stacks frames with source-over, so alpha accumulates — 16 stacked
+        // frames push a 2/255 glow past the cutoff and the box swells to the
+        // whole scratch. 8 is the frame count the cutoff was tuned against.
+        const box = _unionBounds(
+            (typeof measureSpriteAlphaBounds === 'function') ? measureSpriteAlphaBounds(idle.frames, UNIT_BAKE_SCRATCH) : null,
+            (typeof measureSpriteAlphaBounds === 'function') ? measureSpriteAlphaBounds(attack.frames, UNIT_BAKE_SCRATCH) : null
+        );
+        const crop = box
+            ? {
+                x: Math.max(0, box.x0 - UNIT_BAKE_PAD),
+                y: Math.max(0, box.y0 - UNIT_BAKE_PAD),
+                w: Math.min(UNIT_BAKE_SCRATCH, box.x1 + UNIT_BAKE_PAD) - Math.max(0, box.x0 - UNIT_BAKE_PAD),
+                h: Math.min(UNIT_BAKE_SCRATCH, box.y1 + UNIT_BAKE_PAD) - Math.max(0, box.y0 - UNIT_BAKE_PAD)
+              }
+            : { x: origin - cfg.size / 2, y: origin - cfg.size / 2, w: cfg.size, h: cfg.size };
+
+        // Anchor keeps the draw origin under sprite.x/y, so every offset below
+        // (and the isLeft mirror, which flips about that origin) stays valid.
+        st.anchor    = { x: (origin - crop.x) / crop.w, y: (origin - crop.y) / crop.h };
+        st.idleTex   = _cropToTextures(idle, crop, isShrine);
+        st.attackTex = _cropToTextures(attack, crop, isShrine);
+        console.log(`[pixi_unit] Baked idle+attack frames (${st.idleTex.length}×2) for "${type}" `
+                  + `(${crop.w}x${crop.h}, was ${cfg.size}x${cfg.size}).`);
     } catch (err) {
         console.error(`[pixi_unit] bake failed for "${type}":`, err);
         st.bakeFailed = true;
         st.idleTex = null;
         st.attackTex = null;
+        st.anchor = null;
     }
     return st.idleTex;
 }
@@ -252,10 +384,16 @@ function _acquireUnitSprite(type) {
         sprite.textures = idleTex;
     } else {
         sprite = new PIXI.AnimatedSprite(idleTex);
-        sprite.anchor.set(0.5, 0.5);
-        sprite.animationSpeed = 0.08;
         sprite.loop = true;
+        sprite.roundPixels = true;
     }
+    // Crop moved the art's midpoint; this anchor puts the draw origin back under
+    // sprite.x/y so the position offsets below need no adjustment.
+    if (st.anchor) sprite.anchor.set(st.anchor.x, st.anchor.y);
+    else sprite.anchor.set(0.5, 0.5);
+    // Match playback to the baked cycle instead of a flat 0.08 for every unit.
+    const ucfg = _resolveCfg(type); // shrine subtypes aren't registry keys
+    sprite.animationSpeed = ucfg.frames / ((ucfg.cycleMs / 1000) * 60);
     sprite.visible = true;
     sprite.alpha = 1;
     sprite.scale.set(1, 1);
@@ -319,7 +457,7 @@ function _releaseUnitRecord(type, record) {
     if (sprite) {
         sprite.stop();
         sprite.visible = false;
-        if (sprite.parent) sprite.parent.removeChild(sprite);
+            if (sprite.parent) sprite.parent.removeChild(sprite);
         _getUnitState(type).pool.push(sprite);
     }
     if (shadow)     { shadow.clear();    shadow.visible=false;    if (shadow.parent)    shadow.parent.removeChild(shadow);    _unitShadowPool.push(shadow); }
@@ -421,21 +559,17 @@ function renderPixiUnit(tower) {
     // Mirror x-axis for right-slot towers (pUnit only differs by x-flip).
     const isLeft = !!(tower.currentSlot && typeof tower.currentSlot.area === 'string'
                       && tower.currentSlot.area.indexOf('left') !== -1);
-    // Normalize all tiers to T1 display size: scale = (T1_bake * base) / this_bake.
-    const _typeScale = (UNIT_REF_BAKE_SIZE * UNIT_RENDER_SCALE) / cfg.size;
-    // Shrines: bigger overall + extra tall. Lift sprite so base stays on slot.
+    // One scale for every tier: the art inside the box is the same 45x63 art
+    // pixels whatever the tier, so nothing needs normalizing per type.
     const isShrineT2 = tower.isShrine && tower.data.tier === 2;
-    // Uniform mul (X = Y) — non-uniform scale distorts pixel art.
-    const shrineMul  = tower.isShrine ? (isShrineT2 ? 2.10 : 1.75) : 1;
-    const shrineMulX = shrineMul;
-    const shrineMulY = shrineMul;
+    const scale = tower.isShrine ? 1 : UNIT_RENDER_SCALE;
+    // Ground line under the sprite — shadow and tier rings sit here.
+    const footY = ly + (tower.isShrine ? 25 : UNIT_Y_OFFSET + UNIT_ART_FOOT * scale - 4);
     sprite.x = lx;
-    // Extra Y lift for shrines so taller sprite doesn't sink below slot.
-    // Drop shrine ~14px lower than computed lift so base sits deeper on slot.
-    const shrineYLift = tower.isShrine ? (cfg.size * _typeScale * (shrineMulY - 1) * 0.5 - 14) : 0;
-    sprite.y = ly + UNIT_Y_OFFSET - shrineYLift;
-    sprite.scale.x = (isLeft ? _typeScale : -_typeScale) * shrineMulX;
-    sprite.scale.y = _typeScale * shrineMulY;
+    sprite.y = ly + (tower.isShrine ? (isShrineT2 ? SHRINE_T2_Y_OFFSET : SHRINE_T1_Y_OFFSET)
+                                    : UNIT_Y_OFFSET);
+    sprite.scale.x = isLeft ? scale : -scale;
+    sprite.scale.y = scale;
 
     // Swap idle ↔ attack textures based on tower.lastShot recency.
     const attacking = tower.lastShot && (Date.now() - tower.lastShot < UNIT_ATTACK_WINDOW_MS);
@@ -452,11 +586,16 @@ function renderPixiUnit(tower) {
     const cdReady = _cd > 0 ? Math.min(1, _elapsed / _cd) : 1;
     sprite.tint = 0xFFFFFF;
 
+    // Red outline while this unit/shrine is the Sacred Tablet's current subject.
+    if (typeof markSelectionOutline === 'function') {
+        markSelectionOutline(sprite, window.lastInspectedTower === tower);
+    }
+
     // Shadow
     if (!record.shadow) record.shadow = _acquireUnitShadow();
     const sh = record.shadow;
     sh.clear();
-    sh.ellipse(lx, ly + 25, 24, 24 * 0.4);
+    sh.ellipse(lx, footY, tower.isShrine ? 24 : 26, tower.isShrine ? 10 : 10);
     sh.fill({ color: 0x000000, alpha: 0.3 });
 
     // ── Selection range + ritual rings (worldLayer, below sprite) ───────
@@ -509,23 +648,23 @@ function renderPixiUnit(tower) {
             const ang = tAnim + (i * Math.PI * 0.6);
             const ox = Math.cos(ang) * 15;
             const oy = Math.sin(ang * 0.5) * 5;
-            ag.circle(lx + ox, ly + 5 + oy, 8).fill({ color: 0xFFFFFF, alpha: 0.2 + aPulse * 0.1 });
+            ag.circle(lx + ox, footY + oy, 8).fill({ color: 0xFFFFFF, alpha: 0.2 + aPulse * 0.1 });
         }
     } else if (tier === 3) {
         needAuraGfx = true;
         if (!record.auraGfx) record.auraGfx = _acquireUnitAuraGfx();
         const ag = record.auraGfx;
         ag.clear();
-        ag.ellipse(lx, ly + 8, 25 + aPulse * 5, 8 + aPulse * 2)
+        ag.ellipse(lx, footY, 28 + aPulse * 5, 9 + aPulse * 2)
           .stroke({ color: 0xFFD700, alpha: 0.4 + aPulse * 0.3, width: 2 });
     } else if (tier === 4) {
         needAuraSprite = true;
         if (!record.auraSprite) record.auraSprite = _acquireUnitAuraSprite();
         const as = record.auraSprite;
-        as.x = lx; as.y = ly + 5;
+        as.x = lx; as.y = footY - 30;
         as.tint = 0x4A148C;
         as.alpha = 0.3 + aPulse * 0.2;
-        as.width = as.height = 80;
+        as.width = as.height = 110;
         as.visible = true;
     }
 
@@ -540,19 +679,28 @@ function renderPixiUnit(tower) {
         _unitAuraSpritePool.push(record.auraSprite); record.auraSprite = null;
     }
 
-    // ── Shrine halo above head (overlayLayer) ───────────────────────────
+    // ── "Shrine affected" sigil, floating above the head (overlayLayer) ──
+    // A diamond, not a ring: at the board's ~0.58 CSS scale a thin ellipse
+    // collapses into a smudge, while four straight edges stay crisp. Tints are
+    // deliberately pale (not the shrine's own saturated gold/cyan) so the mark
+    // separates from the gold slot frames and the cyan cooldown hex.
     if (!tower.isShrine && (tower.shrineHaloTier1 || tower.shrineHaloTier2)) {
         if (!record.halo) record.halo = _acquireUnitHalo();
-        // T2 (global/sacred) = gold; T1 = cyan. Matches shrine_auras_pixi.js.
-        const color = tower.shrineHaloTier2 ? 0xFFD700 : 0x00E5FF;
-        const floatY = ly - 22 + Math.sin(tAnim * 1.4 + lx * 0.03) * 1.8;
-        const shimmer = 0.72 + Math.sin(tAnim * 0.9 + lx * 0.025) * 0.18;
+        const color   = tower.shrineHaloTier2 ? SHRINE_SIGIL_T2 : SHRINE_SIGIL_T1;
+        const floatY  = ly - 80 + Math.sin(tAnim * 1.5 + lx * 0.03) * 2.0;
+        const shimmer = 0.78 + Math.sin(tAnim * 1.1 + lx * 0.02) * 0.18;
+        const w = 8, h = 11;
         const hg = record.halo;
         hg.clear();
-        // outer bloom
-        hg.ellipse(lx, floatY, 11, 4).stroke({ color, alpha: 0.18 + Math.sin(tAnim * 1.1) * 0.06, width: 6 });
-        // main ring
-        hg.ellipse(lx, floatY, 10, 3.5).stroke({ color, alpha: shimmer, width: 2.5 });
+        // soft bloom behind the mark
+        hg.circle(lx, floatY, h * 1.05).fill({ color, alpha: 0.10 + 0.05 * shimmer });
+        // diamond outline
+        hg.moveTo(lx, floatY - h).lineTo(lx + w, floatY).lineTo(lx, floatY + h).lineTo(lx - w, floatY)
+          .closePath().stroke({ color, alpha: shimmer, width: 2.2 });
+        // white-hot core
+        hg.moveTo(lx, floatY - h * 0.42).lineTo(lx + w * 0.42, floatY)
+          .lineTo(lx, floatY + h * 0.42).lineTo(lx - w * 0.42, floatY)
+          .closePath().fill({ color: 0xFFFFFF, alpha: 0.5 + 0.3 * shimmer });
     } else if (record.halo) {
         record.halo.clear(); record.halo.visible = false;
         if (record.halo.parent) record.halo.parent.removeChild(record.halo);
@@ -596,8 +744,39 @@ function getPixiUnitSprite(tower, typeKey) {
     return rec ? rec.sprite : null;
 }
 
+/**
+ * Draw one idle frame of a unit or shrine into `ctx2d`, centred on (cx, cy).
+ *
+ * The codex used to re-derive all of this — draw fn, synthetic tower, scale —
+ * with its own heuristics, and got a different sprite than the field showed.
+ * This hands it the exact bake the field sprite uses: same registry lookup
+ * (shrine subtypes included), same synthetic tower, same frozen clock.
+ *
+ * @returns {string|null} the draw function's name, or null if there is none.
+ */
+function bakeUnitStill(type, ctx2d, cx, cy, emissiveCtx) {
+    const cfg = _resolveCfg(type);
+    const fnName = cfg && cfg.drawFn;
+    const drawFn = fnName && window[fnName];
+    if (typeof drawFn !== 'function') return null;
+
+    const origCtx = window.ctx;
+    const canEmit = emissiveCtx && typeof setUnitEmissiveTarget === 'function';
+    window.ctx = ctx2d;
+    if (canEmit) setUnitEmissiveTarget(emissiveCtx);
+    try {
+        _withBakeClock(PIXI_UNIT_BAKE_BASE_T, () =>
+            _drawBakeFrame(drawFn, ctx2d, _synthBakeTower(type, false), cx, cy));
+    } finally {
+        if (canEmit) setUnitEmissiveTarget(null);
+        window.ctx = origCtx;
+    }
+    return fnName;
+}
+
 window.PIXI_UNIT_REGISTRY = PIXI_UNIT_REGISTRY;
 window.isPixiUnitType     = isPixiUnitType;
 window.renderPixiUnit     = renderPixiUnit;
 window.gcPixiUnitSprites  = gcPixiUnitSprites;
 window.getPixiUnitSprite  = getPixiUnitSprite;
+window.bakeUnitStill      = bakeUnitStill;   // codex thumbnails reuse the field bake

@@ -1,6 +1,6 @@
 /* equipment_ui.js - Equipment overlay: init, grid, details, toasts */
 
-const EQUIP_TIER_COLORS = ['', '#aaaaaa', '#00ff88', '#ff44ff', '#ffd700'];
+const EQUIP_TIER_COLORS = ['', '#aaaaaa', '#00ff88', '#ff44ff', '#ffd700', '#00e5ff', '#ff3d00'];
 
 // Global handler used by the <img onerror=...> attribute. Avoids interpolating
 // raw SVG markup (with quotes) into an inline JS string literal.
@@ -77,16 +77,24 @@ function initEquipment() {
                 const sc = window.soulCrystals || 0;
                 d.innerHTML = `
                     <div class="unit-info-title" style="color:#00e5ff;">${T('ui.controls.equip_manage_title', '신성한 장비고')}</div>
-                    <div class="unit-info-badge" style="background:#006064; border-color:#00838f; color:#fff;">SACRED ARMORY</div>
+                    <div class="unit-info-badge" style="background:#006064; border-color:#00838f; color:#fff;">${T('ui.equipment.default_subtitle', 'SACRED ARMORY')}</div>
                     <div class="unit-info-desc" style="color:#bbb;">${T('ui.controls.equip_manage_desc', '심연에서 획득한 성스러운 무구들을 관리하고 강화합니다.')}</div>
                     <div class="info-divider" style="opacity:0.3;"></div>
-                    <div style="color:#4dd0e1; font-size:clamp(12px, 2.8vw, 16px); font-weight:900; text-shadow:0 0 8px rgba(77,208,225,0.7);">◆ Soul Crystal: ${sc} SC</div>
-                    <div style="color:#aaa; font-size:clamp(9px, 1.8vw, 12px); margin-top:3px; line-height:1.3;">${T('ui.equipment.sc_row_title', '적 처치 시 드물게 획득. 장비 재계시에 사용.')}</div>
+                    <div style="color:#4dd0e1; font-size: calc(clamp(12px, 2.8vw, 16px) * var(--fs)); font-weight:900; text-shadow:0 0 8px rgba(77,208,225,0.7);">◆ ${T('ui.equipment.sc_label', 'Soul Crystal')}: ${sc} SC</div>
+                    <div style="color:#aaa; font-size: calc(clamp(9px, 1.8vw, 12px) * var(--fs)); margin-top:3px; line-height:1.3;">${T('ui.equipment.sc_row_title', '적 처치 시 드물게 획득. 장비 재계시에 사용.')}</div>
                     <div class="info-divider" style="opacity:0.3;"></div>
-                    <div style="color:#555; font-style:italic; font-size:clamp(7px, 1.4vw, 10px);">"${T('ui.controls.equip_lore', '부러진 칼날도 퇴마사의 손에 들리면 악령을 베는 신검이 될 것입니다.')}"</div>
+                    <div style="color:#555; font-style:italic; font-size: calc(clamp(7px, 1.4vw, 10px) * var(--fs));">"${T('ui.controls.equip_lore', '부러진 칼날도 퇴마사의 손에 들리면 악령을 베는 신검이 될 것입니다.')}"</div>
                 `;
                 if (typeof startInfoResetTimer === 'function') startInfoResetTimer();
             }
+        };
+    }
+
+    const dropRateBtn = document.getElementById('equip-droprate-btn');
+    if (dropRateBtn) {
+        dropRateBtn.onclick = () => {
+            dropRateBtn.classList.add('active');
+            renderDropRateChart();
         };
     }
 
@@ -101,6 +109,50 @@ function initEquipment() {
             }
         };
     }
+}
+
+/**
+ * Drop-rate chart for every equipment grade, rendered into the detail pane.
+ * Rates are read from equipmentTiers, so the chart cannot drift from the table
+ * checkEquipmentDrop() actually rolls against.
+ */
+function renderDropRateChart() {
+    const pane = document.getElementById('equip-info-pane');
+    if (!pane) return;
+    const T = window.t || ((k, f) => f);
+    const tiers = window.equipmentTiers || [];
+    if (!tiers.length) return;
+
+    // Log scale: tier 1 is ~375x more common than tier 6, so a linear bar would
+    // render every high grade as an invisible sliver.
+    const rates = tiers.map(t => t.dropRate);
+    const lmax = Math.log(Math.max(...rates));
+    const lmin = Math.log(Math.min(...rates));
+    const span = (lmax - lmin) || 1;
+
+    const rows = tiers.map(td => {
+        const tc = EQUIP_TIER_COLORS[td.id] || '#aaa';
+        const pct = Math.max(7, ((Math.log(td.dropRate) - lmin) / span) * 100);
+        const oneIn = Math.round(1 / td.dropRate).toLocaleString();
+        const prefix = window.tEquipTier ? window.tEquipTier(td.id, td.prefix) : td.prefix;
+        const nBonus = (typeof secondarySlotCount === 'function') ? secondarySlotCount(td.id) : 0;
+        const stars = nBonus ? `<span class="droprate-bonus" style="color:${tc};">${'★'.repeat(nBonus)}</span>` : '';
+        return `
+            <div class="droprate-row">
+                <span class="droprate-name" style="color:${tc};">[${prefix}]${stars}</span>
+                <span class="droprate-track"><span class="droprate-fill" style="width:${pct.toFixed(0)}%;background:${tc};box-shadow:0 0 6px ${tc}88;"></span></span>
+                <span class="droprate-val" style="color:${tc};">${T('ui.equipment.droprate_one_in', '1 / {n}').replace('{n}', oneIn)}</span>
+            </div>
+        `;
+    }).join('');
+
+    pane.innerHTML = `
+        <div class="droprate-panel">
+            <div class="droprate-title">${T('ui.equipment.droprate_title', '등급별 드랍률')}</div>
+            <div class="droprate-rows">${rows}</div>
+            <div class="droprate-note">${T('ui.equipment.droprate_note', '적 처치당 확률. 보스는 10배. ★ = 보너스 스킯 수.')}</div>
+        </div>
+    `;
 }
 
 /* ─── Info panel discovery notification ─────────────────────────────────── */
@@ -131,8 +183,8 @@ function showEquipInfoInPanel(slot, tier, isUpgrade = false, status) {
         <div class="unit-info-title" style="color:#00e5ff;">${window.SvgIcons ? window.SvgIcons.get('sword') : ''} ${T('ui.equipment.found_prefix', '장비')} ${headerLabel}</div>
         <div class="unit-info-badge" style="background:rgba(0,229,255,0.1); border-color:rgba(0,229,255,0.2); color:#00e5ff;">[${_tPrefix}] ${T('ui.equipment.grade_suffix', '등급')}</div>
         <div style="width:42px;height:42px;margin:3px auto;">${equipIconImg(slot, { size: '100%', opacity: 1 })}</div>
-        <div style="color:#fff; font-size:11px; font-weight:bold; margin:2px 0;">${_sName}</div>
-        <div style="font-size:10px; color:#00ff00; line-height:1.2;">${T('ui.equipment.found_effect_label', '효과')}: ${_sLabel} ${dispBonus}</div>
+        <div style="color:#fff; font-size: calc(11px * var(--fs)); font-weight:bold; margin:2px 0;">${_sName}</div>
+        <div style="font-size: calc(10px * var(--fs)); color:#00ff00; line-height:1.2;">${T('ui.equipment.found_effect_label', '효과')}: ${_sLabel} ${dispBonus}</div>
         <div class="info-divider" style="opacity:0.3;"></div>
         <div class="unit-info-desc" style="opacity:0.8;">"${T('ui.equipment.found_lore', '심연의 악령들조차 이 무구의 빛 앞에서는 눈을 멀게 될 것입니다.')}"</div>
     `;
@@ -156,7 +208,8 @@ function showEquipToast(slot, tier, isUpgrade, status) {
 
     // Fallback status inference
     if (!status) status = isUpgrade ? 'UPGRADE' : 'NEW';
-    const badgeLabel = status; // NEW | UPGRADE | REROLL | EXISTING
+    const _Tb = window.t || ((k, f) => f);
+    const badgeLabel = _Tb('ui.controls.badge_' + String(status).toLowerCase(), status); // NEW | UPGRADE | REROLL | EXISTING
     const badgeClass = status === 'NEW' ? 'badge-new'
                      : status === 'UPGRADE' ? 'badge-upgrade'
                      : status === 'REROLL' ? 'badge-upgrade'
@@ -240,16 +293,19 @@ function renderEquipGrid(filter) {
             const pctOfMax = range[1] > 0 ? Math.min(1, ownedVal / range[1]) : 0;
             const rolledDisp = _equipDispBonus(slotData.stat, ownedVal);
 
-            const sec = (typeof getOwnedSecondary === 'function') ? getOwnedSecondary(slotKey) : null;
+            const bonuses = (typeof getOwnedBonuses === 'function') ? getOwnedBonuses(slotKey) : [];
             let secondaryBar = '';
             let secondaryStar = '';
-            if (sec) {
-                const secRange = (typeof getStatRangeByName === 'function') ? getStatRangeByName(owned.tier, sec.stat) : [0, 0];
-                const secPct = secRange[1] > 0 ? Math.min(1, sec.value / secRange[1]) : 0;
-                const secDisp = _equipDispBonus(sec.stat, sec.value);
-                const secTitle = `★ ${_statLabel(sec.stat)} ${secDisp}`;
-                secondaryBar = `<div class="equip-roll-bar secondary" title="${secTitle}" style="margin-top:1px;"><div class="equip-roll-fill" style="width:${(secPct * 100).toFixed(0)}%;background:#ffd700;box-shadow:0 0 4px #ffd700aa;"></div></div>`;
-                secondaryStar = `<div class="equip-secondary-star" title="${secTitle}" style="position:absolute;top:2px;left:2px;color:#ffd700;font-size:11px;text-shadow:0 0 4px #ffd700,0 0 2px #000;pointer-events:none;z-index:2;">★</div>`;
+            if (bonuses.length) {
+                const titles = bonuses.map(b => `★ ${_statLabel(b.stat)} ${_equipDispBonus(b.stat, b.value)}`);
+                secondaryBar = bonuses.map(b => {
+                    const secRange = (typeof getStatRangeByName === 'function') ? getStatRangeByName(owned.tier, b.stat) : [0, 0];
+                    const secPct = secRange[1] > 0 ? Math.min(1, b.value / secRange[1]) : 0;
+                    return `<div class="equip-roll-bar secondary" title="★ ${_statLabel(b.stat)} ${_equipDispBonus(b.stat, b.value)}" style="margin-top:1px;"><div class="equip-roll-fill" style="width:${(secPct * 100).toFixed(0)}%;background:#ffd700;box-shadow:0 0 4px #ffd700aa;"></div></div>`;
+                }).join('');
+                // One star per bonus slot, so grade reads at a glance from the grid.
+                const stars = '★'.repeat(bonuses.length);
+                secondaryStar = `<div class="equip-secondary-star" title="${titles.join(' · ')}" style="position:absolute;top:2px;left:2px;color:#ffd700;font-size: calc(11px * var(--fs));line-height:1;letter-spacing:-1px;text-shadow:0 0 4px #ffd700,0 0 2px #000;pointer-events:none;z-index:2;">${stars}</div>`;
             }
 
             slotDiv.innerHTML = `
@@ -378,38 +434,43 @@ function _buildTierEffectsTable(slotKey, ownedTier, ownedValue) {
         `;
     }).join('');
 
-    // Secondary stat row (always shown — describes T4 bonus slot).
-    const maxT = (window.MAX_EQUIP_TIER || 4);
-    const tcMax = EQUIP_TIER_COLORS[maxT] || '#ffd700';
-    const sec = (typeof getOwnedSecondary === 'function') ? getOwnedSecondary(slotKey) : null;
-    const isOwnedSec = !!(sec && ownedTier === maxT);
-    let secStatLabel, secValDisp;
+    // Bonus stat rows: Ancient rolls 1, Mythic 2, Transcendent 3. Owned gear
+    // lists its actual rolls; otherwise one placeholder row advertises the slot.
+    const secMinT = (window.SECONDARY_STAT_MIN_TIER || 4);
     const _T2 = window.t || ((k, f) => f);
-    if (isOwnedSec) {
-        const range = (typeof getStatRangeByName === 'function') ? getStatRangeByName(maxT, sec.stat) : [0, 0];
-        const rolled = _equipDispBonus(sec.stat, sec.value);
-        const maxDisp = _equipDispBonus(sec.stat, range[1]);
-        secStatLabel = _statLabel(sec.stat);
-        secValDisp = `<b>${rolled}</b> <span class="tier-effect-max">/ ${maxDisp}</span>`;
-    } else {
-        secStatLabel = _T2('ui.equipment.secondary_stat_label', '랜덤 보조 스탯');
-        secValDisp = `<span style="opacity:0.7;">${_T2('ui.equipment.secondary_stat_locked', '??? (최고 등급 한정)')}</span>`;
-    }
-    const secCls = `tier-effect-row tier-${maxT} secondary${isOwnedSec ? ' current' : ' locked'}`;
-    const secondaryRow = `
-        <div class="${secCls}" style="--tc:${tcMax}; border-top:1px dashed ${tcMax}55; margin-top:3px; padding-top:4px; ${isOwnedSec ? '' : 'opacity:0.55;'}">
+    const ownedBonuses = (ownedTier >= secMinT && typeof getOwnedBonuses === 'function')
+        ? getOwnedBonuses(slotKey) : [];
+    const tcMax = EQUIP_TIER_COLORS[ownedBonuses.length ? ownedTier : secMinT] || '#ffd700';
+
+    const bonusRow = (label, valDisp, isFirst, owned) => `
+        <div class="tier-effect-row tier-${owned ? ownedTier : secMinT} secondary${owned ? ' current' : ' locked'}"
+             style="--tc:${tcMax}; ${isFirst ? `border-top:1px dashed ${tcMax}55; margin-top:3px; padding-top:4px;` : ''} ${owned ? '' : 'opacity:0.55;'}">
             <span class="tier-effect-marker" style="color:${tcMax};">★</span>
             <span class="tier-effect-prefix" style="color:${tcMax};">[${_T2('ui.equipment.bonus_label', '[보너스]').replace(/^\[|\]$/g, '')}]</span>
-            <span class="tier-effect-stat">${secStatLabel}</span>
-            <span class="tier-effect-val" style="color:${tcMax};">${secValDisp}</span>
+            <span class="tier-effect-stat">${label}</span>
+            <span class="tier-effect-val" style="color:${tcMax};">${valDisp}</span>
         </div>
     `;
+
+    let secondaryRow;
+    if (ownedBonuses.length) {
+        secondaryRow = ownedBonuses.map((b, i) => {
+            const range = (typeof getStatRangeByName === 'function') ? getStatRangeByName(ownedTier, b.stat) : [0, 0];
+            const disp = `<b>${_equipDispBonus(b.stat, b.value)}</b> <span class="tier-effect-max">/ ${_equipDispBonus(b.stat, range[1])}</span>`;
+            return bonusRow(_statLabel(b.stat), disp, i === 0, true);
+        }).join('');
+    } else {
+        const locked = `<span style="opacity:0.7;">${_T2('ui.equipment.secondary_stat_locked', '??? (고대 등급 이상)')}</span>`;
+        secondaryRow = bonusRow(_T2('ui.equipment.secondary_stat_label', '랜덤 보조 스킯'), locked, true, false);
+    }
     return `<div class="equip-tier-effects">${rows}${secondaryRow}</div>`;
 }
 
 function showEquipDetail(slotKey) {
     const infoPane = document.getElementById('equip-info-pane');
     if (!infoPane) return;
+    const drBtn = document.getElementById('equip-droprate-btn');
+    if (drBtn) drBtn.classList.remove('active');
     const slotData = equipmentSlots[slotKey];
     const owned = window.ownedEquipment[slotKey] || { tier: 0, count: 0 };
 
@@ -419,7 +480,7 @@ function showEquipDetail(slotKey) {
         const tc = EQUIP_TIER_COLORS[owned.tier] || '#aaa';
         const ownedVal = (typeof getOwnedStatValue === 'function') ? getOwnedStatValue(slotKey) : 0;
 
-        const tierBars = Array.from({length: 4}, (_, i) => {
+        const tierBars = Array.from({length: (window.MAX_EQUIP_TIER || 6)}, (_, i) => {
             const t = i + 1; const c = EQUIP_TIER_COLORS[t];
             const active = t <= owned.tier;
             return `<div class="tier-prog-bar${active ? ' active' : ''}" style="${active ? `background:${c};box-shadow:0 0 5px ${c}66;` : ''}"></div>`;
@@ -515,6 +576,48 @@ function _handleRerollClick(slotKey) {
     }
 }
 
+/**
+ * Owned equipment effects as [{ label, val }] (primary + T4 secondary rolls).
+ * Shared by the armory's total pane and the Sacred Armory button tooltip.
+ *
+ * opts.byStat merges every source of the same stat into a single summed line -
+ * several slots roll the same stat (mainhand/dagger are both cooldown, offhand/
+ * staff both crit_damage), and a T4 secondary can land on a stat a slot already
+ * grants. The pane wants the per-slot breakdown; the totals tooltip does not.
+ */
+function getEquipBonusLines(opts = {}) {
+    const lines = [];
+    if (typeof equipmentSlots === 'undefined') return lines;
+
+    const totals = new Map();   // stat -> summed value, insertion-ordered
+    const addTotal = (stat, val) => totals.set(stat, (totals.get(stat) || 0) + val);
+
+    Object.keys(equipmentSlots).forEach(slotKey => {
+        const owned = window.ownedEquipment[slotKey];
+        if (!owned || owned.tier <= 0) return;
+        const slotData = equipmentSlots[slotKey];
+        const bonusVal = (typeof getOwnedStatValue === 'function') ? getOwnedStatValue(slotKey) : 0;
+        const bonuses = (typeof getOwnedBonuses === 'function') ? getOwnedBonuses(slotKey) : [];
+
+        if (opts.byStat) {
+            addTotal(slotData.stat, bonusVal);
+            bonuses.forEach(b => addTotal(b.stat, b.value));
+            return;
+        }
+
+        lines.push({
+            label: window.tEquipSlot ? window.tEquipSlot(slotKey, 'label', slotData.label) : slotData.label,
+            val: _equipDispBonus(slotData.stat, bonusVal)
+        });
+        bonuses.forEach(b => lines.push({ label: `★ ${_statLabel(b.stat)}`, val: _equipDispBonus(b.stat, b.value) }));
+    });
+
+    if (opts.byStat) {
+        totals.forEach((val, stat) => lines.push({ label: _statLabel(stat), val: _equipDispBonus(stat, val) }));
+    }
+    return lines;
+}
+
 function renderEquipBonuses() {
     const bonusPane = document.getElementById('equip-bonus-pane');
     if (!bonusPane) return;
@@ -541,16 +644,15 @@ function renderEquipBonuses() {
                         <span class="val" style="color:${tc};">${dispBonus}</span>
                     </div>
                 `;
-                const sec = (typeof getOwnedSecondary === 'function') ? getOwnedSecondary(slotKey) : null;
-                if (sec) {
-                    const secDisp = _equipDispBonus(sec.stat, sec.value);
+                const bonuses = (typeof getOwnedBonuses === 'function') ? getOwnedBonuses(slotKey) : [];
+                bonuses.forEach(b => {
                     html += `
                         <div class="total-bonus-item tier-${owned.tier} secondary" style="opacity:0.95; padding-left:14px; border-left:2px solid ${tc}88;">
-                            <span style="color:${tc};">★ ${_statLabel(sec.stat)}</span>
-                            <span class="val" style="color:${tc};">${secDisp}</span>
+                            <span style="color:${tc};">★ ${_statLabel(b.stat)}</span>
+                            <span class="val" style="color:${tc};">${_equipDispBonus(b.stat, b.value)}</span>
                         </div>
                     `;
-                }
+                });
             }
         });
     }
@@ -558,7 +660,7 @@ function renderEquipBonuses() {
 
     if (!hasAny) {
         html = `<div class="equip-bonus-title">${_T3('ui.equipment.total_bonus', '총 장비 효과')}</div>`;
-        html += `<div style="color:#444;font-style:italic;text-align:center;margin-top:15px;font-size:10px;">${_T3('ui.equipment.no_equip', '장착된 장비가 없습니다.')}</div>`;
+        html += `<div style="color:#444;font-style:italic;text-align:center;margin-top:15px;font-size: calc(10px * var(--fs));">${_T3('ui.equipment.no_equip', '장착된 장비가 없습니다.')}</div>`;
     }
     bonusPane.innerHTML = html;
 }
@@ -570,6 +672,8 @@ window.showEquipToast       = showEquipToast;
 window.renderEquipGrid      = renderEquipGrid;
 window.showEquipDetail      = showEquipDetail;
 window.renderEquipBonuses   = renderEquipBonuses;
+window.renderDropRateChart  = renderDropRateChart;
+window.getEquipBonusLines   = getEquipBonusLines;
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initEquipment);

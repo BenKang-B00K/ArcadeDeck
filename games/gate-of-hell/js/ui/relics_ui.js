@@ -99,10 +99,10 @@ function initRelics() {
             const T = window.t || ((k, f) => f);
             d.innerHTML = `
                 <div class="unit-info-title" style="color:#ff4500;">${window.SvgIcons ? window.SvgIcons.get('urn') : ''} ${T('ui.controls.relics_title', '유물')}</div>
-                <div class="unit-info-badge" style="background:rgba(255,69,0,0.1); border-color:rgba(255,69,0,0.25); color:#ff4500;">RELIC VAULT</div>
+                <div class="unit-info-badge" style="background:rgba(255,69,0,0.1); border-color:rgba(255,69,0,0.25); color:#ff4500;">${T('ui.relics.default_subtitle', 'RELIC VAULT')}</div>
                 <div class="unit-info-desc" style="color:#bbb;">${T('ui.controls.relics_desc', '정화 중 획득한 보물로 아군 전체를 영구 강화합니다.')}</div>
-                <div style="color:#d6b4ff; font-size:clamp(11px, 2.4vw, 14px); font-weight:900; text-shadow:0 0 6px rgba(186,85,211,0.6);">◆ ${sf} SF</div>
-                <div style="color:#888; font-size:clamp(8px, 1.5vw, 10px); line-height:1.25;">${T('ui.controls.relics_cost_fmt', '일반 {n} · 최상위 {s} SF').replace('{n}', normalCost).replace('{s}', supremeCost)}</div>
+                <div style="color:#d6b4ff; font-size: calc(clamp(11px, 2.4vw, 14px) * var(--fs)); font-weight:900; text-shadow:0 0 6px rgba(186,85,211,0.6);">◆ ${sf} SF</div>
+                <div style="color:#888; font-size: calc(clamp(8px, 1.5vw, 10px) * var(--fs)); line-height:1.25;">${T('ui.controls.relics_cost_fmt', '일반 {n} · 최상위 {s} SF').replace('{n}', normalCost).replace('{s}', supremeCost)}</div>
             `;
             if (typeof startInfoResetTimer === 'function') startInfoResetTimer();
         };
@@ -136,8 +136,8 @@ function showRelicInfoInPanel(id, status) {
         <div class="unit-info-title" style="color:#ff4500;">${window.SvgIcons ? window.SvgIcons.get('urn') : ''} ${_Tr('ui.relics.found_title', '유물 발견!')}</div>
         <div class="unit-info-badge" style="background:rgba(255,69,0,0.1); border-color:rgba(255,69,0,0.2); color:#ff4500;">New Discovery</div>
         <div style="width:46px;height:46px;margin:3px auto;">${relicIconImg(id, { size: '100%', opacity: 1 })}</div>
-        <div style="color:#fff; font-size:11px; font-weight:bold; margin:2px 0;">${rName}</div>
-        <div style="font-size:10px; color:#00ff00; line-height:1.2;">${_Tr('ui.relics.effect_label', '효과')}: ${rEffect}</div>
+        <div style="color:#fff; font-size: calc(11px * var(--fs)); font-weight:bold; margin:2px 0;">${rName}</div>
+        <div style="font-size: calc(10px * var(--fs)); color:#00ff00; line-height:1.2;">${_Tr('ui.relics.effect_label', '효과')}: ${rEffect}</div>
         <div class="info-divider" style="opacity:0.3;"></div>
         <div class="unit-info-desc" style="opacity:0.8;">"${rLore}"</div>
     `;
@@ -156,7 +156,8 @@ function showRelicToast(id, status) {
         const cnt = (window.collectedRelics && window.collectedRelics[id]) || 0;
         status = cnt <= 1 ? 'NEW' : 'EXISTING';
     }
-    const badgeLabel = status === 'NEW' ? 'NEW' : 'EXISTING';
+    const _Tb = window.t || ((k, f) => f);
+    const badgeLabel = status === 'NEW' ? _Tb('ui.controls.badge_new', 'NEW') : _Tb('ui.controls.badge_existing', 'EXISTING');
     const badgeClass = status === 'NEW' ? 'badge-new' : 'badge-existing';
 
     const toast = document.createElement('div');
@@ -348,7 +349,7 @@ function showRelicDetail(id) {
     infoPane.innerHTML = `
         <div class="relic-detail-art ${owned ? '' : 'empty'}">${relicIconImg(id, imgOpts)}</div>
         <div class="relic-detail-body">
-            <div class="relic-detail-title">${rdName} <span style="font-size:9px; opacity:0.7;">(${ownedDisp})</span></div>
+            <div class="relic-detail-title">${rdName} <span style="font-size: calc(9px * var(--fs)); opacity:0.7;">(${ownedDisp})</span></div>
             <div class="relic-detail-effect">${rdEffect}</div>
             <div class="relic-detail-source" style="color:${srcMeta.color}; border-color:${srcMeta.color}33; background:${srcMeta.color}14;">${T('ui.relics.source_label', '출처')}: <b>${srcMeta.label}</b></div>
             <div class="col-detail-divider" style="background:linear-gradient(90deg, transparent, rgba(255,69,0,0.3), transparent);"></div>
@@ -358,12 +359,12 @@ function showRelicDetail(id) {
 }
 
 /* ─── Total aggregated bonuses ──────────────────────────────────────────── */
-function renderTotalBonuses() {
-    const pane = document.getElementById('relic-bonus-pane');
-    if (!pane) return;
+/**
+ * Active relic bonuses as [{ label, val }], non-zero only.
+ * Shared by the vault's total pane and the Relics button tooltip.
+ */
+function getRelicBonusLines() {
     const _Tb = window.t || ((k, f) => f);
-    pane.innerHTML = `<div class="relic-bonus-title">${_Tb('ui.relics.total_bonus', '총 유물 보너스')}</div>`;
-
     if (typeof updateTotalRelicBonuses === 'function') updateTotalRelicBonuses();
 
     const labels = {
@@ -391,25 +392,33 @@ function renderTotalBonuses() {
         ledger_stacks:           _Tb('ui.relics.bonus_ledger_stacks', "영혼 청구서 중첩")
     };
 
-    let bonusHtml = '';
-    for (let key in labels) {
+    const PCT = ['damage', 'cooldown', 'crit_chance', 'crit_damage', 'slow_strength', 'portal_dmg_reduction',
+                 'sell_refund', 'shrine_mastery', 'execute_threshold', 'treasure_chance', 'crit_chain',
+                 'portal_heal_chance', 'echo_shot_chance', 'combo_damage', 'adjacency_damage'];
+
+    const lines = [];
+    for (const key in labels) {
         const val = (typeof getRelicBonus === 'function') ? getRelicBonus(key) : 0;
-        if (val !== 0) {
-            let dispVal = "";
-            if (['damage', 'cooldown', 'crit_chance', 'crit_damage', 'slow_strength', 'portal_dmg_reduction', 'sell_refund', 'shrine_mastery', 'execute_threshold', 'treasure_chance', 'crit_chain', 'portal_heal_chance', 'echo_shot_chance', 'combo_damage', 'adjacency_damage'].includes(key)) {
-                dispVal = `+${(val * 100).toFixed(0)}%`;
-            } else {
-                dispVal = `+${val.toFixed(0)}`;
-            }
-            bonusHtml += `
-                <div class="relic-bonus-item">
-                    <span>${labels[key]}</span>
-                    <span class="val">${dispVal}</span>
-                </div>
-            `;
-        }
+        if (val === 0) continue;
+        lines.push({
+            label: labels[key],
+            val: PCT.includes(key) ? `+${(val * 100).toFixed(0)}%` : `+${val.toFixed(0)}`
+        });
     }
-    pane.innerHTML += bonusHtml;
+    return lines;
+}
+
+function renderTotalBonuses() {
+    const pane = document.getElementById('relic-bonus-pane');
+    if (!pane) return;
+    const _Tb = window.t || ((k, f) => f);
+    pane.innerHTML = `<div class="relic-bonus-title">${_Tb('ui.relics.total_bonus', '총 유물 보너스')}</div>`;
+    pane.innerHTML += getRelicBonusLines().map(b => `
+                <div class="relic-bonus-item">
+                    <span>${b.label}</span>
+                    <span class="val">${b.val}</span>
+                </div>
+            `).join('');
 }
 
 // Window Exports
@@ -417,6 +426,7 @@ window.initRelics           = initRelics;
 window.showRelicInfoInPanel = showRelicInfoInPanel;
 window.showRelicToast       = showRelicToast;
 window.renderRelicsGrid     = renderRelicsGrid;
+window.getRelicBonusLines   = getRelicBonusLines;
 window.showRelicDetail      = showRelicDetail;
 window.renderTotalBonuses   = renderTotalBonuses;
 window.updateRelicSfBadge   = updateRelicSfBadge;

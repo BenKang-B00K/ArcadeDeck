@@ -1,1935 +1,1649 @@
 /* pix_tier3.js - Tier 3 Exorcists (Advanced Units) */
 
+// ───────────────────────────────────────────────────
+// MIDAS — 황금의 미다스. Gold mask, gilded plate over a purple underrobe, and
+// gold dust falling from his fingertips.
+// Lore: 황금 가면에 도금 갑주, 손끝에 황금 가루를 흩뿌리는 부의 화신.
+// The old art showed a bare face and a sceptre reaching 66px above the head,
+// which set the sprite's whole crop and left the figure tiny beside it.
+// ───────────────────────────────────────────────────
 function drawMidas(cx, cy, tower) {
     const area   = tower.currentSlot ? tower.currentSlot.area : 'left-slots';
     const isLeft = area === 'left-slots';
     const now    = Date.now();
     const isAtk  = (now - (tower.lastShot || 0)) < 400;
-    const idleY  = Math.sin(now * 0.003) * 4;
     const S = 2.0;
+    const idleY  = Math.sin(now * 0.0025) * 2;
     const p = (ox, oy, col, w=1, h=1) => pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S);
-    const ep       = (Math.sin(now * 0.005) + 1) / 2;
-    const orbPulse = (Math.sin(now * 0.006) + 1) / 2;
-    const ang      = now * 0.002;
-    const CO='#000000';
-    const PS='#2A0050', PM='#4A0080', PB='#7B1FA2', PL='#AB47BC', PH='#E1BEE7';
-    const GS='#7A5800', GM='#B8860B', GB='#FFD700', GL='#FFE57F', GH='#FFFDE7', GW='#FFFFD8';
-    const SAP='#1565C0', RUB='#C62828', RUH='#FF6E6E', EM='#00C853';
-    const SK='#F5C090';
+    // Glows go through `lighter`, which is what the bake records as emissive;
+    // the finishing pass then blooms exactly these and nothing else.
+    const glow = (ox, oy, col, w, h, a) => {
+        ctx.save(); ctx.globalAlpha = a; ctx.globalCompositeOperation = 'lighter';
+        pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S); ctx.restore();
+    };
+    const ep   = (Math.sin(now * 0.005) + 1) / 2;
+    const orbP = (Math.sin(now * 0.006) + 1) / 2;
+    const ang  = now * 0.002;
 
-    // ── gold rain aura
-    ctx.save(); ctx.globalAlpha = 0.15 + ep * 0.22;
-    pUnit(ctx,cx,cy,-22,-44+idleY,GB,44,76,isLeft,S);
+    const CO='#000';
+    const G0='#3A2600', G1='#7A5400', G2='#B98A0A', G3='#FFCF33', G4='#FFF0A8', G5='#FFFDE8';
+    const P0='#1B0730', P1='#3A1160', P2='#5E2094', P3='#8B41C8', P4='#C088F0';
+    const RUB='#C62828', RUH='#FF7A7A';
+
+    // gold-dust aura
+    ctx.save(); ctx.globalAlpha = 0.14 + ep * 0.20;
+    pUnitAura(ctx, cx, cy, -20, -38 + idleY, G3, 40, 68, isLeft, S);
     ctx.restore();
 
-    // ── 5 ORBITING GOLD ORBS (was 3, varying radius)
-    for (let i = 0; i < 5; i++) {
-        const a   = ang + i * (Math.PI * 2 / 5);
-        const r   = 18 + (i % 2) * 6;
-        const ox2 = Math.cos(a) * r;
-        const oy2 = Math.sin(a) * r * 0.55 - 6;
-        p(ox2-3, oy2-3, CO, 7, 7);
-        p(ox2-2, oy2-2, GM, 5, 5);
-        p(ox2-2, oy2-2, GH, 5, 1);                                                // top highlight
-        p(ox2-1, oy2-1, GB, 3, 3);
-        p(ox2,   oy2,   GL, 1, 1);
-        ctx.save(); ctx.globalAlpha = 0.50 + orbPulse * 0.30;
-        pUnit(ctx,cx,cy,ox2-2,oy2-2+idleY,GW,5,5,isLeft,S);
-        ctx.restore();
+    // ── FOUR ORBITING GOLD ORBS (kept close; they used to swing out to r=24)
+    for (let i = 0; i < 4; i++) {
+        const a  = ang + i * (Math.PI / 2);
+        const ox2 = Math.round(Math.cos(a) * 15);
+        const oy2 = Math.round(Math.sin(a) * 7) - 8;
+        p(ox2-2, oy2-2, CO, 5, 5); p(ox2-1, oy2-1, G1, 3, 3);
+        p(ox2-1, oy2-1, G3, 3, 1);                                               // top highlight
+        p(ox2,   oy2,   G4, 1, 1);
+        glow(ox2-1, oy2-1, G4, 3, 1, 0.40 + orbP * 0.30);
     }
 
-    // ── BOOTS (purple + gold cuff)
-    p(-7,14,CO,7,9); p(-6,15,PS,5,8); p(-4,16,GB,2,5);
-    p( 1,14,CO,6,9); p( 2,15,PS,5,8); p( 3,16,GB,2,5);
-    p(-7,14,GB,7,1); p( 1,14,GB,6,1);
+    // ── SABATONS
+    p(-7, 14, CO, 7, 9); p(-6, 15, P0, 5, 8); p(-6, 15, P2, 5, 1);
+    p( 1, 14, CO, 6, 9); p( 2, 15, P0, 5, 8); p( 2, 15, P2, 5, 1);
+    p(-7, 14, G2, 7, 1); p( 1, 14, G2, 6, 1);                                    // gilt cuffs
 
-    // ── ROBE LOWER (purple, gold stripes + 4 jewel inlay)
-    p(-8,2,CO,16,13); p(-7,3,PS,14,11); p(-6,4,PM,11,9); p(-5,5,PB,7,7);
-    p(-7,3,PH,14,1);                                                              // top highlight
-    p(-5,4,GB,1,10); p( 4,4,GB,1,10);                                             // gold vertical stripes
-    p(-2,6,GB,1,8); p( 1,7,GB,1,7);
-    // Jewel belt row
-    p(-8,0,CO,16,5); p(-7,1,GS,14,4); p(-7,1,GM,14,1);
-    p(-4,1,SAP,2,2); p(-1,1,RUB,2,2); p( 2,1,SAP,2,2); p( 5,1,EM,2,2);
-    p(-7,12,CO,14,3); p(-6,13,GM,12,2); p(-6,13,GB,12,1);                         // gold hem
-    for (let r=0; r<2; r++) { p(-6,5+r*4,GB,1,1); p(5,5+r*4,GB,1,1); }            // gold rivets
+    // ── PURPLE UNDERROBE
+    p(-8,  2, CO, 16, 14); p(-7,  3, P0, 14, 12); p(-6,  4, P1, 11, 10);
+    p(-7,  3, P4, 14,  1);                                                       // top highlight
+    p(-4,  5, P2,  7, 9);                                                        // lit panel
+    p(-8, 13, CO, 16,  3); p(-7, 14, G1, 14, 2); p(-7, 14, G3, 14, 1);           // gilt hem
 
-    // ── UPPER ROBE (riveted, gold pectoral)
-    p(-7,-14,CO,15,15); p(-6,-13,PS,13,13); p(-5,-12,PM,10,11); p(-4,-11,PB,7,9); p(-3,-10,PL,4,7);
-    p(-6,-13,PH,13,1);                                                            // top highlight
-    p(-5,-12,GB,1,10); p( 3,-11,GB,1,9); p(-2,-10,GB,1,8);                        // gold trims
-    // Gold pectoral plate w/ ruby gem
-    p(-5,-2,CO,10,4); p(-4,-1,GS,8,3); p(-1,-1,GB,3,2);
-    p(-3,-6,CO,6,5); p(-2,-5,GM,4,3); p(-2,-5,GB,4,1);
-    p(-1,-4,RUB,2,1); p(-1,-4,RUH,2,1);
-    ctx.save(); ctx.globalAlpha = 0.55 + ep * 0.35;
-    pUnit(ctx,cx,cy,-3,-6+idleY,GW,6,5,isLeft,S);
-    ctx.restore();
-    for (let r=0; r<3; r++) { p(-6,-10+r*4,GB,1,1); p(5,-10+r*4,GB,1,1); }        // gold rivets
+    // ── JEWELLED BELT
+    p(-8,  0, CO, 16, 3); p(-7, 1, G1, 14, 2); p(-7, 1, G3, 14, 1);
+    p(-2, -1, CO,  5, 5); p(-1, 0, RUB, 3, 3); p(-1, 0, RUH, 3, 1);
+    glow(-1, 0, G5, 3, 1, 0.45 + ep * 0.30);
 
-    // ── PAULDRONS (gold-capped purple)
-    p(-12,-12,CO,8,9); p(-11,-11,GM,6,8); p(-10,-10,GB,4,7); p(-11,-11,GH,6,1);
-    p(-11,-12,GW,6,1);
-    p( 6,-12,CO,8,9); p( 7,-11,GM,6,8); p( 8,-10,GB,4,7); p( 7,-11,GH,6,1);
-    p( 7,-12,GW,6,1);
+    // ── GILDED CUIRASS (gold plate over the purple)
+    p(-7,-14, CO, 14, 16); p(-6,-13, G1, 12, 14); p(-5,-13, G2, 10, 13);
+    p(-6,-13, G4, 12,  1);                                                       // top highlight
+    p(-3,-12, G3,  6, 11);                                                       // lit centre plate
+    p( 4,-12, G1,  2, 11);                                                       // shaded side
+    p(-6, -8, G0, 12,  1); p(-6, -4, G0, 12, 1);                                 // plate seams
+    // ruby pectoral
+    p(-2, -7, CO, 5, 5); p(-1, -6, RUB, 3, 3); p(-1, -6, RUH, 3, 1);
+    glow(-1, -6, G5, 3, 1, 0.55 + ep * 0.35);
 
-    // ── ARMS + HANDS
-    p(-10,-10,CO,5,12); p(-9,-9,PM,4,10); p(-9,-9,PL,4,1);
-    p(-10,-17,CO,5,8); p(-9,-16,SK,4,6);
-    p( 7,-10,CO,5,12); p( 8,-9,PM,4,10); p( 8,-9,PL,4,1);
-    p( 7,-17,CO,5,8); p( 8,-16,SK,4,6);
+    // ── PAULDRONS
+    p(-13,-17, CO, 7, 8); p(-12,-16, G1, 5, 6); p(-12,-16, G4, 5, 1);
+    p(-12,-15, G2,  5, 4);
+    p(  6,-17, CO, 7, 8); p(  7,-16, G1, 5, 6); p(  7,-16, G4, 5, 1);
+    p(  7,-15, G2,  5, 4);
 
-    // ── GOLD SCEPTER (taller, multi-layer crown jewels)
-    p(9,-54,CO,4,44); p(10,-53,GS,3,42); p(10,-50,GM,2,36); p(10,-46,GB,2,30);    // shaft
-    p(9,-44,GB,4,1); p(9,-32,GB,4,1); p(9,-20,GB,4,1); p(9,-8,GB,4,1);            // gold bands
-    // Scepter crown jewel (multi-layered)
-    p(6,-62,CO,12,12); p(7,-61,GM,10,10); p(8,-60,GB,8,8); p(9,-59,GL,6,6);
-    p(7,-61,GW,10,1);                                                             // top highlight
-    p(10,-58,GH,4,4); p(11,-57,'#FFFFFF',2,2);
-    // Ruby gem at scepter tip
-    p(10,-66,CO,4,5); p(11,-65,RUB,2,3); p(11,-65,RUH,2,1);
-    // Sub-jewels on crown
-    p( 6,-58,SAP,1,1); p(17,-58,EM,1,1); p( 6,-54,EM,1,1); p(17,-54,SAP,1,1);
-    ctx.save(); ctx.globalAlpha = 0.55 + orbPulse * 0.40;
-    pUnit(ctx,cx,cy,7,-61+idleY,GW,10,10,isLeft,S);
-    ctx.restore();
+    // ── LEFT ARM (short gilt sceptre, held low)
+    p(-12,-11, CO, 6, 13); p(-11,-10, P1, 4, 11); p(-11,-10, P3, 4, 1);
+    p(-12,  1, CO, 6,  5); p(-11,  2, G2, 4,  3); p(-11, 2, G4, 4, 1);
+    p(-11,-16, CO, 3, 20); p(-10,-15, G1, 1, 18);                                // haft
+    p(-12,-20, CO, 5,  5); p(-11,-19, G2, 3, 3); p(-11,-19, G4, 3, 1);           // head
+    glow(-11,-19, G5, 3, 1, 0.40 + orbP * 0.30);
+
+    // ── RIGHT ARM (raised, fingers spread)
+    p( 6,-11, CO, 6, 12); p( 7,-10, P1, 4, 10); p( 7,-10, P3, 4, 1);
+    p( 8,-20, CO, 6, 11); p( 9,-19, P1, 4,  9); p( 9,-19, P3, 4, 1);
+    p( 8,-24, CO, 6,  6); p( 9,-23, G2, 4,  4); p( 9,-23, G4, 4, 1);             // gilded hand
+    p( 9,-19, G1, 1,  2); p(11,-19, G1, 1, 2);                                   // finger gaps
+
+    // ── GOLD DUST — motes shed from the fingertips, each on its own phase so
+    //    the fall never reads as a repeating column.
+    for (let i = 0; i < 7; i++) {
+        const t  = ((now * 0.0009) + i / 7) % 1;
+        const mx = 9 + ((i * 3) % 5) + Math.round(Math.sin(now * 0.004 + i) * 1);
+        const my = -18 + t * 26;
+        const a  = (1 - t) * 0.85;
+        p(mx, my, i % 3 ? G3 : G4, 1, 1);
+        glow(mx, my, G5, 1, 1, a * 0.7);
+    }
 
     // ── NECK
-    p(-2,-16,CO,5,3); p(-1,-15,SK,3,2);
+    p(-3,-17, CO, 7, 3); p(-2,-16, P0, 5, 2);
 
-    // ── HEAD (regal, golden-tinted face)
-    p(-8,-30,CO,16,14); p(-7,-29,'#F5E0C0',14,12); p(-6,-28,SK,11,10); p(-5,-27,'#F5C878',8,8);
-    p(-5,-23,CO,3,2); p( 2,-23,CO,3,2);
-    p(-4,-23,GM,2,1); p( 3,-23,GM,2,1);
-    p(-2,-21,CO,5,1);
-    // Golden facial markings
-    p(-6,-22,GB,1,1); p( 5,-22,GB,1,1);
+    // ── GOLD MASK (smooth full face, slit eyes, serene mouth line)
+    p(-7,-31, CO, 14, 15);
+    p(-6,-30, G1, 12, 13); p(-5,-30, G2, 10, 12); p(-4,-29, G3, 7, 10);
+    p(-6,-30, G4, 12,  1);                                                       // top highlight
+    p( 4,-29, G1,  2, 10);                                                       // shaded cheek
+    p(-1,-28, G4,  2, 12);                                                       // centre-line sheen
+    p(-5,-26, CO,  4,  2); p( 2,-26, CO, 4, 2);                                  // eye slits
+    p(-4,-26, G0,  2,  1); p( 3,-26, G0, 2, 1);
+    glow(-5,-26, G5, 4, 1, 0.30 + ep * 0.25);
+    glow( 2,-26, G5, 4, 1, 0.30 + ep * 0.25);
+    p(-3,-20, G1,  7,  1);                                                       // mouth line
+    p(-7,-27, G2,  1,  6); p( 6,-27, G2, 1, 6);                                  // mask edge
 
-    // ── RUBY TIARA CROWN (gold-multi-spire, ruby centerpiece)
-    p(-8,-37,CO,16,8); p(-7,-36,GM,14,6); p(-6,-35,GB,11,4); p(-5,-34,GL,8,2);
-    p(-7,-36,GW,14,1);                                                            // top highlight
-    p(-8,-37,GS,16,1);                                                            // base
-    // Center ruby spire
-    p(-1,-41,CO,4,5); p( 0,-40,RUB,2,4); p( 0,-40,RUH,2,1);
-    p(-1,-44,CO,2,3); p( 0,-43,GB,1,2); p( 0,-43,GW,1,1);
-    // Side gold spires
-    p(-7,-39,CO,3,4); p(-6,-38,GB,1,3);
-    p( 5,-39,CO,3,4); p( 6,-38,GB,1,3);
-    p(-7,-40,SAP,1,1); p( 6,-40,EM,1,1);                                          // side gems
+    // ── CIRCLET (modest band, ruby centre — the old tiara was a second crown)
+    p(-8,-36, CO, 16, 5); p(-7,-35, G1, 14, 3); p(-7,-35, G3, 14, 1);
+    p(-2,-39, CO,  5, 5); p(-1,-38, RUB, 3, 3); p(-1,-38, RUH, 3, 1);
+    p(-7,-38, CO,  3, 4); p(-6,-37, G3, 1, 3);
+    p( 4,-38, CO,  3, 4); p( 5,-37, G3, 1, 3);
+    glow(-1,-38, G5, 3, 1, 0.45 + ep * 0.30);
 
     if (isAtk) {
-        ctx.save(); ctx.globalAlpha = 0.78; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy, 6,-64+idleY,GW,18,16,isLeft,S);                          // scepter flash
-        ctx.restore();
-        ctx.save(); ctx.globalAlpha = 0.50; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy,-10,-8+idleY,GL,26,34,isLeft,S);
-        ctx.restore();
+        glow(-1,-38, G5, 3, 3, 0.65);
+        glow(-1, -6, G5, 3, 3, 0.60);
+        glow( 8,-24, G5, 6, 6, 0.55);                                            // casting hand
     }
 }
 
+// ───────────────────────────────────────────────────
+// PHILOSOPHER — 공허의 현자. Star-flecked black robe, open void codex, round
+// spectacles, white beard.
+// Lore: 별무늬 검은 로브에 공허의 책을 펼친 안경 쓴 노년의 현자.
+// The old art was a faceless hood with a rolled scroll under a crystal twice
+// the height of the figure — no book, no glasses, no sage.
+// ───────────────────────────────────────────────────
 function drawPhilosopher(cx, cy, tower) {
     const area   = tower.currentSlot ? tower.currentSlot.area : 'left-slots';
     const isLeft = area === 'left-slots';
     const now    = Date.now();
     const isAtk  = (now - (tower.lastShot || 0)) < 400;
-    const idleY  = Math.sin(now * 0.002) * 2;
     const S = 2.0;
+    const idleY  = Math.sin(now * 0.002) * 2;
     const p = (ox, oy, col, w=1, h=1) => pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S);
-    const ep        = (Math.sin(now * 0.005) + 1) / 2;
-    const voidPulse = (Math.sin(now * 0.004) + 1) / 2;
-    const cryY      = Math.sin(now * 0.003) * 6;
-    const shdT      = now * 0.0015;
-    const CO='#000000';
-    const RS='#050505', RM='#0A0A0A', RB='#151515', RL='#222222', RH='#3A3A3A';
-    const VS='#1A0038', VM='#4A0080', VB='#7B1FA2', VL='#9C27B0', VH='#CE93D8';
-    const CY='#00ACC1', CL='#00E5FF', CH='#B2EBF2', CW='#E0FFFF';
-    const PA='#C8B89A', PLA='#E8D8B8', PH='#F8E8C8';
-    const GD='#FFD700';
+    // Glows go through `lighter`, which is what the bake records as emissive;
+    // the finishing pass then blooms exactly these and nothing else.
+    const glow = (ox, oy, col, w, h, a) => {
+        ctx.save(); ctx.globalAlpha = a; ctx.globalCompositeOperation = 'lighter';
+        pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S); ctx.restore();
+    };
+    const ep    = (Math.sin(now * 0.005) + 1) / 2;
+    const voidP = (Math.sin(now * 0.004) + 1) / 2;
+    const spin  = now * 0.0016;
 
-    // ── void aura
-    ctx.save(); ctx.globalAlpha = 0.16 + ep * 0.22;
-    pUnit(ctx,cx,cy,-22,-56+idleY,VL,44,88,isLeft,S);
+    const CO='#000';
+    const N0='#050510', N1='#12122A', N2='#20204A', N3='#33336E', N4='#5A5A9E';  // starred robe
+    const C1='#0A6E96', C2='#1FB8DC', C3='#7FE8FF', C4='#DDFAFF';                // void cyan
+    const K0='#B08050', K1='#E4BC94', K2='#FFDCBC';                              // aged skin
+    const W1='#9A9AA8', W2='#CFCFDC', W3='#F2F2FA';                              // white hair
+    const P1='#8A7A54', P2='#C9B98E', P3='#EDE0BC', P4='#FFF8E0';                // pages
+    const G2='#B88000', G3='#FFD700';
+
+    // void aura
+    ctx.save(); ctx.globalAlpha = 0.14 + ep * 0.20;
+    pUnitAura(ctx, cx, cy, -20, -38 + idleY, C2, 40, 68, isLeft, S);
     ctx.restore();
 
-    // ── 4 ORBITING VOIDSTONE SHARDS
+    // ── FOUR VOIDSTONE SHARDS in a slow orbit
     for (let i = 0; i < 4; i++) {
-        const a   = shdT + i * (Math.PI / 2);
-        const ox2 = Math.cos(a) * 19;
-        const oy2 = Math.sin(a) * 11 - 8;
-        p(ox2-2, oy2-2, CO, 5, 5);
-        p(ox2-1, oy2-1, VM, 3, 3);
-        p(ox2-1, oy2-1, VH, 3, 1);
-        ctx.save(); ctx.globalAlpha = 0.55 + voidPulse * 0.30;
-        pUnit(ctx,cx,cy,ox2-1,oy2-1+idleY,VL,3,3,isLeft,S);
-        ctx.restore();
+        const a  = spin + i * (Math.PI / 2);
+        const ox2 = Math.round(Math.cos(a) * 15);
+        const oy2 = Math.round(Math.sin(a) * 7) - 22;
+        p(ox2-1, oy2-2, CO, 3, 5); p(ox2, oy2-1, N3, 1, 3);
+        glow(ox2, oy2-1, C3, 1, 3, 0.40 + voidP * 0.30);
     }
 
-    // ── HUGE FLOATING CRYSTAL (multi-faceted, bobbing)
-    p(-5,-58+cryY,CO,11,18); p(-4,-57+cryY,VS,9,16); p(-3,-56+cryY,CY,7,14);
-    p(-4,-57+cryY,CW,9,1);                                                        // top highlight
-    p(-2,-54+cryY,CL,5,10);  p(-1,-52+cryY,CW,3,7);
-    p(-5,-52+cryY,CO,11,5); p(-4,-51+cryY,CH,9,3);                                // facet band
-    p( 0,-44+cryY,CW,1,3);                                                        // bottom point
-    // Sub-shards
-    p(-7,-50+cryY,CO,3,4); p(-6,-49+cryY,VB,1,3);
-    p( 4,-50+cryY,CO,3,4); p( 5,-49+cryY,VB,1,3);
-    ctx.save(); ctx.globalAlpha = 0.60 + voidPulse * 0.35;
-    pUnit(ctx,cx,cy,-5,-58+cryY+idleY,CW,11,18,isLeft,S);
-    ctx.restore();
+    // ── SHOES
+    p(-7, 16, CO, 7, 7); p(-6, 17, N0, 5, 6); p(-6, 17, N2, 5, 1);
+    p( 1, 16, CO, 6, 7); p( 2, 17, N0, 5, 6); p( 2, 17, N2, 5, 1);
 
-    // ── BOOTS
-    p(-7,14,CO,7,9); p(-6,15,RS,5,8); p(-4,16,RM,3,6);
-    p( 1,14,CO,6,9); p( 2,15,RS,5,8); p( 3,16,RM,3,6);
-    p(-7,14,VB,7,1); p( 1,14,VB,6,1);
+    // ── LOWER ROBE
+    p(-9,  2, CO, 18, 16); p(-8,  3, N0, 16, 14); p(-7,  4, N1, 13, 12);
+    p(-8,  3, N4, 16,  1);                                                       // top highlight
+    p(-4,  5, N2,  8, 11);                                                       // lit panel
+    p(-9, 15, CO, 18,  3); p(-8, 16, N2, 16, 2); p(-8, 16, N3, 16, 1);
 
-    // ── ROBE LOWER (dark, top-highlighted, void-glow)
-    p(-8,2,CO,16,13); p(-7,3,RS,14,11); p(-6,4,RM,11,9); p(-5,5,RB,7,7);
-    p(-7,3,RH,14,1);                                                              // top highlight
-    p(-5,4,`rgba(74,0,128,${0.18+voidPulse*0.25})`,11,10);
-    p(-7,12,CO,14,3); p(-6,13,VB,12,2); p(-6,13,VL,12,1);                         // void hem
+    // ── ROBE TORSO
+    p(-8,-14, CO, 16, 17); p(-7,-13, N0, 14, 15); p(-6,-13, N1, 12, 14);
+    p(-7,-13, N4, 14,  1);                                                       // top highlight
+    p(-3,-12, N2,  6, 13);                                                       // lit centre
 
-    // ── BELT (gold w/ void gem)
-    p(-8,0,CO,16,3); p(-7,1,RL,14,2); p(-7,1,RH,14,1);
-    p(-2,0,CO,4,3); p(-1,1,VL,2,1);
-    ctx.save(); ctx.globalAlpha = 0.65 + ep * 0.30;
-    pUnit(ctx,cx,cy,-1,1+idleY,CW,2,1,isLeft,S);
-    ctx.restore();
+    // ── STAR FLECKS across the robe (fixed positions, twinkling in place)
+    const stars = [[-6,-10],[-2,-6],[3,-11],[5,-3],[-7,-2],[1,1],[-5,6],[4,8],[-2,12],[6,4],[-8,9],[2,-14]];
+    for (let i = 0; i < stars.length; i++) {
+        const tw = 0.35 + 0.45 * Math.abs(Math.sin(now * 0.003 + i * 1.7));
+        p(stars[i][0], stars[i][1], W2, 1, 1);
+        glow(stars[i][0], stars[i][1], C4, 1, 1, tw);
+    }
 
-    // ── UPPER ROBE (riveted, void gem chest)
-    p(-7,-14,CO,15,17); p(-6,-13,RS,13,15); p(-5,-12,RM,10,12); p(-4,-11,RB,7,10);
-    p(-6,-13,RH,13,1);                                                            // top highlight
-    p(-4,-10,`rgba(103,0,160,${0.25+voidPulse*0.30})`,8,12);
-    p(-5,-14,CO,10,3); p(-4,-13,VB,8,2); p(-4,-13,VL,8,1);                        // collar
-    // Void gem chest emblem
-    p(-3,-6,CO,6,6); p(-2,-5,VM,4,4); p(-2,-5,VH,4,1); p(-1,-4,CL,2,2);
-    ctx.save(); ctx.globalAlpha = 0.55 + ep * 0.35;
-    pUnit(ctx,cx,cy,-3,-6+idleY,CW,6,6,isLeft,S);
-    ctx.restore();
-    for (let r=0; r<3; r++) { p(-6,-10+r*4,CL,1,1); p(5,-10+r*4,CL,1,1); }        // glowing rivets
+    // ── VOID SASH
+    p(-8,  0, CO, 16, 3); p(-7, 1, N2, 14, 2); p(-7, 1, N4, 14, 1);
+    p(-2, -1, CO,  5, 5); p(-1, 0, C1,  3, 3); p(-1, 0, C3, 3, 1);
+    glow(-1, 0, C4, 3, 1, 0.55 + voidP * 0.35);
 
-    // ── PAULDRONS (dark, void-trim)
-    p(-13,-13,CO,8,9); p(-12,-11,RM,6,8); p(-11,-11,RB,4,7); p(-12,-11,RH,6,1);
-    p(-12,-12,VB,6,1);
-    p( 6,-13,CO,8,9); p( 7,-11,RM,6,8); p( 8,-11,RB,4,7); p( 7,-11,RH,6,1);
-    p( 7,-12,VB,6,1);
+    // ── SHOULDER MANTLE
+    p(-10,-17, CO, 20, 5); p(-9,-16, N1, 18, 3); p(-9,-16, N3, 18, 1);
+    p(-10,-13, CO,  4, 6); p(-9,-12, N1, 2, 5);
+    p(  7,-13, CO,  4, 6); p(  8,-12, N1, 2, 5);
 
-    // ── ARMS + HANDS
-    p(-11,-10,CO,5,12); p(-10,-9,RM,4,10); p(-10,-9,RH,4,1);
-    p(-11,-17,CO,5,8); p(-10,-16,PA,4,6);
-    p( 7,-10,CO,5,12); p( 8,-9,RM,4,10); p( 8,-9,RH,4,1);
-    p( 7,-17,CO,5,8); p( 8,-16,PA,4,6);
+    // ── ARMS (both forward, holding the codex open)
+    p(-12,-10, CO, 6, 11); p(-11,-9, N1, 4, 9); p(-11,-9, N3, 4, 1);
+    p(-13, -1, CO, 6,  5); p(-12,  0, K1, 4, 3); p(-12, 0, K2, 4, 1);
+    p(  6,-10, CO, 6, 11); p(  7,-9, N1, 4, 9); p(  7,-9, N3, 4, 1);
+    p(  7, -1, CO, 6,  5); p(  8,  0, K1, 4, 3); p(  8, 0, K2, 4, 1);
 
-    // ── PARCHMENT SCROLL (held off-hand, ornate)
-    p(8,-7,CO,8,18); p(9,-6,PLA,6,16); p(9,-6,PH,6,1);                            // scroll body + highlight
-    p(9,-3,'#5D4037',5,1); p(9,3,'#5D4037',5,1); p(9,9,'#5D4037',5,1);            // text lines
-    p(8,-9,CO,8,3); p(9,-8,'#8B7355',6,2);                                        // top spool
-    p(8,11,CO,8,3); p(9,12,'#8B7355',6,2);                                        // bottom spool
-    p(8,-9,GD,8,1); p(8,13,GD,8,1);                                               // gold caps
+    // ── OPEN VOID CODEX (two pages tilted open on the spine, cyan script)
+    p(-11,  1, CO, 22, 12);
+    p(-10,  2, P1, 10, 10); p( 1,  2, P1, 9, 10);                                // page backs
+    p(-10,  2, P2,  9, 10); p( 1,  2, P3, 8, 10);                                // left/right faces
+    p(-10,  2, P4,  9,  1); p( 1,  2, P4, 8,  1);                                // page top highlight
+    p( -1,  1, CO,  3, 12); p( -1,  2, N2, 1, 10); p(-1, 2, G3, 1, 1);           // spine
+    for (let i = 0; i < 3; i++) {
+        p(-9, 4 + i * 3, C1, 6, 1); p(2, 4 + i * 3, C1, 5, 1);                   // lines of script
+        glow(-9, 4 + i * 3, C3, 6, 1, 0.35 + voidP * 0.25);
+        glow( 2, 4 + i * 3, C3, 5, 1, 0.35 + voidP * 0.25);
+    }
+    p(-11, 12, CO, 22, 2); p(-10, 13, G2, 20, 1);                                // gilt edge
+
+    // ── VOID SIGIL rising off the open page
+    const sg = -2 - Math.round(voidP * 2);
+    p(-2, sg, CO, 5, 5); p(-1, sg + 1, C1, 3, 3); p(-1, sg + 1, C3, 3, 1);
+    glow(-2, sg, C4, 5, 1, 0.45 + voidP * 0.35);
+    glow(-1, sg + 1, C4, 3, 3, 0.25 + voidP * 0.25);
 
     // ── NECK
-    p(-2,-16,CO,5,3); p(-1,-15,RM,3,2);
+    p(-3,-17, CO, 7, 3); p(-2,-16, K0, 5, 2);
 
-    // ── HEAD (deep hood, glowing eyes)
-    p(-8,-30,CO,16,14); p(-7,-29,RS,14,12); p(-6,-28,RM,12,10); p(-5,-27,RB,9,8);
-    p(-7,-29,RH,14,1);                                                            // top highlight
-    // Cyan glowing eyes
-    p(-4,-24,CO,4,3); p( 1,-24,CO,4,3);
-    p(-3,-23,isAtk?CW:CL,2,1); p( 2,-23,isAtk?CW:CL,2,1);
-    ctx.save(); ctx.globalAlpha = 0.65 + voidPulse * 0.30;
-    pUnit(ctx,cx,cy,-4,-24+idleY,CW,4,3,isLeft,S);
-    pUnit(ctx,cx,cy, 1,-24+idleY,CW,4,3,isLeft,S);
-    ctx.restore();
+    // ── HEAD (old, lined)
+    p(-7,-31, CO, 14, 15);
+    p(-6,-30, K1, 12, 13); p(-6,-30, K2, 12, 1);                                 // top highlight
+    p( 4,-29, K0,  2, 10);                                                       // shaded cheek
+    p(-5,-22, K0, 10,  1);                                                       // brow-to-cheek line
 
-    // ── DEEP HOOD (taller w/ cyan-tipped antenna)
-    p(-8,-36,CO,16,8); p(-7,-35,RS,14,7); p(-6,-34,RM,11,6); p(-5,-33,RB,8,5);
-    p(-7,-35,RH,14,1);                                                            // top highlight
-    p(-8,-38,CO,12,3); p(-7,-37,RM,10,2);                                         // peak
-    // Hood antenna (cyan-tipped)
-    p(-1,-42,CO,3,5); p( 0,-41,VB,1,4); p( 0,-43,CL,1,2);
-    ctx.save(); ctx.globalAlpha = 0.65 + ep * 0.30;
-    pUnit(ctx,cx,cy, 0,-43+idleY,CW,1,2,isLeft,S);
-    ctx.restore();
+    // ── SPECTACLES (two round rims on a bridge — the lore's one giveaway)
+    p(-6,-27, CO, 5, 5); p(-5,-26, N0, 3, 3);
+    p( 1,-27, CO, 5, 5); p( 2,-26, N0, 3, 3);
+    p(-1,-26, G2, 2, 1);                                                         // bridge
+    p(-7,-26, G2, 1, 1); p( 6,-26, G2, 1, 1);                                    // temple arms
+    p(-5,-26, isAtk ? C3 : C1, 3, 1);                                            // lens catchlight
+    p( 2,-26, isAtk ? C3 : C1, 3, 1);
+    glow(-5,-26, C4, 3, 1, 0.40 + voidP * 0.30);
+    glow( 2,-26, C4, 3, 1, 0.40 + voidP * 0.30);
+
+    // ── WHITE BEARD + BROWS
+    p(-6,-23, CO, 12, 2); p(-5,-23, W2, 10, 1);                                  // brows
+    p(-6,-20, CO, 12, 9); p(-5,-19, W1, 10, 8); p(-5,-19, W3, 10, 1);
+    p(-3,-18, W2,  6, 6);
+    p(-2,-11, CO,  5, 4); p(-1,-10, W1, 3, 3);                                   // beard point
+    p(-2,-20, K0,  5, 2);                                                        // mouth in the beard
+
+    // ── SKULLCAP + WHITE HAIR
+    p(-7,-34, CO, 14, 4); p(-6,-33, N1, 12, 2); p(-6,-33, N3, 12, 1);
+    p(-8,-31, CO,  3, 7); p(-7,-30, W1, 1, 6);                                   // side hair
+    p( 6,-31, CO,  3, 7); p( 7,-30, W1, 1, 6);
+    p(-2,-36, CO,  5, 3); p(-1,-35, C1, 3, 1);                                   // cap void stone
+    glow(-1,-35, C4, 3, 1, 0.50 + voidP * 0.35);
 
     if (isAtk) {
-        ctx.save(); ctx.globalAlpha = 0.78; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy,-5,-60+cryY+idleY,CW,16,22,isLeft,S);                     // crystal flash
-        ctx.restore();
-        ctx.save(); ctx.globalAlpha = 0.50; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy,-10,-12+idleY,VL,26,44,isLeft,S);
-        ctx.restore();
+        glow(-2, sg, C4, 5, 5, 0.65);
+        glow(-5,-26, C4, 3, 1, 0.75); glow(2,-26, C4, 3, 1, 0.75);
+        for (let i = 0; i < 3; i++) {
+            glow(-9, 4 + i * 3, C4, 6, 1, 0.55); glow(2, 4 + i * 3, C4, 5, 1, 0.55);
+        }
     }
 }
 
+// ────────────────────────────────────────────────────
+// ILLUSIONIST — 환영술사. Iridescent veil, blank mask, and two afterimages
+// sliding out of true either side of the body.
+// Lore: 무지개빛 베일에 가면을 쓴 환영술사, 주위에 잔상이 흐릿하게 어른거림.
+// ────────────────────────────────────────────────────
 function drawIllusion(cx, cy, tower) {
     const area   = tower.currentSlot ? tower.currentSlot.area : 'left-slots';
     const isLeft = area === 'left-slots';
     const now    = Date.now();
     const isAtk  = (now - (tower.lastShot || 0)) < 400;
-    const idleY  = Math.sin(now * 0.004) * 3;
     const S = 2.0;
+    const idleY  = Math.sin(now * 0.002) * 2;
     const p = (ox, oy, col, w=1, h=1) => pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S);
-    const ep    = (Math.sin(now * 0.005) + 1) / 2;
-    const maskX = Math.sin(now * 0.003) * 14;
-    const maskY = Math.cos(now * 0.004) * 9;
-    const CO='#000000';
-    const P1S='#1A0050', P1M='#311B92', P1B='#4527A0', P1L='#7E57C2', P1H='#B39DDB';
-    const P2S='#560027', P2M='#880E4F', P2B='#AD1457', P2L='#E91E63', P2H='#F48FB1';
-    const SV='#CFD8DC', SM='#ECEFF1', SH='#FFFFFF';
-    const GD2='#B88000', GB='#FFD700', GH='#FFF4A0';
-    const SK='#F5D0A0';
+    // Glows use `lighter`, which the bake records as emissive so the finishing
+    // pass blooms exactly these pixels and not the pale plate around them.
+    const glow = (ox, oy, col, w, h, a) => {
+        ctx.save(); ctx.globalAlpha = a; ctx.globalCompositeOperation = 'lighter';
+        pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S); ctx.restore();
+    };
+    const ep   = (Math.sin(now * 0.004) + 1) / 2;
+    const slip = Math.sin(now * 0.0026) * 4;                                     // afterimage drift
+    const IRI = ['#FF7ACF', '#7FE8FF', '#FFE79A', '#B98CFF', '#8CFFC0'];
+    const iri = (k) => IRI[(Math.floor(now * 0.004) + k) % IRI.length];
 
-    // ── illusion aura (dual-color)
+    const CO='#000';
+    const V0='#1A0F30', V1='#3A2560', V2='#5F3F98', V3='#8A63CC', V4='#C0A0F0';  // veil violet
+    const M0='#5E5468', M1='#9A90AC', M2='#CFC6DC', M3='#F4EEFA';                // mask porcelain
+    const K1='#F0C090';
+
     ctx.save(); ctx.globalAlpha = 0.13 + ep * 0.18;
-    pUnit(ctx,cx,cy,-22,-48+idleY,P1L,22,80,isLeft,S);
-    pUnit(ctx,cx,cy,  0,-48+idleY,P2L,22,80,isLeft,S);
+    pUnitAura(ctx, cx, cy, -20, -36 + idleY, V3, 40, 66, isLeft, S);
     ctx.restore();
 
-    // ── 2 LARGE FLOATING DRAMA MASKS (laughing + weeping, orbiting)
-    // Laughing mask (white, gold-trim)
-    p(maskX-16, maskY-9, CO, 11, 11);
-    p(maskX-15, maskY-8, SH, 9, 9);
-    p(maskX-15, maskY-8, GB, 9, 1);                                               // gold top trim
-    p(maskX-14, maskY-7, SM, 7, 5);
-    p(maskX-13, maskY-5, CO, 2, 1); p(maskX-11, maskY-5, CO, 2, 1);               // joy eyes
-    p(maskX-14, maskY-2, CO, 7, 2); p(maskX-13, maskY-1, P2L, 5, 1);              // laughing mouth
-    p(maskX-13, maskY-4, GB, 1, 1); p(maskX-11, maskY-4, GB, 1, 1);               // gold cheek studs
-    ctx.save(); ctx.globalAlpha = 0.50 + ep * 0.30;
-    pUnit(ctx,cx,cy,maskX-16,maskY-9+idleY,SH,11,11,isLeft,S);
-    ctx.restore();
+    // ── TWO AFTERIMAGES — the same silhouette offset either way, kept faint.
+    //    The old art filled a flat violet rectangle behind the figure instead,
+    //    which read as a coloured card, not as a body slipping out of true.
+    for (let k = 0; k < 2; k++) {
+        const dx = Math.round((k ? slip : -slip));
+        ctx.save(); ctx.globalAlpha = 0.20 + ep * 0.12;
+        pUnit(ctx, cx, cy, dx - 6, -32 + idleY, k ? iri(0) : iri(2), 12, 12, isLeft, S);
+        pUnit(ctx, cx, cy, dx - 7, -18 + idleY, k ? iri(0) : iri(2), 14, 21, isLeft, S);
+        pUnit(ctx, cx, cy, dx - 8,   3 + idleY, k ? iri(0) : iri(2), 16, 17, isLeft, S);
+        ctx.restore();
+    }
 
-    // Weeping mask (dark, magenta-trim)
-    p(-maskX+11, -maskY+5, CO, 11, 11);
-    p(-maskX+12, -maskY+6, '#2A2A2A', 9, 9);
-    p(-maskX+12, -maskY+6, P2M, 9, 1);                                            // magenta top trim
-    p(-maskX+13, -maskY+7, '#424242', 7, 5);
-    p(-maskX+13, -maskY+9, CO, 2, 1); p(-maskX+15, -maskY+9, CO, 2, 1);           // weeping eyes
-    p(-maskX+13, -maskY+10, P1L, 1, 2); p(-maskX+16, -maskY+10, P1L, 1, 2);       // tear streaks
-    p(-maskX+14, -maskY+13, CO, 5, 2); p(-maskX+15, -maskY+12, P2L, 3, 1);        // frown
-    p(-maskX+12, -maskY+8, GB, 1, 1); p(-maskX+19, -maskY+8, GB, 1, 1);           // gold studs
-    ctx.save(); ctx.globalAlpha = 0.50 + ep * 0.30;
-    pUnit(ctx,cx,cy,-maskX+11,-maskY+5+idleY,P2L,11,11,isLeft,S);
-    ctx.restore();
+    // ── SHOES
+    p(-7, 20, CO, 6, 5); p(-6, 21, V0, 4, 3); p(-6, 21, V2, 4, 1);
+    p( 1, 20, CO, 6, 5); p( 2, 21, V0, 4, 3); p( 2, 21, V2, 4, 1);
 
-    // ── BOOTS (split color, gold-cuffed)
-    p(-7,14,CO,7,9); p(-6,15,P1M,3,8); p(-3,15,P2M,3,8);
-    p( 1,14,CO,6,9); p( 2,15,P1M,3,8); p( 5,15,P2M,3,8);
-    p(-7,14,GB,7,1); p( 1,14,GB,6,1);
-    p(-8,21,CO,4,4); p(-7,22,GB,2,2); p( 3,21,CO,4,4); p( 4,22,GB,2,2);           // gold ankle chains
+    // ── LOWER VEIL (layered, hem drifting)
+    p(-8,  3, CO, 16, 18);
+    p(-7,  4, V0, 14, 16); p(-6,  5, V1, 12, 15); p(-4,  6, V2, 8, 13);
+    p(-7,  4, V4, 14,  1);                                                       // top highlight
+    for (let i = 0; i < 8; i++) {
+        const hx = -7 + i * 2;
+        const hl = 2 + ((i * 3) % 4) + Math.round(Math.sin(now * 0.003 + i) * 1);
+        p(hx, 19, V1, 2, hl);
+        if (i % 2 === 0) glow(hx, 19 + hl - 1, iri(i), 2, 1, 0.30 + ep * 0.20);
+    }
 
-    // ── ROBE LOWER (split, top-highlighted)
-    p(-8,2,CO,16,13); p(-8,3,P1M,8,11); p( 0,3,P2M,8,11);
-    p(-7,4,P1B,6,9); p( 1,4,P2B,6,9);
-    p(-8,3,P1H,8,1); p( 0,3,P2H,8,1);                                             // top highlights
-    p(-7,12,CO,14,3); p(-6,13,GD2,12,2); p(-6,13,GB,12,1);                        // gold hem
-    // Vertical riveted center seam
-    p(-1,2,CO,2,12); p( 0,3,GD2,1,11); p( 0,3,GB,1,1); p( 0,7,GB,1,1); p( 0,11,GB,1,1);
+    // ── SASH
+    p(-7,  1, CO, 14, 3); p(-6, 2, V2, 12, 2); p(-6, 2, V4, 12, 1);
 
-    // ── BELT (gold w/ split-jewel buckle)
-    p(-8,0,CO,16,3); p(-7,1,GD2,14,2); p(-7,1,GB,14,1);
-    p(-2,0,CO,4,3); p(-1,1,P1L,1,1); p( 0,1,P2L,1,1);                             // dual-color gem
+    // ── TORSO VEIL
+    p(-7,-16, CO, 14, 18);
+    p(-6,-15, V0, 12, 16); p(-5,-15, V1, 10, 15); p(-3,-14, V2, 6, 13);
+    p(-6,-15, V4, 12,  1);                                                       // top highlight
+    // spectrum thread down the front
+    for (let i = 0; i < 4; i++) glow(0, -13 + i * 4, iri(i), 1, 2, 0.45 + ep * 0.25);
 
-    // ── UPPER TORSO (split)
-    p(-7,-14,CO,15,17); p(-7,-13,P1M,7,15); p( 0,-13,P2M,8,15);
-    p(-6,-12,P1B,5,12); p( 1,-12,P2B,6,12);
-    p(-7,-13,P1H,7,1); p( 0,-13,P2H,8,1);                                         // top highlights
-    p(-4,-5,P1L,2,2); p( 2,-5,P2L,2,2);
-    // Riveted seam
-    p(-1,-14,CO,2,16); p( 0,-13,GD2,1,15); p( 0,-9,GB,1,1); p( 0,-5,GB,1,1); p( 0,-1,GB,1,1);
-    // Joker chest emblem (dual-color)
-    p(-3,-8,CO,6,5); p(-2,-7,P1B,3,3); p( 1,-7,P2B,3,3);
-    p(-1,-6,P1H,1,1); p( 0,-6,P2H,1,1);
-    ctx.save(); ctx.globalAlpha = 0.50 + ep * 0.30;
-    pUnit(ctx,cx,cy,-3,-8+idleY,'#FFFFFF',6,5,isLeft,S);
-    ctx.restore();
+    // ── SHOULDER VEIL
+    p(-10,-19, CO, 20, 5); p(-9,-18, V1, 18, 3); p(-9,-18, V3, 18, 1);
 
-    // ── PAULDRONS (split, gold-stud)
-    p(-13,-12,CO,8,8); p(-12,-11,P1B,6,7); p(-11,-10,P1L,3,5); p(-12,-11,P1H,6,1);
-    p(-12,-8,GB,2,2);
-    p( 6,-12,CO,8,8); p( 7,-11,P2B,6,7); p( 8,-10,P2L,3,5); p( 7,-11,P2H,6,1);
-    p( 7,-8,GB,2,2);
-
-    // ── ARMS + HANDS
-    p(-11,-10,CO,5,12); p(-10,-9,P1M,4,10); p(-10,-9,P1L,4,1);
-    p(-11,-17,CO,5,8); p(-10,-16,SK,4,6);
-    p( 7,-10,CO,5,12); p( 8,-9,P2M,4,10); p( 8,-9,P2L,4,1);
-    p( 7,-17,CO,5,8); p( 8,-16,SK,4,6);
-
-    // ── TWIN SWORD-CANES (dual silver blades, held at sides)
-    p(-13,4,CO,4,18); p(-12,5,SV,2,16); p(-12,5,SM,2,1);                          // L cane shaft
-    p(-14,2,CO,6,4); p(-13,3,GB,4,2); p(-13,3,GH,4,1);                            // L pommel
-    p(-14,22,CO,4,3); p(-13,22,P1L,2,1);                                          // L tip
-    p( 10,4,CO,4,18); p( 11,5,SV,2,16); p( 11,5,SM,2,1);                          // R cane shaft
-    p( 9,2,CO,6,4); p( 10,3,GB,4,2); p( 10,3,GH,4,1);                             // R pommel
-    p( 9,22,CO,4,3); p( 10,22,P2L,2,1);                                           // R tip
+    // ── SLEEVES
+    p(-12,-15, CO, 6, 15); p(-11,-14, V1, 4, 13); p(-11,-14, V3, 4, 1);
+    p(-12,  0, CO, 6,  5); p(-11,  1, K1, 4,  3);
+    p(  6,-15, CO, 6, 15); p(  7,-14, V1, 4, 13); p(  7,-14, V3, 4, 1);
+    p(  6,  0, CO, 6,  5); p(  7,  1, K1, 4,  3);
 
     // ── NECK
-    p(-2,-16,CO,5,3); p(-1,-15,SK,3,2);
+    p(-2,-21, CO, 4, 3); p(-1,-20, V0, 2, 2);
 
-    // ── HEAD (split-face makeup)
-    p(-8,-30,CO,16,14); p(-7,-29,SK,14,12); p(-6,-28,'#F8E0B0',11,10);
-    // Split face paint (left purple, right magenta)
-    p(-7,-29,P1L,7,4); p( 0,-29,P2L,7,4);
-    p(-5,-23,CO,3,2); p( 2,-23,CO,3,2);
-    p(-4,-23,P1L,2,1); p( 3,-23,P2L,2,1);
-    ctx.save(); ctx.globalAlpha = 0.65 + ep * 0.30;
-    pUnit(ctx,cx,cy,-4,-23+idleY,'#FFFFFF',2,1,isLeft,S);
-    pUnit(ctx,cx,cy, 3,-23+idleY,'#FFFFFF',2,1,isLeft,S);
-    ctx.restore();
-    p(-2,-21,CO,4,1);
+    // ── BLANK MASK (porcelain, two slits, no features — that is the character)
+    p(-7,-33, CO, 14, 14);
+    p(-6,-32, M0, 12, 12); p(-5,-32, M1, 10, 11); p(-4,-31, M2, 7, 9);
+    p(-6,-32, M3, 12,  1);                                                       // top highlight
+    p( 4,-31, M0,  2,  9);                                                       // shaded cheek
+    p(-5,-28, CO,  4,  2); p( 2,-28, CO, 4, 2);                                  // eye slits
+    p(-4,-28, iri(1), 2, 1); p( 3,-28, iri(3), 2, 1);
+    glow(-4,-28, iri(1), 2, 1, 0.60 + ep * 0.30);
+    glow( 3,-28, iri(3), 2, 1, 0.60 + ep * 0.30);
+    p(-2,-23, M0,  5,  1);                                                       // seam where a mouth would be
 
-    // ── JESTER CROWN (5-spire split-color w/ gold bells)
-    p(-8,-36,CO,16,8); p(-8,-35,P1B,8,7); p( 0,-35,P2B,8,7);
-    p(-8,-35,P1H,8,1); p( 0,-35,P2H,8,1);                                         // top highlights
-    p(-8,-36,GB,16,1);                                                            // gold base ring
-    // 5 horn spires (alternating colors)
-    p(-7,-41,CO,4,6); p(-6,-40,P1M,2,5); p(-5,-42,P1L,1,2);                       // outer L
-    p(-3,-43,CO,4,8); p(-2,-42,P2M,2,7); p(-1,-44,P2L,1,2);                       // inner L
-    p( 1,-46,CO,4,11); p( 2,-45,P1M,2,10); p( 3,-47,P1L,1,3);                     // center tallest
-    p( 5,-43,CO,4,8); p( 6,-42,P2M,2,7); p( 7,-44,P2L,1,2);                       // inner R
-    p( 8,-41,CO,3,6); p( 9,-40,P1M,1,5); p( 9,-42,P1L,1,2);                       // outer R
-    // Gold bells on tips
-    p(-5,-42,GB,1,1); p(-1,-44,GB,1,1); p( 3,-47,GB,1,1); p( 7,-44,GB,1,1); p( 9,-42,GB,1,1);
+    // ── VEIL HOOD over the mask
+    p(-8,-38, CO, 16, 6); p(-7,-37, V1, 14, 4); p(-7,-37, V3, 14, 1);
+    p(-9,-34, CO,  3, 8); p(-8,-33, V0, 1, 7);
+    p( 7,-34, CO,  3, 8); p( 8,-33, V0, 1, 7);
+    p(-2,-41, CO,  5, 4); p(-1,-40, iri(2), 3, 1);                               // crest stone
+    glow(-1,-40, iri(2), 3, 1, 0.55 + ep * 0.30);
 
     if (isAtk) {
-        ctx.save(); ctx.globalAlpha = 0.55; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy,maskX-18,maskY-11+idleY,SH,14,14,isLeft,S);
-        pUnit(ctx,cx,cy,-maskX+9,-maskY+3+idleY,P2L,14,14,isLeft,S);
-        ctx.restore();
-        ctx.save(); ctx.globalAlpha = 0.45; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy,-10,-16+idleY,P1L,24,38,isLeft,S);
-        pUnit(ctx,cx,cy,  0,-16+idleY,P2L,12,38,isLeft,S);
-        ctx.restore();
+        glow(-4,-28, iri(1), 2, 1, 0.85); glow(3,-28, iri(3), 2, 1, 0.85);
+        for (let i = 0; i < 4; i++) glow(0, -13 + i * 4, iri(i), 1, 2, 0.70);
     }
 }
 
+// ────────────────────────────────────────────────────
+// MASTER OF REFLECTION — 반사의 거장. Crystal plate, a faceted crystal stave,
+// and light breaking off it into a spread of colour.
+// Lore: 수정 갑주에 다면 수정 지팡이, 빛이 산란되어 무지개로 흘어지는 거장.
+// ────────────────────────────────────────────────────
 function drawReflection(cx, cy, tower) {
     const area   = tower.currentSlot ? tower.currentSlot.area : 'left-slots';
     const isLeft = area === 'left-slots';
     const now    = Date.now();
     const isAtk  = (now - (tower.lastShot || 0)) < 400;
-    const idleY  = Math.sin(now * 0.002) * 2;
     const S = 2.0;
+    const idleY  = Math.sin(now * 0.002) * 2;
     const p = (ox, oy, col, w=1, h=1) => pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S);
-    const ep    = (Math.sin(now * 0.005) + 1) / 2;
-    const pulse = (Math.sin(now * 0.006) + 1) / 2;
-    const ang   = now * 0.0025;
-    const CO='#000000';
-    const AS='#C5D5E0', AM='#D8E8F0', AB='#E8F4FC', AL='#F0F8FF', AH='#FFFFFF';
-    const CY='#00B8D4', CL='#00E5FF', CH='#B2EBF2';
-    const RBC = ['#FF5252','#FFD740','#00E676','#40C4FF','#B388FF','#FF8FAB'];
-    const SK='#F0D8C0';
-    const GD2='#B88000', GD='#FFD700';
+    // Glows use `lighter`, which the bake records as emissive so the finishing
+    // pass blooms exactly these pixels and not the pale plate around them.
+    const glow = (ox, oy, col, w, h, a) => {
+        ctx.save(); ctx.globalAlpha = a; ctx.globalCompositeOperation = 'lighter';
+        pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S); ctx.restore();
+    };
+    const ep  = (Math.sin(now * 0.004) + 1) / 2;
+    const IRI = ['#FF7ACF', '#7FE8FF', '#FFE79A', '#B98CFF', '#8CFFC0'];
+    const iri = (k) => IRI[(Math.floor(now * 0.004) + k) % IRI.length];
 
-    // ── prismatic aura
-    ctx.save(); ctx.globalAlpha = 0.13 + ep * 0.20;
-    pUnit(ctx,cx,cy,-22,-44+idleY,AH,44,76,isLeft,S);
+    const CO='#000';
+    const Q0='#243444', Q1='#4E7288', Q2='#88B4C8', Q3='#C6E4F0', Q4='#FFFFFF';  // crystal plate
+    const G2='#B88000', G3='#FFD700', G4='#FFF4A0';
+    const K0='#C4834E', K1='#F0C090', K2='#FFDCBC';
+
+    ctx.save(); ctx.globalAlpha = 0.13 + ep * 0.18;
+    pUnitAura(ctx, cx, cy, -20, -38 + idleY, Q3, 40, 68, isLeft, S);
     ctx.restore();
 
-    // ── 6 RAINBOW SHARDS (was 4, full spectrum orbit)
-    for (let i = 0; i < 6; i++) {
-        const a   = ang + i * (Math.PI / 3);
-        const ox2 = Math.cos(a) * 20;
-        const oy2 = Math.sin(a) * 12 - 6;
-        p(ox2-2, oy2-4, CO, 5, 10);
-        p(ox2-1, oy2-3, RBC[i], 3, 8);
-        p(ox2-1, oy2-3, AH, 3, 1);                                                // top highlight
-        p(ox2,   oy2-1, AH, 1, 3);
-        ctx.save(); ctx.globalAlpha = 0.50 + pulse * 0.30;
-        pUnit(ctx,cx,cy,ox2-2,oy2-4+idleY,RBC[i],5,10,isLeft,S);
-        ctx.restore();
+    // ── SABATONS
+    p(-8, 22, CO, 7, 5); p(-7, 23, Q1, 5, 3); p(-7, 23, Q3, 5, 1);
+    p( 1, 22, CO, 7, 5); p( 2, 23, Q1, 5, 3); p( 2, 23, Q3, 5, 1);
+
+    // ── GREAVES (faceted: each plate gets its own lit corner)
+    p(-8,  4, CO, 16, 19);
+    p(-7,  5, Q0, 14, 17); p(-6,  5, Q1, 12, 16); p(-4,  6, Q2, 8, 14);
+    p(-7,  5, Q4, 14,  1);                                                       // top highlight
+    p(-6,  8, Q3,  3,  1); p( 2, 12, Q3, 3, 1); p(-5, 16, Q3, 3, 1);             // facet catches
+    p(-1,  6, Q0,  2, 13);                                                       // leg split
+    p(-8, 19, CO, 16,  3); p(-7, 20, G2, 14, 2); p(-7, 20, G3, 14, 1);
+
+    // ── BELT
+    p(-7,  1, CO, 14, 4); p(-6, 2, G2, 12, 2); p(-6, 2, G3, 12, 1);
+    p(-2,  0, CO,  5, 5); p(-1, 1, Q2,  3, 3); p(-1, 1, Q4, 3, 1);
+    glow(-1, 1, iri(0), 3, 1, 0.50 + ep * 0.30);
+
+    // ── CRYSTAL CUIRASS
+    p(-7,-16, CO, 14, 18);
+    p(-6,-15, Q0, 12, 16); p(-5,-15, Q1, 10, 15); p(-3,-14, Q2, 6, 13);
+    p(-6,-15, Q4, 12,  1);                                                       // top highlight
+    p(-5,-12, Q3,  3,  1); p( 2, -8, Q3, 3, 1); p(-4, -4, Q3, 3, 1);             // facet catches
+    p( 4,-14, Q0,  2, 13);                                                       // shaded flank
+    // prism core
+    p(-2, -9, CO, 5, 6); p(-1, -8, Q3, 3, 4);
+    glow(-1, -8, iri(1), 3, 1, 0.55 + ep * 0.30);
+    glow(-1, -6, iri(3), 3, 1, 0.45 + ep * 0.25);
+
+    // ── PAULDRONS (crystal shards)
+    p(-12,-19, CO, 6, 8); p(-11,-18, Q1, 4, 6); p(-11,-18, Q4, 4, 1);
+    p(-12,-23, CO, 4, 5); p(-11,-22, Q2, 2, 4); p(-11,-23, Q4, 2, 1);
+    p(  6,-19, CO, 6, 8); p(  7,-18, Q1, 4, 6); p(  7,-18, Q4, 4, 1);
+    p(  8,-23, CO, 4, 5); p(  9,-22, Q2, 2, 4); p(  9,-23, Q4, 2, 1);
+
+    // ── COLLAR
+    p(-6,-19, CO, 12, 3); p(-5,-18, Q3, 10, 2); p(-5,-18, Q4, 10, 1);
+
+    // ── ARMS
+    p(-11,-13, CO, 5, 14); p(-10,-12, Q1, 3, 12); p(-10,-12, Q3, 3, 1);
+    p(-11,  0, CO, 5,  5); p(-10,  1, K1, 3,  3); p(-10, 1, K2, 3, 1);
+    p(  6,-13, CO, 5, 10); p(  7,-12, Q1, 3,  8); p(  7,-12, Q3, 3, 1);
+    p(  7,-19, CO, 5,  8); p(  8,-18, Q1, 3,  6); p(  8,-18, Q3, 3, 1);
+    p(  7,-22, CO, 5,  5); p(  8,-21, K1, 3,  3); p(  8,-21, K2, 3, 1);          // gripping hand
+
+    // ── FACETED CRYSTAL STAVE
+    p( 9,-24, CO, 4, 44); p(10,-23, Q1, 2, 42); p(10,-23, Q3, 2, 1);
+    p( 9,-12, G3, 4, 1); p( 9, 2, G3, 4, 1);                                     // gold collars
+    // crystal head: three stacked facets, each lit on its upper-left
+    p( 7,-38, CO, 8, 6); p( 8,-37, Q1, 6, 4); p( 8,-37, Q4, 6, 1);
+    p( 8,-33, CO, 6, 5); p( 9,-32, Q2, 4, 3); p( 9,-32, Q4, 4, 1);
+    p( 9,-42, CO, 4, 5); p(10,-41, Q2, 2, 3); p(10,-41, Q4, 2, 1);
+    glow( 8,-37, iri(0), 6, 1, 0.45 + ep * 0.30);
+    glow( 9,-32, iri(2), 4, 1, 0.40 + ep * 0.25);
+    glow(10,-41, iri(4), 2, 1, 0.45 + ep * 0.25);
+
+    // ── SCATTERED SPECTRUM — light breaking off the crystal head into a fan
+    for (let i = 0; i < 5; i++) {
+        const t  = ((now * 0.0012) + i / 5) % 1;
+        const rx = 11 + Math.round(t * 8);
+        const ry = -36 + Math.round((i - 2) * 3 + t * 6);
+        glow(rx, ry, iri(i), 2, 1, (1 - t) * 0.75);
     }
 
-    // ── HUGE SILVER MIRROR STAFF (ornate frame + multi-layer face)
-    // Frame outer (gold-trimmed)
-    p( 9,-14,CO,16,42); p(10,-13,GD2,14,40); p(10,-13,GD,14,1);                   // outer rim
-    p(11,-12,AS,12,38);
-    // Inner mirror face (cyan-sky reflection gradient)
-    p(12,-10,CO,10,34); p(13,-9,AS,8,32); p(13,-9,AM,8,16);                       // sky half
-    p(13,7,AB,8,16);                                                              // ground half reflection
-    p(14,-7,`rgba(0,229,255,${0.25+pulse*0.35})`,6,28); p(14,2,CL,4,16);
-    p(16,-4,AH,2,10);
-    // Cross-glint pattern
-    p(15,-6,AH,1,1); p(17,-3,AH,1,1); p(16,1,AH,1,1);
-    ctx.save(); ctx.globalAlpha = 0.45 + pulse * 0.40;
-    pUnit(ctx,cx,cy,13,-9+idleY,AH,8,32,isLeft,S);
-    ctx.restore();
-    // Gold corner studs
-    p( 9,-14,CO,3,3); p(10,-13,GD,1,1);
-    p(22,-14,CO,3,3); p(23,-13,GD,1,1);
-    p( 9,25,CO,3,3); p(10,26,GD,1,1);
-    p(22,25,CO,3,3); p(23,26,GD,1,1);
-    // Hilt grip
-    p(13,-2,CO,10,3); p(13,3,AM,9,2);
-    p(17,-10,CO,3,22); p(18,-9,AM,2,20);
-
-    // ── BOOTS (cyan-cuffed)
-    p(-7,14,CO,7,9); p(-6,15,AS,5,8); p(-4,16,AL,3,6);
-    p( 1,14,CO,6,9); p( 2,15,AS,5,8); p( 3,16,AL,3,6);
-    p(-7,14,CL,7,1); p( 1,14,CL,6,1);
-
-    // ── ROBE LOWER (white-silver, top-highlighted, cyan glow)
-    p(-8,2,CO,16,13); p(-7,3,AS,14,11); p(-6,4,AM,11,9); p(-5,5,AB,7,7);
-    p(-7,3,AH,14,1);                                                              // top highlight
-    p(-3,6,`rgba(0,229,255,${0.18+pulse*0.22})`,7,6);
-    p(-7,12,CO,14,3); p(-6,13,GD2,12,2); p(-6,13,GD,12,1);                        // gold hem
-
-    // ── BELT (gold w/ prismatic gem)
-    p(-8,0,CO,16,3); p(-7,1,GD2,14,2); p(-7,1,GD,14,1);
-    p(-2,0,CO,4,3); p(-1,1,CL,2,1);
-
-    // ── UPPER ROBE (riveted, prismatic chest emblem)
-    p(-7,-14,CO,15,17); p(-6,-13,AS,13,15); p(-5,-12,AM,10,12); p(-4,-11,AB,7,10); p(-3,-10,AL,4,8);
-    p(-6,-13,AH,13,1);                                                            // top highlight
-    p(-2,-8,`rgba(0,229,255,${0.25+pulse*0.30})`,6,10);
-    // Prismatic emblem (4 mini rainbow shards radiating)
-    p(-3,-6,CO,6,6); p(-2,-5,AS,4,4); p(-2,-5,AH,4,1);
-    p(-2,-5,RBC[0],1,4); p(-1,-5,RBC[2],1,4); p( 0,-5,RBC[3],1,4); p( 1,-5,RBC[1],1,4);
-    ctx.save(); ctx.globalAlpha = 0.55 + ep * 0.35;
-    pUnit(ctx,cx,cy,-3,-6+idleY,AH,6,6,isLeft,S);
-    ctx.restore();
-    for (let r=0; r<3; r++) { p(-6,-10+r*4,CL,1,1); p(5,-10+r*4,CL,1,1); }        // glowing rivets
-
-    // ── PAULDRONS (silver-rim)
-    p(-13,-12,CO,8,9); p(-12,-11,AS,6,8); p(-11,-11,AM,4,7); p(-10,-10,AL,2,5);
-    p(-12,-11,AH,6,1);
-    p(-12,-12,GD,6,1);
-    p( 6,-12,CO,8,9); p( 7,-11,AS,6,8); p( 8,-11,AM,4,7); p( 9,-10,AL,2,5);
-    p( 7,-11,AH,6,1);
-    p( 7,-12,GD,6,1);
-
-    // ── ARMS + HANDS
-    p(-11,-10,CO,5,12); p(-10,-9,AM,4,10); p(-10,-9,AH,4,1);
-    p(-11,-17,CO,5,8); p(-10,-16,SK,4,6);
-    p( 7,-10,CO,5,12); p( 8,-9,AM,4,10); p( 8,-9,AH,4,1);
-    p( 7,-17,CO,5,8); p( 8,-16,SK,4,6);
-
     // ── NECK
-    p(-2,-16,CO,5,3); p(-1,-15,AM,3,2);
+    p(-2,-22, CO, 4, 3); p(-1,-21, K0, 2, 2);
 
-    // ── HEAD (pale, cyan eye band)
-    p(-8,-30,CO,16,14); p(-7,-29,AS,14,12); p(-6,-28,AM,11,10); p(-5,-27,AB,8,8);
-    // Cyan visor band
-    p(-5,-24,CO,11,4); p(-4,-23,`rgba(0,229,255,${0.70+pulse*0.30})`,9,3); p(-3,-23,AH,5,2);
-    ctx.save(); ctx.globalAlpha = 0.55 + pulse * 0.30;
-    pUnit(ctx,cx,cy,-4,-23+idleY,AH,9,3,isLeft,S);
-    ctx.restore();
+    // ── HEAD
+    p(-6,-34, CO, 12, 13);
+    p(-5,-33, K1, 10, 11); p(-5,-33, K2, 10, 1);
+    p( 3,-32, K0,  2,  9);
+    p(-4,-29, CO, 3, 2); p( 1,-29, CO, 3, 2);
+    p(-3,-29, isAtk ? iri(1) : Q4, 1, 1); p( 2,-29, isAtk ? iri(1) : Q4, 1, 1);
+    p(-1,-25, K0, 2, 1);
 
-    // ── SILVER CROWN (multi-spire w/ rainbow gems)
-    p(-6,-38,CO,12,10); p(-5,-37,AS,10,9); p(-4,-36,AM,7,7);
-    p(-5,-37,AH,10,1);                                                            // top highlight
-    p(-6,-38,GD,12,1);                                                            // gold base
-    // Crown spires (4, rainbow gem-tipped)
-    p(-5,-41,CO,3,4); p(-4,-40,AM,1,3); p(-4,-41,RBC[0],1,1);
-    p(-2,-43,CO,3,6); p(-1,-42,AM,1,5); p(-1,-43,RBC[1],1,1);
-    p( 1,-44,CO,3,7); p( 2,-43,AL,1,6); p( 2,-44,RBC[2],1,1);
-    p( 4,-41,CO,3,4); p( 5,-40,AM,1,3); p( 5,-41,RBC[3],1,1);
+    // ── CRYSTAL DIADEM (three shards, tallest centre)
+    p(-7,-37, CO, 14, 4); p(-6,-36, Q1, 12, 2); p(-6,-36, Q3, 12, 1);
+    p(-5,-40, CO, 3, 4); p(-4,-39, Q2, 1, 3);
+    p(-1,-43, CO, 3, 7); p( 0,-42, Q3, 1, 6); p( 0,-42, Q4, 1, 2);
+    p( 3,-40, CO, 3, 4); p( 4,-39, Q2, 1, 3);
+    glow( 0,-42, iri(3), 1, 2, 0.55 + ep * 0.30);
 
     if (isAtk) {
-        ctx.save(); ctx.globalAlpha = 0.78; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy, 8,-16+idleY,CL,20,44,isLeft,S);                          // mirror flash
-        ctx.restore();
-        ctx.save(); ctx.globalAlpha = 0.50; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy,-10,-16+idleY,AH,24,42,isLeft,S);
-        ctx.restore();
+        glow( 8,-37, iri(0), 6, 6, 0.60);
+        glow(-1, -8, iri(1), 3, 4, 0.55);
     }
 }
 
+// ───────────────────────────────────────────────────
+// GRAND SEALER — 대봉인사. White robe worked with gold, sealing talismans
+// standing in the air around him.
+// Lore: 황금 자수가 박힌 백색 의복, 봉인 부적이 공중에 떠도는 대봉인사.
+// ───────────────────────────────────────────────────
 function drawGrandSealer(cx, cy, tower) {
     const area   = tower.currentSlot ? tower.currentSlot.area : 'left-slots';
     const isLeft = area === 'left-slots';
     const now    = Date.now();
     const isAtk  = (now - (tower.lastShot || 0)) < 400;
-    const idleY  = Math.sin(now * 0.002) * 2;
     const S = 2.0;
+    const idleY  = Math.sin(now * 0.002) * 2;
     const p = (ox, oy, col, w=1, h=1) => pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S);
-    const ep   = (Math.sin(now * 0.005) + 1) / 2;
-    const ang  = now * 0.0015;
-    const streF = Math.sin(now * 0.004) * 1;
-    const CO='#000000';
-    const WR='#F0F4F8', WH='#FFFFFF', WS='#E8ECF0';
-    const TE='#00897B', TL='#4DB6AC', TH='#80CBC4';
-    const SK='#F5DCC7', DS='#E8C09A';
-    const TA='#FFF8C0', CN='#D32F2F', CH='#FF6E6E';
-    const GHL='#8D6E63', GD2='#B88000', GD='#FFD700';
+    const glow = (ox, oy, col, w, h, a) => {
+        ctx.save(); ctx.globalAlpha = a; ctx.globalCompositeOperation = 'lighter';
+        pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S); ctx.restore();
+    };
+    const ep   = (Math.sin(now * 0.004) + 1) / 2;
+    const spin = now * 0.0011;
 
-    // ── sealing aura (gold)
-    ctx.save(); ctx.globalAlpha = 0.13 + ep * 0.20;
-    pUnit(ctx,cx,cy,-22,-44+idleY,GD,44,76,isLeft,S);
+    const CO='#000';
+    const W0='#4A4A56', W1='#8C8C9C', W2='#C8C8D8', W3='#EDEDF6', W4='#FFFFFF';  // white robe
+    const G0='#3A2600', G1='#7A5400', G2='#B98A0A', G3='#FFCF33', G4='#FFF0A8', G5='#FFFDE8';
+    const P2='#C9B98E', P3='#EDE0BC', P4='#FFF8E0';                              // seal paper
+    const R2='#A81824', R3='#E0343C';
+    const K0='#C4834E', K1='#F0C090', K2='#FFDCBC';
+    const H1='#9A9AA8', H2='#CFCFDC';
+
+    ctx.save(); ctx.globalAlpha = 0.13 + ep * 0.18;
+    pUnitAura(ctx, cx, cy, -20, -36 + idleY, G3, 40, 64, isLeft, S);
     ctx.restore();
 
-    // ── 5 ORBITING SEALING TALISMANS (was 3, kanji-style)
+    // ── FIVE SEALING TALISMANS standing in the air on a slow ring
     for (let i = 0; i < 5; i++) {
-        const a  = ang + i * (Math.PI * 2 / 5);
-        const tx = Math.cos(a) * 19;
-        const ty = Math.sin(a) * 11 - 8;
-        p(tx-2, ty-3, CO, 6, 9);
-        p(tx-1, ty-2, TA, 4, 7);
-        p(tx-1, ty-2, WH, 4, 1);                                                  // top highlight
-        p(tx-1, ty   , CN, 4, 1);                                                 // red seal line
-        p(tx,   ty+2 , CN, 1, 1);                                                 // seal dot
-        ctx.save(); ctx.globalAlpha = 0.50 + ep * 0.30;
-        pUnit(ctx,cx,cy,tx-2,ty-3+idleY,TA,6,9,isLeft,S);
-        ctx.restore();
+        const a  = spin + i * (Math.PI * 2 / 5);
+        const sx = Math.round(Math.cos(a) * 17);
+        const sy = -14 + Math.round(Math.sin(a) * 9);
+        const front = Math.sin(a) > 0;
+        p(sx - 1, sy - 5, CO, 4, 11);
+        p(sx,     sy - 4, front ? P3 : P2, 2, 9);
+        p(sx,     sy - 4, P4, 2, 1);                                             // paper top light
+        p(sx,     sy - 2, R2, 2, 1); p(sx, sy + 1, R2, 2, 1);                    // ink marks
+        glow(sx, sy - 4, G5, 2, 1, (front ? 0.42 : 0.22) + ep * 0.22);
     }
 
-    // ── BOOTS (white-tabi, teal cuffs)
-    p(-7,14,CO,7,9); p(-6,15,WS,5,8); p(-4,16,WH,3,6);
-    p( 1,14,CO,6,9); p( 2,15,WS,5,8); p( 3,16,WH,3,6);
-    p(-7,14,TE,7,1); p( 1,14,TE,6,1);
+    // ── SHOES
+    p(-7, 22, CO, 6, 5); p(-6, 23, W1, 4, 3); p(-6, 23, W3, 4, 1);
+    p( 1, 22, CO, 6, 5); p( 2, 23, W1, 4, 3); p( 2, 23, W3, 4, 1);
 
-    // ── LOWER ROBE (white w/ teal trim, top-highlighted)
-    p(-8,2,CO,16,14); p(-7,3,WR,14,12); p(-6,4,WH,11,10);
-    p(-7,3,WH,14,1);                                                              // top highlight
-    p(-5,4,TL,3,10);                                                              // teal center stripe
-    p(-8,14,CO,16,3); p(-7,15,TE,14,2); p(-6,16,TL,12,1);                         // teal hem
+    // ── ROBE SKIRT with gold embroidery
+    p(-8,  4, CO, 16, 19);
+    p(-7,  5, W1, 14, 17); p(-6,  5, W2, 12, 16); p(-4,  6, W3, 8, 14);
+    p(-7,  5, W4, 14,  1);                                                       // top highlight
+    p(-3,  7, W0,  1, 12); p( 2,  7, W0,  1, 12);
+    for (let i = 0; i < 4; i++) { p(-6 + i * 4, 9, G2, 3, 1); p(-5 + i * 4, 13, G2, 2, 1); }
+    p(-8, 19, CO, 16,  3); p(-7, 20, G2, 14, 2); p(-7, 20, G3, 14, 1);
 
-    // ── BELT (teal w/ gold buckle + bell)
-    p(-8,-1,CO,16,3); p(-7,0,TE,14,2); p(-7,0,TH,14,1);
-    p(-2,-1,CO,4,3); p(-1,0,GD,2,1);
-    // Hanging bell ornament
-    p(-2,3,CO,3,4); p(-1,4,GD2,1,3); p(-1,4,GD,1,1);
+    // ── SASH
+    p(-7,  1, CO, 14, 4); p(-6, 2, G1, 12, 2); p(-6, 2, G3, 12, 1);
 
-    // ── UPPER ROBE (white w/ teal collar)
-    p(-7,-14,CO,15,17); p(-6,-13,WR,13,15); p(-5,-12,WH,10,12); p(-4,-11,WS,8,10);
-    p(-6,-13,WH,13,1);                                                            // top highlight
-    p(-7,-14,CO,15,3); p(-6,-13,TE,13,2); p(-5,-12,TL,11,1);                      // teal collar
-    // Talisman emblem on chest
-    p(-3,-7,CO,6,9); p(-2,-6,TA,4,7); p(-2,-6,WH,4,1);
-    p(-2,-4,CN,4,1); p(-1,-2,CN,2,2); p(-1,0,CH,1,1);
-    ctx.save(); ctx.globalAlpha = 0.50 + ep * 0.30;
-    pUnit(ctx,cx,cy,-3,-7+idleY,TA,6,9,isLeft,S);
-    ctx.restore();
-    // Cuffs
-    p(-9,-10,CO,4,6); p(-8,-9,TE,3,5); p(-8,-9,TH,3,1);
-    p( 6,-10,CO,4,6); p( 7,-9,TE,3,5); p( 7,-9,TH,3,1);
-    for (let r=0; r<2; r++) { p(-6,-9+r*5,CN,1,1); p(5,-9+r*5,CN,1,1); }          // red rivets
+    // ── ROBE TORSO
+    p(-7,-17, CO, 14, 19);
+    p(-6,-16, W1, 12, 17); p(-5,-16, W2, 10, 16); p(-3,-15, W3, 6, 14);
+    p(-6,-16, W4, 12,  1);                                                       // top highlight
+    p(-6,-16, G2,  1, 17); p( 5,-16, G2, 1, 17);                                 // gold placket
+    for (let i = 0; i < 3; i++) p(-4, -13 + i * 5, G2, 9, 1);                    // embroidery rows
+    p(-2,-10, CO,  5,  5); p(-1, -9, G2, 3, 3); p(-1, -9, G4, 3, 1);
+    glow(-1, -9, G5, 3, 1, 0.50 + ep * 0.30);
 
-    // ── ARMS
-    // Left arm raised (seal gesture)
-    p(-10,-13,CO,5,12); p(-9,-12,WR,4,10); p(-9,-12,WH,4,1);
-    p(-12,-19,CO,5,8); p(-11,-18,SK,4,6);
-    // Right arm holding Gohei
-    p(  6,-13,CO,5,12); p( 7,-12,WR,4,10); p( 7,-12,WH,4,1);
-    p(  7,-21,CO,5,8); p( 8,-20,SK,4,6);
+    // ── COLLAR
+    p(-8,-21, CO, 16, 5); p(-7,-20, W3, 14, 3); p(-7,-20, W4, 14, 1);
+    p(-7,-18, G2, 14, 1);
 
-    // ── HEAD (shaved monk, gold-trim headband w/ kanji)
-    p(-8,-30,CO,16,14); p(-7,-29,SK,14,12);
-    p(-7,-30,DS,8,4);                                                             // forehead shading
-    // Black headband
-    p(-8,-24,CO,16,3); p(-7,-23,'#1A1A1A',14,2);
-    p(-8,-24,GD,16,1);                                                            // gold trim top
-    p(-7,-23,TE,14,1);                                                            // teal mid line
-    // Central kanji seal (red on yellow)
-    p(-4,-24,CO,5,4); p(-3,-23,TA,3,3); p(-2,-23,CN,1,3);
-    // Eyes + mouth (closed meditation)
-    p(-5,-23,CO,3,1); p( 2,-23,CO,3,1);                                           // closed eyes
-    p(-2,-20,DS,5,1);
-    p(-3,-19,CO,6,1);                                                             // serene mouth
+    // ── SLEEVES, both hands up in a sealing sign
+    p(-13,-16, CO, 7, 13); p(-12,-15, W2, 5, 11); p(-12,-15, W4, 5, 1);
+    p(-13, -5, CO, 6,  5); p(-12, -4, K1, 4,  3); p(-12, -4, K2, 4, 1);
+    p(  6,-16, CO, 7, 13); p(  7,-15, W2, 5, 11); p(  7,-15, W4, 5, 1);
+    p(  7, -5, CO, 6,  5); p(  8, -4, K1, 4,  3); p(  8, -4, K2, 4, 1);
+    p(-2, -6, CO,  5,  4); p(-1, -5, K1, 3, 2);                                  // hands joined
 
-    // ── SACRED GOHEI WAND (taller, multi-strand streamers + gold bell + tassel)
-    p(9,-50,CO,3,32); p(10,-49,GHL,2,30);                                         // handle (taller)
-    p(8,-46,GD,4,1); p(8,-36,GD,4,1); p(8,-26,GD,4,1);                            // gold grip bands
-    // Top mount (gold-trim)
-    p(8,-54,CO,8,6); p(9,-53,GD2,6,4); p(9,-53,GD,6,1);
-    // Multi-strand zigzag streamers (5 strips total)
-    // Strip 1 (left, longer)
-    p(7,-62+streF,CO,4,12); p(8,-61+streF,WH,2,10); p(8,-61+streF,WS,2,1);
-    p(7,-60+streF,CO,3,2); p(7,-56+streF,CO,3,2); p(7,-52+streF,CO,3,2);          // zigzag notches
-    // Strip 2
-    p(11,-64+streF,CO,4,14); p(12,-63+streF,WH,2,12); p(12,-63+streF,WS,2,1);
-    p(11,-62+streF,CO,3,2); p(11,-58+streF,CO,3,2); p(11,-54+streF,CO,3,2);
-    // Strip 3 (center, tallest)
-    p(9,-68+streF,CO,4,18); p(10,-67+streF,WH,2,16); p(10,-67+streF,WS,2,1);
-    p(9,-66+streF,CO,3,2); p(9,-62+streF,CO,3,2); p(9,-58+streF,CO,3,2); p(9,-54+streF,CO,3,2);
-    // Strip 4
-    p(13,-64-streF,CO,4,14); p(14,-63-streF,WH,2,12); p(14,-63-streF,WS,2,1);
-    // Strip 5 (right)
-    p(15,-62-streF,CO,4,12); p(16,-61-streF,WH,2,10); p(16,-61-streF,WS,2,1);
-    // Teal seal squares between strips
-    p(8,-50,TL,2,2); p(13,-50,TL,2,2);
-    // Gold bell at base of streamers
-    p(11,-54,CO,4,5); p(12,-53,GD,2,3); p(12,-53,'#FFFCC0',2,1);
-    p(12,-49,CO,2,1); p(12,-49,GD2,2,1);                                          // bell clapper
+    // ── NECK + HEAD
+    p(-2,-22, CO, 4, 3); p(-1,-21, K0, 2, 2);
+    p(-6,-34, CO, 12, 13);
+    p(-5,-33, K1, 10, 11); p(-5,-33, K2, 10, 1);
+    p( 3,-32, K0,  2,  9);
+    p(-4,-29, CO, 3, 1); p( 1,-29, CO, 3, 1);                                    // eyes closed
+    p(-1,-25, K0, 2, 1);
+    p(-6,-35, CO, 12, 4); p(-5,-34, H1, 10, 2); p(-5,-34, H2, 10, 1);            // white hair
+    p(-7,-31, CO,  2, 5); p( 5,-31, CO, 2, 5);
+
+    // ── SEALING CROWN — a gold band carrying an upright talisman
+    p(-7,-38, CO, 14, 4); p(-6,-37, G1, 12, 2); p(-6,-37, G4, 12, 1);
+    p(-2,-45, CO,  5, 8); p(-1,-44, P3, 3, 6); p(-1,-44, P4, 3, 1);
+    p(-1,-42, R2,  3, 1); p(-1,-39, R2, 3, 1);
+    glow(-1,-44, G5, 3, 1, 0.45 + ep * 0.28);
 
     if (isAtk) {
-        ctx.save(); ctx.globalAlpha = 0.78; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy,7,-68+streF+idleY,WH,12,24,isLeft,S);                     // streamer flash
-        ctx.restore();
-        ctx.save(); ctx.globalAlpha = 0.65; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy,8,-36+idleY,'#FFD060',12,46,isLeft,S);                    // gold burst
-        ctx.restore();
+        for (let i = 0; i < 5; i++) {
+            const a = spin + i * (Math.PI * 2 / 5);
+            glow(Math.round(Math.cos(a) * 17), -18 + Math.round(Math.sin(a) * 9), G5, 2, 9, 0.55);
+        }
+        glow(-1, -9, G5, 3, 3, 0.60);
     }
 }
 
+// ───────────────────────────────────────────────────
+// FLAME TALISMAN MASTER — 화염 부적 마스터. Red-black robe, a bundle of burning
+// talismans in the fist, embers left behind at every step.
+// Lore: 적흑 도복에 불타는 부적 다발, 발걸음마다 잔불이 번지는 마스터.
+// ───────────────────────────────────────────────────
 function drawFlameMaster(cx, cy, tower) {
     const area   = tower.currentSlot ? tower.currentSlot.area : 'left-slots';
     const isLeft = area === 'left-slots';
     const now    = Date.now();
     const isAtk  = (now - (tower.lastShot || 0)) < 400;
-    const idleY  = Math.sin(now * 0.002) * 2;
     const S = 2.0;
+    const idleY  = Math.sin(now * 0.002) * 2;
     const p = (ox, oy, col, w=1, h=1) => pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S);
-    const ep        = (Math.sin(now * 0.005) + 1) / 2;
-    const firePulse = (Math.sin(now * 0.010) + 1) / 2;
-    const fSway     = Math.sin(now * 0.006) * 2;
-    const CO='#000000', CH='#0A0A0A', CB='#1A1A1A', CV='#2A2A2A', DB='#2E1A00';
-    const LV='#FF3D00', OL='#FF6D00', GF='#FFD600', GA='#FFAB00', LW='#FFFF80';
-    const SK='#BF6030', FT='#FF4400', FTL='#FF9900';
-    const GD2='#B88000', GD='#FFD700';
-    const CN='#D32F2F';
+    const glow = (ox, oy, col, w, h, a) => {
+        ctx.save(); ctx.globalAlpha = a; ctx.globalCompositeOperation = 'lighter';
+        pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S); ctx.restore();
+    };
+    const ep    = (Math.sin(now * 0.004) + 1) / 2;
+    const flick = Math.round(Math.sin(now * 0.012) * 1);
+    const step  = (now % 1500) / 1500;
 
-    // ── inferno aura
-    ctx.save(); ctx.globalAlpha = 0.16 + ep * 0.22;
-    pUnit(ctx,cx,cy,-22,-44+idleY,LV,44,76,isLeft,S);
+    const CO='#000';
+    const D0='#180608', D1='#3A0E12', D2='#6A1A1E', D3='#9E2C2E', D4='#D45A50';  // red-black robe
+    const P2='#C9B98E', P3='#EDE0BC', P4='#FFF8E0';
+    const F0='#7A1800', F1='#C43800', F2='#FF6A00', F3='#FFB020', F4='#FFE890';
+    const G2='#B88000', G3='#FFD700';
+    const K0='#B87848', K1='#E8A870', K2='#FFC898';
+    const H0='#1A1010', H1='#3A2018', H2='#66382A';
+
+    ctx.save(); ctx.globalAlpha = 0.14 + ep * 0.20;
+    pUnitAura(ctx, cx, cy, -19, -34 + idleY, F2, 38, 62, isLeft, S);
     ctx.restore();
 
-    // ── EMBER POOL AT FEET
-    ctx.save(); ctx.globalAlpha = 0.40 + firePulse * 0.30;
-    pUnit(ctx,cx,cy,-2,10+idleY,LV,18,4,isLeft,S);
-    ctx.restore();
-
-    // ── BOOTS (charcoal w/ glowing ember cuffs)
-    p(-7,14,CO,7,9); p(-6,15,CH,5,8); p(-4,16,CB,3,6);
-    p( 1,14,CO,6,9); p( 2,15,CH,5,8); p( 3,16,CB,3,6);
-    p(-7,14,LV,7,1); p( 1,14,LV,6,1);
-
-    // ── LOWER ROBE (charcoal w/ multi-layer molten lava hem)
-    p(-7,2,CO,14,14); p(-6,3,CH,12,12); p(-5,4,CB,8,10);
-    p(-6,3,CV,12,1);                                                              // top highlight
-    p(-6,13,CO,13,5); p(-5,14,LV,11,4);                                           // lava hem outline
-    p(-4,15,OL,9,3); p(-3,16,GF,7,2); p(-2,17,LW,5,1);                            // lava layers
-    for (let r=0; r<2; r++) { p(-5,5+r*4,LV,1,1); p(4,5+r*4,LV,1,1); }            // lava rivets
-
-    // ── CHARCOAL SASH BELT (gold-trim, ember clasp)
-    p(-5,-2,CO,11,4); p(-4,-1,DB,9,3); p(-4,-1,'#5A3010',9,1);
-    p(-5,-2,GD2,11,1);                                                            // gold top trim
-    p(-1,-1,CO,4,3); p(0,0,OL,2,1);
-    ctx.save(); ctx.globalAlpha = 0.65 + firePulse * 0.30;
-    pUnit(ctx,cx,cy,0,0+idleY,GF,2,1,isLeft,S);
-    ctx.restore();
-
-    // ── UPPER TORSO ROBE (charcoal, lava chest core)
-    p(-6,-14,CO,13,17); p(-5,-13,CH,11,15); p(-4,-12,CB,8,13);
-    p(-5,-13,CV,11,1);                                                            // top highlight
-    // Molten sleeve edges
-    p(-9,-10,CO,4,7); p(-8,-9,LV,3,5); p(-8,-9,OL,3,1);
-    p( 6,-10,CO,4,7); p( 7,-9,LV,3,5); p( 7,-9,OL,3,1);
-    // Lava chest core (glowing flame heart)
-    p(-3,-9,CO,6,8); p(-2,-8,DB,4,6); p(-2,-8,LV,4,1);
-    p(-2,-6,OL,4,3); p(-1,-4,GF,2,2); p( 0,-3,LW,1,1);
-    ctx.save(); ctx.globalAlpha = 0.60 + firePulse * 0.35;
-    pUnit(ctx,cx,cy,-3,-9+idleY,LW,6,8,isLeft,S);
-    ctx.restore();
-    for (let r=0; r<2; r++) { p(-5,-10+r*5,LV,1,1); p(4,-10+r*5,LV,1,1); }        // ember rivets
-
-    // ── PAULDRONS (charcoal w/ ember vents)
-    p(-12,-13,CO,7,8); p(-11,-12,CH,5,6); p(-10,-11,CB,3,4); p(-11,-12,CV,5,1);
-    p(-10,-10,LV,3,1); p(-10,-8,OL,3,1);                                          // ember vents L
-    p( 5,-13,CO,7,8); p( 6,-12,CH,5,6); p( 7,-11,CB,3,4); p( 6,-12,CV,5,1);
-    p( 7,-10,LV,3,1); p( 7,-8,OL,3,1);                                            // ember vents R
-
-    // ── ARMS
-    // Right arm raised (burning talisman hand)
-    p(-10,-13,CO,5,12); p(-9,-12,CH,4,10); p(-9,-12,CV,4,1);
-    p(-12,-19,CO,5,8); p(-11,-18,SK,4,6);
-    // Burning talisman (bigger, double-layer)
-    p(-15,-27,CO,7,12); p(-14,-26,GA,5,10); p(-14,-26,GF,5,1);
-    p(-13,-23,GF,3,4); p(-13,-22,LW,3,2);
-    p(-13,-19,CN,3,1); p(-13,-17,CN,3,1);                                         // red seal lines
-    ctx.save(); ctx.globalAlpha = 0.60 + firePulse * 0.30; ctx.globalCompositeOperation = 'lighter';
-    pUnit(ctx,cx,cy,-15,-29+idleY,FTL,7,14,isLeft,S);
-    ctx.restore();
-
-    // Left arm (Inferno War Fan hand)
-    p(  6,-13,CO,5,12); p( 7,-12,CH,4,10); p( 7,-12,CV,4,1);
-    p(  7,-21,CO,5,8); p( 8,-20,SK,4,6);
-
-    // ── NECK
-    p(-2,-16,CO,5,3); p(-1,-15,SK,3,2);
-
-    // ── HEAD (intense, scarred)
-    p(-8,-30,CO,16,14); p(-7,-29,SK,14,12);
-    // Eyes: glowing orange
-    p(-5,-23,CO,3,2); p( 2,-23,CO,3,2);
-    p(-4,-23,OL,2,1); p( 3,-23,OL,2,1);
-    ctx.save(); ctx.globalAlpha = 0.65 + firePulse * 0.30;
-    pUnit(ctx,cx,cy,-4,-23+idleY,LW,2,1,isLeft,S);
-    pUnit(ctx,cx,cy, 3,-23+idleY,LW,2,1,isLeft,S);
-    ctx.restore();
-    // Battle scar
-    p(-6,-26,SK,1,1); p(-5,-25,SK,1,1); p(-4,-24,SK,1,1);
-    p(-3,-19,CO,6,1);                                                             // grim mouth
-
-    // ── WILD FIRE TOPKNOT (taller, multi-flame strands)
-    p(-8,-30,CO,16,3); p(-7,-29,CO,12,6); p(-6,-29,'#3A1A00',10,5);               // hair base
-    p(-4,-36,CO,8,8); p(-3,-35,'#5A1A00',6,7);                                    // mid hair
-    p(-1,-39,CO,4,5); p( 0,-38,FT,2,4);                                           // topknot bun
-    p(-1,-42,CO,3,5); p( 0,-41,FT,1,4);                                           // top flame strand
-    // 5 flame tufts radiating from topknot
-    p(-3,-40,CO,3,4); p(-2,-39,FT,1,3); p(-2,-41,LW,1,1);                         // L flame
-    p( 2,-40,CO,3,4); p( 3,-39,FT,1,3); p( 3,-41,LW,1,1);                         // R flame
-    p( 0,-44,FT,2,3); p( 1,-46,LW,1,1);                                           // top flame
-    ctx.save(); ctx.globalAlpha = 0.55 + firePulse * 0.35;
-    pUnit(ctx,cx,cy,-3,-45+idleY,FT,8,8,isLeft,S);
-    ctx.restore();
-
-    // ── MASSIVE INFERNO WAR FAN (taller, multi-rib, gold-tipped)
-    const fx = 10;
-    // Ribs (6 alternating gold/red)
-    for (let r = 0; r < 6; r++) {
-        const rx = fx + r * 2 + fSway;
-        p(rx,   -36, CO, 2, 32);
-        p(rx,   -35, r % 2 === 0 ? '#5A0000' : GD2, 2, 30);
-        p(rx,   -35, r % 2 === 0 ? '#8B0000' : GF, 2, 1);                         // top highlight
+    // ── EMBERS SPREADING FROM THE FOOTFALL
+    for (let i = 0; i < 6; i++) {
+        const t  = (step + i / 6) % 1;
+        const bx = -12 + i * 4 + Math.round(t * 3) * (i % 2 ? 1 : -1);
+        p(bx, 25, F0, 2, 1);
+        glow(bx, 25, F2, 2, 1, (1 - t) * 0.65);
+        if (i % 2 === 0) glow(bx, 24 - Math.round(t * 3), F4, 1, 1, (1 - t) * 0.5);
     }
-    // Fan top edge (curved gold crescent)
-    p(fx, -36+fSway, GD, 14, 2); p(fx, -36+fSway, '#FFFCC0', 14, 1);
-    // Painted flame seal on fan face (multi-row)
-    p(fx+1, -28+fSway, GF, 2, 2); p(fx+5, -28+fSway, GF, 2, 2); p(fx+9, -28+fSway, GF, 2, 2);
-    p(fx+2, -22+fSway, FT, 1, 4); p(fx+6, -22+fSway, FT, 1, 4); p(fx+10, -22+fSway, FT, 1, 4);
-    p(fx+1, -16+fSway, GA, 2, 2); p(fx+5, -16+fSway, GA, 2, 2); p(fx+9, -16+fSway, GA, 2, 2);
-    // Fan handle base (gold)
-    p(fx+11, -36+fSway, CO, 4, 28); p(fx+12, -35+fSway, GD2, 2, 26); p(fx+12, -35+fSway, GD, 2, 1);
-    p(fx+11, -10+fSway, CO, 4, 4); p(fx+12, -9+fSway, GD, 2, 2);                  // pommel
-    // Fire trail along fan top
-    ctx.save(); ctx.globalAlpha = 0.55 + firePulse * 0.40; ctx.globalCompositeOperation = 'lighter';
-    pUnit(ctx,cx,cy,fx,-40+fSway+idleY,FT,14,8,isLeft,S);
-    ctx.restore();
-    ctx.save(); ctx.globalAlpha = 0.40 + firePulse * 0.30;
-    pUnit(ctx,cx,cy,fx,-38+fSway+idleY,FTL,14,4,isLeft,S);
-    ctx.restore();
+
+    // ── SANDALS
+    p(-7, 22, CO, 6, 5); p(-6, 23, D1, 4, 3); p(-6, 23, D3, 4, 1);
+    p( 1, 22, CO, 6, 5); p( 2, 23, D1, 4, 3); p( 2, 23, D3, 4, 1);
+
+    // ── ROBE SKIRT
+    p(-8,  4, CO, 16, 19);
+    p(-7,  5, D0, 14, 17); p(-6,  5, D1, 12, 16); p(-4,  6, D2, 8, 14);
+    p(-7,  5, D4, 14,  1);                                                       // top highlight
+    p(-3,  7, D0,  1, 12); p( 2,  7, D0,  1, 12);
+    for (let i = 0; i < 8; i++) {                                                // scorched hem
+        const hx = -7 + i * 2, hl = 2 + ((i * 3) % 3) + (i % 2 ? flick : -flick);
+        p(hx, 20, CO, 2, hl + 1); p(hx, 20, i % 2 ? F0 : D1, 2, hl);
+        if (i % 2 === 0) glow(hx, 20 + hl - 1, F2, 2, 1, 0.35 + ep * 0.22);
+    }
+
+    // ── SASH
+    p(-7,  1, CO, 14, 4); p(-6, 2, F0, 12, 2); p(-6, 2, F2, 12, 1);
+    glow(-6, 2, F3, 12, 1, 0.28 + ep * 0.22);
+
+    // ── ROBE TORSO
+    p(-7,-17, CO, 14, 19);
+    p(-6,-16, D0, 12, 17); p(-5,-16, D1, 10, 16); p(-3,-15, D2, 6, 14);
+    p(-6,-16, D4, 12,  1);                                                       // top highlight
+    p(-5,-16, D3,  4,  9); p( 1,-16, D3, 4, 9);                                  // crossed lapels
+    p(-2,-10, CO,  5,  5); p(-1, -9, F1, 3, 3); p(-1, -9, F3, 3, 1);
+    glow(-1, -9, F4, 3, 1, 0.55 + ep * 0.32);
+
+    // ── COLLAR
+    p(-7,-20, CO, 14, 4); p(-6,-19, D2, 12, 2); p(-6,-19, D4, 12, 1);
+
+    // ── SLEEVES, right fist up with the burning bundle
+    p(-12,-16, CO, 6, 15); p(-11,-15, D1, 4, 13); p(-11,-15, D3, 4, 1);
+    p(-12,  0, CO, 6,  5); p(-11,  1, K1, 4,  3); p(-11, 1, K2, 4, 1);
+    p(  6,-16, CO, 6, 10); p(  7,-15, D1, 4,  8); p(  7,-15, D3, 4, 1);
+    p(  8,-25, CO, 6, 11); p(  9,-24, D1, 4,  9); p(  9,-24, D3, 4, 1);
+    p(  8,-29, CO, 6,  5); p(  9,-28, K1, 4,  3); p(  9,-28, K2, 4, 1);
+
+    // ── BURNING TALISMAN BUNDLE — a fan of slips, the top edges alight
+    for (let i = 0; i < 4; i++) {
+        const sx = 8 + i * 2;
+        const sy = -42 + i * 2;
+        p(sx, sy, CO, 4, 14);
+        p(sx + 1, sy + 1, P2, 2, 12); p(sx + 1, sy + 1, P4, 2, 1);
+        p(sx + 1, sy + 4, F0, 2, 1);                                             // ink gone to char
+        const fh = 3 + ((i * 3) % 3) + (i % 2 ? flick : -flick);
+        p(sx + 1, sy - fh, CO, 2, fh); p(sx + 1, sy - fh + 1, F1, 2, fh - 1);
+        p(sx + 1, sy - fh + 1, F3, 2, 1);
+        glow(sx + 1, sy - fh + 1, F4, 2, 2, 0.55 + ep * 0.28);
+    }
+
+    // ── NECK + HEAD
+    p(-2,-22, CO, 4, 3); p(-1,-21, K0, 2, 2);
+    p(-6,-34, CO, 12, 13);
+    p(-5,-33, K1, 10, 11); p(-5,-33, K2, 10, 1);
+    p( 3,-32, K0,  2,  9);
+    p(-6,-35, CO, 12,  4); p(-5,-34, H1, 10, 2); p(-5,-34, H2, 10, 1);
+    p(-7,-31, CO,  2,  5); p( 5,-31, CO, 2, 5);
+    p(-7,-30, H0,  1,  4); p( 6,-30, H0, 1, 4);
+    p(-4,-29, CO,  3,  2); p( 1,-29, CO, 3, 2);
+    p(-3,-29, isAtk ? F4 : F3, 1, 1); p( 2,-29, isAtk ? F4 : F3, 1, 1);
+    p(-2,-25, K0,  4,  1);
+
+    // ── SCORCHED HEADBAND
+    p(-7,-37, CO, 14, 3); p(-6,-36, F0, 12, 2); p(-6,-36, F1, 12, 1);
+    p(-2,-40, CO,  5, 4); p(-1,-39, F1, 3, 2); p(-1,-39, F3, 3, 1);
+    glow(-1,-39, F4, 3, 1, 0.50 + ep * 0.28);
 
     if (isAtk) {
-        ctx.save(); ctx.globalAlpha = 0.78; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy,fx-2,-44+fSway+idleY,LW,20,46,isLeft,S);                  // fan unfolds
-        ctx.restore();
-        ctx.save(); ctx.globalAlpha = 0.55; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy,-15,-30+idleY,FT,10,16,isLeft,S);                         // talisman flare
-        ctx.restore();
+        glow( 8,-46, F4, 12, 16, 0.60);
+        glow(-1, -9, F4,  3,  3, 0.60);
     }
 }
 
+// ───────────────────────────────────────────────────
+// VAJRAPANI — 금강역사. Bare muscled torso, a golden trident, the vajra seal
+// alight on the forehead.
+// Lore: 근육질 상체에 황금 삼지창, 이마에 금강 인장이 빛나는 역사.
+// ───────────────────────────────────────────────────
 function drawVajrapani(cx, cy, tower) {
     const area   = tower.currentSlot ? tower.currentSlot.area : 'left-slots';
     const isLeft = area === 'left-slots';
     const now    = Date.now();
     const isAtk  = (now - (tower.lastShot || 0)) < 400;
-    const idleY  = Math.sin(now * 0.003) * 2;
     const S = 2.0;
+    const idleY  = Math.sin(now * 0.002) * 2;
     const p = (ox, oy, col, w=1, h=1) => pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S);
-    const ep         = (Math.sin(now * 0.005) + 1) / 2;
-    const lightPulse = (Math.sin(now * 0.008) + 1) / 2;
-    const haloRot    = now * 0.002;
-    const CO='#000000';
-    const BS='#5D3A1A', BM='#8B5A2B', BB='#A0522D', BL='#C68642', BH='#D4A050';
-    const GS='#7A5800', GM='#B8860B', GB='#FFD700', GL='#FFE57F', GH='#FFFFF0', GW='#FFFCC0';
-    const TS='#3E2723', TM='#5D4037', TB='#795548', TL='#A1887F';
-    const LM='#1E6ADF', LL='#4FC3F7', LW='#FFFFFF';
-    const RD='#D32F2F';
+    const glow = (ox, oy, col, w, h, a) => {
+        ctx.save(); ctx.globalAlpha = a; ctx.globalCompositeOperation = 'lighter';
+        pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S); ctx.restore();
+    };
+    const ep = (Math.sin(now * 0.004) + 1) / 2;
 
-    // ── lightning aura
-    ctx.save(); ctx.globalAlpha = 0.16 + ep * 0.22;
-    pUnit(ctx,cx,cy,-22,-50+idleY,LL,44,82,isLeft,S);
+    const CO='#000';
+    const K0='#8A5628', K1='#B87848', K2='#E8A870', K3='#FFC898';                // bronzed skin
+    const G0='#3A2600', G1='#7A5400', G2='#B98A0A', G3='#FFCF33', G4='#FFF0A8';
+    const R1='#6A0C14', R2='#A81824', R3='#E0343C';                              // crimson wrap
+    const W1='#5A4A34', W2='#8A7454';
+
+    ctx.save(); ctx.globalAlpha = 0.13 + ep * 0.18;
+    pUnitAura(ctx, cx, cy, -19, -36 + idleY, G3, 38, 64, isLeft, S);
     ctx.restore();
 
-    // ── LIGHTNING HALO RING (orbiting bolts behind head, rotating)
-    for (let i = 0; i < 6; i++) {
-        const a = haloRot + i * (Math.PI / 3);
-        const hx = Math.cos(a) * 14;
-        const hy = Math.sin(a) * 14 - 30;
-        p(hx-1, hy-1, CO, 3, 3);
-        p(hx,   hy,   LL, 1, 1);
-        ctx.save(); ctx.globalAlpha = 0.60 + lightPulse * 0.30;
-        pUnit(ctx,cx,cy,hx-1,hy-1+idleY,LW,3,3,isLeft,S);
-        ctx.restore();
-    }
+    // ── BARE FEET
+    p(-9, 22, CO, 7, 5); p(-8, 23, K0, 5, 3); p(-8, 23, K2, 5, 1);
+    p( 2, 22, CO, 7, 5); p( 3, 23, K0, 5, 3); p( 3, 23, K2, 5, 1);
 
-    // ── LIGHTNING-CORE GLOW (chest)
-    ctx.save(); ctx.globalAlpha = 0.45 + lightPulse * 0.35;
-    pUnit(ctx,cx,cy,-4,-12+idleY,LL,10,20,isLeft,S);
-    ctx.restore();
+    // ── CRIMSON WRAP (short, knee length)
+    p(-9,  6, CO, 18, 15);
+    p(-8,  7, R1, 16, 13); p(-7,  7, R2, 14, 12); p(-4,  8, R3, 8, 10);
+    p(-8,  7, R3, 16,  1);                                                       // top highlight
+    p(-9, 18, CO, 18,  3); p(-8, 19, G2, 16, 2); p(-8, 19, G3, 16, 1);
 
-    // ── MASSIVE 3-PRONG VAJRA SCEPTER (taller, glowing core)
-    // Shaft
-    p(10,-58,CO,5,54); p(11,-57,GS,4,52); p(11,-54,GM,3,46); p(11,-50,GB,2,40);
-    p(10,-46,GB,5,1); p(10,-32,GB,5,1); p(10,-18,GB,5,1); p(10,-4,GB,5,1);        // gold bands
-    // Central vajra orb (large, multi-layered)
-    p( 6,-66,CO,14,12); p( 7,-65,GM,12,10); p( 8,-64,GB,9,8); p( 9,-63,GL,6,6);
-    p( 7,-65,GW,12,1);                                                            // top highlight
-    p(10,-61,LW,4,4);                                                             // bright center
-    // 3 prongs at top
-    p( 6,-70,CO,4,6); p( 7,-69,GB,2,5); p( 7,-71,GL,2,1);                         // L prong
-    p(11,-72,CO,4,8); p(12,-71,GL,2,7); p(12,-73,LW,2,1);                         // center prong (tallest)
-    p(16,-70,CO,4,6); p(17,-69,GB,2,5); p(17,-71,GL,2,1);                         // R prong
-    // 3 prongs at bottom
-    p( 6,-54,CO,4,6); p( 7,-53,GB,2,5); p( 7,-50,GL,2,1);
-    p(11,-52,CO,4,8); p(12,-51,GL,2,7); p(12,-46,LW,2,1);
-    p(16,-54,CO,4,6); p(17,-53,GB,2,5); p(17,-50,GL,2,1);
-    // Lightning arcing between prongs
-    ctx.save(); ctx.globalAlpha = 0.65 + lightPulse * 0.30;
-    pUnit(ctx,cx,cy, 7,-65+idleY,LL,12,10,isLeft,S);
-    ctx.restore();
-    ctx.save(); ctx.globalAlpha = 0.55 + lightPulse * 0.30;
-    pUnit(ctx,cx,cy, 8,-73+idleY,LW,8,3,isLeft,S);
-    pUnit(ctx,cx,cy, 8,-48+idleY,LW,8,3,isLeft,S);
-    ctx.restore();
+    // ── GOLD SASH
+    p(-9,  3, CO, 18, 4); p(-8, 4, G1, 16, 2); p(-8, 4, G3, 16, 1);
 
-    // ── KNEELING LOTUS BASE (monk pose)
-    p(-8,8,CO,16,15); p(-7,9,TS,14,13); p(-6,10,TM,11,11); p(-5,11,TB,7,9);
-    p(-7,9,TL,14,1);                                                              // top highlight
-    p(-4,10,CO,2,6); p(-1,10,CO,2,7); p(2,11,CO,2,6); p(5,10,CO,2,5);
-    p(-3,11,TL,1,5); p( 0,11,TL,1,6);
-    // Gold lotus petals at base
-    p(-9,18,CO,4,3); p(-8,19,GB,2,2);
-    p( 5,18,CO,4,3); p( 6,19,GB,2,2);
+    // ── MUSCLED TORSO (bare, defined in the ramp rather than outlined boxes)
+    p(-8,-18, CO, 17, 22);
+    p(-7,-17, K0, 15, 20); p(-6,-17, K1, 13, 19); p(-4,-16, K2, 9, 9);
+    p(-7,-17, K3, 15,  1);                                                       // top highlight
+    p( 5,-16, K0,  2, 18);                                                       // shaded flank
+    p(-1,-16, K0,  2, 18);                                                       // sternum line
+    p(-6,-10, K0, 13,  1); p(-6, -6, K0, 13, 1); p(-6, -2, K0, 13, 1);           // abdominal lines
+    p(-6,-15, K3,  5,  3); p( 2,-15, K3, 5, 3);                                  // pectoral light
 
-    // ── BOOTS (under robe)
-    p(-7,14,CO,7,9); p(-6,15,TM,5,8); p(-4,16,TB,3,6);
-    p( 1,14,CO,6,9); p( 2,15,TM,5,8); p( 3,16,TB,3,6);
-    p(-7,14,GB,7,1); p( 1,14,GB,6,1);
+    // ── GOLD ARMLETS + ARMS
+    p(-13,-16, CO, 6, 16); p(-12,-15, K0, 4, 14); p(-12,-15, K2, 4, 1);
+    p(-13,-11, G2,  6, 2);                                                       // armlet
+    p(-13,  1, CO, 6,  5); p(-12,  2, K1, 4,  3); p(-12, 2, K3, 4, 1);
+    p(  7,-17, CO, 6, 12); p(  8,-16, K0, 4, 10); p(  8,-16, K2, 4, 1);
+    p(  7,-12, G2,  6, 2);
+    p(  8,-26, CO, 6, 11); p(  9,-25, K0, 4,  9); p(  9,-25, K2, 4, 1);
+    p(  8,-29, CO, 6,  5); p(  9,-28, K1, 4,  3); p(  9,-28, K3, 4, 1);
 
-    // ── LOWER ROBE (earth-brown, gold trim)
-    p(-8,2,CO,16,7); p(-7,3,BS,14,5); p(-6,4,BM,11,4); p(-4,5,BL,7,3);
-    p(-7,3,BH,14,1);                                                              // top highlight
-    p(-8,2,GB,16,1);                                                              // gold belt-line
+    // ── GOLDEN TRIDENT
+    p(10,-26, CO, 4, 50); p(11,-25, W1, 2, 48); p(11,-25, W2, 2, 1);             // shaft
+    p(10,-12, G2, 4, 1); p(10, 6, G2, 4, 1);                                     // bindings
+    p( 8,-34, CO, 8,  6); p( 9,-33, G2, 6, 4); p( 9,-33, G4, 6, 1);              // socket
+    p(11,-46, CO, 3, 13); p(12,-45, G3, 1, 11); p(12,-45, G4, 1, 3);             // centre tine
+    p( 8,-42, CO, 3,  9); p( 9,-41, G3, 1,  7); p( 9,-41, G4, 1, 2);             // left tine
+    p(14,-42, CO, 3,  9); p(15,-41, G3, 1,  7); p(15,-41, G4, 1, 2);             // right tine
+    p( 8,-35, CO, 9,  2); p( 9,-34, G3, 7, 1);                                   // tine bridge
+    glow(12,-45, G4, 1, 4, 0.50 + ep * 0.30);
+    glow( 9,-41, G4, 1, 3, 0.40 + ep * 0.26);
+    glow(15,-41, G4, 1, 3, 0.40 + ep * 0.26);
 
-    // ── UPPER ROBE (brown w/ gold lightning seal)
-    p(-7,-14,CO,14,17); p(-6,-13,BS,12,15); p(-5,-12,BM,9,12); p(-4,-11,BB,6,10); p(-3,-10,BL,4,8);
-    p(-6,-13,BH,12,1);                                                            // top highlight
-    p(-3,-12,BH,2,6); p( 1,-12,BH,2,6); p(-1,-6,BH,2,4);                          // brown panels
-    // Lightning glyph on chest (cyan zigzag, was simpler)
-    p(-2,-10,LM,5,1); p(-1,-8,LL,4,1); p(-4,-6,LM,6,1); p(-2,-4,LL,4,1);
-    p(-1,-7,LW,1,1); p(-2,-5,LW,1,1);                                             // bright bolts
-    ctx.save(); ctx.globalAlpha = 0.55 + lightPulse * 0.30;
-    pUnit(ctx,cx,cy,-4,-10+idleY,LL,9,8,isLeft,S);
-    ctx.restore();
-    for (let r=0; r<3; r++) { p(-6,-10+r*4,LL,1,1); p(5,-10+r*4,LL,1,1); }        // lightning rivets
+    // ── NECK + HEAD (fierce, brows down)
+    p(-3,-23, CO, 7, 3); p(-2,-22, K0, 5, 2);
+    p(-7,-36, CO, 14, 14);
+    p(-6,-35, K0, 12, 12); p(-5,-35, K1, 10, 11); p(-4,-34, K2, 7, 4);
+    p(-6,-35, K3, 12,  1);                                                       // top highlight
+    p( 4,-34, K0,  2, 10);
+    p(-6,-31, K0, 12,  2);                                                       // heavy brow
+    p(-5,-29, CO,  3,  2); p( 2,-29, CO, 3, 2);
+    p(-4,-29, G3,  1,  1); p( 3,-29, G3, 1, 1);                                  // gold-lit eyes
+    glow(-4,-29, G4, 1, 1, 0.60 + ep * 0.30);
+    glow( 3,-29, G4, 1, 1, 0.60 + ep * 0.30);
+    p(-3,-25, CO,  7,  2); p(-2,-24, K0, 5, 1);                                  // bared teeth
 
-    // ── PAULDRONS (gold, top-highlighted)
-    p(-13,-12,CO,8,9); p(-12,-11,GM,6,8); p(-11,-10,GB,4,7); p(-10,-9,GL,2,5);
-    p(-12,-11,GW,6,1);
-    p( 6,-12,CO,8,9); p( 7,-11,GM,6,8); p( 8,-10,GB,4,7); p( 9,-9,GL,2,5);
-    p( 7,-11,GW,6,1);
-
-    // ── ARMS + HANDS
-    p(-11,-10,CO,5,12); p(-10,-9,BM,4,10); p(-10,-9,BL,4,1);
-    p(-11,-17,CO,5,8); p(-10,-16,BL,4,6);
-    p( 7,-10,CO,5,12); p( 8,-9,BM,4,10); p( 8,-9,BL,4,1);
-    p( 7,-17,CO,5,8); p( 8,-16,BL,4,6);
-
-    // ── NECK
-    p(-3,-16,CO,7,4); p(-2,-15,BS,5,3);
-
-    // ── HEAD (wrathful monk face)
-    p(-8,-30,CO,16,14); p(-7,-29,BS,14,12); p(-6,-28,BM,11,10); p(-5,-27,BB,8,8); p(-4,-26,BL,5,6);
-    // Fang grimace (full mouth)
-    p(-4,-22,CO,9,3); p(-3,-21,'#FFFFFF',7,2);
-    p(-3,-22,CO,1,2); p(-1,-22,CO,1,2); p( 1,-22,CO,1,2); p( 3,-22,CO,1,2);       // teeth gaps
-    // Wrathful eyes (lightning blue, glaring)
-    p(-5,-25,CO,4,3); p( 1,-25,CO,4,3);
-    p(-4,-24,LL,2,1); p( 2,-24,LL,2,1);
-    ctx.save(); ctx.globalAlpha = 0.70 + lightPulse * 0.25;
-    pUnit(ctx,cx,cy,-4,-24+idleY,LW,2,1,isLeft,S);
-    pUnit(ctx,cx,cy, 2,-24+idleY,LW,2,1,isLeft,S);
-    ctx.restore();
-    // Third eye (gold center)
-    p(-1,-27,CO,3,3); p( 0,-26,GB,1,1); p( 0,-26,LW,1,1);
-
-    // ── FLAMED CROWN / TOPKNOT (gold w/ lightning crystal)
-    p(-8,-36,CO,16,8); p(-7,-35,GS,14,7); p(-6,-34,GM,11,5); p(-5,-33,GB,8,3); p(-3,-36,GL,5,2);
-    p(-7,-35,GW,14,1);                                                            // top highlight
-    p(-8,-36,GB,16,1);                                                            // gold base
-    // Lightning crystal on crown
-    p(-2,-40,CO,4,5); p(-1,-39,LM,2,4); p(-1,-39,LL,2,1);
-    p(-1,-42,CO,2,3); p( 0,-41,LW,1,2);
-    ctx.save(); ctx.globalAlpha = 0.65 + lightPulse * 0.30;
-    pUnit(ctx,cx,cy, 0,-42+idleY,LW,1,2,isLeft,S);
-    ctx.restore();
-    // Side spikes
-    p(-7,-39,CO,3,4); p(-6,-38,GB,1,3);
-    p( 5,-39,CO,3,4); p( 6,-38,GB,1,3);
+    // ── TOPKNOT + VAJRA SEAL
+    p(-6,-38, CO, 12, 3); p(-5,-37, '#2A1A0E', 10, 2);
+    p(-2,-42, CO,  5, 5); p(-1,-41, '#2A1A0E', 3, 3);
+    p(-2,-33, CO,  5, 4); p(-1,-32, G2, 3, 2); p(-1,-32, G4, 3, 1);              // seal
+    p( 0,-32, G3,  1, 1);
+    glow(-1,-32, G4, 3, 2, 0.60 + ep * 0.35);
 
     if (isAtk) {
-        ctx.save(); ctx.globalAlpha = 0.78; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy, 6,-74+idleY,LW,18,18,isLeft,S);                          // vajra flash
-        ctx.restore();
-        ctx.save(); ctx.globalAlpha = 0.50; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy,-6,-16+idleY,LL,16,40,isLeft,S);
-        ctx.restore();
+        glow(11,-46, G4, 3, 13, 0.60);
+        glow(-1,-32, G4, 3,  2, 0.90);
     }
 }
 
+// ───────────────────────────────────────────────────
+// RESONANT SAINT — 진동의 성자. White vestments under a great holy bell
+// shouldered on its yoke, the air ringing around it.
+// Lore: 백색 사제복에 거대한 성종을 짊어진 성자, 종소리에 공기가 진동함.
+// ───────────────────────────────────────────────────
 function drawSaint(cx, cy, tower) {
     const area   = tower.currentSlot ? tower.currentSlot.area : 'left-slots';
     const isLeft = area === 'left-slots';
     const now    = Date.now();
     const isAtk  = (now - (tower.lastShot || 0)) < 400;
-    const idleY  = Math.sin(now * 0.001) * 3;
     const S = 2.0;
+    const idleY  = Math.sin(now * 0.002) * 2;
     const p = (ox, oy, col, w=1, h=1) => pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S);
-    const ep        = (Math.sin(now * 0.004) + 1) / 2;
-    const haloPulse = (Math.sin(now * 0.005) + 1) / 2;
-    const dovT      = now * 0.0014;
-    const CO='#000000';
-    const WS='#E8E8E8', WM='#F0F0F0', WB='#F8F8F8', WH='#FFFFFF';
-    const GS='#7A5800', GM='#B8860B', GB='#FFD700', GL='#FFE57F', GH='#FFFDE7', GW='#FFFCC0';
-    const SK='#F5DCC7', DS='#E8C09A', GHL='#8D6E63';
+    const glow = (ox, oy, col, w, h, a) => {
+        ctx.save(); ctx.globalAlpha = a; ctx.globalCompositeOperation = 'lighter';
+        pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S); ctx.restore();
+    };
+    const ep   = (Math.sin(now * 0.004) + 1) / 2;
+    const ring = (now % 1300) / 1300;
+    const sway = Math.round(Math.sin(now * 0.0045) * 1);
 
-    // ── divine aura
-    ctx.save(); ctx.globalAlpha = 0.16 + ep * 0.22;
-    pUnit(ctx,cx,cy,-22,-48+idleY,GB,44,80,isLeft,S);
+    const CO='#000';
+    const W0='#4A4A56', W1='#8C8C9C', W2='#C8C8D8', W3='#EDEDF6', W4='#FFFFFF';  // vestments
+    const G0='#3A2600', G1='#7A5400', G2='#B98A0A', G3='#FFCF33', G4='#FFF0A8';  // bell bronze
+    const K0='#C4834E', K1='#F0C090', K2='#FFDCBC';
+    const H1='#9A9AA8', H2='#CFCFDC';
+
+    ctx.save(); ctx.globalAlpha = 0.13 + ep * 0.18;
+    pUnitAura(ctx, cx, cy, -20, -36 + idleY, G3, 40, 64, isLeft, S);
     ctx.restore();
 
-    // ── HOLY NIMBUS ELLIPSE AT FEET (pulsing larger)
-    ctx.save(); ctx.globalAlpha = 0.30 + haloPulse * 0.25;
-    pUnit(ctx,cx,cy,-10,16+idleY,GB,22,5,isLeft,S);
-    ctx.restore();
-    ctx.save(); ctx.globalAlpha = 0.50 + haloPulse * 0.30;
-    pUnit(ctx,cx,cy,-8,17+idleY,GL,18,3,isLeft,S);
-    ctx.restore();
+    // ── SHOES
+    p(-7, 22, CO, 6, 5); p(-6, 23, W1, 4, 3); p(-6, 23, W3, 4, 1);
+    p( 1, 22, CO, 6, 5); p( 2, 23, W1, 4, 3); p( 2, 23, W3, 4, 1);
 
-    // ── 4 ORBITING DOVES (small white sparks at corners)
-    for (let i = 0; i < 4; i++) {
-        const a  = dovT + i * (Math.PI / 2);
-        const dx = Math.cos(a) * 20;
-        const dy = Math.sin(a) * 12 - 18;
-        p(dx-1, dy-1, CO, 3, 3);
-        p(dx,   dy,   WH, 1, 1);
-        ctx.save(); ctx.globalAlpha = 0.65;
-        pUnit(ctx,cx,cy,dx-1,dy-1+idleY,GL,3,3,isLeft,S);
-        ctx.restore();
+    // ── VESTMENT SKIRT
+    p(-8,  4, CO, 16, 19);
+    p(-7,  5, W1, 14, 17); p(-6,  5, W2, 12, 16); p(-4,  6, W3, 8, 14);
+    p(-7,  5, W4, 14,  1);                                                       // top highlight
+    p(-3,  7, W0,  1, 12); p( 2,  7, W0,  1, 12);
+    p(-8, 19, CO, 16,  3); p(-7, 20, G2, 14, 2); p(-7, 20, G3, 14, 1);
+
+    // ── CINCTURE
+    p(-7,  1, CO, 14, 4); p(-6, 2, G1, 12, 2); p(-6, 2, G3, 12, 1);
+
+    // ── VESTMENT TORSO
+    p(-7,-17, CO, 14, 19);
+    p(-6,-16, W1, 12, 17); p(-5,-16, W2, 10, 16); p(-3,-15, W3, 6, 14);
+    p(-6,-16, W4, 12,  1);                                                       // top highlight
+    p(-5,-16, G1,  2, 17); p( 3,-16, G1, 2, 17);                                 // gold stole
+    p(-5,-16, G3,  2,  1); p( 3,-16, G3, 2, 1);
+
+    // ── COLLAR
+    p(-7,-20, CO, 14, 4); p(-6,-19, W3, 12, 2); p(-6,-19, W4, 12, 1);
+
+    // ── SHOULDER YOKE the bell hangs from
+    p(-11,-22, CO, 22, 4); p(-10,-21, G1, 20, 2); p(-10,-21, G3, 20, 1);
+
+    // ── ARMS steadying the yoke
+    p(-12,-16, CO, 6, 14); p(-11,-15, W2, 4, 12); p(-11,-15, W4, 4, 1);
+    p(-12, -3, CO, 6,  5); p(-11, -2, K1, 4,  3); p(-11, -2, K2, 4, 1);
+    p(  6,-16, CO, 6, 12); p(  7,-15, W2, 4, 10); p(  7,-15, W4, 4, 1);
+    p(  6, -5, CO, 6,  5); p(  7, -4, K1, 4,  3); p(  7, -4, K2, 4, 1);
+
+    // ── GREAT HOLY BELL, shouldered — tapered in courses, swinging slightly
+    const bx = 8 + sway;
+    p(bx+2,-24, G2, 2, 3);                                                       // hanger loop
+    p(bx+1,-22, CO, 5, 4); p(bx+2,-21, G2, 3, 2);                                // crown
+    p(bx,  -19, CO, 8, 5); p(bx+1,-18, G1, 6, 3); p(bx+1,-18, G3, 6, 1);         // shoulder
+    p(bx-1,-15, CO,10, 6); p(bx,  -14, G1, 8, 4); p(bx,  -14, G2, 8, 2);
+    p(bx+1,-13, G3, 6,  2);                                                      // lit face
+    p(bx-2, -9, CO,12, 7); p(bx-1, -8, G1,10, 5); p(bx-1, -8, G2,10, 2);
+    p(bx,   -7, G3, 8,  2);
+    p(bx-3, -3, CO,14, 4); p(bx-2, -2, G2,12, 2); p(bx-2, -2, G4,12, 1);         // flared lip
+    p(bx+2,  1, CO, 4, 4); p(bx+3,  2, G1, 2, 2);                                // clapper
+    p(bx-1,-13, G0,  1,10); p(bx+7,-13, G0, 1, 10);                              // cast seams
+    glow(bx-1, -8, G4, 10, 1, 0.35 + ep * 0.28);
+    glow(bx-2, -2, G4, 12, 1, 0.40 + ep * 0.28);
+
+    // ── THE TOLL — rings travelling outward from the lip
+    for (let i = 0; i < 3; i++) {
+        const t = (ring + i / 3) % 1;
+        const r = 3 + Math.round(t * 9);
+        glow(bx + 12 + r, -8 + i * 4, G4, 1, 3, (1 - t) * 0.6);
+        glow(bx - 5 - r,  -8 + i * 4, G4, 1, 3, (1 - t) * 0.35);
     }
 
-    // ── TALL GOLDEN SCEPTER (multi-layer crystal w/ cross top)
-    p( 9,-50,CO,4,40); p(10,-49,GHL,3,38); p(10,-46,GS,3,32); p(10,-42,GM,2,26);  // shaft
-    p(9,-40,GB,4,1); p(9,-28,GB,4,1); p(9,-16,GB,4,1);                            // gold bands
-    // Crystal orb top (multi-layer, larger)
-    p( 6,-58,CO,12,14); p( 7,-57,GM,10,12); p( 8,-56,GB,8,10); p( 9,-55,GL,5,7);
-    p( 7,-57,GW,10,1);                                                            // top highlight
-    p(10,-53,WH,4,4);                                                             // bright center
-    // Gold cross atop crystal
-    p(10,-66,CO,4,8); p(11,-65,GB,2,6); p(11,-65,GW,2,1);
-    p( 8,-64,CO,8,3); p( 9,-63,GB,6,1);
-    ctx.save(); ctx.globalAlpha = 0.60 + haloPulse * 0.35;
-    pUnit(ctx,cx,cy, 7,-57+idleY,GW,10,12,isLeft,S);
-    ctx.restore();
+    // ── NECK + HEAD (eyes closed, listening)
+    p(-2,-25, CO, 4, 3); p(-1,-24, K0, 2, 2);
+    p(-6,-37, CO, 12, 13);
+    p(-5,-36, K1, 10, 11); p(-5,-36, K2, 10, 1);
+    p( 3,-35, K0,  2,  9);
+    p(-6,-38, CO, 12,  4); p(-5,-37, H1, 10, 2); p(-5,-37, H2, 10, 1);
+    p(-4,-32, CO,  3,  1); p( 1,-32, CO, 3, 1);                                  // closed lids
+    p(-1,-28, K0,  2,  1);
 
-    // ── HUGE GOLDEN HALO RING (behind head, pulsing)
-    p(-11,-36,CO,22,4); p(-10,-35,GM,20,3); p(-9,-35,GB,16,1);
-    p(-11,-36,GW,22,1);                                                           // top highlight
-    p(-12,-34,CO,3,3); p(11,-34,CO,3,3);                                          // side caps
-    p(-11,-33,GB,1,2); p(12,-33,GB,1,2);
-    ctx.save(); ctx.globalAlpha = 0.55 + haloPulse * 0.40;
-    pUnit(ctx,cx,cy,-11,-36+idleY,GL,22,4,isLeft,S);
-    ctx.restore();
-    // Halo rays (5 small protrusions)
-    p(-9,-39,GB,1,2); p(-4,-40,GB,1,3); p( 0,-41,GW,1,2); p( 4,-40,GB,1,3); p( 9,-39,GB,1,2);
-
-    // ── BOOTS (gold-cuffed)
-    p(-7,14,CO,7,9); p(-6,15,WS,5,8); p(-4,16,WM,3,6);
-    p( 1,14,CO,6,9); p( 2,15,WS,5,8); p( 3,16,WM,3,6);
-    p(-7,14,GB,7,1); p( 1,14,GB,6,1);
-
-    // ── LOWER ROBE (pristine white, top-highlighted, gold center column)
-    p(-8,2,CO,16,13); p(-7,3,WS,14,11); p(-6,4,WM,11,9); p(-5,5,WB,7,7);
-    p(-7,3,WH,14,1);                                                              // top highlight
-    p(-2,2,CO,5,13); p(-1,3,GS,3,11); p( 0,4,GM,2,9); p( 0,4,GB,2,1);             // gold column
-    p(-7,12,CO,14,3); p(-6,13,GM,12,2); p(-6,13,GB,12,1);                         // gold hem
-
-    // ── BELT (gold-trim w/ holy gem)
-    p(-8,0,CO,16,3); p(-7,1,GM,14,2); p(-7,1,GB,14,1);
-    p(-2,0,CO,4,3); p(-1,1,GW,2,1);
-
-    // ── UPPER ROBE (riveted, gold cross emblem)
-    p(-7,-14,CO,15,17); p(-6,-13,WS,13,15); p(-5,-12,WM,10,12); p(-4,-11,WB,7,10); p(-3,-10,WH,4,8);
-    p(-6,-13,WH,13,1);                                                            // top highlight
-    p(-2,-13,CO,5,16); p(-1,-12,GS,3,14); p( 0,-11,GM,2,12); p( 0,-8,GB,2,6);     // gold scripture
-    // Glowing gold cross emblem (overlay)
-    p(-1,-9,CO,3,8); p( 0,-8,GW,1,6);
-    p(-3,-6,CO,7,3); p(-2,-5,GW,5,1);
-    ctx.save(); ctx.globalAlpha = 0.55 + ep * 0.30;
-    pUnit(ctx,cx,cy,-1,-9+idleY,GW,3,8,isLeft,S);
-    pUnit(ctx,cx,cy,-3,-6+idleY,GW,7,3,isLeft,S);
-    ctx.restore();
-    for (let r=0; r<3; r++) { p(-6,-10+r*4,GB,1,1); p(5,-10+r*4,GB,1,1); }        // gold rivets
-
-    // ── PAULDRONS (white w/ gold-trim)
-    p(-13,-12,CO,8,9); p(-12,-11,WS,6,8); p(-11,-11,WM,4,7); p(-12,-11,WH,6,1);
-    p(-12,-12,GB,6,1);
-    p( 6,-12,CO,8,9); p( 7,-11,WS,6,8); p( 8,-11,WM,4,7); p( 7,-11,WH,6,1);
-    p( 7,-12,GB,6,1);
-
-    // ── ARMS + HANDS
-    p(-11,-10,CO,5,12); p(-10,-9,WM,4,10); p(-10,-9,WH,4,1);
-    p(-11,-17,CO,5,8); p(-10,-16,SK,4,6);
-    p( 7,-10,CO,5,12); p( 8,-9,WM,4,10); p( 8,-9,WH,4,1);
-    p( 7,-17,CO,5,8); p( 8,-16,SK,4,6);
-
-    // ── NECK
-    p(-3,-16,CO,7,3); p(-2,-15,SK,5,2);
-
-    // ── HEAD (serene, golden eyes)
-    p(-8,-30,CO,16,14); p(-7,-29,SK,14,12); p(-6,-28,DS,11,10); p(-5,-27,'#F5C898',8,8);
-    p(-5,-23,CO,3,1); p( 2,-23,CO,3,1);
-    p(-4,-23,GL,2,1); p( 3,-23,GL,2,1);
-    ctx.save(); ctx.globalAlpha = 0.65 + ep * 0.30;
-    pUnit(ctx,cx,cy,-4,-23+idleY,GW,2,1,isLeft,S);
-    pUnit(ctx,cx,cy, 3,-23+idleY,GW,2,1,isLeft,S);
-    ctx.restore();
-    p(-2,-21,CO,5,1);                                                             // serene mouth
-
-    // ── HOLY CROWN (white w/ gold scripture cap)
-    p(-8,-38,CO,16,8); p(-7,-37,WM,14,7); p(-6,-36,WH,11,6);
-    p(-7,-37,WH,14,1);                                                            // top highlight
-    p(-8,-38,GB,16,1);                                                            // gold base
-    // Center gold spire w/ jewel
-    p(-2,-42,CO,4,5); p(-1,-41,GB,2,4); p(-1,-41,GW,2,1);
-    p(-1,-44,CO,2,3); p( 0,-43,GW,1,2);
+    // ── HALO
+    p(-8,-44, CO, 16, 1); p(-8,-40, CO, 16, 1);
+    p(-9,-43, CO,  1, 3); p( 8,-43, CO, 1, 3);
+    p(-8,-43, G3, 16, 1); p(-8,-41, G2, 16, 1); p(-8,-42, G0, 16, 1);
+    glow(-8,-43, G4, 16, 1, 0.42 + ep * 0.30);
 
     if (isAtk) {
-        ctx.save(); ctx.globalAlpha = 0.78; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy,-13,-37+idleY,GB,26,7,isLeft,S);                          // halo flash
-        ctx.restore();
-        ctx.save(); ctx.globalAlpha = 0.55; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy, 5,-60+idleY,GW,16,18,isLeft,S);                          // crystal flash
-        ctx.restore();
-        ctx.save(); ctx.globalAlpha = 0.45; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy,-10,-16+idleY,GH,24,42,isLeft,S);
-        ctx.restore();
+        glow(bx-3, -9, G4, 14, 10, 0.60);
+        glow(-8,-43, G4, 16, 1, 0.60);
     }
 }
 
+// ───────────────────────────────────────────────────
+// ABYSSAL KILLER — 심연의 학살자. Black plate, a soul-harvest scythe, and
+// violet mist pouring out of two empty sockets.
+// Lore: 검은 갑주에 영혼 수확 낫, 텅 빈 눈동자에 보랏빛 안개가 흐르는 학살자.
+// ───────────────────────────────────────────────────
 function drawAbyssalKiller(cx, cy, tower) {
     const area   = tower.currentSlot ? tower.currentSlot.area : 'left-slots';
     const isLeft = area === 'left-slots';
     const now    = Date.now();
     const isAtk  = (now - (tower.lastShot || 0)) < 400;
-    const idleY  = Math.sin(now * 0.002) * 2;
     const S = 2.0;
+    const idleY  = Math.sin(now * 0.002) * 2;
     const p = (ox, oy, col, w=1, h=1) => pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S);
-    const ep        = (Math.sin(now * 0.005) + 1) / 2;
-    const edgePulse = (Math.sin(now * 0.005) + 1) / 2;
-    const wingF     = Math.sin(now * 0.004) * 2;
-    const CO='#000000';
-    const VS='#050505', VM='#0A0A0A', VB='#121212', VL='#1A1A1A', VH='#2C2C2C';
-    const PS='#1A0038', PM='#4A0080', PB='#7B1FA2', PL='#9C27B0', PH='#CE93D8', PW='#E1BEE7';
-    const DS='#1A1A1A', DM='#424242', DL='#616161';
-    const SK='#3A2040';
-    const GD='#FFD700';
+    // Glows use `lighter`; the bake records those as emissive so the finishing
+    // pass blooms exactly them and leaves the plate alone.
+    const glow = (ox, oy, col, w, h, a) => {
+        ctx.save(); ctx.globalAlpha = a; ctx.globalCompositeOperation = 'lighter';
+        pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S); ctx.restore();
+    };
+    const ep   = (Math.sin(now * 0.005) + 1) / 2;
+    const mist = (now % 2000) / 2000;
 
-    // ── abyssal aura
-    ctx.save(); ctx.globalAlpha = 0.14 + ep * 0.20;
-    pUnit(ctx,cx,cy,-26,-44+idleY,PB,52,76,isLeft,S);
+    const CO='#000';
+    const K0='#08080E', K1='#1A1A26', K2='#2E2E42', K3='#4A4A66', K4='#78789A';
+    const V0='#1A0038', V1='#3E0F72', V2='#6A22B4', V3='#9C4CE0', V4='#D8B0FF';  // soul mist
+    const S2='#98A2B8', S3='#D2DAEA', S4='#FFFFFF';
+
+    ctx.save(); ctx.globalAlpha = 0.13 + ep * 0.18;
+    pUnitAura(ctx, cx, cy, -20, -36 + idleY, V2, 40, 66, isLeft, S);
     ctx.restore();
 
-    // ── SHADOW POOL AT FEET
-    p(-9,20,CO,18,6); p(-8,21,`rgba(74,0,128,${0.4+edgePulse*0.3})`,16,5); p(-7,22,PS,13,3);
+    // ── BOOTS
+    p(-7, 20, CO, 6, 5); p(-6, 21, K1, 4, 3); p(-6, 21, K3, 4, 1);
+    p( 1, 20, CO, 6, 5); p( 2, 21, K1, 4, 3); p( 2, 21, K3, 4, 1);
 
-    // ── BAT-WING CAPE (3 layer per side, taller, fluttering)
-    // Left wing: outer membrane
-    p(-22,-22+wingF,CO,12,30); p(-21,-21+wingF,DS,10,28); p(-21,-21+wingF,DM,10,1);
-    p(-20,-20+wingF,VM,8,24); p(-19,-19+wingF,VB,5,18);
-    // Wing bones (3 dark ribs)
-    p(-22,-20+wingF,VL,1,26); p(-18,-18+wingF,VL,1,22); p(-14,-16+wingF,VL,1,18);
-    // Wing claw spike tips
-    p(-23,-24+wingF,CO,3,4); p(-22,-23+wingF,DM,1,2);                             // top claw
-    p(-23,2+wingF,CO,3,4); p(-22,3+wingF,DM,1,2);                                 // bottom claw
-    // Purple membrane glow trim
-    p(-22,-22+wingF,PL,1,30); p(-22,-22+wingF,PB,12,1);
-    ctx.save(); ctx.globalAlpha = 0.45 + edgePulse * 0.30;
-    pUnit(ctx,cx,cy,-22,-22+wingF+idleY,PL,12,30,isLeft,S);
-    ctx.restore();
+    // ── GREAVES
+    p(-8,  2, CO, 16, 19); p(-7,  3, K0, 14, 17); p(-6,  4, K1, 12, 15);
+    p(-7,  3, K4, 14,  1);                                                       // top highlight
+    p(-1,  4, K0,  2, 15);
+    p(-8, 17, CO, 16,  3); p(-7, 18, V1, 14, 2); p(-7, 18, V2, 14, 1);           // soul-lit hem
 
-    // Right wing (mirror)
-    p(11,-22-wingF,CO,12,30); p(12,-21-wingF,DS,10,28); p(12,-21-wingF,DM,10,1);
-    p(13,-20-wingF,VM,8,24); p(14,-19-wingF,VB,5,18);
-    p(11,-20-wingF,VL,1,26); p(15,-18-wingF,VL,1,22); p(19,-16-wingF,VL,1,18);
-    p(21,-24-wingF,CO,3,4); p(22,-23-wingF,DM,1,2);
-    p(21,2-wingF,CO,3,4); p(22,3-wingF,DM,1,2);
-    p(22,-22-wingF,PL,1,30); p(11,-22-wingF,PB,12,1);
-    ctx.save(); ctx.globalAlpha = 0.45 + edgePulse * 0.30;
-    pUnit(ctx,cx,cy,11,-22-wingF+idleY,PL,12,30,isLeft,S);
-    ctx.restore();
+    // ── BELT
+    p(-8,  0, CO, 16, 3); p(-7, 1, K2, 14, 2); p(-7, 1, K4, 14, 1);
+    p(-2, -1, CO,  5, 5); p(-1, 0, V1,  3, 3); p(-1, 0, V3, 3, 1);
+    glow(-1, 0, V4, 3, 1, 0.55 + ep * 0.32);
 
-    // ── BOOTS (void-cuffed)
-    p(-7,14,CO,7,9); p(-6,15,VS,5,8); p(-4,16,VM,3,6);
-    p( 1,14,CO,6,9); p( 2,15,VS,5,8); p( 3,16,VM,3,6);
-    p(-7,14,PB,7,1); p( 1,14,PB,6,1);
+    // ── CUIRASS
+    p(-7,-16, CO, 14, 18); p(-6,-15, K0, 12, 16); p(-5,-15, K1, 10, 15);
+    p(-6,-15, K4, 12,  1);                                                       // top highlight
+    p(-3,-14, K2,  6, 13);
+    p(-6,-10, K0, 12,  1); p(-6, -5, K0, 12, 1);                                 // plate seams
+    p(-2, -9, CO,  5,  5); p(-1, -8, V1, 3, 3); p(-1, -8, V3, 3, 1);             // soul reliquary
+    glow(-1, -8, V4, 3, 1, 0.55 + ep * 0.32);
 
-    // ── ROBE LOWER (void-black, purple glow under)
-    p(-8,2,CO,16,13); p(-7,3,VS,14,11); p(-6,4,VM,11,9); p(-5,5,VB,7,7);
-    p(-7,3,VH,14,1);                                                              // top highlight
-    p(-7,3,`rgba(74,0,128,${0.12+edgePulse*0.18})`,14,12);
-    p(-7,12,CO,14,3); p(-6,13,PM,12,2); p(-6,13,PL,12,1);                         // purple hem
+    // ── PAULDRONS (spiked)
+    p(-12,-19, CO, 6, 8); p(-11,-18, K1, 4, 6); p(-11,-18, K4, 4, 1);
+    p(-13,-23, CO, 4, 5); p(-12,-22, K2, 2, 4);
+    p(  6,-19, CO, 6, 8); p(  7,-18, K1, 4, 6); p(  7,-18, K4, 4, 1);
+    p(  9,-23, CO, 4, 5); p( 10,-22, K2, 2, 4);
 
-    // ── BELT (void w/ purple gem)
-    p(-8,0,CO,16,3); p(-7,1,VL,14,2); p(-7,1,VH,14,1);
-    p(-2,0,CO,4,3); p(-1,1,PL,2,1);
-    ctx.save(); ctx.globalAlpha = 0.65 + ep * 0.30;
-    pUnit(ctx,cx,cy,-1,1+idleY,PW,2,1,isLeft,S);
-    ctx.restore();
+    // ── ARMS
+    p(-12,-13, CO, 6, 13); p(-11,-12, K1, 4, 11); p(-11,-12, K3, 4, 1);
+    p(-12,  0, CO, 6,  5); p(-11,  1, K2, 4,  3);
+    p(  6,-13, CO, 6, 13); p(  7,-12, K1, 4, 11); p(  7,-12, K3, 4, 1);
+    p(  6,  0, CO, 6,  5); p(  7,  1, K2, 4,  3);
 
-    // ── UPPER ROBE (riveted, purple-glow void gem chest)
-    p(-7,-14,CO,15,17); p(-6,-13,VS,13,15); p(-5,-12,VM,10,12); p(-4,-11,VB,7,10);
-    p(-6,-13,VH,13,1);                                                            // top highlight
-    p(-7,-13,`rgba(74,0,128,${0.22+edgePulse*0.25})`,14,16);
-    p(-6,-5,PB,1,8); p( 5,-5,PB,1,8);                                             // purple side strips
-    // Void gem chest emblem
-    p(-3,-6,CO,6,6); p(-2,-5,PM,4,4); p(-2,-5,PH,4,1); p(-1,-4,PW,2,2);
-    ctx.save(); ctx.globalAlpha = 0.60 + edgePulse * 0.35;
-    pUnit(ctx,cx,cy,-3,-6+idleY,PL,6,6,isLeft,S);
-    ctx.restore();
-    for (let r=0; r<3; r++) { p(-6,-10+r*4,PL,1,1); p(5,-10+r*4,PL,1,1); }        // glowing rivets
+    // ── SOUL-HARVEST SCYTHE — haft on the right, blade sweeping over the head
+    p(12,-30, CO, 4, 52); p(13,-29, K1, 2, 50); p(13,-29, K3, 2, 1);             // haft
+    p(12,-14, V1, 4, 1); p(12, 4, V1, 4, 1);                                     // soul bindings
+    p(10,-34, CO, 8,  6); p(11,-33, K2, 6, 4); p(11,-33, K4, 6, 1);              // collar
+    // blade: stepped courses sweeping left and up
+    for (let i = 0; i < 8; i++) {
+        const bx = 10 - i * 2 - Math.round(Math.sin(i / 7 * Math.PI) * 2);
+        const by = -38 - Math.round(i * 0.9);
+        p(bx, by, CO, 4, 4);
+        p(bx, by, i < 6 ? S2 : S3, 3, 2);
+        p(bx, by, S4, 3, 1);                                                     // edge light
+        glow(bx, by, V4, 3, 1, 0.24 + ep * 0.20);
+    }
 
-    // ── PAULDRONS (spiked, purple-tipped)
-    p(-13,-12,CO,8,9); p(-12,-11,VS,6,8); p(-11,-11,VM,4,7); p(-10,-10,PS,2,5);
-    p(-12,-11,VH,6,1);
-    p(-14,-15,CO,3,4); p(-13,-14,PM,1,3); p(-13,-14,PL,1,1);                      // L spike
-    p( 6,-12,CO,8,9); p( 7,-11,VS,6,8); p( 8,-11,VM,4,7); p( 9,-10,PS,2,5);
-    p( 7,-11,VH,6,1);
-    p(11,-15,CO,3,4); p(12,-14,PM,1,3); p(12,-14,PL,1,1);                         // R spike
-
-    // ── ARMS + HANDS
-    p(-11,-10,CO,5,12); p(-10,-9,VM,4,10); p(-10,-9,VH,4,1);
-    p(-11,-17,CO,5,8); p(-10,-16,SK,4,6);
-    p( 7,-10,CO,5,12); p( 8,-9,VM,4,10); p( 8,-9,VH,4,1);
-    p( 7,-17,CO,5,8); p( 8,-16,SK,4,6);
-
-    // ── NECK
-    p(-3,-16,CO,7,3); p(-2,-15,VS,5,2);
-
-    // ── HEAD (deep void, purple-glowing eyes)
-    p(-8,-30,CO,16,14); p(-7,-29,VS,14,12); p(-6,-28,VM,12,10); p(-5,-27,VB,9,8);
-    p(-7,-29,VH,14,1);                                                            // top highlight
-    // Purple-void eyes
-    p(-4,-24,PB,4,2); p( 1,-24,PB,4,2);
-    p(-3,-24,PH,2,1); p( 2,-24,PH,2,1);
-    ctx.save(); ctx.globalAlpha = 0.70 + edgePulse * 0.25;
-    pUnit(ctx,cx,cy,-4,-24+idleY,PW,4,2,isLeft,S);
-    pUnit(ctx,cx,cy, 1,-24+idleY,PW,4,2,isLeft,S);
-    ctx.restore();
-
-    // ── BAT-EARED HOOD (taller w/ 2 small ear spikes)
-    p(-8,-36,CO,16,10); p(-7,-35,VS,14,9); p(-6,-34,VM,11,7); p(-5,-33,VB,8,5);
-    p(-7,-35,VH,14,1);                                                            // top highlight
-    // Bat ears (small horns)
-    p(-9,-40,CO,3,5); p(-8,-39,VL,1,4); p(-8,-41,PL,1,1);                         // L ear
-    p( 6,-40,CO,3,5); p( 7,-39,VL,1,4); p( 7,-41,PL,1,1);                         // R ear
-    // Center purple gem
-    p(-2,-39,CO,4,3); p(-1,-38,PL,2,1); p(-1,-38,PW,2,1);
+    // ── HELM with two empty sockets
+    p(-7,-33, CO, 14, 15); p(-6,-32, K0, 12, 13); p(-5,-32, K1, 10, 12);
+    p(-6,-32, K4, 12,  1);                                                       // top highlight
+    p(-6,-27, K0, 12,  6);                                                       // face void
+    p(-5,-26, CO,  4,  4); p( 2,-26, CO, 4, 4);
+    p(-4,-25, V2,  2,  2); p( 3,-25, V2, 2, 2);
+    glow(-4,-25, V4, 2, 2, 0.75 + ep * 0.25);
+    glow( 3,-25, V4, 2, 2, 0.75 + ep * 0.25);
+    // mist pouring down out of the sockets
+    for (let i = 0; i < 4; i++) {
+        const t = (mist + i / 4) % 1;
+        const my = -22 + Math.round(t * 10);
+        glow(-4 + (i % 2) * 7, my, V3, 2, 1, (1 - t) * 0.55);
+    }
+    p(-8,-33, CO, 3, 8); p(-7,-32, K1, 1, 7);                                    // cheek guards
+    p( 6,-33, CO, 3, 8); p( 7,-32, K1, 1, 7);
+    p(-2,-37, CO, 5, 5); p(-1,-36, V1, 3, 3); p(-1,-36, V3, 3, 1);               // crest stone
+    glow(-1,-36, V4, 3, 1, 0.50 + ep * 0.30);
 
     if (isAtk) {
-        ctx.save(); ctx.globalAlpha = 0.72; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy,-22,-24+wingF+idleY,PL,46,32,isLeft,S);                   // wing burst
-        ctx.restore();
-        ctx.save(); ctx.globalAlpha = 0.55; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy,-10,-16+idleY,PB,26,42,isLeft,S);
-        ctx.restore();
+        glow(-4,-25, V4, 2, 2, 0.95); glow(3,-25, V4, 2, 2, 0.95);
+        glow(-6,-40, V4, 18, 8, 0.45);                                           // blade sweep
     }
 }
 
+// ───────────────────────────────────────────────────
+// SPATIAL SLASHER — 공간 절단자. Silver plate, a curved dimension blade, and
+// the rifts it leaves hanging in the air behind the cut.
+// Lore: 은빛 갑주에 휘어진 차원 검, 베인 자리에 균열이 남는 절단자.
+// ───────────────────────────────────────────────────
 function drawSpatialSlasher(cx, cy, tower) {
     const area   = tower.currentSlot ? tower.currentSlot.area : 'left-slots';
     const isLeft = area === 'left-slots';
     const now    = Date.now();
     const isAtk  = (now - (tower.lastShot || 0)) < 400;
-    const idleY  = Math.sin(now * 0.002) * 2;
     const S = 2.0;
+    const idleY  = Math.sin(now * 0.002) * 2;
     const p = (ox, oy, col, w=1, h=1) => pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S);
-    const ep        = (Math.sin(now * 0.005) + 1) / 2;
-    const linePulse = (Math.sin(now * 0.006) + 1) / 2;
-    const glitchX   = Math.random() < 0.08 ? (Math.random() - 0.5) * 8 : 0;
-    const CO='#000000';
-    const IS='#1A1A6A', IM='#283593', IB='#303F9F', IL='#3949AB', IH='#3F51B5', IV='#7986CB';
-    const CY='#00B8D4', CL='#00E5FF', CH='#B2EBF2', CW='#FFFFFF';
-    const SK='#B0B8D8';
-    const VM='#4A0080', VL='#9C27B0';
+    // Glows use `lighter`; the bake records those as emissive so the finishing
+    // pass blooms exactly them and leaves the plate alone.
+    const glow = (ox, oy, col, w, h, a) => {
+        ctx.save(); ctx.globalAlpha = a; ctx.globalCompositeOperation = 'lighter';
+        pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S); ctx.restore();
+    };
+    const ep   = (Math.sin(now * 0.005) + 1) / 2;
+    const rift = (now % 1500) / 1500;
 
-    // ── spatial aura
-    ctx.save(); ctx.globalAlpha = 0.14 + ep * 0.20;
-    pUnit(ctx,cx,cy,-22,-42+idleY,CL,44,76,isLeft,S);
+    const CO='#000';
+    const Z0='#2E323E', Z1='#767E92', Z2='#B6BECE', Z3='#E2E8F2', Z4='#FFFFFF';  // silver
+    const C1='#0A6E96', C2='#22B8E0', C3='#7FE8FF', C4='#DDFAFF';                // rift cyan
+    const V2='#7B1FA2', V3='#B060E0';                                            // rift violet
+    const K0='#C4834E', K1='#F0C090', K2='#FFDCBC';
+
+    ctx.save(); ctx.globalAlpha = 0.13 + ep * 0.18;
+    pUnitAura(ctx, cx, cy, -20, -34 + idleY, C2, 40, 62, isLeft, S);
     ctx.restore();
 
-    // ── GLITCH AFTERIMAGE (shifted cyan silhouette)
-    ctx.save(); ctx.globalAlpha = 0.20 + linePulse * 0.15;
-    pUnit(ctx,cx,cy,(isLeft ? -14 : 14)+glitchX,0+idleY,CL,12,30,isLeft,S);
-    ctx.restore();
-
-    // ── MASSIVE CYAN SCIMITAR (vertical, curved, glitch-edged)
-    // Shaft (curved upward)
-    p( 9,-58,CO,5,52); p(10,-57,CY,3,50); p(10,-54,CL,2,46); p(11,-54,CH,1,42);
-    p(11,-58,CO,1,10); p(12,-57,CW,1,8);                                          // tip
-    // Curved blade extension (gets wider at top)
-    p( 8,-60,CO,7,6); p( 9,-59,CL,5,4); p(10,-58,CW,3,2);
-    // Hilt (cross-shaped)
-    p( 6,-10,CO,11,4); p( 7,-9,CY,9,3); p( 8,-9,CL,5,2);                          // crossguard
-    p(10,-6,CO,3,8); p(11,-5,IM,1,6);                                             // grip
-    p( 8,2,CO,7,4); p( 9,3,CY,5,2); p(10,3,CW,3,1);                               // pommel
-    // Glitch dots along blade (animated)
-    for (let i = 0; i < 4; i++) {
-        const gy = -50 + i*12;
-        ctx.save(); ctx.globalAlpha = 0.65 + linePulse * 0.30;
-        pUnit(ctx,cx,cy,11+(i%2===0?-2:0),gy+idleY,CW,1,1,isLeft,S);
-        ctx.restore();
+    // ── HANGING RIFTS — three diagonal tears, each on its own fade cycle so
+    //    they read as cuts left behind rather than as decoration.
+    for (let i = 0; i < 3; i++) {
+        const t  = (rift + i / 3) % 1;
+        const a  = (1 - t) * 0.9;
+        const rx = 12 + i * 3;
+        const ry = -26 + i * 11;
+        for (let j = 0; j < 6; j++) {
+            p(rx + j, ry + j * 2, CO, 2, 2);
+            glow(rx + j, ry + j * 2, j % 2 ? C4 : V3, 2, 1, a * 0.75);
+        }
     }
-    // Always-glowing edge
-    ctx.save(); ctx.globalAlpha = 0.55 + linePulse * 0.30;
-    pUnit(ctx,cx,cy,11,-54+idleY,CW,1,50,isLeft,S);
-    ctx.restore();
 
-    // ── BOOTS
-    p(-7,14,CO,7,9); p(-6,15,IS,5,8); p(-4,16,IM,3,6);
-    p( 1,14,CO,6,9); p( 2,15,IS,5,8); p( 3,16,IM,3,6);
-    p(-7,14,CL,7,1); p( 1,14,CL,6,1);
+    // ── SABATONS
+    p(-8, 22, CO, 7, 5); p(-7, 23, Z1, 5, 3); p(-7, 23, Z3, 5, 1);
+    p( 1, 22, CO, 7, 5); p( 2, 23, Z1, 5, 3); p( 2, 23, Z3, 5, 1);
 
-    // ── ROBE LOWER (indigo armored)
-    p(-8,2,CO,16,13); p(-7,3,IS,14,11); p(-6,4,IM,11,9); p(-5,5,IB,7,7);
-    p(-7,3,IV,14,1);                                                              // top highlight
-    p(-1,4,`rgba(0,229,255,${0.25+linePulse*0.30})`,3,10);
-    p(-7,12,CO,14,3); p(-6,13,CY,12,2); p(-6,13,CL,12,1);                         // cyan hem
+    // ── GREAVES
+    p(-8,  4, CO, 16, 19); p(-7,  5, Z0, 14, 17); p(-6,  5, Z1, 12, 16);
+    p(-4,  6, Z2,  8, 14);
+    p(-7,  5, Z4, 14,  1);                                                       // top highlight
+    p(-1,  6, Z0,  2, 13);
+    p(-8, 19, CO, 16,  3); p(-7, 20, C1, 14, 2); p(-7, 20, C2, 14, 1);
 
-    // ── BELT (indigo w/ cyan gem)
-    p(-8,0,CO,16,3); p(-7,1,IB,14,2); p(-7,1,IH,14,1);
-    p(-2,0,CO,4,3); p(-1,1,CL,2,1);
+    // ── BELT
+    p(-7,  1, CO, 14, 4); p(-6, 2, Z2, 12, 2); p(-6, 2, Z4, 12, 1);
+    p(-2,  0, CO,  5, 5); p(-1, 1, C1,  3, 3); p(-1, 1, C3, 3, 1);
+    glow(-1, 1, C4, 3, 1, 0.50 + ep * 0.30);
 
-    // ── CHEST (cyan circuit lines, dual void rifts)
-    p(-7,-14,CO,15,17); p(-6,-13,IS,13,15); p(-5,-12,IM,10,12); p(-4,-11,IB,7,10); p(-3,-10,IL,4,8);
-    p(-6,-13,IV,13,1);                                                            // top highlight
-    p(-1,-12,`rgba(0,229,255,${0.35+linePulse*0.40})`,2,11);
-    p(-4,-6,CY,9,1);
-    p(-6,-9,CO,12,4); p(-5,-8,IM,10,3); p(-4,-7,IB,7,2);
-    // Dual void rifts (purple slashes)
-    p(-5,-5,CO,3,2); p(-4,-4,VM,1,1);
-    p( 3,-5,CO,3,2); p( 4,-4,VM,1,1);
-    ctx.save(); ctx.globalAlpha = 0.55 + linePulse * 0.30;
-    pUnit(ctx,cx,cy,-5,-5+idleY,VL,3,2,isLeft,S);
-    pUnit(ctx,cx,cy, 3,-5+idleY,VL,3,2,isLeft,S);
-    ctx.restore();
-    // Cyan circuit horizontal lines
-    p(-5,-11,CL,8,1); p(-5,-3,CL,8,1);
-    for (let r=0; r<3; r++) { p(-6,-10+r*4,CL,1,1); p(5,-10+r*4,CL,1,1); }        // glowing rivets
+    // ── CUIRASS
+    p(-7,-16, CO, 14, 18); p(-6,-15, Z0, 12, 16); p(-5,-15, Z1, 10, 15);
+    p(-6,-15, Z4, 12,  1);                                                       // top highlight
+    p(-3,-14, Z2,  6, 13);
+    p( 4,-14, Z0,  2, 13);                                                       // shaded flank
+    p(-2, -9, CO,  5,  5); p(-1, -8, C1, 3, 3); p(-1, -8, C3, 3, 1);
+    glow(-1, -8, C4, 3, 1, 0.55 + ep * 0.30);
 
-    // ── PAULDRONS (indigo w/ cyan trim)
-    p(-13,-12,CO,8,9); p(-12,-11,IM,6,8); p(-11,-11,IB,4,7); p(-12,-11,IV,6,1);
-    p(-12,-9,CL,6,1);
-    p( 6,-12,CO,8,9); p( 7,-11,IM,6,8); p( 8,-11,IB,4,7); p( 7,-11,IV,6,1);
-    p( 7,-9,CL,6,1);
+    // ── PAULDRONS + COLLAR
+    p(-12,-19, CO, 6, 8); p(-11,-18, Z1, 4, 6); p(-11,-18, Z4, 4, 1);
+    p(  6,-19, CO, 6, 8); p(  7,-18, Z1, 4, 6); p(  7,-18, Z4, 4, 1);
+    p(-6,-20, CO, 12, 3); p(-5,-19, Z3, 10, 2); p(-5,-19, Z4, 10, 1);
 
-    // ── ARMS + HANDS
-    p(-11,-10,CO,5,12); p(-10,-9,IM,4,10); p(-10,-9,IV,4,1);
-    p(-11,-17,CO,5,8); p(-10,-16,SK,4,6);
-    p( 7,-10,CO,5,12); p( 8,-9,IM,4,10); p( 8,-9,IV,4,1);
-    p( 7,-17,CO,5,8); p( 8,-16,IB,4,6);
+    // ── ARMS, sword arm cocked back
+    p(-12,-13, CO, 6, 13); p(-11,-12, Z1, 4, 11); p(-11,-12, Z3, 4, 1);
+    p(-12,  0, CO, 6,  5); p(-11,  1, K1, 4,  3); p(-11, 1, K2, 4, 1);
+    p(  6,-14, CO, 6, 10); p(  7,-13, Z1, 4,  8); p(  7,-13, Z3, 4, 1);
+    p(  7,-20, CO, 6,  7); p(  8,-19, K1, 4,  5); p(  8,-19, K2, 4, 1);
 
-    // ── NECK
-    p(-3,-16,CO,7,3); p(-2,-15,IM,5,2);
+    // ── DIMENSION BLADE — a curved sweep with a cyan inner edge
+    p( 8,-16, CO, 5, 5); p( 9,-15, C1, 3, 3);                                    // guard
+    //    Same overlap rule as the assassin's blades: 5-wide blocks stepping 1
+    //    in x and 2 in y with the curve damped to +-2 keeps the sweep solid.
+    for (let i = 0; i < 10; i++) {
+        const off = Math.round(Math.sin(i / 9 * Math.PI) * 2);
+        const sx  = 10 + i + off;
+        const sy  = -19 - i * 2;
+        p(sx, sy, CO, 5, 4);
+        p(sx, sy, i < 8 ? Z2 : Z3, 4, 3);
+        p(sx, sy, Z4, 4, 1);                                                     // spine light
+        glow(sx, sy + 2, C4, 4, 1, 0.34 + ep * 0.24);                            // cutting edge
+    }
+    p( 9,-11, CO, 3, 4); p(10,-10, Z1, 1, 3);                                    // grip
+    p( 8, -8, CO, 5, 3); p( 9, -7, C2, 3, 1);                                    // pommel stone
 
-    // ── HEAD (cyan visor band — wide)
-    p(-8,-30,CO,16,14); p(-7,-29,IS,14,12); p(-6,-28,IM,12,10); p(-5,-27,IB,9,8);
-    p(-7,-29,IV,14,1);                                                            // top highlight
-    // Cyan scope-visor (full band)
-    p(-7,-25,CO,15,5); p(-6,-24,CL,13,4); p(-5,-24,`rgba(0,229,255,${0.80+linePulse*0.20})`,10,3);
-    p(-4,-23,CH,3,1); p( 1,-23,CH,3,1);
-    ctx.save(); ctx.globalAlpha = 0.60 + linePulse * 0.30;
-    pUnit(ctx,cx,cy,-6,-24+idleY,CW,13,4,isLeft,S);
-    ctx.restore();
+    // ── NECK + HEAD
+    p(-2,-22, CO, 4, 3); p(-1,-21, K0, 2, 2);
+    p(-6,-34, CO, 12, 13);
+    p(-5,-33, K1, 10, 11); p(-5,-33, K2, 10, 1);
+    p( 3,-32, K0,  2,  9);
+    p(-4,-29, CO, 3, 2); p( 1,-29, CO, 3, 2);
+    p(-3,-29, isAtk ? C4 : Z4, 1, 1); p( 2,-29, isAtk ? C4 : Z4, 1, 1);
+    p(-1,-25, K0, 2, 1);
 
-    // ── HOOD/CAP (indigo w/ cyan antennas)
-    p(-7,-36,CO,14,8); p(-6,-35,IS,12,7); p(-5,-34,IM,9,5);
-    p(-6,-35,IV,12,1);                                                            // top highlight
-    p(-7,-36,CL,14,1);                                                            // cyan rim
-    // Side antenna L
-    p(-8,-40,CO,3,4); p(-7,-39,IM,1,3);
-    p(-8,-42,CO,2,3); p(-7,-41,CL,1,2);
-    // Side antenna R (taller)
-    p( 4,-40,CO,3,6); p( 5,-39,IM,1,5); p( 5,-41,CL,1,2);
-    ctx.save(); ctx.globalAlpha = 0.65 + linePulse * 0.30;
-    pUnit(ctx,cx,cy, 5,-41+idleY,CW,1,2,isLeft,S);
-    ctx.restore();
+    // ── VISORED CIRCLET
+    p(-7,-37, CO, 14, 4); p(-6,-36, Z1, 12, 2); p(-6,-36, Z3, 12, 1);
+    p(-1,-40, CO,  3, 4); p( 0,-39, C2, 1, 3);
+    glow( 0,-39, C4, 1, 3, 0.50 + ep * 0.30);
 
     if (isAtk) {
-        ctx.save(); ctx.globalAlpha = 0.85; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy, 7,-62+idleY,CW,12,60,isLeft,S);                          // scimitar slash beam
-        ctx.restore();
-        ctx.save(); ctx.globalAlpha = 0.55; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy,-12,-10+idleY,CL,26,8,isLeft,S);                          // space-cut horizontal
-        ctx.restore();
-        // Glitch slashes (3)
-        for (let i = 0; i < 3; i++) {
-            ctx.save(); ctx.globalAlpha = 0.65;
-            const gx = -14 + i * 12;
-            pUnit(ctx,cx,cy,gx,-10+i*8+idleY,CW,8,1,isLeft,S);
-            ctx.restore();
-        }
+        glow(11,-30, C4, 14, 16, 0.40);
+        glow(-1, -8, C4,  3,  3, 0.60);
     }
 }
 
+// ───────────────────────────────────────────────────
+// WRAITH LORD — 망령 군주. Black iron crown, tattered wraith cloak, and the
+// skeleton soldiers his kills become drifting at his shoulder.
+// Lore: 검은 왕관에 너덜한 망령 망토, 주위에 해골 병사 영혼이 떠도는 군주.
+// The old art orbited four green hands, which read as a swamp creature and
+// said nothing about raising soldiers; the crown was silver, not black.
+// ───────────────────────────────────────────────────
 function drawWraithLord(cx, cy, tower) {
     const area   = tower.currentSlot ? tower.currentSlot.area : 'left-slots';
     const isLeft = area === 'left-slots';
     const now    = Date.now();
     const isAtk  = (now - (tower.lastShot || 0)) < 400;
-    const idleY  = Math.sin(now * 0.002) * 2;
     const S = 2.0;
+    const idleY  = Math.sin(now * 0.002) * 2;
     const p = (ox, oy, col, w=1, h=1) => pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S);
-    const ep         = (Math.sin(now * 0.005) + 1) / 2;
-    const ghostPulse = (Math.sin(now * 0.005) + 1) / 2;
-    const handX      = Math.sin(now * 0.004) * 5;
-    const orbF       = Math.sin(now * 0.003) * 1.5;
-    const CO='#000000';
-    const IS='#1A0050', IM='#26007A', IB='#311B92', IL='#4527A0', IH='#5E35B1', IW='#9575CD';
-    const GS='#00691E', GM='#00C853', GB='#69F0AE', GE='#00E676', GW='#B9F6CA';
-    const BW='#F5F5F5', BS='#9E9E9E', BM='#BDBDBD', BH='#FFFFFF';
-    const SK='#E8E0F0';
+    // Glows go through `lighter`, which is what the bake records as emissive;
+    // the finishing pass then blooms exactly these and nothing else.
+    const glow = (ox, oy, col, w, h, a) => {
+        ctx.save(); ctx.globalAlpha = a; ctx.globalCompositeOperation = 'lighter';
+        pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S); ctx.restore();
+    };
+    const ep    = (Math.sin(now * 0.005) + 1) / 2;
+    const soulP = (Math.sin(now * 0.004) + 1) / 2;
+    const drift = now * 0.0011;
+    const rag   = now * 0.004;
 
-    // ── soul aura
-    ctx.save(); ctx.globalAlpha = 0.15 + ep * 0.22;
-    pUnit(ctx,cx,cy,-22,-50+idleY,GM,44,82,isLeft,S);
-    ctx.restore();
+    const CO='#000';
+    const V0='#0B0424', V1='#1E0F52', V2='#33208A', V3='#5238C0', V4='#8A72E8';  // wraith purple
+    const E0='#04361A', E1='#0A7A3A', E2='#18C468', E3='#5FF2A4', E4='#C8FFE2';  // soul green
+    const B1='#8A8478', B2='#C6C0B2', B3='#EDE8DC', B4='#FFFFFF';                // bone
+    const K0='#08080E', K1='#1C1C28', K2='#34344A', K3='#54546E';                // black iron
 
-    // ── GHOST POOL AT FEET (purple-green mist)
-    p(-9,16,CO,18,8); p(-8,17,`rgba(0,200,83,${0.35+ghostPulse*0.35})`,16,7); p(-7,18,IS,13,5);
-
-    // ── 4 FLOATING GHOST HANDS (was 2)
-    // Hand 1 (low left, swaying)
-    p(-19+handX,5,CO,8,8); p(-18+handX,6,GS,6,6); p(-17+handX,7,GM,4,4); p(-17+handX,8,GB,2,2);
-    ctx.save(); ctx.globalAlpha = 0.55 + ghostPulse * 0.30;
-    pUnit(ctx,cx,cy,-19+handX,5+idleY,GE,8,8,isLeft,S);
-    ctx.restore();
-    // Hand 2 (high left)
-    p(-22-handX,-10,CO,6,6); p(-21-handX,-9,GS,4,4); p(-20-handX,-8,GM,2,2);
-    ctx.save(); ctx.globalAlpha = 0.55 + ghostPulse * 0.30;
-    pUnit(ctx,cx,cy,-22-handX,-10+idleY,GE,6,6,isLeft,S);
-    ctx.restore();
-    // Hand 3 (low right)
-    p(13-handX,10,CO,8,8); p(14-handX,11,GS,6,6); p(15-handX,12,GM,4,4); p(15-handX,13,GB,2,2);
-    ctx.save(); ctx.globalAlpha = 0.55 + ghostPulse * 0.30;
-    pUnit(ctx,cx,cy,13-handX,10+idleY,GE,8,8,isLeft,S);
-    ctx.restore();
-    // Hand 4 (high right)
-    p(16+handX,-12,CO,6,6); p(17+handX,-11,GS,4,4); p(18+handX,-10,GM,2,2);
-    ctx.save(); ctx.globalAlpha = 0.55 + ghostPulse * 0.30;
-    pUnit(ctx,cx,cy,16+handX,-12+idleY,GE,6,6,isLeft,S);
+    // soul aura
+    ctx.save(); ctx.globalAlpha = 0.14 + ep * 0.20;
+    pUnitAura(ctx, cx, cy, -20, -40 + idleY, E2, 40, 70, isLeft, S);
     ctx.restore();
 
-    // ── SOUL STAFF (tall, large soul orb top, bobbing)
-    p(10,-54,CO,4,48); p(11,-53,IS,3,46); p(11,-50,IM,2,40); p(11,-46,IB,2,32);   // shaft
-    p(10,-44,GE,4,1); p(10,-30,GE,4,1); p(10,-16,GE,4,1);                         // green bands
-    // Soul orb top (huge, multi-layer, bobbing)
-    p( 7,-62+orbF,CO,12,12); p( 8,-61+orbF,GS,10,10); p( 9,-60+orbF,GM,8,8);
-    p(10,-59+orbF,GB,6,6); p(11,-58+orbF,GE,4,4); p(12,-57+orbF,GW,2,2);
-    p( 8,-61+orbF,GW,10,1);                                                       // top highlight
-    // Orb glow + spirit wisps trailing
-    ctx.save(); ctx.globalAlpha = 0.65 + ghostPulse * 0.30;
-    pUnit(ctx,cx,cy, 7,-62+orbF+idleY,GW,12,12,isLeft,S);
-    ctx.restore();
-    // Floating soul wisps around orb
-    for (let i = 0; i < 4; i++) {
-        const a  = (now * 0.004) + i * (Math.PI / 2);
-        const wx = Math.cos(a) * 9 + 13;
-        const wy = Math.sin(a) * 6 - 56;
-        ctx.save(); ctx.globalAlpha = 0.60 + ghostPulse * 0.25;
-        pUnit(ctx,cx,cy,wx,wy+idleY,GE,2,2,isLeft,S);
-        ctx.restore();
+    // ── GRAVE MIST AT THE FEET
+    p(-10, 20, CO, 20, 6);
+    p( -9, 21, E0, 18, 4); p(-8, 21, E1, 16, 1);
+    glow(-9, 21, E2, 18, 2, 0.16 + soulP * 0.16);
+
+    // ── THREE SKELETON-SOLDIER SPIRITS — a skull, a rib cage and a wisp tail
+    //    each. These are the souls the ability actually raises, which is the
+    //    whole read the old floating hands were missing.
+    for (let i = 0; i < 3; i++) {
+        const a  = drift + i * (Math.PI * 2 / 3);
+        const sx = Math.round(Math.cos(a) * 17) + (i === 1 ? 1 : 0);
+        const sy = Math.round(Math.sin(a) * 7) - 6 + i * 2;
+        const bob = Math.round(Math.sin(now * 0.005 + i * 2) * 1);
+        // skull
+        p(sx-2, sy-3+bob, CO, 5, 5); p(sx-1, sy-2+bob, E1, 3, 3);
+        p(sx-1, sy-2+bob, E2, 3, 1);                                             // top highlight
+        p(sx-1, sy-1+bob, CO, 1, 1); p(sx+1, sy-1+bob, CO, 1, 1);                // sockets
+        // rib cage
+        p(sx-2, sy+2+bob, CO, 5, 4); p(sx-1, sy+3+bob, E0, 3, 2);
+        p(sx-2, sy+3+bob, E1, 5, 1); p(sx-2, sy+5+bob, E1, 5, 1);                // ribs
+        // wisp tail
+        p(sx-1, sy+6+bob, E0, 3, 2); p(sx, sy+8+bob, E0, 1, 2);
+        glow(sx-2, sy-3+bob, E3, 5, 3, 0.35 + soulP * 0.30);
+        glow(sx-2, sy+2+bob, E2, 5, 4, 0.22 + soulP * 0.20);
     }
 
     // ── BOOTS
-    p(-7,14,CO,7,9); p(-6,15,IS,5,8); p(-4,16,IM,3,6);
-    p( 1,14,CO,6,9); p( 2,15,IS,5,8); p( 3,16,IM,3,6);
-    p(-7,14,GE,7,1); p( 1,14,GE,6,1);                                             // green cuffs
+    p(-7, 14, CO, 7, 9); p(-6, 15, V0, 5, 8); p(-6, 15, V2, 5, 1);
+    p( 1, 14, CO, 6, 9); p( 2, 15, V0, 5, 8); p( 2, 15, V2, 5, 1);
+    p(-7, 14, E1, 7, 1); p( 1, 14, E1, 6, 1);                                    // soul-lit cuffs
 
-    // ── ROBE LOWER (purple, top-highlighted, green hem)
-    p(-8,2,CO,16,13); p(-7,3,IS,14,11); p(-6,4,IM,11,9); p(-5,5,IB,7,7);
-    p(-7,3,IW,14,1);                                                              // top highlight
-    p(-7,12,CO,14,3); p(-6,13,GS,12,2); p(-6,13,GE,12,1);                         // green hem
+    // ── TATTERED CLOAK — one mass, then a ragged fringe of uneven strips.
+    //    A flat hem is what made the old cloak read as a robe.
+    p(-11,-16, CO, 23, 30); p(-10,-15, V0, 21, 28); p(-9,-15, V1, 19, 27);
+    p(-10,-15, V3, 21,  1);                                                      // top highlight
+    p(-6,-14, V2, 11, 25);                                                       // lit inner panel
+    for (let i = 0; i < 11; i++) {
+        const tx = -11 + i * 2;
+        const tl = 3 + ((i * 5) % 7) + Math.round(Math.sin(rag + i) * 1.5);
+        p(tx, 14, CO, 2, tl); p(tx, 14, V1, 1, tl - 1);
+        if (i % 2 === 0) p(tx, 14 + tl - 1, E1, 2, 1);                           // soul-lit tips
+    }
 
-    // ── BELT (purple w/ green soul gem)
-    p(-8,0,CO,16,3); p(-7,1,IB,14,2); p(-7,1,IH,14,1);
-    p(-2,0,CO,4,3); p(-1,1,GE,2,1);
-    ctx.save(); ctx.globalAlpha = 0.65 + ep * 0.30;
-    pUnit(ctx,cx,cy,-1,1+idleY,GW,2,1,isLeft,S);
-    ctx.restore();
+    // ── ROBE UNDER THE CLOAK
+    p(-7,  2, CO, 14, 13); p(-6,  3, V0, 12, 11); p(-5,  4, V1, 9, 9);
+    p(-6,  3, V3, 12,  1);                                                       // top highlight
+    p(-7, 12, CO, 14,  3); p(-6, 13, E0, 12, 2); p(-6, 13, E2, 12, 1);           // soul hem
 
-    // ── UPPER ROBE (riveted, green soul gem chest)
-    p(-7,-14,CO,15,17); p(-6,-13,IS,13,15); p(-5,-12,IM,10,12); p(-4,-11,IB,7,10); p(-3,-10,IL,4,8);
-    p(-6,-13,IW,13,1);                                                            // top highlight
-    p(-5,-5,`rgba(0,200,83,${0.20+ghostPulse*0.25})`,11,8);
-    // Soul gem chest emblem
-    p(-3,-6,CO,6,6); p(-2,-5,GS,4,4); p(-2,-5,GB,4,1); p(-1,-4,GE,2,2);
-    ctx.save(); ctx.globalAlpha = 0.60 + ep * 0.35;
-    pUnit(ctx,cx,cy,-3,-6+idleY,GW,6,6,isLeft,S);
-    ctx.restore();
-    for (let r=0; r<3; r++) { p(-6,-10+r*4,GE,1,1); p(5,-10+r*4,GE,1,1); }        // glowing rivets
+    // ── BELT
+    p(-7,  0, CO, 14, 3); p(-6, 1, V2, 12, 2); p(-6, 1, V4, 12, 1);
+    p(-2, -1, CO,  5, 5); p(-1, 0, E1,  3, 3); p(-1, 0, E3, 3, 1);
+    glow(-1, 0, E4, 3, 1, 0.55 + ep * 0.35);
 
-    // ── PAULDRONS (purple, ghost-glow)
-    p(-13,-12,CO,8,9); p(-12,-11,IS,6,8); p(-11,-11,IM,4,7); p(-12,-11,IW,6,1);
-    p(-12,-12,GE,6,1);
-    p( 6,-12,CO,8,9); p( 7,-11,IS,6,8); p( 8,-11,IM,4,7); p( 7,-11,IW,6,1);
-    p( 7,-12,GE,6,1);
+    // ── CUIRASS
+    p(-7,-14, CO, 14, 16); p(-6,-13, V0, 12, 14); p(-5,-13, V1, 10, 13);
+    p(-6,-13, V4, 12,  1);                                                       // top highlight
+    p(-3,-12, V2,  6, 11);                                                       // lit centre panel
+    // soul gem
+    p(-2, -7, CO, 5, 5); p(-1, -6, E1, 3, 3); p(-1, -6, E3, 3, 1);
+    glow(-1, -6, E4, 3, 1, 0.60 + ep * 0.35);
+    for (let r = 0; r < 3; r++) { glow(-6,-11+r*4, E3, 1, 1, 0.45); glow(5,-11+r*4, E3, 1, 1, 0.45); }
 
-    // ── ARMS + HANDS
-    p(-11,-10,CO,5,12); p(-10,-9,IM,4,10); p(-10,-9,IW,4,1);
-    p(-11,-17,CO,5,8); p(-10,-16,SK,4,6);
-    p( 7,-10,CO,5,12); p( 8,-9,IM,4,10); p( 8,-9,IW,4,1);
-    p( 7,-17,CO,5,8); p( 8,-16,SK,4,6);
+    // ── PAULDRONS (black iron, soul-fire rim)
+    p(-13,-16, CO, 7, 8); p(-12,-15, K1, 5, 6); p(-12,-15, K3, 5, 1);
+    p(-12,-16, E1,  5, 1);
+    p(  6,-16, CO, 7, 8); p(  7,-15, K1, 5, 6); p(  7,-15, K3, 5, 1);
+    p(  7,-16, E1,  5, 1);
+
+    // ── ARMS
+    p(-12,-10, CO, 6, 13); p(-11,-9, V1, 4, 11); p(-11,-9, V3, 4, 1);
+    p(-12,  2, CO, 6,  5); p(-11, 3, B2, 4,  3); p(-11, 3, B3, 4, 1);            // skeletal hand
+    p(  6,-10, CO, 6, 13); p(  7,-9, V1, 4, 11); p(  7,-9, V3, 4, 1);
+    p(  6,  2, CO, 6,  5); p(  7, 3, B2, 4,  3); p(  7, 3, B3, 4, 1);
+
+    // ── SOUL STAFF (shortened; the old one reached 54px above the head and
+    //    set the whole texture's crop by itself)
+    p(11,-36, CO, 4, 40); p(12,-35, V0, 2, 38); p(12,-35, V2, 2, 1);
+    p(11,-24, E1, 4, 1); p(11,-12, E1, 4, 1); p(11, 0, E1, 4, 1);                // soul bands
+    p( 9,-44, CO, 8,  9); p(10,-43, E0, 6, 7); p(11,-42, E1, 4, 5);
+    p(12,-41, E2, 2, 3); p(10,-43, E3, 6, 1);                                    // orb top highlight
+    glow(10,-43, E3, 6, 1, 0.55 + soulP * 0.35);
+    glow(11,-42, E4, 4, 3, 0.40 + soulP * 0.30);
 
     // ── NECK
-    p(-3,-16,CO,7,3); p(-2,-15,IS,5,2);
+    p(-3,-17, CO, 7, 3); p(-2,-16, V0, 5, 2);
 
-    // ── SKULL FACE (white skull, green eye sockets, fang grimace)
-    p(-8,-30,CO,16,14); p(-7,-29,SK,14,12); p(-6,-28,BW,11,10); p(-5,-27,'#F0F0F0',8,8);
-    // Green-glowing eye sockets
-    p(-5,-25,CO,3,4); p( 2,-25,CO,3,4);
-    p(-4,-24,GE,2,2); p( 3,-24,GE,2,2);
-    p(-4,-23,GW,2,1); p( 3,-23,GW,2,1);
-    ctx.save(); ctx.globalAlpha = 0.75 + ghostPulse * 0.25;
-    pUnit(ctx,cx,cy,-5,-25+idleY,GW,3,4,isLeft,S);
-    pUnit(ctx,cx,cy, 2,-25+idleY,GW,3,4,isLeft,S);
-    ctx.restore();
-    // Nasal cavity
-    p(-1,-20,CO,2,2);
-    // Fang grimace
-    p(-4,-18,CO,9,3); p(-3,-17,BW,7,2);
-    p(-3,-18,CO,1,3); p(-1,-18,CO,1,3); p( 1,-18,CO,1,3); p( 3,-18,CO,1,3);       // teeth gaps
+    // ── SKULL FACE
+    p(-7,-31, CO, 14, 15);
+    p(-6,-30, B1, 12, 13); p(-5,-30, B2, 10, 12); p(-4,-29, B3, 7, 10);
+    p(-6,-30, B4, 12,  1);                                                       // top highlight
+    p( 4,-29, B1,  2, 10);                                                       // shaded cheek
+    p(-5,-26, CO,  4,  5); p( 2,-26, CO, 4, 5);                                  // eye sockets
+    p(-4,-25, E1,  2,  3); p( 3,-25, E1, 2, 3);
+    glow(-4,-25, E3, 2, 2, 0.70 + soulP * 0.30);
+    glow( 3,-25, E3, 2, 2, 0.70 + soulP * 0.30);
+    p(-1,-21, CO,  3,  3);                                                       // nasal cavity
+    p(-5,-18, CO, 11,  3); p(-4,-17, B3, 9, 2);                                  // jaw
+    for (let i = 0; i < 5; i++) p(-4 + i * 2, -18, CO, 1, 3);                    // teeth gaps
 
-    // ── GHOST CROWN (silver w/ green wraith ribbons trailing)
-    p(-8,-36,CO,16,8); p(-7,-35,BS,14,7); p(-6,-34,BW,11,6);
-    p(-7,-35,BH,14,1);                                                            // top highlight
-    p(-8,-36,GE,16,1);                                                            // green base ring
-    // Wraith ribbon spires (3 ghost ribbons)
-    p(-6,-40,CO,4,4); p(-5,-39,BS,3,3); p(-5,-39,GE,3,1);                         // L ribbon
-    p( 2,-40,CO,4,4); p( 3,-39,BS,3,3); p( 3,-39,GE,3,1);                         // R ribbon
-    p(-1,-44,CO,4,8); p( 0,-43,BS,2,7); p( 0,-43,GE,2,2); p( 0,-46,GW,2,1);       // center tallest
+    // ── BLACK IRON CROWN — five points, soul-fire in the gaps
+    p(-8,-37, CO, 16, 6); p(-7,-36, K0, 14, 4); p(-7,-36, K2, 14, 1);
+    p(-7,-33, K1, 14, 1);
+    for (let i = 0; i < 5; i++) {
+        const px = -7 + i * 3;
+        const ph = (i === 2) ? 7 : (i % 2 ? 4 : 5);
+        p(px, -37 - ph, CO, 3, ph + 1);
+        p(px + 1, -36 - ph, K2, 1, ph);
+        if (i % 2 === 0) glow(px + 1, -36 - ph, E3, 1, 2, 0.45 + ep * 0.30);
+    }
+    glow(-7,-33, E2, 14, 1, 0.22 + ep * 0.20);                                   // soul-fire in the band
 
     if (isAtk) {
-        ctx.save(); ctx.globalAlpha = 0.78; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy, 7,-64+orbF+idleY,GW,14,16,isLeft,S);                     // soul orb flash
-        ctx.restore();
-        ctx.save(); ctx.globalAlpha = 0.50; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy,-22,-12+idleY,GE,46,30,isLeft,S);                         // ghost-hand burst
-        ctx.restore();
+        glow(11,-42, E4, 4, 3, 0.70);
+        glow(-4,-25, E4, 2, 2, 0.85); glow(3,-25, E4, 2, 2, 0.85);
+        glow(-1, -6, E4, 3, 3, 0.60);
     }
 }
 
+// ───────────────────────────────────────────────────
+// CURSED SHAMAN — 저주받은 주술사. Bone mask, feather headdress, and the black
+// curse doll he drives pins into.
+// Lore: 뼈 가면과 깃털 장식, 검은 저주 인형을 손에 쥔 어두운 주술사.
+// The old art had a painted bare face, a ritual drum and a banner pole taller
+// than the sprite — three props, none of them the one in the brief.
+// ───────────────────────────────────────────────────
 function drawCursedShaman(cx, cy, tower) {
     const area   = tower.currentSlot ? tower.currentSlot.area : 'left-slots';
     const isLeft = area === 'left-slots';
     const now    = Date.now();
     const isAtk  = (now - (tower.lastShot || 0)) < 400;
-    const idleY  = Math.sin(now * 0.003) * 2;
     const S = 2.0;
+    const idleY  = Math.sin(now * 0.003) * 2;
     const p = (ox, oy, col, w=1, h=1) => pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S);
+    // Glows go through `lighter`, which is what the bake records as emissive;
+    // the finishing pass then blooms exactly these and nothing else.
+    const glow = (ox, oy, col, w, h, a) => {
+        ctx.save(); ctx.globalAlpha = a; ctx.globalCompositeOperation = 'lighter';
+        pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S); ctx.restore();
+    };
     const ep    = (Math.sin(now * 0.005) + 1) / 2;
     const pulse = (Math.sin(now * 0.008) + 1) / 2;
-    const skSway = Math.sin(now * 0.004) * 1;
-    const CO='#000000';
-    const RS='#1A0040', RM='#2A0060', RB='#3F51B5', RL='#5C6BC0', RH='#7986CB';
-    const GY='#616161', GYL='#9E9E9E', GYH='#BDBDBD';
-    const TS='#4E342E', TM='#6D4C41', TB='#795548', TH='#A1887F';
-    const BW='#F5F5F5', BS='#9E9E9E';
-    const RD='#D32F2F', RH2='#FF6E6E';
-    const GD='#FFD700';
+    const sway  = Math.sin(now * 0.004) * 1;
 
-    // ── curse aura
-    ctx.save(); ctx.globalAlpha = 0.15 + ep * 0.20;
-    pUnit(ctx,cx,cy,-26,-58+idleY,RD,52,90,isLeft,S);
+    const CO='#000';
+    const H0='#150A16', H1='#301A34', H2='#4E2C54', H3='#70457A', H4='#9A6BA6';  // hide robe
+    const B1='#8C8272', B2='#C8BEA8', B3='#E8E0CC', B4='#FFFAEC';                // bone
+    const R1='#5A0010', R2='#A00020', R3='#E02440', R4='#FF7A90';                // curse red
+    const F1='#7A2A12', F2='#C4581E', F3='#F09A3C';                              // feathers
+    const D0='#0A0A0C', D1='#1E1E22', D2='#33333A';                              // curse doll
+    const T1='#4E342E', T2='#6D4C41', T3='#A1887F';                              // wood
+
+    // curse aura
+    ctx.save(); ctx.globalAlpha = 0.14 + ep * 0.18;
+    pUnitAura(ctx, cx, cy, -20, -38 + idleY, R2, 40, 68, isLeft, S);
     ctx.restore();
 
-    // ── VOODOO BANNER (taller pole, shrunken-head top, 3 hanging skulls)
-    // Pole (curved/gnarled wood)
-    p(-15,-54,CO,5,52); p(-14,-53,TS,3,50); p(-14,-50,TM,2,44); p(-14,-46,TB,2,36);
-    // Pole tip — shrunken head + topknot
-    p(-17,-62,CO,10,12); p(-16,-61,TM,8,10); p(-15,-60,TB,6,8);
-    p(-16,-61,TH,8,1);                                                            // top highlight
-    // Stitched mouth + eye sockets
-    p(-15,-56,CO,2,2); p(-12,-56,CO,2,2);                                         // eye sockets
-    p(-14,-53,RD,4,1);                                                            // stitched mouth
-    ctx.save(); ctx.globalAlpha = 0.65 + pulse * 0.30;
-    pUnit(ctx,cx,cy,-15,-56+idleY,RH2,2,2,isLeft,S);
-    pUnit(ctx,cx,cy,-12,-56+idleY,RH2,2,2,isLeft,S);
-    ctx.restore();
-    // Tribal feathers on top
-    p(-16,-66,CO,3,5); p(-15,-65,RD,1,4); p(-15,-67,'#FF9900',1,1);
-    p(-13,-66,CO,3,5); p(-12,-65,'#FF9900',1,4); p(-12,-67,RD,1,1);
-    // 3 hanging skulls (sway)
-    for (let i = 0; i < 3; i++) {
-        const sy = -38 + i * 10;
-        const sx = -13 + (i % 2 === 0 ? skSway : -skSway);
-        p(sx, sy-2, CO, 1, 2);                                                    // rope
-        p(sx-2, sy, CO, 5, 5); p(sx-1, sy+1, BW, 3, 3);
-        p(sx-1, sy+2, CO, 1, 1); p(sx+1, sy+2, CO, 1, 1);                         // eye sockets
-        p(sx-1, sy+4, CO, 3, 1);                                                  // teeth
+    // ── BOOTS
+    p(-7, 14, CO, 7, 9); p(-6, 15, H0, 5, 8); p(-6, 15, H2, 5, 1);
+    p( 1, 14, CO, 6, 9); p( 2, 15, H0, 5, 8); p( 2, 15, H2, 5, 1);
+    p(-7, 14, R2, 7, 1); p( 1, 14, R2, 6, 1);
+
+    // ── HIDE SKIRT (ragged, bone tassels)
+    p(-8,  2, CO, 16, 14); p(-7,  3, H0, 14, 12); p(-6,  4, H1, 11, 10);
+    p(-7,  3, H3, 14,  1);                                                       // top highlight
+    p(-4,  5, H2,  7, 9);                                                        // lit panel
+    for (let i = 0; i < 7; i++) {
+        const tx = -7 + i * 2, tl = 3 + ((i * 3) % 5);
+        p(tx, 14, CO, 2, tl); p(tx, 14, H1, 1, tl - 1);
+        if (i % 2 === 1) p(tx, 14 + tl - 1, B2, 2, 1);                           // bone bead tips
     }
-    // Banner cloth (small, frayed)
-    p(-13,-12,CO,5,18); p(-12,-11,RS,3,16); p(-12,-11,RM,3,1);                    // cloth body
-    p(-13,5,CO,2,3); p(-9,5,CO,2,3);                                              // tassels
 
-    // ── RITUAL DRUM (held right side, with drumstick)
-    // Drum body (taller, multi-layer)
-    p( 9,4,CO,12,14); p(10,5,TM,10,12); p(11,6,TB,8,10); p(11,6,TH,8,1);
-    // Drum skin (top)
-    p( 9,2,CO,12,4); p(10,3,BW,10,2); p(10,3,BS,10,1);
-    // Red ritual marks on drum side
-    p(12,9,RD,2,2); p(12,8,CO,4,1);
-    p(13,11,RD,1,3); p(15,11,RD,1,3);                                             // tribal stripes
-    // Drumstick (raised)
-    p(20,-4,CO,2,12); p(21,-3,TB,1,10); p(21,-3,TH,1,1);
-    p(19,-6,CO,4,4); p(20,-5,BW,2,2);                                             // stick ball
+    // ── BONE BELT
+    p(-8,  0, CO, 16, 3); p(-7, 1, B1, 14, 2); p(-7, 1, B3, 14, 1);
+    p(-2, -1, CO,  5, 5); p(-1, 0, R1,  3, 3); p(-1, 0, R3, 3, 1);
+    glow(-1, 0, R4, 3, 1, 0.55 + pulse * 0.35);
 
-    // ── BOOTS (purple)
-    p(-7,14,CO,7,9); p(-6,15,RS,5,8); p(-4,16,RM,3,6);
-    p( 1,14,CO,6,9); p( 2,15,RS,5,8); p( 3,16,RM,3,6);
-    p(-7,14,RD,7,1); p( 1,14,RD,6,1);
+    // ── ROBE TORSO
+    p(-7,-14, CO, 14, 16); p(-6,-13, H0, 12, 14); p(-5,-13, H1, 10, 13);
+    p(-6,-13, H4, 12,  1);                                                       // top highlight
+    p(-3,-12, H2,  6, 11);                                                       // lit centre
+    // curse sigil
+    p(-2, -7, CO, 5, 5); p(-1, -6, R1, 3, 3); p(-1, -6, R3, 3, 1);
+    glow(-1, -6, R4, 3, 1, 0.55 + pulse * 0.35);
 
-    // ── BONE FUR ROBE LOWER (grey/bone, tasseled)
-    p(-8,14,CO,16,10); p(-7,15,GY,14,8); p(-6,16,GYL,11,6);
-    p(-7,15,GYH,14,1);                                                            // top highlight
-    p(-7,20,CO,5,4); p(-3,21,CO,5,4); p( 1,20,CO,5,4);                            // bone tassels
-
-    // ── ROBE LOWER (purple, top-highlighted)
-    p(-8,2,CO,16,13); p(-7,3,RS,14,11); p(-6,4,RM,11,9); p(-5,5,RB,7,7);
-    p(-7,3,RL,14,1);                                                              // top highlight
-
-    // ── BELT (bone w/ red gem)
-    p(-8,0,CO,16,3); p(-7,1,GYL,14,2); p(-7,1,GYH,14,1);
-    p(-2,0,CO,4,3); p(-1,1,RD,2,1);
-
-    // ── UPPER ROBE (riveted, red curse mark)
-    p(-7,-14,CO,15,17); p(-6,-13,RS,13,15); p(-5,-12,RM,10,12); p(-4,-11,RB,7,10); p(-3,-10,RL,4,8);
-    p(-6,-13,RH,13,1);                                                            // top highlight
-    // Bone necklace
-    p(-4,-14,CO,9,2);
-    for (let i = 0; i < 4; i++) p(-3+i*2,-13,BW,1,1);
-    // Red curse skull on chest
-    p(-3,-6,CO,6,6); p(-2,-5,RD,4,4); p(-2,-5,RH2,4,1);
-    p(-1,-4,CO,1,1); p( 1,-4,CO,1,1);                                             // eyes
-    p(-1,-2,CO,2,1);                                                              // mouth
-    ctx.save(); ctx.globalAlpha = 0.55 + pulse * 0.30;
-    pUnit(ctx,cx,cy,-3,-6+idleY,RH2,6,6,isLeft,S);
-    ctx.restore();
-    for (let r=0; r<3; r++) { p(-6,-10+r*4,RD,1,1); p(5,-10+r*4,RD,1,1); }        // red rivets
+    // ── FUR MANTLE + BONE NECKLACE
+    p(-9,-17, CO, 18, 5); p(-8,-16, H1, 16, 3); p(-8,-16, H3, 16, 1);
+    for (let i = 0; i < 6; i++) { p(-6 + i * 2, -13, CO, 2, 3); p(-6 + i * 2, -12, B2, 1, 2); }
 
     // ── PAULDRONS (bone-spiked)
-    p(-13,-12,CO,8,9); p(-12,-11,RS,6,8); p(-11,-11,RM,4,7); p(-12,-11,RH,6,1);
-    p(-14,-15,CO,3,4); p(-13,-14,BW,1,3);                                         // bone spike L
-    p( 6,-12,CO,8,9); p( 7,-11,RS,6,8); p( 8,-11,RM,4,7); p( 7,-11,RH,6,1);
-    p(11,-15,CO,3,4); p(12,-14,BW,1,3);                                           // bone spike R
+    p(-13,-17, CO, 7, 7); p(-12,-16, H1, 5, 5); p(-12,-16, H3, 5, 1);
+    p(-13,-21, CO, 3, 5); p(-12,-20, B2, 1, 4); p(-12,-21, B4, 1, 1);
+    p(  6,-17, CO, 7, 7); p(  7,-16, H1, 5, 5); p(  7,-16, H3, 5, 1);
+    p( 10,-21, CO, 3, 5); p( 11,-20, B2, 1, 4); p( 11,-21, B4, 1, 1);
 
-    // ── ARMS + HANDS
-    p(-11,-10,CO,5,12); p(-10,-9,RM,4,10); p(-10,-9,RL,4,1);
-    p(-11,-17,CO,5,8); p(-10,-16,'#C8A878',4,6);
-    p( 7,-10,CO,5,12); p( 8,-9,RM,4,10); p( 8,-9,RL,4,1);
-    p( 7,-17,CO,5,8); p( 8,-16,'#C8A878',4,6);
+    // ── LEFT ARM (holds the doll out)
+    p(-13,-11, CO, 6, 12); p(-12,-10, H1, 4, 10); p(-12,-10, H3, 4, 1);
+    p(-14,  0, CO, 6,  5); p(-13,  1, B2, 4,  3); p(-13, 1, B3, 4, 1);
+
+    // ── BLACK CURSE DOLL (the brief's prop: sackcloth body, stitched X eyes,
+    //    two iron pins driven in, swinging from the fist)
+    const dx = -13 + sway;
+    p(dx-1,  6, T2, 1, 2);                                                       // cord
+    p(dx-3,  8, CO, 7, 7); p(dx-2,  9, D1, 5, 5); p(dx-2, 9, D2, 5, 1);          // head
+    p(dx-2, 10, R2, 1, 1); p(dx+1, 10, R2, 1, 1);                                // stitched eyes
+    p(dx-1, 12, R1, 3, 1);                                                       // stitched mouth
+    p(dx-3, 15, CO, 7, 8); p(dx-2, 16, D0, 5, 6); p(dx-2, 16, D2, 5, 1);         // body
+    p(dx-5, 16, CO, 3, 5); p(dx-4, 17, D1, 1, 4);                                // arms
+    p(dx+3, 16, CO, 3, 5); p(dx+4, 17, D1, 1, 4);
+    p(dx-2, 22, CO, 2, 4); p(dx+1, 22, CO, 2, 4);                                // legs
+    p(dx-4, 17, B3, 5, 1); p(dx-1, 19, B3, 5, 1);                                // iron pins
+    glow(dx-4, 17, R4, 5, 1, 0.35 + pulse * 0.30);
+    glow(dx-1, 19, R4, 5, 1, 0.35 + pulse * 0.30);
+
+    // ── RIGHT ARM (raised, bone rattle)
+    p( 7,-11, CO, 6, 12); p( 8,-10, H1, 4, 10); p( 8,-10, H3, 4, 1);
+    p( 9,-20, CO, 6, 11); p(10,-19, H1, 4,  9); p(10,-19, H3, 4, 1);
+    p( 9,-23, CO, 6,  5); p(10,-22, B2, 4,  3); p(10,-22, B3, 4, 1);
+    p(11,-30, CO, 2,  8); p(11,-30, T2, 1,  7);                                  // rattle haft
+    p( 9,-34, CO, 6,  5); p(10,-33, B2, 4,  3); p(10,-33, B4, 4, 1);             // rattle skull
+    p(10,-32, CO, 1,  1); p(12,-32, CO, 1, 1);
+    glow(10,-32, R3, 1, 1, 0.55 + pulse * 0.30);
+    glow(12,-32, R3, 1, 1, 0.55 + pulse * 0.30);
 
     // ── NECK
-    p(-3,-16,CO,7,3); p(-2,-15,RM,5,2);
+    p(-3,-17, CO, 7, 3); p(-2,-16, H0, 5, 2);
 
-    // ── HEAD (tribal red face paint, fang grimace)
-    p(-8,-30,CO,16,14); p(-7,-29,TS,14,12); p(-6,-28,TM,12,10); p(-5,-27,TB,9,8);
-    // Tribal red face paint (stripes)
-    p(-6,-28,RD,11,1); p(-6,-22,RD,11,1);                                         // horizontal stripes
-    p(-3,-29,RD,1,12); p( 2,-29,RD,1,12);                                         // vertical stripes
-    // Glowing gold eyes (peering through)
-    p(-3,-25,'#FFD600',3,2); p( 1,-25,'#FFD600',3,2);
-    p(-2,-24,'#FFFCC0',1,1); p( 2,-24,'#FFFCC0',1,1);
-    ctx.save(); ctx.globalAlpha = 0.70 + pulse * 0.25;
-    pUnit(ctx,cx,cy,-3,-25+idleY,'#FFFCC0',3,2,isLeft,S);
-    pUnit(ctx,cx,cy, 1,-25+idleY,'#FFFCC0',3,2,isLeft,S);
-    ctx.restore();
-    // Fang grimace
-    p(-4,-23,CO,9,4); p(-3,-22,BW,7,3);
-    p(-3,-23,CO,1,3); p(-1,-23,CO,1,3); p( 1,-23,CO,1,3); p( 3,-23,CO,1,3);       // teeth gaps
+    // ── BONE MASK (covers the whole face: carved plate, slit eyes, bared teeth)
+    p(-7,-31, CO, 14, 15);
+    p(-6,-30, B1, 12, 13); p(-5,-30, B2, 10, 12); p(-4,-29, B3, 7, 10);
+    p(-6,-30, B4, 12,  1);                                                       // top highlight
+    p( 4,-29, B1,  2, 10);                                                       // shaded side
+    p(-6,-24, R1, 12,  1); p(-6,-21, R1, 12, 1);                                 // carved bands
+    p(-5,-27, CO,  4,  2); p( 2,-27, CO, 4, 2);                                  // eye slits
+    p(-4,-27, R2,  2,  1); p( 3,-27, R2, 2, 1);
+    glow(-4,-27, R4, 2, 1, 0.75 + pulse * 0.25);
+    glow( 3,-27, R4, 2, 1, 0.75 + pulse * 0.25);
+    p(-4,-19, CO,  9,  3); p(-3,-18, B4, 7, 2);                                  // bared teeth
+    for (let i = 0; i < 4; i++) p(-3 + i * 2, -19, CO, 1, 3);
+    p(-1,-23, CO,  3,  2);                                                       // mask nose slot
 
-    // ── HORNED CROWN (tribal bone w/ feathers)
-    p(-8,-36,CO,16,8); p(-7,-35,TS,14,7); p(-6,-34,TM,11,6); p(-5,-33,TB,8,5);
-    p(-7,-35,TH,14,1);                                                            // top highlight
-    p(-5,-37,BW,2,2); p( 0,-37,BW,2,2); p( 4,-37,BW,2,2);                         // bone studs
-    // Curved horns
-    p(-10,-40,CO,4,5); p(-9,-39,GY,2,4); p(-9,-41,BW,2,1);                        // horn L
-    p( 6,-40,CO,4,5); p( 7,-39,GY,2,4); p( 7,-41,BW,2,1);                         // horn R
-    // Center feather plume
-    p(-1,-42,CO,4,6); p( 0,-41,RD,2,5); p( 0,-44,'#FF9900',2,2); p( 1,-46,GD,1,2);
+    // ── FEATHER HEADDRESS (five, fanning back, red through amber)
+    p(-8,-36, CO, 16, 6); p(-7,-35, T1, 14, 4); p(-7,-35, T3, 14, 1);            // hide band
+    p(-6,-33, B2, 12, 1);                                                        // bone studs row
+    for (let i = 0; i < 5; i++) {
+        const fx = -8 + i * 4;
+        const fh = (i === 2) ? 13 : (i % 2 ? 9 : 11);
+        const tilt = Math.round((i - 2) * 1.2);
+        p(fx + tilt, -36 - fh, CO, 3, fh);
+        p(fx + tilt + 1, -35 - fh, i % 2 ? F2 : F1, 1, fh - 2);
+        p(fx + tilt + 1, -35 - fh, F3, 1, 3);                                    // bright tip
+    }
+    glow(-8,-33, R3, 16, 1, 0.20 + pulse * 0.18);
 
     if (isAtk) {
-        ctx.save(); ctx.globalAlpha = 0.78; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy,-18,-66+idleY,RD,16,18,isLeft,S);                         // head burst
-        ctx.restore();
-        ctx.save(); ctx.globalAlpha = 0.55; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy, 7,2+idleY,RD,16,18,isLeft,S);                            // drum burst
-        ctx.restore();
-        ctx.save(); ctx.globalAlpha = 0.45; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy,-10,-16+idleY,RL,24,40,isLeft,S);
-        ctx.restore();
+        glow(-4,-27, R4, 2, 1, 0.90); glow(3,-27, R4, 2, 1, 0.90);
+        glow(dx-3, 8, R4, 7, 15, 0.45);                                          // doll flares
+        glow(-1, -6, R4, 3, 3, 0.55);
     }
 }
 
+// ───────────────────────────────────────────────────
+// HOLY RAMPART — 신성한 성벽. White plate behind an enormous gold tower shield,
+// planted and immovable.
+// Lore: 거대한 황금 타워실드에 백색 갑주, 미동도 없는 견고한 성벽.
+// ───────────────────────────────────────────────────
 function drawRampart(cx, cy, tower) {
     const area   = tower.currentSlot ? tower.currentSlot.area : 'left-slots';
     const isLeft = area === 'left-slots';
     const now    = Date.now();
     const isAtk  = (now - (tower.lastShot || 0)) < 400;
-    const idleY  = Math.sin(now * 0.002) * 2;
     const S = 2.0;
+    const idleY  = Math.sin(now * 0.002) * 2;
     const p = (ox, oy, col, w=1, h=1) => pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S);
-    const ep    = (Math.sin(now * 0.004) + 1) / 2;
-    const pulse = (Math.sin(now * 0.004) + 1) / 2;
-    const plumF = Math.sin(now * 0.005) * 1.5;
-    const CO='#000000';
-    const PS='#8A9BA8', PM='#9EADB8', PB='#B0BEC5', PL='#CFD8DC', PH='#ECEFF1', PW='#FFFFFF';
-    const BC='#0D47A1', BM='#1565C0', BL='#1976D2', BH='#2196F3', BW='#80D8FF';
-    const GHL='#8D6E63', GHS='#5D4037';
-    const SK='#F0D0A0';
-    const GD2='#B88000', GD='#FFD700';
+    const glow = (ox, oy, col, w, h, a) => {
+        ctx.save(); ctx.globalAlpha = a; ctx.globalCompositeOperation = 'lighter';
+        pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S); ctx.restore();
+    };
+    const ep = (Math.sin(now * 0.004) + 1) / 2;
 
-    // ── holy bulwark aura
-    ctx.save(); ctx.globalAlpha = 0.14 + ep * 0.20;
-    pUnit(ctx,cx,cy,-28,-44+idleY,BH,52,76,isLeft,S);
+    const CO='#000';
+    const M0='#3A3E4A', M1='#767E92', M2='#B6BECE', M3='#E2E8F2', M4='#FFFFFF';  // white plate
+    const G0='#3A2600', G1='#7A5400', G2='#B98A0A', G3='#FFCF33', G4='#FFF0A8';
+    const K0='#C4834E', K1='#F0C090', K2='#FFDCBC';
+
+    ctx.save(); ctx.globalAlpha = 0.13 + ep * 0.18;
+    pUnitAura(ctx, cx, cy, -22, -36 + idleY, G3, 44, 64, isLeft, S);
     ctx.restore();
 
-    // ── TALL PIKE (off-side, gold-bound)
-    p(-16,-26,CO,4,60); p(-15,-25,GHS,3,58); p(-15,-22,GHL,2,52);
-    p(-16,-18,GD,4,1); p(-16,-2,GD,4,1); p(-16,14,GD,4,1);                        // gold grip bands
-    // Pike head (spearhead w/ side blades)
-    p(-19,-34,CO,10,12); p(-18,-33,PS,8,10); p(-17,-32,PB,6,8); p(-16,-31,PH,4,6);
-    p(-18,-33,PW,8,1);                                                            // top highlight
-    p(-16,-30,BL,3,2);                                                            // blue gem
-    ctx.save(); ctx.globalAlpha = 0.55 + pulse * 0.30;
-    pUnit(ctx,cx,cy,-16,-30+idleY,BW,3,2,isLeft,S);
-    ctx.restore();
-    p(-20,-36,CO,3,4); p(-19,-35,PB,1,3);                                         // L side blade
-    p(-14,-36,CO,3,4); p(-13,-35,PB,1,3);                                         // R side blade
+    // ── SABATONS (planted wide)
+    p(-11, 22, CO, 8, 5); p(-10, 23, M1, 6, 3); p(-10, 23, M3, 6, 1);
+    p(  4, 22, CO, 8, 5); p(  5, 23, M1, 6, 3); p(  5, 23, M3, 6, 1);
 
-    // ── MASSIVE TOWER SHIELD (right side, glowing blue cross, gold rim)
-    p( 9,-14,CO,16,44); p(10,-13,PS,14,42); p(11,-12,PM,12,40);
-    p(12,-10,PB,9,36); p(13,-8,PL,5,32);
-    p(10,-13,PW,14,1);                                                            // top highlight
-    // Gold rim (full perimeter)
-    p( 9,-14,GD,16,2); p( 9,28,GD,16,2);
-    p( 9,-14,GD,2,44); p(23,-14,GD,2,44);
-    p( 9,-14,GD2,1,44); p(23,-14,GD2,1,44);
-    // Corner studs
-    p( 9,-14,CO,3,3); p(10,-13,GD,1,1);
-    p(22,-14,CO,3,3); p(23,-13,GD,1,1);
-    p( 9,27,CO,3,3); p(10,28,GD,1,1);
-    p(22,27,CO,3,3); p(23,28,GD,1,1);
-    // Blue cross emblem (bold, glowing)
-    p(15,-8,CO,5,30); p(16,-7,BC,3,28); p(16,-7,BL,3,2);
-    p(11,4,CO,13,5); p(12,5,BC,11,3); p(12,5,BL,11,1);
-    ctx.save(); ctx.globalAlpha = 0.60 + pulse * 0.40;
-    pUnit(ctx,cx,cy,15,-8+idleY,BW,5,30,isLeft,S);
-    pUnit(ctx,cx,cy,11,4+idleY,BW,13,5,isLeft,S);
-    ctx.restore();
-    // Center crystal
-    p(15,4,CO,5,5); p(16,5,BH,3,3); p(16,5,BW,3,1);
-    p(10,8,BC,3,22); p(20,8,BC,3,22);                                             // edge ribs
+    // ── GREAVES
+    p(-9,  4, CO, 18, 19); p(-8,  5, M0, 16, 17); p(-7,  5, M1, 14, 16);
+    p(-5,  6, M2, 10, 14);
+    p(-8,  5, M4, 16,  1);                                                       // top highlight
+    p(-1,  6, M0,  2, 13);
+    p(-9, 19, CO, 18,  3); p(-8, 20, G2, 16, 2); p(-8, 20, G3, 16, 1);
 
-    // ── BOOTS (gold-cuffed)
-    p(-7,14,CO,7,9); p(-6,15,PS,5,8); p(-4,16,PB,2,6); p(-4,16,BC,3,2);
-    p( 1,14,CO,6,9); p( 2,15,PS,5,8); p( 3,16,PB,2,6); p( 3,16,BC,3,2);
-    p(-7,14,GD,7,1); p( 1,14,GD,6,1);
+    // ── BELT
+    p(-8,  1, CO, 16, 4); p(-7, 2, G1, 14, 2); p(-7, 2, G3, 14, 1);
 
-    // ── ROBE LOWER (steel-blue tabard, top-highlighted)
-    p(-8,2,CO,16,13); p(-7,3,PS,14,11); p(-6,4,PM,11,9); p(-5,5,PB,7,7);
-    p(-7,3,PW,14,1);                                                              // top highlight
-    p(-4,2,BC,8,3); p(-2,5,BC,4,8);                                               // blue tabard
-    p(-7,12,CO,14,3); p(-6,13,GD2,12,2); p(-6,13,GD,12,1);                        // gold hem
+    // ── CUIRASS
+    p(-8,-18, CO, 17, 20); p(-7,-17, M0, 15, 18); p(-6,-17, M1, 13, 17);
+    p(-4,-16, M2,  9, 15);
+    p(-7,-17, M4, 15,  1);                                                       // top highlight
+    p( 6,-16, M0,  2, 16);
+    p(-7,-11, M0, 15,  1); p(-7, -5, M0, 15, 1);                                 // plate seams
 
-    // ── BELT (gold w/ blue gem)
-    p(-8,0,CO,16,3); p(-7,1,GD2,14,2); p(-7,1,GD,14,1);
-    p(-2,0,CO,4,3); p(-1,1,BH,2,1);
+    // ── PAULDRONS + COLLAR
+    p(-14,-21, CO, 7, 9); p(-13,-20, M1, 5, 7); p(-13,-20, M4, 5, 1);
+    p(-13,-21, G2,  5, 1);
+    p(  7,-21, CO, 7, 9); p(  8,-20, M1, 5, 7); p(  8,-20, M4, 5, 1);
+    p(  8,-21, G2,  5, 1);
+    p(-6,-22, CO, 12, 3); p(-5,-21, M3, 10, 2); p(-5,-21, M4, 10, 1);
 
-    // ── CHEST (plate w/ glowing blue cross, gold rivets)
-    p(-7,-14,CO,15,17); p(-6,-13,PS,13,15); p(-5,-12,PM,10,12); p(-4,-11,PB,7,10); p(-3,-10,PH,4,8);
-    p(-6,-13,PW,13,1);                                                            // top highlight
-    p(-4,-13,BC,8,4); p(-2,-9,BC,4,8);                                            // tabard cross base
-    // Glowing cross overlay
-    p(-1,-13,CO,3,16); p(0,-12,BH,1,14); p(0,-12,BW,1,2);
-    p(-4,-7,CO,9,3); p(-3,-6,BH,7,1); p(-3,-6,BW,7,1);
-    ctx.save(); ctx.globalAlpha = 0.55 + pulse * 0.35;
-    pUnit(ctx,cx,cy,-1,-13+idleY,BW,3,16,isLeft,S);
-    pUnit(ctx,cx,cy,-4,-7+idleY,BW,9,3,isLeft,S);
-    ctx.restore();
-    for (let r=0; r<3; r++) { p(-6,-10+r*4,GD,1,1); p(5,-10+r*4,GD,1,1); }        // gold rivets
+    // ── ARMS braced behind the shield
+    p(-13,-15, CO, 6, 14); p(-12,-14, M1, 4, 12); p(-12,-14, M3, 4, 1);
+    p(  7,-15, CO, 6, 14); p(  8,-14, M1, 4, 12); p(  8,-14, M3, 4, 1);
 
-    // ── PAULDRONS (plate, gold-tipped)
-    p(-13,-12,CO,8,9); p(-12,-11,PS,6,8); p(-11,-11,PM,4,7); p(-10,-10,PH,2,5);
-    p(-12,-11,PW,6,1);
-    p(-12,-12,GD,6,1);
-    p( 6,-12,CO,8,9); p( 7,-11,PS,6,8); p( 8,-11,PM,4,7); p( 9,-10,PH,2,5);
-    p( 7,-11,PW,6,1);
-    p( 7,-12,GD,6,1);
+    // ── ENORMOUS GOLD TOWER SHIELD — taller than the unit, planted in the
+    //    ground. Built as a rim, a field, ribs and a boss so it has depth
+    //    instead of being one gold slab.
+    p(-20,-40, CO, 20, 66);                                                      // outline
+    p(-19,-39, G1, 18, 64); p(-19,-39, G4, 18, 1);                               // rim + top light
+    p(-17,-37, G0, 14, 60);                                                      // recessed field
+    p(-16,-36, G2, 12, 58); p(-16,-36, G3, 12, 2);
+    p(-16,-36, G4, 12,  1);
+    p(-13,-36, G1,  1, 58); p( -6,-36, G1, 1, 58);                               // vertical ribs
+    p(-16,-18, G1, 12,  1); p(-16,  2, G1, 12, 1);                               // banding
+    // central boss with a cross
+    p(-14,-12, CO, 8, 10); p(-13,-11, G3, 6, 8); p(-13,-11, G4, 6, 1);
+    p(-11,-11, CO, 3,  8); p(-10,-10, G1, 1, 6);
+    p(-14, -8, CO, 8,  3); p(-13, -7, G1, 6, 1);
+    glow(-16,-36, G4, 12, 2, 0.35 + ep * 0.26);
+    glow(-13,-11, G4,  6, 1, 0.40 + ep * 0.28);
+    // ground bite where it is planted
+    p(-18, 24, CO, 16, 3); p(-17, 25, G1, 14, 2);
 
-    // ── ARMS + GAUNTLETS
-    p(-11,-10,CO,5,12); p(-10,-9,PM,4,10); p(-10,-9,PH,4,1);
-    p(-11,-17,CO,5,8); p(-10,-16,SK,4,6);
-    p( 7,-10,CO,5,12); p( 8,-9,PM,4,10); p( 8,-9,PH,4,1);
-    p( 7,-17,CO,5,8); p( 8,-16,SK,4,6);
-
-    // ── NECK
-    p(-3,-16,CO,7,3); p(-2,-15,PM,5,2);
-
-    // ── HELM (closed visor, glowing blue band)
-    p(-8,-30,CO,16,14); p(-7,-29,PS,14,12); p(-6,-28,PM,11,10); p(-5,-27,PB,8,8); p(-4,-26,PH,5,6);
-    p(-7,-29,PW,14,1);                                                            // top highlight
-    p(-5,-24,CO,11,5); p(-4,-23,BL,9,4); p(-3,-23,BH,6,3);                        // visor
-    p(-3,-23,SK,3,2);
-    ctx.save(); ctx.globalAlpha = 0.55 + pulse * 0.30;
-    pUnit(ctx,cx,cy,-4,-23+idleY,BW,9,4,isLeft,S);
-    ctx.restore();
-    p(-8,-16,GD,16,1);                                                            // gold helm rim
-    p(-9,-26,GD,2,12); p( 7,-26,GD,2,12);                                         // side gold strips
-
-    // ── HELM CREST (blue flowing plume, taller)
-    p(-8,-36,CO,16,8); p(-7,-35,PS,14,7); p(-6,-34,PM,11,5); p(-5,-33,PH,8,3);
-    p(-7,-35,PW,14,1);                                                            // top highlight
-    p(-5,-38+plumF,CO,4,4); p(-4,-37+plumF,BC,3,3); p(-4,-37+plumF,BL,3,1);       // L plume
-    p( 2,-38+plumF,CO,4,4); p( 3,-37+plumF,BC,3,3); p( 3,-37+plumF,BL,3,1);       // R plume
-    p(-2,-42+plumF,CO,4,6); p(-1,-41+plumF,BM,2,5); p(-1,-41+plumF,BH,2,1);       // center taller
-    p(-1,-44+plumF,CO,2,3); p( 0,-43+plumF,BW,1,2);
+    // ── NECK + GREAT HELM (visor slit only)
+    p(-2,-24, CO, 4, 3); p(-1,-23, K0, 2, 2);
+    p(-7,-37, CO, 14, 15); p(-6,-36, M0, 12, 13); p(-5,-36, M1, 10, 12);
+    p(-6,-36, M4, 12,  1);                                                       // top highlight
+    p( 4,-35, M0,  2, 11);
+    p(-6,-31, CO, 12,  3); p(-5,-30, K0, 10, 1);                                 // visor slit
+    p(-5,-30, isAtk ? G4 : G3, 10, 1);
+    glow(-5,-30, G4, 10, 1, 0.40 + ep * 0.28);
+    p(-7,-38, CO, 14, 2); p(-6,-37, G2, 12, 1);                                  // helm band
+    p(-2,-42, CO,  5, 5); p(-1,-41, G3, 3, 3); p(-1,-41, G4, 3, 1);              // crest
+    glow(-1,-41, G4, 3, 1, 0.45 + ep * 0.28);
 
     if (isAtk) {
-        ctx.save(); ctx.globalAlpha = 0.78; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy, 8,-14+idleY,BW,20,46,isLeft,S);                          // shield flash
-        ctx.restore();
-        ctx.save(); ctx.globalAlpha = 0.55; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy,-21,-36+idleY,BW,14,16,isLeft,S);                         // pike flash
-        ctx.restore();
+        glow(-16,-36, G4, 12, 58, 0.28);
+        glow(-13,-11, G4,  6, 8, 0.55);
     }
 }
 
+// ───────────────────────────────────────────────────
+// KNIGHT OF JUDGMENT — 심판의 기사. Platinum plate, a holy greatsword, and the
+// scales of judgment hanging as a halo above the helm.
+// Lore: 백금 갑주에 거룩한 양손검, 머리 위에 천칭 후광이 떠도는 심판자.
+// ───────────────────────────────────────────────────
 function drawJudgment(cx, cy, tower) {
     const area   = tower.currentSlot ? tower.currentSlot.area : 'left-slots';
     const isLeft = area === 'left-slots';
     const now    = Date.now();
     const isAtk  = (now - (tower.lastShot || 0)) < 400;
-    const idleY  = Math.sin(now * 0.002) * 2;
     const S = 2.0;
+    const idleY  = Math.sin(now * 0.002) * 2;
     const p = (ox, oy, col, w=1, h=1) => pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S);
-    const ep    = (Math.sin(now * 0.005) + 1) / 2;
-    const pulse = (Math.sin(now * 0.005) + 1) / 2;
-    const wingF = Math.sin(now * 0.004) * 2;
-    const CO='#000000';
-    const AS='#9E9E9E', AM='#BDBDBD', AB='#D0D0D0', AL='#E8E8E8', AH='#FFFFFF';
-    const GS='#7A5800', GM='#B8860B', GB='#FFD700', GL='#FFE57F', GH='#FFFFF0', GW='#FFFCC0';
-    const WS='#C8C8C8', WM='#E0E0E0', WH='#FFFFFF';
-    const CY1='#0099CC', CY='#00E5FF', CW='#B2EBF2';
-    const SK='#F0D0A0';
+    const glow = (ox, oy, col, w, h, a) => {
+        ctx.save(); ctx.globalAlpha = a; ctx.globalCompositeOperation = 'lighter';
+        pUnit(ctx, cx, cy, ox, oy + idleY, col, w, h, isLeft, S); ctx.restore();
+    };
+    const ep   = (Math.sin(now * 0.003) + 1) / 2;
+    const tilt = Math.round(Math.sin(now * 0.0024) * 1);
 
-    // ── divine judgment aura
-    ctx.save(); ctx.globalAlpha = 0.16 + ep * 0.22;
-    pUnit(ctx,cx,cy,-30,-46+idleY,GB,60,80,isLeft,S);
+    const CO='#000';
+    const T0='#2E323E', T1='#767E92', T2='#B6BECE', T3='#E2E8F2', T4='#FFFFFF';  // platinum
+    const G0='#3A2600', G1='#7A5400', G2='#B98A0A', G3='#FFCF33', G4='#FFF0A8';
+    const K0='#C4834E', K1='#F0C090', K2='#FFDCBC';
+
+    ctx.save(); ctx.globalAlpha = 0.13 + ep * 0.18;
+    pUnitAura(ctx, cx, cy, -20, -38 + idleY, G3, 40, 66, isLeft, S);
     ctx.restore();
 
-    // ── TWIN ANGEL WINGS (3-layer per side, fluttering)
-    // Outer layer
-    ctx.save(); ctx.globalAlpha = 0.38 + pulse * 0.22;
-    pUnit(ctx,cx,cy,-26,-12+wingF+idleY,WH,16,30,isLeft,S);
-    pUnit(ctx,cx,cy, 10,-12-wingF+idleY,WH,16,30,isLeft,S);
-    ctx.restore();
-    // Left wing — feathered, gold-tipped
-    p(-26,-12+wingF,CO,14,28); p(-25,-11+wingF,WS,12,26); p(-24,-10+wingF,WM,9,24); p(-23,-8+wingF,WH,5,20);
-    p(-25,-11+wingF,AH,12,1);                                                     // top highlight
-    p(-25,0+wingF,CO,4,14); p(-24,1+wingF,WS,2,12);                               // wing lower fold
-    p(-25,-14+wingF,CO,6,8); p(-24,-13+wingF,WS,4,6); p(-23,-12+wingF,WH,2,4);    // wing top tuft
-    // Gold feather tips
-    p(-26,-14+wingF,GB,1,2); p(-26,-6+wingF,GB,1,2); p(-26,2+wingF,GB,1,2); p(-26,10+wingF,GB,1,2);
-    // Right wing (mirror)
-    p( 10,-12-wingF,CO,14,28); p(11,-11-wingF,WS,12,26); p(12,-10-wingF,WM,9,24); p(13,-8-wingF,WH,5,20);
-    p( 11,-11-wingF,AH,12,1);                                                     // top highlight
-    p( 23,0-wingF,CO,4,14); p(24,1-wingF,WS,2,12);
-    p( 11,-14-wingF,CO,6,8); p(12,-13-wingF,WS,4,6); p(13,-12-wingF,WH,2,4);
-    p(23,-14-wingF,GB,1,2); p(23,-6-wingF,GB,1,2); p(23,2-wingF,GB,1,2); p(23,10-wingF,GB,1,2);
+    // ── SABATONS
+    p(-9, 22, CO, 8, 5); p(-8, 23, T1, 6, 3); p(-8, 23, T3, 6, 1);
+    p( 2, 22, CO, 8, 5); p( 3, 23, T1, 6, 3); p( 3, 23, T3, 6, 1);
 
-    // ── MASSIVE JUDGMENT SWORD (vertical, gold-trimmed, glowing edge)
-    p(-1,-66,CO,7,80); p( 0,-65,GS,5,78); p( 0,-62,GM,3,72); p( 0,-58,GB,2,62);   // shaft
-    p( 1,-56,`rgba(255,215,0,${0.5+pulse*0.5})`,1,58);                            // glowing core
-    // Sword crossguard (broad, jeweled)
-    p(-8,12,CO,18,6); p(-7,13,GS,16,4); p(-6,14,GB,12,2); p(-6,14,GW,12,1);
-    p(-3,14,CY,2,2);                                                              // center gem
-    // Sword pommel (gold ball)
-    p(-3,20,CO,6,5); p(-2,21,GB,4,3); p(-2,21,GW,4,1);
-    p(-1,22,CW,2,1);
-    // Sword tip flare
-    p(-2,-70,CO,5,5); p(-1,-69,GW,3,3);
-    ctx.save(); ctx.globalAlpha = 0.55 + pulse * 0.35;
-    pUnit(ctx,cx,cy,-1,-66+idleY,GW,7,80,isLeft,S);
-    ctx.restore();
+    // ── GREAVES
+    p(-9,  4, CO, 18, 19); p(-8,  5, T0, 16, 17); p(-7,  5, T1, 14, 16);
+    p(-5,  6, T2, 10, 14);
+    p(-8,  5, T4, 16,  1);                                                       // top highlight
+    p(-1,  6, T0,  2, 13);
+    p(-9, 19, CO, 18,  3); p(-8, 20, G2, 16, 2); p(-8, 20, G3, 16, 1);
 
-    // ── BOOTS (gold-cuffed)
-    p(-7,14,CO,7,9); p(-6,15,AS,5,8); p(-4,16,AM,3,6);
-    p( 1,14,CO,6,9); p( 2,15,AS,5,8); p( 3,16,AM,3,6);
-    p(-7,14,GB,7,1); p( 1,14,GB,6,1);
+    // ── BELT
+    p(-8,  1, CO, 16, 4); p(-7, 2, G1, 14, 2); p(-7, 2, G3, 14, 1);
 
-    // ── ROBE LOWER (silver-white, gold scripture center)
-    p(-8,2,CO,16,13); p(-7,3,AS,14,11); p(-6,4,AM,11,9); p(-5,5,AB,7,7);
-    p(-7,3,AH,14,1);                                                              // top highlight
-    p(-2,2,CO,5,13); p(-1,3,GS,3,11); p( 0,4,GB,2,8); p( 0,4,GW,2,1);
+    // ── CUIRASS with a gold judgment band
+    p(-8,-18, CO, 17, 20); p(-7,-17, T0, 15, 18); p(-6,-17, T1, 13, 17);
+    p(-4,-16, T2,  9, 15);
+    p(-7,-17, T4, 15,  1);                                                       // top highlight
+    p( 6,-16, T0,  2, 16);
+    p(-7,-11, G2, 15,  3); p(-6,-10, G4, 13, 1);
+    p(-2, -5, CO,  5,  5); p(-1, -4, G3, 3, 3); p(-1, -4, G4, 3, 1);
+    glow(-1, -4, G4, 3, 1, 0.50 + ep * 0.30);
 
-    // ── BELT (gold w/ cyan judgment gem)
-    p(-8,0,CO,16,3); p(-7,1,GM,14,2); p(-7,1,GB,14,1);
-    p(-2,0,CO,4,3); p(-1,1,CY,2,1);
+    // ── PAULDRONS + COLLAR
+    p(-13,-21, CO, 7, 9); p(-12,-20, T1, 5, 7); p(-12,-20, T4, 5, 1);
+    p(-12,-21, G2,  5, 1);
+    p(  6,-21, CO, 7, 9); p(  7,-20, T1, 5, 7); p(  7,-20, T4, 5, 1);
+    p(  7,-21, G2,  5, 1);
+    p(-6,-22, CO, 12, 3); p(-5,-21, T3, 10, 2); p(-5,-21, T4, 10, 1);
 
-    // ── CHEST (riveted, cyan judgment eye)
-    p(-7,-14,CO,15,17); p(-6,-13,AS,13,15); p(-5,-12,AM,10,12); p(-4,-11,AB,7,10); p(-3,-10,AL,4,8);
-    p(-6,-13,AH,13,1);                                                            // top highlight
-    p(-2,-13,CO,5,16); p(-1,-12,GS,3,14); p( 0,-11,GM,2,12); p( 0,-8,GB,2,6);     // gold column
-    // Cyan judgment eye on chest
-    p(-4,-5,CO,9,9); p(-3,-4,AB,7,7); p(-2,-3,CY,5,5);
-    p(-1,-2,GB,3,3); p( 0,-1,CO,1,1);                                             // pupil
-    ctx.save(); ctx.globalAlpha = 0.60 + pulse * 0.30;
-    pUnit(ctx,cx,cy,-4,-5+idleY,CW,9,9,isLeft,S);
-    ctx.restore();
-    for (let r=0; r<3; r++) { p(-6,-10+r*4,GB,1,1); p(5,-10+r*4,GB,1,1); }        // gold rivets
+    // ── ARMS, both to the hilt
+    p(-12,-15, CO, 6, 14); p(-11,-14, T1, 4, 12); p(-11,-14, T3, 4, 1);
+    p(-12,  0, CO, 6,  5); p(-11,  1, T2, 4,  3); p(-11, 1, T4, 4, 1);
+    p(  6,-15, CO, 6, 14); p(  7,-14, T1, 4, 12); p(  7,-14, T3, 4, 1);
+    p(  6,  0, CO, 6,  5); p(  7,  1, T2, 4,  3); p(  7, 1, T4, 4, 1);
 
-    // ── PAULDRONS (silver, gold-rim)
-    p(-13,-12,CO,8,9); p(-12,-11,AS,6,8); p(-11,-11,AM,4,7); p(-10,-10,AH,2,5);
-    p(-12,-11,AH,6,1);
-    p(-12,-12,GB,6,1);
-    p( 6,-12,CO,8,9); p( 7,-11,AS,6,8); p( 8,-11,AM,4,7); p( 9,-10,AH,2,5);
-    p( 7,-11,AH,6,1);
-    p( 7,-12,GB,6,1);
+    // ── HOLY GREATSWORD, held point-down in front
+    p(-3, -8, CO, 7, 34); p(-2, -7, T2, 5, 32); p(-2, -7, T4, 5, 1);             // blade
+    p(-1, -7, T3, 3, 30);                                                        // fuller light
+    p(-2, 26, CO, 5,  4); p(-1, 27, T3, 3, 2);                                   // point
+    p(-7,-12, CO, 15, 5); p(-6,-11, G2, 13, 3); p(-6,-11, G4, 13, 1);            // crossguard
+    p(-2,-18, CO,  5, 7); p(-1,-17, G1, 3, 5);                                   // grip
+    p(-3,-23, CO,  7, 6); p(-2,-22, G3, 5, 4); p(-2,-22, G4, 5, 1);              // pommel
+    glow(-2, -7, T4, 5, 1, 0.35 + ep * 0.26);
+    glow(-6,-11, G4, 13, 1, 0.40 + ep * 0.28);
 
-    // ── ARMS + HANDS
-    p(-11,-10,CO,5,12); p(-10,-9,AM,4,10); p(-10,-9,AH,4,1);
-    p(-11,-17,CO,5,8); p(-10,-16,SK,4,6);
-    p( 7,-10,CO,5,12); p( 8,-9,AM,4,10); p( 8,-9,AH,4,1);
-    p( 7,-17,CO,5,8); p( 8,-16,SK,4,6);
+    // ── NECK + GREAT HELM
+    p(-2,-25, CO, 4, 3); p(-1,-24, K0, 2, 2);
+    p(-7,-38, CO, 14, 15); p(-6,-37, T0, 12, 13); p(-5,-37, T1, 10, 12);
+    p(-6,-37, T4, 12,  1);                                                       // top highlight
+    p( 4,-36, T0,  2, 11);
+    p(-6,-32, CO, 12,  3); p(-5,-31, K0, 10, 1);
+    p(-5,-31, isAtk ? G4 : G3, 10, 1);                                           // visor slit
+    glow(-5,-31, G4, 10, 1, 0.40 + ep * 0.28);
+    p(-7,-39, CO, 14, 2); p(-6,-38, G2, 12, 1);
 
-    // ── NECK
-    p(-3,-16,CO,7,3); p(-2,-15,AM,5,2);
-
-    // ── HEAD (silver helm, cyan glowing visor band)
-    p(-8,-30,CO,16,14); p(-7,-29,AS,14,12); p(-6,-28,AM,11,10); p(-5,-27,AB,8,8); p(-4,-26,AH,5,6);
-    p(-7,-29,AH,14,1);                                                            // top highlight
-    // Cyan judgment visor (wide band)
-    p(-5,-25,CO,11,4); p(-4,-24,`rgba(0,229,255,${0.55+pulse*0.40})`,9,3); p(-3,-24,AH,5,2);
-    ctx.save(); ctx.globalAlpha = 0.65 + pulse * 0.30;
-    pUnit(ctx,cx,cy,-4,-24+idleY,CW,9,3,isLeft,S);
-    ctx.restore();
-    p(-8,-16,GB,16,1);                                                            // gold helm rim
-
-    // ── HALO CROWN (3-spire gold w/ cyan center jewel)
-    p(-8,-36,CO,16,8); p(-7,-35,AS,14,7); p(-6,-34,AM,11,6); p(-5,-33,GB,8,4);
-    p(-7,-35,AH,14,1);                                                            // top highlight
-    p(-8,-36,GM,16,1); p(-8,-36,GB,16,1);                                         // gold base ring
-    // 3 gold spires
-    p(-6,-40,CO,4,6); p(-5,-39,GB,3,5); p(-5,-40,GW,3,1);                         // L spire
-    p( 2,-40,CO,4,6); p( 3,-39,GB,3,5); p( 3,-40,GW,3,1);                         // R spire
-    p(-1,-44,CO,4,10); p( 0,-43,GL,2,9); p( 0,-44,GW,2,2); p( 1,-46,CY,1,3);      // center tallest w/ cyan tip
-    ctx.save(); ctx.globalAlpha = 0.65 + pulse * 0.30;
-    pUnit(ctx,cx,cy, 1,-46+idleY,CW,1,3,isLeft,S);
-    ctx.restore();
+    // ── SCALES HALO floating over the helm
+    p(-1,-46, CO, 3, 5); p( 0,-45, G2, 1, 3);                                    // post
+    p(-9,-48, CO, 19, 3); p(-8,-47, G2, 17, 1); p(-8,-47, G4, 17, 1);            // beam
+    pChain(p, -8, -46, -8, -43, 2, G1, G3);
+    pChain(p,  8, -46,  8, -43, 2, G1, G3);
+    p(-11,-42 + tilt, CO, 7, 3); p(-10,-41 + tilt, G2, 5, 2); p(-10,-41 + tilt, G4, 5, 1);
+    p(  5,-42 - tilt, CO, 7, 3); p(  6,-41 - tilt, G2, 5, 2); p(  6,-41 - tilt, G4, 5, 1);
+    glow(-8,-47, G4, 17, 1, 0.45 + ep * 0.30);
+    glow(-10,-41 + tilt, G4, 5, 1, 0.35 + ep * 0.25);
+    glow(  6,-41 - tilt, G4, 5, 1, 0.35 + ep * 0.25);
 
     if (isAtk) {
-        ctx.save(); ctx.globalAlpha = 0.85; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy,-3,-72+idleY,GW,11,12,isLeft,S);                          // sword tip flash
-        ctx.restore();
-        ctx.save(); ctx.globalAlpha = 0.62; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy,-1,-60+idleY,GW,7,68,isLeft,S);                           // sword beam
-        ctx.restore();
-        ctx.save(); ctx.globalAlpha = 0.50; ctx.globalCompositeOperation = 'lighter';
-        pUnit(ctx,cx,cy,-26,-14+idleY,WH,52,34,isLeft,S);                         // wing burst
-        ctx.restore();
+        glow(-8,-47, G4, 17, 3, 0.65);
+        glow(-2, -7, T4,  5, 32, 0.35);
     }
 }
 

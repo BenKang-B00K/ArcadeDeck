@@ -1,63 +1,6 @@
 /* === ui_hud.css === */
 /* ui_hud.css - Top HUD Bar, Stage Info, and Global Controls */
 
-#settings-btn {
-    z-index: 5;
-    background: none;
-    border: 1px solid rgba(255, 215, 0, 0.3);
-    color: #ffd700;
-    font-size: 10px;
-    cursor: pointer;
-    width: 18px; 
-    height: 18px; 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 3px;
-    transition: all 0.2s;
-    background: rgba(0,0,0,0.3);
-}
-
-#settings-btn:hover {
-    border-color: #00e5ff;
-    box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
-    transform: scale(1.1);
-    color: #fff;
-}
-
-#restart-btn-top, #game-pause-btn {
-    min-width: 45px;
-    height: 16px;
-    background: #1a0000;
-    color: #ff4500;
-    border: 1px solid #8b0000;
-    border-radius: 2px;
-    font-family: 'Cinzel', serif;
-    font-size: 8px;
-    padding: 0 4px;
-    cursor: pointer;
-    text-transform: uppercase;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-}
-
-#restart-btn-top {
-    width: 136px;
-    height: 14.5px;
-    padding: 10px 5px;
-    border: 1px solid #8b0000;
-}
-
-#restart-btn-top:hover, #game-pause-btn:hover {
-    border-color: #00e5ff;
-    box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
-    color: #fff;
-    transform: scale(1.05);
-}
-
 /* Sleeping Statue Curse Widget — bottom-left corner of game canvas */
 #sleeping-statue-widget {
     position: absolute;
@@ -75,6 +18,9 @@
     background: rgba(8, 0, 14, 0.60);
     pointer-events: auto;
     backdrop-filter: blur(2px);
+    /* Fixed width: long form names / curse labels must not push the box over the adjacent slot. */
+    width: clamp(44px, 11vw, 56px);
+    box-sizing: border-box;
 }
 #sleeping-statue-widget:hover {
     border-color: rgba(200, 80, 255, 0.65);
@@ -92,6 +38,10 @@
 #sleeping-statue-icon[data-form="1"] { filter: hue-rotate(-15deg) saturate(1.2) drop-shadow(0 0 6px rgba(255,140,80,0.55)); }
 #sleeping-statue-icon[data-form="2"] { filter: hue-rotate(-30deg) saturate(1.35) drop-shadow(0 0 7px rgba(255,80,80,0.65)); }
 #sleeping-statue-icon[data-form="3"] { filter: hue-rotate(-50deg) saturate(1.5) brightness(1.1) drop-shadow(0 0 9px rgba(255,30,30,0.8)); }
+#sleeping-statue-icon[data-form="4"] { filter: hue-rotate(-70deg) saturate(1.7) brightness(1.15) drop-shadow(0 0 10px rgba(255,60,20,0.85)); }
+#sleeping-statue-icon[data-form="5"] { filter: hue-rotate(-90deg) saturate(1.9) brightness(1.2) drop-shadow(0 0 12px rgba(255,20,60,0.9)); }
+#sleeping-statue-icon[data-form="6"] { filter: hue-rotate(-120deg) saturate(2.1) brightness(1.25) drop-shadow(0 0 14px rgba(220,0,120,0.95)); }
+#sleeping-statue-icon[data-form="7"] { filter: hue-rotate(-150deg) saturate(2.4) brightness(1.3) contrast(1.15) drop-shadow(0 0 16px rgba(180,0,255,1)); }
 .sleeping-statue-info {
     display: flex;
     flex-direction: column;
@@ -100,20 +50,18 @@
     width: 100%;
 }
 #sleeping-statue-name {
-    font-size: clamp(5px, 1.39vw, 7.5px);
+    font-size: calc(clamp(5px, 1.39vw, 7.5px) * var(--fs));
     text-align: center;
     color: #ffb3b3;
     white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
     pointer-events: none;
     line-height: 1;
     font-family: 'Cinzel', serif;
     font-weight: 700;
 }
-.gstat-row {
-    display: none; /* hidden in compact mode; visible in tooltip */
-}
-.gstat-ally  { color: #ff8888; }
-.gstat-enemy { color: #ffaa44; }
 
 /* Cursed Status — bottom-right corner of game canvas, same scale as sleeping-statue widget */
 #cursed-status-container {
@@ -131,7 +79,9 @@
     flex-direction: column;
     align-items: center;
     gap: 1px;
-    min-width: clamp(36px, 9.63vw, 52px);
+    width: clamp(44px, 11vw, 56px);
+    box-sizing: border-box;
+    border-radius: 6px; /* match statue widget */
 }
 #cursed-status-container:hover {
     border-color: rgba(200, 80, 255, 0.65);
@@ -139,7 +89,7 @@
 }
 /* Large PE icon inside cursed-status, mirrors sleeping-statue canvas height */
 #cursed-status-icon {
-    font-size: clamp(22px, 6.67vw, 36px);
+    font-size: calc(clamp(22px, 6.67vw, 36px) * var(--fs));
     line-height: 1;
     display: block;
     width: clamp(28px, 8.15vw, 44px);
@@ -153,9 +103,12 @@
 #cursed-status-icon[data-level="2"] { filter: hue-rotate(-50deg) saturate(1.4) drop-shadow(0 0 7px rgba(255,69,0,0.8)); }
 #cursed-status-icon[data-level="3"] { filter: hue-rotate(-70deg) saturate(1.6) brightness(1.1) drop-shadow(0 0 10px rgba(255,34,34,0.9)); animation: cursedPulse 1s infinite alternate; }
 #cursed-status {
-    font-size: clamp(5px, 1.39vw, 7.5px);
+    font-size: calc(clamp(5px, 1.39vw, 7.5px) * var(--fs));
     font-weight: bold;
     white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
     pointer-events: none;
     line-height: 1;
     font-family: 'Cinzel', serif;
@@ -187,7 +140,7 @@
     display: flex;
     align-items: center;
     gap: 3px;
-    font-size: 7px;
+    font-size: calc(7px * var(--fs));
     color: #ff4500;
     height: 16px;
 }
@@ -224,13 +177,28 @@
     display: flex;
     align-items: center;
     gap: 2px;
-    font-size: 8px;
+    font-size: calc(8px * var(--fs));
     font-weight: bold;
     color: #888;
     white-space: nowrap;
 }
 
-.gauge-icon { font-size: clamp(9px, 2.22vw, 12px); transition: transform 0.2s; }
+.gauge-icon { font-size: calc(clamp(9px, 2.22vw, 12px) * var(--fs)); transition: transform 0.2s; }
+.gauge-abbr {
+    font-family: 'Cinzel', serif;
+    font-size: calc(clamp(7px, 1.6vw, 8px) * var(--fs));
+    letter-spacing: 0.5px;
+    color: #9a9a9a;
+}
+#se-label .gauge-icon, #se-label .gauge-abbr { color: #4dd0e1; }
+#pe-label .gauge-icon, #pe-label .gauge-abbr { color: #b388ff; }
+#rs-label .gauge-icon, #rs-label .gauge-abbr { color: #ff6e6e; }
+/* PE ≥ 75%: pulse the bar so the game-over threshold is impossible to miss. */
+.gauge-bar.pe.danger { border-color: #ff1744; animation: peDanger 0.9s infinite alternate; }
+@keyframes peDanger {
+    from { box-shadow: 0 0 2px rgba(255, 23, 68, 0.4); }
+    to   { box-shadow: 0 0 8px rgba(255, 23, 68, 0.95), inset 0 0 6px rgba(255, 23, 68, 0.5); }
+}
 
 .gauge-bar {
     flex: 1;
@@ -247,7 +215,7 @@
     right: 4px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: clamp(7px, 1.67vw, 9px);
+    font-size: calc(clamp(7px, 1.67vw, 9px) * var(--fs));
     font-weight: bold;
     color: #fff;
     text-shadow: 1px 1px 1px #000;
@@ -261,7 +229,7 @@
 /* Gauge Floating Numbers — positioned via JS with position:fixed */
 .gauge-floating-num {
     position: fixed;
-    font-size: 11px;
+    font-size: calc(11px * var(--fs));
     font-weight: 900;
     pointer-events: none;
     z-index: 9999;
@@ -340,7 +308,7 @@
     position: absolute;
     top: 2px; left: 0; right: 0;
     text-align: center;
-    font-size: clamp(7px, 1.1vw, 11px);
+    font-size: calc(clamp(7px, 1.1vw, 11px) * var(--fs));
     font-weight: 900;
     color: #ffcce0;
     text-shadow: 0 1px 2px #000, 0 0 4px rgba(255, 0, 102, 0.8);
@@ -353,7 +321,7 @@
     left: -4px;
     background: #d50000;
     color: #fff;
-    font-size: 8px;
+    font-size: calc(8px * var(--fs));
     font-weight: 900;
     padding: 1px 4px;
     border-radius: 4px;
@@ -363,20 +331,15 @@
     pointer-events: none;
     display: none;
 }
-#tba-card {
-    filter: grayscale(1) brightness(0.4);
-    cursor: not-allowed;
-    border-color: #444 !important;
-    color: #666 !important;
+/* Settings card (was the TBA placeholder) — only touch-reachable way to pause/restart. */
+#settings-btn .card-icon svg {
+    width: 58%;
+    height: 58%;
+    filter: drop-shadow(0 0 5px currentColor);
+    animation: gearSpin 12s linear infinite;
 }
-#tba-card .tba-label {
-    position: relative;
-    z-index: 2;
-    font-size: clamp(8px, 1.2vw, 11px);
-    font-weight: 900;
-    color: #888;
-    letter-spacing: 1px;
-}
+#settings-btn:hover .card-icon svg { animation-duration: 3s; }
+@keyframes gearSpin { to { transform: rotate(360deg); } }
 
 .tower-card {
     background: #0a0a0a;
@@ -412,10 +375,11 @@
     transition: transform 0.2s;
 }
 .tower-card:hover .card-icon img { transform: scale(1.06); }
-.tower-card .card-label { font-size: clamp(9px, 1.8vw, 14px); font-weight: bold; position: relative; z-index: 2; }
+.tower-card .card-label { font-size: calc(clamp(9px, 1.8vw, 14px) * var(--fs)); font-weight: bold; position: relative; z-index: 2; }
 .tower-card .card-cost {
-    font-size: clamp(8px, 1.3vw, 13px);
+    font-size: calc(clamp(8px, 1.3vw, 11px) * var(--fs));
     font-weight: 700;
+    white-space: nowrap; /* "100 SE" wrapped to two lines at 13px in a 47px card */
     opacity: 1;
     position: absolute;
     left: 0; right: 0; bottom: 2px;
@@ -436,7 +400,7 @@
     right: -4px;
     background: #ff1744;
     color: #fff;
-    font-size: 7px;
+    font-size: calc(7px * var(--fs));
     font-weight: 900;
     padding: 1px 4px;
     border-radius: 4px;
@@ -470,7 +434,7 @@
     transform: translateX(-50%);
     background: #ff1744;
     color: #fff;
-    font-size: 9px;
+    font-size: calc(9px * var(--fs));
     font-weight: 900;
     padding: 2px 6px;
     border-radius: 3px;
@@ -577,7 +541,7 @@
 .st-default { gap: clamp(4px, 1vw, 8px); padding: clamp(4px, 1vw, 8px) 0; }
 .st-sigil {
     font-family: 'Cinzel', serif;
-    font-size: clamp(22px, 22cqi, 36px);
+    font-size: calc(clamp(22px, 22cqi, 36px) * var(--fs));
     color: #e6b855;
     text-shadow:
         0 0 18px rgba(212,168,64,0.7),
@@ -593,7 +557,7 @@
 }
 .st-default-title {
     font-family: 'Cinzel', serif;
-    font-size: clamp(11px, 11cqi, 16px);
+    font-size: calc(clamp(11px, 11cqi, 16px) * var(--fs));
     font-weight: 900;
     color: #e8c170;
     letter-spacing: clamp(2px, 0.6vw, 5px);
@@ -607,7 +571,7 @@
 .st-default-sub {
     color: #b8a890;
     font-family: 'Cinzel', serif;
-    font-size: clamp(6px, 5.5cqi, 9px);
+    font-size: calc(clamp(6px, 5.5cqi, 9px) * var(--fs));
     letter-spacing: clamp(3px, 0.8vw, 6px);
     font-weight: 700;
     text-transform: uppercase;
@@ -624,7 +588,7 @@
 .st-lore {
     color: #c8b89a;
     font-family: 'Cinzel', 'Noto Serif KR', serif;
-    font-size: clamp(7px, 6cqi, 10px);
+    font-size: calc(clamp(7px, 6cqi, 10px) * var(--fs));
     line-height: 1.55;
     max-width: 88%;
     font-style: italic;
@@ -635,7 +599,7 @@
 }
 .st-hint {
     margin-top: clamp(3px, 0.7vw, 6px);
-    font-size: clamp(6px, 5cqi, 8px);
+    font-size: calc(clamp(6px, 5cqi, 8px) * var(--fs));
     color: #8898b0;
     text-transform: uppercase;
     letter-spacing: clamp(2px, 0.5vw, 3px);
@@ -687,7 +651,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: clamp(12px, 13cqi, 18px);
+    font-size: calc(clamp(12px, 13cqi, 18px) * var(--fs));
     background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.08), rgba(0,0,0,0.6));
     border: 1px solid rgba(255,215,0,0.25);
     box-shadow: inset 0 0 8px rgba(0,0,0,0.7), 0 0 6px rgba(0,0,0,0.5);
@@ -728,7 +692,7 @@
 }
 .st-name {
     font-family: 'Cinzel', 'Noto Serif KR', serif;
-    font-size: clamp(10px, 9cqi, 14px);
+    font-size: calc(clamp(10px, 9cqi, 14px) * var(--fs));
     font-weight: 700;
     color: #ffd700;
     letter-spacing: 0.5px;
@@ -753,7 +717,7 @@
 }
 .st-tier-badge {
     font-family: 'Cinzel', serif;
-    font-size: clamp(6px, 5cqi, 8px);
+    font-size: calc(clamp(6px, 5cqi, 8px) * var(--fs));
     font-weight: 900;
     padding: 1px 6px;
     border-radius: 3px;
@@ -771,7 +735,7 @@
 .st-tier-badge.shrine { color: #00ff88; }
 .st-name.shrine { color: #00ff88; text-shadow: 0 0 10px rgba(0,255,136,0.4), 0 1px 0 rgba(0,0,0,0.95), 0 2px 4px rgba(0,0,0,0.9); }
 .st-role {
-    font-size: clamp(6px, 5cqi, 8px);
+    font-size: calc(clamp(6px, 5cqi, 8px) * var(--fs));
     color: #c8c8c8;
     font-style: italic;
     letter-spacing: 0.5px;
@@ -780,7 +744,7 @@
 .st-role-chip {
     flex: 0 0 auto;
     font-family: 'Cinzel', 'Noto Serif KR', serif;
-    font-size: clamp(6px, 5cqi, 8.5px);
+    font-size: calc(clamp(6px, 5cqi, 8.5px) * var(--fs));
     font-weight: 700;
     font-style: italic;
     padding: 1px 6px;
@@ -798,7 +762,7 @@
 .st-role-chip.tier3 { color: #d49bff; border-color: rgba(191,90,242,0.4); }
 .st-role-chip.tier4 { color: #ffc46b; border-color: rgba(255,159,10,0.45); }
 .st-tag {
-    font-size: clamp(6px, 5cqi, 8px);
+    font-size: calc(clamp(6px, 5cqi, 8px) * var(--fs));
     font-weight: 700;
     padding: 1px 5px;
     border-radius: 3px;
@@ -826,8 +790,8 @@
 .st-stat {
     display: flex;
     align-items: center;
-    gap: clamp(4px, 0.9vw, 7px);
-    padding: clamp(3px, 0.8vw, 6px) clamp(5px, 1vw, 8px);
+    gap: clamp(3px, 0.6vw, 5px);
+    padding: clamp(3px, 0.8vw, 6px) clamp(4px, 0.8vw, 6px);
     background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0.65));
     border: 1px solid rgba(255,215,0,0.18);
     border-radius: 5px;
@@ -836,12 +800,12 @@
 }
 .st-stat-ic {
     flex: 0 0 auto;
-    width: clamp(14px, 12cqi, 20px);
-    height: clamp(14px, 12cqi, 20px);
+    width: clamp(13px, 10cqi, 17px);
+    height: clamp(13px, 10cqi, 17px);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: clamp(10px, 9cqi, 14px);
+    font-size: calc(clamp(10px, 9cqi, 14px) * var(--fs));
     line-height: 1;
     filter: drop-shadow(0 0 5px currentColor) drop-shadow(0 1px 1px rgba(0,0,0,0.9));
 }
@@ -861,7 +825,7 @@
 .st-stat-body { display: flex; flex-direction: column; min-width: 0; flex: 1; gap: 1px; }
 .st-stat-lbl {
     font-family: 'Cinzel', serif;
-    font-size: clamp(6px, 4.8cqi, 8px);
+    font-size: calc(clamp(6px, 4.8cqi, 8px) * var(--fs));
     font-weight: 900;
     letter-spacing: 1.2px;
     text-transform: uppercase;
@@ -871,7 +835,7 @@
 }
 .st-stat-val {
     font-family: 'JetBrains Mono', 'Cinzel', monospace;
-    font-size: clamp(9px, 8cqi, 12px);
+    font-size: calc(clamp(9px, 7.5cqi, 11px) * var(--fs));
     font-weight: 900;
     color: #fff;
     line-height: 1.05;
@@ -927,7 +891,7 @@
     align-items: center;
     justify-content: center;
     font-family: 'JetBrains Mono', monospace;
-    font-size: clamp(8px, 6.5cqi, 10px);
+    font-size: calc(clamp(8px, 6.5cqi, 10px) * var(--fs));
     font-weight: 900;
     color: #fff;
     text-shadow: 0 0 4px #000, 0 0 4px #000, 0 1px 2px rgba(0,0,0,0.95);
@@ -946,7 +910,7 @@
     border-radius: 0 5px 5px 0;
     color: #d0d0d0;
     font-family: 'Cinzel', 'Noto Serif KR', serif;
-    font-size: clamp(7.5px, 6cqi, 10px);
+    font-size: calc(clamp(7.5px, 6cqi, 10px) * var(--fs));
     line-height: 1.5;
     font-style: italic;
     font-weight: 500;
@@ -962,7 +926,7 @@
 .st-warn-line {
     width: 100%;
     font-family: 'Cinzel', 'Noto Serif KR', serif;
-    font-size: clamp(6.5px, 5cqi, 8.5px);
+    font-size: calc(clamp(6.5px, 5cqi, 8.5px) * var(--fs));
     color: #888;
     font-style: italic;
     text-align: left;
@@ -975,7 +939,7 @@
     margin-top: 3px;
     color: #908070;
     font-family: 'Cinzel', 'Noto Serif KR', serif;
-    font-size: clamp(6.5px, 5cqi, 8.5px);
+    font-size: calc(clamp(6.5px, 5cqi, 8.5px) * var(--fs));
     font-style: italic;
     letter-spacing: 1.2px;
     text-align: center;
@@ -1015,7 +979,7 @@
         inset 0 -1px 0 rgba(0,0,0,0.7),
         inset 0 0 14px rgba(0,0,0,0.55);
     color: #b8a888;
-    font-size: clamp(6.5px, 5.5cqi, 8.5px);
+    font-size: calc(clamp(6.5px, 5.5cqi, 8.5px) * var(--fs));
     text-transform: uppercase;
     letter-spacing: 0.7px;
     padding: 2px 6px;
@@ -1064,23 +1028,13 @@
 }
 .st-btn-lbl {
     font-family: 'Cinzel', serif;
-    font-size: clamp(7.5px, 6.5cqi, 10px);
+    font-size: calc(clamp(7.5px, 6.5cqi, 10px) * var(--fs));
     font-weight: 900;
     color: #ffd700;
     line-height: 1.05;
     letter-spacing: 1.3px;
     text-shadow: 0 0 8px rgba(255,215,0,0.5), 0 1px 1px rgba(0,0,0,0.95);
 }
-.st-btn-sub {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: clamp(6px, 5cqi, 8px);
-    font-weight: 800;
-    opacity: 0.95;
-    letter-spacing: 0.4px;
-    text-shadow: 0 1px 1px rgba(0,0,0,0.95);
-    margin-top: 1px;
-}
-
 .st-btn.demolish {
     background:
         linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0) 40%),
@@ -1111,7 +1065,7 @@
 .st-shell.warn { align-items: center; justify-content: center; text-align: center; }
 .st-warn-block { display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .st-warn-icon {
-    font-size: clamp(16px, 16cqi, 26px);
+    font-size: calc(clamp(16px, 16cqi, 26px) * var(--fs));
     color: #ff1744;
     filter: drop-shadow(0 0 10px rgba(255,23,68,0.6));
     animation: warnFlash 0.6s infinite alternate;
@@ -1122,7 +1076,7 @@
 }
 .st-warn-title {
     font-family: 'Cinzel', serif;
-    font-size: clamp(11px, 10cqi, 14px);
+    font-size: calc(clamp(11px, 10cqi, 14px) * var(--fs));
     font-weight: 900;
     color: #ff1744;
     text-shadow:
@@ -1134,7 +1088,7 @@
 }
 .st-warn-msg {
     font-family: 'Cinzel', 'Noto Serif KR', serif;
-    font-size: clamp(8px, 7cqi, 10px);
+    font-size: calc(clamp(8px, 7cqi, 10px) * var(--fs));
     font-weight: 700;
     color: #f0e0e0;
     max-width: 92%;
@@ -1146,7 +1100,7 @@
 /* Typography & Titles */
 .unit-info-title {
     font-family: 'Cinzel', serif;
-    font-size: clamp(10px, 2.5vw, 14px);
+    font-size: calc(clamp(10px, 2.5vw, 14px) * var(--fs));
     font-weight: 700;
     color: #ffd700;
     text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
@@ -1191,7 +1145,7 @@
 }
 
 .unit-info-stats span:first-child { 
-    font-size: clamp(5.5px, 1.4vw, 7.5px); 
+    font-size: calc(clamp(5.5px, 1.4vw, 7.5px) * var(--fs)); 
     color: var(--stat-color, #ffd700); 
     font-weight: 900; 
     opacity: 0.7; 
@@ -1199,7 +1153,7 @@
     letter-spacing: 0.5px;
 }
 .unit-info-stats span:last-child { 
-    font-size: clamp(9px, 2.2vw, 12px); 
+    font-size: calc(clamp(9px, 2.2vw, 12px) * var(--fs)); 
     font-weight: 900; 
     color: #fff; 
     text-shadow: 0 0 10px var(--stat-glow, rgba(255,255,255,0.2));
@@ -1257,14 +1211,14 @@
 }
 
 .promo-label {
-    font-size: clamp(7px, 1.8vw, 9px);
+    font-size: calc(clamp(7px, 1.8vw, 9px) * var(--fs));
     font-weight: 900;
     color: #ffd700;
     line-height: 1;
 }
 
 .promo-cost-val {
-    font-size: clamp(6px, 1.5vw, 8px);
+    font-size: calc(clamp(6px, 1.5vw, 8px) * var(--fs));
     font-weight: bold;
     opacity: 0.9;
     margin-top: 1px;
@@ -1281,7 +1235,7 @@
     border: 1px solid #3e2723;
     border-radius: 4px;
     color: #666;
-    font-size: clamp(7px, 1.5vw, 9px);
+    font-size: calc(clamp(7px, 1.5vw, 9px) * var(--fs));
     font-family: 'Cinzel', serif;
     padding: 0 8px;
     cursor: pointer;
@@ -1299,7 +1253,7 @@
 
 /* Enemy Info Specialized Styles */
 .enemy-info-avatar {
-    font-size: clamp(20px, 5vw, 32px);
+    font-size: calc(clamp(20px, 5vw, 32px) * var(--fs));
     margin: clamp(2px, 0.5vw, 4px) 0;
     filter: drop-shadow(0 0 10px rgba(255, 69, 0, 0.6));
     animation: enemyPulse 2s infinite alternate ease-in-out;
@@ -1319,7 +1273,7 @@
 
 .info-default-text {
     font-family: 'Cinzel', serif;
-    font-size: clamp(10px, 2.8vw, 16px);
+    font-size: calc(clamp(10px, 2.8vw, 16px) * var(--fs));
     font-weight: 900;
     color: #d4a840;
     opacity: 0.92;
@@ -1328,9 +1282,9 @@
     text-shadow: 0 0 12px rgba(210,155,40,0.55), 0 1px 4px rgba(0,0,0,0.9);
 }
 
-.info-subtitle { color: #8fa8b8; font-size: clamp(6px, 1.6vw, 9px); margin-top: 2px; letter-spacing: 3px; font-weight: bold; z-index: 2; }
-.info-lore-text { color: #8fa0b0; font-size: clamp(7px, 1.8vw, 10px); line-height: 1.5; max-width: 90%; margin: 8px 0; z-index: 2; }
-.info-hint-text { font-size: clamp(6px, 1.5vw, 8px); color: #7080a0; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; z-index: 2; }
+.info-subtitle { color: #8fa8b8; font-size: calc(clamp(6px, 1.6vw, 9px) * var(--fs)); margin-top: 2px; letter-spacing: 3px; font-weight: bold; z-index: 2; }
+.info-lore-text { color: #8fa0b0; font-size: calc(clamp(7px, 1.8vw, 10px) * var(--fs)); line-height: 1.5; max-width: 90%; margin: 8px 0; z-index: 2; }
+.info-hint-text { font-size: calc(clamp(6px, 1.5vw, 8px) * var(--fs)); color: #7080a0; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; z-index: 2; }
 
 /* === ui_feedback.css === */
 /* ui_feedback.css - Tooltips, Switches, and Interactive Feedback */
@@ -1352,6 +1306,26 @@
     width: 160px;
     max-width: 160px;
 }
+
+/* Wide skin: for tooltips carrying a sentence rather than a couple of stats
+   (the Sacrifice warning), where 160px at 7.5px type wrapped to six lines. */
+.floating-tooltip.wide {
+    /* Explicit width, not just max-width: the tablet buttons sit near the right
+       edge of the positioning container, where a shrink-to-fit box collapses to
+       the space remaining beside its `left` offset (~108px) instead of 250. */
+    width: 250px;
+    max-width: 250px;
+    padding: 7px 11px;
+    /* Relic totals can run to ~22 lines late game; this holds all of them, so
+       the cap only ever guards against the box running off the container.
+       overflow:auto is deliberately avoided - at auto height the box reports a
+       few px of phantom overflow and paints a scrollbar that eats 14px. */
+    max-height: 320px;
+    overflow: hidden;
+}
+.floating-tooltip.wide .tooltip-title   { font-size: calc(11px * var(--fs)); margin-bottom: 4px; }
+.floating-tooltip.wide .tooltip-content { font-size: calc(9.5px * var(--fs)); line-height: 1.4; }
+.floating-tooltip.wide .tooltip-stat    { font-size: calc(9px * var(--fs)); margin-top: 4px; }
 
 .floating-tooltip::after {
     content: "";
@@ -1376,9 +1350,9 @@
     to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.tooltip-title { color: #ff00ff; font-weight: bold; font-size: 9px; margin-bottom: 3px; border-bottom: 1px solid rgba(255,0,255,0.2); padding-bottom: 1px; }
-.tooltip-content { color: #ccc; font-size: 7.5px; line-height: 1.2; }
-.tooltip-stat { display: flex; justify-content: space-between; gap: 8px; margin-top: 2px; font-size: 7px; }
+.tooltip-title { color: #ff00ff; font-weight: bold; font-size: calc(9px * var(--fs)); margin-bottom: 3px; border-bottom: 1px solid rgba(255,0,255,0.2); padding-bottom: 1px; }
+.tooltip-content { color: #ccc; font-size: calc(7.5px * var(--fs)); line-height: 1.2; }
+.tooltip-stat { display: flex; justify-content: space-between; gap: 8px; margin-top: 2px; font-size: calc(7px * var(--fs)); }
 .tooltip-stat span:first-child { color: #888; }
 .tooltip-stat span:last-child { color: #ffa500; font-weight: bold; }
 
@@ -1393,7 +1367,7 @@
     right: 6px;
     top: 4%;
     /* Responsive font-size: slightly smaller base, better scaling */
-    font-size: clamp(8px, 1.2vw, 11px);
+    font-size: calc(clamp(8px, 1.2vw, 11px) * var(--fs));
     width: clamp(120px, 28%, 200px);
     background: linear-gradient(135deg, #0d0012 85%, #1a0030);
     border: 1px solid rgba(148, 0, 211, 0.6);

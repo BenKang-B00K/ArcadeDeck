@@ -80,8 +80,7 @@ function renderGraphics() {
     if (typeof updatePixiSlots        === 'function') updatePixiSlots();
     if (typeof updateSlotsVfx         === 'function') updateSlotsVfx();
 
-    // ── Level 1: Background — drawLavaRoad baked once to bgLayer sprite (lava_road_pixi).
-    if (typeof updateLavaRoadPixi      === 'function') updateLavaRoadPixi();
+    // ── Level 1: Background ─────────────────────────────────────────────────
     if (typeof renderPixiShrineAuras   === 'function') renderPixiShrineAuras();
     if (typeof renderPixiShrineVfx     === 'function') renderPixiShrineVfx();
 
@@ -89,6 +88,8 @@ function renderGraphics() {
     if (typeof drawEnemies     === 'function') drawEnemies();
     if (typeof drawUnits       === 'function') drawUnits();
     if (typeof drawSummons     === 'function') drawSummons();
+    // Runs after every entity had its chance to claim the tablet's red outline.
+    if (typeof tickSelectionOutline === 'function') tickSelectionOutline();
 
     // ── Level 3: World Overlay — Portal / Gate ───────────────────────────────
     if (typeof drawPortal               === 'function') drawPortal();
@@ -113,6 +114,7 @@ function renderGraphics() {
     if (typeof drawImpactRings          === 'function') drawImpactRings();
     if (typeof drawStageFlashes         === 'function') drawStageFlashes();
     drawSelectionHalo();
+    if (typeof applyScreenShake === 'function') applyScreenShake();
 
     // ── Final Pixi render pass ────────────────────────────────────────────────
     // v8: simple app.render() or renderer.render({ container: stage })

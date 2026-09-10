@@ -49,6 +49,8 @@
         ghost: '<path d="M6 9a6 6 0 0112 0v10l-2-2-2 2-2-2-2 2-2-2-2 2zm3 3v2h2v-2zm4 0v2h2v-2z"/>',
         portal: '<path d="M12 2a4 10 0 100 20 4 10 0 000-20zm0 3a2 7 0 110 14 2 7 0 010-14z"/>',
 
+        chart: '<path d="M3 3h2v16h16v2H3zm4 10h3v6H7zm5-6h3v12h-3zm5 3h3v9h-3z"/>',
+
         // ── Generic placeholders for entity icons (data fallback) ────────
         ally_placeholder: '<path d="M12 3a4 4 0 100 8 4 4 0 000-8zm-6 18a6 6 0 0112 0z"/>',
         enemy_placeholder: '<path d="M4 6l4-2 4 2 4-2 4 2v6a8 8 0 01-16 0zm5 4v2h2v-2zm6 0v2h2v-2z"/>',

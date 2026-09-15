@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>🍉 FRUIT FRENZY v2</title>
+<title>FRUIT FRENZY</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap">
 <link rel="stylesheet" href="style.css">
-
-<script src="https://unpkg.com/i18next@23.10.1/i18next.min.js"></script>
-<script src="https://unpkg.com/i18next-browser-languagedetector@7.2.0/i18nextBrowserLanguageDetector.min.js"></script>
 </head>
 <body class="lang-en">
 
 <div id="achievement-toast">
-  <div class="ac-icon">🏆</div>
+  <div class="ac-icon" data-ico="trophy"></div>
   <div class="ac-info">
     <div class="ac-title" id="ac-toast-title">Achievement Unlocked!</div>
     <div class="ac-desc" id="ac-toast-desc">Achievement details</div>
@@ -22,6 +22,7 @@
 <div id="lang-wrap">
   <button class="lang-btn" id="lang-ko" onclick="switchLang('ko')">KR</button>
   <button class="lang-btn" id="lang-en" onclick="switchLang('en')">EN</button>
+  <button class="lang-btn" id="lang-ja" onclick="switchLang('ja')">JA</button>
 </div>
 
 <div id="stars"></div>
@@ -53,13 +54,13 @@
   <div id="canvas-wrap">
     <canvas id="gameCanvas"></canvas>
     <div id="floaters"></div>
-    <div id="lvlup" data-t="level_up">⭐ LEVEL UP! ⭐</div>
+    <div id="lvlup" data-t="level_up">LEVEL UP!</div>
 
     <!-- OVERLAY (start / game over) -->
     <div id="overlay">
-      <div class="ov-emoji">🍉</div>
+      <div class="ov-emoji" data-ico="watermelon"></div>
       <div class="ov-title" data-t="title">FRUIT FRENZY</div>
-      <div class="ov-sub" data-t="start_msg">Catch the fruits with your basket!<br>Avoid the bombs 💣 at all costs!</div>
+      <div class="ov-sub" data-t="start_msg">Catch the fruits with your basket!<br>Avoid the bombs at all costs!</div>
       <button class="btn" id="startBtn" data-t="start_btn">▶ Start</button>
     </div>
   </div>
@@ -69,16 +70,16 @@
     <div id="level-label" data-t="level">LV 1</div>
     <div id="level-track"><div id="level-fill"></div></div>
     <div id="lives-row">
-      <span class="hrt" id="h0">❤️</span>
-      <span class="hrt" id="h1">❤️</span>
-      <span class="hrt" id="h2">❤️</span>
+      <span class="hrt" id="h0" data-ico="heart"></span>
+      <span class="hrt" id="h1" data-ico="heart"></span>
+      <span class="hrt" id="h2" data-ico="heart"></span>
     </div>
   </div>
 
   <!-- BOTTOM -->
   <div id="bottom-row">
-    <div id="hint" data-t="hint">🖱️ Move with mouse or touch</div>
-    <button id="sound-btn" title="Toggle sound">🔊</button>
+    <div id="hint"><span data-ico="pointer"></span><span data-t="hint">Move with mouse or touch</span></div>
+    <button id="sound-btn" title="Toggle sound" data-ico="sound"></button>
   </div>
 </div>
 
@@ -170,8 +171,8 @@ function unlockAchievement(id) {
   const title = document.getElementById('ac-toast-title');
   const desc  = document.getElementById('ac-toast-desc');
   
-  title.textContent = i18next.t(`ac_${id}_title`) || 'Achievement!';
-  desc.textContent  = i18next.t(`ac_${id}_desc`) || '';
+  title.textContent = tr(`ac_${id}_title`);
+  desc.textContent  = tr(`ac_${id}_desc`);
   
   toast.classList.add('show');
   playTone(880, 'sine', 0.1, 0.2);
@@ -190,12 +191,12 @@ function showAchievements() {
   let listHtml = '';
   ACHIEVEMENTS.forEach(ac => {
     const isUnlocked = unlockedAchievements.includes(ac.id);
-    const title = i18next.t(`ac_${ac.id}_title`) || ac.id;
-    const desc  = i18next.t(`ac_${ac.id}_desc`) || '';
+    const title = tr(`ac_${ac.id}_title`);
+    const desc  = tr(`ac_${ac.id}_desc`);
     
     listHtml += `
       <div class="ac-item ${isUnlocked ? 'unlocked' : 'locked'}">
-        <div class="ac-item-icon">${isUnlocked ? '🏆' : '🔒'}</div>
+        <div class="ac-item-icon">${ico(isUnlocked ? 'trophy' : 'lock')}</div>
         <div class="ac-item-info">
           <div class="ac-item-title">${title}</div>
           <div class="ac-item-desc">${desc}</div>
@@ -205,10 +206,10 @@ function showAchievements() {
   });
 
   overlay.innerHTML = `
-    <div class="ov-title" style="font-size:32px; margin-bottom:5px;">${i18next.t('ac_menu_title') || 'ACHIEVEMENTS'}</div>
-    <div class="ac-counter">🏆 ${unlockedCount} / ${totalCount}</div>
+    <div class="ov-title" style="font-size:32px; margin-bottom:5px;">${tr('ac_menu_title')}</div>
+    <div class="ac-counter">${ico('trophy')} ${unlockedCount} / ${totalCount}</div>
     <div class="ac-list">${listHtml}</div>
-    <button class="btn secondary" id="backBtn">${i18next.t('back_btn') || 'BACK'}</button>
+    <button class="btn secondary" id="backBtn">${tr('back_btn')}</button>
   `;
   document.getElementById('backBtn').addEventListener('click', showMenu);
 }
@@ -220,6 +221,7 @@ const DESIGN_W = 420, DESIGN_H = 580;
 const canvas = document.getElementById('gameCanvas');
 const ctx    = canvas.getContext('2d');
 let W, H, scale = 1;
+const DPR = Math.min(window.devicePixelRatio || 1, 2);   // ponytail: cap 2 — 3x phones pay 9x fill for nothing visible
 let mouseX = 0;
 
 function resize() {
@@ -231,8 +233,9 @@ function resize() {
   scale = Math.min(maxW / DESIGN_W, maxH / DESIGN_H, 1);
   W = Math.round(DESIGN_W * scale);
   H = Math.round(DESIGN_H * scale);
-  canvas.width  = W;
-  canvas.height = H;
+  canvas.width  = Math.round(W * DPR);           // HiDPI backing store; all drawing stays in CSS px via the transform
+  canvas.height = Math.round(H * DPR);
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   canvas.style.width  = W + 'px';
   canvas.style.height = H + 'px';
   document.documentElement.style.setProperty('--cw', W + 'px');
@@ -252,6 +255,12 @@ function resize() {
       if (it.vx != null) it.vx *= r;
       if (it.amp != null) it.amp *= r;
       if (it.accel != null) it.accel *= r;
+      if (it.vy != null) it.vy *= r;
+      if (it.g != null) it.g *= r;
+      if (it.maxVy != null) it.maxVy *= r;
+      if (it.minSpeed != null) it.minSpeed *= r;
+      if (it.floorY != null) it.floorY *= ry;
+      if (it.hoverY != null) it.hoverY *= ry;
       if (it.baseX != null) it.baseX *= rx;
       if (it.ghosts) it.ghosts.forEach(g => { g.x *= rx; g.y *= ry; });
     });
@@ -259,11 +268,31 @@ function resize() {
       p.x *= rx; p.y *= ry;
       p.vx *= r; p.vy *= r; p.sz *= r;
     });
+    G.chunks.forEach(c => { c.x *= rx; c.y *= ry; c.vx *= r; c.vy *= r; c.s *= r; });
+    G.splats.forEach(s => { s.x *= rx; s.y *= ry; s.s *= r; });
+    G.bullets.forEach(b => { b.x *= rx; b.y *= ry; b.vy *= r; });
     G.trail = G.trail.map(t => t * rx);
     mouseX *= rx;
   } else {
     mouseX = W / 2;
   }
+  canvasLeft = canvas.getBoundingClientRect().left;
+  buildStaticGradients();
+}
+
+/* gradients that only depend on W/H — built once per resize, not per frame */
+let BG_BASE, BG_BOTTOM, BG_VIG, canvasLeft = 0;
+function buildStaticGradients() {
+  BG_BASE = ctx.createLinearGradient(0, 0, 0, H);
+  BG_BASE.addColorStop(0, '#1a0838');
+  BG_BASE.addColorStop(0.55, '#0a031e');
+  BG_BASE.addColorStop(1, '#0d0220');
+  BG_BOTTOM = ctx.createLinearGradient(0, H - 100 * scale, 0, H);
+  BG_BOTTOM.addColorStop(0, 'transparent');
+  BG_BOTTOM.addColorStop(1, 'rgba(0,245,255,0.10)');
+  BG_VIG = ctx.createRadialGradient(W/2, H/2, Math.min(W,H)*0.35, W/2, H/2, Math.max(W,H)*0.75);
+  BG_VIG.addColorStop(0, 'transparent');
+  BG_VIG.addColorStop(1, 'rgba(0,0,0,0.45)');
 }
 resize();
 window.addEventListener('resize', () => { resize(); });
@@ -311,6 +340,10 @@ function sfxCatch(combo) {
   if (combo >= 3) playTone(f*1.5, 'sine', .25, .12);
 }
 function sfxBomb()  { playTone(80,  'sawtooth', .35, .3, 220); }
+function sfxShot()  { playTone(1200, 'square', .07, .08, 700); }
+function sfxDetonate() { playTone(50, 'square', .3, .22, 300); }
+function sfxEmpty() { playTone(180, 'square', .06, .08); }
+function sfxAmmo()  { playTone(660, 'sine', .15, .2); setTimeout(() => playTone(990, 'sine', .22, .2), 80); }
 function sfxMiss()  { playTone(200, 'triangle', .25, .2, 100); }
 function sfxLevel() {
   [523,659,784,1047].forEach((f,i)=> setTimeout(()=>playTone(f,'sine',.3,.25), i*100));
@@ -321,7 +354,7 @@ function sfxGameOver() {
 
 document.getElementById('sound-btn').addEventListener('click', () => {
   soundOn = !soundOn;
-  document.getElementById('sound-btn').textContent = soundOn ? '🔊' : '🔇';
+  document.getElementById('sound-btn').innerHTML = ico(soundOn ? 'sound' : 'mute');
 });
 
 /* ═══════════════════════════════════════
@@ -346,9 +379,9 @@ const FRUIT_COLORS = {
   'banana': '#ffe066', 'watermelon': '#ff4d6a', 'blueberry': '#6666ff', 'pineapple': '#ffd633',
   'mango': '#ffb347', 'pear': '#c8e063', 'dragonfruit': '#ff66cc', 'coconut': '#a87654',
   'avocado': '#7fa650', 'plum': '#8b3a8b', 'pomegranate': '#c8313c', 'lime': '#a8e040',
-  'star': '#ffe600', 'bomb': '#ff2d78'
+  'star': '#ffe600', 'bomb': '#ff2d78', 'ammo': '#00f5ff'
 };
-const FRUITS = Object.keys(FRUIT_COLORS).filter(k => k !== 'star' && k !== 'bomb');
+const FRUITS = Object.keys(FRUIT_COLORS).filter(k => k !== 'star' && k !== 'bomb' && k !== 'ammo');
 const STAR_F = 'star';
 const BOMB   = 'bomb';
 
@@ -376,18 +409,63 @@ const SVG_SOURCES = {
   lime: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><ellipse cx='50' cy='52' rx='34' ry='38' fill='#a8e040'/><path d='M50 14v76M16 52h68M24 28l52 48M76 28L24 76' stroke='#6b9020' stroke-width='2' opacity='.4' fill='none'/><ellipse cx='42' cy='40' rx='12' ry='16' fill='#d4f08a' opacity='.6'/><ellipse cx='32' cy='28' rx='6' ry='3' fill='#3fa635' transform='rotate(-30 32 28)'/></svg>`,
   star: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 8l12 26 28 4-20 20 5 28L50 72 25 86l5-28L10 38l28-4z' fill='#ffe600' stroke='#cc9900' stroke-width='2'/><path d='M50 16l9 20 22 3-16 16 4 22L50 66l-19 11 4-22-16-16 22-3z' fill='url(#sg)'/><defs><radialGradient id='sg' cx='.5' cy='.4'><stop offset='0' stop-color='#fff5a3'/><stop offset='1' stop-color='#ffe600' stop-opacity='0'/></radialGradient></defs></svg>`,
   bomb: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='58' r='34' fill='#1a1a1a'/><circle cx='40' cy='48' r='10' fill='#444' opacity='.7'/><path d='M50 24c0-8 6-14 14-14' stroke='#8b6f47' stroke-width='4' fill='none'/><circle cx='66' cy='10' r='5' fill='#ff8c00'/><circle cx='66' cy='10' r='3' fill='#ffe600'/><circle cx='72' cy='6' r='2' fill='#ff2d78'/><circle cx='60' cy='6' r='2' fill='#ffe600'/></svg>`,
+  ammo: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='14' y='24' width='72' height='58' rx='10' fill='#0d2a3a' stroke='#00f5ff' stroke-width='4'/><rect x='22' y='32' width='56' height='42' rx='6' fill='#123c52'/><path d='M14 46h72' stroke='#00f5ff' stroke-width='2' opacity='.35'/><g fill='#e0ffff'><rect x='33' y='38' width='11' height='30' rx='5.5'/><rect x='56' y='38' width='11' height='30' rx='5.5'/></g><g fill='#00f5ff'><rect x='33' y='38' width='11' height='11' rx='5.5'/><rect x='56' y='38' width='11' height='11' rx='5.5'/></g></svg>`,
   basket: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 60'><path d='M8 12h84l-8 44H16z' fill='#8b5a2b' stroke='#5c3a1a' stroke-width='2'/><g stroke='#5c3a1a' stroke-width='1.5' fill='none' opacity='.6'><path d='M16 22h70M18 32h66M20 42h62M24 52h54M30 12v44M50 12v44M70 12v44'/></g><path d='M4 10h92v6H4z' fill='#a0703a' stroke='#5c3a1a' stroke-width='2'/></svg>`
 };
 
 const SPRITES = {};
+const SPRITE_PX = 256; // items draw at <=78 CSS px x DPR 2
 for (const [k, svg] of Object.entries(SVG_SOURCES)) {
   const img = new Image();
+  img.onload = () => {
+    const c = document.createElement('canvas');
+    c.width = SPRITE_PX;
+    c.height = k === 'basket' ? Math.round(SPRITE_PX * 0.6) : SPRITE_PX;
+    const cx = c.getContext('2d');
+    cx.drawImage(img, 0, 0, c.width, c.height);
+    if (FRUITS.includes(k)) {                      // uniform 3D shading, clipped to the sprite: lit top-left, shaded bottom-right
+      const p = SPRITE_PX;
+      const g = cx.createRadialGradient(p*0.38, p*0.36, 0, p*0.5, p*0.52, p*0.56);
+      g.addColorStop(0,    'rgba(255,255,255,0.34)');
+      g.addColorStop(0.42, 'rgba(255,255,255,0)');
+      g.addColorStop(1,    'rgba(0,0,0,0.30)');
+      cx.globalCompositeOperation = 'source-atop';
+      cx.fillStyle = g;
+      cx.fillRect(0, 0, p, p);
+    }
+    SPRITES[k] = c;
+  };
   img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
-  SPRITES[k] = img;
 }
 
+const svgUrl = svg => `url('data:image/svg+xml;utf8,${encodeURIComponent(svg).replace(/'/g, "%27")}')`;   // single-quoted so it survives inside style="…"
+
+/* UI ICONS — id-free so they can be inlined; fruit sprites (gradient ids) go through background-image instead */
+const starPts = (n, ro, ri) => Array.from({ length: n*2 }, (_, i) => {
+  const r = i % 2 ? ri : ro, a = Math.PI * i / n - Math.PI/2;
+  return `${(50 + r*Math.cos(a)).toFixed(1)},${(50 + r*Math.sin(a)).toFixed(1)}`;
+}).join(' ');
+const UI_SVG = {
+  trophy: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M28 12h44v30a22 22 0 0 1-44 0z' fill='#ffd633'/><path d='M28 20H16a4 4 0 0 0-4 4c0 13 9 22 20 24M72 20h12a4 4 0 0 1 4 4c0 13-9 22-20 24' fill='none' stroke='#e6a800' stroke-width='6' stroke-linecap='round'/><path d='M43 62h14v10H43z' fill='#cc9900'/><path d='M32 72h36a4 4 0 0 1 4 4v10H28V76a4 4 0 0 1 4-4z' fill='#b38600'/><ellipse cx='40' cy='28' rx='5' ry='9' fill='#fff5a3' opacity='.55'/></svg>`,
+  lock: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M30 46V32a20 20 0 0 1 40 0v14' fill='none' stroke='#9a9a9a' stroke-width='8' stroke-linecap='round'/><rect x='20' y='44' width='60' height='44' rx='9' fill='#7a7a7a'/><circle cx='50' cy='62' r='6' fill='#2a2a2a'/><rect x='47' y='64' width='6' height='13' rx='2' fill='#2a2a2a'/></svg>`,
+  heart: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 90C25 70 8 55 8 34a20 20 0 0 1 36-12l6 8 6-8a20 20 0 0 1 36 12c0 21-17 36-42 56z' fill='#ff2d78'/><ellipse cx='30' cy='34' rx='6' ry='10' fill='#ff9ac0' opacity='.6' transform='rotate(-25 30 34)'/></svg>`,
+  heartbreak: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 90C25 70 8 55 8 34a20 20 0 0 1 36-12l6 8 6-8a20 20 0 0 1 36 12c0 21-17 36-42 56z' fill='#ff2d78'/><path d='M50 30l-8 16 12 12-10 14 6 18' stroke='#3a0a20' stroke-width='6' fill='none' stroke-linejoin='round' stroke-linecap='round'/></svg>`,
+  boom: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><polygon points='${starPts(12, 48, 30)}' fill='#ff6a00'/><polygon points='${starPts(12, 34, 20)}' fill='#ffd633'/><circle cx='50' cy='50' r='11' fill='#fff5a3'/></svg>`,
+  fire: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 6c4 16 22 26 22 50a22 22 0 0 1-44 0c0-10 6-16 10-22 2 8 6 10 10 10 0-14-6-24 2-38z' fill='#ff6a00'/><path d='M50 48c4 8 12 12 12 22a12 12 0 0 1-24 0c0-6 4-10 6-14 2 4 4 6 6 6 0-6-2-10 0-14z' fill='#ffe600'/></svg>`,
+  sound: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M14 38h16l22-18v60L30 62H14z' fill='currentColor'/><path d='M62 36a20 20 0 0 1 0 28M72 24a36 36 0 0 1 0 52' fill='none' stroke='currentColor' stroke-width='7' stroke-linecap='round'/></svg>`,
+  mute: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M14 38h16l22-18v60L30 62H14z' fill='currentColor'/><path d='M62 38l24 24M86 38L62 62' fill='none' stroke='currentColor' stroke-width='7' stroke-linecap='round'/></svg>`,
+  pointer: `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M30 12l48 40-20 4 12 24-10 5-12-24-14 16z' fill='currentColor'/></svg>`,
+};
+function ico(name, cls = '') {
+  return UI_SVG[name]
+    ? UI_SVG[name].replace('<svg', `<svg class="ico ${cls}"`)
+    : `<span class="ico ${cls}" style="background-image:${svgUrl(SVG_SOURCES[name])}"></span>`;
+}
+document.querySelectorAll('[data-ico]').forEach(el => { el.innerHTML = ico(el.dataset.ico); });
+document.head.insertAdjacentHTML('beforeend', `<link rel="icon" href="data:image/svg+xml;utf8,${encodeURIComponent(SVG_SOURCES.watermelon)}">`);
+
 /* DECORATIVE FRUIT — ambient background */
-const DECOR_FRUIT_KEYS = Object.keys(SVG_SOURCES).filter(k => k !== 'bomb' && k !== 'basket');
+const DECOR_FRUIT_KEYS = Object.keys(SVG_SOURCES).filter(k => k !== 'bomb' && k !== 'basket' && k !== 'ammo');
 const decorRoot = document.getElementById('fruit-decor');
 
 function spawnDecorFruit() {
@@ -407,7 +485,7 @@ function spawnDecorFruit() {
   const delay = -Math.random() * dur;
   const rot = Math.random() * 360;
   const opac = 0.10 + Math.random() * 0.18;
-  el.style.cssText = `left:${px}vw; top:${py}vh; width:${sz}px; height:${sz}px; opacity:${opac}; background-image:url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}"); animation: decorFloat ${dur}s ease-in-out ${delay}s infinite alternate; --r:${rot}deg;`;
+  el.style.cssText = `left:${px}vw; top:${py}vh; width:${sz}px; height:${sz}px; opacity:${opac}; background-image:${svgUrl(svg)}; animation: decorFloat ${dur}s ease-in-out ${delay}s infinite alternate; --r:${rot}deg;`;
   decorRoot.appendChild(el);
   return el;
 }
@@ -481,7 +559,7 @@ function createEater(cfg) {
   if (!decorRoot) return;
   const el = document.createElement('div');
   el.className = 'fruit-eater ' + (cfg.cls || '');
-  el.style.backgroundImage = `url("data:image/svg+xml;utf8,${encodeURIComponent(cfg.idleSvg)}")`;
+  el.style.backgroundImage = svgUrl(cfg.idleSvg);
   el.innerHTML = `<div class="eater-pupil eater-pupil-l"></div><div class="eater-pupil eater-pupil-r"></div>`;
   const pupils = el.querySelectorAll('.eater-pupil');
   decorRoot.appendChild(el);
@@ -529,10 +607,10 @@ function createEater(cfg) {
     claimedFruits.delete(t.el);
     chompUntil = performance.now() + 350;
     el.classList.add('chomping');
-    el.style.backgroundImage = `url("data:image/svg+xml;utf8,${encodeURIComponent(cfg.chompSvg)}")`;
+    el.style.backgroundImage = svgUrl(cfg.chompSvg);
     setTimeout(() => {
       el.classList.remove('chomping');
-      el.style.backgroundImage = `url("data:image/svg+xml;utf8,${encodeURIComponent(cfg.idleSvg)}")`;
+      el.style.backgroundImage = svgUrl(cfg.idleSvg);
     }, 350);
     setTimeout(() => { if (t.el.parentNode) t.el.remove(); }, 600);
     setTimeout(() => spawnDecorFruit(), 1200 + Math.random() * 1500);
@@ -541,6 +619,7 @@ function createEater(cfg) {
   }
 
   function tick() {
+    if (G && G.running) { requestAnimationFrame(tick); return; }
     const now = performance.now();
     const chomping = now < chompUntil;
 
@@ -588,7 +667,7 @@ function createEater(cfg) {
       if (now >= thinkSwapAt) {
         const k = DECOR_FRUIT_KEYS[Math.floor(Math.random() * DECOR_FRUIT_KEYS.length)];
         thoughtKey = k;
-        thoughtFruit.style.backgroundImage = `url("data:image/svg+xml;utf8,${encodeURIComponent(SVG_SOURCES[k])}")`;
+        thoughtFruit.style.backgroundImage = svgUrl(SVG_SOURCES[k]);
         thinkSwapAt = now + 110 + Math.random() * 70;
       }
       thought.classList.add('show', 'thinking');
@@ -597,7 +676,7 @@ function createEater(cfg) {
       const k = target.el.dataset.fruit;
       if (k !== thoughtKey) {
         thoughtKey = k;
-        thoughtFruit.style.backgroundImage = `url("data:image/svg+xml;utf8,${encodeURIComponent(SVG_SOURCES[k])}")`;
+        thoughtFruit.style.backgroundImage = svgUrl(SVG_SOURCES[k]);
       }
       thought.classList.add('show');
       thought.classList.remove('thinking');
@@ -629,7 +708,8 @@ function newState() {
     running: false, over: false,
     score: 0, lives: 3,
     levelIdx: 0,
-    items: [], particles: [], floaters: [], trail: [], shockwaves: [], sparkles: [],
+    items: [], particles: [], floaters: [], trail: [], shockwaves: [], sparkles: [], chunks: [], splats: [], bullets: [],
+    ammo: AMMO_START, ammoMax: AMMO_START, reload: 0, ammoDeny: 0,
     basket: {
       x: W/2, w: Math.round(82*scale), h: Math.round(20*scale),
       sx: 1, sy: 1
@@ -648,20 +728,75 @@ function newState() {
 /* ═══════════════════════════════════════
    INPUT
 ═══════════════════════════════════════ */
+/* PC: pointer is locked to the canvas while playing (see startGame) — locked = relative movementX, Esc = back to absolute */
+const FINE_POINTER = matchMedia('(hover:hover) and (pointer:fine)').matches;
 canvas.addEventListener('mousemove', e => {
-  const r = canvas.getBoundingClientRect();
-  mouseX = (e.clientX - r.left);
+  mouseX = document.pointerLockElement === canvas
+    ? Math.max(0, Math.min(W, mouseX + e.movementX))
+    : e.clientX - canvasLeft;
 });
+canvas.addEventListener('mousedown', e => { if (e.button === 0) shoot(); });
 canvas.addEventListener('touchmove', e => {
   e.preventDefault();
-  const r = canvas.getBoundingClientRect();
-  mouseX = (e.touches[0].clientX - r.left);
+  mouseX = e.touches[0].clientX - canvasLeft;
 }, { passive:false });
 canvas.addEventListener('touchstart', e => {
   e.preventDefault();
-  const r = canvas.getBoundingClientRect();
-  mouseX = (e.touches[0].clientX - r.left);
+  mouseX = e.touches[0].clientX - canvasLeft;
+  shoot();
 }, { passive:false });
+
+/* bullet goes straight up from the basket; bombs detonate, fruit costs a life */
+const AMMO_START = 2, AMMO_CAP = 4, RELOAD_FRAMES = 90;   // ponytail: one bullet back every ~1.5s; tune here
+function shoot() {
+  if (!G.running) return;
+  if (G.ammo <= 0) { G.ammoDeny = 1; sfxEmpty(); return; }
+  G.ammo--;
+  const by = H - Math.round(55*scale);
+  G.bullets.push({ x: G.basket.x, y: by - 6*scale, vy: -13*scale });
+  G.basket.sy = 0.85;                              // recoil
+  spawnParticles(G.basket.x, by - 4*scale, '#00f5ff', 4);
+  sfxShot();
+}
+function detonate(bomb) {
+  G.items.splice(G.items.indexOf(bomb), 1);
+  G.bombsAvoided++;
+  G.score += 1;
+  G.screenShake = Math.max(G.screenShake, 10);
+  G.flash = Math.max(G.flash, 0.4);
+  spawnParticles(bomb.x, bomb.y, '#ff8c00', 16);
+  spawnParticles(bomb.x, bomb.y, '#ffe600', 8);
+  spawnShockwave(bomb.x, bomb.y, 'rgba(255,140,0,0.9)', 90);
+  spawnShockwave(bomb.x, bomb.y, 'rgba(255,255,255,0.7)', 55);
+  addFloater(bomb.x, bomb.y, `${ico('boom')} +1`, '#ff8c00');
+  sfxDetonate();
+  checkLevelUp();
+  updateHUD();
+  checkAchievements();
+}
+function catchAmmo(item) {
+  const grew = G.ammoMax < AMMO_CAP;
+  if (grew) G.ammoMax++;
+  G.ammo = G.ammoMax; G.reload = 0;             // full refill either way
+  G.basket.sx = 1.25; G.basket.sy = 0.75;
+  G.flash = Math.max(G.flash, 0.4);
+  sfxAmmo();
+  spawnParticles(item.x, item.y, '#00f5ff', 14);
+  spawnShockwave(item.x, item.y, 'rgba(0,245,255,0.9)', 60);
+  for (let i = 0; i < 8; i++) spawnSparkle(item.x, item.y, '#e0ffff');
+  addFloater(item.x, item.y, grew ? `AMMO +1` : `RELOAD`, '#00f5ff');
+}
+function shotFruit(fruit) {
+  G.items.splice(G.items.indexOf(fruit), 1);
+  G.comboCount = 0;
+  G.lives--;
+  G.screenShake = 15;
+  sfxMiss();
+  spawnBurst(fruit);
+  addFloater(fruit.x, fruit.y, `${ico('heartbreak')} -1`, '#ff2d78');
+  updateHUD();
+  if (G.lives <= 0) gameOver();
+}
 
 /* ═══════════════════════════════════════
    UI HELPERS
@@ -689,7 +824,7 @@ function updateHUD() {
   const pct  = G.levelIdx >= LEVELS.length-1 ? 100
     : Math.min(100, ((G.score - prev) / (lv.scoreTarget - prev)) * 100);
   
-  const lvPrefix = i18next.t('level') || 'LV';
+  const lvPrefix = tr('level');
   document.getElementById('level-label').textContent = `${lvPrefix} ${lv.level}`;
   document.getElementById('level-fill').style.width  = pct + '%';
 }
@@ -697,7 +832,7 @@ function updateHUD() {
 /* floating score text */
 function addFloater(x, y, text, color) {
   const div = document.createElement('div');
-  div.textContent = text;
+  div.innerHTML = text;
   div.style.cssText = `
     position:absolute;
     left:${x}px; top:${y}px;
@@ -727,8 +862,8 @@ document.head.appendChild(floatStyle);
 /* level-up banner */
 function showLevelUp(lvNum) {
   const el = document.getElementById('lvlup');
-  const lvPrefix = i18next.t('level') || 'LEVEL';
-  el.textContent = `⭐ ${lvPrefix} ${lvNum}! ⭐`;
+  const lvPrefix = tr('level');
+  el.innerHTML = `${ico('star')} ${lvPrefix} ${lvNum}! ${ico('star')}`;
   el.style.transition = 'none';
   el.style.opacity = '1';
   el.style.transform = 'translate(-50%,-50%) scale(1)';
@@ -745,10 +880,14 @@ function showLevelUp(lvNum) {
 ═══════════════════════════════════════ */
 function startGame() {
   document.getElementById('overlay').style.display = 'none';
+  document.body.classList.add('playing');
   canvas.style.cursor = 'none';
+  const ac = getAudioCtx();                       // iOS: must create/resume inside a user gesture
+  if (ac.state === 'suspended') ac.resume();
   G = newState();
   G.running = true;
   mouseX = W / 2;
+  if (FINE_POINTER) canvas.requestPointerLock?.()?.catch?.(() => {});   // must be inside the Start click; rejects harmlessly if denied
   updateHUD();
   requestAnimationFrame(loop);
 }
@@ -761,6 +900,11 @@ const MOVEMENT_POOL = [
   { type:'bounce',   weight:[ 0, 1, 2, 3, 4, 5, 6] },
   { type:'accel',    weight:[ 0, 1, 2, 3, 4, 5, 6] },
   { type:'pendulum', weight:[ 0, 0, 1, 2, 3, 4, 5] },
+  // physics-y: hop = down→bounce up→down, brake/skid = friction, hover = stall then plunge
+  { type:'hop',      weight:[ 0, 1, 2, 3, 4, 4, 5] },
+  { type:'brake',    weight:[ 0, 1, 2, 3, 3, 4, 4] },
+  { type:'skid',     weight:[ 0, 1, 2, 3, 4, 4, 5] },
+  { type:'hover',    weight:[ 0, 0, 1, 2, 3, 4, 5] },
 ];
 
 function pickMovement(levelIdx) {
@@ -775,23 +919,35 @@ function pickMovement(levelIdx) {
   return 'straight';
 }
 
+function wallBounce(item) {
+  if (item.x < item.sz/2) { item.x = item.sz/2; item.vx = Math.abs(item.vx); }
+  else if (item.x > W - item.sz/2) { item.x = W - item.sz/2; item.vx = -Math.abs(item.vx); }
+}
+
 function spawnItem() {
   const lv = LEVELS[G.levelIdx];
   const isBomb = Math.random() < lv.bombChance;
   const isStar = !isBomb && Math.random() < 0.04;
-  const emoji  = isBomb ? BOMB : isStar ? STAR_F : FRUITS[Math.floor(Math.random()*FRUITS.length)];
+  const isAmmo = !isBomb && !isStar && Math.random() < 0.006;   // very rare: ~1 per 3 min at mid levels
+  const emoji  = isBomb ? BOMB : isStar ? STAR_F : isAmmo ? 'ammo' : FRUITS[Math.floor(Math.random()*FRUITS.length)];
   const sz = Math.round((28 + Math.random()*12) * scale);
 
   let move = pickMovement(G.levelIdx);
   if (isStar) move = Math.random() < 0.6 ? 'zigzag' : 'pendulum';
-  if (isBomb && G.levelIdx >= 2 && Math.random() < 0.35) move = 'bounce';
+  if (isAmmo) move = 'drift';
+  if (isBomb) {
+    const r = Math.random();
+    if (G.levelIdx >= 1 && r < 0.30) move = 'seek';
+    else if (G.levelIdx >= 2 && r < 0.55) move = 'bounce';
+    else if (G.levelIdx >= 3 && r < 0.70) move = 'hover';
+  }
 
   const baseX = sz + Math.random()*(W - sz*2);
-  const baseSpeed = (lv.speed + Math.random()*1.4) * scale;
+  const baseSpeed = (lv.speed + Math.random()*1.4) * scale * (isAmmo ? 0.7 : 1);
 
   const item = {
     x: baseX, y: -sz,
-    sz, emoji, isBomb, isStar,
+    sz, emoji, isBomb, isStar, isAmmo,
     speed: baseSpeed,
     rot: 0,
     rotSpd: (Math.random()-.5) * 6,
@@ -824,6 +980,32 @@ function spawnItem() {
       item.phase = Math.random() * Math.PI * 2;
       item.speed = baseSpeed * 0.8;
       break;
+    case 'hop':
+      item.vy = baseSpeed;
+      item.g = 0.06 * scale;
+      item.maxVy = baseSpeed * 2.2;              // ponytail: fairness cap, tune if hop feels unfair
+      item.floorY = (0.25 + Math.random()*0.35) * H;
+      item.bounces = Math.random() < 0.4 ? 2 : 1;
+      break;
+    case 'brake':
+      item.speed = baseSpeed * 2.6;
+      item.minSpeed = baseSpeed * 0.45;
+      item.friction = 0.965;
+      break;
+    case 'skid':
+      item.vx = (Math.random() < 0.5 ? -1 : 1) * (5 + Math.random()*4) * scale;
+      item.friction = 0.955;
+      break;
+    case 'hover':
+      item.vy = 0;
+      item.maxVy = baseSpeed * 2.2;
+      item.hoverY = (0.2 + Math.random()*0.35) * H;
+      item.hoverT = 30 + Math.random()*30;
+      break;
+    case 'seek':
+      item.vx = 0; item.rotSpd = 0;
+      item.speed = baseSpeed * 0.85;
+      break;
   }
 
   G.items.push(item);
@@ -842,6 +1024,37 @@ function spawnParticles(x, y, color, count=10) {
   }
 }
 
+function spawnJuice(x, y, color, n) {
+  for (let i = 0; i < n; i++) {
+    const a = Math.random()*Math.PI*2, sp = (1.5 + Math.random()*3.5)*scale;
+    G.particles.push({ x, y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp - 1.5*scale, life: 1, color, sz: (2+Math.random()*3)*scale, juice: true });
+  }
+}
+/* catch: sprite splits into quarters that fly apart, plus juice */
+function spawnBurst(item) {
+  const img = SPRITES[item.emoji];
+  if (!img) return;
+  const s = item.sz * 1.4, hw = img.width/2, hh = img.height/2;
+  for (let q = 0; q < 4; q++) {
+    const dx = q & 1 ? 1 : -1, dy = q >> 1 ? 1 : -1;
+    G.chunks.push({
+      img, s, sx: (q & 1) * hw, sy: (q >> 1) * hh, hw, hh,
+      x: item.x + dx*s/4, y: item.y + dy*s/4, rot: item.rot,
+      vx: dx * (1 + Math.random()*2) * scale,
+      vy: (dy * (1 + Math.random()*1.5) - 2.5) * scale,
+      rotSpd: (Math.random()-.5) * 16, life: 1,
+    });
+  }
+  spawnJuice(item.x, item.y, FRUIT_COLORS[item.emoji], 8);
+}
+/* miss: fruit squashes on the floor under the basket, puddle spreads */
+function spawnSplat(item) {
+  const y = H - Math.round(55*scale) + G.basket.h;
+  const color = FRUIT_COLORS[item.emoji];
+  G.splats.push({ img: SPRITES[item.emoji], x: item.x, y, s: item.sz*1.4, color, life: 1 });
+  spawnJuice(item.x, y, color, 6);
+}
+
 function checkLevelUp() {
   const lv = LEVELS[G.levelIdx];
   if (G.levelIdx < LEVELS.length-1 && G.score >= lv.scoreTarget) {
@@ -855,7 +1068,9 @@ function checkLevelUp() {
 
 function gameOver() {
   G.running = false; G.over = true;
+  document.body.classList.remove('playing');
   canvas.style.cursor = 'auto';
+  if (document.pointerLockElement === canvas) document.exitPointerLock();
   sfxGameOver();
   if (G.score > best) {
     best = G.score;
@@ -869,16 +1084,20 @@ function gameOver() {
     subScore: best
   }, '*');
 
+  renderGameOver();
+}
+
+function renderGameOver() {
   const overlay = document.getElementById('overlay');
   const isNew   = G.score === best && best > 0;
   overlay.style.display = 'flex';
   
   const t = translations;
   overlay.innerHTML = `
-    <div style="font-size:${Math.round(50*scale)}px">💥</div>
+    <div style="font-size:${Math.round(50*scale)}px">${ico('boom')}</div>
     <div class="ov-title">${t.game_over || 'GAME OVER!'}</div>
-    <div class="ov-score">🏆 ${G.score} ${t.pts || ''}</div>
-    ${isNew ? `<div class="new-best">${t.new_best || 'NEW BEST!'}</div>` : ''}
+    <div class="ov-score">${ico('trophy')} ${G.score} ${t.pts || ''}</div>
+    ${isNew ? `<div class="new-best">${ico('star')} ${t.new_best || 'NEW BEST!'}</div>` : ''}
     <div class="ov-best">${t.best_record || 'Best'}: <span>${best} ${t.pts || ''}</span></div>
     <div class="score-grid">
       <div>${t.stat_fruits || 'Fruits'}</div><div class="sg-val">${G.fruitsTotal}</div>
@@ -888,7 +1107,7 @@ function gameOver() {
     </div>
     <div class="btn-row">
       <button class="btn secondary" id="menuBtn">${t.menu_btn || 'MENU'}</button>
-      <button class="btn secondary btn-icon" id="acBtn">🏆 ${unlockedAchievements.length}</button>
+      <button class="btn secondary btn-icon" id="acBtn">${ico('trophy')} ${unlockedAchievements.length}</button>
     </div>
     <button class="btn" id="startBtn">${t.restart_btn || 'REPLAY'}</button>
   `;
@@ -904,18 +1123,21 @@ function showMenu() {
   canvas.style.cursor = 'auto';
   const t = translations;
   overlay.innerHTML = `
-    <div class="ov-emoji">🍉</div>
+    ${ico('watermelon', 'ov-emoji')}
     <div class="ov-title">${t.title || 'FRUIT FRENZY'}</div>
     <div class="ov-sub">${t.start_msg || ''}</div>
     <div class="score-grid" style="font-size:12px;">
-      <div>⭐ ${t.summary_star || 'Star'}</div><div class="sg-val">${t.val_star || '3pts'}</div>
-      <div>🍎 ${t.summary_fruit || 'Fruit'}</div><div class="sg-val">${t.val_fruit || '1pt'}</div>
-      <div>💣 ${t.summary_bomb || 'Bomb'}</div><div class="sg-val">${t.val_bomb || '-1'}</div>
-      <div>🍎 ${t.summary_miss || 'Miss'}</div><div class="sg-val">${t.val_miss || '-1'}</div>
+      <div>${ico('star')} ${t.summary_star || 'Star'}</div><div class="sg-val">${t.val_star || '3pts'}</div>
+      <div>${ico('apple')} ${t.summary_fruit || 'Fruit'}</div><div class="sg-val">${t.val_fruit || '1pt'}</div>
+      <div>${ico('bomb')} ${t.summary_bomb || 'Bomb'}</div><div class="sg-val">${t.val_bomb || '-1'}</div>
+      <div>${ico('boom')} ${t.summary_shoot || 'Shoot bomb'}</div><div class="sg-val">${t.val_shoot || '+1'}</div>
+      <div>${ico('boom')} ${t.summary_shot_fruit || 'Shoot fruit'}</div><div class="sg-val">${t.val_miss || '-1'}</div>
+      <div>${ico('ammo')} ${t.summary_ammo || 'Ammo Crate'}</div><div class="sg-val">${t.val_ammo || 'Bank +1 (max 4)'}</div>
+      <div>${ico('heartbreak')} ${t.summary_miss || 'Miss'}</div><div class="sg-val">${t.val_miss || '-1'}</div>
     </div>
     <div class="btn-row">
       <button class="btn" id="startBtn">${t.start_btn || 'START'}</button>
-      <button class="btn secondary btn-icon" id="acBtn">🏆 ${unlockedAchievements.length}</button>
+      <button class="btn secondary btn-icon" id="acBtn">${ico('trophy')} ${unlockedAchievements.length}</button>
     </div>
     ${best>0?`<div class="ov-best">${t.best_record || 'Best'}: <span>${best} ${t.pts || ''}</span></div>`:''}
   `;
@@ -928,11 +1150,7 @@ function showMenu() {
 ═══════════════════════════════════════ */
 function drawBG() {
   // base vertical gradient
-  const base = ctx.createLinearGradient(0, 0, 0, H);
-  base.addColorStop(0, '#1a0838');
-  base.addColorStop(0.55, '#0a031e');
-  base.addColorStop(1, '#0d0220');
-  ctx.fillStyle = base;
+  ctx.fillStyle = BG_BASE;
   ctx.fillRect(0, 0, W, H);
 
   // animated nebula blobs (cheap radial gradients)
@@ -968,7 +1186,7 @@ function drawBG() {
     const hue = (G.bgTime * 0.15) % 360;
     ctx.save();
     ctx.shadowColor = `hsl(${hue},100%,60%)`;
-    ctx.shadowBlur = Math.round(30 * scale);
+    ctx.shadowBlur = Math.round(30 * scale*DPR);
     ctx.strokeStyle = `hsla(${hue},100%,65%,${G.edgeGlow * 0.55})`;
     ctx.lineWidth = Math.round(6 * scale);
     ctx.strokeRect(2, 2, W - 4, H - 4);
@@ -979,17 +1197,11 @@ function drawBG() {
   }
 
   // bottom glow
-  const g = ctx.createLinearGradient(0, H - 100 * scale, 0, H);
-  g.addColorStop(0, 'transparent');
-  g.addColorStop(1, 'rgba(0,245,255,0.10)');
-  ctx.fillStyle = g;
+  ctx.fillStyle = BG_BOTTOM;
   ctx.fillRect(0, H - 100 * scale, W, 100 * scale);
 
   // vignette
-  const vg = ctx.createRadialGradient(W/2, H/2, Math.min(W,H)*0.35, W/2, H/2, Math.max(W,H)*0.75);
-  vg.addColorStop(0, 'transparent');
-  vg.addColorStop(1, 'rgba(0,0,0,0.45)');
-  ctx.fillStyle = vg;
+  ctx.fillStyle = BG_VIG;
   ctx.fillRect(0, 0, W, H);
 
   // combo flash
@@ -1034,7 +1246,7 @@ function drawBasket(x) {
 
   // outer glow halo (combo-pulsed)
   ctx.shadowColor = G.comboCount >= 5 ? `hsl(${(G.bgTime*0.4)%360},100%,65%)` : '#00f5ff';
-  ctx.shadowBlur  = Math.round((20 + comboBoost*22) * scale);
+  ctx.shadowBlur  = Math.round((20 + comboBoost*22) * scale*DPR);
 
   // body gradient
   const gr = ctx.createLinearGradient(bx, by, bx, by+bh);
@@ -1085,7 +1297,7 @@ function drawBasket(x) {
   ctx.stroke();
 
   const basketImg = SPRITES.basket;
-  if (basketImg && basketImg.complete && basketImg.naturalWidth > 0) {
+  if (basketImg) {
     const bsW = bw * 0.6;
     const bsH = bsW * 0.6;
     ctx.drawImage(basketImg, x - bsW/2, by + bh - bsH*0.1, bsW, bsH);
@@ -1097,7 +1309,7 @@ function drawBasket(x) {
 function drawItems() {
   G.items.forEach(item => {
     const img = SPRITES[item.emoji];
-    if (!img || !img.complete || img.naturalWidth === 0) return;
+    if (!img) return;
     const s = item.sz * 1.4;
 
     // ground shadow (faux 3D, fades as item nears bottom)
@@ -1108,7 +1320,6 @@ function drawItems() {
     ctx.save();
     ctx.globalAlpha = shadAlpha;
     ctx.fillStyle = '#000';
-    ctx.filter = 'blur(2px)';
     ctx.beginPath();
     ctx.ellipse(item.x, groundY + 2*scale, shadW, 3*scale, 0, 0, Math.PI*2);
     ctx.fill();
@@ -1133,7 +1344,7 @@ function drawItems() {
     if (item.isBomb) {
       const pulse = 0.5 + 0.5 * Math.sin(item.t * 0.3);
       ctx.shadowColor = '#ff3333';
-      ctx.shadowBlur  = Math.round((14 + pulse*16) * scale);
+      ctx.shadowBlur  = Math.round((14 + pulse*16) * scale*DPR);
       // fuse spark
       const sparkR = (2 + pulse*2) * scale;
       const sg = ctx.createRadialGradient(s*0.18, -s*0.34, 0, s*0.18, -s*0.34, sparkR*3);
@@ -1141,25 +1352,21 @@ function drawItems() {
       sg.addColorStop(1, 'transparent');
       ctx.fillStyle = sg;
       ctx.fillRect(-s, -s, s*2, s*2);
-    } else if (item.isStar) {
-      ctx.shadowColor = '#ffe600';
-      ctx.shadowBlur  = Math.round(24*scale);
+    } else if (item.isStar || item.isAmmo) {
+      ctx.shadowColor = item.isStar ? '#ffe600' : '#00f5ff';
+      ctx.shadowBlur  = Math.round(24* scale*DPR);
       // rotating sparkle halo
       const halo = ctx.createRadialGradient(0,0,0, 0,0, s*0.9);
-      halo.addColorStop(0, 'rgba(255,245,150,0.35)');
+      halo.addColorStop(0, item.isStar ? 'rgba(255,245,150,0.35)' : 'rgba(0,245,255,0.30)');
       halo.addColorStop(1, 'transparent');
       ctx.fillStyle = halo;
       ctx.fillRect(-s, -s, s*2, s*2);
-    } else {
-      ctx.shadowColor = 'rgba(255,255,255,0.35)';
-      ctx.shadowBlur  = Math.round(8*scale);
     }
     ctx.drawImage(img, -s/2, -s/2, s, s);
     ctx.restore();
   });
   ctx.globalAlpha = 1;
   ctx.shadowBlur = 0;
-  ctx.filter = 'none';
 }
 
 function drawParticles() {
@@ -1168,14 +1375,99 @@ function drawParticles() {
   G.particles.forEach(p => {
     ctx.globalAlpha = p.life;
     ctx.fillStyle   = p.color;
-    ctx.shadowColor = p.color;
-    ctx.shadowBlur  = Math.round(12*scale);
     ctx.beginPath();
-    ctx.arc(p.x, p.y, p.sz * p.life, 0, Math.PI*2);
+    if (p.juice) {   // droplet stretched along its velocity
+      const r = p.sz * p.life, len = Math.hypot(p.vx, p.vy) / scale;
+      ctx.ellipse(p.x, p.y, r * (1 + len*0.25), r * 0.6, Math.atan2(p.vy, p.vx), 0, Math.PI*2);
+    } else {
+      ctx.arc(p.x, p.y, p.sz * p.life, 0, Math.PI*2);
+    }
     ctx.fill();
   });
   ctx.restore();
   ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+}
+
+function drawBullets() {
+  if (!G.bullets.length) return;
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.shadowColor = '#00f5ff';
+  ctx.shadowBlur = 10*scale*DPR;
+  G.bullets.forEach(b => {
+    const g = ctx.createLinearGradient(0, b.y, 0, b.y + 26*scale);
+    g.addColorStop(0, 'rgba(0,245,255,0.6)');
+    g.addColorStop(1, 'transparent');
+    ctx.fillStyle = g;
+    ctx.fillRect(b.x - 1.5*scale, b.y, 3*scale, 26*scale);      // trail
+    ctx.fillStyle = '#e0ffff';
+    ctx.beginPath();
+    ctx.roundRect(b.x - 2.5*scale, b.y - 8*scale, 5*scale, 12*scale, 2.5*scale);
+    ctx.fill();
+  });
+  ctx.restore();
+  ctx.shadowBlur = 0;
+}
+
+/* ammo pips, top-left of the panel: filled = ready, outline = empty, the next one fills bottom-up as it reloads */
+function drawAmmo() {
+  const w = 7*scale, h = 18*scale, py = 14*scale, deny = G.ammoDeny;
+  ctx.save();
+  ctx.lineWidth = 1.2*scale;
+  for (let i = 0; i < G.ammoMax; i++) {
+    const x = 17*scale + i*14*scale + (Math.random()-.5) * 4*scale*deny;   // rattles when the player clicks on empty
+    ctx.beginPath();
+    ctx.roundRect(x - w/2, py, w, h, w/2);
+    if (i < G.ammo) {
+      ctx.shadowColor = '#00f5ff'; ctx.shadowBlur = 8*scale*DPR;
+      ctx.fillStyle = '#e0ffff';
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      continue;
+    }
+    ctx.strokeStyle = deny > 0.05 ? `rgba(255,45,120,${0.4 + deny*0.6})` : 'rgba(0,245,255,0.35)';
+    ctx.stroke();
+    if (i === G.ammo) {
+      ctx.save();
+      ctx.clip();
+      const p = G.reload / RELOAD_FRAMES;
+      ctx.fillStyle = 'rgba(0,245,255,0.55)';
+      ctx.fillRect(x - w/2, py + h*(1-p), w, h*p);
+      ctx.restore();
+    }
+  }
+  ctx.restore();
+}
+
+function drawChunks() {
+  G.chunks.forEach(c => {
+    ctx.save();
+    ctx.globalAlpha = c.life;
+    ctx.translate(c.x, c.y);
+    ctx.rotate(c.rot * Math.PI/180);
+    ctx.drawImage(c.img, c.sx, c.sy, c.hw, c.hh, -c.s/4, -c.s/4, c.s/2, c.s/2);
+    ctx.restore();
+  });
+  ctx.globalAlpha = 1;
+}
+
+function drawSplats() {
+  G.splats.forEach(sp => {
+    const a = sp.life;
+    ctx.save();
+    ctx.globalAlpha = a * 0.8;
+    ctx.fillStyle = sp.color;
+    ctx.beginPath();
+    ctx.ellipse(sp.x, sp.y, sp.s * (0.9 - a*0.3), sp.s * 0.14, 0, 0, Math.PI*2);
+    ctx.fill();
+    if (sp.img) {   // flattened sprite sinking into the puddle
+      ctx.globalAlpha = a;
+      const h = sp.s * 0.3 * a + 1;
+      ctx.drawImage(sp.img, sp.x - sp.s*0.7, sp.y - h, sp.s*1.4, h);
+    }
+    ctx.restore();
+  });
+  ctx.globalAlpha = 1;
 }
 
 function drawShockwaves() {
@@ -1185,8 +1477,6 @@ function drawShockwaves() {
   G.shockwaves.forEach(s => {
     const a = s.life;
     ctx.strokeStyle = s.color;
-    ctx.shadowColor = s.color;
-    ctx.shadowBlur = 18*scale;
     ctx.globalAlpha = a;
     ctx.lineWidth = (4 * a) * scale;
     ctx.beginPath();
@@ -1204,8 +1494,6 @@ function drawSparkles() {
   G.sparkles.forEach(p => {
     ctx.globalAlpha = p.life;
     ctx.fillStyle = p.color;
-    ctx.shadowColor = p.color;
-    ctx.shadowBlur = 8*scale;
     const r = p.sz * p.life;
     // diamond sparkle
     ctx.beginPath();
@@ -1259,7 +1547,16 @@ function loop() {
 
   // basket
   const bTargetX = Math.max(G.basket.w/2, Math.min(W - G.basket.w/2, mouseX));
+  const prevBX = G.basket.x;
   G.basket.x += (bTargetX - G.basket.x) * (1 - Math.pow(0.8, dt_f));
+  const bvx = G.basket.x - prevBX;
+  if (Math.abs(bvx) > 2.5*scale && Math.random() < 0.7*dt_f) {   // sparks kick off the trailing edge
+    G.particles.push({
+      x: G.basket.x - Math.sign(bvx) * G.basket.w/2, y: H - Math.round(55*scale) + Math.random()*G.basket.h,
+      vx: -bvx*0.25 + (Math.random()-.5)*scale, vy: -(0.5 + Math.random())*scale,
+      life: 0.8, color: '#00f5ff', sz: (1.5 + Math.random()*2)*scale,
+    });
+  }
   G.trail.push(G.basket.x);
   if (G.trail.length > 10) G.trail.shift();
 
@@ -1279,8 +1576,39 @@ function loop() {
         break;
       case 'bounce':
         item.x += item.vx * dt_f;
-        if (item.x < item.sz/2) { item.x = item.sz/2; item.vx = Math.abs(item.vx); }
-        else if (item.x > W - item.sz/2) { item.x = W - item.sz/2; item.vx = -Math.abs(item.vx); }
+        wallBounce(item);
+        item.y += item.speed * dt_f;
+        break;
+      case 'hop':
+        item.vy = Math.min(item.maxVy, item.vy + item.g * dt_f);
+        item.y += item.vy * dt_f;
+        if (item.bounces > 0 && item.vy > 0 && item.y >= item.floorY) {
+          item.bounces--;
+          // rebound capped so the apex stays on screen
+          item.vy = -Math.min(item.vy * 0.75, Math.sqrt(2 * item.g * (item.floorY - item.sz)));
+        }
+        break;
+      case 'brake':
+        item.speed = Math.max(item.minSpeed, item.speed * Math.pow(item.friction, dt_f));
+        item.y += item.speed * dt_f;
+        break;
+      case 'skid':
+        item.vx *= Math.pow(item.friction, dt_f);
+        item.x += item.vx * dt_f;
+        wallBounce(item);
+        item.y += item.speed * dt_f;
+        break;
+      case 'hover':
+        if (item.y < item.hoverY) item.y = Math.min(item.hoverY, item.y + item.speed * dt_f);
+        else if (item.hoverT > 0) { item.hoverT -= dt_f; item.rotSpd += (item.rotSpd < 0 ? -0.4 : 0.4) * dt_f; }   // spin-up telegraphs the drop
+        else { item.vy = Math.min(item.maxVy, item.vy + 0.25 * scale * dt_f); item.y += item.vy * dt_f; }
+        break;
+      case 'seek':
+        item.vx += Math.sign(G.basket.x - item.x) * 0.10 * scale * dt_f;
+        item.vx *= Math.pow(0.97, dt_f);          // friction-damped so it overshoots instead of snapping on
+        item.x += item.vx * dt_f;
+        wallBounce(item);
+        item.rot = item.vx / scale * 6;           // leans into the turn
         item.y += item.speed * dt_f;
         break;
       case 'accel':
@@ -1305,9 +1633,9 @@ function loop() {
       if (item.ghosts.length > 5) item.ghosts.length = 5;
     }
 
-    // sparkle trail for stars
-    if (item.isStar && Math.random() < 0.5 * dt_f) {
-      spawnSparkle(item.x, item.y, '#ffe600');
+    // sparkle trail for stars / ammo crates
+    if ((item.isStar || item.isAmmo) && Math.random() < 0.5 * dt_f) {
+      spawnSparkle(item.x, item.y, item.isStar ? '#ffe600' : '#00f5ff');
     }
 
     const by = H - Math.round(55*scale);
@@ -1318,7 +1646,9 @@ function loop() {
     // catch
     if (item.y + item.sz/2 >= by && item.y - item.sz/2 < by+bh &&
         item.x >= bx-bw && item.x <= bx+bw) {
-      if (item.isBomb) {
+      if (item.isAmmo) {
+        catchAmmo(item);
+      } else if (item.isBomb) {
         G.comboCount = 0;
         G.lives--;
         G.screenShake = 25;
@@ -1328,7 +1658,7 @@ function loop() {
         spawnParticles(item.x, item.y, FRUIT_COLORS[BOMB], 18);
         spawnShockwave(item.x, item.y, 'rgba(255,60,120,0.95)', 80);
         spawnShockwave(item.x, item.y, 'rgba(255,200,60,0.7)', 50);
-        addFloater(item.x, item.y, '💥 -1', '#ff2d78');
+        addFloater(item.x, item.y, `${ico('boom')} -1`, '#ff2d78');
         updateHUD();
         if (G.lives <= 0) { gameOver(); return false; }
       } else {
@@ -1344,8 +1674,9 @@ function loop() {
 
         sfxCatch(G.comboCount - 1);
         const col = FRUIT_COLORS[item.emoji];
-        const lbl = item.isStar ? '+3 ⭐' : (G.comboCount>=3 ? `+${pts} 🔥` : `+${pts}`);
+        const lbl = item.isStar ? `+3 ${ico('star')}` : (G.comboCount>=3 ? `+${pts} ${ico('fire')}` : `+${pts}`);
         spawnParticles(item.x, item.y, col, item.isStar ? 18 : 12);
+        spawnBurst(item);
         spawnShockwave(item.x, item.y, col, item.isStar ? 70 : 45);
         if (item.isStar) {
           spawnShockwave(item.x, item.y, 'rgba(255,255,200,0.8)', 95);
@@ -1358,18 +1689,22 @@ function loop() {
       return false;
     }
 
-    // missed
-    if (item.y > H + item.sz) {
-      if (!item.isBomb) {
+    // missed — the moment it clears the basket's underside it can't be caught, so it hits the floor there
+    if (item.y - item.sz/2 >= by + bh) {
+      if (item.isAmmo) { /* no penalty */ }
+      else if (!item.isBomb) {
         G.comboCount = 0;
         G.lives--;
         G.screenShake = 15;
         sfxMiss();
-        addFloater(item.x, H - 30*scale, '💔', '#ff2d78');
+        spawnSplat(item);
+        addFloater(item.x, H - 30*scale, ico('heartbreak'), '#ff2d78');
         updateHUD();
         if (G.lives <= 0) { gameOver(); return false; }
       } else {
         G.bombsAvoided++;
+        spawnParticles(item.x, by + bh, '#8a8a8a', 8);            // dud: smoke puff
+        spawnShockwave(item.x, by + bh, 'rgba(255,140,60,0.5)', 30);
       }
       checkAchievements();
       return false;
@@ -1394,6 +1729,30 @@ function loop() {
     p.life -= 0.04 * dt_f;
     return p.life > 0;
   });
+
+  // bullets
+  if (G.ammo < G.ammoMax && (G.reload += dt_f) >= RELOAD_FRAMES) { G.reload = 0; G.ammo++; }
+  G.ammoDeny *= Math.pow(0.9, dt_f);
+  const lipY = H - Math.round(55*scale);
+  G.bullets = G.bullets.filter(b => {
+    b.y += b.vy * dt_f;
+    if (b.y < -20*scale) return false;
+    // only things still above the basket lip — never snipes a fruit that's already being caught
+    const hit = G.items.find(it => !it.isAmmo && it.y + it.sz/2 < lipY && Math.hypot(it.x - b.x, it.y - b.y) < it.sz * 0.6);
+    if (!hit) return true;
+    if (hit.isBomb) detonate(hit); else shotFruit(hit);
+    return false;
+  });
+
+  // chunks / splats
+  G.chunks = G.chunks.filter(c => {
+    c.x += c.vx * dt_f; c.y += c.vy * dt_f;
+    c.vy += 0.18 * scale * dt_f;
+    c.rot += c.rotSpd * dt_f;
+    c.life -= 0.03 * dt_f;
+    return c.life > 0;
+  });
+  G.splats = G.splats.filter(s => { s.life -= 0.02 * dt_f; return s.life > 0; });
 
   // shockwaves
   G.shockwaves = G.shockwaves.filter(s => {
@@ -1421,8 +1780,11 @@ function loop() {
   if (ox||oy) ctx.translate(ox, oy);
 
   drawBG();
+  drawSplats();
   drawItems();
   drawBasket(G.basket.x);
+  drawBullets();
+  drawChunks();
   drawParticles();
   drawSparkles();
   drawShockwaves();
@@ -1431,7 +1793,7 @@ function loop() {
   const dy = H - 55*scale;
   ctx.save();
   ctx.shadowColor = 'rgba(255,45,120,0.5)';
-  ctx.shadowBlur = 8*scale;
+  ctx.shadowBlur = 8*scale*DPR;
   ctx.strokeStyle = 'rgba(255,45,120,0.35)';
   ctx.lineWidth = 1.2;
   ctx.setLineDash([8*scale, 6*scale]);
@@ -1444,6 +1806,7 @@ function loop() {
   ctx.restore();
 
   ctx.restore();
+  drawAmmo();
 }
 
 /* ═══════════════════════════════════════

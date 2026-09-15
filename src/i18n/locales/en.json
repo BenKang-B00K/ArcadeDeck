@@ -1305,80 +1305,81 @@
       "scoreLabel": "Stars"
     },
     "14": {
-      "title": "Fruit Frenzy",
-      "description": "A juicy, fast-twitch arcade collector where every catch fills your Encyclopedia and stacks your score multiplier.",
-      "fullDescription": "Fruit Frenzy is a vertical arcade collector tuned for one-handed phone play and equally satisfying on desktop. Fruits cascade from above at escalating speeds; you tap or click to catch them mid-fall. Each unique fruit you catch for the first time fills a slot in the **Encyclopedia**, and every filled slot permanently raises your **score multiplier** for future runs — turning a casual session into a long-tail metagame.\n      **Frenzy Mode** triggers on chain catches: hit **five fruits** without missing and the screen lights up, fruit values double, and a wave of rare encyclopedia entries enters the spawn pool. Drop the chain and Frenzy resets — the tension between greed and caution drives every run. Special fruits (**Golden Apple**, **Phantom Pear**, **Mystic Mango**) appear under specific weather conditions on the orchard backdrop, rewarding players who pay attention to ambient cues, not just falling sprites.\n      The leaderboard is **dual-sort**: top score primary, Encyclopedia completion percentage as tiebreaker. That rewards both burst high-scorers and patient collectors. New fruits ship with seasonal events, so the Encyclopedia is never truly finished.",
-      "controls": "Mouse/Touch: Click or tap fruits to collect them. Hold and drag on touch devices to sweep across multiple fruits in one motion. Avoid the falling rotten fruits — they break your chain and end Frenzy Mode early.",
-      "tips": "Prioritize fruits you have never caught before — **Encyclopedia** entries raise your **permanent multiplier** and pay off across every future run, while duplicates only buff the current session. Watch for color streaks in the falling pattern: **three of the same color** in a row signals a guaranteed Frenzy trigger if you catch all three. During Frenzy, ignore the bottom row of low-tier fruits and hunt the rare drops appearing near the top. **Rotten fruit** looks similar to ripe at high speeds — when in doubt, do not tap. Saving a Frenzy bank for a **Golden Apple** spawn typically doubles a single tap's score over a sustained chain.",
-      "lore": "The **Orchard of Abundance** is a magical grove suspended between seasons, where every fruit ever grown still ripens somewhere on its impossible trees. When the **Encyclopedia of the Harvest** was stolen and its pages scattered into the wind, the orchard's magic spilled over and the fruits gained mischievous minds of their own.\n      You are the next **Harvester**, chosen by the orchard itself. Your task is to catch every variety, rebuild the **Encyclopedia**, and restore the balance — one falling apple, one impossible mango at a time.",
+      "title": "Fruit Frenzy v1.3",
+      "description": "A fast vertical catcher: slide the basket under falling fruit, dodge bombs or shoot them out of the sky, and ride combos through seven levels.",
+      "fullDescription": "Fruit Frenzy is a vertical arcade catcher built for one-handed phone play and just as sharp on desktop. Slide the **basket** left and right to catch fruit as it falls; every catch is 1 point, and once your **combo** reaches 3 every catch is worth 2. Rare stars pay 3. Miss a fruit or catch a **bomb** and you lose one of your **3 lives** — lose all three and the run is over.\n      Score carries you through **seven levels** (Novice to Myth): fruit falls faster, spawns thicker, bombs get more common and the basket shrinks. From level 2 fruit starts pulling **moves** — hopping off an invisible floor, braking mid-air, skidding sideways, and from level 3 hovering before a plunge — while bombs begin to **seek** the basket.\n      v1.3 adds a **gun**: click or tap to fire a bullet straight up. Shooting a bomb detonates it mid-air for a point; shooting a fruit destroys it and costs a life. You bank 2 bullets and one reloads every ~1.5 seconds. A very rare **ammo crate** drifts down now and then — catch it to grow the bank (up to 4) and refill on the spot. **50 achievements** track fruit caught, bombs avoided, combo streaks, score milestones and level clears.",
+      "controls": "Mouse / Touch: move the basket. On PC the mouse locks to the canvas while playing (Esc releases it). Left-click or tap: fire a bullet straight up. Bullets pop bombs for a point but destroy fruit for a life, so aim only at bombs.",
+      "tips": "Combo is the whole economy — once it hits **3**, every fruit pays double, so a clean streak out-scores any risky grab. Shoot **bombs**, never fruit: a shot bomb is **+1** and counts as avoided, a shot fruit is **−1 life**. Keep one bullet banked for **seeking bombs** — they lean toward the basket from level 2 and are far easier to pop than to dodge. Hovering fruit **spins up** before it plunges; that spin is your cue to get underneath. A miss counts the instant the fruit clears the basket's underside, so commit early instead of chasing. The **ammo crate** (slow, cyan glow) costs nothing to miss but grows your bank to 4 — always worth the detour.",
+      "lore": "The **Orchard of Abundance** is a grove suspended between seasons, where every fruit ever grown still ripens somewhere on its impossible trees. Lately the harvest has turned mischievous: fruit hops, brakes and hovers on the way down, and something is rolling bombs off the branches.\n      You are the newest **Harvester**, basket in one hand and a sling of bullets in the other. Catch what falls, shoot what explodes, and keep the orchard's rhythm alive as long as your three lives last.",
       "features": [
-        "50+ Unique Fruits to Discover and Document",
-        "Encyclopedia Progression with Permanent Score Multipliers",
-        "Frenzy Mode Triggered by Chain Catches",
-        "Rare Weather-Gated Special Fruit Spawns",
-        "Dual-Sort Global Leaderboard (Score + Completion)",
-        "Seasonal Events with New Encyclopedia Pages",
-        "One-Handed Mobile and Desktop Friendly"
+        "Seven Levels from Novice to Myth with Rising Speed and Bomb Rate",
+        "Combo Scoring: Every Catch Pays Double Past a 3x Streak",
+        "Hopping, Braking, Skidding and Hovering Fruit Moves",
+        "Seeking Bombs That Steer Toward Your Basket",
+        "Shoot Bombs Mid-Air with a 2-Bullet Bank and Rare Ammo Crates",
+        "50 Achievements Across Catches, Combos, Score and Levels",
+        "Juicy Canvas VFX: Fruit Quarters, Juice Puddles, Sparks",
+        "One-Handed Mobile and Desktop Friendly — EN / KO / JA"
       ],
-      "objectives": "Catch falling fruits to rebuild the **Encyclopedia of the Harvest**, trigger **Frenzy Mode** by chaining catches, and push your score as high as possible — with **Encyclopedia** completion percentage as the leaderboard tiebreaker.",
+      "objectives": "Catch falling fruit with the basket, dodge or shoot the bombs, and build long combos to climb through seven levels — the run ends when your three lives are gone, so the goal is the highest score before that.",
       "controlsTable": [
         {
-          "key": "Mouse Click / Tap",
-          "action": "Catch a falling fruit"
+          "key": "Mouse Move / Drag",
+          "action": "Slide the basket left and right"
         },
         {
-          "key": "Hold and Drag (Touch)",
-          "action": "Sweep across multiple fruits in one motion"
+          "key": "Left Click / Tap",
+          "action": "Fire a bullet straight up from the basket"
         },
         {
-          "key": "Avoid (no input)",
-          "action": "Let rotten fruits pass — tapping them breaks your chain"
+          "key": "Esc",
+          "action": "Release the mouse lock on PC"
         }
       ],
       "faq": [
         {
-          "q": "What is the Encyclopedia and why does it matter?",
-          "a": "The Encyclopedia tracks every unique fruit variety you have caught. Each new entry permanently raises your score multiplier for all future runs — making Encyclopedia completion a long-term metagame that compounds across sessions."
+          "q": "How does scoring work?",
+          "a": "Each fruit is 1 point, or 2 once your combo reaches 3. Rare stars are worth 3, and shooting a bomb is also 1 point. Missing a fruit, catching a bomb, or shooting a fruit costs one of your 3 lives."
         },
         {
-          "q": "How do I trigger Frenzy Mode?",
-          "a": "Catch five fruits in a row without missing or hitting a rotten fruit. On the fifth catch, Frenzy Mode activates: the screen lights up, fruit values double, and rare Encyclopedia entries enter the spawn pool."
+          "q": "How do I level up?",
+          "a": "Levels advance on score: 10, 25, 45, 70, 100 and 140 points take you from Novice up to Myth. Each level speeds up the fall, thickens spawns, raises the bomb chance and shrinks the basket a little."
         },
         {
-          "q": "How do I tell rotten fruit from fresh?",
-          "a": "Rotten fruit closely resembles ripe fruit at high speeds. When in doubt, do not tap — a missed catch is better than breaking your chain. The leaderboard rewards chain consistency, not total taps."
+          "q": "How does shooting work?",
+          "a": "Click or tap to fire straight up. You bank 2 bullets and one reloads every ~1.5 seconds — the ammo pips top-left show the state. Hitting a bomb detonates it for +1; hitting a fruit destroys it and costs a life, so only shoot at bombs."
         },
         {
-          "q": "What are the special fruits (Golden Apple, Phantom Pear, Mystic Mango)?",
-          "a": "Special fruits spawn under specific weather conditions on the orchard backdrop. Pay attention to ambient visual cues — cloud cover, lighting shifts — not just the falling sprites. These rare entries provide the largest Encyclopedia multiplier jumps."
+          "q": "What is the ammo crate?",
+          "a": "A very rare, slow-drifting crate with a cyan glow. Catching it grows your bullet bank by one (up to 4) and refills it. Missing it costs nothing, and bullets pass straight through it."
         },
         {
-          "q": "What is the best strategy during Frenzy?",
-          "a": "During Frenzy, ignore low-value fruits at the bottom row and hunt rare drops appearing near the top of the screen. Saving your chain for a Golden Apple spawn typically doubles a single catch's score versus sustained low-tier chaining."
+          "q": "Why do fruit and bombs move strangely at higher levels?",
+          "a": "From level 2 fruit can hop off an invisible floor, brake in the air or skid sideways, and bombs can steer toward the basket. From level 3 fruit can hover before plunging, and from level 4 bombs hover too. Hovering objects spin up before they drop — that is your tell."
         }
       ],
       "featuredComments": [
         {
-          "name": "HarvestChain",
-          "text": "Encyclopedia entries are the whole game. Don't grind high scores on early runs — grind for new varieties. Every unique catch permanently raises your multiplier and makes every future run worth more.",
+          "name": "ComboFarmer",
+          "text": "Once the combo hits 3 every fruit is worth double. I stopped chasing wide catches and just kept the streak alive — my scores doubled overnight.",
           "badge": "Strategy"
         },
         {
-          "name": "FrenzyTrip",
-          "text": "Three of the same color in a row is a guaranteed Frenzy trigger if you catch all three. Once I started recognizing the color streaks I could actually plan for Frenzy instead of just hoping it happened."
+          "name": "BombPopper",
+          "text": "Keep one bullet in the bank for seeking bombs. Dodging one that leans into your basket is a coin flip; popping it is a free point."
         },
         {
-          "name": "PhantomPear",
-          "text": "The Orchard of Abundance suspended between seasons with fruits that have mischievous minds of their own — I wasn't expecting the lore to be charming but here we are.",
+          "name": "HoverWatch",
+          "text": "Hovering fruit spins faster right before it plunges. Once you read the spin you can be waiting underneath instead of reacting."
+        },
+        {
+          "name": "CrateChaser",
+          "text": "The ammo crate is worth every detour. Missing it costs nothing, and a 4-bullet bank turns level 6 bomb spam into target practice."
+        },
+        {
+          "name": "OrchardLore",
+          "text": "A grove suspended between seasons with fruit that hops and brakes on the way down — I did not expect the flavour text to be this charming.",
           "badge": "Lore"
-        },
-        {
-          "name": "RottenDoubt",
-          "text": "When in doubt, don't tap. A missed catch is better than breaking a Frenzy chain. The leaderboard rewards consistency. One mistaken rotten fruit tap at the wrong moment costs more than the points were ever worth."
-        },
-        {
-          "name": "GoldenBurst",
-          "text": "Saving a built Frenzy chain for a Golden Apple spawn is the highest-value play in the game. The doubled fruit value on a special fruit during Frenzy is genuinely the score spike you're building toward every run."
         }
       ],
       "scoreLabel": "Score"
@@ -2814,7 +2815,6 @@
         }
       ]
     },
-    "_comment": "Per-game canonical English. Translators mirror this in {lang}.json.",
     "31": {
       "title": "Debt & Dragons",
       "description": "An idle tower where five floors each print gold a different way — crack dragon eggs, scrape sigil scrolls, drop plinko pearls, bank dice hands, brew potions — all to pay off a Warden whose toll goes up every single time you clear it.",
@@ -2975,6 +2975,7 @@
           "a": "Progress, gold, owned runners and per-skin mileage all save in this browser. Touch is fully supported — tap to jump with hold length driving the height, swipe sideways for lanes, swipe up for a full jump — and the game runs in English, Korean and Japanese."
         }
       ]
-    }
+    },
+    "_comment": "Per-game canonical English. Translators mirror this in {lang}.json."
   }
 }

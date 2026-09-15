@@ -1,17 +1,15 @@
-let translations = {};
-
-// Full fallback resources (50 achievements included)
-const fallbackResources = {
+// ponytail: two string tables, no i18next — was 2 render-blocking CDN scripts + a redundant locales/ fetch
+const RESOURCES = {
   ko: {
     "title": "FRUIT FRENZY",
     "score": "SCORE", "best": "BEST", "combo": "COMBO", "level": "LEVEL", "level_up": "레벨 업!",
-    "start_msg": "바구니로 과일을 받아요!<br>폭탄 💣은 절대 피하세요!",
+    "start_msg": "바구니로 과일을 받아요!<br>폭탄은 절대 피하세요!",
     "start_btn": "시작하기", "restart_btn": "다시 하기", "menu_btn": "메인으로",
-    "game_over": "게임 오버!", "pts": "점", "new_best": "🎉 신기록 달성!", "best_record": "최고 기록",
+    "game_over": "게임 오버!", "pts": "점", "new_best": "신기록 달성!", "best_record": "최고 기록",
     "stat_fruits": "과일 수집", "stat_bombs": "폭탄 회피", "stat_combo": "최고 콤보", "stat_level": "도달 레벨",
-    "summary_star": "희귀 별", "summary_fruit": "과일", "summary_bomb": "폭탄 수집", "summary_miss": "과일 놓침",
-    "val_star": "3점", "val_fruit": "1점 (콤보시 2점)", "val_bomb": "목숨 -1", "val_miss": "목숨 -1",
-    "hint": "🖱️ 마우스 또는 터치로 이동", "sound_title": "사운드 켜기/끄기",
+    "summary_star": "희귀 별", "summary_fruit": "과일", "summary_bomb": "폭탄 수집", "summary_miss": "과일 놓침", "summary_shoot": "폭탄 격추", "summary_shot_fruit": "과일 격추", "summary_ammo": "탄창 상자",
+    "val_star": "3점", "val_fruit": "1점 (콤보시 2점)", "val_bomb": "목숨 -1", "val_miss": "목숨 -1", "val_shoot": "1점", "val_ammo": "탄창 +1 (최대 4)",
+    "hint": "이동: 마우스/터치 · 발사: 클릭/탭", "sound_title": "사운드 켜기/끄기",
     "levels": ["초보자", "견습생", "아마추어", "고수", "달인", "전설", "신화"],
     "ac_unlocked": "업적 달성!", "ac_menu_title": "업적 도감", "back_btn": "뒤로 가기",
     // 50 Achievements (KR)
@@ -69,13 +67,13 @@ const fallbackResources = {
   en: {
     "title": "FRUIT FRENZY",
     "score": "SCORE", "best": "BEST", "combo": "COMBO", "level": "LEVEL", "level_up": "LEVEL UP!",
-    "start_msg": "Catch fruits with the basket!<br>Avoid the bombs 💣 at all costs!",
+    "start_msg": "Catch fruits with the basket!<br>Avoid the bombs at all costs!",
     "start_btn": "START", "restart_btn": "REPLAY", "menu_btn": "MENU",
-    "game_over": "GAME OVER!", "pts": "pts", "new_best": "🎉 NEW BEST!", "best_record": "Best Score",
+    "game_over": "GAME OVER!", "pts": "pts", "new_best": "NEW BEST!", "best_record": "Best Score",
     "stat_fruits": "Fruits Caught", "stat_bombs": "Bombs Avoided", "stat_combo": "Best Combo", "stat_level": "Reached Level",
-    "summary_star": "Rare Star", "summary_fruit": "Fruit", "summary_bomb": "Bomb Catch", "summary_miss": "Missed Fruit",
-    "val_star": "3 pts", "val_fruit": "1 pt (2 for combo)", "val_bomb": "Life -1", "val_miss": "Life -1",
-    "hint": "🖱️ Move with mouse or touch", "sound_title": "Sound On/Off",
+    "summary_star": "Rare Star", "summary_fruit": "Fruit", "summary_bomb": "Bomb Catch", "summary_miss": "Missed Fruit", "summary_shoot": "Shoot Bomb", "summary_shot_fruit": "Shoot Fruit", "summary_ammo": "Ammo Crate",
+    "val_star": "3 pts", "val_fruit": "1 pt (2 for combo)", "val_bomb": "Life -1", "val_miss": "Life -1", "val_shoot": "1 pt", "val_ammo": "Bank +1 (max 4)",
+    "hint": "Move: mouse/touch · Shoot: click/tap", "sound_title": "Sound On/Off",
     "levels": ["Novice", "Apprentice", "Amateur", "Expert", "Master", "Legend", "Myth"],
     "ac_unlocked": "ACHIEVEMENT UNLOCKED!", "ac_menu_title": "ACHIEVEMENTS", "back_btn": "BACK",
     // 50 Achievements (EN)
@@ -129,70 +127,100 @@ const fallbackResources = {
     "ac_survivor_title": "Perfect Survivor", "ac_survivor_desc": "Reach Level 4 with full health!",
     "ac_unscathed_title": "Flawless Player", "ac_unscathed_desc": "Reach 300 pts with 3 lives!",
     "ac_frenzy_god_title": "Frenzy God", "ac_frenzy_god_desc": "Legendary 250x Combo!"
+  },
+  ja: {
+    "title": "FRUIT FRENZY",
+    "score": "SCORE", "best": "BEST", "combo": "COMBO", "level": "LEVEL", "level_up": "レベルアップ!",
+    "start_msg": "バスケットでフルーツをキャッチ!<br>爆弾は絶対に避けよう!",
+    "start_btn": "スタート", "restart_btn": "もう一度", "menu_btn": "メニュー",
+    "game_over": "ゲームオーバー!", "pts": "点", "new_best": "新記録達成!", "best_record": "最高記録",
+    "stat_fruits": "フルーツ獲得", "stat_bombs": "爆弾回避", "stat_combo": "最大コンボ", "stat_level": "到達レベル",
+    "summary_star": "レアスター", "summary_fruit": "フルーツ", "summary_bomb": "爆弾キャッチ", "summary_miss": "フルーツ落下", "summary_shoot": "爆弾撃墜", "summary_shot_fruit": "フルーツ撃墜", "summary_ammo": "弾薬箱",
+    "val_star": "3点", "val_fruit": "1点 (コンボ中2点)", "val_bomb": "ライフ -1", "val_miss": "ライフ -1", "val_shoot": "1点", "val_ammo": "弾倉 +1 (最大4)",
+    "hint": "移動: マウス/タッチ · 発射: クリック/タップ", "sound_title": "サウンド オン/オフ",
+    "levels": ["初心者", "見習い", "アマチュア", "上級者", "達人", "伝説", "神話"],
+    "ac_unlocked": "実績解除!", "ac_menu_title": "実績図鑑", "back_btn": "戻る",
+    // 50 Achievements (JA)
+    "ac_first_catch_title": "さわやかな始まり", "ac_first_catch_desc": "最初のフルーツをキャッチ!",
+    "ac_fruits_10_title": "フルーツバスケット", "ac_fruits_10_desc": "フルーツを10個集めた。",
+    "ac_fruits_50_title": "フルーツ好き", "ac_fruits_50_desc": "フルーツを50個集めた。",
+    "ac_fruits_100_title": "フルーツ収集家", "ac_fruits_100_desc": "フルーツを100個集めた。",
+    "ac_fruits_200_title": "フルーツ専門家", "ac_fruits_200_desc": "フルーツを200個集めた。",
+    "ac_fruit_collector_title": "大豊作", "ac_fruit_collector_desc": "フルーツを合計300個集めた!",
+    "ac_fruits_500_title": "フルーツマスター", "ac_fruits_500_desc": "フルーツを500個集めた。",
+    "ac_fruits_1000_title": "フルーツの達人", "ac_fruits_1000_desc": "フルーツを1000個集めた。",
+    "ac_combo_5_title": "リズムに乗って", "ac_combo_5_desc": "5コンボ達成!",
+    "ac_combo_10_title": "ダブルリズム", "ac_combo_10_desc": "10コンボ達成!",
+    "ac_combo_20_title": "フルーツ旋風", "ac_combo_20_desc": "20コンボ達成!",
+    "ac_combo_30_title": "トリプルリズム", "ac_combo_30_desc": "30コンボ達成!",
+    "ac_combo_40_title": "止まらない手", "ac_combo_40_desc": "40コンボ達成!",
+    "ac_combo_50_title": "コンボの達人", "ac_combo_50_desc": "50コンボ達成!",
+    "ac_combo_60_title": "集中力爆発", "ac_combo_60_desc": "60コンボ達成!",
+    "ac_combo_70_title": "無我の境地", "ac_combo_70_desc": "70コンボ達成!",
+    "ac_combo_80_title": "華麗な手さばき", "ac_combo_80_desc": "80コンボ達成!",
+    "ac_combo_90_title": "極限の境地", "ac_combo_90_desc": "90コンボ達成!",
+    "ac_combo_100_title": "神の領域", "ac_combo_100_desc": "100コンボ達成!",
+    "ac_combo_120_title": "不可能はない", "ac_combo_120_desc": "120コンボ達成!",
+    "ac_frenzy_king_title": "フレンジーキング", "ac_frenzy_king_desc": "150コンボ達成!",
+    "ac_combo_200_title": "フレンジーエンペラー", "ac_combo_200_desc": "200コンボ達成!",
+    "ac_bombs_5_title": "危険察知", "ac_bombs_5_desc": "爆弾を5個回避した。",
+    "ac_bombs_10_title": "安全第一", "ac_bombs_10_desc": "爆弾を10個回避した。",
+    "ac_bombs_20_title": "爆弾探知機", "ac_bombs_20_desc": "爆弾を20個回避した。",
+    "ac_bombs_30_title": "安全運転", "ac_bombs_30_desc": "爆弾を30個回避した。",
+    "ac_bombs_40_title": "回避の専門家", "ac_bombs_40_desc": "爆弾を40個回避した。",
+    "ac_bombs_50_title": "爆弾スペシャリスト", "ac_bombs_50_desc": "爆弾を50個回避した。",
+    "ac_bombs_75_title": "爆弾マスター", "ac_bombs_75_desc": "爆弾を75個回避した。",
+    "ac_bombs_100_title": "アンタッチャブル", "ac_bombs_100_desc": "爆弾を100個回避した。",
+    "ac_score_50_title": "小さな一歩", "ac_score_50_desc": "50点突破!",
+    "ac_score_100_title": "フルーツ長者", "ac_score_100_desc": "100点突破!",
+    "ac_score_200_title": "中級収集家", "ac_score_200_desc": "200点突破!",
+    "ac_score_300_title": "ベテラン", "ac_score_300_desc": "300点突破!",
+    "ac_score_400_title": "高得点者", "ac_score_400_desc": "400点突破!",
+    "ac_score_500_title": "フルーツマスター", "ac_score_500_desc": "500点突破!",
+    "ac_score_750_title": "大物収集家", "ac_score_750_desc": "750点突破!",
+    "ac_score_1000_title": "千点の栄光", "ac_score_1000_desc": "1000点突破!",
+    "ac_score_1500_title": "伝説の始まり", "ac_score_1500_desc": "1500点突破!",
+    "ac_score_2000_title": "フルーツの神", "ac_score_2000_desc": "2000点突破!",
+    "ac_score_5000_title": "無限の栄光", "ac_score_5000_desc": "5000点突破!",
+    "ac_level_2_title": "入門者", "ac_level_2_desc": "レベル2到達!",
+    "ac_level_3_title": "熟練の農夫", "ac_level_3_desc": "レベル3到達!",
+    "ac_level_4_title": "エキスパート", "ac_level_4_desc": "レベル4到達!",
+    "ac_level_5_title": "ベテラン収集家", "ac_level_5_desc": "レベル5到達!",
+    "ac_level_6_title": "頂点に立つ者", "ac_level_6_desc": "レベル6到達!",
+    "ac_level_max_title": "伝説の帰還", "ac_level_max_desc": "全難易度を制覇!",
+    "ac_survivor_title": "完璧な生存者", "ac_survivor_desc": "ハート3つでレベル4到達!",
+    "ac_unscathed_title": "無欠のプレイ", "ac_unscathed_desc": "ハート3つで300点達成!",
+    "ac_frenzy_god_title": "フレンジーゴッド", "ac_frenzy_god_desc": "250コンボという神話的記録!"
   }
 };
 
 /* ═══════════════════════════════════════
-   I18NEXT INITIALIZATION
+   I18N
 ═══════════════════════════════════════ */
-async function initI18n() {
-  i18next.init({
-    lng: 'ko',
-    fallbackLng: 'en',
-    resources: {
-      ko: { translation: fallbackResources.ko },
-      en: { translation: fallbackResources.en }
-    }
-  }, (err, t) => {
-    translations = i18next.getResourceBundle(i18next.language, 'translation');
-    document.body.className = `lang-${i18next.language}`;
-    document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-    const activeBtn = document.getElementById(`lang-${i18next.language}`);
-    if (activeBtn) activeBtn.classList.add('active');
-    updateStaticTexts();
-    if (typeof updateHUD === 'function' && typeof G !== 'undefined' && G) updateHUD();
-  });
+let translations = RESOURCES.ko;
 
-  try {
-    const [koRes, enRes] = await Promise.all([
-      fetch('locales/ko.json').then(r => r.ok ? r.json() : null),
-      fetch('locales/en.json').then(r => r.ok ? r.json() : null)
-    ]);
-    if (koRes) i18next.addResourceBundle('ko', 'translation', koRes, true, true);
-    if (enRes) i18next.addResourceBundle('en', 'translation', enRes, true, true);
-    translations = i18next.getResourceBundle(i18next.language, 'translation');
-    updateStaticTexts();
-    if (typeof updateHUD === 'function' && typeof G !== 'undefined' && G) updateHUD();
-  } catch (err) {
-    console.warn('I18n: External fetch failed.');
-  }
+function tr(key) {
+  return translations[key] ?? RESOURCES.en[key] ?? key;
 }
 
-function updateStaticTexts() {
+function applyLang(lng) {
+  const lang = RESOURCES[lng] ? lng : 'en';
+  translations = RESOURCES[lang];
+  document.body.classList.remove('lang-ko', 'lang-en', 'lang-ja');
+  document.body.classList.add('lang-' + lang);
+  document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.toggle('active', btn.id === 'lang-' + lang));
   document.querySelectorAll('[data-t]').forEach(el => {
     const key = el.getAttribute('data-t');
-    const translated = i18next.t(key);
-    if (translated && translated !== key) el.innerHTML = translated;
+    const v = tr(key);
+    if (v !== key) el.innerHTML = v;
   });
+  if (typeof G !== 'undefined' && G) updateHUD();
 }
 
 function switchLang(lng) {
-  i18next.changeLanguage(lng, (err, t) => {
-    translations = i18next.getResourceBundle(lng, 'translation');
-    document.body.className = `lang-${lng}`;
-    document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-    const activeBtn = document.getElementById(`lang-${lng}`);
-    if (activeBtn) activeBtn.classList.add('active');
-    updateStaticTexts();
-    if (typeof updateHUD === 'function' && typeof G !== 'undefined' && G) updateHUD();
-    const overlay = document.getElementById('overlay');
-    if (overlay && overlay.style.display !== 'none') {
-      if (typeof G !== 'undefined' && G && G.over) {
-        if (typeof gameOver === 'function') gameOver();
-      } else {
-        if (typeof showMenu === 'function') showMenu();
-      }
-    }
-  });
+  applyLang(lng);
+  const overlay = document.getElementById('overlay');
+  if (overlay.style.display !== 'none') (G && G.over ? renderGameOver : showMenu)();
 }
-initI18n();
+
+applyLang('ko');

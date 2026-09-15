@@ -3,7 +3,7 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://arcadedeck.net/</loc>
-    <lastmod>2026-09-14</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja" />
@@ -12,7 +12,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ja</loc>
-    <lastmod>2026-09-14</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja" />
@@ -21,7 +21,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ko</loc>
-    <lastmod>2026-09-14</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja" />
@@ -273,7 +273,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/play/fruit-frenzy</loc>
-    <lastmod>2026-05-15</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/fruit-frenzy" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/fruit-frenzy" />
@@ -282,7 +282,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ja/play/fruit-frenzy</loc>
-    <lastmod>2026-05-15</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/fruit-frenzy" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/fruit-frenzy" />
@@ -291,7 +291,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ko/play/fruit-frenzy</loc>
-    <lastmod>2026-05-15</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/fruit-frenzy" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/fruit-frenzy" />
@@ -746,7 +746,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/genre/action</loc>
-    <lastmod>2026-05-16</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/action" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/action" />
@@ -755,7 +755,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ja/genre/action</loc>
-    <lastmod>2026-05-16</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/action" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/action" />
@@ -764,7 +764,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ko/genre/action</loc>
-    <lastmod>2026-05-16</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/action" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/action" />
@@ -773,7 +773,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/genre/arcade</loc>
-    <lastmod>2026-09-14</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/arcade" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/arcade" />
@@ -782,7 +782,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ja/genre/arcade</loc>
-    <lastmod>2026-09-14</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/arcade" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/arcade" />
@@ -791,7 +791,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ko/genre/arcade</loc>
-    <lastmod>2026-09-14</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/arcade" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/arcade" />

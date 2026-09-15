@@ -243,7 +243,10 @@
   border: none;
   cursor: pointer;
   z-index: var(--z-hamburger);
-  padding: 0;
+  /* 24x16 icon; padding grows the tap target to 48x40, margin keeps layout. */
+  box-sizing: content-box;
+  padding: 12px;
+  margin: -12px;
 }
 
 .menu-toggle span {

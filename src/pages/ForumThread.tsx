@@ -27,10 +27,10 @@ import {
   FORUM_REPLY_PAGE_SIZE,
   FORUM_SUBMIT_COOLDOWN_MS,
   stripHtml,
-  timeAgo,
   type ForumPost,
   type ForumThread as ForumThreadDoc,
 } from '../data/forum';
+import { timeAgo } from '../utils/dates';
 import './Forum.css';
 
 const ForumThread: React.FC = () => {

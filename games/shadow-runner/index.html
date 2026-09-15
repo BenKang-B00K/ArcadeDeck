@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/png" href="./favicon.png">
+<title>SHADOW RUNNER</title>
+<!-- Self-hosted fonts. This used to @import fonts.googleapis.com, which failed silently in the
+     packaged Electron build (offline / firewalled / Steam Deck) and dropped the whole UI to
+     generic monospace. Regenerate with: `node scripts/fetch-fonts.mjs` -->
+<link rel="stylesheet" href="fonts/fonts.css">
+  <script type="module" crossorigin src="./assets/index-5gfgsc-e.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CBlp1M9N.css">
+</head>
+<body>
+
+<div id="game-container"></div>
+
+<!-- ============ Title ============ -->
+<div id="title-overlay" class="overlay">
+  <div class="title-logo-wrap">
+    <div class="title-logo-tag-top" data-i18n="title.tag_top">— ENTER THE CORRIDOR —</div>
+    <div class="title-logo">
+      <span class="title-logo-shadow">SHADOW</span>
+      <span class="title-logo-runner">RUNNER</span>
+    </div>
+    <div class="title-logo-tag-bot" data-i18n="title.tag_bot">action platformer · roguelike · combat-driven</div>
+  </div>
+
+  <div class="title-stats" id="title-stats">
+    <div class="title-stat">
+      <div class="title-stat-icon">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M3 18 L8 8 L13 14 L17 6 L21 18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="title-stat-body">
+        <div class="title-stat-label" data-i18n="title.stat.best_wave">BEST WAVE</div>
+        <div class="title-stat-value" id="title-stat-wave">0</div>
+      </div>
+    </div>
+    <div class="title-stat">
+      <div class="title-stat-icon">
+        <svg viewBox="0 0 24 24" width="18" height="18"><polygon points="12,3 15,9 22,10 17,15 18,22 12,18 6,22 7,15 2,10 9,9" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="title-stat-body">
+        <div class="title-stat-label" data-i18n="title.stat.best_score">BEST SCORE</div>
+        <div class="title-stat-value" id="title-stat-score">000000</div>
+      </div>
+    </div>
+    <div class="title-stat">
+      <div class="title-stat-icon">
+        <svg viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8" fill="none"/><text x="12" y="16" text-anchor="middle" font-size="10" font-weight="bold" font-family="serif" fill="currentColor">$</text></svg>
+      </div>
+      <div class="title-stat-body">
+        <div class="title-stat-label" data-i18n="title.stat.essence">ESSENCE</div>
+        <div class="title-stat-value" id="title-stat-currency">0</div>
+      </div>
+    </div>
+    <div class="title-stat">
+      <div class="title-stat-icon">
+        <svg viewBox="0 0 24 24" width="18" height="18"><path d="M5 4 H19 V20 L12 16 L5 20 Z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="title-stat-body">
+        <div class="title-stat-label" data-i18n="title.stat.chapters">CHAPTERS</div>
+        <div class="title-stat-value" id="title-stat-chapters">0 / 12</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="title-controls-wrap">
+    <div class="title-controls-col">
+      <div class="title-controls-head">▸ <span data-i18n="title.ctrl.movement">MOVEMENT</span></div>
+      <div class="title-controls-row"><span class="key">← →</span><span data-i18n="ctrl.move">move</span></div>
+      <div class="title-controls-row"><span class="key">SPACE</span><span data-i18n="ctrl.jump">jump · double jump</span></div>
+      <div class="title-controls-row"><span class="key">↓</span><span data-i18n="ctrl.drop">drop through</span></div>
+      <div class="title-controls-row"><span class="key">C</span><span data-i18n="ctrl.dash">dash</span></div>
+    </div>
+    <div class="title-controls-col">
+      <div class="title-controls-head">▸ <span data-i18n="title.ctrl.combat">COMBAT</span></div>
+      <div class="title-controls-row"><span class="key">Z</span><span data-i18n="ctrl.attack">attack · combo · air slash</span></div>
+      <div class="title-controls-row"><span class="key">X</span><span data-i18n="ctrl.super">SUPER · DIVE · PLUNGE</span></div>
+      <div class="title-controls-row"><span class="key">S</span><span data-i18n="ctrl.subweapon">sub-weapon</span></div>
+    </div>
+    <div class="title-controls-col">
+      <div class="title-controls-head">▸ <span data-i18n="title.ctrl.system">SYSTEM</span></div>
+      <div class="title-controls-row"><span class="key">E</span><span data-i18n="ctrl.interact">interact</span></div>
+      <div class="title-controls-row"><span class="key">V</span><span data-i18n="ctrl.stats">stats panel</span></div>
+      <div class="title-controls-row"><span class="key">ESC</span><span data-i18n="ctrl.quit">quit run</span></div>
+    </div>
+  </div>
+
+  <div class="title-lang" style="margin-bottom:14px;">
+    <span class="title-lang-label" data-i18n="title.difficulty">DIFFICULTY</span>
+    <div class="title-lang-btns" id="title-diff-btns"></div>
+  </div>
+
+  <div class="btn-row title-btn-row">
+    <button class="btn title-btn-primary" id="title-start">
+      <span class="title-btn-arrow">▶</span> <span data-i18n="title.enter">ENTER</span> <span class="btn-hint title-btn-hint">[ENTER]</span>
+    </button>
+  </div>
+
+  <div class="btn-row" style="justify-content:center;">
+    <button class="btn secondary" id="title-settings">🎮 <span data-i18n="settings.title">SETTINGS</span> <span class="btn-hint">[SPACE]</span></button>
+    <button class="btn secondary" id="title-exit">⏻ <span data-i18n="title.exit">EXIT GAME</span> <span class="btn-hint">[ESC]</span></button>
+  </div>
+
+  <div class="title-lang">
+    <div class="title-lang-head">
+      <span class="title-lang-label" data-i18n="title.lang">LANGUAGE</span>
+      <span class="btn-hint">[PGUP/PGDN]</span>
+    </div>
+    <div class="title-lang-btns" id="title-lang-btns"></div>
+  </div>
+
+  <div class="title-footer">
+    <span class="title-footer-blink">▮</span> <span data-i18n="title.awaiting">AWAITING INPUT</span>
+  </div>
+</div>
+
+<!-- ============ Chapter Select ============ -->
+<div id="chapter-select-overlay" class="overlay">
+  <div class="overlay-image"><img src="./scene/chapter-select.webp" alt=""></div>
+  <div class="shop-title" data-i18n="chapter_select.title">CHAPTER SELECT</div>
+  <div class="overlay-subtitle" data-i18n="chapter_select.subtitle">jump straight in · skip the hub</div>
+  <div class="card-row" id="chapter-select-list"></div>
+  <button class="btn" id="chapter-select-back">▶ <span data-i18n="btn.back">Back</span> <span class="btn-hint">[ESC]</span></button>
+</div>
+
+<!-- ============ Curse Select (Pact) ============ -->
+<div id="curse-select-overlay" class="overlay">
+  <div class="overlay-image"><img src="./scene/curse-select.webp" alt=""></div>
+  <div class="shop-title" style="color:#ff3864" data-i18n="curse_select.title">PACT OF CURSES</div>
+  <div class="overlay-subtitle" id="curse-select-subtitle" data-i18n="curse_select.subtitle">choose 0–3 · penalty + reward · committed for the run</div>
+  <div class="card-row" id="curse-select-list"></div>
+  <div class="btn-row">
+    <button class="btn" id="curse-select-confirm">▶ <span data-i18n="btn.commit">Commit</span> <span class="btn-hint">[ENTER]</span></button>
+    <button class="btn" id="curse-select-skip">▶ <span data-i18n="btn.skip">Skip</span> <span class="btn-hint">[ESC]</span></button>
+  </div>
+</div>
+
+<!-- ============ Death ============ -->
+<div id="death-overlay" class="overlay">
+  <div class="overlay-image"><img src="./scene/death-screen.webp" alt="Death"></div>
+  <div class="death-title" id="death-title" data-i18n="death.title">YOU DIED</div>
+  <div class="overlay-subtitle" id="death-stats" style="margin-bottom:10px">score: 000000 · wave: 0</div>
+  <div class="overlay-subtitle" id="death-currency" style="margin-bottom:6px; color: var(--gold)">+0 earned · total 0</div>
+  <div class="overlay-subtitle" id="death-best" style="margin-bottom:28px; color: var(--dimmer)">best: wave 0 · score 000000</div>
+  <div class="btn-row">
+    <button class="btn" id="death-menu">▶ <span data-i18n="btn.restart">Restart Run</span> <span class="btn-hint">[ENTER]</span></button>
+  </div>
+</div>
+
+<!-- ============ Controller settings (remap) ============ -->
+<div id="settings-overlay" class="overlay">
+  <div class="settings-frame">
+    <div class="shop-title settings-title" data-i18n="settings.title">SETTINGS</div>
+    <div class="settings-rule"></div>
+    <div id="settings-binds" class="settings-binds"></div>
+    <div class="btn-row" style="justify-content:center; margin-top:8px;">
+      <button class="btn secondary" id="settings-reset" data-i18n="settings.reset">RESET</button>
+      <button class="btn" id="settings-back" data-i18n="settings.back">BACK</button>
+    </div>
+    <div class="settings-foot" data-i18n="settings.foot">D-PAD move · A rebind · Y reset · B back</div>
+  </div>
+</div>
+
+<!-- ============ Quit confirm (ESC in-run) ============ -->
+<div id="quit-overlay" class="overlay">
+  <div class="overlay-image"><img src="./scene/quit_confirm.webp" alt="Quit"></div>
+  <div class="death-title" data-i18n="quit.title">QUIT RUN?</div>
+  <div class="overlay-subtitle" data-i18n="quit.subtitle">return to main menu</div>
+  <div class="quit-warn" data-i18n="quit.warn">current run progress will be lost</div>
+  <div class="btn-row">
+    <button class="btn" id="quit-yes">▶ <span data-i18n="btn.quit">Quit</span> <span class="btn-hint">[ENTER]</span></button>
+    <button class="btn secondary" id="quit-settings">⚙ <span data-i18n="settings.title">SETTINGS</span> <span class="btn-hint">[SPACE]</span></button>
+    <button class="btn secondary" id="quit-no"><span data-i18n="btn.cancel">Cancel</span> <span class="btn-hint">[ESC]</span></button>
+  </div>
+</div>
+
+<!-- ============ Cutscene (Chapter intro) ============ -->
+<div id="cutscene-overlay" class="overlay">
+  <div class="cutscene-frame">
+    <div class="cutscene-image" id="cutscene-image"></div>
+    <div class="cutscene-title" id="cutscene-title"></div>
+    <div class="cutscene-subtitle" id="cutscene-subtitle"></div>
+    <div class="cutscene-narration" id="cutscene-narration"></div>
+  </div>
+  <div class="cutscene-continue-hint" id="cutscene-continue-hint" data-i18n="cutscene.continue">Press Any Key to Continue</div>
+</div>
+
+<!-- ============ Summary (end-of-chapter stats) ============ -->
+<div id="summary-overlay" class="overlay">
+  <div class="summary-frame">
+    <div class="overlay-image" style="height:150px; margin-bottom:16px"><img src="./scene/summary-clear.webp" alt="Chapter Clear"></div>
+    <div class="summary-chapter" id="summary-chapter">Chapter 1 · Cleared</div>
+    <div class="summary-title" data-i18n="summary.title">CHAPTER COMPLETE</div>
+    <div class="summary-flavor" data-i18n="summary.flavor">Breath. The corridor holds. Soon, the next.</div>
+    <div class="summary-grid" id="summary-stats"></div>
+    <button class="btn" id="summary-continue">▶ <span data-i18n="btn.to_shop">To Shop</span> <span class="btn-hint">[ENTER]</span></button>
+  </div>
+</div>
+
+<!-- ============ Upgrade Pick (wave clear reward) ============ -->
+<div id="upgrade-overlay" class="overlay">
+  <div class="overlay-image"><img src="./scene/upgrade.webp" alt=""></div>
+  <div class="shop-title" data-i18n="upgrade.title">WAVE CLEAR</div>
+  <div class="overlay-subtitle" data-i18n="upgrade.subtitle">choose an upgrade</div>
+  <div class="card-row" id="upgrade-cards"></div>
+  <!-- Build strip: the run's numbers, held cards and tag counts — the pick used to be made blind,
+       because the HUD stats panel hides itself the moment a fullscreen overlay opens. -->
+  <div id="upgrade-build">
+    <div class="build-nums" id="build-nums"></div>
+    <div class="build-icons" id="build-held"></div>
+    <div class="card-tags" id="build-tags"></div>
+  </div>
+  <div id="upgrade-hint">
+    <span data-i18n="upgrade.hint">[1-3] pick · [← →] move · [ENTER] confirm · [SPACE] inspect</span>
+    <span id="upgrade-hint-banish" data-i18n="upgrade.hint_banish"> · [R/BKSP] banish</span>
+  </div>
+</div>
+
+<!-- ============ Shop ============ -->
+<div id="shop-overlay" class="overlay">
+  <div class="overlay-image"><img src="./scene/shop.webp" alt="Shop"></div>
+  <div class="shop-head">
+    <div class="shop-title" data-i18n="shop.title">SHOP</div>
+    <div class="overlay-subtitle" data-i18n="shop.subtitle">spend coins · leave anytime</div>
+    <div id="shop-currency-line"><span data-i18n="shop.coins">coins:</span> <span class="coins" id="shop-currency">0</span></div>
+  </div>
+  <div class="card-row" id="shop-items"></div>
+  <!-- Same build strip the wave reward uses — the shop spends gold on the same effect kinds. -->
+  <div id="shop-build">
+    <div class="build-nums" id="shop-build-nums"></div>
+    <div class="build-icons" id="shop-build-held"></div>
+    <div class="card-tags" id="shop-build-tags"></div>
+  </div>
+  <button class="btn" id="shop-continue">▶ <span data-i18n="btn.leave">Leave</span> <span class="btn-hint">[ESC]</span></button>
+</div>
+
+<!-- ============ Meta (permanent upgrade tree) ============ -->
+<div id="meta-overlay" class="overlay">
+  <div class="overlay-image"><img src="./scene/echo.webp" alt="Echo"></div>
+  <div class="meta-head">
+    <div class="shop-title" data-i18n="meta.title">ECHO</div>
+    <div class="overlay-subtitle" data-i18n="meta.subtitle">what survives death · carries into every run</div>
+    <div id="meta-stats-line">
+      <span data-i18n="meta.coins">coins:</span> <span class="coins" id="meta-currency">0</span>
+      <span style="opacity:0.5; margin: 0 10px">·</span>
+      <span data-i18n="meta.best">best:</span> <span class="best" id="meta-best">wave 0 · score 000000</span>
+    </div>
+  </div>
+  <div id="meta-owned">0 / 0 unlocked</div>
+  <div class="meta-grid" id="meta-nodes"></div>
+  <!-- Preview row — what the focused node would do to the next run's stats. Filled by MetaScene. -->
+  <div id="meta-build">
+    <span class="sd-head" id="meta-build-head"></span>
+    <span class="build-nums" id="meta-build-rows"></span>
+  </div>
+  <button class="btn" id="meta-back">▶ <span data-i18n="btn.leave">Leave</span> <span class="btn-hint">[ESC]</span></button>
+  <button id="meta-reset" title="dev only" data-i18n="meta.reset">reset all progress</button>
+  <!-- Inline reset-confirm panel — shown by MetaScene instead of window.confirm() -->
+  <div id="meta-reset-confirm" style="position:absolute; inset:0; background:rgba(10,14,20,0.88); flex-direction:column; align-items:center; justify-content:center; gap:18px; z-index:10; display:none;">
+    <div style="font-family:'VT323',monospace; font-size:36px; color:var(--accent);" data-i18n="meta.reset_confirm.title">RESET ALL PROGRESS?</div>
+    <div style="font-size:13px; color:var(--dim); text-align:center; max-width:420px;" data-i18n="meta.reset_confirm.body">This will erase all currency, unlocks and best scores. This cannot be undone.</div>
+    <div style="display:flex; gap:24px; margin-top:8px;">
+      <button class="btn" id="meta-reset-yes">▶ <span data-i18n="btn.reset">Reset</span> <span class="btn-hint">[ENTER]</span></button>
+      <button class="btn secondary" id="meta-reset-no"><span data-i18n="btn.cancel">Cancel</span> <span class="btn-hint">[ESC]</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Equipment (sub-weapon + Rune of Empower) ============ -->
+<div id="equip-overlay" class="overlay">
+  <div class="overlay-image"><img src="./scene/equip.webp" alt="Equipment"></div>
+  <div class="eq-head">
+    <div class="shop-title" data-i18n="equip.title">EQUIPMENT</div>
+    <div class="overlay-subtitle" data-i18n="equip.subtitle">one sub-weapon · upgrade with runes</div>
+    <div class="eq-coins"><span data-i18n="equip.coins">coins:</span> <span class="coins" id="equip-currency">0</span></div>
+  </div>
+  <div class="eq-body">
+    <div class="eq-left">
+      <div class="eq-grid" id="equip-grid"></div>
+      <div class="eq-rune-bar" id="equip-rune"></div>
+      <div class="eq-keys" id="equip-keys" data-i18n="equip.keys">[1-6] select · [← → ↑ ↓] move · [ENTER] buy · [R] empower · [SPACE] evolve · [ESC] leave</div>
+    </div>
+    <div class="eq-detail" id="equip-detail"></div>
+  </div>
+  <button class="btn" id="equip-continue">▶ <span data-i18n="btn.leave">Leave</span> <span class="btn-hint">[ESC]</span></button>
+</div>
+
+<!-- ============ Codex (UPGRADE & SHOP compendium) ============ -->
+<div id="codex-overlay" class="overlay">
+  <div class="overlay-image"><img src="./scene/codex.webp" alt="Codex"></div>
+  <div class="shop-title" data-i18n="codex.title">CODEX</div>
+  <div class="overlay-subtitle"><span class="btn-hint">[Q/W/E/R/T/Y]</span> tabs · <span class="btn-hint">[1/2]</span> sub · <span class="btn-hint">[← → ↑ ↓]</span> select · <span class="btn-hint">[ENTER]</span> open · <span class="btn-hint">[ESC]</span> back</div>
+  <div class="codex-tabs">
+    <button class="codex-tab active" id="codex-tab-item"><span data-i18n="codex.tab.item">ITEM</span> <span class="btn-hint">[Q]</span></button>
+    <button class="codex-tab" id="codex-tab-subweapon"><span data-i18n="codex.tab.subweapon">SUB-WEAPON</span> <span class="btn-hint">[W]</span></button>
+    <button class="codex-tab" id="codex-tab-upgrade"><span data-i18n="codex.tab.upgrade">UPGRADE</span> <span class="btn-hint">[E]</span></button>
+    <button class="codex-tab" id="codex-tab-shop"><span data-i18n="codex.tab.shop">SHOP</span> <span class="btn-hint">[R]</span></button>
+    <button class="codex-tab" id="codex-tab-meta"><span data-i18n="codex.tab.meta">META</span> <span class="btn-hint">[T]</span></button>
+  </div>
+  <div class="codex-tabs" id="codex-subtabs" style="display:none">
+    <button class="codex-tab active" id="codex-subtab-unique"><span data-i18n="codex.subtab.unique">UNIQUE</span> <span class="btn-hint">[1]</span></button>
+    <button class="codex-tab" id="codex-subtab-set"><span data-i18n="codex.subtab.set">SET</span> <span class="btn-hint">[2]</span></button>
+  </div>
+  <div id="codex-progress">0 / 0 discovered</div>
+  <div class="codex-grid" id="codex-grid"></div>
+  <button class="btn" id="codex-back">▶ <span data-i18n="btn.leave">Leave</span> <span class="btn-hint">[ESC]</span></button>
+</div>
+
+<!-- ============ HUD (always on during a Run) ============ -->
+<!-- ============ Inventory (Mannequin interaction) ============ -->
+<div id="inventory-overlay" class="overlay">
+ <div class="inv-frame">
+  <!-- Header strip, not a full plate: the inventory is a dense working panel and a 21:9 banner
+       would cost the grid real rows on a 1280x800 screen. The header text sits on the art. -->
+  <div class="overlay-image inv-banner"><img src="./scene/inventory.webp" alt=""></div>
+  <div class="inv-header">
+    <div class="inv-header-left">
+      <button class="btn inv-mini-btn" id="inventory-continue"><span data-i18n="inv.leave">LEAVE</span> <span class="btn-hint">[ESC]</span></button>
+    </div>
+    <div class="inv-header-center">
+      <div class="inv-header-title" data-i18n="inv.title">INVENTORY</div>
+      <div class="inv-header-sub" data-i18n="inv.sub">L-click EQUIP · R-click UNEQUIP · ✕ SCRAP · ESC close</div>
+      <div class="inv-header-sub"><span class="btn-hint">[ALT]</span> compare</div>
+    </div>
+  </div>
+  <div class="inv-root">
+    <div class="inv-col-left">
+      <div class="inv-core-panel" id="inventory-core"></div>
+      <div class="inv-derived-panel">
+        <div class="inv-derived-title" data-i18n="inv.derived">DERIVED</div>
+        <div class="inv-derived-grid" id="inventory-derived"></div>
+      </div>
+      <div class="inv-grid-wrap">
+        <div class="inv-grid-header">
+          <span class="inv-grid-header-l">
+            <span data-i18n="inv.bag">BAG</span>
+            <span class="inv-grid-cap" id="inventory-cap">0 / 10</span>
+          </span>
+          <span class="inv-grid-header-r">
+            <span class="inv-shards"><span class="inv-shards-key" data-i18n="inv.shards">SHARDS</span><span id="inventory-shards">0</span></span>
+            <button class="btn inv-mini-btn inv-focus-btn" id="inventory-focus"><span data-i18n="inv.focus">FOCUS</span>: <span class="inv-focus-set" id="inventory-focus-set">ALL</span> <span class="btn-hint">[F]</span></button>
+            <button class="btn inv-mini-btn inv-roll-btn" id="inventory-roll"><span data-i18n="inv.roll">ROLL</span> <span class="inv-roll-cost" id="inventory-roll-cost">−8</span> <span class="btn-hint">[R]</span></button>
+          </span>
+        </div>
+        <div class="inv-grid-scroll">
+          <div class="inv-grid" id="inventory-grid"></div>
+        </div>
+      </div>
+    </div>
+    <div class="inv-col-right">
+     <div class="inv-mannequin-bay">
+     <div class="inv-mannequin">
+      <div class="inv-mannequin-header">⌜ <span data-i18n="inv.mannequin">MANNEQUIN</span> ⌝</div>
+      <div class="inv-equip-col inv-equip-col-left" id="inventory-equip-left"></div>
+      <div class="inv-silhouette" id="inventory-silhouette">
+        <div class="inv-sil-glow"></div>
+        <div class="inv-sil-pedestal">
+          <div class="inv-sil-pedestal-disc"></div>
+          <div class="inv-sil-pedestal-rim"></div>
+        </div>
+        <div class="inv-sil-figure">
+          <svg viewBox="-12 -12 124 184" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+            <defs>
+              <radialGradient id="invPlayerHalo" cx="0.5" cy="0.5" r="0.55">
+                <stop offset="0%"  stop-color="#2de2e6" stop-opacity="0.18"/>
+                <stop offset="55%" stop-color="#2de2e6" stop-opacity="0.06"/>
+                <stop offset="100%" stop-color="#2de2e6" stop-opacity="0"/>
+              </radialGradient>
+              <radialGradient id="invPlayerFootGlow" cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0%"  stop-color="#2de2e6" stop-opacity="0.45"/>
+                <stop offset="100%" stop-color="#2de2e6" stop-opacity="0"/>
+              </radialGradient>
+              <radialGradient id="invReactorGlow" cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0%"  stop-color="#2de2e6" stop-opacity="1"/>
+                <stop offset="55%" stop-color="#2de2e6" stop-opacity="0.4"/>
+                <stop offset="100%" stop-color="#2de2e6" stop-opacity="0"/>
+              </radialGradient>
+              <radialGradient id="invEyeGlow" cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0%"  stop-color="#2de2e6" stop-opacity="1"/>
+                <stop offset="100%" stop-color="#2de2e6" stop-opacity="0"/>
+              </radialGradient>
+              <linearGradient id="invSwordGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%"  stop-color="#a8f8fa"/>
+                <stop offset="50%" stop-color="#2de2e6"/>
+                <stop offset="100%" stop-color="#0e6a72"/>
+              </linearGradient>
+              <linearGradient id="invHoodRim" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"  stop-color="#2de2e6" stop-opacity="0.85"/>
+                <stop offset="100%" stop-color="#2de2e6" stop-opacity="0"/>
+              </linearGradient>
+              <filter id="invSoftGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="1.2" result="b"/>
+                <feMerge>
+                  <feMergeNode in="b"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+              <filter id="invStrongGlow" x="-80%" y="-80%" width="260%" height="260%">
+                <feGaussianBlur stdDeviation="2.6" result="b"/>
+                <feMerge>
+                  <feMergeNode in="b"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+
+            <!-- ambient halo -->
+            <ellipse cx="50" cy="70" rx="70" ry="80" fill="url(#invPlayerHalo)">
+              <animate attributeName="rx" values="68;74;68" dur="5.4s" repeatCount="indefinite"/>
+              <animate attributeName="ry" values="78;84;78" dur="5.4s" repeatCount="indefinite"/>
+            </ellipse>
+            <!-- foot glow patch (animated radius) -->
+            <ellipse cx="50" cy="132" rx="32" ry="6" fill="url(#invPlayerFootGlow)">
+              <animate attributeName="rx" values="28;36;28" dur="3.8s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.6;1;0.6" dur="3.8s" repeatCount="indefinite"/>
+            </ellipse>
+            <!-- ground shadow -->
+            <ellipse cx="50" cy="134" rx="22" ry="4" fill="rgba(0,0,0,0.55)"/>
+            <!-- side energy beams (vertical cyan flares) -->
+            <line x1="-6" y1="40" x2="-6" y2="120" stroke="#2de2e6" stroke-width="1" opacity="0.35">
+              <animate attributeName="opacity" values="0.15;0.55;0.15" dur="3.0s" repeatCount="indefinite"/>
+            </line>
+            <line x1="106" y1="40" x2="106" y2="120" stroke="#2de2e6" stroke-width="1" opacity="0.35">
+              <animate attributeName="opacity" values="0.55;0.15;0.55" dur="3.0s" repeatCount="indefinite"/>
+            </line>
+
+            <!-- The body is NOT drawn here. It used to be a hand-ported copy of
+                 PlayerRenderer.drawBody() and drifted every time the sprite changed; it is now
+                 rendered by that same function into #inventory-mannequin-canvas, overlaid on this
+                 decorative bay. Only the ambience below belongs to the SVG. -->
+
+            <!-- =============== floating cyan motes (decorative, drift + blink) =============== -->
+            <g filter="url(#invSoftGlow)">
+              <circle cx="6" cy="46" r="1.8" fill="#2de2e6">
+                <animate attributeName="opacity" values="0.2;1;0.2" dur="2.6s" repeatCount="indefinite"/>
+                <animate attributeName="cy" values="44;48;44" dur="4.2s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="98" cy="48" r="1.8" fill="#2de2e6">
+                <animate attributeName="opacity" values="1;0.2;1" dur="3.0s" repeatCount="indefinite"/>
+                <animate attributeName="cy" values="50;46;50" dur="4.6s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="2" cy="92" r="1.4" fill="#2de2e6">
+                <animate attributeName="opacity" values="0.3;0.95;0.3" dur="2.2s" repeatCount="indefinite"/>
+                <animate attributeName="cy" values="90;94;90" dur="3.8s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="104" cy="94" r="1.4" fill="#2de2e6">
+                <animate attributeName="opacity" values="0.95;0.3;0.95" dur="2.4s" repeatCount="indefinite"/>
+                <animate attributeName="cy" values="94;90;94" dur="3.6s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="50" cy="-6" r="2.0" fill="#2de2e6">
+                <animate attributeName="opacity" values="0.4;1;0.4" dur="1.8s" repeatCount="indefinite"/>
+                <animate attributeName="cy" values="-7;-3;-7" dur="3.2s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="14" cy="120" r="1.2" fill="#2de2e6">
+                <animate attributeName="opacity" values="0.3;0.9;0.3" dur="2.8s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="86" cy="122" r="1.2" fill="#2de2e6">
+                <animate attributeName="opacity" values="0.9;0.3;0.9" dur="3.0s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="22" cy="14" r="1.0" fill="#2de2e6">
+                <animate attributeName="opacity" values="0.2;0.85;0.2" dur="3.4s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="78" cy="14" r="1.0" fill="#2de2e6">
+                <animate attributeName="opacity" values="0.85;0.2;0.85" dur="3.6s" repeatCount="indefinite"/>
+              </circle>
+            </g>
+          </svg>
+          <!-- the body itself — drawn by PlayerRenderer, same function the run uses.
+               Wider than the 25px sprite box on purpose: a long cloak reaches 6px behind the
+               heels and a greatsword 10px past the hand, and both used to clip. -->
+          <canvas id="inventory-mannequin-canvas" width="176" height="184"></canvas>
+          <svg style="display:none">
+            <defs>
+              <linearGradient id="armorPlate" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%"  stop-color="#7a8088"/>
+                <stop offset="35%" stop-color="#3a3e48"/>
+                <stop offset="65%" stop-color="#2a2e36"/>
+                <stop offset="100%" stop-color="#14161c"/>
+              </linearGradient>
+              <linearGradient id="armorPlateDark" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%"  stop-color="#3a3e48"/>
+                <stop offset="50%" stop-color="#1a1d26"/>
+                <stop offset="100%" stop-color="#0a0c12"/>
+              </linearGradient>
+              <linearGradient id="goldTrim" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f5d18a"/>
+                <stop offset="100%" stop-color="#8a6a2a"/>
+              </linearGradient>
+              <radialGradient id="visorGlow" cx="0.5" cy="0.5" r="0.5">
+                <stop offset="0%"  stop-color="#f5d18a" stop-opacity="0.95"/>
+                <stop offset="60%" stop-color="#8a6a2a" stop-opacity="0.4"/>
+                <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+              </radialGradient>
+              <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="1.6" result="b"/>
+                <feMerge>
+                  <feMergeNode in="b"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+
+            <!-- back banner -->
+            <polygon points="38,20 62,20 58,200 50,210 42,200" fill="#1a1018" opacity="0.55"/>
+            <polygon points="40,22 60,22 56,196 50,202 44,196" fill="#3a1820" opacity="0.6"/>
+            <line x1="50" y1="22" x2="50" y2="202" stroke="#f5d18a" stroke-width="0.4" opacity="0.5"/>
+
+            <!-- helm crest -->
+            <polygon points="50,2 46,18 54,18" fill="#8a1820" opacity="0.85"/>
+            <polygon points="50,4 47,16 53,16" fill="#f53848" opacity="0.7"/>
+
+            <!-- helm shell -->
+            <path d="M36,18 Q36,8 50,8 Q64,8 64,18 L64,38 Q64,46 50,46 Q36,46 36,38 Z"
+                  fill="url(#armorPlate)" stroke="#f5d18a" stroke-width="0.5" opacity="0.95"/>
+            <!-- helm shadow side -->
+            <path d="M55,12 Q64,18 64,38 Q64,44 58,46 L56,42 Q60,38 60,30 L58,16 Z"
+                  fill="url(#armorPlateDark)" opacity="0.85"/>
+            <!-- visor slit -->
+            <rect x="40" y="26" width="20" height="3" fill="#000"/>
+            <rect x="41" y="26.5" width="18" height="1.5" fill="url(#visorGlow)"/>
+            <circle cx="44" cy="27.3" r="0.6" fill="#f5d18a" filter="url(#softGlow)"/>
+            <circle cx="56" cy="27.3" r="0.6" fill="#f5d18a" filter="url(#softGlow)"/>
+            <!-- helm rivets -->
+            <circle cx="38" cy="22" r="0.7" fill="#c89a4a"/>
+            <circle cx="62" cy="22" r="0.7" fill="#c89a4a"/>
+            <circle cx="38" cy="42" r="0.7" fill="#c89a4a"/>
+            <circle cx="62" cy="42" r="0.7" fill="#c89a4a"/>
+            <!-- chin guard -->
+            <path d="M40,40 Q50,52 60,40" fill="none" stroke="#1a1d26" stroke-width="1.5"/>
+            <!-- gorget -->
+            <rect x="42" y="46" width="16" height="6" fill="url(#armorPlateDark)" stroke="#3a3e48" stroke-width="0.3"/>
+
+            <!-- pauldrons -->
+            <ellipse cx="28" cy="58" rx="11" ry="9" fill="url(#armorPlate)" stroke="#f5d18a" stroke-width="0.4"/>
+            <ellipse cx="28" cy="58" rx="6" ry="5" fill="url(#armorPlateDark)"/>
+            <circle cx="28" cy="58" r="1.6" fill="url(#goldTrim)"/>
+            <ellipse cx="72" cy="58" rx="11" ry="9" fill="url(#armorPlate)" stroke="#f5d18a" stroke-width="0.4"/>
+            <ellipse cx="72" cy="58" rx="6" ry="5" fill="url(#armorPlateDark)"/>
+            <circle cx="72" cy="58" r="1.6" fill="url(#goldTrim)"/>
+
+            <!-- breastplate -->
+            <path d="M36,52 L64,52 L66,90 Q60,98 50,98 Q40,98 34,90 Z"
+                  fill="url(#armorPlate)" stroke="#f5d18a" stroke-width="0.5"/>
+            <!-- chest seam + ribs -->
+            <line x1="50" y1="54" x2="50" y2="96" stroke="#0a0c12" stroke-width="1"/>
+            <path d="M40,62 Q50,66 60,62" fill="none" stroke="#0a0c12" stroke-width="0.6"/>
+            <path d="M38,72 Q50,76 62,72" fill="none" stroke="#0a0c12" stroke-width="0.6"/>
+            <path d="M37,82 Q50,86 63,82" fill="none" stroke="#0a0c12" stroke-width="0.6"/>
+            <!-- chest emblem (heart-anchor) -->
+            <polygon points="50,68 54,72 50,80 46,72" fill="url(#goldTrim)" stroke="#3a2010" stroke-width="0.3"/>
+            <circle cx="50" cy="73" r="1.4" fill="#f5d18a" opacity="0.9" filter="url(#softGlow)">
+              <animate attributeName="opacity" values="0.5;1;0.5" dur="2.4s" repeatCount="indefinite"/>
+            </circle>
+            <!-- shoulder rivets -->
+            <circle cx="38" cy="55" r="0.7" fill="#c89a4a"/>
+            <circle cx="62" cy="55" r="0.7" fill="#c89a4a"/>
+
+            <!-- arms (upper) -->
+            <rect x="20" y="58" width="8" height="32" rx="3" fill="url(#armorPlateDark)" stroke="#3a3e48" stroke-width="0.3"/>
+            <rect x="72" y="58" width="8" height="32" rx="3" fill="url(#armorPlateDark)" stroke="#3a3e48" stroke-width="0.3"/>
+            <!-- bracers -->
+            <rect x="18" y="92" width="12" height="14" rx="2" fill="url(#armorPlate)" stroke="#f5d18a" stroke-width="0.4"/>
+            <rect x="70" y="92" width="12" height="14" rx="2" fill="url(#armorPlate)" stroke="#f5d18a" stroke-width="0.4"/>
+            <line x1="20" y1="98" x2="28" y2="98" stroke="#0a0c12" stroke-width="0.4"/>
+            <line x1="72" y1="98" x2="80" y2="98" stroke="#0a0c12" stroke-width="0.4"/>
+
+            <!-- gloves / fists -->
+            <ellipse cx="24" cy="112" rx="6" ry="6" fill="url(#armorPlateDark)" stroke="#3a3e48" stroke-width="0.4"/>
+            <circle cx="24" cy="112" r="1.4" fill="url(#goldTrim)"/>
+            <ellipse cx="76" cy="112" rx="6" ry="6" fill="url(#armorPlateDark)" stroke="#3a3e48" stroke-width="0.4"/>
+            <circle cx="76" cy="112" r="1.4" fill="url(#goldTrim)"/>
+
+            <!-- belt -->
+            <rect x="34" y="98" width="32" height="6" fill="#1a1018" stroke="#3a2010" stroke-width="0.3"/>
+            <rect x="46" y="98.5" width="8" height="5" fill="url(#goldTrim)"/>
+            <circle cx="50" cy="101" r="1.2" fill="#1a1018"/>
+
+            <!-- faulds (skirt plates) -->
+            <path d="M34,104 L40,128 L34,128 Z" fill="url(#armorPlateDark)" stroke="#3a3e48" stroke-width="0.3"/>
+            <path d="M40,104 L46,132 L38,132 Z" fill="url(#armorPlate)" stroke="#3a3e48" stroke-width="0.3"/>
+            <path d="M46,104 L52,134 L44,134 Z" fill="url(#armorPlateDark)" stroke="#3a3e48" stroke-width="0.3"/>
+            <path d="M52,104 L58,134 L50,134 Z" fill="url(#armorPlate)" stroke="#3a3e48" stroke-width="0.3"/>
+            <path d="M58,104 L62,132 L54,132 Z" fill="url(#armorPlateDark)" stroke="#3a3e48" stroke-width="0.3"/>
+            <path d="M64,104 L62,128 L56,128 Z" fill="url(#armorPlate)" stroke="#3a3e48" stroke-width="0.3"/>
+
+            <!-- thighs -->
+            <rect x="36" y="128" width="12" height="32" rx="3" fill="url(#armorPlateDark)" stroke="#3a3e48" stroke-width="0.3"/>
+            <rect x="52" y="128" width="12" height="32" rx="3" fill="url(#armorPlateDark)" stroke="#3a3e48" stroke-width="0.3"/>
+            <!-- knee plates -->
+            <ellipse cx="42" cy="160" rx="7" ry="4" fill="url(#armorPlate)" stroke="#f5d18a" stroke-width="0.3"/>
+            <ellipse cx="58" cy="160" rx="7" ry="4" fill="url(#armorPlate)" stroke="#f5d18a" stroke-width="0.3"/>
+            <circle cx="42" cy="160" r="1.2" fill="url(#goldTrim)"/>
+            <circle cx="58" cy="160" r="1.2" fill="url(#goldTrim)"/>
+            <!-- greaves -->
+            <rect x="36" y="164" width="12" height="36" rx="3" fill="url(#armorPlate)" stroke="#f5d18a" stroke-width="0.4"/>
+            <rect x="52" y="164" width="12" height="36" rx="3" fill="url(#armorPlate)" stroke="#f5d18a" stroke-width="0.4"/>
+            <line x1="42" y1="170" x2="42" y2="196" stroke="#0a0c12" stroke-width="0.5"/>
+            <line x1="58" y1="170" x2="58" y2="196" stroke="#0a0c12" stroke-width="0.5"/>
+            <!-- sabatons -->
+            <ellipse cx="42" cy="204" rx="8" ry="5" fill="url(#armorPlateDark)" stroke="#f5d18a" stroke-width="0.4"/>
+            <ellipse cx="58" cy="204" rx="8" ry="5" fill="url(#armorPlateDark)" stroke="#f5d18a" stroke-width="0.4"/>
+
+            <!-- floating runes (decorative) -->
+            <g opacity="0.7">
+              <circle cx="14" cy="80" r="1.2" fill="#f5d18a">
+                <animate attributeName="opacity" values="0.2;1;0.2" dur="3s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="86" cy="78" r="1.2" fill="#f5d18a">
+                <animate attributeName="opacity" values="1;0.2;1" dur="3.4s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="10" cy="140" r="1" fill="#c89a4a">
+                <animate attributeName="opacity" values="0.2;0.9;0.2" dur="2.6s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="90" cy="142" r="1" fill="#c89a4a">
+                <animate attributeName="opacity" values="0.9;0.2;0.9" dur="2.8s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="50" cy="6" r="1.4" fill="#f5d18a">
+                <animate attributeName="opacity" values="0.4;1;0.4" dur="2s" repeatCount="indefinite"/>
+              </circle>
+            </g>
+          </svg>
+        </div>
+        <div class="inv-sil-rune-ring"></div>
+      </div>
+      <div class="inv-equip-col inv-equip-col-right" id="inventory-equip-right"></div>
+      <div class="inv-mannequin-footer">⌞ <span data-i18n="inv.status">STATUS · ONLINE</span> ⌟</div>
+     </div>
+     </div>
+     <!-- Set bonuses live under the mannequin as emblems; the full ladder is in the hover tooltip. -->
+     <div class="inv-setbar" id="inventory-sets-panel" style="display:none">
+       <div class="inv-setbar-title" data-i18n="inv.set_bonuses">SET BONUSES</div>
+       <div class="inv-setbar-list" id="inventory-sets"></div>
+     </div>
+    </div>
+  </div>
+ </div>
+</div>
+<div id="inventory-tooltip"></div>
+
+<div id="hud-overlay">
+  <div class="hud-left">
+    <!-- Row labels are glyphs, not words: at 18px they cost a fixed width no locale can overflow.
+         The hud.* keys stay live as the tooltip via data-i18n-title (Locale.ts applyI18n), so the
+         label still has an accessible name in all six locales. alt="" — the title already says it. -->
+    <div class="hud-stat hud-stat-score">
+      <div class="hud-label"><img class="hud-ico" src="./hud/ico_score.webp" alt="" data-i18n-title="hud.score"></div>
+      <div class="hud-value" id="hud-score">000000</div>
+    </div>
+    <div class="hud-stat">
+      <div class="hud-label"><img class="hud-ico" src="./hud/ico_coins.webp" alt="" data-i18n-title="hud.coins"></div>
+      <div class="hud-value" id="hud-coins">0</div>
+    </div>
+    <div class="hud-stat">
+      <div class="hud-label"><img class="hud-ico" src="./hud/ico_combo.webp" alt="" data-i18n-title="hud.combo"></div>
+      <div class="hud-value" id="hud-combo">x0</div>
+    </div>
+    <div class="hud-stat">
+      <div class="hud-label"><img class="hud-ico" src="./hud/ico_super.webp" alt="" data-i18n-title="hud.super"></div>
+      <div class="hud-value" id="hud-ko">OFF</div>
+    </div>
+    <div class="hud-stat">
+      <div class="hud-label"><img class="hud-ico" src="./hud/ico_equip.webp" alt="" data-i18n-title="hud.equipment"></div>
+      <div class="hud-value" id="hud-equip">0/0</div>
+    </div>
+    <div class="hud-stat" id="hud-curses" style="display:none">
+      <div class="hud-label"><img class="hud-ico" src="./hud/ico_curses.webp" alt="" data-i18n-title="hud.curses"></div>
+      <div class="hud-value" id="hud-curse-icons"></div>
+    </div>
+    <!-- Pickup strip — moved out of the STATS (V) panel and always visible. The ids are unchanged, so statsPanel.ts needs no edit.
+         These three labels are glyphs too, but they need no CSS of their own: .hud-build .hud-label keeps
+         its `display:block`, so the img sits at the left edge with the grid under it. -->
+    <div class="hud-build" data-build="upgrades">
+      <div class="hud-label"><img class="hud-ico" src="./hud/ico_wave.webp" alt="" data-i18n-title="stats.wave_upgrades"></div>
+      <div class="meta-icon-grid" id="sl-upgrades"></div>
+    </div>
+    <div class="hud-build" data-build="shop">
+      <div class="hud-label"><img class="hud-ico" src="./hud/ico_shop.webp" alt="" data-i18n-title="stats.shop_upgrades"></div>
+      <div class="meta-icon-grid" id="sl-shop"></div>
+    </div>
+    <div class="hud-build" data-build="meta">
+      <div class="hud-label"><img class="hud-ico" src="./hud/ico_echo.webp" alt="" data-i18n-title="stats.echo_unlocked"></div>
+      <div class="meta-icon-grid" id="sl-meta"></div>
+    </div>
+  </div>
+  <!-- Tag tracker — top-right, below the audio toolbar. hud.ts rebuilds it when a count changes. -->
+  <div class="hud-tags" id="hud-tags" style="display:none"></div>
+  <div class="hud-top">
+    <div id="hud-wave">WAVE 00</div>
+    <div id="hud-chapter-title"></div>
+    <div id="hud-wave-status"></div>
+  </div>
+  <!-- Wave countdown — large number at screen centre, hud.ts toggles visible -->
+  <div id="wave-countdown">
+    <div class="wave-countdown-label" data-i18n="hud.next_wave_in">NEXT WAVE IN</div>
+    <div class="wave-countdown-number" id="wave-countdown-number">0</div>
+  </div>
+  <!-- Tutorial prompt — banner at screen centre, hud.ts toggles visible -->
+  <div id="hud-tutorial-banner"></div>
+  <!-- Ability cooldown bar — bottom-centre of the canvas. One slot per `data-ability`; hud.ts
+       finds them once and writes only --cd-progress and the .ready class per frame. Adding a slot
+       is markup plus one entry in HudState.abilities — no icon table in TS. -->
+  <div class="hud-cooldowns" id="hud-cooldowns">
+    <div class="hud-cd-slot" data-ability="dash" data-i18n-title="hud.dash">
+      <div class="hud-cd-box">
+        <!-- Dash: graduated speed lines, the after-image chevron the dash leaves behind, and the
+             lead chevron punching out of it. Three depths of the same forward motion — the read is
+             immediate at 24px, where a running figure would collapse to mush. -->
+        <svg class="hud-cd-ico" viewBox="0 0 24 24" aria-hidden="true">
+          <path class="cd-trail" d="M1.5 6.5h5.5M1.5 12h3.5M1.5 17.5h5.5"/>
+          <path class="cd-echo" d="M9.5 5 16 12l-6.5 7"/>
+          <path class="cd-lead" d="M14.5 5 21 12l-6.5 7"/>
+        </svg>
+      </div>
+      <span class="hud-cd-key">C</span>
+    </div>
+    <!-- The sub-weapon's icon and tier come from subweapons.json, so unlike the dash they are
+         written by hud.ts rather than sitting in this markup. -->
+    <div class="hud-cd-slot" data-ability="subweapon" data-i18n-title="hud.sub" style="display:none">
+      <div class="hud-cd-box"><div class="hud-cd-img" data-cd-img></div></div>
+      <span class="hud-cd-badge" data-cd-badge></span>
+      <span class="hud-cd-key">S</span>
+    </div>
+  </div>
+  <!-- Stats toggle — bottom-right corner. `data-stats-toggle` is what binds it to the panel:
+       statsPanel.ts wires and syncs every element carrying it, so this and the (hidden) toolbar
+       button stay in step without either knowing about the other. -->
+  <button id="hud-stats-btn" class="hud-corner-btn" data-stats-toggle
+          aria-pressed="false" data-i18n-title="audio.stats">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M6 21V11M12 21V4M18 21V15"/></svg>
+    <span class="hud-corner-key">V</span>
+  </button>
+</div>
+
+<!-- ============ Top-right toolbar ============ -->
+<div id="audio-controls">
+  <!-- Icons are currentColor SVG, not emoji — emoji come from an OS font, so they burn in colours
+       outside the palette (blue ABCD tiles, a purple note) and hover/active/off colour transitions
+       did not apply at all. With stroke=currentColor the .off/.active/:hover colours reach the icon. -->
+  <button id="stats-toggle" class="audio-btn" data-stats-toggle aria-pressed="false">
+    <svg viewBox="0 0 24 24"><path d="M3 21h18M6 21V11M12 21V4M18 21V15"/></svg>
+    <span class="audio-key">V</span>
+    <span class="audio-tip"><span data-i18n="audio.stats">STATS</span><span class="hud-key">[V]</span></span>
+  </button>
+  <button id="sfx-toggle" class="audio-btn" aria-pressed="true">
+    <svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 8.5a5 5 0 0 1 0 7"/><path d="M20 6a9 9 0 0 1 0 12"/></svg>
+    <span class="audio-key">N</span>
+    <span class="audio-tip"><span data-i18n="audio.sfx">SFX</span><span class="hud-key">[N]</span></span>
+  </button>
+  <button id="music-toggle" class="audio-btn" aria-pressed="true">
+    <svg viewBox="0 0 24 24"><path d="M9 17V5l11-2v12"/><circle class="f" cx="6" cy="17" r="3"/><circle class="f" cx="17" cy="15" r="3"/></svg>
+    <span class="audio-key">M</span>
+    <span class="audio-tip"><span data-i18n="audio.music">MUSIC</span><span class="hud-key">[M]</span></span>
+  </button>
+  <button id="sfxvol-toggle" class="audio-btn" data-badge="100">
+    <svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 10v4"/><path d="M20 8v8"/></svg>
+    <span class="audio-tip"><span data-i18n="audio.sfxvol">SFX VOLUME</span><span id="sfxvol-toggle-value">100%</span></span>
+  </button>
+  <button id="musicvol-toggle" class="audio-btn" data-badge="100">
+    <svg viewBox="0 0 24 24"><path d="M9 17V5l11-2v12"/><circle class="f" cx="6" cy="17" r="3"/><path d="M22 9v6"/></svg>
+    <span class="audio-tip"><span data-i18n="audio.musicvol">MUSIC VOLUME</span><span id="musicvol-toggle-value">100%</span></span>
+  </button>
+  <button id="fx-toggle" class="audio-btn" data-badge="100">
+    <svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3"/></svg>
+    <span class="audio-tip"><span data-i18n="audio.fx">SCREEN EFFECTS</span><span id="fx-toggle-value">100%</span></span>
+  </button>
+  <button id="cb-toggle" class="audio-btn" aria-pressed="true">
+    <svg viewBox="0 0 24 24"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.6"/></svg>
+    <span class="audio-key">B</span>
+    <span class="audio-tip"><span data-i18n="audio.colorblind">COLORBLIND</span><span class="hud-key">[B]</span></span>
+  </button>
+  <button id="size-toggle" class="audio-btn" data-badge="M">
+    <svg viewBox="0 0 24 24"><path d="M2 20 7 6l5 14M3.7 15.6h6.6"/><path d="M14 20l3.5-9L21 20M15.1 17.2h4.8"/></svg>
+    <span class="audio-key">T</span>
+    <span class="audio-tip"><span data-i18n="audio.textsize">TEXT SIZE</span><span id="size-toggle-value" data-i18n="textsize.medium">MEDIUM</span><span class="hud-key">[T]</span></span>
+  </button>
+  <button id="crisp-toggle" class="audio-btn" aria-pressed="false">
+    <svg viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg>
+    <span class="audio-key">P</span>
+    <span class="audio-tip"><span data-i18n="audio.crisp">CRISP</span><span class="hud-key">[P]</span></span>
+  </button>
+  <button id="display-toggle" class="audio-btn" data-badge="F">
+    <svg viewBox="0 0 24 24"><path d="M3 5h18v11H3zM8 20h8M12 16v4"/></svg>
+    <span class="audio-tip"><span data-i18n="audio.display">DISPLAY</span><span id="display-toggle-value" data-i18n="display.fullscreen">FULLSCREEN</span><span class="hud-key">[ALT+ENTER]</span></span>
+  </button>
+</div>
+
+<!-- ============ Stats panel (toggled with V during a Run) ============ -->
+<div id="stats-panel">
+  <div class="stats-header">
+    <div class="stats-title" data-i18n="stats.title">STATS</div>
+    <div class="stats-hint">V</div>
+  </div>
+  <!-- One `.stats-fam` per core stat: the stat on the left, the derived rows it feeds on the
+       right. The pairing is the layout, not a coincidence of ordering — CSS centres the core cell
+       against its own block, so DEX lands beside ATK SPD (the middle of its three) without anyone
+       counting rows. JUMP is parentless and rides an empty core cell. -->
+  <div class="stats-cols">
+    <div class="stats-fam stats-fam-head">
+      <div class="stats-section first" data-i18n="stats.core">CORE STATS</div>
+      <div class="fam-rows">
+        <div class="stats-section first" data-i18n="stats.derived">DERIVED</div>
+        <div class="stats-row stats-head">
+          <span></span>
+          <span class="base-h" data-i18n="stats.base">BASE</span>
+          <span class="now-h" data-i18n="stats.now">NOW</span>
+        </div>
+      </div>
+    </div>
+    <div class="stats-fam">
+      <div class="stats-row attr" id="sr-str">
+        <span class="abbr lbl-str">STR</span>
+        <span class="label lbl-str" title="Strength — melee damage" data-i18n="stats.str" data-i18n-title="stats.str.tip">Strength</span>
+        <span class="now">5</span>
+      </div>
+      <div class="fam-rows">
+        <div class="stats-row" id="sr-dmg">
+          <span class="label lbl-dmg" data-i18n="stats.dmg">DAMAGE</span>
+          <span class="base">1.00x</span>
+          <span class="now">1.00x</span>
+        </div>
+      </div>
+    </div>
+    <div class="stats-fam">
+      <div class="stats-row attr" id="sr-dex">
+        <span class="abbr lbl-dex">DEX</span>
+        <span class="label lbl-dex" title="Dexterity — move/attack speed, dash cooldown" data-i18n="stats.dex" data-i18n-title="stats.dex.tip">Dexterity</span>
+        <span class="now">5</span>
+      </div>
+      <div class="fam-rows">
+        <div class="stats-row" id="sr-spd">
+          <span class="label lbl-dex" data-i18n="stats.spd">MOVEMENT SPD</span>
+          <span class="base">1.00x</span>
+          <span class="now">1.00x</span>
+        </div>
+        <div class="stats-row" id="sr-atkspd">
+          <span class="label lbl-dex" data-i18n="stats.atkspd">ATK SPD</span>
+          <span class="base">1.00x</span>
+          <span class="now">1.00x</span>
+        </div>
+        <div class="stats-row" id="sr-dash">
+          <span class="label lbl-dash" data-i18n="stats.dash">DASH SPD</span>
+          <span class="base">1.00x</span>
+          <span class="now">1.00x</span>
+        </div>
+      </div>
+    </div>
+    <div class="stats-fam">
+      <div class="stats-row attr" id="sr-vit">
+        <span class="abbr lbl-vit">VIT</span>
+        <span class="label lbl-vit" title="Vitality — max HP, stamina, regen" data-i18n="stats.vit" data-i18n-title="stats.vit.tip">Vitality</span>
+        <span class="now">5</span>
+      </div>
+      <div class="fam-rows">
+        <div class="stats-row" id="sr-hp">
+          <span class="label lbl-hp" data-i18n="stats.hp">Max HP</span>
+          <span class="base">100</span>
+          <span class="now">100</span>
+        </div>
+        <div class="stats-row" id="sr-st">
+          <span class="label lbl-st" data-i18n="stats.stamina">Max STAMINA</span>
+          <span class="base">100</span>
+          <span class="now">100</span>
+        </div>
+        <div class="stats-row" id="sr-regen">
+          <span class="label lbl-regen" data-i18n="stats.regen">ST-REGEN</span>
+          <span class="base">30/s</span>
+          <span class="now">30/s</span>
+        </div>
+      </div>
+    </div>
+    <div class="stats-fam">
+      <div class="stats-row attr" id="sr-foc">
+        <span class="abbr lbl-foc">FOC</span>
+        <span class="label lbl-foc" title="Focus — sub-weapon dmg + cd" data-i18n="stats.foc" data-i18n-title="stats.foc.tip">Focus</span>
+        <span class="now">5</span>
+      </div>
+      <div class="fam-rows">
+        <div class="stats-row" id="sr-subdmg">
+          <span class="label lbl-foc" data-i18n="stats.subdmg">SUB DMG</span>
+          <span class="base">1.00x</span>
+          <span class="now">1.00x</span>
+        </div>
+        <div class="stats-row" id="sr-subcd">
+          <span class="label lbl-foc" data-i18n="stats.subcd">SUB CD</span>
+          <span class="base">1.00x</span>
+          <span class="now">1.00x</span>
+        </div>
+      </div>
+    </div>
+    <div class="stats-fam">
+      <div class="stats-row attr" id="sr-lck">
+        <span class="abbr lbl-lck">LCK</span>
+        <span class="label lbl-lck" title="Luck — crit chance/mul, coin" data-i18n="stats.lck" data-i18n-title="stats.lck.tip">Luck</span>
+        <span class="now">5</span>
+      </div>
+      <div class="fam-rows">
+        <div class="stats-row" id="sr-crit">
+          <span class="label lbl-lck" data-i18n="stats.crit">CRIT %</span>
+          <span class="base">0.5%</span>
+          <span class="now">0.5%</span>
+        </div>
+        <div class="stats-row" id="sr-critmul">
+          <span class="label lbl-lck" data-i18n="stats.critmul">CRIT X</span>
+          <span class="base">2.00x</span>
+          <span class="now">2.00x</span>
+        </div>
+        <div class="stats-row" id="sr-coin">
+          <span class="label lbl-lck" data-i18n="stats.coin">COIN</span>
+          <span class="base">1.00x</span>
+          <span class="now">1.00x</span>
+        </div>
+      </div>
+    </div>
+    <div class="stats-fam">
+      <div class="stats-row attr" id="sr-wil">
+        <span class="abbr lbl-wil">WIL</span>
+        <span class="label lbl-wil" title="Will — invuln, damage reduction" data-i18n="stats.wil" data-i18n-title="stats.wil.tip">Will</span>
+        <span class="now">5</span>
+      </div>
+      <div class="fam-rows">
+        <div class="stats-row" id="sr-invuln">
+          <span class="label lbl-wil" data-i18n="stats.invuln">INVULNERABLE</span>
+          <span class="base">0.23s</span>
+          <span class="now">0.23s</span>
+        </div>
+        <div class="stats-row" id="sr-takendmg">
+          <span class="label lbl-wil" data-i18n="stats.takendmg">DMG TAKEN</span>
+          <span class="base">1.00x</span>
+          <span class="now">1.00x</span>
+        </div>
+      </div>
+    </div>
+    <div class="stats-fam">
+      <div class="fam-core-empty"></div>
+      <div class="fam-rows">
+        <div class="stats-row" id="sr-jmp">
+          <span class="label lbl-jmp" data-i18n="stats.jump">JUMP</span>
+          <span class="base">2</span>
+          <span class="now">2</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+</body>
+</html>

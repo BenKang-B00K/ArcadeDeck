@@ -187,6 +187,13 @@ html, body {
   -webkit-user-select: none;
 }
 
+/* <html> keeps the opaque page colour; body stays transparent so the fixed
+   z-index:-1 canvas (HeroBackground) is not painted over by body's own
+   background box. */
+body {
+  background-color: transparent;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -342,4 +349,38 @@ svg.lucide { vertical-align: -0.125em; }
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ── Breadcrumbs (blog + game player) ── */
+.breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+  align-items: center;
+}
+
+.breadcrumbs a {
+  color: #00d2ff;
+  text-decoration: none;
+}
+
+.breadcrumbs a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumbs .breadcrumb-current {
+  color: var(--text-primary);
+  font-weight: 500;
+  max-width: 60ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.game-breadcrumbs {
+  margin-top: 4px;
+  margin-bottom: 12px;
 }

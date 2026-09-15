@@ -9,7 +9,7 @@ import type {
 } from './registry';
 import { EN_OVERLAY } from './registry';
 
-type StringField = 'title' | 'description' | 'fullDescription' | 'controls' | 'tips' | 'lore' | 'objectives';
+type StringField = 'title' | 'description' | 'fullDescription' | 'controls' | 'tips' | 'lore' | 'objectives' | 'scoreLabel';
 type ArrayField = 'features';
 type ObjectArrayField = 'controlsTable' | 'faq' | 'characters' | 'featuredComments';
 
@@ -85,11 +85,4 @@ export function getLocalizedObjects<F extends ObjectArrayField>(
     if (v) return v;
   }
   return readObjectArray<T>(EN_OVERLAY, game.id, field) ?? [];
-}
-
-// English-only feature list. Used for structural checks (e.g. "Local Co-op",
-// "PC Only" platform badges) where the marker is the canonical English string,
-// not a translated label.
-export function getEnFeatures(id: string): string[] {
-  return readArray(EN_OVERLAY, id, 'features') ?? [];
 }

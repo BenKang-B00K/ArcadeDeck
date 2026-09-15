@@ -7,7 +7,6 @@ const KEYS = {
   top5:  'ct_top5',
   ach:   'ct_ach',
   stats: 'ct_stats',
-  prevPassed: 'ct_prev_passed',
 };
 
 const LEGACY_HIGH = 'click-target-high';
@@ -93,8 +92,3 @@ export function loadAchievements() {
   return obj && typeof obj === 'object' ? obj : {};
 }
 export function saveAchievements(ach) { safeSet(KEYS.ach, JSON.stringify(ach)); }
-
-export function getPrevRoundPassed() {
-  return localStorage.getItem(KEYS.prevPassed) !== '0';
-}
-export function setPrevRoundPassed(passed) { safeSet(KEYS.prevPassed, passed ? '1' : '0'); }

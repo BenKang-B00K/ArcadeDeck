@@ -42,18 +42,6 @@ export function isValidCategory(c: string): c is ForumCategoryId {
   return FORUM_CATEGORIES.some(cat => cat.id === c);
 }
 
-export function timeAgo(date: Date): string {
-  const sec = Math.floor((Date.now() - date.getTime()) / 1000);
-  if (sec < 60) return 'Just now';
-  const min = Math.floor(sec / 60);
-  if (min < 60) return `${min}m ago`;
-  const hr = Math.floor(min / 60);
-  if (hr < 24) return `${hr}h ago`;
-  const day = Math.floor(hr / 24);
-  if (day < 7) return `${day}d ago`;
-  return date.toLocaleDateString();
-}
-
 export function stripHtml(s: string): string {
   return s.replace(/<[^>]*>/g, '');
 }

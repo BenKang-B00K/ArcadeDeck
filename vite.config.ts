@@ -36,6 +36,11 @@ export default defineConfig({
       // precache stays lean (single index.html shell + hashed assets). If the
       // build order ever changes, add `workbox.globIgnores` to skip
       // `**/{ja,ko}/**/*` and `**/blog/tag/**/*`.
+      // The three.js chunk is ~750 kB and only Home's background needs it —
+      // keep it out of the precache and let the HTTP cache handle it.
+      workbox: {
+        globIgnores: ['**/three.module-*.js'],
+      },
       manifest: {
         id: '/',
         name: 'ArcadeDeck | The Ultimate Free Browser Games Platform',

@@ -2,22 +2,16 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { BookOpen } from 'lucide-react';
 import { posts } from '../../data/posts';
-import { useUiText } from '../../i18n';
+import { useUiText, useLocale } from '../../i18n';
+import { formatPostDate } from '../../utils/dates';
 
 interface Props {
   gameSlug: string;
 }
 
-const formatDate = (iso: string) =>
-  new Date(iso + 'T00:00:00Z').toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    timeZone: 'UTC',
-  });
-
 const RelatedPosts: React.FC<Props> = ({ gameSlug }) => {
   const t = useUiText();
+  const { lang } = useLocale();
   const related = posts.filter(
     (p) => Array.isArray(p.relatedGames) && p.relatedGames.includes(gameSlug),
   );
@@ -33,7 +27,7 @@ const RelatedPosts: React.FC<Props> = ({ gameSlug }) => {
         {related.map((p) => (
           <li key={p.slug}>
             <Link to={`/blog/${p.slug}`}>
-              <span className="related-post-date">{formatDate(p.date)}</span>
+              <span className="related-post-date">{formatPostDate(p.date, lang, 'short')}</span>
               <span className="related-post-title">{p.title}</span>
               <span className="related-post-excerpt">{p.excerpt}</span>
             </Link>

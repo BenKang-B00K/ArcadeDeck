@@ -2,12 +2,12 @@
 
 ## 1. Adding a New Game — Two-File Workflow
 
-A new game touches only two source files plus one image. Other locale files are translated separately by the user.
+A new game touches two source files plus one image, and the same text is translated into `ja.json` and `ko.json`.
 
 1. **`src/data/games.json`** — structural data only (`id`, `slug`, `gameUrl`, etc.). No text.
 2. **`src/i18n/locales/en.json`** (`games[<id>]` block) — canonical English text.
 
-Other languages (`de.json`, `ja.json`, `ko.json`, …) fall back to English per field. Do not auto-fill them.
+Other languages fall back to English per field. `ja.json` and `ko.json` ship translated in the same change; the rest fall back.
 
 ### `src/data/games.json` (structural fields only)
 
@@ -119,7 +119,7 @@ src/
 - 11 locales supported: `en`, `de`, `es`, `es-LA`, `fr`, `ja`, `ko`, `pt`, `ru`, `vi`, `zh`.
 - `en.json` is the canonical source. Every translatable string lives there first.
 - Missing keys in any other locale fall back to English per-field.
-- **Never invent translations** for non-English locales without explicit instruction. The user owns those files.
+- **`ja.json` and `ko.json` stay at parity with `en.json`** — translate every new key in the same change. Other locales fall back to English until the user adds them.
 - New UI strings must be added to `en.json` `ui` block. Reference them via `useUiText()` / `ui()` helpers — never hardcode strings in components.
 - URL prefix routing is automatic: English at root (`/`, `/play/{slug}`); other locales at `/{lang}/…` (e.g. `/ja/play/foo`, `/ko/`).
 - Backups must live **outside** `src/i18n/locales/` (the glob bundles every `*.json` in that dir into the build).

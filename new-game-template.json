@@ -11,7 +11,8 @@
     "status": "PLAYABLE",
     "isOriginal": true,
     "language": "EN",
-    "badge": "POPULAR"
+    "badge": "POPULAR",
+    "scoreTiers": [10, 25, 50]
   },
 
   "en_json_games_entry": {
@@ -20,6 +21,7 @@
       "description": "A short 1-2 sentence description in English.",
       "fullDescription": "\n      Paragraph 1: What is this game?\n      Paragraph 2: Core gameplay mechanics.\n      Paragraph 3: What makes it unique?\n      Paragraph 4: Challenge / call to action.\n    ",
       "controls": "Mouse Click: Action / WASD: Move / Space: Jump",
+      "scoreLabel": "Score",
       "tips": "Pro tip 1. Pro tip 2. Pro tip 3.",
       "lore": "\n      Background story paragraph 1.\n      Background story paragraph 2.\n    ",
       "features": [

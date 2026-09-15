@@ -1,419 +1,178 @@
-import React, { useState, useMemo, lazy, Suspense, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
-
-import { Search, X, Edit3, ArrowRight, Sparkles } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { X, Shuffle, Edit3, Check } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import GameCard from '../components/GameCard';
+import GameGrid from '../components/GameGrid';
+import HeroBackground from '../components/HeroBackground';
 import AdBanner from '../components/AdBanner';
-import { games } from '../data/games';
-import { useToast, type ToastType } from '../contexts/useToast';
-import { BANNED_WORDS, RANDOM_ID_MIN, RANDOM_ID_MAX, AD_SLOTS } from '../constants/gameConstants';
-import { useUiText, useLocale } from '../i18n';
-import { SkeletonGrid } from '../components/Skeleton';
-import HeroCarousel from '../components/home/HeroCarousel';
-import StatsStrip from '../components/home/StatsStrip';
-import ScrollProgress from '../components/home/ScrollProgress';
-import BackToTop from '../components/home/BackToTop';
-import { getLocalizedString } from '../i18n';
-import { thumb360, SRCSET_SIZES } from '../utils/thumb';
+import { games, deviceGames, GENRE_HUE, type Game } from '../data/games';
+import { useToast } from '../contexts/useToast';
+import { BANNED_WORDS, AD_SLOTS } from '../constants/gameConstants';
+import { useUiText, useLocale, getLocalizedString } from '../i18n';
+import { readNickname, saveNickname } from '../hooks/useNickname';
 import './Home.css';
 
-const GameGrid = lazy(() => import('../components/GameGrid'));
-const TrendingRail = lazy(() => import('../components/home/TrendingRail'));
+const ALL_GENRES = ['All', ...new Set(deviceGames.flatMap(g => g.genres))];
+const PLAYABLE = deviceGames.filter(g => g.status !== 'IN PRODUCTION' && g.gameUrl);
+const FEATURED = deviceGames.filter(g => g.featured);
 
-const safeSetSession = (key: string, value: string): void => {
-  try { sessionStorage.setItem(key, value); } catch { /* quota / private mode */ }
+// Full-width spotlight for the Featured Game section. Thumbnail is 640w, so the
+// image column caps at ~half the container; description fills the rest.
+const FeaturedCard: React.FC<{ game: Game }> = ({ game }) => {
+  const t = useUiText();
+  const { lang, overlay } = useLocale();
+  const title = getLocalizedString(game, 'title', lang, overlay);
+  const description = getLocalizedString(game, 'description', lang, overlay);
+  return (
+    <Link to={`/play/${game.slug}`} className="featured-card">
+      <div className="featured-card-image">
+        <img src={`${import.meta.env.BASE_URL}${game.thumbnail}`} alt={title} width="640" height="360" decoding="async" />
+      </div>
+      <div className="featured-card-body">
+        <div className="card-tags-row">
+          {game.genres.map((genre, i) => (
+            <span key={genre} className={`genre-tag ${i === 0 ? 'main' : 'sub'}`} style={{ '--h': GENRE_HUE[genre] ?? 260 } as React.CSSProperties}>{genre}</span>
+          ))}
+        </div>
+        <h3>{title}</h3>
+        <p>{description}</p>
+        <span className="play-btn">{t('gameCardPlayNow', 'Play Now')}</span>
+      </div>
+    </Link>
+  );
+};
+
+const readRecent = (): string[] => {
+  try { return JSON.parse(localStorage.getItem('recently_played') || '[]'); } catch { return []; }
 };
 
 const Home: React.FC = () => {
   const t = useUiText();
-  const { lang, overlay } = useLocale();
-  const [nickname, setNickname] = React.useState<string>(() => {
-    const saved = localStorage.getItem('player_nickname');
-    if (saved) return saved;
-    const randomId = Math.floor(RANDOM_ID_MIN + Math.random() * (RANDOM_ID_MAX - RANDOM_ID_MIN + 1));
-    const initialName = `Player#${randomId}`;
-    localStorage.setItem('player_nickname', initialName);
-    return initialName;
-  });
-  const [isEditing, setIsEditing] = React.useState(false);
-  const [tempName, setTempName] = React.useState(nickname);
-  const [selectedGenre, setSelectedGenre] = useState<string>('All');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [recentlyPlayedIds, setRecentlyPlayedIds] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem('recently_played');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  React.useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key !== 'recently_played') return;
-      try {
-        setRecentlyPlayedIds(e.newValue ? JSON.parse(e.newValue) : []);
-      } catch {
-        setRecentlyPlayedIds([]);
-      }
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  }, []);
+  const navigate = useNavigate();
   const { showToast } = useToast();
-  const showNotification = (msg: string, type: ToastType = 'info') => showToast(msg, type, 3000);
+  const [genre, setGenre] = useState('All');
+  const [nickname, setNickname] = useState(readNickname);
+  const [editing, setEditing] = useState(false);
 
-  // Extract all unique genres from data (memoized — games array is static)
-  const allGenres = useMemo(() => ['All', ...new Set(games.flatMap(g => g.genres))], []);
-
-  const genreCounts = useMemo(() => {
-    const counts: Record<string, number> = { All: games.length };
-    games.forEach(g => g.genres.forEach(genre => { counts[genre] = (counts[genre] || 0) + 1; }));
-    return counts;
-  }, []);
-
-  // Featured: prefer POPULAR + UPDATE badged, top up to 5 with newest by id.
-  const featuredGames = useMemo(() => {
-    const badged = games.filter(g => g.badge === 'POPULAR' || g.badge === 'UPDATE' || g.badge === 'NEW');
-    const byNewest = [...games].sort((a, b) => parseInt(b.id) - parseInt(a.id));
-    const seen = new Set<string>();
-    const picks = [];
-    for (const g of [...badged, ...byNewest]) {
-      if (seen.has(g.id)) continue;
-      seen.add(g.id);
-      picks.push(g);
-      if (picks.length >= 5) break;
-    }
-    return picks;
-  }, []);
-
-  // Trending: playable games sorted by lastUpdated desc, top 10.
-  const trendingGames = useMemo(() => {
-    return [...games]
-      .sort((a, b) => (b.lastUpdated || '').localeCompare(a.lastUpdated || ''))
-      .slice(0, 10);
-  }, []);
-
-  const totalOriginals = useMemo(() => games.filter(g => g.isOriginal).length, []);
-  const totalPlays = useMemo(() => recentlyPlayedIds.length, [recentlyPlayedIds]);
-
-  // Scroll-reveal: observe any element with `.reveal-section` and add `.in-view`.
-  useEffect(() => {
-    if (typeof IntersectionObserver === 'undefined') {
-      document.querySelectorAll('.reveal-section').forEach(el => el.classList.add('in-view'));
-      return;
-    }
-    const io = new IntersectionObserver(
-      (entries, observer) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('in-view');
-            observer.unobserve(entry.target);
-          }
-        }
-      },
-      { rootMargin: '0px 0px -10% 0px', threshold: 0.1 },
-    );
-    document.querySelectorAll('.reveal-section').forEach(el => io.observe(el));
-    return () => io.disconnect();
-  }, [selectedGenre, searchQuery, recentlyPlayedIds.length]);
-
-  // Sticky filter bar: toggle `.is-stuck` when sentinel (placed right before bar)
-  // leaves the viewport (scrolled past the navbar offset).
-  const stickySentinelRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    const el = stickySentinelRef.current;
-    if (!el || typeof IntersectionObserver === 'undefined') return;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        const bar = document.querySelector('.genre-filters-container');
-        if (!bar) return;
-        if (entry.intersectionRatio === 0) bar.classList.add('is-stuck');
-        else bar.classList.remove('is-stuck');
-      },
-      { threshold: [0, 1], rootMargin: '-70px 0px 0px 0px' },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  const handleSaveName = (e: React.FormEvent) => {
-    e.preventDefault();
-    const finalName = tempName.trim();
-    if (!finalName) return;
-
-    // Check for inappropriate words
-    const lowerCaseName = finalName.toLowerCase();
-    const hasBannedWord = BANNED_WORDS.some(word => lowerCaseName.includes(word.toLowerCase()));
-
-    if (hasBannedWord) {
-      showNotification("Inappropriate language detected. Please choose a different nickname.", 'error');
-      return;
-    }
-
-    setNickname(finalName);
-    localStorage.setItem('player_nickname', finalName);
-    setIsEditing(false);
-  };
-
-  const recentlyPlayedGames = games.filter(g => recentlyPlayedIds.includes(g.id))
-    .sort((a, b) => recentlyPlayedIds.indexOf(a.id) - recentlyPlayedIds.indexOf(b.id));
-
-  const recentlyUpdatedGames = useMemo(
-    () =>
-      games
-        .filter((g): g is typeof g & { lastUpdated: string } => Boolean(g.lastUpdated))
-        .sort((a, b) => (a.lastUpdated < b.lastUpdated ? 1 : -1))
-        .slice(0, 8),
+  const recent = useMemo(
+    // Stored newest-first (GamePlayer prepends on play); show the 4 latest.
+    () => readRecent().slice(0, 4).flatMap(id => { const g = games.find(x => x.id === id); return g ? [g] : []; }),
     [],
   );
 
-  const formatUpdateDate = (iso: string) =>
-    new Date(iso + 'T00:00:00Z').toLocaleDateString(lang === 'en' ? 'en-US' : lang, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      timeZone: 'UTC',
-    });
+  useEffect(() => { document.title = 'ArcadeDeck | Play the Best Online Browser Games'; }, []);
 
-  React.useEffect(() => {
-    document.title = 'ArcadeDeck | Play the Best Online Browser Games';
-  }, []);
+  const comingSoon = () => showToast(t('homeComingSoonNotification', 'This game is coming soon!'), 'info', 3000);
 
-  // Head meta, hreflang and JSON-LD for every home shell are baked by
-  // scripts/prerender-pages.js. Rendering them here too would make React 19
-  // hoist a second, locale-blind copy into <head>.
+  const surprise = () => {
+    const g = PLAYABLE[Math.floor(Math.random() * PLAYABLE.length)];
+    if (g) navigate(`/play/${g.slug}`);
+  };
+
+  const pickGenre = (g: string) => {
+    setGenre(g);
+    document.getElementById('games')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const saveNick = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const name = String(new FormData(e.currentTarget).get('nick') ?? '').trim();
+    if (!name) return;
+    const lower = name.toLowerCase();
+    if (BANNED_WORDS.some(w => lower.includes(w.toLowerCase()))) {
+      showToast(t('homeNicknameBanned', 'Inappropriate language detected. Please choose a different nickname.'), 'error', 3000);
+      return;
+    }
+    if (!saveNickname(name)) {
+      showToast(t('homeNicknameStorageError', 'Could not save your nickname — your browser is blocking site storage.'), 'error', 4000);
+      return;
+    }
+    setNickname(name);
+    setEditing(false);
+    showToast(t('homeNicknameSaved', 'Nickname saved. We will remember it next time you visit.'), 'success', 3000);
+  };
+
+  const unfiltered = genre === 'All';
+  const showRecent = recent.length > 0 && unfiltered;
+  const showFeatured = FEATURED.length > 0 && unfiltered;
+
+  // Head meta / JSON-LD are baked by scripts/prerender-pages.js. The static
+  // shell in index.html mirrors this <header> so the LCP element is stable.
   return (
     <div className="home-page">
-      <ScrollProgress />
+      <HeroBackground />
       <Navbar />
 
       <main>
-        {/* ── Hero Carousel: featured games ── */}
-        <HeroCarousel slides={featuredGames} />
+        <header className="home-hero">
+          <div className="container home-hero-content">
+            <h1>{t('homeHeroTitle', 'Welcome to')} <span>ArcadeDeck</span></h1>
+            <p>{t('homeHeroSubtitle', 'Dozens of handcrafted browser games. Pick one, jump in, and see how far you can go.')}</p>
 
-        {/* ── Stats Strip ── */}
-        <StatsStrip
-          totalGames={games.length}
-          totalGenres={allGenres.length - 1}
-          totalOriginals={totalOriginals}
-          totalPlays={totalPlays}
-        />
+            <div className="home-hero-actions">
+              <button type="button" className="home-hero-random" onClick={surprise}>
+                <Shuffle size={16} aria-hidden="true" />
+                {t('homeRandomGame', 'Surprise me')}
+              </button>
+            </div>
 
-        {/* ── Gamer ID Card ── */}
-        <section className="gamer-id-section reveal-section">
-          <div className="container">
-            <div className="gamer-id-wrapper">
-              {isEditing ? (
-                <div className="hero-gamer-display editing">
-                  <form onSubmit={handleSaveName} className="hero-gamer-form">
-                    <div className="hero-gamer-row">
-                      <input
-                        type="text"
-                        value={tempName}
-                        onChange={(e) => setTempName(e.target.value)}
-                        maxLength={12}
-                        placeholder={t('homeNicknamePlaceholder', 'Enter nickname...')}
-                        aria-label={t('homeNicknameAriaLabel', 'Game nickname')}
-                        autoFocus
-                      />
-                    </div>
-                    <div className="hero-gamer-row">
-                      <button type="submit">{t('homeNicknameSave', 'Save')}</button>
-                      <button type="button" className="cancel-btn" onClick={() => setIsEditing(false)}>{t('homeNicknameCancel', 'Cancel')}</button>
-                    </div>
-                  </form>
-                </div>
+            <div className="home-hero-nick">
+              {editing ? (
+                <form className="home-hero-nick-card" onSubmit={saveNick}>
+                  <span className="home-hero-nick-avatar" aria-hidden="true">{nickname.charAt(0).toUpperCase()}</span>
+                  <input name="nick" defaultValue={nickname} maxLength={12} autoFocus placeholder={t('homeNicknamePlaceholder', 'Enter nickname...')} aria-label={t('homeNicknameAriaLabel', 'Game nickname')} />
+                  <button type="submit" className="home-hero-nick-save" aria-label={t('homeNicknameSave', 'Save')}><Check size={16} aria-hidden="true" /></button>
+                  <button type="button" className="home-hero-nick-cancel" onClick={() => setEditing(false)} aria-label={t('homeNicknameCancel', 'Cancel')}><X size={16} aria-hidden="true" /></button>
+                </form>
               ) : (
-                <div className="hero-gamer-spotlight">
-                  <span className="neon-arrow neon-arrow-left" aria-hidden="true">&#9654;</span>
-                  <div
-                    className="hero-gamer-display"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => { setTempName(''); setIsEditing(true); }}
-                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setTempName(''); setIsEditing(true); } }}
-                    aria-label={t('homeNicknameChangeAria', 'Click to change nickname')}
-                  >
-                    <div className="hero-gamer-row">
-                      <span className="hero-gamer-label">{t('homeNicknameLabel', 'Game Nickname')}</span>
-                    </div>
-                    <div className="hero-gamer-row">
-                      <strong className="hero-gamer-name">{nickname}</strong>
-                      <Edit3 size={14} className="hero-gamer-edit-icon" aria-hidden="true" />
-                    </div>
-                  </div>
-                  <span className="neon-arrow neon-arrow-right" aria-hidden="true">&#9664;</span>
-                </div>
+                <button type="button" className="home-hero-nick-card home-hero-nick-btn" onClick={() => setEditing(true)} aria-label={t('homeNicknameChangeAria', 'Click to change nickname')}>
+                  <span className="home-hero-nick-avatar" aria-hidden="true">{nickname.charAt(0).toUpperCase()}</span>
+                  <span className="home-hero-nick-text">
+                    <small>{t('homeNickPrefix', 'Playing as')}</small>
+                    <strong>{nickname}</strong>
+                  </span>
+                  <Edit3 size={14} aria-hidden="true" />
+                </button>
               )}
             </div>
           </div>
-        </section>
+        </header>
 
-        {/* ── Trending Rail (auto-scrolling marquee) ── */}
-        <Suspense fallback={<div style={{ minHeight: 240 }} />}>
-          <TrendingRail games={trendingGames} />
-        </Suspense>
+        <div id="games">
+          <div className="container">
+            <nav className="genre-filters" aria-label={t('homeGenresAria', 'Game genres')}>
+              {ALL_GENRES.map(g => (
+                <button key={g} type="button" className={g === genre ? 'active' : ''} aria-pressed={g === genre} style={{ '--h': GENRE_HUE[g] ?? 260 } as React.CSSProperties} onClick={() => setGenre(g)}>
+                  {g}
+                </button>
+              ))}
+            </nav>
 
-        <div className="neon-scanline reveal-section" aria-hidden="true" />
+            {showFeatured && (
+              <section className="recent-section">
+                <h2 className="section-title">{t('homeFeaturedTitle', 'Featured')} {t('homeFeaturedSpan', 'Game')}</h2>
+                {FEATURED.map(g => <FeaturedCard key={g.id} game={g} />)}
+              </section>
+            )}
 
-        {/* ── Search + Genre filters (sticky) ── */}
-        <div id="games-grid" className="games-grid-main-wrapper">
-          <div ref={stickySentinelRef} className="sticky-sentinel" aria-hidden="true" />
-          <div className="container games-grid-section">
-            <div className="genre-filters-container">
-              <div className="genre-search-row">
-                <div className="inline-search-wrapper">
-                  <Search size={15} className="inline-search-icon" aria-hidden="true" />
-                  <input
-                    type="search"
-                    className="inline-search-input"
-                    placeholder={t('homeSearchPlaceholder', 'Search...')}
-                    aria-label={t('homeSearchAriaLabel', 'Search games')}
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                  />
-                  {searchQuery && (
-                    <button className="inline-search-clear" onClick={() => setSearchQuery('')} aria-label={t('homeSearchClearAria', 'Clear search')}><X size={14} aria-hidden="true" /></button>
-                  )}
+            {showRecent && (
+              <section className="recent-section">
+                <h2 className="section-title">{t('homeRecentTitle', 'Jump')} {t('homeRecentSpan', 'Back In')}</h2>
+                <div className="game-grid">
+                  {recent.map(g => <GameCard key={g.id} game={g} onProductionClick={comingSoon} />)}
                 </div>
-                <div className="genre-filters">
-                  {allGenres.map((genre) => (
-                    <button
-                      key={genre}
-                      onClick={() => {
-                        setSelectedGenre(genre);
-                        safeSetSession('selected_genre', genre);
-                      }}
-                      className={`genre-btn ${selectedGenre === genre ? 'active' : ''}`}
-                    >
-                      <span className="btn-text">{genre}</span>
-                      <span className="genre-count">{genreCounts[genre] || 0}</span>
-                      {selectedGenre === genre && <span className="active-dot"></span>}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
+              </section>
+            )}
           </div>
 
-          {/* ── Genre Quick Results (mini cards below filter bar) ── */}
-          {selectedGenre !== 'All' && (
-            <div className="container">
-              <div className="genre-quick-results">
-                {games
-                  .filter(g => g.genres.includes(selectedGenre))
-                  .sort((a, b) => parseInt(b.id) - parseInt(a.id))
-                  .map(g => {
-                    const title = getLocalizedString(g, 'title', lang, overlay);
-                    return (
-                      <Link key={`quick-${g.id}`} to={`/play/${g.slug}`} className="quick-card">
-                        <img
-                          src={`${import.meta.env.BASE_URL}${g.thumbnail}`}
-                          srcSet={`${import.meta.env.BASE_URL}${thumb360(g.thumbnail)} 360w, ${import.meta.env.BASE_URL}${g.thumbnail} 640w`}
-                          sizes={SRCSET_SIZES}
-                          alt={title}
-                          width="640"
-                          height="360"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                        <span className="quick-card-title">{title}</span>
-                      </Link>
-                    );
-                  })
-                }
-              </div>
-            </div>
-          )}
-
-          {/* ── Recently Played (only for returning users) ── */}
-          {recentlyPlayedGames.length > 0 && !searchQuery && selectedGenre === 'All' && (
-            <div className="container">
-              <section className="recently-played-section neon-panel reveal-section">
-                <h2 className="section-greeting">
-                  <span className="section-greeting-text">{t('homeRecentGreeting', 'Jump back in,')}</span>
-                  {' '}
-                  <strong className="section-greeting-name">{nickname}</strong>
-                  <ArrowRight size={20} className="section-greeting-arrow" aria-hidden="true" />
-                </h2>
-                <div className="game-grid small-grid small-grid-scroll">
-                  {recentlyPlayedGames.map((game, i) => (
-                    <div key={`recent-${game.id}`} className="reveal-stagger" style={{ '--i': i } as React.CSSProperties}>
-                      <GameCard
-                        game={game}
-                        isRecentlyPlayed
-                        maxTags={2}
-                        recentIndex={i}
-                        onProductionClick={() => showNotification(t('homeComingSoonNotification', 'This game is coming soon!'), 'info')}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </section>
-            </div>
-          )}
-
-          {/* ── Recently Updated ── */}
-          {recentlyUpdatedGames.length > 0 && !searchQuery && selectedGenre === 'All' && (
-            <div className="container">
-              <section className="recently-updated-section neon-panel reveal-section">
-                <h2 className="section-title-small" style={{ textAlign: 'left', marginBottom: '20px' }}>
-                  <span className="live-dot" aria-hidden="true"></span>
-                  {t('homeUpdatedTitle', 'Recently')} <span>{t('homeUpdatedSpan', 'Updated')}</span>
-                </h2>
-                <div className="game-grid small-grid">
-                  {recentlyUpdatedGames.map((game, i) => (
-                    <div key={`updated-${game.id}`} className="updated-card-wrapper reveal-stagger" style={{ '--i': i } as React.CSSProperties}>
-                      <div className="updated-date-pill">
-                        <Sparkles size={12} aria-hidden="true" />
-                        <span>{t('homeUpdatedOn', 'Updated {date}').replace('{date}', formatUpdateDate(game.lastUpdated))}</span>
-                      </div>
-                      <GameCard
-                        game={game}
-                        maxTags={2}
-                        onProductionClick={() => showNotification(t('homeComingSoonNotification', 'This game is coming soon!'), 'info')}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </section>
-            </div>
-          )}
+          <GameGrid selectedGenre={genre} onProductionClick={comingSoon} onGenreClick={pickGenre} />
 
           <div className="container">
-            <div className="ad-banner-wrapper">
-              <AdBanner slot={AD_SLOTS.HOME_TOP} />
-            </div>
-          </div>
-
-          {/* ── Main Game Grid ── */}
-          <div className="container grid-content-wrapper">
-            <Suspense fallback={<SkeletonGrid count={8} />}>
-              <GameGrid
-                selectedGenre={selectedGenre}
-                searchQuery={searchQuery}
-                onProductionClick={() => showNotification(t('homeComingSoonNotification', 'This game is coming soon!'), 'info')}
-                onGenreClick={(genre) => {
-                  setSelectedGenre(genre);
-                  safeSetSession('selected_genre', genre);
-                  document.getElementById('games-grid')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              />
-            </Suspense>
+            <AdBanner slot={AD_SLOTS.HOME_BOTTOM} />
           </div>
         </div>
-
-        {/* ── Bottom Ad ── */}
-        <section className="bottom-ad-section">
-          <div className="container">
-            <AdBanner slot={AD_SLOTS.HOME_BOTTOM} style={{ margin: '0' }} />
-          </div>
-        </section>
       </main>
-
-      <BackToTop />
 
       <footer className="footer">
         <div className="container footer-container">

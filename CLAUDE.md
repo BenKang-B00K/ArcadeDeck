@@ -33,9 +33,9 @@ There are no tests in this repo.
 
 - `src/data/games.json` — structural fields only (`id`, `slug`, `thumbnail`, `genres`, `gameUrl`, `aspectRatio`, `status`, `isOriginal`, `language`, `badge`). No text.
 - `src/i18n/locales/en.json` — canonical English text under `games[<id>]` (`title`, `description`, `fullDescription`, `controls`, `tips`, `lore`, `features`). Source of truth for game copy.
-- `src/i18n/locales/{lang}.json` — overlay translations for non-English locales (ja, ko). Same shape. Missing fields fall back to English. The user owns all non-English translations.
+- `src/i18n/locales/{lang}.json` — overlay translations for non-English locales (ja, ko). Same shape. Missing fields fall back to English. Keep ja and ko at parity with `en.json` — every new key gets translated in the same change.
 
-Adding a new game: edit `games.json` (structural) + `en.json` `games` block (text) + drop a WebP into `public/images/`. Templates: `new-game-template.txt`, `new-game-template.json`. Other locales are translated separately by the user. Code paths read structural config from `games.json` — never hardcode game IDs (`id === '7'` is forbidden by RULES.md). Game text is always resolved via `getLocalizedString` / `getLocalizedArray` / `getLocalizedObjects` (structured fields: `controlsTable`, `faq`, `characters`, `featuredComments`) from `src/i18n/getLocalized.ts` — direct property access (`game.title`) is not on the `Game` type. Type definitions live in `src/data/games.ts`.
+Adding a new game: edit `games.json` (structural) + `en.json` `games` block (text) + drop a WebP into `public/images/`. Templates: `new-game-template.txt`, `new-game-template.json`. Translate the same block into `ja.json` and `ko.json` in the same change. Code paths read structural config from `games.json` — never hardcode game IDs (`id === '7'` is forbidden by RULES.md). Game text is always resolved via `getLocalizedString` / `getLocalizedArray` / `getLocalizedObjects` (structured fields: `controlsTable`, `faq`, `characters`, `featuredComments`) from `src/i18n/getLocalized.ts` — direct property access (`game.title`) is not on the `Game` type. Type definitions live in `src/data/games.ts`.
 
 **i18n internals:** `src/i18n/registry.ts` eager-imports `en.json` so English is always available as the fallback. Other overlays lazy-load via `import.meta.glob('./locales/*.json')`. `src/i18n/store.ts` exposes `useLocale()` returning `{ lang, overlay }` and seeds `en` synchronously to avoid a null flash on initial render. Underscore-prefixed locale files (e.g. `_template.json`) are ignored by the glob filter. Backups belong outside `src/i18n/locales/` so the glob does not bundle them.
 
@@ -47,7 +47,9 @@ Adding a new game: edit `games.json` (structural) + `en.json` `games` block (tex
 
 **Sitemap:** `scripts/generate-sitemap.js` writes `public/sitemap.xml` from `games.json` on every build, with `xhtml:hreflang` alternates per locale. `scripts/generate-rss.js` emits the blog feed. Do not edit either output by hand — they're regenerated.
 
-**Game iframes:** Games run in iframes hosted elsewhere (`gameUrl`). There is no score/leaderboard plumbing — `GamePlayer` just mounts the frame behind a click-to-start gate.
+**Game iframes:** Games run in iframes hosted elsewhere (`gameUrl`), behind a click-to-start gate in `GamePlayer`.
+
+**Personal bests (no leaderboard):** Games post `{ type: 'GAME_OVER', score }` to the parent frame (`GAME_SCORE` / `SCORE_UPDATE` / `gameOver` also accepted). `GamePlayer` accepts the message only from the game's own origin and stores the best run in `localStorage` via `src/utils/pb.ts`. Nothing is submitted anywhere — there is no global ranking, no Firestore, no Cloud Functions. `scoreTiers` in `games.json` (bronze/silver/gold, ascending — a tuning knob) drives the mastery badge; `scoreLabel` in `en.json` names the score. Deck Level on `/my-games` is XP summed from games played, tiers earned, and best streak.
 
 **Caching:** `CommentSection` loads latest 20 with cursor pagination (`startAfter`). Do not switch to `onSnapshot` (cost/perf).
 
@@ -57,7 +59,7 @@ Adding a new game: edit `games.json` (structural) + `en.json` `games` block (tex
 - **Firestore rules:** never `allow update: if true`. Comments capped at 300 chars, nicknames at 30.
 - **Errors:** every route is wrapped in `<ErrorBoundary>` — don't add per-page try/catch UI.
 - **Images:** WebP only, in `public/images/`, referenced as `"images/foo.webp"` from `games.json`. PWA icons: 192×192 and 512×512.
-- **i18n:** When adding a new game, only fill `en.json` `games[id]`. The user adds translations for other locales themselves. Never invent translations for `ko.json`, `ja.json`, etc. without explicit instruction.
+- **i18n:** `en.json` is canonical — write text there first, then translate it into `ja.json` and `ko.json` in the same change. Never leave ja/ko behind on a new game or a new UI string.
 - **UI strings:** new UI copy goes into `en.json` `ui` block, accessed via `useUiText()` / `ui()`. Never hardcode user-facing strings in components.
 - **Image optimization:** `scripts/optimize-images.cjs` resizes/re-encodes oversized banners in-place to 640w q70 and emits `{slug}-360.webp` variants. Skips icons and `arcadedeck-banner.webp`. Pass `--blog` to run the same loop over `public/images/blog/` (1600w inline, 1200w hero, q72). Run manually after adding large new images.
 - **Image naming:** `{slug}.webp` kebab-case lowercase (matches `games.json` slug). System files: `favicon.webp`, `arcadedeck-banner.webp`, `bg.webp`, `icon-192x192.webp`, `icon-512x512.webp`.

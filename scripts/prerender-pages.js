@@ -24,7 +24,9 @@ const BCP47 = {
 };
 const SITE = 'https://arcadedeck.net';
 const prefix = (lang) => (lang === 'en' ? '' : '/' + lang.toLowerCase());
-const fullUrl = (lang, path) => `${SITE}${prefix(lang)}${path}`;
+// Locale home is /ja, not /ja/ — firebase.json has trailingSlash:false, so the
+// slashed form 301s and Search Console files it under "page with redirect".
+const fullUrl = (lang, path) => `${SITE}${prefix(lang)}${lang !== 'en' && path === '/' ? '' : path}`;
 
 const games = JSON.parse(readFileSync('src/data/games.json', 'utf-8'));
 const posts = JSON.parse(readFileSync('src/data/posts.json', 'utf-8'))
@@ -70,6 +72,13 @@ function escAttr(s) {
   return String(s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 }
 
+// **term** markup in locale text (see renderRich in GameInfoTabs.tsx).
+const RICH = /\*\*(.+?)\*\*/g;
+const rich = (s) => String(s ?? '').replace(RICH, '<strong>$1</strong>');
+const strip = (s) => String(s ?? '').replace(RICH, '$1');
+const paras = (s) => String(s ?? '').split('\n').map(p => p.trim()).filter(Boolean)
+  .map(p => `<p style="line-height:1.7;">${rich(p)}</p>`).join('');
+
 // hreflang block: list every locale that has a translation entry for `gameId`,
 // or all locales for catalog/static pages (pass gameId=null).
 function hreflangBlock(routePath, gameId = null) {
@@ -113,6 +122,13 @@ const inlinedCss = cssHrefs
   .join('\n');
 const inlinedStyle = inlinedCss ? `<style>${inlinedCss}</style>` : '';
 const modulePreloads = (baseHead.match(/<link[^>]*rel="modulepreload"[^>]*>/g) || []).join('\n    ');
+
+// Game and genre shells build their <head> from scratch rather than rewriting
+// index.html, so anything only present in the template is silently dropped from
+// them. The AdSense publisher meta went missing on all 117 of those pages —
+// the catalogue's best content, and exactly what a site reviewer crawls.
+// Read it from the built template so there is one source of truth.
+const adsenseMeta = (indexHtml.match(/<meta name="google-adsense-account"[^>]*>/) || [''])[0];
 
 const playableGames = games.filter(g => g.status !== 'IN PRODUCTION');
 const postsForGame = (slug) =>
@@ -198,6 +214,8 @@ for (const lang of SUPPORTED_LOCALES) {
         sameAs: ['https://www.wikidata.org/wiki/Q139585213'],
       },
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD', availability: 'https://schema.org/InStock' },
+      // Ties the free web edition to its paid PC release so the two are not read as rival pages.
+      ...(game.steamUrl ? { sameAs: [game.steamUrl] } : {}),
     });
 
     const breadcrumbLd = JSON.stringify({
@@ -234,7 +252,7 @@ for (const lang of SUPPORTED_LOCALES) {
       mainEntity: faqPairs.map(p => ({
         '@type': 'Question',
         name: p.q,
-        acceptedAnswer: { '@type': 'Answer', text: p.a },
+        acceptedAnswer: { '@type': 'Answer', text: strip(p.a) },
       })),
     });
 
@@ -250,16 +268,16 @@ for (const lang of SUPPORTED_LOCALES) {
     const castHeading = ui('charactersHeading', lang, 'Cast');
 
     const objectivesHtml = t.objectives
-      ? `<h2 style="margin-top:32px;font-size:1.3rem;">🎯 ${objectivesHeading}</h2><p style="line-height:1.7;">${t.objectives}</p>`
+      ? `<h2 style="margin-top:32px;font-size:1.3rem;">🎯 ${objectivesHeading}</h2><p style="line-height:1.7;">${rich(t.objectives)}</p>`
       : '';
     const controlsTableHtml = (Array.isArray(t.controlsTable) && t.controlsTable.length)
       ? `<h2 style="margin-top:32px;font-size:1.3rem;">${ctblHeading}</h2><table style="width:100%;border-collapse:collapse;margin-top:8px;"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid #2a2740;">${ctblKeyH}</th><th style="text-align:left;padding:8px;border-bottom:1px solid #2a2740;">${ctblActH}</th></tr></thead><tbody>${t.controlsTable.map(r => `<tr><td style="padding:8px;font-family:monospace;border-bottom:1px solid #1a1726;">${r.key}</td><td style="padding:8px;border-bottom:1px solid #1a1726;">${r.action}</td></tr>`).join('')}</tbody></table>`
       : '';
     const charactersHtml = (Array.isArray(t.characters) && t.characters.length)
-      ? `<h2 style="margin-top:32px;font-size:1.3rem;">${castHeading}</h2><ul style="line-height:1.7;list-style:none;padding:0;">${t.characters.map(c => `<li style="margin-bottom:12px;"><strong>${c.name}</strong> <em style="color:#9aa;font-size:0.85rem;">${c.role}</em><br>${c.desc}</li>`).join('')}</ul>`
+      ? `<h2 style="margin-top:32px;font-size:1.3rem;">${castHeading}</h2><ul style="line-height:1.7;list-style:none;padding:0;">${t.characters.map(c => `<li style="margin-bottom:12px;"><strong>${c.name}</strong> <em style="color:#9aa;font-size:0.85rem;">${c.role}</em><br>${rich(c.desc)}</li>`).join('')}</ul>`
       : '';
     const faqStaticHtml = (Array.isArray(t.faq) && t.faq.length)
-      ? `<h2 style="margin-top:32px;font-size:1.3rem;">${faqStaticHeading}</h2><dl style="line-height:1.7;">${t.faq.map(p => `<dt style="font-weight:700;color:#00d2ff;margin-top:12px;">${p.q}</dt><dd style="margin:4px 0 0 0;">${p.a}</dd>`).join('')}</dl>`
+      ? `<h2 style="margin-top:32px;font-size:1.3rem;">${faqStaticHeading}</h2><dl style="line-height:1.7;">${t.faq.map(p => `<dt style="font-weight:700;color:#00d2ff;margin-top:12px;">${p.q}</dt><dd style="margin:4px 0 0 0;">${rich(p.a)}</dd>`).join('')}</dl>`
       : '';
     const featuredCommentsHeading = ui('seoPlayerHighlights', lang, 'Player Highlights');
     const featuredCommentsHtml = (Array.isArray(t.featuredComments) && t.featuredComments.length)
@@ -309,6 +327,7 @@ for (const lang of SUPPORTED_LOCALES) {
     <meta name="keywords" content="${escAttr(t.title)}, ${escAttr(game.genres.join(', '))}, free online game, browser game, arcadedeck" />
     <meta name="robots" content="${robotsValue}" />
     <meta name="theme-color" content="#050507" />
+    ${adsenseMeta}
     <link rel="icon" type="image/webp" href="/images/favicon.webp" />
     <link rel="apple-touch-icon" href="/images/icon-192x192.webp" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -351,7 +370,7 @@ for (const lang of SUPPORTED_LOCALES) {
         <p style="font-size:1.1rem;line-height:1.6;">${t.description}</p>
 
         <h2 style="margin-top:32px;font-size:1.3rem;">${aboutH2}</h2>
-        <div style="line-height:1.7;">${(t.fullDescription || '').replace(/\n/g, '<br>')}</div>
+        <div>${paras(t.fullDescription)}</div>
 
         ${objectivesHtml}
 
@@ -359,11 +378,11 @@ for (const lang of SUPPORTED_LOCALES) {
 
         ${controlsTableHtml}
 
-        ${t.tips ? `<h2 style="margin-top:32px;font-size:1.3rem;">${tipsH2}</h2><p style="line-height:1.6;">${t.tips}</p>` : ''}
+        ${t.tips ? `<h2 style="margin-top:32px;font-size:1.3rem;">${tipsH2}</h2><p style="line-height:1.6;">${rich(t.tips)}</p>` : ''}
 
         ${faqStaticHtml}
 
-        ${t.lore ? `<h2 style="margin-top:32px;font-size:1.3rem;">${loreH2}</h2><div style="line-height:1.7;font-style:italic;">${t.lore.replace(/\n/g, '<br>')}</div>` : ''}
+        ${t.lore ? `<h2 style="margin-top:32px;font-size:1.3rem;">${loreH2}</h2><div>${paras(t.lore)}</div>` : ''}
 
         ${charactersHtml}
 
@@ -376,6 +395,8 @@ for (const lang of SUPPORTED_LOCALES) {
         ${crossLinksHtml}
 
         ${relatedPostsHtml}
+
+        ${game.steamUrl ? `<p style="margin-top:32px;"><a href="${game.steamUrl}" rel="noopener noreferrer" style="color:#00d2ff;">${ui('playerSteam', lang, 'Full version on Steam')}</a></p>` : ''}
 
         <p style="margin-top:32px;color:#9aa;">${genresLabel}: ${game.genres.join(', ')}</p>
         <p style="color:#9aa;">${ui('seoLoadingGame', lang, 'Loading interactive game…')} <a href="${pageUrl}" style="color:#00d2ff;">${pageUrl}</a></p>
@@ -403,6 +424,13 @@ const allGenres = (() => {
   }
   return Array.from(set).sort();
 })();
+
+// Mirrors generate-sitemap.js: a genre needs more than two games to be worth
+// indexing. Thinner ones still get a page (the UI links to them) but are kept
+// out of the sitemap and marked noindex below.
+const indexableGenres = allGenres.filter(
+  gn => playableGames.filter(g => g.genres.includes(gn)).length > 2,
+);
 
 for (const genre of allGenres) {
   const slug = genreSlug(genre);
@@ -464,6 +492,7 @@ for (const genre of allGenres) {
     <meta name="keywords" content="${escAttr(genre)}, free online ${escAttr(genre.toLowerCase())} games, browser games, arcadedeck" />
     <meta name="robots" content="${inGenre.length <= 2 ? 'noindex, follow' : 'index, follow'}" />
     <meta name="theme-color" content="#050507" />
+    ${adsenseMeta}
     <link rel="icon" type="image/webp" href="/images/favicon.webp" />
     <link rel="apple-touch-icon" href="/images/icon-192x192.webp" />
     <link rel="canonical" href="${pageUrl}" />
@@ -510,7 +539,26 @@ ${itemsHtml}
 // =====================================================================
 // PER-LOCALE HOME SHELLS — / + /{lang}/
 // =====================================================================
-const NOSCRIPT_BLOCK_REGEX = /<noscript>[\s\S]*?<\/noscript>/;
+// index.html carries two <noscript> blocks: the Google Fonts fallback in <head>
+// (a bare <link>) and the crawler fallback in <body> (opens with a <div>).
+// Anchor on that <div> — a bare /<noscript>/ matched the font link first and
+// every shell rewrite silently landed its copy in <head> instead of <body>.
+const NOSCRIPT_BLOCK_REGEX = /<noscript>\s*<div[\s\S]*?<\/noscript>/;
+// #root holds the static shell React replaces on mount. It sits on one line.
+const ROOT_BLOCK_REGEX = /<div id="root">.*<\/div>/;
+
+// Put a shell's crawlable copy directly into #root so it is real visible HTML
+// rather than noscript-only. Crawlers that do not execute JS — the AdSense
+// reviewer among them — never see <noscript>, and every non-home shell was
+// otherwise serving the home hero and the home game list. The body <noscript>
+// is redundant once #root carries the copy, so it is dropped.
+// Replacements use function form: post bodies contain `$`, which the string
+// form of String.replace would interpret as a capture-group reference.
+const renderShellBody = (shell, contentHtml) =>
+  shell
+    .replace(ROOT_BLOCK_REGEX, () => `<div id="root">${contentHtml}\n    </div>`)
+    .replace(NOSCRIPT_BLOCK_REGEX, () => '');
+
 const inlineCssOnce = (html) => {
   let first = true;
   return html.replace(cssLinkRegex, () => {
@@ -622,18 +670,40 @@ ${noscriptItems}
   shell = shell.replace(/(<meta property="twitter:title" content=")[^"]*(")/, `$1${escAttr(homeTitle)}$2`);
   shell = shell.replace(/(<meta property="twitter:description" content=")[^"]*(")/, `$1${escAttr(homeDesc)}$2`);
 
-  // Replace LCP shell hero text with translated version.
-  // Includes placeholder for the gamer-id spotlight so the static-shell hero
-  // matches the post-hydration React tree dimensions — prevents Lighthouse
-  // from re-detecting a larger LCP candidate when React mounts.
-  const nickLabel = ui('homeNicknameLabel', lang, 'Game Nickname');
-  shell = shell.replace(
-    /<header class="hero">[\s\S]*?<\/header>/,
-    `<header class="hero"><div class="container hero-content"><h1>${heroTitle} <span data-text="ArcadeDeck">ArcadeDeck</span></h1><p>${heroSub}</p><div class="hero-gamer-spotlight"><span class="neon-arrow neon-arrow-left" aria-hidden="true">&#9654;</span><div class="hero-gamer-display"><div class="hero-gamer-row"><span class="hero-gamer-label">${nickLabel}</span></div><div class="hero-gamer-row"><strong class="hero-gamer-name">&nbsp;</strong></div></div><span class="neon-arrow neon-arrow-right" aria-hidden="true">&#9664;</span></div></div></header>`,
-  );
+  // Replace LCP shell hero text with translated version. Mirrors the <header>
+  // Home.tsx renders so the static shell and the React tree share dimensions.
+  const surprise = ui('homeRandomGame', lang, 'Surprise me');
+  const heroHtml = `<header class="home-hero"><div class="container home-hero-content"><h1>${heroTitle} <span>ArcadeDeck</span></h1><p>${heroSub}</p><div class="home-hero-actions"><button type="button" class="home-hero-random" disabled>${surprise}</button></div><div class="home-hero-nick"></div></div></header>`;
+
+  // Visible catalogue below the hero. Without it #root carried ~115 characters
+  // of text and the whole catalogue existed only in <noscript> + JSON-LD.
+  // Text-only on purpose: it paints in the same frame as the hero, so LCP
+  // timing is unchanged, and no images means no extra layout work before
+  // React swaps the subtree.
+  const catalogueItems = playableGames
+    .map(g => {
+      const tg = txt(g.id, lang);
+      return `        <li style="margin-bottom:10px;"><a href="${fullUrl(lang, '/play/' + g.slug)}" style="color:#00d2ff;font-weight:600;text-decoration:none;">${tg.title || ''}</a> <span style="color:#9aa;">— ${tg.description || ''}</span></li>`;
+    })
+    .join('\n');
+  // Only genres the sitemap considers indexable (>2 games). Linking the thin
+  // one- and two-game genre pages from home would surface pages we chose not
+  // to submit.
+  const genreLinks = indexableGenres
+    .map(gn => `<a href="${fullUrl(lang, '/genre/' + genreSlug(gn))}" style="color:#00d2ff;text-decoration:none;margin-right:12px;">${gn}</a>`)
+    .join('');
+  const catalogueHtml = `<div id="games"><div class="container" style="padding:24px 20px;font-family:system-ui,sans-serif;">
+      <nav aria-label="${escAttr(ui('homeGenresAria', lang, 'Game genres'))}" style="margin-bottom:20px;font-size:0.9rem;">${genreLinks}</nav>
+      <h2 style="font-size:1.3rem;margin:0 0 14px;">${ui('seoOurGames', lang, 'Our Games')}</h2>
+      <ul style="line-height:1.6;font-size:0.95rem;list-style:none;padding:0;margin:0;">
+${catalogueItems}
+      </ul>
+    </div></div>`;
+
+  shell = shell.replace(ROOT_BLOCK_REGEX, () => `<div id="root">${heroHtml}${catalogueHtml}</div>`);
 
   // Replace noscript body.
-  shell = shell.replace(NOSCRIPT_BLOCK_REGEX, `<noscript>${noscriptBody}\n    </noscript>`);
+  shell = shell.replace(NOSCRIPT_BLOCK_REGEX, () => `<noscript>${noscriptBody}\n    </noscript>`);
 
   // Inject home JSON-LD before </head>.
   shell = shell.replace('</head>', `${homeJsonLd(lang)}\n  </head>`);
@@ -701,6 +771,10 @@ const routeShells = {
     title: 'My Games | ArcadeDeck',
     description: 'Your personal ArcadeDeck library. Recently played games, liked titles, and your active Gamer ID — all stored in your browser.',
     canonical: `${SITE}/my-games`,
+    // Renders a per-visitor localStorage library: empty for every crawler, and
+    // the prerendered copy describes a page no visitor actually sees. Keep it
+    // out of the index rather than serve copy that never matches the render.
+    noindex: true,
     extraLd: [breadcrumbLdFor('My Games', `${SITE}/my-games`)],
     noscript: `
       <div style="background:#171424;color:#eaeaf0;font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;">
@@ -794,6 +868,10 @@ const routeShells = {
     title: 'The Fractured Realm — Web MMO | ArcadeDeck',
     description: 'Explore The Fractured Realm, a browser-based MMO adventure hosted on ArcadeDeck.',
     canonical: `${SITE}/fractured-realm`,
+    // Renders as a bare fullscreen iframe of an external build with no text of
+    // its own. The prerendered description would be copy the visitor never
+    // sees, so the page stays out of the index and the sitemap.
+    noindex: true,
     extraLd: [breadcrumbLdFor('The Fractured Realm', `${SITE}/fractured-realm`)],
     noscript: `
       <div style="background:#0a0a12;color:#eaeaf0;font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;line-height:1.7;">
@@ -836,36 +914,40 @@ const routeShells = {
   },
 };
 
+// Every helper below writes into an HTML attribute or element text, so each
+// value goes through escAttr first. Raw copy reaches these unescaped: a blog
+// tag description carries double quotes and two post titles carry an
+// ampersand, which closed the content attribute early and truncated the
+// description on all 29 tag pages.
 const replaceMeta = (html, name, value) =>
-  html.replace(new RegExp(`(<meta name="${name}" content=")[^"]*(")`), `$1${value}$2`);
-const replaceTitle = (html, value) => html.replace(/<title>[\s\S]*?<\/title>/, `<title>${value}</title>`);
+  html.replace(new RegExp(`(<meta name="${name}" content=")[^"]*(")`), `$1${escAttr(value)}$2`);
+const replaceTitle = (html, value) => html.replace(/<title>[\s\S]*?<\/title>/, `<title>${escAttr(value)}</title>`);
 const replaceCanonical = (html, value) =>
-  html.replace(/(<link rel="canonical" href=")[^"]*(")/, `$1${value}$2`);
+  html.replace(/(<link rel="canonical" href=")[^"]*(")/, `$1${escAttr(value)}$2`);
 const injectHreflangSelf = (html, value) => {
   const block = `<link rel="canonical" href="${value}" />\n    <link rel="alternate" hreflang="en" href="${value}" />\n    <link rel="alternate" hreflang="x-default" href="${value}" />`;
   return html.replace(/<link rel="canonical" href="[^"]*" \/>/, block);
 };
 const replaceOgUrl = (html, value) =>
-  html.replace(/(<meta property="og:url" content=")[^"]*(")/, `$1${value}$2`);
+  html.replace(/(<meta property="og:url" content=")[^"]*(")/, `$1${escAttr(value)}$2`);
 const replaceOgTitle = (html, value) =>
-  html.replace(/(<meta property="og:title" content=")[^"]*(")/, `$1${value}$2`);
+  html.replace(/(<meta property="og:title" content=")[^"]*(")/, `$1${escAttr(value)}$2`);
 const replaceOgDesc = (html, value) =>
-  html.replace(/(<meta property="og:description" content=")[^"]*(")/, `$1${value}$2`);
-const overrideTwitter = (shell, url, title, description) => {
-  const esc = (s) => String(s).replace(/"/g, '&quot;');
-  return shell
-    .replace(/(<meta (?:name|property)="twitter:url" content=")[^"]*(")/, `$1${url}$2`)
-    .replace(/(<meta (?:name|property)="twitter:title" content=")[^"]*(")/, `$1${esc(title)}$2`)
-    .replace(/(<meta (?:name|property)="twitter:description" content=")[^"]*(")/, `$1${esc(description)}$2`);
-};
+  html.replace(/(<meta property="og:description" content=")[^"]*(")/, `$1${escAttr(value)}$2`);
+const overrideTwitter = (shell, url, title, description) =>
+  shell
+    .replace(/(<meta (?:name|property)="twitter:url" content=")[^"]*(")/, `$1${escAttr(url)}$2`)
+    .replace(/(<meta (?:name|property)="twitter:title" content=")[^"]*(")/, `$1${escAttr(title)}$2`)
+    .replace(/(<meta (?:name|property)="twitter:description" content=")[^"]*(")/, `$1${escAttr(description)}$2`);
 
 for (const [route, cfg] of Object.entries(routeShells)) {
   const dir = `dist/${route}`;
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 
-  let shell = inlineCssOnce(indexHtml).replace(NOSCRIPT_BLOCK_REGEX, `<noscript>${cfg.noscript}\n    </noscript>`);
+  let shell = renderShellBody(inlineCssOnce(indexHtml), cfg.noscript);
   shell = replaceTitle(shell, cfg.title);
   shell = replaceMeta(shell, 'description', cfg.description);
+  if (cfg.noindex) shell = replaceMeta(shell, 'robots', 'noindex, follow');
   shell = replaceCanonical(shell, cfg.canonical);
   shell = injectHreflangSelf(shell, cfg.canonical);
   shell = replaceOgUrl(shell, cfg.canonical);
@@ -997,7 +1079,7 @@ ${relatedGames
     ],
   });
 
-  let shell = inlineCssOnce(indexHtml).replace(NOSCRIPT_BLOCK_REGEX, `<noscript>${postNoscript}\n    </noscript>`);
+  let shell = renderShellBody(inlineCssOnce(indexHtml), postNoscript);
   shell = replaceTitle(shell, title);
   shell = replaceMeta(shell, 'description', post.excerpt);
   shell = replaceCanonical(shell, url);
@@ -1106,7 +1188,7 @@ ${matches
     ],
   });
 
-  let shell = inlineCssOnce(indexHtml).replace(NOSCRIPT_BLOCK_REGEX, `<noscript>${tagNoscript}\n    </noscript>`);
+  let shell = renderShellBody(inlineCssOnce(indexHtml), tagNoscript);
   shell = replaceTitle(shell, tagTitle);
   shell = replaceMeta(shell, 'description', tagDesc);
   // Single-post tag pages are too thin to index — point the canonical at the
@@ -1126,6 +1208,17 @@ ${matches
     .join('\n    ');
   shell = shell.replace('</head>', `${tagLdTags}\n  </head>`);
   writeFileSync(`${dir}/index.html`, shell);
+}
+
+// Real 404 shell. firebase.json only rewrites known SPA routes to index.html,
+// so every other path gets this file with a 404 status instead of a 200 that
+// claims canonical = home (Search Console soft-404 / duplicate noise).
+{
+  let shell = replaceTitle(indexHtml, '404 - Page Not Found | ArcadeDeck');
+  shell = replaceMeta(shell, 'robots', 'noindex, follow');
+  shell = shell.replace(/\s*<link rel="canonical" href="[^"]*" \/>/, '');
+  shell = shell.replace(/\s*<link rel="alternate" hreflang="[^"]*" href="[^"]*" \/>/g, '');
+  writeFileSync('dist/404.html', shell);
 }
 
 const localeShellCount = SUPPORTED_LOCALES.length;

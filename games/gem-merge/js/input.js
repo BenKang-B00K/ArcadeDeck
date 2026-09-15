@@ -1,15 +1,17 @@
-import { W, H, WT, DROP_Y, COOLDOWN, GEMS } from './config.js';
-import { S, rndLevel } from './state.js';
+import { W, H, WT, DROP_Y, COOLDOWN, GEMS, GEM_GAP } from './config.js';
+import { S } from './state.js';
 import { app, layerGuide } from './renderer.js';
 import { createBall } from './balls.js';
-import { drawNextUI } from './ui.js';
-import { spawnDropEffect } from './fx.js';
+import { gemOutline } from './gems.js';
+import { spawnDropTrail } from './fx.js';
 import { playDrop } from './audio.js';
+import { checkAchievements } from './achievements.js';
 
 export function drawGuide() {
   layerGuide.removeChildren();
   if (S.gameOver) return;
   const gem = GEMS[S.nextLevel - 1];
+  S.nextAngle = Math.random() * Math.PI * 2; // preview and the dropped gem share this orientation
   S.guideContainer = new PIXI.Container();
 
   const lineGfx = new PIXI.Graphics();
@@ -19,16 +21,10 @@ export function drawGuide() {
   }
   S.guideContainer.addChild(lineGfx);
 
-  const ay = H - WT - DROP_Y;
-  const arrowGfx = new PIXI.Graphics();
-  arrowGfx.beginFill(gem.color, 0.45);
-  arrowGfx.moveTo(-5, ay-9); arrowGfx.lineTo(5, ay-9); arrowGfx.lineTo(0, ay);
-  arrowGfx.closePath(); arrowGfx.endFill();
-  S.guideContainer.addChild(arrowGfx);
-
   const circ = new PIXI.Graphics();
   circ.lineStyle(2, gem.color, 0.82);
-  circ.beginFill(gem.color, 0.18); circ.drawCircle(0,0,gem.r); circ.endFill();
+  circ.beginFill(gem.color, 0.18); circ.drawPolygon(gemOutline(S.nextLevel).flat()); circ.endFill();
+  circ.rotation = S.nextAngle;
   S.guideContainer.addChild(circ);
 
   const shineHint = new PIXI.Graphics();
@@ -46,8 +42,8 @@ export function drawGuide() {
   layerGuide.addChild(S.guideContainer);
 }
 
-export function clampX(x) {
-  const r = GEMS[S.nextLevel - 1].r;
+function clampX(x) {
+  const r = GEMS[S.nextLevel - 1].r + GEM_GAP;
   return Math.max(WT + r, Math.min(W - WT - r, x));
 }
 
@@ -56,34 +52,31 @@ function toCanvasX(clientX) {
   return (clientX - rect.left) * (W / rect.width);
 }
 
-export function dropBall() {
+function dropBall() {
   if (S.gameOver) return;
   const now = Date.now();
   if (now - S.lastDrop < COOLDOWN) return;
   S.lastDrop = now;
   
-  const x = clampX(S.mouseX);
-  const color = GEMS[S.nextLevel - 1].color;
-  spawnDropEffect(x, DROP_Y, color);
+  const gem = GEMS[S.nextLevel - 1];
   playDrop(S.nextLevel);
-
-  createBall(x, DROP_Y, S.nextLevel);
-  S.nextLevel = rndLevel();
-  drawGuide(); drawNextUI();
+  spawnDropTrail(createBall(clampX(S.mouseX), DROP_Y, S.nextLevel, S.nextAngle), gem.color, gem.r);
+  S.nextLevel = 1;
+  drawGuide();
+  checkAchievements();
 }
 
-app.view.addEventListener('mousemove', (e) => {
+// Pointer Events cover mouse, touch and pen alike; PIXI sets touch-action:none on the canvas so the
+// browser never turns a drag into a scroll/zoom. Touch pointers are implicitly captured, so a finger
+// that slides off the canvas still drops on release — same as the old touchend behaviour.
+function aim(e) {
+  if (!e.isPrimary) return;
   S.mouseX = toCanvasX(e.clientX);
   if (S.guideContainer) S.guideContainer.x = clampX(S.mouseX);
+}
+app.view.addEventListener('pointerdown', aim);
+app.view.addEventListener('pointermove', aim);
+app.view.addEventListener('pointerup', (e) => {
+  if (!e.isPrimary || e.button !== 0) return;
+  aim(e); dropBall();
 });
-app.view.addEventListener('click', dropBall);
-app.view.addEventListener('touchmove', (e) => {
-  e.preventDefault();
-  S.mouseX = toCanvasX(e.touches[0].clientX);
-  if (S.guideContainer) S.guideContainer.x = clampX(S.mouseX);
-}, { passive: false });
-app.view.addEventListener('touchend', (e) => {
-  e.preventDefault();
-  S.mouseX = toCanvasX(e.changedTouches[0].clientX);
-  dropBall();
-}, { passive: false });

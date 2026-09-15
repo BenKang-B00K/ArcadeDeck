@@ -9,13 +9,15 @@ import {
 } from './storage.js';
 
 import {
-  initAudio, playHit, startBgm, stopBgm, setMuted, unlockAudio,
+  initAudio, playSfx, startBgm, stopBgm, setMuted, unlockAudio,
 } from './audio.js';
 
 import {
   initAchievementsUI, unlockAchievement, checkAchievements,
   renderTop5, renderAchievements,
 } from './achievements.js';
+
+import { svgIcon } from './icons.js';
 
 migrate();
 
@@ -30,7 +32,9 @@ const startBtn = document.getElementById('start');
 const overlay = document.getElementById('start-overlay');
 const countdownEl = document.getElementById('countdown');
 const resultOverlay = document.getElementById('result-overlay');
+const resultEyebrowEl = document.getElementById('result-eyebrow');
 const resultTitleEl = document.getElementById('result-title');
+const resultConfettiEl = document.getElementById('result-confetti');
 const resultMsgEl = document.getElementById('result-msg');
 const resultScoreEl = document.getElementById('result-score');
 const soundToggleEl = document.getElementById('sound-toggle');
@@ -52,13 +56,19 @@ let CANVAS_H = 480;
 const gameWrap = canvas.parentElement;
 
 function resizeCanvas() {
-  const dpr = window.devicePixelRatio || 1;
+  // dpr capped at 2: dpr-3 phones would push ~2.2× the fill-rate for no visible gain.
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
   const wrapW = gameWrap.clientWidth || 640;
   if (wrapW < 1) return;
   const maxH = (window.innerHeight || 480) * 0.55;
   const aspect = Math.max(0.5, Math.min(4 / 3, wrapW / maxH));
-  CANVAS_W = Math.max(200, Math.round(wrapW));
-  CANVAS_H = Math.max(150, Math.round(wrapW / aspect));
+  const w = Math.max(200, Math.round(wrapW));
+  const h = Math.max(150, Math.round(wrapW / aspect));
+  // Assigning canvas.width clears + reallocs the backing store; skip no-op resizes
+  // (mobile fires `resize` on URL-bar show/hide, often mid-round).
+  if (w === CANVAS_W && h === CANVAS_H && canvas.width === w * dpr) return;
+  CANVAS_W = w;
+  CANVAS_H = h;
 
   canvas.width = CANVAS_W * dpr;
   canvas.height = CANVAS_H * dpr;
@@ -74,7 +84,6 @@ function resizeCanvas() {
   }
 }
 window.addEventListener('resize', resizeCanvas);
-window.addEventListener('orientationchange', () => setTimeout(resizeCanvas, 150));
 
 // --- Constants ---
 const START_SECONDS = 15;
@@ -83,6 +92,8 @@ const BASE_RADIUS = 32;
 const MIN_RADIUS = 20;
 const MIN_HIT_RADIUS = 22;
 const MISS_PENALTY = 0.5;
+const FADE_START_S = 5;        // ball starts fading when this much round time is left
+const MIN_TARGET_ALPHA = 0.3;  // ball opacity at 0s
 
 // --- State ---
 let score = 0;
@@ -91,7 +102,6 @@ let highscore = getHighscore();
 let level = getLevel();
 let timeLeft = START_SECONDS;
 let running = false;
-let timerId = null;
 let autoMoveTimer = null;
 let countdownTimer = null;
 let _endAt = 0;
@@ -99,7 +109,6 @@ let _lastTime = 0;
 
 // Clears all timers/intervals so a stale round can't fire after restart/teardown.
 function clearAllTimers() {
-  if (timerId != null) { clearInterval(timerId); timerId = null; }
   if (autoMoveTimer != null) { clearTimeout(autoMoveTimer); autoMoveTimer = null; }
   if (countdownTimer != null) { clearInterval(countdownTimer); countdownTimer = null; }
   if (comboTimerId != null) { clearTimeout(comboTimerId); comboTimerId = null; }
@@ -107,7 +116,7 @@ function clearAllTimers() {
 
 const target = {
   x: 100, y: 100, r: 30, scale: 1, hitR: 0,
-  glowGrad: null, bodyGrad: null,
+  glowGrad: null, bodyGrad: null, specGrad: null, shadowGrad: null,
   ringR: 0, ringStart: 0, ringLife: 0, ringTTL: 0,
 };
 
@@ -142,7 +151,7 @@ function resetCombo() {
 }
 function comboTier() { return Math.min(5, Math.floor(combo / 3)); } // 0..5
 function comboColor(tier) {
-  return ['#ffffff','#ffd6ea','#9cfffa','#b58bff','#ffd86b','#ff5e7a'][Math.min(tier, 5)];
+  return ['#ffffff','#ffd6ea','#9cfffa','#b58bff','#ffd86b','#ff5e7a'][tier];
 }
 
 // Level-up celebration trigger: fires once per round when score first crosses required.
@@ -161,33 +170,16 @@ for (let i = 0; i < 30; i++) {
 // --- postMessage parent origin resolver ---
 // Returns a validated http(s) origin string, or null if none can be determined.
 // Never falls back to '*' — refuse to broadcast cross-origin messages without a target.
-function isValidHttpOrigin(o) {
-  try {
-    const u = new URL(o);
-    if (u.protocol !== 'http:' && u.protocol !== 'https:') return false;
-    if (!u.hostname || u.hostname === 'null') return false;
-    return u.origin === o;
-  } catch (e) { return false; }
-}
+// Priority: ?host= URL param → document.referrer → window.location.origin.
 function getParentOrigin() {
-  try {
-    const host = new URLSearchParams(window.location.search).get('host');
-    if (host) {
-      const o = new URL(host).origin;
-      if (isValidHttpOrigin(o)) return o;
-    }
-  } catch (e) { console.warn('getParentOrigin: host param parse failed', e); }
-  try {
-    if (document.referrer) {
-      const o = new URL(document.referrer).origin;
-      if (isValidHttpOrigin(o)) return o;
-    }
-  } catch (e) { console.warn('getParentOrigin: referrer parse failed', e); }
-  try {
-    if (window.location.origin && isValidHttpOrigin(window.location.origin)) {
-      return window.location.origin;
-    }
-  } catch (e) { console.warn('getParentOrigin: window.origin failed', e); }
+  const host = new URLSearchParams(window.location.search).get('host');
+  for (const candidate of [host, document.referrer, window.location.origin]) {
+    if (!candidate) continue;
+    try {
+      const o = new URL(candidate).origin;   // opaque origins serialize as 'null' → rejected below
+      if (/^https?:\/\//.test(o)) return o;
+    } catch (e) { console.warn('getParentOrigin: bad candidate', candidate, e); }
+  }
   return null;
 }
 
@@ -208,10 +200,7 @@ function getRequiredScore() {
 
 function getMoveInterval() {
   // 7% reduction per level, floor at 300ms (reached ~level 16).
-  const minInterval = 300;
-  const reduction = 0.93;
-  const mult = Math.pow(reduction, Math.max(0, Number(level) - 1));
-  return Math.max(minInterval, Math.round(MOVE_INTERVAL * mult));
+  return Math.max(300, Math.round(MOVE_INTERVAL * 0.93 ** (level - 1)));
 }
 
 // --- Target ---
@@ -222,11 +211,26 @@ function rebuildTargetGradients() {
   glow.addColorStop(1,   'rgba(0,0,0,0)');
   target.glowGrad = glow;
 
-  const body = ctx.createRadialGradient(0, 0, 0, target.r * 0.8, 0, target.r);
-  body.addColorStop(0,    '#fff9f6');
-  body.addColorStop(0.25, '#ffdfe5');
-  body.addColorStop(1,    '#ff5e6e');
+  // Sphere shading in local (translated) space: light source top-left, dark rim bottom-right.
+  // Inner circle must lie inside the outer one or the gradient renders as a cone.
+  const r = target.r;
+  const body = ctx.createRadialGradient(-r * 0.35, -r * 0.35, r * 0.1, 0, 0, r);
+  body.addColorStop(0,    '#fff4f2');
+  body.addColorStop(0.3,  '#ff9aa8');
+  body.addColorStop(0.75, '#ff5e6e');
+  body.addColorStop(1,    '#7a1f36');
   target.bodyGrad = body;
+
+  const spec = ctx.createRadialGradient(-r * 0.38, -r * 0.42, 0, -r * 0.38, -r * 0.42, r * 0.4);
+  spec.addColorStop(0, 'rgba(255,255,255,0.85)');
+  spec.addColorStop(1, 'rgba(255,255,255,0)');
+  target.specGrad = spec;
+
+  // Circular; drawn under a scale(1, 0.32) so it becomes a soft contact-shadow ellipse.
+  const shadow = ctx.createRadialGradient(0, 0, 0, 0, 0, r * 0.9);
+  shadow.addColorStop(0, 'rgba(0,0,0,0.45)');
+  shadow.addColorStop(1, 'rgba(0,0,0,0)');
+  target.shadowGrad = shadow;
 }
 
 function placeTarget() {
@@ -365,6 +369,7 @@ function spawnLevelUpBurst() {
   ripples.push({ x: cx, y: cy, r: 0, alpha: 1.0, color: '255,216,107', growth: 6 });
   ripples.push({ x: cx, y: cy, r: 0, alpha: 0.7, color: '255,255,255', delay: 6, growth: 5 });
   spawnFloat(cx, cy - 36, 'CLEARED!', '#ffd86b', 2.4);
+  playSfx('clear');
   shake = 14;
   cameraPunch(1.06);
 }
@@ -383,7 +388,7 @@ function spawnHitEffects(x, y) {
   spawnRipple(x, y, tier);
   const text = combo >= 3 ? `+${combo}!` : '+1';
   spawnFloat(x, y, text, comboColor(tier), 1.6 + tier * 0.18);
-  playHit(1 + tier * 0.05);
+  playSfx('hit', 1 + tier * 0.05);
   shake = 8 + tier * 1.5;
   target.scale = 1.8 + tier * 0.08;
   cameraPunch(1.02 + tier * 0.008);
@@ -403,44 +408,45 @@ function scheduleAutoMove() {
 let _prevScore = score;
 let _prevTime = Math.ceil(timeLeft);
 
-function hexToRgb(hex) {
-  hex = hex.replace('#','');
-  const n = parseInt(hex, 16);
-  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-}
-function rgbStr(rgb) { return `rgb(${Math.round(rgb[0])},${Math.round(rgb[1])},${Math.round(rgb[2])})`; }
-function mixColors(a, b, t) {
-  const ra = hexToRgb(a), rb = hexToRgb(b);
-  return rgbStr([ra[0] + (rb[0] - ra[0]) * t, ra[1] + (rb[1] - ra[1]) * t, ra[2] + (rb[2] - ra[2]) * t]);
-}
-function timeColor(fraction) {
-  fraction = Math.max(0, Math.min(1, fraction));
-  return fraction > 0.5
-    ? mixColors('#ffd86b', '#6eff88', (fraction - 0.5) * 2)
-    : mixColors('#ff5e6e', '#ffd86b', fraction * 2);
+function animatePop(el, from = 1.15) {
+  el.animate([{ transform: `scale(${from})` }, { transform: 'scale(1)' }], { duration: 220, easing: 'cubic-bezier(.2,.9,.2,1)' });
 }
 
-function animatePop(el) {
-  if (!el) return;
-  el.classList.remove('hud-pop');
-  void el.offsetWidth; // restart CSS transition on rapid changes
-  el.classList.add('hud-pop');
-  clearTimeout(el._popTimer);
-  el._popTimer = setTimeout(() => el.classList.remove('hud-pop'), 260);
-}
+// red → yellow → green as time remaining grows; shared by HUD and the in-ball timer
+const timeColor = (t) => `hsl(${Math.round(120 * t / START_SECONDS)} 100% 70%)`;
 
+// Runs every frame: write DOM only on change (textContent replaces the text node even when equal).
 function updateHUD() {
-  if (levelEl) levelEl.textContent = level;
-  scoreEl.textContent = score;
-  if (score !== _prevScore) { animatePop(scoreEl); _prevScore = score; }
+  if (levelEl.textContent != level) levelEl.textContent = level;
+  if (score !== _prevScore) { scoreEl.textContent = score; animatePop(scoreEl); _prevScore = score; }
+  const tStr = timeLeft.toFixed(1);
+  if (timeEl.textContent !== tStr) {
+    timeEl.textContent = tStr;
+    timeEl.style.color = timeColor(timeLeft);
+  }
   const tCeil = Math.ceil(timeLeft);
-  timeEl.textContent = timeLeft.toFixed(1);
-  timeEl.style.color = timeColor(Math.max(0, Math.min(1, timeLeft / START_SECONDS)));
   if (tCeil !== _prevTime) { animatePop(timeEl); _prevTime = tCeil; }
-  highEl.textContent = highscore;
+  if (highEl.textContent != highscore) highEl.textContent = highscore;
 }
 
 // --- End-of-round messaging ---
+// DOM confetti over the playfield for the cleared card (canvas is cleared while !running).
+const CONFETTI_PALETTE = ['#ffd86b', '#ff5e7a', '#9cfffa', '#b58bff', '#fff', '#ffb347'];
+function spawnConfetti(count = 48) {
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('i');
+    el.style.cssText =
+      `--x:${(Math.random() * 100).toFixed(1)}%;` +
+      `--dx:${((Math.random() - 0.5) * 120).toFixed(0)}px;` +
+      `--w:${(5 + Math.random() * 6).toFixed(0)}px;--h:${(8 + Math.random() * 8).toFixed(0)}px;` +
+      `--c:${CONFETTI_PALETTE[i % CONFETTI_PALETTE.length]};` +
+      `--t:${(1.6 + Math.random() * 1.2).toFixed(2)}s;--delay:${(Math.random() * 0.6).toFixed(2)}s;`;
+    frag.appendChild(el);
+  }
+  resultConfettiEl.replaceChildren(frag);
+}
+
 function computeLevel(s, required) {
   if (s <= 0) return { title: 'No Hits',      msg: 'Give it another go — warm up and aim for a few hits!' };
   const ratio = required > 0 ? s / required : 0;
@@ -460,7 +466,8 @@ function endGame() {
   const required = getRequiredScore();
   const passed = score >= required;
   const finalTimeRemaining = timeLeft;
-  const playedLevel = Number(level);
+  const playedLevel = level;
+  playSfx(passed ? 'win' : 'fail');
 
   if (passed) {
     level = playedLevel + 1;
@@ -481,30 +488,19 @@ function endGame() {
   checkAchievements(score, playedLevel, misses, finalTimeRemaining, passed);
 
   const result = computeLevel(score, required);
-  if (resultOverlay) {
-    resultTitleEl.textContent = result.title;
-    resultMsgEl.textContent = result.msg;
-    resultScoreEl.textContent = `Clicks: ${score}/${required}  |  Next: Level ${level}`;
-    resultOverlay.style.display = 'flex';
-    resultOverlay.classList.add('active');
-    resultOverlay.setAttribute('aria-hidden', 'false');
-    let dismissed = false;
-    const dismiss = () => {
-      if (dismissed) return;
-      dismissed = true;
-      resultOverlay.classList.remove('active');
-      resultOverlay.setAttribute('aria-hidden', 'true');
-      resultOverlay.style.display = 'none';
-      resultOverlay.removeEventListener('click', dismiss);
-      startBtn.textContent = `Start Level ${level}`;
-      startBtn.style.display = 'inline-block';
-    };
-    resultOverlay.addEventListener('click', dismiss);
-    setTimeout(dismiss, 2500);
-  } else {
+  resultOverlay.classList.toggle('cleared', passed);
+  resultEyebrowEl.textContent = passed ? `Level ${playedLevel} cleared · ${result.title}` : `Level ${playedLevel}`;
+  resultTitleEl.textContent = passed ? 'Congratulations!' : result.title;
+  resultMsgEl.textContent = result.msg;
+  resultScoreEl.textContent = `Clicks: ${score}/${required}  |  Next: Level ${level}`;
+  if (passed) spawnConfetti();
+  resultOverlay.show();
+  resultOverlay.addEventListener('close', () => {
+    resultConfettiEl.replaceChildren();
     startBtn.textContent = `Start Level ${level}`;
     startBtn.style.display = 'inline-block';
-  }
+  }, { once: true });
+  setTimeout(() => resultOverlay.close(), 2500);  // click-to-dismiss wired below
 
   const parentOrigin = getParentOrigin();
   if (parentOrigin) {
@@ -518,7 +514,7 @@ function endGame() {
     console.warn('postMessage GAME_OVER skipped: no validated parent origin');
   }
 
-  if (overlay) overlay.classList.remove('active');
+  overlay.classList.remove('active');
 }
 
 function startGame() {
@@ -538,31 +534,20 @@ function startGame() {
   updateHUD();
   startBgm();
 
-  _endAt = performance.now() + START_SECONDS * 1000;
-  timerId = setInterval(() => {
-    timeLeft = Math.max(0, (_endAt - performance.now()) / 1000);
-    canvas.classList.toggle('urgent', timeLeft <= 5 && timeLeft > 0);
-    if (timeLeft <= 0) {
-      timeLeft = 0;
-      canvas.classList.remove('urgent');
-      endGame();
-      return;
-    }
-    updateHUD();
-  }, 50);
+  _endAt = performance.now() + START_SECONDS * 1000;  // clock ticks in updateAndDraw
   scheduleAutoMove();
 }
 
 // --- Input ---
 let shakeOx = 0, shakeOy = 0;
 
+// rect already reflects the shake/punch CSS transform, so no manual offset here.
 function canvasPosFromEvent(e) {
   const rect = canvas.getBoundingClientRect();
-  const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-  const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-  const x = (clientX - rect.left + shakeOx) * (CANVAS_W / rect.width);
-  const y = (clientY - rect.top  + shakeOy) * (CANVAS_H / rect.height);
-  return { x, y };
+  return {
+    x: (e.clientX - rect.left) * (CANVAS_W / rect.width),
+    y: (e.clientY - rect.top)  * (CANVAS_H / rect.height),
+  };
 }
 
 function onCanvasClick(e) {
@@ -583,6 +568,7 @@ function onCanvasClick(e) {
   } else {
     misses++;
     _endAt -= MISS_PENALTY * 1000;
+    playSfx('miss');
     const hadCombo = combo;
     resetCombo();
     spawnFloat(pos.x, pos.y, `-${MISS_PENALTY}s`, '#ff5e6e');
@@ -607,11 +593,25 @@ function updateAndDraw(now) {
 
   _globalTime += dt;
 
+  // Round clock: deadline-based so frame drops never cost time.
+  if (running) {
+    timeLeft = Math.max(0, (_endAt - now) / 1000);
+    canvas.classList.toggle('urgent', timeLeft <= 5 && timeLeft > 0);
+    if (timeLeft <= 0) endGame(); else updateHUD();
+  }
   if (!running) {
     ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
     requestAnimationFrame(updateAndDraw);
     return;
   }
+
+  // Ball fades in the final seconds; digits fade less so the timer stays readable.
+  const fadeT = Math.min(1, timeLeft / FADE_START_S);
+  const wantAlpha = MIN_TARGET_ALPHA + (1 - MIN_TARGET_ALPHA) * fadeT;
+  const textAlpha = 0.7 + 0.3 * fadeT;
+  // The canvas is never cleared (trail fill above), so a translucent ball accumulates frame over frame
+  // toward S = a / (1 - (1-a)(1-trailAlpha)). Invert so the *visible* opacity equals wantAlpha.
+  const ballAlpha = wantAlpha >= 1 ? 1 : trailAlpha * wantAlpha / (1 - (1 - trailAlpha) * wantAlpha);
 
   // Background stars — brightness scales with combo for reactive feel.
   ctx.globalCompositeOperation = 'lighter';
@@ -648,7 +648,7 @@ function updateAndDraw(now) {
   // Glow
   if (target.glowGrad) {
     const glowPulse = 1 + 0.15 * Math.sin(_globalTime * 4);
-    ctx.globalAlpha = 0.7 + 0.3 * Math.sin(_globalTime * 3);
+    ctx.globalAlpha = (0.7 + 0.3 * Math.sin(_globalTime * 3)) * ballAlpha;
     ctx.fillStyle = target.glowGrad;
     ctx.beginPath();
     ctx.arc(target.x, target.y, target.r * 5 * glowPulse, 0, Math.PI * 2);
@@ -792,34 +792,58 @@ function updateAndDraw(now) {
   ctx.save();
   ctx.translate(target.x, target.y);
   ctx.scale(target.scale, target.scale);
+  ctx.globalAlpha = ballAlpha;  // cleared by restore()
+  const r = target.r;
 
-  const pulseR = target.r * (1.3 + 0.12 * Math.sin(_globalTime * 5));
+  const pulseR = r * (1.3 + 0.12 * Math.sin(_globalTime * 5));
   ctx.strokeStyle = `rgba(255,130,160,${(0.15 + 0.1 * Math.sin(_globalTime * 5)).toFixed(2)})`;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.arc(0, 0, pulseR, 0, Math.PI * 2);
   ctx.stroke();
 
+  // Contact shadow (squashed circular gradient → soft ellipse)
+  ctx.save();
+  ctx.translate(0, r * 0.95);
+  ctx.scale(1, 0.32);
+  ctx.fillStyle = target.shadowGrad || 'rgba(0,0,0,0.3)';
+  ctx.beginPath();
+  ctx.arc(0, 0, r * 0.9, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // Sphere body
   ctx.fillStyle = target.bodyGrad || '#ff5e6e';
   ctx.beginPath();
-  ctx.arc(0, 0, target.r, 0, Math.PI * 2);
+  ctx.arc(0, 0, r, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.lineWidth = 3;
-  ctx.strokeStyle = 'rgba(255,110,130,0.9)';
+  // Rim light on the shadowed side
+  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = 'rgba(255,200,220,0.35)';
   ctx.beginPath();
-  ctx.arc(0, 0, target.r, 0, Math.PI * 2);
+  ctx.arc(0, 0, r - 1, -0.15 * Math.PI, 0.65 * Math.PI);
   ctx.stroke();
 
+  // Soft specular
+  ctx.fillStyle = target.specGrad || 'rgba(255,255,255,0.35)';
   ctx.beginPath();
-  ctx.arc(-target.r * 0.3, -target.r * 0.35, target.r * 0.28, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(255,255,255,0.35)';
+  ctx.arc(-r * 0.38, -r * 0.42, r * 0.4, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.beginPath();
-  ctx.arc(target.r * 0.15, target.r * 0.2, target.r * 0.1, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(255,255,255,0.15)';
-  ctx.fill();
+  // Round timer in the center. Dark outline is load-bearing: near 0s the hsl fill is red on a red sphere.
+  const fs = Math.round(r * 1.05);
+  const secs = Math.ceil(timeLeft);
+  ctx.globalAlpha = textAlpha;
+  ctx.font = `900 ${fs}px system-ui, Arial, sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.lineJoin = 'round';
+  ctx.lineWidth = fs * 0.14;
+  ctx.strokeStyle = 'rgba(0,0,0,0.55)';
+  ctx.strokeText(secs, 0, fs * 0.05);
+  ctx.fillStyle = timeColor(timeLeft);
+  ctx.fillText(secs, 0, fs * 0.05);
 
   ctx.restore();
 
@@ -827,67 +851,27 @@ function updateAndDraw(now) {
 }
 
 // --- UI wiring ---
-let _lastFocusedBeforeModal = null;
-function setModalState(el, show) {
-  if (!el) return;
-  el.classList.toggle('active', show);
-  el.setAttribute('aria-hidden', show ? 'false' : 'true');
-}
-function openModal(el, focusEl) {
-  if (!el) return;
-  _lastFocusedBeforeModal = document.activeElement;
-  setModalState(el, true);
-  if (focusEl && typeof focusEl.focus === 'function') {
-    try { focusEl.focus(); } catch (e) { console.warn('modal focus failed', e); }
-  }
-}
-function closeModal(el) {
-  if (!el) return;
-  setModalState(el, false);
-  if (_lastFocusedBeforeModal && typeof _lastFocusedBeforeModal.focus === 'function') {
-    try { _lastFocusedBeforeModal.focus(); } catch (e) { console.warn('restore focus failed', e); }
-  }
-  _lastFocusedBeforeModal = null;
-}
-
-function toggleGuide(show) {
-  if (show) openModal(guideOverlay, guideClose);
-  else closeModal(guideOverlay);
-}
-if (guideToggle) guideToggle.addEventListener('click', () => toggleGuide(true));
-if (guideClose)  guideClose.addEventListener('click', () => toggleGuide(false));
-if (guideOverlay) guideOverlay.addEventListener('click', (e) => {
-  if (e.target === guideOverlay) toggleGuide(false);
+// Modals are native <dialog>: showModal() gives Esc, focus trap/restore, backdrop and a11y for free.
+guideToggle.addEventListener('click', () => guideOverlay.showModal());
+guideClose.addEventListener('click', () => guideOverlay.close());
+recordsToggle.innerHTML = svgIcon('trophy');
+recordsToggle.addEventListener('click', () => {
+  renderTop5(top5ListEl);
+  renderAchievements(achievementsListEl);
+  recordsOverlay.showModal();
 });
-
-function toggleRecords(show) {
-  if (!recordsOverlay) return;
-  if (show) {
-    renderTop5(top5ListEl);
-    renderAchievements(achievementsListEl);
-    openModal(recordsOverlay, recordsClose);
-  } else {
-    closeModal(recordsOverlay);
-  }
+recordsClose.addEventListener('click', () => recordsOverlay.close());
+// Backdrop click closes: the card is the dialog's only child, so a click whose target is the
+// dialog itself landed outside the card. Result overlay covers the playfield → any tap dismisses.
+for (const dlg of [guideOverlay, recordsOverlay]) {
+  dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
 }
-if (recordsToggle) recordsToggle.addEventListener('click', () => toggleRecords(true));
-if (recordsClose)  recordsClose.addEventListener('click', () => toggleRecords(false));
-if (recordsOverlay) recordsOverlay.addEventListener('click', (e) => {
-  if (e.target === recordsOverlay) toggleRecords(false);
-});
-
-// Esc closes any open modal.
-window.addEventListener('keydown', (e) => {
-  if (e.key !== 'Escape') return;
-  if (guideOverlay && guideOverlay.classList.contains('active')) toggleGuide(false);
-  else if (recordsOverlay && recordsOverlay.classList.contains('active')) toggleRecords(false);
-});
+resultOverlay.addEventListener('click', () => resultOverlay.close());
 
 // Sound toggle
 let soundEnabled = getSoundPref();
 function updateSoundUI() {
-  if (!soundToggleEl) return;
-  soundToggleEl.textContent = soundEnabled ? '🔊' : '🔇';
+  soundToggleEl.innerHTML = svgIcon(soundEnabled ? 'volume' : 'volume-x');
   soundToggleEl.classList.toggle('muted', !soundEnabled);
   soundToggleEl.setAttribute('aria-pressed', (!soundEnabled).toString());
 }
@@ -897,34 +881,19 @@ function setSoundEnabled(v) {
   setMuted(!soundEnabled);
   updateSoundUI();
 }
-if (soundToggleEl) soundToggleEl.addEventListener('click', () => {
+soundToggleEl.addEventListener('click', () => {
   setSoundEnabled(!soundEnabled);
   if (!soundEnabled) unlockAchievement('sound_toggle');
 });
 
 // Init audio & apply saved sound pref
 initAudio();
-try { setSoundEnabled(soundEnabled); } catch (e) { console.warn('initial setSoundEnabled failed', e); updateSoundUI(); }
+setSoundEnabled(soundEnabled);
 
-// Canvas input — prevent double-fire on mobile (touchstart + click)
-let lastTouchTime = 0;
-let lastInputTime = 0;
-const INPUT_THROTTLE = 60;
-canvas.addEventListener('touchstart', (e) => {
-  e.preventDefault();
-  if (e.touches.length > 1) return;
-  const now = Date.now();
-  if (now - lastInputTime < INPUT_THROTTLE) return;
-  lastInputTime = now;
-  lastTouchTime = now;
-  onCanvasClick(e);
-}, { passive: false });
-canvas.addEventListener('click', (e) => {
-  if (Date.now() - lastTouchTime < 500) return;
-  const now = Date.now();
-  if (now - lastInputTime < INPUT_THROTTLE) return;
-  lastInputTime = now;
-  onCanvasClick(e);
+// Canvas input — pointerdown unifies mouse/touch/pen with no double-fire (touch-action:none in CSS).
+// No isPrimary check: two-thumb alternating taps overlap, and the second finger is non-primary.
+canvas.addEventListener('pointerdown', (e) => {
+  if (e.button === 0) onCanvasClick(e);
 });
 canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
@@ -934,28 +903,26 @@ startBtn.addEventListener('click', () => {
   unlockAudio();
   overlay.classList.add('active');
   startBtn.style.display = 'none';
-  if (countdownEl) {
-    countdownEl.style.display = 'flex';
-    let t = 2;
-    countdownEl.textContent = t;
-    countdownTimer = setInterval(() => {
-      t--;
-      if (t > 0) {
-        countdownEl.textContent = t;
-      } else {
-        clearInterval(countdownTimer);
-        countdownTimer = null;
-        countdownEl.style.display = 'none';
-        overlay.classList.remove('active');
-        startBtn.textContent = 'Start';
-        startGame();
-      }
-    }, 1000);
-  } else {
-    overlay.classList.remove('active');
+  countdownEl.style.display = 'flex';
+  let t = 3;
+  const showDigit = (v) => { countdownEl.textContent = v; animatePop(countdownEl, 1.6); playSfx('tick'); };
+  showDigit(t);
+  countdownTimer = setInterval(() => {
+    t--;
+    if (t > 0) { showDigit(t); return; }
+    clearInterval(countdownTimer);
+    countdownTimer = null;
+    overlay.classList.remove('active');  // before startGame: .countdown then inherits pointer-events:none
     startBtn.textContent = 'Start';
     startGame();
-  }
+    // "GO!" flashes over the live round. No timer: clearAllTimers()/re-entry guard stay unaffected.
+    countdownEl.textContent = 'GO!';
+    playSfx('go');
+    countdownEl.animate(
+      [{ transform: 'scale(1.6)', opacity: 1 }, { transform: 'scale(1)', opacity: 1, offset: 0.35 }, { opacity: 0 }],
+      { duration: 550 }
+    ).onfinish = () => { countdownEl.style.display = 'none'; };
+  }, 1000);
 });
 
 // Initialize view

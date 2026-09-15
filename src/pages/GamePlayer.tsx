@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
-import { Maximize, Minimize, Heart, Link as LinkIcon, Home, X } from 'lucide-react';
-import { games } from '../data/games';
+import { Maximize, Minimize, Heart, Link as LinkIcon, Home, X, Trophy } from 'lucide-react';
+import { games, GENRE_HUE } from '../data/games';
 import type { Game } from '../data/games';
 import Navbar from '../components/Navbar';
 import AdBanner from '../components/AdBanner';
@@ -15,8 +15,10 @@ import RelatedGames from '../components/gameplayer/RelatedGames';
 import RelatedPosts from '../components/gameplayer/RelatedPosts';
 import { useNickname } from '../hooks/useNickname';
 import { AD_SLOTS } from '../constants/gameConstants';
+import { MAX_SCORE, TIER_META, formatScore, nextTierAt, readPB, recordPlayed, savePB, tierOf } from '../utils/pb';
 import { useUiText, useLocale, getLocalizedString, getLocalizedObjects } from '../i18n';
 import { genreSlug } from '../utils/genres';
+import '../components/GameCard.css';
 import './GamePlayer.css';
 
 const GamePlayer: React.FC = () => {
@@ -28,6 +30,8 @@ const GamePlayer: React.FC = () => {
   const [isLiked, setIsLiked] = useState<boolean>(() =>
     localStorage.getItem(`liked_${id}`) === 'true'
   );
+  const [pb, setPb] = useState<number>(() => readPB(id ?? ''));
+  const [isNewBest, setIsNewBest] = useState(false);
   const [isPseudoFullscreen, setIsPseudoFullscreen] = useState(false);
   const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -57,8 +61,41 @@ const GamePlayer: React.FC = () => {
     const recentlyPlayed = JSON.parse(localStorage.getItem('recently_played') || '[]');
     const updatedList = [game.id, ...recentlyPlayed.filter((gid: string) => gid !== game.id)].slice(0, 5);
     localStorage.setItem('recently_played', JSON.stringify(updatedList));
+    recordPlayed(game.id);
     void import('../utils/streak').then(m => m.recordPlayToday());
   }, [id, game]);
+
+  // Personal best. Games post their final score to the parent frame; we keep
+  // the best one in localStorage. Nothing leaves the browser.
+  useEffect(() => {
+    if (!game) return;
+    setPb(readPB(game.id));
+    setIsNewBest(false);
+    let allowedOrigin: string;
+    try {
+      allowedOrigin = new URL(game.gameUrl).origin;
+    } catch {
+      return;
+    }
+
+    const SCORE_TYPES = ['GAME_OVER', 'GAME_SCORE', 'SCORE_UPDATE', 'gameOver'];
+    const onMessage = (event: MessageEvent) => {
+      if (event.origin !== allowedOrigin) return;
+      const data = event.data as { type?: string; score?: unknown } | null;
+      if (!data || !data.type || !SCORE_TYPES.includes(data.type)) return;
+
+      const score = Number(data.score);
+      if (!Number.isFinite(score) || score <= 0 || score > MAX_SCORE) return;
+
+      if (savePB(game.id, score)) {
+        setPb(score);
+        setIsNewBest(true);
+      }
+    };
+
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, [game]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -89,6 +126,21 @@ const GamePlayer: React.FC = () => {
     };
   }, []);
 
+  // Browser shortcuts eat keys games bind: ESC tap exits fullscreen (pause
+  // menus), Ctrl+W closes the tab (WASD + Ctrl crouch). Keyboard Lock
+  // (Chrome/Edge) forwards locked keys to the game while fullscreen; only
+  // press-and-hold ESC exits. Lock persists across fullscreen sessions and
+  // also covers fullscreen requested by the game itself. No-op on
+  // Firefox/Safari. Not locking Tab on purpose: it would swallow Alt+Tab.
+  useEffect(() => {
+    const kb = (navigator as Navigator & {
+      keyboard?: { lock(keys?: string[]): Promise<void>; unlock(): void };
+    }).keyboard;
+    if (!kb?.lock) return;
+    kb.lock(['Escape', 'KeyW']).catch(() => {});
+    return () => kb.unlock();
+  }, []);
+
   useEffect(() => {
     const el = gameWrapperRef.current;
     if (!el) return;
@@ -104,26 +156,29 @@ const GamePlayer: React.FC = () => {
   // Target the wrapper (already mounted) so iframe mounts inside the fullscreen
   // element a render later. Fallback to pseudo-fullscreen on browsers without
   // Element.requestFullscreen (iOS Safari).
-  const handlePlay = () => {
-    setGameStarted(true);
-    // Opt-out per game: skip auto-fullscreen when autoFullscreen === false.
-    // Manual Fullscreen button stays available.
-    if (game?.autoFullscreen === false) return;
-    const wrapper = gameWrapperRef.current as (HTMLDivElement & {
-      webkitRequestFullscreen?: () => void;
-    }) | null;
-    if (!wrapper) return;
+  // Native fullscreen, else pseudo-fullscreen (iOS Safari has no
+  // requestFullscreen; Chrome rejects with "not granted" outside a gesture).
+  const enterFullscreen = (element: HTMLElement) => {
+    const el = element as HTMLElement & { webkitRequestFullscreen?: () => void };
     try {
-      if (wrapper.requestFullscreen) {
-        wrapper.requestFullscreen().catch(() => setIsPseudoFullscreen(true));
-      } else if (wrapper.webkitRequestFullscreen) {
-        wrapper.webkitRequestFullscreen();
+      if (el.requestFullscreen) {
+        el.requestFullscreen().catch(() => setIsPseudoFullscreen(true));
+      } else if (el.webkitRequestFullscreen) {
+        el.webkitRequestFullscreen();
       } else {
         setIsPseudoFullscreen(true);
       }
     } catch {
       setIsPseudoFullscreen(true);
     }
+  };
+
+  const handlePlay = () => {
+    setGameStarted(true);
+    // Opt-out per game: skip auto-fullscreen when autoFullscreen === false.
+    // Manual Fullscreen button stays available.
+    if (game?.autoFullscreen === false) return;
+    if (gameWrapperRef.current) enterFullscreen(gameWrapperRef.current);
   };
 
   const handleFullscreen = () => {
@@ -143,33 +198,29 @@ const GamePlayer: React.FC = () => {
       return;
     }
 
-    const element = iframeRef.current;
-    if (!element) return;
-
-    try {
-      const el = element as HTMLIFrameElement & { webkitRequestFullscreen?: () => void };
-      if (el.requestFullscreen) {
-        el.requestFullscreen();
-      } else if (el.webkitRequestFullscreen) {
-        el.webkitRequestFullscreen();
-      } else {
-        // Pseudo-fullscreen for iOS iPhone
-        setIsPseudoFullscreen(true);
-      }
-    } catch (err) {
-      console.error("Fullscreen error:", err);
-      // Fallback
-      setIsPseudoFullscreen(true);
-    }
+    if (iframeRef.current) enterFullscreen(iframeRef.current);
   };
 
   const isFs = isNativeFullscreen || isPseudoFullscreen;
+
+  // Keys go to whatever is focused; without this the first Space/arrow after
+  // entering fullscreen scrolls the page instead of reaching the game.
+  useEffect(() => {
+    if (isFs) iframeRef.current?.focus({ preventScroll: true });
+  }, [isFs]);
   const fullscreenLabel = isFs ? uiT('playerExitFullscreen', 'Exit') : t.fullscreen;
   const FsIcon = isFs ? Minimize : Maximize;
 
   const handleShare = () => {
     setShowShareModal(true);
   };
+
+  const toggleLike = () => {
+    const n = !isLiked;
+    setIsLiked(n);
+    localStorage.setItem(`liked_${id}`, String(n));
+  };
+  const likeLabel = isLiked ? uiT('unlikeGame', 'Unlike this game') : uiT('likeGame', 'Like this game');
 
   if (!game) return <div className="not-found"><h2>Not found</h2><Link to="/">Home</Link></div>;
 
@@ -231,8 +282,39 @@ const GamePlayer: React.FC = () => {
         <div className="game-header-section">
           <div className="details-header centered-header">
             <h1>{getLocalizedString(game, 'title', lang, overlay)}</h1>
-            <span className="genre-label">{game.genres[0]}</span>
+            <div className="game-genres">
+              {game.genres.map((g, i) => (
+                <Link
+                  key={g}
+                  to={`/genre/${genreSlug(g)}`}
+                  className={`genre-tag ${i === 0 ? 'main' : 'sub'} clickable-genre`}
+                  style={{ '--h': GENRE_HUE[g] ?? 260 } as React.CSSProperties}
+                >{g}</Link>
+              ))}
+            </div>
           </div>
+
+          {pb > 0 && (() => {
+            const tier = tierOf(game.id, pb);
+            const meta = TIER_META[tier];
+            const next = nextTierAt(game.id, pb);
+            const label = getLocalizedString(game, 'scoreLabel', lang, overlay) || uiT('pbScore', 'Score');
+            return (
+              <div className="pb-row" aria-live="polite">
+                <span className={`pb-chip ${meta ? meta.cls : ''}`}>
+                  <Trophy size={14} aria-hidden="true" />
+                  <span>{uiT('pbBest', 'Best')} {label}: <strong>{formatScore(pb)}</strong></span>
+                  {meta && <span className="pb-tier">{uiT(meta.key, meta.en)}</span>}
+                </span>
+                {isNewBest && <span className="pb-new">{uiT('pbNewBest', 'New best!')}</span>}
+                {next !== null && (
+                  <span className="pb-next">
+                    {uiT('pbNextTier', '{n} to next tier').replace('{n}', formatScore(next - pb))}
+                  </span>
+                )}
+              </div>
+            );
+          })()}
 
           <div className="game-controls">
             {gameStarted && (
@@ -240,7 +322,7 @@ const GamePlayer: React.FC = () => {
                 <FsIcon size={16} aria-hidden="true" /> {fullscreenLabel}
               </button>
             )}
-            <button className={`control-btn like-btn ${isLiked ? 'active' : ''}`} onClick={() => { const n = !isLiked; setIsLiked(n); localStorage.setItem(`liked_${id}`, String(n)); }}>
+            <button className={`control-btn like-btn ${isLiked ? 'active' : ''}`} onClick={toggleLike} aria-label={likeLabel}>
               <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} aria-hidden="true" />
             </button>
             <button className="control-btn share-btn" onClick={() => handleShare()}>
@@ -272,13 +354,16 @@ const GamePlayer: React.FC = () => {
               )}
               <iframe
                 ref={iframeRef}
-                src={game.gameUrl}
+                src={lang === 'en' ? game.gameUrl : `${game.gameUrl}?lang=${lang}`}
                 title={getLocalizedString(game, 'title', 'en', null)}
                 frameBorder="0"
                 allowFullScreen
                 allow="fullscreen; autoplay; gamepad; clipboard-write"
                 className="game-iframe"
-                onLoad={() => setIframeLoading(false)}
+                onLoad={() => {
+                  setIframeLoading(false);
+                  iframeRef.current?.focus({ preventScroll: true });
+                }}
               ></iframe>
             </>
           )}
@@ -306,7 +391,7 @@ const GamePlayer: React.FC = () => {
           <button className="sticky-btn sticky-fullscreen" onClick={handleFullscreen} aria-pressed={isFs}>
             <FsIcon size={16} aria-hidden="true" /> {fullscreenLabel}
           </button>
-          <button className={`sticky-btn sticky-like ${isLiked ? 'liked' : ''}`} aria-label={isLiked ? 'Unlike this game' : 'Like this game'} onClick={() => { const n = !isLiked; setIsLiked(n); localStorage.setItem(`liked_${id}`, String(n)); }}>
+          <button className={`sticky-btn sticky-like ${isLiked ? 'liked' : ''}`} aria-label={likeLabel} onClick={toggleLike}>
             <Heart size={18} fill={isLiked ? 'currentColor' : 'none'} aria-hidden="true" />
           </button>
           <button className="sticky-btn sticky-share" onClick={handleShare}>

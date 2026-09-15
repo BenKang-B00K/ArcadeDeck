@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { Rocket, Flame, Gamepad2 } from 'lucide-react';
+import { Rocket, Flame, Gamepad2, Trophy, Share2 } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import { games } from '../data/games';
+import { games, deviceGames } from '../data/games';
 import type { Game } from '../data/games';
 import { thumb360, SRCSET_SIZES } from '../utils/thumb';
 import { useNickname } from '../hooks/useNickname';
 import { getCurrentStreak, readStreak } from '../utils/streak';
+import { TIER_META, XP_PER_LEVEL, deckStats, formatScore, readPB, tierOf } from '../utils/pb';
 import { useUiText, useLocale, getLocalizedString } from '../i18n';
 import './MyGames.css';
 
@@ -26,9 +27,32 @@ const MyGames = () => {
   const { lang, overlay } = useLocale();
   const nickname = useNickname();
   const [streak] = useState(() => ({ current: getCurrentStreak(), best: readStreak().best }));
+  const deck = useMemo(() => deckStats(), []);
+  const [copied, setCopied] = useState(false);
+
+  // ponytail: native share sheet where it exists, clipboard everywhere else.
+  const handleShareDeck = async () => {
+    const text = t('deckShareText', 'ArcadeDeck Deck Level {lvl} — {played}/{total} games played, {mastered} mastered 🎮')
+      .replace('{lvl}', String(deck.level))
+      .replace('{played}', String(deck.played))
+      .replace('{total}', String(deck.total))
+      .replace('{mastered}', String(deck.mastered));
+    const url = 'https://arcadedeck.net/';
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'ArcadeDeck', text, url });
+        return;
+      }
+      await navigator.clipboard.writeText(`${text} ${url}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // user dismissed the share sheet, or clipboard is blocked — nothing to do
+    }
+  };
   const recentGames = useMemo(() => readRecentlyPlayed(), []);
   const otherGames = useMemo(
-    () => games.filter(g => !recentGames.some(r => r.id === g.id)),
+    () => deviceGames.filter(g => !recentGames.some(r => r.id === g.id)),
     [recentGames],
   );
 
@@ -38,11 +62,16 @@ const MyGames = () => {
 
   const renderCard = (game: Game) => {
     const title = getLocalizedString(game, 'title', lang, overlay);
+    const pb = readPB(game.id);
+    const meta = TIER_META[tierOf(game.id, pb)];
+    // Absolute path, or a locale-prefixed URL (/ja/my-games) resolves the
+    // relative "images/…" against the prefix and 404s.
+    const thumbUrl = `${import.meta.env.BASE_URL}${game.thumbnail}`;
     return (
       <Link key={game.id} to={`/play/${game.slug}`} className="mini-game-card">
         <img
-          src={game.thumbnail}
-          srcSet={`${thumb360(game.thumbnail)} 360w, ${game.thumbnail} 640w`}
+          src={thumbUrl}
+          srcSet={`${import.meta.env.BASE_URL}${thumb360(game.thumbnail)} 360w, ${thumbUrl} 640w`}
           sizes={SRCSET_SIZES}
           alt={title}
           width="640"
@@ -53,7 +82,17 @@ const MyGames = () => {
         <div className="mini-info">
           <h4>{title}</h4>
           <span className="genre-tag">{game.genres[0]}</span>
+          {pb > 0 && (
+            <span className="mini-pb">
+              {getLocalizedString(game, 'scoreLabel', lang, overlay) || t('pbScore', 'Score')} {formatScore(pb)}
+            </span>
+          )}
         </div>
+        {meta && (
+          <span className={`mini-tier ${meta.cls}`} title={t(meta.key, meta.en)}>
+            <Trophy size={13} aria-hidden="true" />
+          </span>
+        )}
         <span className="go-arrow">→</span>
       </Link>
     );
@@ -73,6 +112,28 @@ const MyGames = () => {
           <h1>{t('myGamesTitle', 'My')} <span>{t('myGamesSpan', 'Games')}</span></h1>
           <p className="subtitle">{t('myGamesSubtitle', 'Your library, saved right here in this browser')}</p>
           <div className="nickname-badge">{t('myGamesOperator', 'Operator')}: {nickname}</div>
+
+          <div className="deck-panel">
+            <div className="deck-level">
+              <span className="deck-level-num">{deck.level}</span>
+              <span className="deck-level-word">{t('deckLevel', 'Deck Level')}</span>
+            </div>
+            <div className="deck-bar" role="progressbar" aria-valuemin={0} aria-valuemax={XP_PER_LEVEL} aria-valuenow={deck.xpIntoLevel}>
+              <span style={{ width: `${(deck.xpIntoLevel / XP_PER_LEVEL) * 100}%` }} />
+            </div>
+            <p className="deck-xp">{t('deckXp', '{a} / {b} XP to level {n}')
+              .replace('{a}', String(deck.xpIntoLevel))
+              .replace('{b}', String(XP_PER_LEVEL))
+              .replace('{n}', String(deck.level + 1))}</p>
+            <ul className="deck-stats">
+              <li><strong>{deck.played}/{deck.total}</strong> {t('deckPlayed', 'played')}</li>
+              <li><strong>{deck.mastered}</strong> {t('deckMastered', 'mastered')}</li>
+              <li><strong>{deck.bestStreak}</strong> {t('deckBestStreak', 'best streak')}</li>
+            </ul>
+            <button type="button" className="deck-share" onClick={handleShareDeck}>
+              <Share2 size={15} aria-hidden="true" /> {copied ? t('deckShareCopied', 'Copied!') : t('deckShare', 'Share my deck')}
+            </button>
+          </div>
           {streak.best > 0 && (
             <div className="ach-row" aria-label={t('myAchAriaLabel', 'Achievements')}>
               {streak.current >= 3 && (

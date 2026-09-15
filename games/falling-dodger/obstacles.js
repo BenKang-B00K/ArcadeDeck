@@ -7,19 +7,16 @@ import { createObstacleDrawer } from './obstacle-draw.js';
 export function createObstacleSystem(env) {
   // Destructure env for convenience (these are live references / getters)
   const {
-    ctx, W, H, CFG, rng, sign,
+    ctx, W, WALL_W, CFG, rng, sign,
     player,
-    getTimeMs, getScrollSpeed,
-    addShockwave, spawnParticles, addFloat,
-    setShake, setFlash,
+    getTimeMs, getScrollSpeed, getHMode,
     shouldInjectChanger,
     onChangerInjected,
     onChangerCollected,
     onChangerMissed,
     onPass,
   } = env;
-  const WALL_W = env.WALL_W || 0;
-  const getHMode = env.getHMode || (() => false);
+  const rngInt = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
   const playMinX = WALL_W;
   const playMaxX = W - WALL_W;
   const playW = playMaxX - playMinX;
@@ -47,7 +44,7 @@ export function createObstacleSystem(env) {
   }
   function spawnSpikeCluster(y, gid) {
     const c = CFG.kinds.spikeCluster;
-    const count = c.minCount + Math.floor(Math.random() * (c.maxCount - c.minCount + 1));
+    const count = rngInt(c.minCount, c.maxCount);
     const startX = Math.random() * (W - count * c.step);
     for (let i = 0; i < count; i++) {
       obstacles.push({
@@ -150,9 +147,7 @@ export function createObstacleSystem(env) {
   }
   function spawnRotor(y, gid) {
     const c = CFG.kinds.rotor;
-    const minC = c.minCount || 1;
-    const maxC = c.maxCount || minC;
-    const count = minC + Math.floor(Math.random() * (maxC - minC + 1));
+    const count = rngInt(c.minCount, c.maxCount);
     const slot = W / count;
     let maxH = 0;
     for (let i = 0; i < count; i++) {
@@ -183,7 +178,7 @@ export function createObstacleSystem(env) {
     const c = CFG.kinds.saw;
     const r = c.radius;
     const d = r * 2;
-    const count = (c.minCount || 1) + Math.floor(Math.random() * ((c.maxCount || c.minCount || 1) - (c.minCount || 1) + 1));
+    const count = rngInt(c.minCount, c.maxCount);
     // distribute starting positions evenly across rail so they don't overlap
     const slot = (W - d) / count;
     const startDir = sign();
@@ -221,30 +216,17 @@ export function createObstacleSystem(env) {
     }
     return c.size * 2;
   }
-  function spawnBomb(y, gid) {
-    const c = CFG.kinds.bomb;
-    obstacles.push({
-      kind: 'bomb', gid,
-      x: 60 + Math.random() * (W - 120 - c.size), y, w: c.size, h: c.size,
-      state: 'tick', stateT: 0,
-      fuse: c.fuse, boomDur: c.boomDur, maxR: c.maxR,
-      fragCount: c.fragCount, fragSpeedMin: c.fragSpeedMin, fragSpeedMax: c.fragSpeedMax,
-      fragLifeDecay: c.fragLifeDecay,
-      appear: 0
-    });
-    return c.size;
-  }
   function spawnSpinner(y, gid) {
     const c = CFG.kinds.spinner;
     const armLen = rng(c.minArmLen, c.maxArmLen);
-    const margin = Math.max(c.marginMin || 0, armLen + 10);
+    const margin = Math.max(c.marginMin, armLen + 10);
     const cx = margin + Math.random() * Math.max(0, W - 2 * margin);
     const sx = cx - armLen;
     const sh = armLen * 2;
     obstacles.push({
       kind: 'spinner', gid,
       x: sx, y, w: sh, h: sh,
-      arms: 2, armLen, armW: c.armW,
+      armLen, armW: c.armW,
       angle: Math.random() * Math.PI * 2,
       vAng: sign() * rng(c.vAngMin, c.vAngMax),
       appear: 0
@@ -349,7 +331,7 @@ export function createObstacleSystem(env) {
     obstacles.push({
       kind: 'portal', gid,
       x: 0, y, w: W, h: c.ringR * 2 + 4,
-      aX, bX, yOff: c.ringR,
+      aX, bX,
       ringR: c.ringR, ringSpin: 0,
       ballT: 0,
       ballX: aX, ballY: y + c.ringR,
@@ -374,7 +356,7 @@ export function createObstacleSystem(env) {
   }
   function spawnStalactite(y, gid) {
     const c = CFG.kinds.stalactite;
-    const count = Math.floor(rng(c.minCount, c.maxCount + 0.999));
+    const count = rngInt(c.minCount, c.maxCount);
     const usableW = W - 2 * c.marginMin;
     const slot = usableW / count;
     for (let i = 0; i < count; i++) {
@@ -395,7 +377,7 @@ export function createObstacleSystem(env) {
   }
   function spawnBoomerang(y, gid) {
     const c = CFG.kinds.boomerang;
-    const count = Math.floor(rng(c.minCount, c.maxCount + 0.999));
+    const count = rngInt(c.minCount, c.maxCount);
     const range = W - c.rangeMargin;
     for (let i = 0; i < count; i++) {
       const side = Math.random() < 0.5 ? 'L' : 'R';
@@ -498,7 +480,7 @@ export function createObstacleSystem(env) {
     slider: spawnSlider, bigSpike: spawnBigSpike, laser: spawnLaser,
     chaser: spawnChaser, blinker: spawnBlinker, homing: spawnHoming,
     rotor: spawnRotor, shrinker: spawnShrinker, saw: spawnSaw,
-    swarm: spawnSwarm, bomb: spawnBomb, spinner: spawnSpinner, gate: spawnGate,
+    swarm: spawnSwarm, spinner: spawnSpinner, gate: spawnGate,
     pendulum: spawnPendulum, lightning: spawnLightning,
     bouncer: spawnBouncer,
     growBar: spawnGrowBar,
@@ -547,14 +529,17 @@ export function createObstacleSystem(env) {
     const dx = p.x - cx, dy = p.y - cy;
     return dx * dx + dy * dy < p.r * p.r;
   }
+  // circle vs rect rotated by `ang` about (ax, ay): rect spans [x0, x1] along its axis, half-width hw
+  function hitRotRect(p, ax, ay, ang, x0, x1, hw) {
+    const cs = Math.cos(-ang), sn = Math.sin(-ang);
+    const dx = p.x - ax, dy = p.y - ay;
+    const lx = dx * cs - dy * sn;
+    const ly = dx * sn + dy * cs;
+    const ex = lx - Math.max(x0, Math.min(lx, x1));
+    const ey = ly - Math.max(-hw, Math.min(ly, hw));
+    return ex * ex + ey * ey < p.r * p.r;
+  }
   function hit(p, o) {
-    if (o.kind === 'frag') {
-      if (o.life <= 0) return false;
-      const cx = o.x + o.w / 2, cy = o.y + o.h / 2;
-      const dx = p.x - cx, dy = p.y - cy;
-      const r = 5;
-      return dx * dx + dy * dy < (r + p.r) * (r + p.r);
-    }
     if (o.kind === 'pendulum') {
       const ax = o.anchorX;
       const ay = o.y + 8;
@@ -564,17 +549,8 @@ export function createObstacleSystem(env) {
       const dx0 = p.x - wx, dy0 = p.y - wy;
       const sumR = o.weightR + p.r;
       if (dx0 * dx0 + dy0 * dy0 < sumR * sumR) return true;
-      // arm: rotated rect from anchor to weight (length armLen, width armW)
-      const len = o.armLen;
-      const angFromX = Math.atan2(wy - ay, wx - ax); // local x-axis along arm
-      const cs = Math.cos(-angFromX), sn = Math.sin(-angFromX);
-      const dx = p.x - ax, dy = p.y - ay;
-      const lx = dx * cs - dy * sn;
-      const ly = dx * sn + dy * cs;
-      const ccx = Math.max(0, Math.min(lx, len));
-      const ccy = Math.max(-o.armW / 2, Math.min(ly, o.armW / 2));
-      const ex = lx - ccx, ey = ly - ccy;
-      return ex * ex + ey * ey < p.r * p.r;
+      // arm: rotated rect from anchor to weight
+      return hitRotRect(p, ax, ay, Math.atan2(wy - ay, wx - ax), 0, o.armLen, o.armW / 2);
     }
     if (o.kind === 'lightning') {
       if (o.phase !== 'fire') return false;
@@ -608,44 +584,17 @@ export function createObstacleSystem(env) {
       return hitRect(p, ex, beamY, W - ex, o.beamW);
     }
     if (o.kind === 'rotor') {
-      const cx = o.x + o.w / 2, cy = o.y + o.h / 2;
-      const cs = Math.cos(-o.angle), sn = Math.sin(-o.angle);
-      const dx = p.x - cx, dy = p.y - cy;
-      const lx = dx * cs - dy * sn;
-      const ly = dx * sn + dy * cs;
-      const hx = o.w / 2, hy = o.h / 2;
-      const ccx = Math.max(-hx, Math.min(lx, hx));
-      const ccy = Math.max(-hy, Math.min(ly, hy));
-      const ex = lx - ccx, ey = ly - ccy;
-      return ex * ex + ey * ey < p.r * p.r;
+      return hitRotRect(p, o.x + o.w / 2, o.y + o.h / 2, o.angle, -o.w / 2, o.w / 2, o.h / 2);
     }
     if (o.kind === 'spinner') {
       const cx = o.x + o.w / 2, cy = o.y + o.h / 2;
-      const dx0 = p.x - cx, dy0 = p.y - cy;
-      for (let i = 0; i < o.arms; i++) {
-        const ang = o.angle + i * (Math.PI * 2 / o.arms);
-        const cs = Math.cos(-ang), sn = Math.sin(-ang);
-        const lx = dx0 * cs - dy0 * sn;
-        const ly = dx0 * sn + dy0 * cs;
-        const ccx = Math.max(0, Math.min(lx, o.armLen));
-        const ccy = Math.max(-o.armW / 2, Math.min(ly, o.armW / 2));
-        const ex = lx - ccx, ey = ly - ccy;
-        if (ex * ex + ey * ey < p.r * p.r) return true;
-      }
-      return false;
+      return hitRotRect(p, cx, cy, o.angle, 0, o.armLen, o.armW / 2)
+          || hitRotRect(p, cx, cy, o.angle + Math.PI, 0, o.armLen, o.armW / 2);
     }
     if (o.kind === 'gate') {
       const lx = o.gateCenter - o.gapW / 2;
       const rx = o.gateCenter + o.gapW / 2;
       return hitRect(p, 0, o.y, lx, o.h) || hitRect(p, rx, o.y, W - rx, o.h);
-    }
-    if (o.kind === 'bomb') {
-      if (o.state !== 'boom') return false;
-      const cx = o.x + o.w / 2, cy = o.y + o.h / 2;
-      const prog = o.stateT / o.boomDur;
-      const r = o.maxR * prog;
-      const dx = p.x - cx, dy = p.y - cy;
-      return dx * dx + dy * dy < (r + p.r) * (r + p.r);
     }
     if (o.kind === 'blinker' && !o.active) return false;
     if (o.kind === 'portal') {
@@ -694,8 +643,18 @@ export function createObstacleSystem(env) {
     passedGroups = new Set();
   }
 
-  function spawn(spawnY) {
-    return spawnObstacle(spawnY);
+  function phaseOf(o) {
+    const cyc = o.t % o.cycleMs;
+    return cyc < o.warnMs ? 'warn' : (cyc < o.warnMs + o.fireMs ? 'fire' : 'idle');
+  }
+  function chaseX(o, f) {
+    const step = (player.x - o.w / 2 - o.x) * (1 - Math.pow(1 - o.vxLerp, f));
+    const cap = o.vxMax * f;
+    o.x += Math.max(-cap, Math.min(cap, step));
+  }
+  function bounceX(o) {
+    if (o.x < playMinX)       { o.x = playMinX;       o.vx = Math.abs(o.vx); }
+    if (o.x + o.w > playMaxX) { o.x = playMaxX - o.w; o.vx = -Math.abs(o.vx); }
   }
 
   function update(dt, f) {
@@ -712,24 +671,16 @@ export function createObstacleSystem(env) {
         case 'changer':  o.spin = (o.spin || 0) + 0.04 * f; break;
         case 'slider':
           o.x += o.vx * f;
-          if (o.x < playMinX)          { o.x = playMinX;            o.vx = Math.abs(o.vx); }
-          if (o.x + o.w > playMaxX)    { o.x = playMaxX - o.w;      o.vx = -Math.abs(o.vx); }
+          bounceX(o);
           break;
-        case 'chaser': {
-          const target = player.x - o.w / 2;
-          let step = (target - o.x) * (1 - Math.pow(1 - o.vxLerp, f));
-          const cap = (o.vxMax ?? 8) * f;
-          if (step > cap) step = cap;
-          else if (step < -cap) step = -cap;
-          o.x += step;
+        case 'chaser':
+          chaseX(o, f);
           o.x = Math.max(playMinX, Math.min(playMaxX - o.w, o.x));
           break;
-        }
-        case 'laser': {
-          const cyc = o.t % o.cycleMs;
-          o.phase = cyc < o.warnMs ? 'warn' : (cyc < o.warnMs + o.fireMs ? 'fire' : 'idle');
+        case 'laser':
+        case 'lightning':
+          o.phase = phaseOf(o);
           break;
-        }
         case 'blinker': {
           if (o.blinkPhase == null) { o.active = true; break; }
           const idx = Math.floor(o.t / o.periodMs) % 3;
@@ -737,16 +688,10 @@ export function createObstacleSystem(env) {
           o.active = o.blinkPhase === cur;
           break;
         }
-        case 'homing': {
+        case 'homing':
           o.y -= o.vy * f;
-          const target = player.x - o.w / 2;
-          let step = (target - o.x) * (1 - Math.pow(1 - o.vxLerp, f));
-          const cap = (o.vxMax ?? 8) * f;
-          if (step > cap) step = cap;
-          else if (step < -cap) step = -cap;
-          o.x += step;
+          chaseX(o, f);
           break;
-        }
         case 'rotor':
           o.angle += o.vAng * f;
           break;
@@ -765,47 +710,12 @@ export function createObstacleSystem(env) {
         case 'saw':
           o.spin += o.spinRate * f;
           o.x += o.vx * f;
-          if (o.x < playMinX) { o.x = playMinX; o.vx = Math.abs(o.vx); }
-          if (o.x + o.w > playMaxX) { o.x = playMaxX - o.w; o.vx = -Math.abs(o.vx); }
+          bounceX(o);
           break;
         case 'swarm': {
           const ph = o.t * 0.005 + o.idx * 0.7 + o.phaseOff;
           o.x = o.baseX + Math.sin(ph) * o.ampX + o.drift * (o.t * o.driftScale);
           o.x = Math.max(0, Math.min(W - o.w, o.x));
-          break;
-        }
-        case 'bomb': {
-          o.stateT = (o.stateT || 0) + dt;
-          if (o.state === 'tick' && o.stateT > o.fuse) {
-            o.state = 'boom'; o.stateT = 0;
-            const bx = o.x + o.w / 2, by = o.y + o.h / 2;
-            addShockwave(bx, by, 'rgba(255, 160, 80, 0.85)');
-            spawnParticles(bx, by, '#ffb060', 22, 6);
-            setFlash(0.25);
-            setShake(8);
-            // shrapnel: lethal fragments fly outward
-            for (let i = 0; i < o.fragCount; i++) {
-              const a = (i / o.fragCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
-              const sp2 = rng(o.fragSpeedMin, o.fragSpeedMax);
-              obstacles.push({
-                kind: 'frag', gid: o.gid,
-                x: bx - 4, y: by - 4, w: 8, h: 8,
-                vx: Math.cos(a) * sp2,
-                vy: Math.sin(a) * sp2,
-                life: 1,
-                lifeDecay: o.fragLifeDecay,
-                appear: 1
-              });
-            }
-          } else if (o.state === 'boom' && o.stateT > o.boomDur) {
-            o.state = 'gone';
-          }
-          break;
-        }
-        case 'frag': {
-          o.x += o.vx * f;
-          o.y += o.vy * f;
-          o.life -= (o.lifeDecay || 0.018) * f;
           break;
         }
         case 'spinner':
@@ -819,17 +729,11 @@ export function createObstacleSystem(env) {
         case 'pendulum':
           o.angle = o.swingAmp * Math.sin(o.t * o.swingSpeed + o.phase);
           break;
-        case 'lightning': {
-          const cyc = o.t % o.cycleMs;
-          o.phase = cyc < o.warnMs ? 'warn' : (cyc < o.warnMs + o.fireMs ? 'fire' : 'idle');
-          break;
-        }
         case 'bouncer':
           o.x += o.vx * f;
           o.y += o.vy * f;
-          o.spin = (o.spin || 0) + 0.05 * f;
-          if (o.x < playMinX) { o.x = playMinX; o.vx = Math.abs(o.vx); }
-          if (o.x + o.w > playMaxX) { o.x = playMaxX - o.w; o.vx = -Math.abs(o.vx); }
+          o.spin += 0.05 * f;
+          bounceX(o);
           break;
         case 'crusher': {
           const cyc = o.t % o.cycleMs;
@@ -851,18 +755,12 @@ export function createObstacleSystem(env) {
           }
           break;
         }
-        case 'portal': {
+        case 'portal':
           o.ringSpin += 0.025 * f;
-          const aY = o.y + o.yOff;
-          const bY = aY;
-          const dx = o.bX - o.aX, dy = bY - aY;
-          const len = Math.hypot(dx, dy) || 1;
-          o.ballT += o.ballSpeed * f;
-          if (o.ballT > len) o.ballT -= len;
-          o.ballX = o.aX + (dx / len) * o.ballT;
-          o.ballY = aY + (dy / len) * o.ballT;
+          o.ballT = (o.ballT + o.ballSpeed * f) % (o.bX - o.aX);
+          o.ballX = o.aX + o.ballT;
+          o.ballY = o.y + o.ringR;
           break;
-        }
         case 'growBar': {
           const span = o.spawnY - player.y;
           if (span > 0) {
@@ -919,7 +817,7 @@ export function createObstacleSystem(env) {
         }
       }
       // Pass detection
-      if (o.kind !== 'frag' && !passedGroups.has(o.gid) && o.y + o.h < player.y - player.r) {
+      if (!passedGroups.has(o.gid) && o.y + o.h < player.y - player.r) {
         passedGroups.add(o.gid);
         const groupParts = obstacles.filter(g => g.gid === o.gid);
         let nearest = Infinity;
@@ -927,23 +825,15 @@ export function createObstacleSystem(env) {
           const dx = Math.max(g.x - player.x, player.x - (g.x + g.w), 0);
           if (dx < nearest) nearest = dx;
         }
-        const isClose = nearest < 22;
-        if (isClose) {
-          addFloat(player.x + 22, player.y - 6, '+5 CLOSE', '#9be8ff');
-          spawnParticles(player.x, player.y - 6, '#9be8ff', 10, 2);
-        } else {
-          addFloat(player.x + 18, player.y - 6, '+1', '#ffffff');
-        }
-        onPass(o.gid, isClose);
+        onPass(o.gid, nearest < 22);
       }
     }
 
     // Cull off-screen obstacles
     obstacles = obstacles.filter(o => {
-      if (o.kind === 'frag') return o.life > 0 && o.y > -20 && o.y < H + 20 && o.x > -20 && o.x < W + 20;
       const keep = o.y + o.h > -20;
       // failsafe: changer scrolled off uncollected → re-arm so next one spawns
-      if (!keep && o.kind === 'changer' && !o.collected && onChangerMissed) onChangerMissed();
+      if (!keep && o.kind === 'changer' && !o.collected) onChangerMissed();
       return keep;
     });
 
@@ -979,11 +869,5 @@ export function createObstacleSystem(env) {
     drawer.drawAll(obstacles);
   }
 
-  return {
-    list: () => obstacles,
-    reset,
-    spawn,
-    update,
-    draw,
-  };
+  return { reset, spawn: spawnObstacle, update, draw };
 }

@@ -92,6 +92,9 @@ export interface GameTranslation {
   // Structured long-mode fields (all optional). Rendered as subsections in
   // the Long view of the corresponding section.
   objectives?: string;
+  // Name of the number a game reports as its score ("Depth", "Waves", …).
+  // Only games whose build posts a GAME_OVER score have one.
+  scoreLabel?: string;
   controlsTable?: ControlEntry[];
   faq?: FaqEntry[];
   characters?: CharacterEntry[];

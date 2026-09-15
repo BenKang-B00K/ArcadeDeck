@@ -8,18 +8,19 @@ declare global {
 
 const AD_CLIENT_ID = "ca-pub-2461804849200179";
 // Set to true once AdSense site approval moves from "Getting ready" to "Ready".
-// While false, we render the placeholder only — no script load, no adsbygoogle.push,
-// which avoids 400 Bad Request console noise during review.
+// While false the component renders nothing — no script load, no adsbygoogle.push,
+// which avoids 400 Bad Request console noise during review. It also keeps the
+// dashed "ADVERTISEMENT SPACE" boxes off the live site: empty ad frames read as
+// an unfinished page to an AdSense reviewer.
 const ADSENSE_APPROVED = false;
 
 interface AdBannerProps {
   slot?: string;
   style?: React.CSSProperties;
   format?: 'auto' | 'fluid' | 'rectangle';
-  placeholderText?: string;
 }
 
-const AdBanner: React.FC<AdBannerProps> = ({ slot, style, format = 'auto', placeholderText = "ADVERTISEMENT SPACE" }) => {
+const AdBanner: React.FC<AdBannerProps> = ({ slot, style, format = 'auto' }) => {
   const adPushed = useRef(false);
 
   useEffect(() => {
@@ -44,32 +45,16 @@ const AdBanner: React.FC<AdBannerProps> = ({ slot, style, format = 'auto', place
     }
   }, [slot]);
 
-  // Filter out margin from style for the placeholder to avoid double margin
-  const { margin, marginTop, marginBottom, marginLeft, marginRight, ...otherStyles } = style || {};
+  // Nothing to render until the account is approved. Reserving an empty box
+  // would only advertise that the page is unfinished.
+  if (!slot || !ADSENSE_APPROVED) return null;
 
-  // Placeholder style
-  const placeholderStyle: React.CSSProperties = {
-    background: 'var(--surface-2)',
-    border: '1px dashed var(--border-default)',
-    borderRadius: '12px',
-    color: 'var(--text-muted)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '0.85rem',
-    minHeight: '120px',
-    width: '100%',
-    overflow: 'hidden',
-    boxSizing: 'border-box',
-    textTransform: 'uppercase',
-    letterSpacing: '1px',
-    fontWeight: '700',
-    ...otherStyles
-  };
+  // Filter out margin from style so the container does not double it up.
+  const { margin, marginTop, marginBottom, marginLeft, marginRight } = style || {};
 
   return (
-    <div className="ad-container" style={{ 
-      width: '100%', 
+    <div className="ad-container" style={{
+      width: '100%',
       textAlign: 'center',
       margin: margin || '20px 0',
       marginTop,
@@ -78,25 +63,19 @@ const AdBanner: React.FC<AdBannerProps> = ({ slot, style, format = 'auto', place
       marginRight,
       minHeight: '120px'
     }}>
-      {slot && ADSENSE_APPROVED ? (
-        <ins className="adsbygoogle"
-             style={{ 
-               display: 'block', 
-               width: '100%',
-               height: 'auto',
-               minHeight: '120px',
-               textDecoration: 'none'
-             }}
-             data-ad-client={AD_CLIENT_ID}
-             data-ad-slot={slot}
-             data-ad-format={format}
-             data-full-width-responsive="true">
-        </ins>
-      ) : (
-        <div style={placeholderStyle}>
-           {placeholderText}
-        </div>
-      )}
+      <ins className="adsbygoogle"
+           style={{
+             display: 'block',
+             width: '100%',
+             height: 'auto',
+             minHeight: '120px',
+             textDecoration: 'none'
+           }}
+           data-ad-client={AD_CLIENT_ID}
+           data-ad-slot={slot}
+           data-ad-format={format}
+           data-full-width-responsive="true">
+      </ins>
     </div>
   );
 };

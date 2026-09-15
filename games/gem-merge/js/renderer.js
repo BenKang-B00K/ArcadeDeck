@@ -6,20 +6,20 @@ export const app = new PIXI.Application({
   width: W, height: H,
   backgroundColor: 0x0d0d20,
   antialias: !isMobile,
-  resolution: isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 2),
+  resolution: Math.min(window.devicePixelRatio || 1, 2),
   autoDensity: true,
   powerPreference: 'high-performance',
 });
 document.getElementById('game-container').appendChild(app.view);
 
-export const layerBG    = new PIXI.Container();
+const layerBG    = new PIXI.Container();
 export const layerBalls = new PIXI.Container();
 export const layerFX    = new PIXI.Container();
 export const layerGuide = new PIXI.Container();
 app.stage.addChild(layerBG, layerBalls, layerFX, layerGuide);
 
 // ── Play field
-export const bgField = new PIXI.Graphics();
+const bgField = new PIXI.Graphics();
 bgField.beginFill(0x0b0b20);
 bgField.drawRect(WT, 0, W - WT * 2, H - WT);
 bgField.endFill();

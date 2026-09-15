@@ -18,10 +18,10 @@ import {
   FORUM_CATEGORIES,
   FORUM_THREAD_PAGE_SIZE,
   isValidCategory,
-  timeAgo,
   type ForumCategoryId,
   type ForumThread,
 } from '../data/forum';
+import { timeAgo } from '../utils/dates';
 import './Forum.css';
 
 const Forum: React.FC = () => {

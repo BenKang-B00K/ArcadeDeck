@@ -1,10 +1,9 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Monitor, Gamepad2, Play } from 'lucide-react';
-import type { Game } from '../data/games';
-import { useLocale, getLocalizedString, getEnFeatures, useUiText } from '../i18n';
+import { Monitor, Smartphone, Gamepad2 } from 'lucide-react';
+import { GENRE_HUE, type Game } from '../data/games';
+import { useLocale, getLocalizedString, useUiText } from '../i18n';
 import { thumb360, SRCSET_SIZES } from '../utils/thumb';
-import { useTilt } from '../hooks/useTilt';
 import './GameCard.css';
 
 const prefetchedUrls = new Set<string>();
@@ -20,67 +19,53 @@ function prefetchGameUrl(url: string): void {
     link.crossOrigin = 'anonymous';
     document.head.appendChild(link);
   } catch {
-    // ignore prefetch errors — purely a perf hint
+    // purely a perf hint
   }
 }
 
 interface GameCardProps {
   game: Game;
   onProductionClick?: () => void;
-  isRecentlyPlayed?: boolean;
   onGenreClick?: (genre: string) => void;
-  maxTags?: number;
-  recentIndex?: number;
 }
 
-const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecentlyPlayed = false, onGenreClick, maxTags, recentIndex }) => {
-  const [imageLoaded, setImageLoaded] = useState(false);
+
+const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, onGenreClick }) => {
   const { lang, overlay } = useLocale();
   const t = useUiText();
   const title = getLocalizedString(game, 'title', lang, overlay);
+  const isInProduction = game.status === 'IN PRODUCTION';
 
   const isRemote = game.thumbnail.startsWith('http');
-  const thumbnailUrl = isRemote
-    ? game.thumbnail
-    : `${import.meta.env.BASE_URL}${game.thumbnail}`;
-  const srcSet = isRemote
-    ? undefined
-    : `${import.meta.env.BASE_URL}${thumb360(game.thumbnail)} 360w, ${thumbnailUrl} 640w`;
+  const thumbnailUrl = isRemote ? game.thumbnail : `${import.meta.env.BASE_URL}${game.thumbnail}`;
+  const srcSet = isRemote ? undefined : `${import.meta.env.BASE_URL}${thumb360(game.thumbnail)} 360w, ${thumbnailUrl} 640w`;
 
   const handleClick = (e: React.MouseEvent) => {
-    if (game.status === 'IN PRODUCTION') {
+    if (isInProduction) {
       e.preventDefault();
-      if (onProductionClick) onProductionClick();
+      onProductionClick?.();
     }
   };
 
+  // Prefetch the game document after a short hover so quick mouse passes don't fire it.
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { tiltHandlers } = useTilt<HTMLAnchorElement>(5);
-
   const handleMouseEnter = () => {
-    if (game.status === 'IN PRODUCTION' || !game.gameUrl) return;
+    if (isInProduction || !game.gameUrl) return;
     if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
     hoverTimerRef.current = setTimeout(() => prefetchGameUrl(game.gameUrl), 120);
   };
-
-  const handleMouseLeave = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    if (hoverTimerRef.current) {
-      clearTimeout(hoverTimerRef.current);
-      hoverTimerRef.current = null;
-    }
-    tiltHandlers.onMouseLeave(e);
+  const handleMouseLeave = () => {
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    hoverTimerRef.current = null;
   };
 
-  const isInProduction = game.status === 'IN PRODUCTION';
-
-  // Show only the most important platform badge (priority: Co-op > PC Only > Mobile).
-  // Read from the canonical English features list — these are semantic markers,
-  // not display strings, so they should not change with locale.
-  const enFeatures = getEnFeatures(game.id);
-  const platformBadge = enFeatures.some(f => f.startsWith('Local Co-op'))
-    ? <div className="platform-badge coop"><Gamepad2 size={12} aria-hidden="true" /> {t('gameCardCoop', 'Co-op')}</div>
-    : enFeatures.includes('PC Only')
-    ? <div className="platform-badge pc-only"><Monitor size={12} aria-hidden="true" /> {t('gameCardPcOnly', 'PC Only')}</div>
+  // Platform badge from structural config, not translatable copy.
+  const platformBadge = game.genres.includes('Local Co-op')
+    ? <span className="platform-badge"><Gamepad2 size={12} aria-hidden="true" /> {t('gameCardCoop', 'Co-op')}</span>
+    : game.platform === 'PC'
+    ? <span className="platform-badge"><Monitor size={12} aria-hidden="true" /> {t('gameCardPcOnly', 'PC Only')}</span>
+    : game.platform === 'MOBILE'
+    ? <span className="platform-badge"><Smartphone size={12} aria-hidden="true" /> {t('gameCardMobileOnly', 'Mobile Only')}</span>
     : null;
 
   const badgeClass =
@@ -96,22 +81,15 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onMouseMove={tiltHandlers.onMouseMove}
       onFocus={handleMouseEnter}
     >
-      {/* Row 1: Title + Badge */}
       <div className="card-title-row">
         <h3>{title}</h3>
         {game.isOriginal && <span className="original-dot" title={t('gameCardOriginal', 'Original')} />}
-        {game.badge && (
-          <span className={`game-badge badge-${badgeClass}`}>
-            {game.badge}
-          </span>
-        )}
+        {game.badge && <span className={`game-badge badge-${badgeClass}`}>{game.badge}</span>}
       </div>
 
-      {/* Row 2: Image */}
-      <div className={`card-image${imageLoaded ? '' : ' img-loading'}`}>
+      <div className="card-image">
         <img
           src={thumbnailUrl}
           srcSet={srcSet}
@@ -121,31 +99,20 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, isRecently
           height="360"
           loading="lazy"
           decoding="async"
-          onLoad={() => setImageLoaded(true)}
         />
         {platformBadge}
-        {typeof recentIndex === 'number' && (
-          <div className="recent-index-chip">
-            <span className="recent-index-num">#{recentIndex + 1}</span>
-            {recentIndex === 0 && <span className="recent-index-tag">{t('homeRecentLastBadge', 'Last')}</span>}
-          </div>
-        )}
-        {isInProduction && (
-          <div className="status-badge in-production">{t('gameCardComingSoon', 'Coming Soon')}</div>
-        )}
-        <div className="card-overlay">
-          <button className="play-btn">
-            {isInProduction ? t('gameCardComingSoon', 'Coming Soon') : isRecentlyPlayed ? <><Play size={14} aria-hidden="true" /> {t('gameCardResume', 'Resume')}</> : t('gameCardPlayNow', 'Play Now')}
-          </button>
+        {isInProduction && <span className="status-badge">{t('gameCardComingSoon', 'Coming Soon')}</span>}
+        <div className="card-overlay" aria-hidden="true">
+          <span className="play-btn">{isInProduction ? t('gameCardComingSoon', 'Coming Soon') : t('gameCardPlayNow', 'Play Now')}</span>
         </div>
       </div>
 
-      {/* Row 3: Tags */}
       <div className="card-tags-row">
-        {(maxTags ? game.genres.slice(0, maxTags) : game.genres).map((genre) => (
+        {game.genres.map((genre, i) => (
           <span
             key={`${game.id}-${genre}`}
-            className={`genre-tag${onGenreClick ? ' clickable-genre' : ''}`}
+            className={`genre-tag ${i === 0 ? 'main' : 'sub'}${onGenreClick ? ' clickable-genre' : ''}`}
+            style={{ '--h': GENRE_HUE[genre] ?? 260 } as React.CSSProperties}
             onClick={onGenreClick ? (e) => { e.preventDefault(); e.stopPropagation(); onGenreClick(genre); } : undefined}
           >{genre}</span>
         ))}

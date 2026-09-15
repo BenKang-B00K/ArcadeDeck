@@ -1,25 +1,20 @@
-import { GEMS } from './config.js';
 import { S, addGemCount } from './state.js';
-import { Bodies, World, engine } from './physics.js';
-import { makeBallSprite } from './gems.js';
+import { Bodies, Body, World, engine } from './physics.js';
+import { makeBallSprite, gemVerts } from './gems.js';
 import { layerBalls } from './renderer.js';
 
-export function createBall(x, y, level) {
-  const gem   = GEMS[level - 1];
-  const mBody = Bodies.circle(x, y, gem.r, {
-    restitution: 0.2, friction: 0.5, frictionAir: 0.012,
-    density: 0.002, label: 'ball',
+export function createBall(x, y, level, angle = Math.random() * Math.PI * 2) {
+  // ponytail: concave stars decompose via poly-decomp (index.html); drop that script and Matter falls back to convex hulls
+  const mBody = Bodies.fromVertices(x, y, gemVerts(level), {
+    restitution: 0.2, friction: 0.5, frictionAir: 0.012, density: 0.002,
   });
-  mBody.gameLevel = level;
+  Body.setAngle(mBody, angle);
   World.add(engine.world, mBody);
   const sprite = makeBallSprite(level);
-  sprite.x = x; sprite.y = y;
+  sprite.x = x; sprite.y = y; sprite.rotation = angle;
   layerBalls.addChild(sprite);
   S.ballMap.set(mBody.id, { body: mBody, sprite, level, born: Date.now() });
-
-  // Track lifetime acquisition of gems
-  try { addGemCount(level); } catch (e) { /* ignore */ }
-
+  addGemCount(level);
   return mBody;
 }
 

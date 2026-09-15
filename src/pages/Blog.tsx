@@ -2,20 +2,16 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { posts, getAllTags } from '../data/posts';
-import { useUiText } from '../i18n';
+import { useUiText, useLocale } from '../i18n';
+import { formatPostDate } from '../utils/dates';
+import { readPosts, isRecentPost } from '../utils/readPosts';
 import './Blog.css';
 import './Home.css';
 
-const formatDate = (iso: string) =>
-  new Date(iso + 'T00:00:00Z').toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'UTC',
-  });
-
 const Blog: React.FC = () => {
   const t = useUiText();
+  const { lang } = useLocale();
+  const [read] = React.useState(readPosts);
   React.useEffect(() => {
     document.title = 'Blog | ArcadeDeck Devlog & Game Updates';
   }, []);
@@ -83,7 +79,12 @@ const Blog: React.FC = () => {
           {posts.map((p) => (
             <Link key={p.slug} to={`/blog/${p.slug}`} className="blog-card">
               <div className="blog-card-meta">
-                <time dateTime={p.date}>{formatDate(p.date)}</time>
+                <time dateTime={p.date}>{formatPostDate(p.date, lang)}</time>
+                {read.has(p.slug) ? (
+                  <span className="blog-badge blog-badge-read">{t('blogBadgeRead', 'READ')}</span>
+                ) : isRecentPost(p.date) ? (
+                  <span className="blog-badge blog-badge-new">{t('blogBadgeNew', 'NEW')}</span>
+                ) : null}
                 {p.tags.slice(0, 2).map((t) => (
                   <span key={t} className="blog-tag">
                     {t}

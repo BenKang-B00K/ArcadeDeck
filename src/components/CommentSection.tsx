@@ -18,22 +18,11 @@ import {
 } from "firebase/firestore/lite";
 import { COMMENT_PAGE_SIZE as PAGE_SIZE } from '../constants/gameConstants';
 import { safeRead, safeWrite, circuitOpen } from '../utils/firestoreCircuit';
+import { timeAgo } from '../utils/dates';
 import './CommentSection.css';
 
 const COMMENT_MAX = 300;
 const SUBMIT_COOLDOWN_MS = 10_000;
-
-const timeAgo = (date: Date): string => {
-  const sec = Math.floor((Date.now() - date.getTime()) / 1000);
-  if (sec < 60)  return 'Just now';
-  const min = Math.floor(sec / 60);
-  if (min < 60)  return `${min}m ago`;
-  const hr = Math.floor(min / 60);
-  if (hr < 24)   return `${hr}h ago`;
-  const day = Math.floor(hr / 24);
-  if (day < 7)   return `${day}d ago`;
-  return date.toLocaleDateString();
-};
 
 interface FirestoreTimestamp {
   toDate(): Date;

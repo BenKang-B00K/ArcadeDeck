@@ -1,32 +1,21 @@
 import { TIERS } from './config.js';
-import { S, rndLevel } from './state.js';
+import { S } from './state.js';
 import { app, twinkles, bgOverlay, isMobile } from './renderer.js';
-import { tickParticles, tickRings, tickFlashes, tickPopups } from './fx.js';
+import { tickFX } from './fx.js';
 import { tickAnnouncements, tickCombos } from './celebration.js';
 import { checkGameOver, restart } from './game.js';
 import { drawGuide } from './input.js';
-import { drawNextUI, buildPanels, buildHelpModal, buildFloatingGems, applyScale, buildInventory, buildCatalog, openCatalog } from './ui.js';
+import { initUI } from './ui.js';
 import { toggleMute } from './audio.js';
 
 // Init
-S.nextLevel = rndLevel();
 document.getElementById('best').textContent = S.best.toLocaleString();
 drawGuide();
-drawNextUI();
 window.addEventListener('beforeunload', () => localStorage.setItem('gmBest', S.best));
 
-applyScale();
-window.addEventListener('resize', applyScale);
-
-buildPanels();
-buildHelpModal();
-buildFloatingGems();
-buildInventory();
-buildCatalog();
-
+initUI();
 document.getElementById('restart-btn').addEventListener('click', restart);
 document.getElementById('mute-btn').addEventListener('click', toggleMute);
-document.getElementById('catalog-btn').addEventListener('click', openCatalog);
 
 // Cap frame rate on mobile — 30fps is imperceptible for this game type
 if (isMobile) app.ticker.maxFPS = 30;
@@ -60,17 +49,16 @@ app.ticker.add(() => {
     }
   }
 
-  tickParticles(); tickRings(); tickFlashes(); tickPopups();
+  tickFX();
   tickAnnouncements(); tickCombos();
 
-  // Screen shake
+  // Screen shake: strongest live shake wins; else-branch also recovers from a restart mid-shake
   if (S.screenShakes.length) {
-    const s = S.screenShakes[S.screenShakes.length - 1];
-    app.stage.x = (Math.random() - 0.5) * s.intensity;
-    app.stage.y = (Math.random() - 0.5) * s.intensity;
-    s.frames--;
-    if (s.frames <= 0) { S.screenShakes.pop(); app.stage.x = 0; app.stage.y = 0; }
-  }
+    let mag = 0;
+    S.screenShakes = S.screenShakes.filter(s => { mag = Math.max(mag, s.intensity); return --s.frames > 0; });
+    app.stage.x = (Math.random() - 0.5) * mag;
+    app.stage.y = (Math.random() - 0.5) * mag;
+  } else app.stage.x = app.stage.y = 0;
 
   if (!S.gameOver && ++S.goTick >= 30) { S.goTick = 0; checkGameOver(); }
 });

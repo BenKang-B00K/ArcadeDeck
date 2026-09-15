@@ -7,16 +7,10 @@ import { games } from '../data/games';
 import type { Game } from '../data/games';
 import { useUiText, useLocale, getLocalizedString } from '../i18n';
 import { thumb360, SRCSET_SIZES } from '../utils/thumb';
+import { formatPostDate } from '../utils/dates';
+import { markPostRead } from '../utils/readPosts';
 import './Blog.css';
 import './Home.css';
-
-const formatDate = (iso: string) =>
-  new Date(iso + 'T00:00:00Z').toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'UTC',
-  });
 
 const slugifyHeading = (text: string): string =>
   text
@@ -95,7 +89,9 @@ const BlogPost: React.FC = () => {
   }, [processed]);
 
   useEffect(() => {
-    if (post) document.title = `${post.title} | ArcadeDeck Blog`;
+    if (!post) return;
+    document.title = `${post.title} | ArcadeDeck Blog`;
+    markPostRead(post.slug);
   }, [post]);
 
   if (!post || !processed) {
@@ -213,7 +209,7 @@ const BlogPost: React.FC = () => {
         <article className="blog-post" ref={articleRef}>
           <h1>{post.title}</h1>
           <div className="post-meta">
-            <time dateTime={post.date}>{formatDate(post.date)}</time>
+            <time dateTime={post.date}>{formatPostDate(post.date, lang)}</time>
             <span>· {post.author}</span>
             <span className="post-reading-time">
               <Clock size={14} aria-hidden="true" /> {readingMinutes} {t('blogMinRead', 'min read')}

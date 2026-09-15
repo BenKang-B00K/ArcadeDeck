@@ -3,7 +3,6 @@ export const DROP_Y    = 68;
 export const DANGER_Y  = 130;
 export const GRAVITY   = 0.8;
 export const COOLDOWN  = 550;
-export const MAX_SPAWN = 4;
 
 export const GEMS = [
   { r:  16, color: 0xff4757, hi: 0xff6b81, score: 1   },
@@ -19,8 +18,6 @@ export const GEMS = [
   { r: 114, color: 0xf9ca24, hi: 0xf8efba, score: 100 },
 ];
 
-export const FACETS = [6, 6, 8, 8, 10, 10, 12, 12, 14, 16, 20];
-
 export const TIERS = [
   { min:    0, label: null,              cls: '',       overlay: 0x6c5ce7, overlayMax: 0.00  },
   { min:   50, label: '✨ NICE!',        cls: 'tier-1', overlay: 0x9b59b6, overlayMax: 0.04  },
@@ -31,3 +28,11 @@ export const TIERS = [
 ];
 
 export const COMBO_WINDOW = 1300;
+
+export const hexStr = n => '#' + n.toString(16).padStart(6, '0');
+
+// Spawns are always Lv1; a combo of ×N upgrades the next spawn to Lv N (capped). Skill, not luck.
+export const COMBO_TIER_CAP = 4;
+
+// Physics outline is inflated by this many px so gems never visually touch
+export const GEM_GAP = 2.5;

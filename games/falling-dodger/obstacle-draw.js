@@ -1,18 +1,74 @@
 // obstacle-draw.js — rendering for obstacle subsystem.
 // Pure draw layer: no state, no mutation of obstacles. Reads o.* + env helpers.
+//
+// Visual language: every solid obstacle = glow halo → gradient body → detail → dark rim.
+// The dark rim (outline()) is what keeps shapes crisp against their own glow.
 
 export function createObstacleDrawer(env) {
   const { ctx, W, getTimeMs, player } = env;
 
-  function roundRect(x, y, w, h, r, fill) {
+  const RIM = 'rgba(8, 6, 22, 0.75)';
+
+  // Fills a rounded rect and returns its Path2D so outline()/stripes() can reuse it.
+  function roundRect(x, y, w, h, r) {
+    const p = new Path2D();
+    p.roundRect(x, y, w, h, r);
+    ctx.fill(p);
+    return p;
+  }
+
+  // Stroke the dark rim. Pass a Path2D, or omit to use the live path right after a fill.
+  function outline(w = 2, p) {
+    ctx.shadowBlur = 0;
+    ctx.lineWidth = w;
+    ctx.strokeStyle = RIM;
+    p ? ctx.stroke(p) : ctx.stroke();
+  }
+
+  // Specular highlight: thin light line inset from the top edge of a rect.
+  function specLine(x, y, w, a = 0.45) {
+    ctx.fillStyle = `rgba(255,255,255,${a})`;
+    ctx.fillRect(x + 5, y + 2.5, Math.max(0, w - 10), 1.5);
+  }
+
+  // Diagonal stripes clipped to Path2D p.
+  function stripes(p, x, y, w, h, color, step = 18, lw = 5) {
+    ctx.save();
+    ctx.clip(p);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lw;
     ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r);
-    ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r);
-    ctx.arcTo(x, y, x + w, y, r);
+    for (let sx = x - h; sx < x + w + h; sx += step) {
+      ctx.moveTo(sx, y + h + 2);
+      ctx.lineTo(sx + h + 2, y - 2);
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function starPath(points, rOut, rIn, rot = 0) {
+    ctx.beginPath();
+    for (let i = 0; i < points * 2; i++) {
+      const ang = rot + (i / (points * 2)) * Math.PI * 2;
+      const r = i % 2 === 0 ? rOut : rIn;
+      ctx.lineTo(Math.cos(ang) * r, Math.sin(ang) * r);
+    }
     ctx.closePath();
-    if (fill) ctx.fill();
+  }
+
+  // Glossy sphere: body gradient + rim + specular dot. Path left live for callers.
+  function orb(r, c0, c1, c2, glow, blur) {
+    const grd = ctx.createRadialGradient(-r * 0.35, -r * 0.35, r * 0.1, 0, 0, r);
+    grd.addColorStop(0, c0);
+    grd.addColorStop(0.45, c1);
+    grd.addColorStop(1, c2);
+    ctx.fillStyle = grd;
+    ctx.shadowColor = glow;
+    ctx.shadowBlur = blur;
+    ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
+    outline(1.5);
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.beginPath(); ctx.ellipse(-r * 0.38, -r * 0.42, r * 0.22, r * 0.14, -0.6, 0, Math.PI * 2); ctx.fill();
   }
 
   function jaggedPath(x0, y0, x1, y1, segs, jitter, seed) {
@@ -33,24 +89,36 @@ export function createObstacleDrawer(env) {
   }
 
   function drawBar(o, c0, c1, c2, glow) {
-    const grd = ctx.createLinearGradient(o.x, o.y, o.x, o.y + o.h);
+    const { x, y, w, h } = o;
+    if (w <= 0) return;
+    const grd = ctx.createLinearGradient(x, y, x, y + h);
     grd.addColorStop(0, c0);
     grd.addColorStop(0.5, c1);
     grd.addColorStop(1, c2);
     ctx.fillStyle = grd;
     ctx.shadowColor = glow;
-    ctx.shadowBlur = 16;
-    roundRect(o.x, o.y, o.w, o.h, 5, true);
+    ctx.shadowBlur = 14;
+    const p = roundRect(x, y, w, h, 5);
     ctx.shadowBlur = 0;
-    ctx.fillStyle = 'rgba(255,255,255,0.35)';
-    ctx.fillRect(o.x + 4, o.y + 2, o.w - 8, 1.5);
+    if (w > 30) stripes(p, x, y, w, h, 'rgba(0,0,0,0.16)');
+    // end caps
+    ctx.save();
+    ctx.clip(p);
+    ctx.fillStyle = 'rgba(0,0,0,0.28)';
+    ctx.fillRect(x, y, 7, h);
+    ctx.fillRect(x + w - 7, y, 7, h);
+    ctx.restore();
+    outline(2, p);
+    specLine(x, y, w);
   }
 
   function drawSpike(o, points, big) {
     ctx.save();
     ctx.translate(o.x + o.w / 2, o.y + o.h / 2);
     ctx.rotate(o.spin || 0);
-    const grd = ctx.createRadialGradient(0, 0, 2, 0, 0, o.w / 2);
+    const s = o.w / 2;
+    const inner = big ? 0.55 : 0.45;
+    const grd = ctx.createRadialGradient(0, 0, 2, 0, 0, s);
     if (big) {
       grd.addColorStop(0, '#ffe2ff');
       grd.addColorStop(0.5, '#ff7adb');
@@ -63,43 +131,50 @@ export function createObstacleDrawer(env) {
       ctx.shadowColor = 'rgba(255, 200, 80, 0.85)';
     }
     ctx.fillStyle = grd;
-    ctx.shadowBlur = big ? 22 : 14;
-    ctx.beginPath();
-    const s = o.w / 2;
-    const inner = big ? 0.55 : 0.45;
-    for (let i = 0; i < points * 2; i++) {
-      const ang = (i / (points * 2)) * Math.PI * 2;
-      const r = i % 2 === 0 ? s : s * inner;
-      ctx.lineTo(Math.cos(ang) * r, Math.sin(ang) * r);
-    }
-    ctx.closePath();
+    ctx.shadowBlur = big ? 20 : 12;
+    starPath(points, s, s * inner);
     ctx.fill();
-    if (big) {
-      ctx.fillStyle = 'rgba(255,255,255,0.6)';
-      ctx.beginPath();
-      ctx.arc(0, 0, o.w * 0.12, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.shadowBlur = 0;
+    outline(big ? 2.5 : 1.5);
+    // facet: lit inner star, offset toward the light
+    ctx.fillStyle = big ? 'rgba(255,225,255,0.45)' : 'rgba(255,250,220,0.5)';
+    ctx.save();
+    ctx.translate(-s * 0.06, -s * 0.08);
+    starPath(points, s * 0.62, s * inner * 0.62);
+    ctx.fill();
+    ctx.restore();
+    // core
+    ctx.fillStyle = big ? '#5a0a4a' : '#8a4a0a';
+    ctx.beginPath(); ctx.arc(0, 0, s * (big ? 0.14 : 0.16), 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.beginPath(); ctx.arc(-s * 0.05, -s * 0.05, s * (big ? 0.06 : 0.07), 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
 
   function drawLaser(o) {
     const timeMs = getTimeMs();
-    const grd = ctx.createLinearGradient(o.x, o.y, o.x + o.w, o.y);
-    grd.addColorStop(0, '#3a4a6a');
-    grd.addColorStop(1, '#1a2235');
-    ctx.fillStyle = grd;
-    ctx.shadowColor = 'rgba(120, 180, 255, 0.5)';
-    ctx.shadowBlur = 10;
-    roundRect(o.x, o.y, o.w, o.h, 4, true);
-    ctx.shadowBlur = 0;
     const dir = o.side === 'R' ? -1 : 1;
     const ex = dir > 0 ? o.x + o.w - 2 : o.x + 2;
     const ey = o.y + o.h / 2;
     const beamY = ey - o.beamW / 2;
     const beamX = dir > 0 ? ex : 0;
     const beamW = dir > 0 ? W - ex : ex;
+
+    // turret housing
+    const grd = ctx.createLinearGradient(o.x, o.y, o.x, o.y + o.h);
+    grd.addColorStop(0, '#4a5a7e');
+    grd.addColorStop(0.5, '#2a3450');
+    grd.addColorStop(1, '#151b2c');
+    ctx.fillStyle = grd;
+    ctx.shadowColor = 'rgba(120, 180, 255, 0.5)';
+    ctx.shadowBlur = 10;
+    outline(2, roundRect(o.x, o.y, o.w, o.h, 4));
+    specLine(o.x, o.y, o.w, 0.3);
+    // vents
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    for (let i = 0; i < 3; i++) ctx.fillRect(o.x + 6, o.y + 8 + i * 6, o.w - 12, 2);
+    // lens socket
+    ctx.fillStyle = '#0a0d18';
+    ctx.beginPath(); ctx.arc(ex, ey, 7, 0, Math.PI * 2); ctx.fill();
 
     if (o.phase !== 'fire') {
       ctx.strokeStyle = 'rgba(255, 100, 100, 0.18)';
@@ -150,8 +225,13 @@ export function createObstacleDrawer(env) {
       ctx.shadowBlur = 24;
       ctx.fillRect(beamX, beamY, beamW, o.beamW);
       ctx.shadowBlur = 0;
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath(); ctx.arc(ex, ey, 6, 0, Math.PI * 2); ctx.fill();
+      // muzzle flare
+      const fl = ctx.createRadialGradient(ex, ey, 1, ex, ey, 16);
+      fl.addColorStop(0, '#ffffff');
+      fl.addColorStop(0.4, 'rgba(255, 180, 180, 0.8)');
+      fl.addColorStop(1, 'rgba(255, 80, 80, 0)');
+      ctx.fillStyle = fl;
+      ctx.beginPath(); ctx.arc(ex, ey, 16, 0, Math.PI * 2); ctx.fill();
     } else {
       ctx.fillStyle = 'rgba(120, 180, 255, 0.6)';
       ctx.beginPath(); ctx.arc(ex, ey, 3, 0, Math.PI * 2); ctx.fill();
@@ -160,24 +240,37 @@ export function createObstacleDrawer(env) {
 
   function drawHoming(o) {
     const cx = o.x + o.w / 2, cy = o.y + o.h / 2;
+    const r = o.w / 2 * 0.9;
+    const timeMs = getTimeMs();
     ctx.save();
     ctx.translate(cx, cy);
-    const grd = ctx.createRadialGradient(0, 0, 2, 0, 0, o.w / 2);
-    grd.addColorStop(0, '#fff');
-    grd.addColorStop(0.4, '#ff7a7a');
-    grd.addColorStop(1, '#6a0a0a');
-    ctx.fillStyle = grd;
-    ctx.shadowColor = '#ff3030';
-    ctx.shadowBlur = 16;
+    // exhaust tail (moves down, so tail points up)
+    const tail = ctx.createLinearGradient(0, -r, 0, -r * 3.2);
+    tail.addColorStop(0, 'rgba(255, 120, 80, 0.75)');
+    tail.addColorStop(1, 'rgba(255, 120, 80, 0)');
+    ctx.fillStyle = tail;
     ctx.beginPath();
-    ctx.arc(0, 0, o.w / 2 * 0.9, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = 'rgba(255,255,255,0.75)';
+    ctx.moveTo(-r * 0.55, -r * 0.6);
+    ctx.lineTo(0, -r * 3.2);
+    ctx.lineTo(r * 0.55, -r * 0.6);
+    ctx.closePath(); ctx.fill();
+    // targeting reticle
+    ctx.save();
+    ctx.rotate(timeMs * 0.003);
+    ctx.strokeStyle = 'rgba(255, 90, 90, 0.7)';
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < 4; i++) {
+      ctx.beginPath();
+      ctx.arc(0, 0, r * 1.7, i * Math.PI / 2 + 0.25, i * Math.PI / 2 + Math.PI / 2 - 0.25);
+      ctx.stroke();
+    }
+    ctx.restore();
+    orb(r, '#fff', '#ff6a6a', '#5a0808', '#ff3030', 14);
+    ctx.strokeStyle = 'rgba(255,255,255,0.8)';
     ctx.lineWidth = 1.2;
     ctx.beginPath();
-    ctx.moveTo(-7, 0); ctx.lineTo(7, 0);
-    ctx.moveTo(0, -7); ctx.lineTo(0, 7);
+    ctx.moveTo(-r * 0.6, 0); ctx.lineTo(r * 0.6, 0);
+    ctx.moveTo(0, -r * 0.6); ctx.lineTo(0, r * 0.6);
     ctx.stroke();
     ctx.restore();
   }
@@ -187,53 +280,85 @@ export function createObstacleDrawer(env) {
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(o.angle);
-    const grd = ctx.createLinearGradient(-o.w/2, 0, o.w/2, 0);
+    const grd = ctx.createLinearGradient(0, -o.h / 2, 0, o.h / 2);
     grd.addColorStop(0, '#9aff8a');
     grd.addColorStop(0.5, '#39d06a');
     grd.addColorStop(1, '#0a4a28');
     ctx.fillStyle = grd;
     ctx.shadowColor = 'rgba(120, 255, 140, 0.6)';
     ctx.shadowBlur = 14;
-    roundRect(-o.w / 2, -o.h / 2, o.w, o.h, 5, true);
+    const p = roundRect(-o.w / 2, -o.h / 2, o.w, o.h, 5);
     ctx.shadowBlur = 0;
-    ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.arc(0, 0, 4, 0, Math.PI * 2); ctx.fill();
+    stripes(p, -o.w / 2, -o.h / 2, o.w, o.h, 'rgba(0,0,0,0.14)');
+    outline(2, p);
+    specLine(-o.w / 2, -o.h / 2, o.w, 0.4);
+    // rivets along the blade
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    for (const px of [-o.w * 0.35, o.w * 0.35]) {
+      ctx.beginPath(); ctx.arc(px, 0, 2.5, 0, Math.PI * 2); ctx.fill();
+    }
+    // hub
+    ctx.fillStyle = '#123a20';
+    ctx.beginPath(); ctx.arc(0, 0, o.h * 0.42, 0, Math.PI * 2); ctx.fill();
+    outline(1.5);
+    ctx.fillStyle = '#e8ffe8';
+    ctx.beginPath(); ctx.arc(0, 0, o.h * 0.22, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#1a3a1a';
-    ctx.beginPath(); ctx.arc(0, 0, 2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(0, 0, o.h * 0.1, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
 
   function drawSaw(o) {
     const cx = o.x + o.w / 2, cy = o.y + o.h / 2;
     const r = o.w / 2;
-    ctx.strokeStyle = 'rgba(180, 180, 200, 0.3)';
+    // rail
+    ctx.strokeStyle = 'rgba(180, 180, 200, 0.35)';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(W, cy); ctx.stroke();
+    ctx.strokeStyle = 'rgba(20, 20, 40, 0.6)';
     ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(0, cy); ctx.lineTo(W, cy);
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(W, cy); ctx.stroke();
+
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(o.spin);
+    // hooked teeth blade
+    const teeth = 12;
+    const step = Math.PI * 2 / teeth;
+    const grd = ctx.createLinearGradient(-r, -r, r, r);
+    grd.addColorStop(0, '#f4f6ff');
+    grd.addColorStop(0.5, '#aeb6c8');
+    grd.addColorStop(1, '#5a6478');
+    ctx.fillStyle = grd;
     ctx.shadowColor = 'rgba(200, 220, 255, 0.8)';
-    ctx.shadowBlur = 18;
-    ctx.fillStyle = '#d8dde8';
+    ctx.shadowBlur = 16;
     ctx.beginPath();
-    const teeth = 14;
-    for (let i = 0; i < teeth * 2; i++) {
-      const ang = (i / (teeth * 2)) * Math.PI * 2;
-      const rr = i % 2 === 0 ? r : r * 0.7;
-      ctx.lineTo(Math.cos(ang) * rr, Math.sin(ang) * rr);
+    for (let i = 0; i < teeth; i++) {
+      const a0 = i * step;
+      ctx.lineTo(Math.cos(a0) * r, Math.sin(a0) * r);
+      ctx.lineTo(Math.cos(a0 + step * 0.62) * r * 0.7, Math.sin(a0 + step * 0.62) * r * 0.7);
     }
     ctx.closePath();
     ctx.fill();
-    ctx.shadowBlur = 0;
-    const hg = ctx.createRadialGradient(0, 0, 2, 0, 0, r * 0.45);
-    hg.addColorStop(0, '#fff');
-    hg.addColorStop(1, '#7a8aa0');
-    ctx.fillStyle = hg;
-    ctx.beginPath(); ctx.arc(0, 0, r * 0.45, 0, Math.PI * 2); ctx.fill();
+    outline(2);
+    // brushed ring + bolt holes
+    ctx.strokeStyle = 'rgba(30, 36, 56, 0.6)';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0, 0, r * 0.6, 0, Math.PI * 2); ctx.stroke();
     ctx.fillStyle = '#1a2030';
-    ctx.beginPath(); ctx.arc(0, 0, r * 0.18, 0, Math.PI * 2); ctx.fill();
+    for (let i = 0; i < 4; i++) {
+      const a = i * Math.PI / 2 + Math.PI / 4;
+      ctx.beginPath(); ctx.arc(Math.cos(a) * r * 0.46, Math.sin(a) * r * 0.46, r * 0.07, 0, Math.PI * 2); ctx.fill();
+    }
+    // hub
+    const hg = ctx.createRadialGradient(-r * 0.1, -r * 0.1, 1, 0, 0, r * 0.32);
+    hg.addColorStop(0, '#fff');
+    hg.addColorStop(1, '#6a7a90');
+    ctx.fillStyle = hg;
+    ctx.beginPath(); ctx.arc(0, 0, r * 0.32, 0, Math.PI * 2); ctx.fill();
+    outline(1.5);
+    ctx.fillStyle = '#1a2030';
+    ctx.beginPath(); ctx.arc(0, 0, r * 0.12, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
 
@@ -241,79 +366,10 @@ export function createObstacleDrawer(env) {
     const cx = o.x + o.w / 2, cy = o.y + o.h / 2;
     ctx.save();
     ctx.translate(cx, cy);
-    const grd = ctx.createRadialGradient(-2, -2, 1, 0, 0, o.w / 2);
-    grd.addColorStop(0, '#ffe0a0');
-    grd.addColorStop(0.5, '#ff6a3c');
-    grd.addColorStop(1, '#3a0a00');
-    ctx.fillStyle = grd;
-    ctx.shadowColor = '#ff5520';
-    ctx.shadowBlur = 12;
-    ctx.beginPath();
-    ctx.arc(0, 0, o.w / 2 * 0.9, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.shadowBlur = 0;
+    orb(o.w / 2 * 0.9, '#ffe0a0', '#ff6a3c', '#3a0a00', '#ff5520', 12);
     ctx.fillStyle = '#1a0a00';
-    ctx.beginPath(); ctx.arc(0, 0, 2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(0, 0, 2.5, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
-  }
-
-  function drawBomb(o) {
-    const cx = o.x + o.w / 2, cy = o.y + o.h / 2;
-    if (o.state === 'tick') {
-      const k = o.stateT / o.fuse;
-      ctx.strokeStyle = `rgba(255, 120, 60, ${0.15 + k * 0.3})`;
-      ctx.setLineDash([4, 5]);
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.arc(cx, cy, o.maxR, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      const pulse = 1 + Math.sin(o.stateT * (0.015 + k * 0.04)) * 0.18;
-      const r = (o.w / 2) * pulse;
-      const grd = ctx.createRadialGradient(cx - 3, cy - 3, 2, cx, cy, r);
-      grd.addColorStop(0, '#fff');
-      grd.addColorStop(0.4, '#ffb020');
-      grd.addColorStop(1, '#5a1a00');
-      ctx.fillStyle = grd;
-      ctx.shadowColor = '#ff5020';
-      ctx.shadowBlur = 14 + k * 14;
-      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = '#fff7c0';
-      ctx.beginPath(); ctx.arc(cx + 4, cy - r - 2, 2 + Math.random(), 0, Math.PI * 2); ctx.fill();
-    } else if (o.state === 'boom') {
-      const prog = o.stateT / o.boomDur;
-      const r = o.maxR * prog;
-      const grd = ctx.createRadialGradient(cx, cy, 2, cx, cy, r);
-      grd.addColorStop(0, `rgba(255, 240, 200, ${1 - prog})`);
-      grd.addColorStop(0.6, `rgba(255, 140, 60, ${0.7 * (1 - prog)})`);
-      grd.addColorStop(1, 'rgba(120, 30, 0, 0)');
-      ctx.fillStyle = grd;
-      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = `rgba(255, 200, 120, ${1 - prog})`;
-      ctx.lineWidth = 3 * (1 - prog) + 1;
-      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
-    }
-  }
-
-  function drawFrag(o) {
-    const cx = o.x + o.w / 2, cy = o.y + o.h / 2;
-    ctx.globalAlpha = Math.min(1, o.life * 1.4);
-    ctx.strokeStyle = 'rgba(255, 180, 80, 0.5)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(cx - o.vx * 2, cy - o.vy * 2);
-    ctx.lineTo(cx, cy);
-    ctx.stroke();
-    const grd = ctx.createRadialGradient(cx, cy, 1, cx, cy, 6);
-    grd.addColorStop(0, '#fff8c0');
-    grd.addColorStop(0.5, '#ff9020');
-    grd.addColorStop(1, '#5a1500');
-    ctx.fillStyle = grd;
-    ctx.shadowColor = '#ff6a20';
-    ctx.shadowBlur = 10;
-    ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
   }
 
   function drawSpinner(o) {
@@ -332,38 +388,46 @@ export function createObstacleDrawer(env) {
     ctx.globalAlpha = 1;
 
     const sweepDir = o.vAng > 0 ? 1 : -1;
-    for (let i = 0; i < o.arms; i++) {
+    for (let i = 0; i < 2; i++) {
       const baseAng = o.angle + i * Math.PI;
       ctx.save();
       ctx.rotate(baseAng - sweepDir * 0.35);
       ctx.globalAlpha = 0.22;
       ctx.fillStyle = '#ffb060';
-      roundRect(0, -o.armW / 2, o.armLen, o.armW, 4, true);
+      roundRect(0, -o.armW / 2, o.armLen, o.armW, 4);
       ctx.globalAlpha = 1;
       ctx.restore();
 
       ctx.save();
       ctx.rotate(baseAng);
-      const grd = ctx.createLinearGradient(0, 0, o.armLen, 0);
-      grd.addColorStop(0, '#e8e0c8');
+      const grd = ctx.createLinearGradient(0, -o.armW / 2, 0, o.armW / 2);
+      grd.addColorStop(0, '#ffe6b0');
       grd.addColorStop(0.5, '#c08838');
       grd.addColorStop(1, '#5a2810');
       ctx.fillStyle = grd;
       ctx.shadowColor = 'rgba(255, 180, 80, 0.7)';
       ctx.shadowBlur = 12;
-      roundRect(0, -o.armW / 2, o.armLen, o.armW, 4, true);
+      const p = roundRect(0, -o.armW / 2, o.armLen, o.armW, 4);
       ctx.shadowBlur = 0;
+      stripes(p, 0, -o.armW / 2, o.armLen, o.armW, 'rgba(0,0,0,0.14)');
+      outline(2, p);
+      specLine(0, -o.armW / 2, o.armLen, 0.35);
+      // blade tip
       ctx.fillStyle = '#ffd060';
       ctx.beginPath();
-      ctx.moveTo(o.armLen, -o.armW / 2 - 4);
-      ctx.lineTo(o.armLen + 10, 0);
-      ctx.lineTo(o.armLen, o.armW / 2 + 4);
+      ctx.moveTo(o.armLen - 2, -o.armW / 2 - 4);
+      ctx.lineTo(o.armLen + 12, 0);
+      ctx.lineTo(o.armLen - 2, o.armW / 2 + 4);
       ctx.closePath();
       ctx.fill();
+      outline(1.5);
       ctx.restore();
     }
 
-    const hg = ctx.createRadialGradient(0, 0, 1, 0, 0, 8);
+    ctx.fillStyle = '#3a2010';
+    ctx.beginPath(); ctx.arc(0, 0, 11, 0, Math.PI * 2); ctx.fill();
+    outline(1.5);
+    const hg = ctx.createRadialGradient(-2, -2, 1, 0, 0, 8);
     hg.addColorStop(0, '#ffe8b0');
     hg.addColorStop(1, '#8a5020');
     ctx.fillStyle = hg;
@@ -376,40 +440,42 @@ export function createObstacleDrawer(env) {
     const ay = o.y + 8;
     const wx = ax + Math.sin(o.angle) * o.armLen;
     const wy = ay + Math.cos(o.angle) * o.armLen;
+    // mount
     ctx.fillStyle = '#3a3548';
-    roundRect(ax - 10, o.y, 20, 8, 3, true);
+    outline(1.5, roundRect(ax - 12, o.y, 24, 8, 3));
     ctx.fillStyle = '#1a1a25';
     ctx.beginPath(); ctx.arc(ax, ay, 4, 0, Math.PI * 2); ctx.fill();
+    // arm
     ctx.save();
     ctx.translate(ax, ay);
     ctx.rotate(Math.atan2(wy - ay, wx - ax) - Math.PI / 2);
-    const grd = ctx.createLinearGradient(0, 0, 0, o.armLen);
-    grd.addColorStop(0, '#9aa0b0');
-    grd.addColorStop(1, '#5a5566');
+    const grd = ctx.createLinearGradient(-o.armW / 2, 0, o.armW / 2, 0);
+    grd.addColorStop(0, '#c8ccd8');
+    grd.addColorStop(0.5, '#8a90a0');
+    grd.addColorStop(1, '#4a4858');
     ctx.fillStyle = grd;
     ctx.shadowColor = 'rgba(180, 180, 220, 0.4)';
     ctx.shadowBlur = 8;
-    roundRect(-o.armW / 2, 0, o.armW, o.armLen, 3, true);
-    ctx.shadowBlur = 0;
+    outline(1.5, roundRect(-o.armW / 2, 0, o.armW, o.armLen, 3));
     ctx.restore();
+    // mace head
     ctx.save();
     ctx.translate(wx, wy);
-    const wg = ctx.createRadialGradient(-4, -4, 2, 0, 0, o.weightR);
-    wg.addColorStop(0, '#ffe2b8');
-    wg.addColorStop(0.4, '#d06a30');
-    wg.addColorStop(1, '#3a0f00');
-    ctx.fillStyle = wg;
+    const R = o.weightR;
+    ctx.fillStyle = '#8a3a18';
     ctx.shadowColor = '#ff7a30';
-    ctx.shadowBlur = 18;
-    ctx.beginPath(); ctx.arc(0, 0, o.weightR, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = '#fff6c0';
-    for (let i = 0; i < 6; i++) {
-      const a = (i / 6) * Math.PI * 2;
-      ctx.beginPath();
-      ctx.arc(Math.cos(a) * o.weightR * 0.7, Math.sin(a) * o.weightR * 0.7, 1.5, 0, Math.PI * 2);
-      ctx.fill();
+    ctx.shadowBlur = 16;
+    ctx.beginPath();
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2;
+      const a2 = a + Math.PI / 8;
+      ctx.lineTo(Math.cos(a) * R * 1.45, Math.sin(a) * R * 1.45);
+      ctx.lineTo(Math.cos(a2) * R * 0.85, Math.sin(a2) * R * 0.85);
     }
+    ctx.closePath();
+    ctx.fill();
+    outline(1.5);
+    orb(R, '#ffe2b8', '#d06a30', '#3a0f00', '#ff7a30', 0);
     ctx.restore();
   }
 
@@ -487,20 +553,13 @@ export function createObstacleDrawer(env) {
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(o.spin);
-    const grd = ctx.createRadialGradient(-3, -3, 2, 0, 0, o.w / 2);
-    grd.addColorStop(0, '#fff');
-    grd.addColorStop(0.4, '#80ffd0');
-    grd.addColorStop(1, '#10503a');
-    ctx.fillStyle = grd;
-    ctx.shadowColor = '#40e0a0';
-    ctx.shadowBlur = 16;
-    ctx.beginPath(); ctx.arc(0, 0, o.w / 2 * 0.9, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = 'rgba(20, 60, 40, 0.6)';
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([3, 3]);
-    ctx.beginPath(); ctx.arc(0, 0, o.w / 2 * 0.55, 0, Math.PI * 2); ctx.stroke();
-    ctx.setLineDash([]);
+    const r = o.w / 2 * 0.9;
+    orb(r, '#fff', '#80ffd0', '#10503a', '#40e0a0', 16);
+    // seam lines (reads as spin)
+    ctx.strokeStyle = 'rgba(10, 50, 35, 0.7)';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.ellipse(0, 0, r * 0.95, r * 0.4, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(0, 0, r * 0.4, r * 0.95, 0, 0, Math.PI * 2); ctx.stroke();
     ctx.restore();
   }
 
@@ -511,9 +570,9 @@ export function createObstacleDrawer(env) {
     const rpiece = { x: rx, y: o.y, w: W - rx, h: o.h };
     drawBar(lpiece, '#7adfff', '#3aa8e0', '#0a3a5a', 'rgba(100, 200, 255, 0.7)');
     drawBar(rpiece, '#7adfff', '#3aa8e0', '#0a3a5a', 'rgba(100, 200, 255, 0.7)');
-    ctx.fillStyle = 'rgba(180, 230, 255, 0.6)';
-    ctx.fillRect(lx - 2, o.y, 2, o.h);
-    ctx.fillRect(rx,    o.y, 2, o.h);
+    ctx.fillStyle = 'rgba(180, 230, 255, 0.85)';
+    ctx.fillRect(lx - 3, o.y, 3, o.h);
+    ctx.fillRect(rx,     o.y, 3, o.h);
   }
 
   function drawChanger(o) {
@@ -536,7 +595,7 @@ export function createObstacleDrawer(env) {
     ctx.fillStyle = g;
     ctx.shadowColor = '#c060ff'; ctx.shadowBlur = 22;
     ctx.beginPath(); ctx.arc(0, 0, o.w / 2 * 0.72, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
+    outline(1.5);
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
     ctx.lineWidth = 2;
     for (let i = 0; i < 4; i++) {
@@ -567,10 +626,17 @@ export function createObstacleDrawer(env) {
     const tailX = o.side === 'L' ? 0 : W;
     const headX = dir > 0 ? o.x + o.w : o.x;
     const railEndX = dir > 0 ? o.x : o.x + o.w;
-    ctx.strokeStyle = '#5a5566';
+    // piston rails
+    ctx.strokeStyle = '#6a6578';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(tailX, o.y + 12);       ctx.lineTo(railEndX, o.y + 12);
+    ctx.moveTo(tailX, o.y + o.h - 12); ctx.lineTo(railEndX, o.y + o.h - 12);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.moveTo(tailX, o.y + 10);       ctx.lineTo(railEndX, o.y + 10);
+    ctx.moveTo(tailX, o.y + 14);       ctx.lineTo(railEndX, o.y + 14);
     ctx.moveTo(tailX, o.y + o.h - 10); ctx.lineTo(railEndX, o.y + o.h - 10);
     ctx.stroke();
     if (o.shadowA > 0) {
@@ -590,26 +656,32 @@ export function createObstacleDrawer(env) {
       ctx.stroke();
       ctx.setLineDash([]);
     }
+    // head block: hazard-striped steel
     const grd = ctx.createLinearGradient(o.x, 0, o.x + o.w, 0);
-    grd.addColorStop(0, '#a8a8b8'); grd.addColorStop(0.5, '#5a5a68'); grd.addColorStop(1, '#1a1a22');
+    grd.addColorStop(0, '#ffd34a'); grd.addColorStop(0.5, '#e0a820'); grd.addColorStop(1, '#8a5a08');
     ctx.fillStyle = grd;
-    ctx.shadowColor = 'rgba(255, 120, 80, 0.55)'; ctx.shadowBlur = 14;
-    roundRect(o.x, o.y, o.w, o.h, 4, true);
+    ctx.shadowColor = 'rgba(255, 160, 60, 0.55)'; ctx.shadowBlur = 14;
+    const p = roundRect(o.x, o.y, o.w, o.h, 4);
     ctx.shadowBlur = 0;
-    ctx.fillStyle = '#d8d8e0';
+    stripes(p, o.x, o.y, o.w, o.h, 'rgba(20, 16, 30, 0.85)', 22, 9);
+    outline(2, p);
+    // teeth
+    ctx.fillStyle = '#e8e8f0';
     const teeth = 8;
     const th = o.h / teeth;
+    ctx.beginPath();
     for (let i = 0; i < teeth; i++) {
-      ctx.beginPath();
       ctx.moveTo(headX, o.y + i * th);
       ctx.lineTo(headX + dir * 10, o.y + (i + 0.5) * th);
       ctx.lineTo(headX, o.y + (i + 1) * th);
-      ctx.closePath(); ctx.fill();
+      ctx.closePath();
     }
+    ctx.fill();
+    outline(1.5);
   }
 
   function drawPortal(o) {
-    const aY = o.y + o.yOff;
+    const aY = o.y + o.ringR;
     const drawRing = (px, py, hue) => {
       ctx.save();
       ctx.translate(px, py);
@@ -630,12 +702,10 @@ export function createObstacleDrawer(env) {
     };
     drawRing(o.aX, aY, 210);
     drawRing(o.bX, aY, 30);
-    const g = ctx.createRadialGradient(o.ballX - 2, o.ballY - 2, 1, o.ballX, o.ballY, o.ballR);
-    g.addColorStop(0, '#fff'); g.addColorStop(0.5, '#ff80d0'); g.addColorStop(1, '#400020');
-    ctx.fillStyle = g;
-    ctx.shadowColor = '#ff40a0'; ctx.shadowBlur = 14;
-    ctx.beginPath(); ctx.arc(o.ballX, o.ballY, o.ballR, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
+    ctx.save();
+    ctx.translate(o.ballX, o.ballY);
+    orb(o.ballR, '#fff', '#ff80d0', '#400020', '#ff40a0', 14);
+    ctx.restore();
   }
 
   function drawWormTunnel(o) {
@@ -695,7 +765,7 @@ export function createObstacleDrawer(env) {
   function drawStalactite(o) {
     const mountY = o.y;
     ctx.fillStyle = '#3a3548';
-    roundRect(o.anchorX - o.mountW / 2, mountY - 10, o.mountW, 12, 3, true);
+    outline(1.5, roundRect(o.anchorX - o.mountW / 2, mountY - 10, o.mountW, 12, 3));
     ctx.fillStyle = '#1a1a25';
     ctx.fillRect(o.anchorX - o.mountW / 2 + 4, mountY - 8, o.mountW - 8, 3);
     if (o.phase === 'warn') {
@@ -717,8 +787,8 @@ export function createObstacleDrawer(env) {
     const sy = mountY + o.yOff;
     ctx.save();
     ctx.translate(o.anchorX, sy);
-    const grd = ctx.createLinearGradient(0, 0, 0, o.spikeH);
-    grd.addColorStop(0, '#b8b0c8'); grd.addColorStop(0.5, '#7a6a8a'); grd.addColorStop(1, '#3a2a4a');
+    const grd = ctx.createLinearGradient(-o.spikeW / 2, 0, o.spikeW / 2, 0);
+    grd.addColorStop(0, '#d8d0e8'); grd.addColorStop(0.45, '#8a7aa0'); grd.addColorStop(1, '#3a2a4a');
     ctx.fillStyle = grd;
     ctx.shadowColor = 'rgba(180, 140, 255, 0.65)'; ctx.shadowBlur = 14;
     ctx.beginPath();
@@ -726,17 +796,18 @@ export function createObstacleDrawer(env) {
     ctx.lineTo(o.spikeW / 2, 0);
     ctx.lineTo(0, o.spikeH);
     ctx.closePath(); ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    outline(2);
+    // lit facet
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
     ctx.beginPath();
-    ctx.moveTo(-2, 0); ctx.lineTo(2, 0); ctx.lineTo(0, o.spikeH * 0.85);
+    ctx.moveTo(-o.spikeW / 2 + 3, 2); ctx.lineTo(-2, 2); ctx.lineTo(-1, o.spikeH * 0.8);
     ctx.closePath(); ctx.fill();
     ctx.restore();
   }
 
   function drawBoomerang(o) {
     ctx.fillStyle = '#3a3548';
-    roundRect(o.anchorX - 6, o.y - 4, 12, 28, 3, true);
+    outline(1.5, roundRect(o.anchorX - 6, o.y - 4, 12, 28, 3));
     ctx.fillStyle = '#1a1a25';
     ctx.beginPath(); ctx.arc(o.anchorX, o.y + 10, 4, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = 'rgba(255, 200, 80, 0.22)';
@@ -749,10 +820,10 @@ export function createObstacleDrawer(env) {
     ctx.save();
     ctx.translate(o.bx, o.by);
     ctx.rotate(o.spin);
-    const grd = ctx.createLinearGradient(-o.size, 0, o.size, 0);
-    grd.addColorStop(0, '#ffe8a0'); grd.addColorStop(0.5, '#ffaa30'); grd.addColorStop(1, '#7a3a0a');
+    const grd = ctx.createLinearGradient(-o.size, -o.size, o.size, o.size);
+    grd.addColorStop(0, '#fff0c0'); grd.addColorStop(0.5, '#ffaa30'); grd.addColorStop(1, '#7a3a0a');
     ctx.fillStyle = grd;
-    ctx.shadowColor = '#ffaa40'; ctx.shadowBlur = 18;
+    ctx.shadowColor = '#ffaa40'; ctx.shadowBlur = 16;
     ctx.beginPath();
     ctx.moveTo(-o.size, -o.size * 0.35);
     ctx.lineTo(-o.size * 0.2, -o.size * 0.55);
@@ -761,9 +832,9 @@ export function createObstacleDrawer(env) {
     ctx.lineTo(-o.size, o.size * 0.35);
     ctx.lineTo(-o.size * 0.35, 0);
     ctx.closePath(); ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = 'rgba(255,255,255,0.45)';
-    ctx.beginPath(); ctx.arc(-o.size * 0.3, -o.size * 0.15, 2.5, 0, Math.PI * 2); ctx.fill();
+    outline(1.5);
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.beginPath(); ctx.ellipse(-o.size * 0.35, -o.size * 0.18, o.size * 0.22, o.size * 0.08, 0.4, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
 
@@ -772,11 +843,10 @@ export function createObstacleDrawer(env) {
     const baseY = o.baseY;
     const halfW = o.tipW / 2;
     const tipX = o.baseX + dirX * o.tipLen;
-    const x0 = o.baseX, x1 = tipX;
-    const grd = ctx.createLinearGradient(x0, 0, x1, 0);
-    grd.addColorStop(0, '#5a0a20');
+    const grd = ctx.createLinearGradient(0, baseY - halfW, 0, baseY + halfW);
+    grd.addColorStop(0, '#ffa0c0');
     grd.addColorStop(0.5, '#d04060');
-    grd.addColorStop(1, '#ff90b0');
+    grd.addColorStop(1, '#5a0a20');
     ctx.fillStyle = grd;
     ctx.shadowColor = 'rgba(255, 80, 120, 0.65)'; ctx.shadowBlur = 12;
     ctx.beginPath();
@@ -785,58 +855,64 @@ export function createObstacleDrawer(env) {
     ctx.lineTo(tipX, baseY);
     ctx.closePath();
     ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    outline(2);
+    // ridge highlight
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
     ctx.beginPath();
-    ctx.moveTo(o.baseX, baseY - 2);
-    ctx.lineTo(o.baseX, baseY + 2);
-    ctx.lineTo(o.baseX + dirX * o.tipLen * 0.85, baseY);
+    ctx.moveTo(o.baseX, baseY - halfW + 4);
+    ctx.lineTo(o.baseX, baseY - 1);
+    ctx.lineTo(o.baseX + dirX * o.tipLen * 0.9, baseY - 1);
     ctx.closePath();
     ctx.fill();
   }
 
   function drawYoyo(o) {
-    const dirX = o.side === 'L' ? 1 : -1;
     const ay = o.y + o.ballR;
     // anchor mount on wall
     ctx.fillStyle = '#3a3548';
-    if (o.side === 'L') roundRect(0, ay - 14, 10, 28, 3, true);
-    else roundRect(o.anchorX - 10, ay - 14, 10, 28, 3, true);
+    outline(1.5, o.side === 'L' ? roundRect(0, ay - 14, 10, 28, 3) : roundRect(o.anchorX - 10, ay - 14, 10, 28, 3));
     ctx.fillStyle = '#1a1a25';
     ctx.beginPath(); ctx.arc(o.anchorX, ay, 4, 0, Math.PI * 2); ctx.fill();
-    // rope
-    ctx.strokeStyle = 'rgba(200, 200, 220, 0.7)';
-    ctx.lineWidth = 2;
+    // chain
+    ctx.strokeStyle = 'rgba(200, 200, 220, 0.85)';
+    ctx.lineWidth = 3;
     ctx.beginPath();
     ctx.moveTo(o.anchorX, ay);
     ctx.lineTo(o.ballX, o.ballY);
     ctx.stroke();
-    // ball
+    ctx.strokeStyle = 'rgba(20, 20, 40, 0.6)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(o.anchorX, ay);
+    ctx.lineTo(o.ballX, o.ballY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // spiked ball
     ctx.save();
     ctx.translate(o.ballX, o.ballY);
     ctx.rotate(o.spin);
-    const grd = ctx.createRadialGradient(-3, -3, 2, 0, 0, o.ballR);
-    grd.addColorStop(0, '#fff'); grd.addColorStop(0.4, '#ff80a0'); grd.addColorStop(1, '#5a1030');
-    ctx.fillStyle = grd;
-    ctx.shadowColor = '#ff5080'; ctx.shadowBlur = 18;
-    ctx.beginPath(); ctx.arc(0, 0, o.ballR, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = 'rgba(40, 10, 20, 0.7)';
-    ctx.lineWidth = 1.5;
-    for (let i = 0; i < 6; i++) {
-      const a = (i / 6) * Math.PI * 2;
-      ctx.beginPath();
-      ctx.moveTo(Math.cos(a) * o.ballR * 0.5, Math.sin(a) * o.ballR * 0.5);
-      ctx.lineTo(Math.cos(a) * o.ballR * 0.9, Math.sin(a) * o.ballR * 0.9);
-      ctx.stroke();
+    const R = o.ballR;
+    ctx.fillStyle = '#7a1838';
+    ctx.shadowColor = '#ff5080'; ctx.shadowBlur = 16;
+    ctx.beginPath();
+    for (let i = 0; i < 10; i++) {
+      const a = (i / 10) * Math.PI * 2;
+      const a2 = a + Math.PI / 10;
+      ctx.lineTo(Math.cos(a) * R * 1.35, Math.sin(a) * R * 1.35);
+      ctx.lineTo(Math.cos(a2) * R * 0.88, Math.sin(a2) * R * 0.88);
     }
+    ctx.closePath();
+    ctx.fill();
+    outline(1.5);
+    orb(R, '#fff', '#ff80a0', '#5a1030', '#ff5080', 0);
     ctx.fillStyle = '#1a0010';
-    ctx.beginPath(); ctx.arc(0, 0, o.ballR * 0.22, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(0, 0, R * 0.22, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
 
   function drawSliderArrows(o) {
-    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
     const cy = o.y + o.h / 2;
     const dir = Math.sign(o.vx);
     for (let i = 0; i < 2; i++) {
@@ -880,31 +956,36 @@ export function createObstacleDrawer(env) {
   function drawChaserEye(o) {
     const cx = o.x + o.w / 2, cy = o.y + o.h / 2;
     const eyeOff = Math.max(-6, Math.min(6, (player.x - cx) * 0.05));
-    ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#1a0a00';
-    ctx.beginPath(); ctx.arc(cx + eyeOff * 0.3, cy, 2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx, cy, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(cx, cy, 5.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#1a0a00';
+    ctx.beginPath(); ctx.arc(cx + eyeOff * 0.4, cy, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(cx + eyeOff * 0.4 - 1, cy - 1, 1, 0, Math.PI * 2); ctx.fill();
   }
 
   function drawGrowBarArrows(o) {
     const cy = o.y + o.h / 2;
-    ctx.fillStyle = 'rgba(255, 240, 200, 0.7)';
+    ctx.fillStyle = 'rgba(255, 240, 200, 0.85)';
     ctx.beginPath();
-    ctx.moveTo(o.x - 6, cy);
-    ctx.lineTo(o.x, cy - 5);
-    ctx.lineTo(o.x, cy + 5);
+    ctx.moveTo(o.x - 7, cy);
+    ctx.lineTo(o.x, cy - 6);
+    ctx.lineTo(o.x, cy + 6);
     ctx.closePath();
     ctx.fill();
     ctx.beginPath();
-    ctx.moveTo(o.x + o.w + 6, cy);
-    ctx.lineTo(o.x + o.w, cy - 5);
-    ctx.lineTo(o.x + o.w, cy + 5);
+    ctx.moveTo(o.x + o.w + 7, cy);
+    ctx.lineTo(o.x + o.w, cy - 6);
+    ctx.lineTo(o.x + o.w, cy + 6);
     ctx.closePath();
     ctx.fill();
   }
 
   function drawAll(obstacles) {
     const timeMs = getTimeMs();
+    ctx.lineJoin = 'round';
     for (const o of obstacles) {
       ctx.globalAlpha = o.appear;
       switch (o.kind) {
@@ -928,13 +1009,11 @@ export function createObstacleDrawer(env) {
         case 'laser':      drawLaser(o); break;
         case 'homing':     drawHoming(o); break;
         case 'rotor':      drawRotor(o); break;
-        case 'shrinker':   if (o.w > 0) drawBar(o, '#ffd56b', '#ff9a2c', '#7a4810', 'rgba(255, 180, 60, 0.7)'); break;
+        case 'shrinker':   drawBar(o, '#ffd56b', '#ff9a2c', '#7a4810', 'rgba(255, 180, 60, 0.7)'); break;
         case 'saw':        drawSaw(o); break;
         case 'swarm':      drawSwarmUnit(o); break;
-        case 'bomb':       drawBomb(o); break;
         case 'spinner':    drawSpinner(o); break;
         case 'gate':       drawGate(o); break;
-        case 'frag':       drawFrag(o); break;
         case 'pendulum':   drawPendulum(o); break;
         case 'lightning':  drawLightning(o); break;
         case 'bouncer':    drawBouncer(o); break;
@@ -952,6 +1031,7 @@ export function createObstacleDrawer(env) {
       }
     }
     ctx.globalAlpha = 1;
+    ctx.lineJoin = 'miter';
   }
 
   return { drawAll };

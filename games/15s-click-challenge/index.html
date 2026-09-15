@@ -11,16 +11,16 @@
 <body>
   <div class="container">
     <div class="toolbar" role="toolbar" aria-label="Game controls">
-      <button type="button" id="records-toggle" class="tb-btn" title="Records &amp; Achievements" aria-label="Records and achievements">&#127942;</button>
+      <button type="button" id="records-toggle" class="tb-btn" title="Records &amp; Achievements" aria-label="Records and achievements"></button>
       <button type="button" id="guide-toggle" class="tb-btn" title="How to Play" aria-label="How to play">?</button>
-      <button type="button" id="sound-toggle" class="tb-btn" title="Toggle Sound" aria-label="Toggle sound" aria-pressed="false">🔊</button>
+      <button type="button" id="sound-toggle" class="tb-btn" title="Toggle Sound" aria-label="Toggle sound" aria-pressed="false"></button>
     </div>
     <div class="header">
       <h1 class="title"><span class="title-accent">15s</span> Click Challenge</h1>
       <p class="subtitle">Tap the glowing target before time runs out</p>
     </div>
 
-    <div id="guide-overlay" class="guide-overlay" role="dialog" aria-modal="true" aria-labelledby="guide-overlay-title" aria-hidden="true">
+    <dialog id="guide-overlay" class="guide-overlay" aria-labelledby="guide-overlay-title">
       <div class="guide-card">
         <div id="guide-overlay-title" class="guide-title">How to Play</div>
         <ul class="guide-quick">
@@ -31,9 +31,9 @@
         </ul>
         <button type="button" id="guide-close" class="guide-close">Got it!</button>
       </div>
-    </div>
+    </dialog>
 
-    <div id="records-overlay" class="guide-overlay" role="dialog" aria-modal="true" aria-labelledby="records-overlay-title" aria-hidden="true">
+    <dialog id="records-overlay" class="guide-overlay" aria-labelledby="records-overlay-title">
       <div class="guide-card records-card">
         <div id="records-overlay-title" class="guide-title">Records</div>
         <div class="guide-section">
@@ -46,7 +46,7 @@
         </div>
         <button type="button" id="records-close" class="guide-close">Close</button>
       </div>
-    </div>
+    </dialog>
 
     <div id="achievement-toast" class="achievement-toast" role="status" aria-live="polite"></div>
 
@@ -73,22 +73,19 @@
       <canvas id="game" role="img" aria-label="Click target playfield"></canvas>
       <div id="start-overlay" class="game-overlay">
         <button type="button" id="start" class="big-start">Start</button>
-        <div id="countdown" class="countdown" aria-live="assertive" style="display:none">2</div>
+        <div id="countdown" class="countdown" aria-live="assertive" style="display:none">3</div>
       </div>
-      <div id="result-overlay" class="game-overlay" role="dialog" aria-modal="true" aria-labelledby="result-title" aria-hidden="true" style="display:none">
+      <dialog id="result-overlay" aria-labelledby="result-title">
+        <div id="result-confetti" class="result-confetti" aria-hidden="true"></div>
         <div class="result-card">
+          <div id="result-eyebrow" class="result-eyebrow"></div>
           <div id="result-title" class="result-title"></div>
           <div id="result-msg" class="result-msg"></div>
           <div id="result-score" class="result-score"></div>
         </div>
-      </div>
+      </dialog>
     </div>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/howler@2.2.3/dist/howler.min.js"
-          integrity="sha384-46Oo18A61vfMErbleKnm7no+MU4xWkCYAHfFjdeBgYnq5437neF0hgpBaX/YM8fu"
-          crossorigin="anonymous"
-          referrerpolicy="no-referrer"
-          defer></script>
   <script type="module" src="js/main.js"></script>
 </body>
 </html>

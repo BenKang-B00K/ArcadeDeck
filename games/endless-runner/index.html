@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Endless Runner</title>
+    <!-- One display face for the title and the PLAY button: wide, round and heavy,
+         like the runner. Everything else stays system-ui. Offline it falls back. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@800;900&display=swap" />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      /* Set on :root at runtime so the banner and the meter label share one source. */
+      :root { --zone-accent: #9a7bff; }
+      html, body { width: 100%; height: 100%; overflow: hidden; background: #0b1020; }
+      #app { position: fixed; inset: 0; }
+      canvas { display: block; }
+      /* The hit itself: a white pop in the middle, a red bruise at the edges,
+         both gone in under a second. main.js replays it by re-adding .hit. */
+      #flash {
+        position: fixed; inset: 0; pointer-events: none; opacity: 0;
+        background:
+          radial-gradient(ellipse at center, rgba(255,255,255,.7), rgba(255,255,255,0) 45%),
+          radial-gradient(ellipse at center, rgba(255,70,90,0) 40%, rgba(255,70,90,.75));
+      }
+      #flash.hit { animation: hitFlash .8s ease-out forwards; }
+      @keyframes hitFlash { from { opacity: 1; } to { opacity: 0; } }
+      /* main.js toggles el.hidden; the bang is needed because #overlay's own
+         display:flex outranks the browser's [hidden] rule. */
+      [hidden] { display: none !important; }
+
+      /* The wallet. One pill, top-right, on every screen: it is the number the
+         run adds to and the menu spends from, so it never moves. z-index lifts
+         it over the overlays, which come later in the DOM. */
+      #coins {
+        position: fixed; top: 14px; right: 16px; z-index: 1;
+        padding: 6px 13px 6px 11px; border-radius: 999px;
+        font-family: system-ui, sans-serif; font-size: 15px; font-weight: 800; letter-spacing: .04em;
+        font-variant-numeric: tabular-nums; color: #ffd85e;
+        background: rgba(11,16,32,.55); border: 1px solid rgba(255,216,94,.28);
+        backdrop-filter: blur(6px);
+        pointer-events: none; user-select: none;
+        text-shadow: 0 2px 8px rgba(0,0,0,.6);
+      }
+      /* The HUD's distance stack has nothing to say while a menu is up. */
+      body:has(.overlay:not([hidden])) #meter { visibility: hidden; }
+      /* A thief just lifted from the wallet: flash red and shake it off. */
+      #coins.robbed { animation: robbed .5s ease-out; }
+      @keyframes robbed {
+        0%   { color: #ff5e6e; transform: translateX(0); }
+        20%  { transform: translateX(-6px); }
+        40%  { transform: translateX(5px); }
+        60%  { transform: translateX(-3px); }
+        80%  { color: #ff5e6e; transform: translateX(2px); }
+        100% { color: #ffd85e; transform: translateX(0); }
+      }
+
+      /* Shield buy button: the one HUD control that is actually clickable. */
+      #shieldBtn {
+        position: fixed; top: 54px; right: 16px;
+        padding: 7px 14px; font-family: system-ui, sans-serif;
+        font-size: 13px; font-weight: 800; letter-spacing: .04em;
+        color: #06121a; background: #7fe8ff; border: none; border-radius: 999px;
+        cursor: pointer; touch-action: manipulation; user-select: none;
+        box-shadow: 0 4px 16px rgba(127,232,255,.35);
+      }
+      #shieldBtn:disabled { background: #2c3c5c; color: #8296b8; box-shadow: none; cursor: default; }
+      #shieldBtn:active:not(:disabled) { transform: translateY(1px); }
+
+      /* Distance sits under the runner: read it without leaving the action.
+         The zone label rides directly above it, one stacked block so the two
+         never drift apart on a resize. */
+      #meter {
+        position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom));
+        transform: translateX(-50%);
+        text-align: center; font-family: system-ui, sans-serif;
+        pointer-events: none; user-select: none; white-space: nowrap;
+      }
+      #zoneTag {
+        font-size: 11px; font-weight: 700; letter-spacing: .3em;
+        text-transform: uppercase; color: var(--zone-accent);
+        opacity: .85; margin-bottom: 2px;
+        text-shadow: 0 0 14px var(--zone-accent), 0 2px 6px rgba(0,0,0,.8);
+        transition: color .8s ease; /* rides the same slow palette blend as the world */
+      }
+      /* Speed: the number for precision, the bar for the glance. Sits between the
+         zone label and the distance, so the stack reads where → how fast → how far. */
+      #speed {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        margin: 3px 0 1px;
+      }
+      #speedBar {
+        width: 62px; height: 3px; border-radius: 2px;
+        background: rgba(190,215,255,.18); overflow: hidden;
+      }
+      #speedFill {
+        width: 0; height: 100%; border-radius: 2px;
+        background: var(--zone-accent);
+        box-shadow: 0 0 8px var(--zone-accent);
+        transition: width .25s linear, background .8s ease;
+      }
+      #speedVal {
+        font-size: 13px; font-weight: 700; letter-spacing: .06em;
+        font-variant-numeric: tabular-nums; /* width can't twitch as it counts */
+        color: #b9c9e6; text-shadow: 0 2px 6px rgba(0,0,0,.8);
+      }
+      #score {
+        color: #eaf0ff;
+        font-size: 30px; font-weight: 800; letter-spacing: .5px;
+        font-variant-numeric: tabular-nums; /* digits don't jitter while counting */
+        text-shadow: 0 2px 10px rgba(0,0,0,.75);
+      }
+
+      /* Zone banner: announces a new region, then gets out of the way. */
+      #zone {
+        position: fixed; top: 17%; left: 0; right: 0;
+        text-align: center; pointer-events: none; user-select: none;
+        font-family: system-ui, sans-serif; opacity: 0;
+      }
+      #zone.show { animation: zoneIn 2.6s ease-out forwards; }
+      #zone .eyebrow {
+        font-size: 12px; font-weight: 700; letter-spacing: .34em;
+        color: var(--zone-accent); text-shadow: 0 0 12px var(--zone-accent);
+      }
+      #zone .name {
+        margin-top: 4px;
+        font-size: clamp(22px, 5vw, 38px); font-weight: 900; letter-spacing: .1em;
+        text-transform: uppercase; color: #eaf0ff;
+        text-shadow: 0 0 26px var(--zone-accent), 0 2px 10px rgba(0,0,0,.75);
+      }
+      #zone.show .name { animation: zoneSpread 2.6s ease-out forwards; }
+      #zone .rule {
+        width: 132px; height: 1px; margin: 10px auto 0;
+        background: linear-gradient(90deg, transparent, var(--zone-accent), transparent);
+      }
+      @keyframes zoneIn {
+        0%   { opacity: 0; transform: translateY(14px); }
+        10%  { opacity: 1; transform: none; }
+        74%  { opacity: 1; transform: none; }
+        100% { opacity: 0; transform: translateY(-10px); }
+      }
+      @keyframes zoneSpread {
+        0%   { letter-spacing: .42em; }
+        30%  { letter-spacing: .1em; }
+      }
+      /* Motion-sensitive players still get the name, just no travel. */
+      @media (prefers-reduced-motion: reduce) {
+        #zone.show, #zone.show .name { animation: zoneFade 2.6s ease-out forwards; }
+        @keyframes zoneFade { 0%,100% { opacity: 0; } 10%,74% { opacity: 1; } }
+      }
+
+      .overlay {
+        position: fixed; inset: 0;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 14px; text-align: center;
+        font-family: system-ui, sans-serif; color: #eaf0ff;
+        background: radial-gradient(ellipse at center, rgba(11,16,32,.55), rgba(11,16,32,.9));
+        backdrop-filter: blur(2px);
+      }
+      .overlay h1 {
+        font-family: Unbounded, system-ui, sans-serif; font-weight: 900;
+        font-size: 44px; line-height: .95; letter-spacing: -.01em; color: #f4f6ff;
+      }
+      .overlay p { font-size: 16px; opacity: .85; max-width: 320px; line-height: 1.5; }
+      /* Big pills: start a run, or buy your way back into one. Nested under
+         .menu-foot on the menu, a direct child on the skin screen. */
+      .overlay > button, .menu-foot > button {
+        padding: 14px 34px; font-size: 18px; font-weight: 800;
+        color: #0b1020; background: #6ea8ff; border: none; border-radius: 999px;
+        cursor: pointer; touch-action: manipulation;
+        box-shadow: 0 8px 24px rgba(110,168,255,.4);
+      }
+      .overlay button:active { transform: translateY(1px); }
+      .overlay button:focus-visible { outline: 2px solid #f4f6ff; outline-offset: 3px; }
+      #reviveBtn { background: #7fe8ff; box-shadow: 0 8px 24px rgba(127,232,255,.4); }
+      /* Secondary pill: closes the skin screen, does not start a run. */
+      #skinsBack {
+        margin-top: 8px; background: transparent; color: #eaf0ff;
+        border: 2px solid rgba(140,180,255,.5); box-shadow: none;
+      }
+
+      /* Language pill: top-left, mirror of the wallet. Lives inside #overlay so
+         it goes with the menu. Switching reloads, so it is hidden on game over —
+         a reload there would throw away the revive on offer. */
+      #lang {
+        position: absolute; top: 14px; left: 16px;
+        padding: 6px 10px; border-radius: 999px;
+        font-family: system-ui, sans-serif; font-size: 13px; font-weight: 800; letter-spacing: .04em;
+        color: #cfe0ff; background: rgba(11,16,32,.55); border: 1px solid rgba(140,180,255,.3);
+        backdrop-filter: blur(6px); cursor: pointer;
+      }
+      body.over #lang { display: none; }
+
+      /* --- Menu ---------------------------------------------------------- */
+      /* The menu is the scene. The title sits above the wormhole, the controls
+         under the runner's feet, and nothing goes between them: only the two
+         edges are darkened, so the ring keeps its glow and the runner stays lit. */
+      #overlay {
+        justify-content: space-between; gap: 0;
+        padding: clamp(24px, 5vh, 48px) 20px calc(20px + env(safe-area-inset-bottom));
+        background: linear-gradient(180deg,
+          rgba(11,16,32,.82) 0%, rgba(11,16,32,0) 36%,
+          rgba(11,16,32,0) 60%, rgba(11,16,32,.86) 100%);
+        backdrop-filter: none;
+        animation: menuIn .45s ease-out;
+      }
+      @keyframes menuIn { from { opacity: 0; } }
+      .menu-head, .menu-foot { display: flex; flex-direction: column; align-items: center; width: 100%; }
+      #overlay h1 {
+        font-size: clamp(30px, 5.6vw, 72px);
+        text-shadow: 0 0 44px color-mix(in srgb, var(--zone-accent) 75%, transparent), 0 4px 18px rgba(0,0,0,.6);
+        transition: text-shadow .8s ease; /* recolours with the zone you died in */
+      }
+      /* Game over lands with weight: the title slams in oversize, the result
+         rises under it a beat later. */
+      body.over #overlay h1 { animation: slam .55s cubic-bezier(.2, 1.5, .4, 1) both; }
+      body.over .final { animation: rise .5s .2s ease-out both; }
+      @keyframes slam { from { opacity: 0; transform: scale(1.6); } }
+      @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+      #overlay p { margin-top: 10px; font-size: 15px; opacity: .78; max-width: 56ch; text-shadow: 0 2px 8px rgba(0,0,0,.8); }
+      /* Run result: the distance is the headline, best and haul ride beside it. */
+      .final { display: flex; align-items: baseline; justify-content: center; gap: 18px; margin-top: 16px; }
+      .final:empty { display: none; }
+      .final b { font-family: Unbounded, system-ui, sans-serif; font-weight: 800; font-size: 32px; color: #ffd85e; text-shadow: 0 2px 12px rgba(0,0,0,.7); }
+      .final span { font-size: 13px; font-weight: 600; opacity: .72; letter-spacing: .03em; text-shadow: 0 2px 8px rgba(0,0,0,.8); }
+      /* New-pin toast: this skin crossed a BADGE_TIERS mark this run. Empty =
+         gone. Pops in a beat after the result, so it reads as a consequence. */
+      .pin {
+        margin-top: 14px; padding: 6px 16px; border-radius: 999px;
+        font-size: 13px; font-weight: 800; letter-spacing: .06em;
+        color: #0b1020; background: #ffd85e; box-shadow: 0 0 26px rgba(255,216,94,.45);
+        animation: pinIn .5s .75s cubic-bezier(.2, 1.4, .4, 1) both; /* after the count-up settles */
+      }
+      .pin:empty { display: none; }
+      @keyframes pinIn { from { opacity: 0; transform: scale(.6); } }
+      .menu-foot { gap: 10px; }
+      /* One row of secondary things — the two perks and the door to the skins —
+         so the PLAY pill under it is the only big thing at the bottom. */
+      .menu-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: min(100%, 720px); }
+      #shop { display: contents; }
+      #startBtn {
+        margin-top: 4px; min-width: min(300px, 100%); padding: 16px 44px;
+        font-family: Unbounded, system-ui, sans-serif; font-weight: 800; font-size: 19px; letter-spacing: .08em;
+        color: #0b1020; background: #f4f6ff;
+        box-shadow: 0 0 0 1px rgba(255,255,255,.35), 0 10px 30px rgba(0,0,0,.45),
+                    0 0 48px color-mix(in srgb, var(--zone-accent) 50%, transparent);
+        transition: transform .12s ease, box-shadow .8s ease;
+      }
+      #startBtn:hover { transform: translateY(-1px); }
+      #startBtn:active { transform: translateY(1px); }
+      #reviveBtn { min-width: min(300px, 100%); }
+      @media (prefers-reduced-motion: reduce) {
+        #overlay, body.over #overlay h1, body.over .final, .pin { animation: none; }
+        #flash.hit { animation-duration: .2s; }
+        #startBtn, #startBtn:hover { transition: none; transform: none; }
+      }
+
+      /* --- Shop ---------------------------------------------------------- */
+      /* Menu perk tiles: name over description, price pinned right — a receipt
+         line, not a card. Scoped to #shop so the skin tiles keep their column layout. */
+      #shop .shop-item, #skinsBtn {
+        display: grid; grid-template-columns: 1fr auto; column-gap: 14px; align-items: center;
+        text-align: left; flex: 1 1 214px; padding: 10px 12px 10px 14px;
+        background: rgba(11,16,32,.66); border: 1px solid rgba(140,180,255,.26); border-radius: 14px;
+        backdrop-filter: blur(8px); font-family: inherit; color: #eaf0ff; cursor: pointer;
+        transition: border-color .15s ease, background .15s ease;
+      }
+      #shop .shop-item .n, #skinsBtn .n { font-size: 12px; font-weight: 800; letter-spacing: .05em; }
+      #shop .shop-item .d, #skinsBtn .d { font-size: 11px; opacity: .58; }
+      #shop .shop-item .c, #skinsBtn .c {
+        grid-column: 2; grid-row: 1 / 3; margin: 0; padding: 4px 10px;
+        font-size: 12px; font-weight: 800; letter-spacing: .04em; color: #ffd85e;
+        border: 1px solid rgba(255,216,94,.45); border-radius: 999px;
+      }
+      #shop .shop-item.owned .c { color: #7dffc0; border-color: rgba(125,255,192,.5); }
+      #shop .shop-item:disabled:not(.owned) { border-color: rgba(140,180,255,.14); }
+      #shop .shop-item:disabled:not(.owned) > * { opacity: .45; }
+      #shop .shop-item:not(:disabled):hover, #skinsBtn:hover,
+      #shop .shop-item:focus-visible, #skinsBtn:focus-visible {
+        border-color: rgba(140,180,255,.6); background: rgba(22,32,62,.8);
+      }
+      /* The door to the skin screen wears the same tile so the row reads as one
+         thing; the chevron is the only sign it is a place, not a purchase. */
+      #skinsBtn .c { color: #cfe0ff; border-color: rgba(140,180,255,.5); padding: 4px 9px; }
+      /* The skin screen is three columns: what you own on the left, what you are
+         wearing alone in the middle, big, and what you do not own yet on the
+         right with a price on it. The eye lands on the runner, then reads
+         left for the wardrobe and right for the shop. */
+      #skinsWrap {
+        display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        gap: 44px; width: min(96vw, 1000px); align-items: start;
+      }
+      .col h2 {
+        margin: 0 0 6px; font-size: 11px; font-weight: 800; letter-spacing: .26em; opacity: .55;
+      }
+      .col h2 b { font-weight: 600; margin-left: 6px; opacity: .8; }
+      /* Side lists scroll on their own. No scrollbar: the fade at both ends is
+         the "more below" cue, and a white bar down the side of a dark card wall
+         was the loudest thing on the screen. */
+      .skin-list {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 10px; max-height: 56vh; overflow-y: auto; padding: 10px 4px 24px;
+        scrollbar-width: none; overscroll-behavior: contain;
+        mask-image: linear-gradient(to bottom, transparent, #000 14px, #000 calc(100% - 26px), transparent);
+      }
+      .skin-list::-webkit-scrollbar { display: none; }
+      .skin-list:empty { min-height: 140px; place-items: center; }
+      .skin-list:empty::after { content: var(--t-empty); font-size: 12px; letter-spacing: .12em; opacity: .4; }
+      #skinsWorn { display: grid; place-items: center; padding: 10px 0; }
+      /* The worn runner gets the hero treatment: one tile, and instead of a
+         portrait a live turntable — drag to turn it, let go and it keeps going. */
+      .skin-tile.hero { width: 256px; padding: 14px 18px 20px; border-radius: 22px; gap: 4px; cursor: default; }
+      .skin-tile.hero .turn {
+        width: 220px; height: 240px; align-self: center; position: relative; z-index: 1;
+        cursor: grab; user-select: none; -webkit-user-select: none;
+        filter: drop-shadow(0 8px 12px rgba(0,0,0,.45));
+      }
+      .skin-tile.hero .turn:active { cursor: grabbing; }
+      .skin-tile.hero::before { top: 120px; width: 220px; height: 100px; }
+      .skin-tile.hero .d::after { content: var(--t-drag); opacity: .55; }
+      .skin-tile.hero .n { font-size: 18px; }
+      .skin-tile.hero .d { font-size: 13px; }
+      .skin-tile.hero .c { font-size: 12px; padding: 5px 16px; }
+      /* Phone: one column, wearer first, then the wardrobe, then the shop. */
+      @media (max-width: 760px) {
+        #skinsWrap {
+          grid-template-columns: 1fr; gap: 14px; max-height: 62vh; overflow-y: auto;
+          scrollbar-width: none; padding: 0 2px 20px;
+          mask-image: linear-gradient(to bottom, #000 calc(100% - 26px), transparent);
+        }
+        #skinsWrap::-webkit-scrollbar { display: none; }
+        .col.hero { order: -1; }
+        .skin-list { max-height: none; overflow: visible; mask-image: none; padding: 4px 2px; }
+      }
+      .shop-item {
+        display: flex; flex-direction: column; gap: 1px;
+        padding: 9px 12px; text-align: left; font-family: inherit; color: #eaf0ff;
+        background: rgba(22,32,62,.6); border: 1px solid rgba(140,180,255,.3);
+        border-radius: 12px; cursor: pointer; touch-action: manipulation;
+      }
+      .shop-item:disabled { cursor: default; }
+      /* Locked = dim the words, not the portrait: the runner is the reason to save up. */
+      .shop-item:disabled:not(.owned) { border-color: rgba(140,180,255,.15); }
+      .shop-item:disabled:not(.owned) > :not(.pv) { opacity: .38; }
+      .shop-item.owned { border-color: rgba(120,255,190,.45); }
+      .shop-item.equipped { border-color: #ffd85e; box-shadow: inset 0 0 0 1px #ffd85e; }
+      .shop-item .n { font-size: 12px; font-weight: 800; letter-spacing: .5px; }
+      .shop-item .d { font-size: 11px; opacity: .55; }
+      /* Skin tiles open with a portrait: the real runner, rendered once per skin. */
+      .shop-item .pv { height: 84px; width: auto; align-self: center; margin-bottom: 2px; image-rendering: auto; }
+      /* margin-top:auto, not a fixed gap: a two-line name (SKIN · HUANG ZHONG)
+         would otherwise push its own price down and break the line the prices
+         make across the row. Pinned to the bottom, the tile can grow freely. */
+      .shop-item .c { font-size: 12px; font-weight: 700; color: #ffd85e; margin-top: auto; padding-top: 3px; }
+      .shop-item.owned .c { color: #7dffc0; }
+
+      /* --- Skin tiles ---------------------------------------------------- */
+      /* Each tile is tinted by its own runner: --tint is the body colour, --glow
+         the glow slot, both set inline by shop.js. The portrait sits on a pool of
+         its glow, so a row of tiles reads as a row of DIFFERENT things before
+         a single name is read. */
+      .skin-tile {
+        --tint: #6ea8ff; --glow: #2ad4ff;
+        position: relative; gap: 2px; padding: 10px 12px 11px; border-radius: 16px;
+        background: linear-gradient(180deg, color-mix(in srgb, var(--tint) 18%, rgba(20,28,56,.72)), rgba(14,20,42,.88));
+        border-color: color-mix(in srgb, var(--tint) 40%, transparent);
+        transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+      }
+      .skin-tile .pv {
+        height: 104px; margin: 0 0 4px; position: relative; z-index: 1;
+        filter: drop-shadow(0 6px 10px rgba(0,0,0,.45));
+      }
+      .skin-tile::before {
+        content: ''; position: absolute; left: 50%; top: 58px; width: 120px; height: 56px;
+        transform: translateX(-50%); border-radius: 50%; pointer-events: none;
+        background: radial-gradient(ellipse at center, color-mix(in srgb, var(--glow) 42%, transparent), transparent 70%);
+        filter: blur(6px);
+      }
+      .skin-tile .n { font-size: 13px; letter-spacing: .06em; }
+      .skin-tile .d { font-size: 11px; opacity: .6; min-height: 14px; }
+      /* Status as a pill, not a coloured word: price / WEAR / WORN are three
+         different verbs and the eye should sort them without reading. */
+      .skin-tile .c {
+        align-self: center; margin-top: 8px; padding: 4px 12px; font-size: 11px; letter-spacing: .1em;
+        border-radius: 999px; border: 1px solid rgba(255,216,94,.5); color: #ffd85e;
+      }
+      .skin-tile.owned .c { border-color: rgba(125,255,192,.6); color: #7dffc0; }
+      .skin-tile.equipped .c { background: #ffd85e; border-color: #ffd85e; color: #0b1020; }
+      .skin-tile.equipped { box-shadow: inset 0 0 0 1px #ffd85e, 0 0 24px color-mix(in srgb, var(--glow) 35%, transparent); }
+      /* Locked: keep the portrait bright — it is the reason to save up — dim the
+         rest, and dash the border so it reads as not-yet rather than broken. */
+      /* Legendary: gold border and a gold halo, whatever colours the runner wears. */
+      .skin-tile.legendary { border-color: rgba(255,216,94,.75); box-shadow: 0 0 22px rgba(255,216,94,.28); }
+      .skin-tile.legendary .n { color: #ffd85e; }
+      .skin-tile:disabled:not(.owned) { border-style: dashed; }
+      .skin-tile:disabled:not(.owned)::before { opacity: .45; }
+      .skin-tile:not(:disabled):hover, .skin-tile:not(:disabled):focus-visible {
+        transform: translateY(-3px);
+        border-color: color-mix(in srgb, var(--tint) 85%, white);
+        box-shadow: 0 12px 28px rgba(0,0,0,.35), 0 0 22px color-mix(in srgb, var(--glow) 30%, transparent);
+        outline: none;
+      }
+      .skin-tile:not(:disabled):active { transform: translateY(-1px); }
+      @media (prefers-reduced-motion: reduce) {
+        .skin-tile { transition: none; }
+        .skin-tile:not(:disabled):hover, .skin-tile:not(:disabled):focus-visible { transform: none; }
+      }
+    </style>
+    <script type="module" crossorigin src="./assets/index-BMcjigss.js"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div id="flash"></div>
+
+    <div id="coins" class="wallet">◉ 0</div>
+    <button id="shieldBtn" hidden>🛡 100</button>
+    <div id="meter">
+      <div id="zoneTag"></div>
+      <div id="speed">
+        <div id="speedBar"><div id="speedFill"></div></div>
+        <div id="speedVal">0 m/min</div>
+      </div>
+      <div id="score">0 m</div>
+    </div>
+
+    <div id="zone">
+      <div class="eyebrow"></div>
+      <div class="name"></div>
+      <div class="rule"></div>
+    </div>
+
+    <!-- Menu and game-over share this: main.js swaps the words, the layout
+         holds. Wallet is the #coins pill top-right, same as during a run. -->
+    <div id="overlay" class="overlay">
+      <select id="lang" aria-label="Language">
+        <option value="en">English</option>
+        <option value="ko">한국어</option>
+        <option value="ja">日本語</option>
+      </select>
+      <header class="menu-head">
+        <h1>ENDLESS RUNNER</h1>
+        <p data-i18n>Dodge the blocks, grab the coins. It only gets faster.</p>
+        <div class="final"></div>
+        <div class="pin"></div>
+      </header>
+      <div class="menu-foot">
+        <div class="menu-row">
+          <div id="shop"></div>
+          <button id="skinsBtn"><span class="n" data-i18n>SKINS</span><span class="d" data-i18n>Wear a different runner</span><span class="c">›</span></button>
+        </div>
+        <button id="reviveBtn" hidden>CONTINUE</button>
+        <button id="startBtn" data-i18n>PLAY</button>
+      </div>
+    </div>
+
+    <!-- Skin screen: skin tiles only. Buy = wear; owned = WEAR/WORN. -->
+    <div id="skinOverlay" class="overlay" hidden>
+      <h1 data-i18n>SKINS</h1>
+      <p data-i18n>Pick a runner. Buying one puts it on.</p>
+      <div id="skinsWrap">
+        <section class="col"><h2><span data-i18n>OWNED</span><b id="ownedN"></b></h2><div id="skinsOwned" class="skin-list"></div></section>
+        <section class="col hero"><h2 data-i18n>EQUIPPED</h2><div id="skinsWorn"></div></section>
+        <section class="col"><h2><span data-i18n>UNOWNED</span><b id="lockedN"></b></h2><div id="skinsLocked" class="skin-list"></div></section>
+      </div>
+      <button id="skinsBack" data-i18n>BACK</button>
+    </div>
+
+  </body>
+</html>

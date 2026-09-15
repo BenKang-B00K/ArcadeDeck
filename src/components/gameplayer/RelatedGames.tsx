@@ -1,7 +1,7 @@
 import React from 'react';
 import { Gamepad2 } from 'lucide-react';
 import GameCard from '../GameCard';
-import { games } from '../../data/games';
+import { deviceGames as games } from '../../data/games';
 import type { Game } from '../../data/games';
 import { useUiText } from '../../i18n';
 

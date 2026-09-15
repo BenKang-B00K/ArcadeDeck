@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ArcadeDeck — Sky Navigation (Three.js) — Planning</title>
+<style>
+  :root{
+    --bg:#0b0f1a; --panel:#141a2b; --line:#26304a;
+    --text:#e6ecff; --dim:#8e9bbd; --accent:#5ec8ff; --good:#4ade80; --warn:#fbbf24; --bad:#f87171;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+       font:15px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif;}
+  .wrap{max-width:980px;margin:0 auto;padding:48px 24px 96px}
+  h1{font-size:clamp(28px,5vw,42px);line-height:1.15;margin:0 0 8px;letter-spacing:-.02em}
+  h2{font-size:22px;margin:56px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  h3{font-size:16px;margin:26px 0 8px;color:var(--accent)}
+  .sub{color:var(--dim);margin:0 0 32px}
+  p,li{color:#cdd6ee}
+  code{font-family:var(--mono);font-size:.88em;background:#1b2338;padding:2px 6px;border-radius:4px;color:#a5d8ff}
+  pre{background:#10162a;border:1px solid var(--line);border-radius:10px;padding:16px;overflow-x:auto}
+  pre code{background:none;padding:0;color:#cdd6ee}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;display:block;overflow-x:auto}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--dim);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;margin:18px 0}
+  .verdict{border-left:3px solid var(--good)}
+  .tag{display:inline-block;font:600 11px/1 var(--mono);padding:5px 8px;border-radius:5px;letter-spacing:.04em}
+  .t-good{background:#123322;color:var(--good)} .t-warn{background:#3a2e10;color:var(--warn)}
+  .t-bad{background:#3a1717;color:var(--bad)}  .t-info{background:#122a3a;color:var(--accent)}
+  ul{padding-left:20px} li{margin:5px 0}
+  .grid2{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+  .kv{font-family:var(--mono);font-size:13px}
+  hr{border:0;border-top:1px solid var(--line);margin:48px 0}
+
+  /* ---- prototype ---- */
+  #proto{position:relative;height:520px;border:1px solid var(--line);border-radius:12px;overflow:hidden;
+         background:linear-gradient(#1a2340 0%,#2d3f6b 35%,#6b5f8f 68%,#e08a5a 100%);cursor:crosshair}
+  #proto canvas{display:block}
+  #labels{position:absolute;inset:0;pointer-events:none}
+  .lbl{position:absolute;transform:translate(-50%,-50%);white-space:nowrap;
+       font:600 12px/1 var(--mono);letter-spacing:.03em;color:#fff;
+       text-shadow:0 2px 10px rgba(0,0,0,.9);padding:6px 10px;border-radius:6px;
+       background:rgba(10,14,26,.42);border:1px solid rgba(255,255,255,.16);
+       opacity:0;transition:opacity .2s;pointer-events:auto;text-decoration:none;display:block}
+  .lbl.near{background:rgba(94,200,255,.22);border-color:var(--accent);box-shadow:0 0 24px rgba(94,200,255,.5)}
+  /* sci-fi neon zone banner: hovers over its island, stem points down at it */
+  .lbl.zone{background:none;border:0;padding:0;transform:translate(-50%,0);pointer-events:none}
+  .zbanner{position:relative;display:flex;flex-direction:column;align-items:center}
+  .ztxt{font:700 15px/1 var(--mono);letter-spacing:.3em;text-indent:.3em;text-transform:uppercase;
+        color:#fff;padding:9px 18px;position:relative;
+        border:1px solid var(--zc);
+        background:linear-gradient(180deg,rgba(4,8,18,.78),rgba(4,8,18,.3));
+        clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);
+        text-shadow:0 0 6px #fff,0 0 14px var(--zc),0 0 30px var(--zc),0 2px 12px #000;
+        box-shadow:0 0 12px var(--zc),0 0 42px -6px var(--zc),inset 0 0 26px -9px var(--zc);
+        animation:zpulse 3.4s ease-in-out infinite}
+  @keyframes zpulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.4)}}
+  /* scanline wash + a bright leading edge — the cheap "hologram" tell */
+  .ztxt::after{content:"";position:absolute;inset:0;pointer-events:none;
+       background:repeating-linear-gradient(180deg,rgba(255,255,255,.12) 0 1px,transparent 1px 3px),
+                  linear-gradient(180deg,var(--zc) 0 2px,transparent 2px)}
+  @media (prefers-reduced-motion:reduce){ .ztxt{animation:none} }
+  .zstem{width:1px;height:var(--stem,26px);
+         background:linear-gradient(180deg,var(--zc),rgba(255,255,255,0));
+         box-shadow:0 0 8px var(--zc)}
+  .zdot{width:7px;height:7px;margin-top:-4px;transform:rotate(45deg);
+        border:1px solid var(--zc);background:rgba(255,255,255,.5);box-shadow:0 0 12px var(--zc)}
+  #hud{position:absolute;left:14px;bottom:14px;font:12px/1.6 var(--mono);color:#dbe6ff;
+       text-shadow:0 1px 6px #000;pointer-events:none}
+  #target{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);text-align:center;
+          font:600 14px/1.5 var(--mono);color:#fff;text-shadow:0 2px 12px #000;pointer-events:none;opacity:0;transition:opacity .18s}
+  #target b{color:var(--accent)}
+  #crosshair{position:absolute;left:50%;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;
+             border:1px solid rgba(255,255,255,.5);border-radius:50%;pointer-events:none}
+  #boot{position:absolute;inset:0;display:grid;place-content:center;text-align:center;gap:10px;
+        background:rgba(8,11,20,.55);backdrop-filter:blur(2px);color:#fff;font:600 15px/1.6 var(--mono)}
+  #boot small{color:var(--dim);font-weight:400}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Sky Navigation for ArcadeDeck</h1>
+<p class="sub">Three.js flight mode — each cloud is a gateway to a game. Planning doc + live prototype.
+<span class="kv">docs/threejs-sky-navigation-plan.html</span></p>
+
+<div class="card verdict">
+  <h3 style="margin-top:0">Verdict: buildable, ~2–3 days, one condition</h3>
+  <p style="margin:0 0 10px"><b>Do not replace <code>/</code>.</b> Home is a prerendered, SEO-load-bearing route
+  (25 games × 6 locales of static shells from <code>scripts/prerender-pages.js</code>). Replacing it with a WebGL
+  canvas deletes the crawlable content that ranks today, and costs an LCP element.</p>
+  <p style="margin:0">Ship sky mode as <b>a second front door</b>: route <code>/sky</code>, lazy chunk, opt-in
+  button on Home, remembered in <code>localStorage</code>. Home stays as-is and keeps ranking. Zero SEO risk,
+  zero bytes added to first paint.</p>
+</div>
+
+<h2>1. Risks and how each one dies</h2>
+<table>
+<tr><th>Risk</th><th>Severity</th><th>Fix</th></tr>
+<tr><td>SEO loss — crawlers see an empty canvas</td><td><span class="tag t-bad">HIGH</span></td>
+    <td>Sky lives at <code>/sky</code>, marked <code>noindex,follow</code>. Home/<code>/play/*</code> untouched.
+        Game labels are real <code>&lt;a href="/play/{slug}"&gt;</code> in a DOM overlay → links still crawlable, still work with JS-lite.</td></tr>
+<tr><td>Bundle weight — three.js ≈ 160 KB gz</td><td><span class="tag t-warn">MED</span></td>
+    <td><code>React.lazy</code> + a <code>three</code> entry in <code>manualChunks</code> (same pattern as the existing <code>firebase</code>/<code>icons</code> split). Chunk only downloads when someone enters sky mode.</td></tr>
+<tr><td>Low-end mobile / no WebGL</td><td><span class="tag t-warn">MED</span></td>
+    <td>Feature-detect + <code>navigator.hardwareConcurrency &lt;= 4</code> → redirect to Home. Cloud puff count scales with DPR.</td></tr>
+<tr><td>Motion sickness / a11y</td><td><span class="tag t-warn">MED</span></td>
+    <td><code>prefers-reduced-motion</code> → never auto-enter; damped camera, no roll, no FOV punch. Persistent "Exit to grid" button. Tab-navigable labels.</td></tr>
+<tr><td>25 games = crowded sky</td><td><span class="tag t-info">LOW</span></td>
+    <td>Golden-angle spiral layout (below). Distance-faded labels: only the nearest ~6 render text.</td></tr>
+<tr><td>Battery drain on idle tab</td><td><span class="tag t-info">LOW</span></td>
+    <td>Pause RAF on <code>visibilitychange</code>. One line.</td></tr>
+</table>
+
+<h2>2. Architecture</h2>
+<pre><code>npm i three                      # + @types/three (dev)
+
+src/pages/Sky.tsx                # route shell: WebGL detect → &lt;SkyScene/&gt; or &lt;Navigate to="/"/&gt;
+src/components/sky/scene.ts      # plain TS, zero React: init(canvas, games) → { dispose }
+src/components/sky/Sky.css
+src/App.tsx                      # + &lt;Route path="/sky" element={&lt;Sky/&gt;} /&gt;   (React.lazy)
+vite.config.ts                   # manualChunks: three → its own chunk
+scripts/prerender-pages.js       # /sky shell gets noindex,follow</code></pre>
+
+<div class="grid2">
+<div class="card"><h3 style="margin-top:0">Why scene.ts is not React</h3>
+<p style="margin:0">Three.js owns a mutable render loop. Wrapping it in React state = re-render storms. One
+<code>useEffect</code> mounts it, returns <code>dispose()</code>. No <code>@react-three/fiber</code> — that is
+another 60 KB and a reconciler you do not need for 25 static billboards.</p></div>
+<div class="card"><h3 style="margin-top:0">Why DOM labels, not 3D text</h3>
+<p style="margin:0">Project each cloud's world position to screen coords, position an absolute
+<code>&lt;a&gt;</code>. Free text rendering, real fonts, real links, keyboard focusable, screen-reader
+readable, i18n via the existing <code>getLocalizedString</code>. A <code>TextGeometry</code> gives you none
+of that and costs a font loader.</p></div>
+</div>
+
+<h2>3. Layout — genre archipelago, not a spiral</h2>
+<div class="card">
+<p style="margin:0 0 10px"><b>The core design question: what can a sky do that a grid cannot?</b> Not density —
+a grid wins that. Not speed — a grid wins that too. The one thing a sky owns is <b>spatial memory</b>:
+"Tower Defense is past the sunset, Gem Merge is the low island on the left." A grid can never be
+remembered as a place.</p>
+<p style="margin:0">That makes layout the highest-leverage decision in the whole feature. A golden-angle
+spiral by array index looks even but means nothing — position carries no information, so nothing is
+learnable and the sky is just a slower grid. <b>Cluster by genre instead.</b> Five islands on a ring,
+games spiralling inside their own island.</p>
+</div>
+<pre><code>// raw genres give 11 zones, 7 of them a single game — dead sky. Fold into 5 dense islands.
+const ZONE_OF = { Arcade:'Arcade', Casual:'Arcade', Strategy:'Strategy', 'Auto-Battle':'Strategy',
+                  'Tower Defense':'Defense', Idle:'Idle &amp; Tycoon', Tycoon:'Idle &amp; Tycoon',
+                  Action:'Action &amp; RPG', Survival:'Action &amp; RPG', Roguelike:'Action &amp; RPG', RPG:'Action &amp; RPG' };
+
+const za = zoneIndex / ZONES.length * Math.PI * 2;                 // island centre on a ring
+const centre = new Vector3(Math.cos(za) * 95, Math.sin(zoneIndex * 2.3) * 12, Math.sin(za) * 95);
+const a = k * GOLDEN, r = 11 * Math.sqrt(k);                       // k = index WITHIN the island
+pos = centre.add(new Vector3(Math.cos(a) * r, Math.sin(k * 1.9) * 6, Math.sin(a) * r));</code></pre>
+<p>Zone sizes land at <span class="kv">Arcade 9 · Strategy 6 · Action&amp;RPG 4 · Defense 3 · Idle&amp;Tycoon 3</span>
+— every island substantial, none a lonely single cloud. Zones map onto the existing
+<code>/genre/:slug</code> IA, so the sky and the grid describe the same site.</p>
+<h3>Three properties worth protecting</h3>
+<ul>
+  <li><b>Positions are deterministic</b> — no <code>Math.random()</code> anywhere. Same sky every visit, or
+      spatial memory never forms. This is a hard constraint, not a nicety.</li>
+  <li><b>Adding a game must not reshuffle the sky.</b> Append within its zone (<code>k</code> = index
+      within zone) so existing clouds never move. Sorting the whole array by date would relocate all 25.</li>
+  <li><b>The hole in the middle is the hub.</b> The ring layout leaves an empty centre — that is where the
+      ArcadeDeck logo / "exit to grid" portal belongs.</li>
+</ul>
+<p><b>Status still tiers within a zone:</b> <code>badge:"NEW"|"UPDATE"</code> nearest the island centre;
+<code>status:"IN PRODUCTION"</code> (4 games) on the island edge as dim translucent puffs, label
+<span class="kv">COMING SOON</span>, not clickable.</p>
+
+<h2>4. Interaction spec</h2>
+<table>
+<tr><th>Input</th><th>Desktop</th><th>Mobile</th></tr>
+<tr><td>Steer</td><td>Mouse position = yaw/pitch, damped</td><td>Drag anywhere</td></tr>
+<tr><td>Thrust</td><td>Always drifting; <kbd>W</kbd>/hold-click = boost</td><td>Always drifting; two-finger = boost</td></tr>
+<tr><td>Target lock</td><td colspan="2">Nearest cloud within 40 u of camera AND within 30° of view axis → HUD shows title + genre</td></tr>
+<tr><td>Enter game</td><td><kbd>Space</kbd> / click the locked cloud</td><td>Tap the locked label</td></tr>
+<tr><td>Autopilot</td><td colspan="2">Click a <i>distant</i> label → camera banks and flies there, hands control back on arrival. Any input cancels. This is the escape valve for "I already know which game I want" — without it, sky mode punishes returning users.</td></tr>
+<tr><td>Escape hatch</td><td colspan="2">Always-visible "Grid view" button → <code>/</code>, choice saved to <code>localStorage</code></td></tr>
+</table>
+<p class="kv" style="color:var(--dim)">Entering = <code>navigate('/play/' + slug)</code>. Same router, so the
+existing <code>GamePlayer</code>, leaderboard and prerendered page all work unchanged.</p>
+
+<h2>5. Performance budget</h2>
+<table>
+<tr><th>Metric</th><th>Target</th><th>How</th></tr>
+<tr><td>Home FCP/LCP</td><td><b>unchanged</b></td><td>Sky is a separate lazy chunk, never touched by Home</td></tr>
+<tr><td>Sky chunk</td><td>&lt; 200 KB gz</td><td>three core only — no loaders, no GLTF, no postprocessing</td></tr>
+<tr><td>Draw calls</td><td>&lt; 40</td><td>All cloud puffs = one <code>InstancedMesh</code> sharing one canvas-generated texture</td></tr>
+<tr><td>Textures</td><td>1</td><td>Radial-gradient puff painted to a 128×128 canvas at runtime → 0 network bytes. A painted WebP replacement costs ~22 KB — see the artwork section.</td></tr>
+<tr><td>Frame</td><td>60 fps desktop / 30 mobile</td><td>Zero lights (unlit sprites), zero shadows, fog for depth</td></tr>
+<tr><td>Assets</td><td>0 files</td><td>Sky is a CSS gradient behind a transparent canvas. No skybox download.</td></tr>
+</table>
+
+<h2>6. Refinements, ranked</h2>
+<p>Ordered by (impact ÷ effort). Everything in tier 1 is already live in the prototype below — fly it before
+reading further. Tier 3 is listed so it stays <i>decided against</i> rather than resurfacing every sprint.</p>
+
+<h3>Tier 1 — done, in the prototype</h3>
+<table>
+<tr><th>Refinement</th><th>Why it matters</th><th>Cost</th></tr>
+<tr><td><b>Genre zones</b> (§3)</td><td>Turns the sky into a place you can learn. The single change that makes sky mode better than a grid rather than a slower one.</td><td>~12 lines</td></tr>
+<tr><td><b>Autopilot on distant click</b></td><td>Kills the fatal flaw: a returning user who wants one specific game should not have to manually fly 90 units. Verified cross-sky in ~3.5 s.</td><td>~10 lines</td></tr>
+<tr><td><b>Bank into turns + FOV punch on boost</b></td><td>The difference between "camera moving" and "flying". Roll is proportional to turn rate, FOV lerps 70→84.</td><td>2 lines</td></tr>
+<tr><td><b>Per-puff height tint</b></td><td>Dark undersides, bright tops — clouds read as volumes, not flat stickers. One <code>setColorAt</code> at init, zero per-frame cost.</td><td>3 lines</td></tr>
+<tr><td><b>Per-instance roll + squash</b></td><td>150 puffs were the same circle stamped 150 times. Rolling and squashing each differently breaks the repetition without a single byte of artwork — see the artwork section below.</td><td>2 lines</td></tr>
+<tr><td><b>Neon zone banners</b></td><td>Sci-fi waypoint hovering over each island — hue-coded per zone, bobbing, with a stem that points down at the island centre. Wayfinding at distance, where game labels are deliberately hidden. See below for why each part is built the way it is.</td><td>~20 lines + CSS</td></tr>
+</table>
+
+<h3>Zone banner — how it's built</h3>
+<div class="card">
+<p style="margin:0 0 10px">Pure DOM + CSS on top of the existing label projection. <b>No extra draw calls, no
+texture, no geometry</b> — the sky is still 1 draw call with the banners on.</p>
+<ul style="margin:0">
+  <li><b>Bob happens in world space, not CSS.</b> A CSS <code>translateY</code> keyframe would bob by a
+      constant pixel amount whether the island is 40 or 140 units away, which instantly reads as a sticker on
+      the screen. Offsetting the world-space Y <i>before</i> projecting means the motion foreshortens with
+      distance and the banner stays welded to its island. ~12 px amplitude near, a slow 5.7 s period.</li>
+  <li><b>The stem is measured, not fixed.</b> Both the banner anchor and the island centre are projected each
+      frame; the stem's height is the screen-pixel delta between them. So the pointer actually lands on the
+      island and shortens correctly as you approach, instead of being a fixed stub that detaches at range.</li>
+  <li><b>Hue per zone</b> (<span class="kv">cyan · violet · magenta · lime · azure</span>) via a
+      <code>--zc</code> custom property — one variable drives border, text glow, box glow, stem gradient and
+      the diamond tip. Zones become identifiable by colour before the text is legible.</li>
+  <li><b>The sci-fi read</b> is three cheap tricks: a <code>clip-path</code> cutting opposite corners, a
+      repeating-gradient scanline wash, and a bright leading edge bar — all in one pseudo-element.</li>
+  <li><b>Fades out on arrival</b> (<code>(d-40)/40</code>). Once you're inside an island the banner has done
+      its job and would only occlude the game labels.</li>
+  <li><b>Reduced-motion is respected</b> — the brightness pulse and the bob amplitude both go to zero.
+      Banners stay fully legible, they just stop moving.</li>
+</ul>
+</div>
+
+<h3>Tier 2 — build during phase 3</h3>
+<table>
+<tr><th>Refinement</th><th>Why</th><th>Note</th></tr>
+<tr><td><b>Thumbnail on approach</b></td><td>Highest remaining visual win. Inside ~50 u a cloud reveals its game art on a billboard — clouds stop being interchangeable white blobs.</td><td>Reuse the existing <code>{slug}-360.webp</code> variants. Load on proximity only: 6 textures live, not 25. Natural LOD, no atlas needed.</td></tr>
+<tr><td><b>Played clouds glow</b></td><td>Free progression layer — "4 of 22 explored" is a reason to come back. Personal, so no two skies look alike.</td><td>Data already exists in <code>MyGames</code>. Tint played clouds warm gold via the same <code>setColorAt</code> path.</td></tr>
+<tr><td><b>Onboarding in the first 3 s</b></td><td>An unexplained flight sim loses people instantly. Auto-drift toward the nearest <code>NEW</code> game with one fading hint line.</td><td>Autopilot already does the flying — point it at a game on mount and fade a hint. Nearly free.</td></tr>
+<tr><td><b>Podium name on the locked cloud</b></td><td>Social proof at the exact moment of decision, and it makes the leaderboard visible to people who never scroll to it.</td><td>The <code>aggregates/podium</code> doc is one read and already cached 24 h in <code>localStorage</code>. No new query.</td></tr>
+<tr><td><b>Wind bed + arrival whoosh</b></td><td>Biggest atmosphere-per-byte in the whole list.</td><td>Gated behind a visible toggle, default OFF. Autoplay policy means it can only start after the first gesture — the "click to launch" gate already provides one.</td></tr>
+<tr><td><b>Star layer above / haze below</b></td><td>Parallax sells altitude; right now up and down feel identical.</td><td>One <code>Points</code> cloud + one gradient plane. ~2 extra draw calls.</td></tr>
+</table>
+
+<h3>Tier 3 — deliberately not doing</h3>
+<table>
+<tr><th>Idea</th><th>Why not</th></tr>
+<tr><td>Soft-particle depth-fade shader</td><td>Needs a custom shader + depth prepass to stop puffs hard-cutting into each other. Real quality gain, but it is the most expensive item here and the height tint already buys most of the perceived volume. Revisit only if clouds still look flat with thumbnails in.</td></tr>
+<tr><td>Volumetric / raymarched clouds</td><td>Beautiful, and a full-screen fragment cost that guts mobile. Wrong trade for a navigation menu.</td></tr>
+<tr><td>Physics, collision, stamina, currency</td><td>Sky mode is a menu. Every game-like system added is one more thing between a visitor and playing an actual game.</td></tr>
+<tr><td>Multiplayer ghosts of other visitors</td><td>Charming, and it needs a realtime presence channel plus moderation surface. Firestore cost model is wrong for it. Not for a navigation layer.</td></tr>
+<tr><td>Procedural weather / day-night cycle</td><td>Breaks the deterministic-sky rule that spatial memory depends on. A fixed dusk is also simply the best-looking option.</td></tr>
+<tr><td>VR / WebXR</td><td>Audience is ~0. <code>three</code> supports it later if that ever changes.</td></tr>
+</table>
+
+<h3>Artwork — PNG or not?</h3>
+<p><b>Short answer: not PNG. WebP.</b> And the format is not where the quality actually comes from — spend
+the free wins first. Numbers below are real encodes of a representative 256² cloud sprite (RGBA, alpha
+required), measured with the <code>sharp</code> already in <code>devDependencies</code>:</p>
+<table>
+<tr><th>Art style</th><th>PNG</th><th>PNG (palette)</th><th>WebP q80</th><th>PNG vs WebP</th></tr>
+<tr><td>Soft painterly — what cloud art actually looks like</td><td>141.4 KB</td><td>20.6 KB</td><td><b>21.7 KB</b></td><td>6.5×</td></tr>
+<tr><td>Detailed puff with visible wisps</td><td>160.1 KB</td><td>38.0 KB</td><td><b>42.5 KB</b></td><td>3.8×</td></tr>
+<tr><td>Heavy noise (worst case)</td><td>163.9 KB</td><td>45.6 KB</td><td><b>58.0 KB</b></td><td>2.8×</td></tr>
+</table>
+<p>Two things fall out of that table:</p>
+<ul>
+  <li><b>Straight PNG is never the answer</b> — 6.5× the bytes for identical pixels on exactly the art style
+      a cloud uses. Soft gradients are PNG's worst case and WebP's best.</li>
+  <li><b>Palette PNG matches WebP on size and loses on quality.</b> It gets there by quantising to 256
+      colours — and on a cloud the smooth alpha falloff <i>is</i> the entire visible surface, so that's
+      precisely where banding shows. WebP keeps full 8-bit alpha at the same cost. WebP-only is already the
+      rule in <code>RULES.md</code>; this is one more reason it's the right rule.</li>
+</ul>
+<p><b>But format is the last decision, not the first.</b> Ranked by quality per byte:</p>
+<table>
+<tr><th>#</th><th>Move</th><th>Cost</th><th>Note</th></tr>
+<tr><td>1</td><td><b>Per-instance roll + non-uniform squash</b></td><td class="kv">0 bytes</td>
+    <td>Every puff was the same circle billboarded the same way — 150 identical stamps. Rolling each one
+        differently and squashing slightly breaks that instantly. <span class="tag t-good">DONE — live below</span></td></tr>
+<tr><td>2</td><td><b>Tint clouds toward their zone hue</b></td><td class="kv">0 bytes</td>
+    <td>Reuses the banner's <code>--zc</code> palette through the existing <code>setColorAt</code> path.
+        Islands become identifiable by colour from across the sky. Do this before buying any art.</td></tr>
+<tr><td>3</td><td><b>One painted 256² WebP puff</b></td><td class="kv">~22 KB</td>
+    <td>Replaces the runtime canvas gradient. Best single quality-per-byte purchase — an irregular painted
+        silhouette is the one thing a radial gradient fundamentally cannot fake.</td></tr>
+<tr><td>4</td><td><b>Game thumbnails on approach</b></td><td class="kv">0 new assets</td>
+    <td>The <code>{slug}-360.webp</code> variants already exist. This is the highest-impact art in the whole
+        feature and it costs no production time — it's what makes cloud #7 <i>Gem Merge</i> instead of
+        "another white blob". Load only for the ~6 nearest.</td></tr>
+<tr><td>5</td><td><b>6-puff atlas</b></td><td class="kv">~180 KB</td>
+    <td>Measured, 768×512 WebP q80. Only if 1–4 still read repetitive. Note it nearly doubles the whole sky
+        chunk budget <i>and</i> needs per-instance UV offsets
+        (<code>InstancedBufferAttribute</code> + <code>onBeforeCompile</code>) to stay at one draw call.
+        Real complexity — earn it before spending it.</td></tr>
+</table>
+<p class="kv" style="color:var(--dim)">Compression footnote: sprite cost is driven by how noisy the art is,
+not by resolution or format — the worst-case style costs ~2.7× the painterly one at the same size in the same
+encoder. Brief the artist for soft, large-feature shapes and the bytes take care of themselves.</p>
+
+<h3>Recommended combination</h3>
+<div class="card verdict">
+<p style="margin:0 0 10px"><b>Do 1 + 2 + 3 + 4. Skip the atlas.</b> Total new artwork: <b>three cloud sprites</b>.
+Total added weight: <b>~30–70 KB</b>. Total added draw calls: <b>2</b>.</p>
+<p style="margin:0"><b>Why the atlas is out:</b> an atlas exists to keep everything in one draw call, which
+costs a per-instance UV attribute and an <code>onBeforeCompile</code> shader patch. But the budget allows 40
+draw calls and we are using 1. Three separate textures on three <code>InstancedMesh</code>es buys the same
+variety for 3 draw calls, <b>zero shader work</b>, and fewer bytes (no atlas padding, and three small images
+compress better than one big sheet). Cheaper on every axis that matters.
+<span class="tag t-good">DONE — the prototype now runs 3 variants at 3 draw calls</span></p>
+</div>
+<table>
+<tr><th>#</th><th>Move</th><th>Status</th><th>Cost</th></tr>
+<tr><td>1</td><td>Per-instance roll + squash</td><td><span class="tag t-good">DONE</span></td><td class="kv">0 bytes</td></tr>
+<tr><td>2</td><td>Zone-hue cloud tint (matches the neon banners)</td><td><span class="tag t-good">DONE</span></td><td class="kv">0 bytes</td></tr>
+<tr><td>3</td><td>Three painted puff sprites, 256² WebP</td><td><span class="tag t-warn">NEEDS ART</span></td><td class="kv">~30–70 KB</td></tr>
+<tr><td>4</td><td>Game thumbnails on approach</td><td><span class="tag t-info">PHASE 3</span></td><td class="kv">0 new assets</td></tr>
+<tr><td>5</td><td><s>6-puff atlas</s></td><td><span class="tag t-bad">DROPPED</span></td><td class="kv">—</td></tr>
+</table>
+
+<h3>Artwork brief — three sprites</h3>
+<p><b>Generate white cloud on pure black, square, 1024×1024.</b> Image generators cannot emit a real alpha
+channel, so brightness becomes transparency: <code>scripts/sky-puff-textures.cjs</code> keys luminance to
+alpha and encodes to WebP at 256².</p>
+<pre><code>node scripts/sky-puff-textures.cjs raw/puff-a.png raw/puff-b.png raw/puff-c.png
+# -> public/images/sky/puff-{a,b,c}.webp   (256², alpha, sRGB, reports KB and warns over budget)</code></pre>
+<p><b>Non-negotiables</b> — these are what make the sprite work in-engine rather than just look nice:</p>
+<ul>
+  <li><b>Pure black background</b> (<code>#000000</code>), not dark grey, not a sky. Grey background becomes
+      a translucent square halo around every cloud.</li>
+  <li><b>Neutral white cloud, no colour cast.</b> The engine multiplies in the zone hue at runtime — pre-tinted
+      art fights it and the islands stop being colour-coded.</li>
+  <li><b>~10% empty margin on all sides.</b> A cloud touching the frame edge gets a hard straight cut where
+      the sprite ends.</li>
+  <li><b>Soft, large forms.</b> Fine wispy detail is the single biggest driver of file size — the noisy style
+      measured 2.7× the painterly one.</li>
+  <li><b>No horizon, ground, sun, birds, text, watermark, border, or drop shadow.</b> One isolated cloud mass.</li>
+</ul>
+<div class="grid2">
+<div class="card"><h3 style="margin-top:0">A — broad mound</h3>
+<pre style="white-space:pre-wrap"><code>A single isolated cumulus cloud, pure white, centred on
+a solid pure black background. Wide flat-bottomed mound
+shape, about three soft overlapping lobes, wider than it
+is tall. Soft painterly airbrushed edges that fade
+gradually to black. Gentle top lighting, slightly darker
+underside. Simple large forms, no fine wispy detail.
+Square composition, cloud fills about 80% of the frame
+with empty black margin on all sides.</code></pre></div>
+<div class="card"><h3 style="margin-top:0">B — tall billow</h3>
+<pre style="white-space:pre-wrap"><code>A single isolated cumulus cloud, pure white, centred on
+a solid pure black background. Tall billowing tower
+shape, four or five rounded cauliflower lobes stacked
+upward, taller than it is wide. Soft painterly airbrushed
+edges that fade gradually to black. Gentle top lighting,
+slightly darker underside. Simple large forms, no fine
+wispy detail. Square composition, cloud fills about 80%
+of the frame with empty black margin on all sides.</code></pre></div>
+<div class="card"><h3 style="margin-top:0">C — torn fragment</h3>
+<pre style="white-space:pre-wrap"><code>A single isolated wispy cloud fragment, pure white,
+centred on a solid pure black background. Loose ragged
+torn shape with two soft lobes and a thinning trailing
+edge, less dense than a full cumulus. Soft painterly
+airbrushed edges that fade gradually to black. Gentle
+top lighting. Simple large forms, no tiny detail.
+Square composition, cloud fills about 80% of the frame
+with empty black margin on all sides.</code></pre></div>
+<div class="card"><h3 style="margin-top:0">Negative prompt</h3>
+<pre style="white-space:pre-wrap"><code>sky, blue, gradient background, horizon, ground,
+landscape, sun, sunset, birds, rain, lightning, text,
+watermark, signature, border, frame, vignette, drop
+shadow, hard edges, outline, sharp contrast, photo
+grain, noise, multiple separate clouds, cropped</code></pre>
+<p class="kv" style="margin:10px 0 0;color:var(--dim)">If the generator ignores "pure black", generate on any
+flat dark colour and the script still keys it — but check the result has no square halo.</p></div>
+</div>
+
+<h3>Open question worth a decision</h3>
+<p><b>Should sky mode ever be the default?</b> Recommendation: no, not initially. Ship it opt-in, then read the
+numbers — if sky-mode sessions show higher games-per-session than grid sessions, promote it to default
+<i>for returning visitors only</i> (first-time visitors keep the grid, which is also what search traffic lands on).
+That keeps the SEO surface and the acquisition path untouched either way.</p>
+
+<h2>7. Phases</h2>
+<ol>
+  <li><b>Prototype</b> — the canvas below, tier-1 refinements included. Validate the <i>feel</i> first; everything after is plumbing. <span class="tag t-good">DONE — scroll down</span></li>
+  <li><b>Port</b> — prototype → <code>scene.ts</code>, fed by real <code>games.json</code> + <code>getLocalizedString</code>. Route + lazy chunk + manualChunks. Zone names go in <code>en.json</code> <code>ui</code>, not hardcoded.</li>
+  <li><b>Polish</b> — tier-2 list (thumbnails, played-glow, onboarding, podium, audio, parallax) + status tiering, mobile touch, reduced-motion, WebGL fallback.</li>
+  <li><b>Wire in</b> — "Enter the Sky" button on Home hero, <code>noindex</code> shell in prerender, remembered preference.</li>
+</ol>
+
+<hr>
+
+<h2>8. Live prototype</h2>
+<p>Real Three.js, real 25 games from <code>games.json</code>, all tier-1 refinements applied. Open this file
+directly — no server needed.</p>
+<p><b>Move mouse to steer · hold click or <kbd>W</kbd> to boost · click a <i>far</i> label for autopilot ·
+fly into a cloud until it lights up, then <kbd>Space</kbd> or click to enter.</b></p>
+
+<div id="proto">
+  <div id="labels"></div>
+  <div id="crosshair"></div>
+  <div id="hud"></div>
+  <div id="target"></div>
+  <div id="boot">Click to launch<small>loads three.js r160 from unpkg (~600 KB, uncached)</small></div>
+</div>
+<p class="kv" style="color:var(--dim);margin-top:10px">Prototype loads three from CDN for zero-setup viewing.
+Production uses <code>npm i three</code> + tree-shaken ESM — a fraction of this size.</p>
+
+<h3>What the prototype proves</h3>
+<ul>
+  <li>25 clouds place into 5 legible islands with no manual positioning and no overlap</li>
+  <li>Proximity targeting reads without a tutorial; autopilot crosses the sky in ~3.5 s</li>
+  <li>DOM labels track 3D positions at 60 fps and stay clickable / focusable</li>
+  <li>Neon zone banners bob in world space and their stems stay locked to island centres at any range</li>
+  <li>Whole sky is 150 instanced puffs across 3 texture variants, <b>3 draw calls</b>, 0 downloaded assets —
+      swapping the runtime placeholders for real WebP art changes one function, nothing else</li>
+  <li>Left alone with no input it never strands you — the boundary banks you back into the field</li>
+</ul>
+
+<h3>What it deliberately skips</h3>
+<p class="kv" style="color:var(--dim)">Touch controls, reduced-motion, WebGL fallback, i18n titles, status
+tiering, and every tier-2 item above. None change the feasibility answer.</p>
+
+</div>
+
+<script>
+// ---------------------------------------------------------------- prototype
+const GAMES = [
+ ["gate-of-hell","Gate of Hell","Tower Defense"],["galaxy-launch","Galaxy Launch","Idle"],
+ ["idle-avatar-rpg","Idle Avatar RPG","Idle"],["gem-merge","Gem Merge","Casual"],
+ ["trade-tycoon","Trade Tycoon","Strategy"],["15s-click-challenge","15s Click Challenge","Arcade"],
+ ["omok","Omok","Strategy"],["40th-century-void-survivor","Void Survivor","Survival"],
+ ["kingdom-of-ashes-endless-war","Endless War","Strategy"],["kingdom-of-ashes-dice-war","Dice War","Roguelike"],
+ ["heroes-of-the-last-nexus","Last Nexus","RPG"],["timing-chef","Timing Chef","Arcade"],
+ ["fruit-frenzy","Fruit Frenzy","Arcade"],["kingdoms-last-stand","Kingdom's Last Stand","Strategy"],
+ ["triangle-battle","Triangle Battle!","Arcade"],["tank-battle-1v1","Tank Battle 1v1","Action"],
+ ["spirit-duel","Spirit Duel","Strategy"],["skyfall","Skyfall","Arcade"],
+ ["polygon-invasion-td","Polygon Invasion TD","Tower Defense"],["just-jump","Just Jump","Arcade"],
+ ["mythic-defenders-heroes-returns","Mythic Defender","Tower Defense"],["falling-dodger","Falling Dodger","Arcade"],
+ ["entrepreneur-tycoon","Entrepreneur Tycoon","Tycoon"],["vault-of-ashes-fallen-era","Vault of Ashes","Auto-Battle"],
+ ["neon-stack","Neon Stack","Arcade"]
+];
+
+document.getElementById('boot').onclick = function () {
+  this.textContent = 'loading three.js…';
+  const s = document.createElement('script');
+  s.src = 'https://unpkg.com/three@0.160.1/build/three.min.js';
+  s.onerror = () => { document.getElementById('boot').innerHTML = 'CDN blocked — connect to the internet, or run <code>npm i three</code> and port the prototype.'; };
+  s.onload = () => { document.getElementById('boot').remove(); start(THREE); };
+  document.head.appendChild(s);
+};
+
+function start(THREE) {
+  const host = document.getElementById('proto');
+  const labelBox = document.getElementById('labels');
+  const hud = document.getElementById('hud');
+  const targetEl = document.getElementById('target');
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(host.clientWidth, host.clientHeight);
+  host.insertBefore(renderer.domElement, labelBox);
+
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.Fog(0x5c6ea8, 60, 240);
+  const cam = new THREE.PerspectiveCamera(70, host.clientWidth / host.clientHeight, 0.5, 400);
+  cam.position.set(0, 20, 148);
+
+  // ---- puff textures -------------------------------------------------------
+  // THREE variants, one InstancedMesh each = 3 draw calls, zero shader work.
+  // Placeholders are painted at runtime (0 network bytes). To swap in real art, replace
+  // makePuffTex() with new THREE.TextureLoader().load('images/sky/puff-{a,b,c}.webp') —
+  // nothing else in this file changes.
+  const VARIANTS = 3;
+  function makePuffTex(v) {
+    const N = 128, c = document.createElement('canvas'); c.width = c.height = N;
+    const cc = c.getContext('2d');
+    // 3 overlapping lobes per variant -> irregular silhouette a single circle can't fake
+    const lobes = [[.5, .52, .46], [.34 + v * .06, .44, .3], [.66 - v * .05, .58, .27]];
+    for (const [lx, ly, lr] of lobes) {
+      const g2 = cc.createRadialGradient(lx * N, ly * N, 0, lx * N, ly * N, lr * N);
+      g2.addColorStop(0, 'rgba(255,255,255,.80)');
+      g2.addColorStop(.5, 'rgba(244,247,255,.34)');
+      g2.addColorStop(1, 'rgba(255,255,255,0)');
+      cc.fillStyle = g2; cc.fillRect(0, 0, N, N);
+    }
+    const t = new THREE.CanvasTexture(c);
+    t.colorSpace = THREE.SRGBColorSpace;
+    return t;
+  }
+
+  const PUFFS = 6;
+  const geo = new THREE.PlaneGeometry(1, 1);
+  // assign every puff to a variant up front, so each mesh is sized exactly
+  const slots = Array.from({ length: VARIANTS }, () => []);
+  const meshes = [];
+
+  // GENRE ZONES: archipelago, not a flat spiral. Each genre is an island on a ring, games
+  // cluster inside it. The sky becomes learnable — "Tower Defense is past the sunset".
+  // Raw genres give 11 zones, 7 of them a single game — dead sky. Fold into 5 dense islands.
+  const ZONE_OF = {
+    'Arcade': 'Arcade', 'Casual': 'Arcade',
+    'Strategy': 'Strategy', 'Auto-Battle': 'Strategy',
+    'Tower Defense': 'Defense',
+    'Idle': 'Idle & Tycoon', 'Tycoon': 'Idle & Tycoon',
+    'Action': 'Action & RPG', 'Survival': 'Action & RPG',
+    'Roguelike': 'Action & RPG', 'RPG': 'Action & RPG',
+  };
+  const GOLDEN = Math.PI * (3 - Math.sqrt(5));
+  const ZONES = [...new Set(GAMES.map(g => ZONE_OF[g[2]]))];
+  const ZONE_HUE = [188, 282, 320, 96, 216];      // cyan · violet · magenta · lime · azure
+  const BOB = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 3.2;
+  const seen = {};
+  const clouds = GAMES.map(([slug, title, genre], i) => {
+    const zone = ZONE_OF[genre];
+    const zi = ZONES.indexOf(zone);
+    const k = (seen[zone] = (seen[zone] ?? -1) + 1);            // index within its zone
+    const za = (zi / ZONES.length) * Math.PI * 2;
+    const center = new THREE.Vector3(Math.cos(za) * 95, Math.sin(zi * 2.3) * 12, Math.sin(za) * 95);
+    const a = k * GOLDEN, r = 11 * Math.sqrt(k);
+    const pos = center.clone().add(
+      new THREE.Vector3(Math.cos(a) * r, Math.sin(k * 1.9) * 6, Math.sin(a) * r));
+
+    const el = document.createElement('a');
+    el.className = 'lbl'; el.href = '/play/' + slug; el.textContent = title;
+    labelBox.appendChild(el);
+    // deterministic puff offsets — no Math.random, same sky every load
+    const puffs = Array.from({ length: PUFFS }, (_, kk) => {
+      const t = i * 7.31 + kk * 2.11;
+      return { o: new THREE.Vector3(Math.sin(t) * 9, Math.cos(t * 1.7) * 3, Math.cos(t * .6) * 6),
+               s: 11 + Math.sin(t * 3.1) * 4,
+               rot: t * 1.37 };   // per-puff roll: kills the "same blob 150×" read for 0 bytes
+    });
+    const cl = { slug, title, genre, pos, el, puffs, center, zi };
+    puffs.forEach((p, kk) => slots[(i + kk) % VARIANTS].push({ cl, p }));
+    el.onclick = e => { e.preventDefault(); locked === cl ? enter(slug, title) : (flyTo = cl); };
+    return cl;
+  });
+
+  // one mesh per texture variant, sized to its exact slot count
+  const colr = new THREE.Color();
+  slots.forEach((list, v) => {
+    const m = new THREE.InstancedMesh(geo,
+      new THREE.MeshBasicMaterial({ map: makePuffTex(v), transparent: true, depthWrite: false, fog: true }),
+      list.length);
+    m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    // colour set ONCE: zone hue for identity + height shading for volume
+    list.forEach(({ cl, p }, n) => m.setColorAt(n, colr.setHSL(
+      ZONE_HUE[cl.zi % ZONE_HUE.length] / 360,
+      0.22,                                   // low sat — still reads as cloud, not candy
+      0.64 + p.o.y * 0.035)));                // dark underside, bright top
+    meshes.push(m); scene.add(m);
+  });
+
+  // Neon waypoint banner per zone: hovers above its island, bobs, stem points down at the centre.
+  // Each zone gets its own hue so the islands are colour-coded from across the sky.
+  const zoneEls = ZONES.map((name, zi) => {
+    const za = (zi / ZONES.length) * Math.PI * 2;
+    const base = new THREE.Vector3(Math.cos(za) * 95, Math.sin(zi * 2.3) * 12, Math.sin(za) * 95);
+    const el = document.createElement('div');
+    el.className = 'lbl zone';
+    el.style.setProperty('--zc', `hsl(${ZONE_HUE[zi % ZONE_HUE.length]} 100% 66%)`);
+    el.innerHTML = '<div class="zbanner"><div class="ztxt"></div>' +
+                   '<div class="zstem"></div><div class="zdot"></div></div>';
+    el.querySelector('.ztxt').textContent = name;          // textContent — never inject game/zone text as HTML
+    labelBox.appendChild(el);
+    return { el, base, anchor: base.clone().setY(base.y + 34), zi };
+  });
+
+  const dummy = new THREE.Object3D();
+  const yaw = { v: 0, t: 0 }, pitch = { v: -0.14, t: -0.14 };   // start tilted into the field
+  let boost = 0, locked = null, flyTo = null;
+  const wrap = a => ((a + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
+
+  host.addEventListener('pointermove', e => {
+    const r = host.getBoundingClientRect();
+    yaw.t   = -((e.clientX - r.left) / r.width  - .5) * 2.2;
+    pitch.t = -((e.clientY - r.top ) / r.height - .5) * 0.7;
+  });
+  host.addEventListener('pointerdown', () => { boost = 1; flyTo = null; });  // any input takes over
+  addEventListener('pointerup', () => boost = 0);
+  addEventListener('keydown', e => {
+    if (e.code === 'KeyW') { boost = 1; flyTo = null; }
+    if (e.code === 'Space' && locked) { e.preventDefault(); enter(locked.slug, locked.title); }
+  });
+  addEventListener('keyup', e => { if (e.code === 'KeyW') boost = 0; });
+  addEventListener('resize', () => {
+    renderer.setSize(host.clientWidth, host.clientHeight);
+    cam.aspect = host.clientWidth / host.clientHeight; cam.updateProjectionMatrix();
+  });
+
+  function enter(slug, title) {
+    targetEl.innerHTML = '&rarr; would navigate to <b>/play/' + slug + '</b>';
+    targetEl.style.opacity = 1;
+    console.log('[sky] enter', slug, title);
+  }
+
+  const fwd = new THREE.Vector3(), toCloud = new THREE.Vector3(), proj = new THREE.Vector3();
+  let raf;
+
+  function frame() {
+    raf = requestAnimationFrame(frame);
+    // click a distant label -> autopilot flies you there. Fixes "I just want Gem Merge now"
+    // without making you leave sky mode.
+    let auto = 0;
+    if (flyTo) {
+      toCloud.copy(flyTo.pos).sub(cam.position);
+      if (toCloud.length() < 34) flyTo = null;
+      else {
+        auto = 1;
+        yaw.t += wrap(Math.atan2(-toCloud.x, -toCloud.z) - yaw.t) * 0.14;
+        pitch.t += (Math.asin(toCloud.y / toCloud.length()) - pitch.t) * 0.14;
+      }
+    }
+
+    yaw.v += (yaw.t - yaw.v) * .045;
+    pitch.v += (pitch.t - pitch.v) * .045;
+    const thrust = Math.max(boost, auto);
+    cam.rotation.set(pitch.v, yaw.v, (yaw.t - yaw.v) * 0.9, 'YXZ');   // bank into the turn
+    cam.fov += ((thrust ? 84 : 70) - cam.fov) * 0.06;                 // FOV punch reads as speed
+    cam.updateProjectionMatrix();
+    cam.getWorldDirection(fwd);
+    cam.position.addScaledVector(fwd, 0.28 + thrust * 0.85);
+    // soft sky boundary: clamp, then bank the aim back toward the field so you never
+    // end up drifting forever at the edge staring at empty sky
+    if (cam.position.length() > 150) {          // zone ring is 95 + cluster spread — keep rim close
+      cam.position.setLength(150);
+      if (!flyTo) {
+        yaw.t += wrap(Math.atan2(cam.position.x, cam.position.z) - yaw.t) * 0.1;  // face origin
+        pitch.t += (-cam.position.y / 300 - pitch.t) * 0.1;
+      }
+    }
+    cam.position.y = THREE.MathUtils.clamp(cam.position.y, -34, 40);
+
+    // billboard every puff at the camera, one mesh per texture variant
+    for (let v = 0; v < VARIANTS; v++) {
+      const list = slots[v];
+      for (let n = 0; n < list.length; n++) {
+        const { cl, p } = list[n];
+        dummy.position.copy(cl.pos).add(p.o);
+        dummy.quaternion.copy(cam.quaternion);
+        dummy.rotateZ(p.rot);                    // billboard, then roll each puff differently
+        dummy.scale.set(p.s * (1 + Math.sin(p.rot) * .18), p.s, 1);   // slight non-uniform squash
+        dummy.updateMatrix();
+        meshes[v].setMatrixAt(n, dummy.matrix);
+      }
+      meshes[v].instanceMatrix.needsUpdate = true;
+    }
+
+    let best = null, bestD = 1e9;
+    for (const cl of clouds) {
+      toCloud.copy(cl.pos).sub(cam.position);
+      const d = toCloud.length();
+      const aim = toCloud.normalize().dot(fwd);       // 1 = dead ahead
+
+      proj.copy(cl.pos).project(cam);
+      const onScreen = proj.z < 1 && Math.abs(proj.x) < 1.1 && Math.abs(proj.y) < 1.1;
+      // full-bright inside 75 u, gone by 125 u — declutters the far field automatically
+      cl.el.style.opacity = onScreen ? String(THREE.MathUtils.clamp((125 - d) / 50, 0, 1)) : '0';
+      if (onScreen) {
+        cl.el.style.left = (proj.x * .5 + .5) * 100 + '%';
+        cl.el.style.top  = (-proj.y * .5 + .5) * 100 + '%';
+      }
+      if (d < 40 && aim > 0.86 && d < bestD) { bestD = d; best = cl; }
+    }
+
+    // Zone banners. Bob happens in WORLD space, not CSS, so it foreshortens with distance and
+    // stays welded to its island. Stem length is measured banner->island in screen px each frame,
+    // so the pointer actually touches the island instead of being a fixed-length stub.
+    const t = performance.now();
+    const W = host.clientWidth, H = host.clientHeight;
+    for (const z of zoneEls) {
+      const d = z.anchor.distanceTo(cam.position);
+      const on = d > 30;
+      let vis = 0;
+      if (on) {
+        proj.copy(z.anchor).setY(z.anchor.y + Math.sin(t * 0.0011 + z.zi * 1.7) * BOB).project(cam);
+        const onScreen = proj.z < 1 && Math.abs(proj.x) < 1.25 && Math.abs(proj.y) < 1.25;
+        if (onScreen) {
+          const ax = (proj.x * .5 + .5) * W, ay = (-proj.y * .5 + .5) * H;
+          z.el.style.left = ax + 'px';
+          z.el.style.top  = ay + 'px';
+          proj.copy(z.base).project(cam);                       // where the island actually is
+          const by = (-proj.y * .5 + .5) * H;
+          z.el.style.setProperty('--stem', THREE.MathUtils.clamp(by - ay - 34, 0, 260) + 'px');
+          vis = THREE.MathUtils.clamp((d - 40) / 40, 0, 1);     // fades out as you arrive
+        }
+      }
+      z.el.style.opacity = String(vis);
+    }
+
+    if (best !== locked) {
+      if (locked) locked.el.classList.remove('near');
+      locked = best;
+      if (locked) {
+        locked.el.classList.add('near');
+        targetEl.innerHTML = '<b>' + locked.title + '</b> &middot; ' + locked.genre +
+                             '<br>press SPACE to enter';
+        targetEl.style.opacity = 1;
+      } else targetEl.style.opacity = 0;
+    }
+    hud.textContent = 'alt ' + cam.position.y.toFixed(0) +
+                      '  ·  ' + GAMES.length + ' gateways / ' + ZONES.length + ' zones  ·  ' +
+                      (flyTo ? 'AUTOPILOT → ' + flyTo.title : thrust ? 'BOOST' : 'drift') +
+                      '  ·  ' + renderer.info.render.calls + ' draw calls';
+    renderer.render(scene, cam);
+  }
+  frame();
+
+  document.addEventListener('visibilitychange', () => {          // no idle battery burn
+    if (document.hidden) cancelAnimationFrame(raf); else frame();
+  });
+}
+</script>
+</body>
+</html>

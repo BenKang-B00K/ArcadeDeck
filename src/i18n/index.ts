@@ -17,6 +17,5 @@ export {
   getLocalizedString,
   getLocalizedArray,
   getLocalizedObjects,
-  getEnFeatures,
 } from './getLocalized';
 export { useUiText } from './useUiText';

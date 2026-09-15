@@ -1,9 +1,11 @@
 /* style.css - VFX-enhanced styling for Click the Target */
+html { overscroll-behavior: none; }  /* no pull-to-refresh / rubber-band from frantic swipe-taps */
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   color: #e6eefc;
   background-color: #061026;
-  /* Layered background: dark top→bottom gradient + corner vignette + nebula image (bottom). */
+  /* Layered background: dark top→bottom gradient + corner vignette + nebula image (bottom).
+     No background-attachment:fixed — iOS ignores it, Android repaints all 3 layers per scroll frame. */
   background-image:
     linear-gradient(180deg, rgba(6,10,30,0.55) 0%, rgba(6,10,30,0.20) 28%, rgba(6,10,30,0.32) 72%, rgba(6,10,30,0.65) 100%),
     radial-gradient(ellipse at center, transparent 35%, rgba(6,10,30,0.55) 100%),
@@ -11,14 +13,19 @@ body {
   background-repeat: no-repeat, no-repeat, no-repeat;
   background-size: cover, cover, cover;
   background-position: center, center, center;
-  background-attachment: fixed, fixed, fixed;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  min-height: 100dvh;  /* mobile: 100vh includes the collapsed URL bar → phantom scroll */
   margin: 0;
   position: relative;
   overflow-x: hidden;
+  /* touch: no double-tap zoom delay on buttons / edge misses, no tap flash, no long-press selection */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* Smaller fallback for narrower viewports — saves bandwidth on mobile. */
@@ -42,28 +49,14 @@ body::before {
   animation: ambientShift 18s linear infinite;
 }
 
-body::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle at 10% 20%, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.00) 28px), radial-gradient(circle at 80% 70%, rgba(255,160,220,0.02) 0px, rgba(255,255,255,0.00) 36px);
-  mix-blend-mode: screen;
-  opacity: 0.9;
-  pointer-events: none;
-  z-index: 1;
-  animation: particlesFloat 10s linear infinite;
-}
-
 @keyframes ambientShift {
   0% { transform: translate3d(-3%, 0, 0) scale(1.02); }
   50% { transform: translate3d(3%, -1.5%, 0) scale(1.01); }
   100% { transform: translate3d(-3%, 0, 0) scale(1.02); }
 }
-
-@keyframes particlesFloat {
-  0% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-6px) rotate(2deg); }
-  100% { transform: translateY(0) rotate(0deg); }
+/* Static on phones: the drifting 140%-viewport layer costs a full-screen composite per frame. */
+@media (max-width: 900px) {
+  body::before { animation: none; transform: none; }
 }
 
 /* subtle animated vignette and noise */
@@ -105,8 +98,6 @@ body::after {
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(0,0,0,0.4);
   transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
 }
 .tb-btn:hover {
   transform: translateY(-2px) scale(1.08);
@@ -115,19 +106,19 @@ body::after {
 }
 .tb-btn:active { transform: translateY(0) scale(0.95); }
 .tb-btn.muted { background: rgba(200,60,80,0.1); border-color: rgba(200,60,80,0.15); color: #ffd6d6; }
+.tb-btn svg { width: 20px; height: 20px; }
 
-/* guide overlay */
+/* guide / records modals (<dialog>; showModal() centers it and paints ::backdrop) */
 .guide-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  background: rgba(4,4,16,0.85);
-  align-items: center;
-  justify-content: center;
+  width: 90%;
+  max-width: 380px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
   animation: guideFadeIn 0.3s ease-out;
 }
-.guide-overlay.active { display: flex; }
+.guide-overlay::backdrop { background: rgba(4,4,16,0.85); }
 @keyframes guideFadeIn { from { opacity:0; } to { opacity:1; } }
 
 .guide-card {
@@ -135,8 +126,6 @@ body::after {
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 18px;
   padding: 24px 28px 20px;
-  max-width: 380px;
-  width: 90%;
   max-height: 80vh;
   overflow-y: auto;
   box-shadow: 0 16px 60px rgba(0,0,0,0.6), 0 0 40px rgba(180,90,220,0.1) inset;
@@ -215,29 +204,6 @@ body::after {
 .guide-card {
   scrollbar-width: thin;
   scrollbar-color: rgba(199,160,255,0.5) rgba(255,255,255,0.03);
-}
-.guide-card::-webkit-scrollbar { width: 10px; }
-.guide-card::-webkit-scrollbar-track {
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(199,160,255,0.04));
-  border-radius: 8px;
-  margin: 6px 0;
-}
-.guide-card::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(199,160,255,0.55), rgba(110,255,255,0.42));
-  border-radius: 8px;
-  border: 2px solid rgba(10,6,24,0.55);
-  background-clip: padding-box;
-  box-shadow: inset 0 0 6px rgba(199,160,255,0.3);
-  transition: background 0.2s ease;
-}
-.guide-card::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, rgba(199,160,255,0.85), rgba(110,255,255,0.65));
-  background-clip: padding-box;
-  box-shadow: inset 0 0 8px rgba(199,160,255,0.5), 0 0 12px rgba(180,90,220,0.25);
-}
-.guide-card::-webkit-scrollbar-thumb:active {
-  background: linear-gradient(180deg, #c7a0ff, #6effff);
-  background-clip: padding-box;
 }
 
 /* --- Top 5 list --- */
@@ -412,7 +378,9 @@ body::after {
   box-shadow: 0 6px 18px rgba(180,90,220,0.20);
 }
 .ach-icon { font-size: 18px; flex-shrink: 0; line-height: 1; }
-.ach-item:not(.unlocked) .ach-icon { filter: grayscale(1) opacity(0.35); }
+.ach-icon svg { display: block; }
+/* locked icons inherit the dim .ach-item color; unlocked get the accent + glow */
+.ach-item.unlocked .ach-icon { color: #c7a0ff; filter: drop-shadow(0 0 5px rgba(199,160,255,0.6)); }
 .ach-body { min-width: 0; flex: 1; }
 .ach-name {
   font-weight: 800;
@@ -459,22 +427,10 @@ body::after {
   pointer-events:none; white-space:nowrap;
 }
 .achievement-toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+.achievement-toast svg { vertical-align: -0.2em; color: #c7a0ff; }
 
-.records-card { max-width: 480px; max-height: 85vh; padding: 24px 24px 18px; }
-
-@media (max-width:700px) {
-  .guide-card { padding: 18px 20px 16px; }
-  .guide-title { font-size: 20px; }
-  .toolbar { gap: 5px; }
-  .tb-btn { width: 34px; height: 34px; font-size: 14px; border-radius: 10px; }
-  .records-card { max-width: 94%; padding: 18px 16px 14px; }
-  .ach-grid { grid-template-columns: 1fr; }
-  .ach-item { padding: 7px 9px; font-size: 11px; }
-  .ach-icon { font-size: 16px; }
-  .top5-list li { padding: 7px 10px 7px 7px; }
-  .top5-score { font-size: 16px; min-width: 56px; }
-  .top5-list li::before { width: 22px; height: 22px; font-size: 12px; }
-}
+#records-overlay { max-width: 480px; }
+.records-card { max-height: 85vh; padding: 24px 24px 18px; }
 
 /* --- Header --- */
 .header { margin-bottom: 6px; }
@@ -500,10 +456,11 @@ body::after {
   color: transparent;
   filter: drop-shadow(0 0 12px rgba(110,255,255,0.3));
 }
+/* No animated filter here: a changing drop-shadow re-rasterizes the blurred text every frame. */
 @keyframes titleGradient {
-  0% { background-position: 0% 50%; filter: drop-shadow(0 4px 16px rgba(200,120,255,0.1)); }
-  50% { background-position: 100% 50%; filter: drop-shadow(0 8px 28px rgba(200,120,255,0.2)); }
-  100% { background-position: 0% 50%; filter: drop-shadow(0 4px 16px rgba(200,120,255,0.1)); }
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .subtitle {
@@ -568,6 +525,7 @@ body::after {
   color: #fff;
   text-shadow: 0 4px 14px rgba(200,120,255,0.12);
   line-height: 1.1;
+  font-variant-numeric: tabular-nums;  /* timer ticks 10×/s; fixed digit width = no sibling reflow */
 }
 .hud-item .unit {
   font-size: 11px;
@@ -600,29 +558,16 @@ body::after {
 }
 .hud-item:hover::before { opacity: 1; }
 
-/* pop animation on value change — applied directly to .hud-value span */
-.hud-pop {
-  transform: scale(1.15);
-  transition: transform 220ms cubic-bezier(.2,.9,.2,1);
-  text-shadow: 0 8px 30px rgba(255,160,220,0.3);
-}
+.hud-value { display: inline-block; }  /* transform (pop animation) needs a box */
 
-@media (max-width:700px) {
-  .title { font-size: clamp(20px, 7vw, 36px); letter-spacing: 1px; }
-  .hud { gap: 5px; }
-  .hud-item { padding: 6px 8px; gap: 5px; border-radius: 10px; }
-  .hud-icon { font-size: 12px; }
-  .hud-item .value { font-size: 16px; }
-  .hud-item .label { font-size: 8px; }
-}
 .game-wrap { position:relative; display:block; max-width:900px; margin:0 auto; }
 canvas { background:transparent; border-radius:12px; display:block; margin:12px auto; box-shadow:0 10px 40px rgba(0,0,0,0.6), 0 0 40px rgba(200,80,200,0.06) inset; border: 3px solid rgba(255,255,255,0.4); touch-action:none; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; transform-origin: center center; will-change: transform; transition: border-color 0.5s ease, box-shadow 0.5s ease; }
 canvas.urgent { border-color: rgba(255,60,60,0.7); box-shadow:0 10px 40px rgba(0,0,0,0.6), 0 0 30px rgba(255,40,40,0.15) inset, 0 0 60px rgba(255,40,40,0.1); }
 .game-overlay { position:absolute; left:0; right:0; top:0; bottom:0; display:flex; align-items:center; justify-content:center; pointer-events:none; }
 .game-overlay.active { pointer-events:auto; }
 .game-overlay .big-start { pointer-events:auto; }
-.countdown { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:84px; font-weight:900; color:#fff; text-shadow:0 10px 40px rgba(200,80,200,0.28); background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); padding:20px 30px; border-radius:18px; }
-@media (max-width:700px) { .countdown { font-size:48px; padding:12px 18px; } }
+/* centered by the flex parent (.game-overlay); no CSS transform so WAAPI scale pops stay centered */
+.countdown { font-size:84px; font-weight:900; color:#fff; text-shadow:0 10px 40px rgba(200,80,200,0.28); background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); padding:20px 30px; border-radius:18px; }
 button { padding:8px 14px; font-size:16px; cursor:pointer; margin:0 6px; border-radius:8px; border:1px solid rgba(255,255,255,0.08); background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); color:#fff; box-shadow:0 4px 14px rgba(0,0,0,0.35); }
 .big-start {
   position:relative; padding: clamp(14px, 2.5vw, 32px) clamp(28px, 5vw, 64px);
@@ -641,10 +586,15 @@ button { padding:8px 14px; font-size:16px; cursor:pointer; margin:0 6px; border-
 @keyframes startGradient { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
 @keyframes pulseGlow { 0% { box-shadow:0 8px 20px rgba(179,107,255,0.12); } 50% { box-shadow:0 14px 40px rgba(179,107,255,0.3); } 100% { box-shadow:0 8px 20px rgba(179,107,255,0.12); } }
 
-/* result overlay — z-index above guide/records (100) so it can't be hidden */
-#result-overlay { pointer-events:none; z-index:110; }
-#result-overlay.active { pointer-events:auto; }
+/* result overlay — non-modal <dialog> stretched over the playfield so any tap dismisses it */
+#result-overlay {
+  position:absolute; inset:0; width:auto; height:auto; max-width:none; max-height:none;
+  margin:0; padding:0; border:0; background:transparent; color:inherit;
+  align-items:center; justify-content:center;
+}
+#result-overlay[open] { display:flex; overflow:hidden; }
 .result-card {
+  position: relative;  /* stacks above the absolutely-positioned confetti layer */
   background: linear-gradient(180deg, rgba(20,12,40,0.94), rgba(10,6,24,0.97));
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 20px;
@@ -678,10 +628,72 @@ button { padding:8px 14px; font-size:16px; cursor:pointer; margin:0 6px; border-
   color: transparent;
   margin-bottom: 8px;
 }
+.result-eyebrow {
+  font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(255,255,255,0.4); margin-bottom: 6px;
+}
+.result-eyebrow:empty { display: none; }
+
+/* --- level cleared: gold celebration state --- */
+.cleared .result-card {
+  border-color: rgba(255,216,107,0.45);
+  box-shadow: 0 16px 60px rgba(0,0,0,0.6), 0 0 60px rgba(255,190,80,0.22), 0 0 40px rgba(255,216,107,0.12) inset;
+  animation: resultPop 0.6s cubic-bezier(.2,1.4,.3,1);
+}
+.cleared .result-eyebrow { color: #ffd86b; }
+.cleared .result-title {
+  background: linear-gradient(90deg, #ffd86b, #fff3c4 40%, #ffb347 60%, #ffd86b);
+  background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: goldShimmer 1.8s linear infinite;
+  filter: drop-shadow(0 0 14px rgba(255,200,90,0.35));
+}
+.cleared .result-score { color: rgba(255,230,170,0.75); }
+@keyframes resultPop {
+  0% { opacity:0; transform:scale(0.6) translateY(30px); }
+  100% { opacity:1; transform:scale(1) translateY(0); }
+}
+@keyframes goldShimmer { from { background-position: 200% 0; } to { background-position: 0 0; } }
+
+.result-confetti { position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+.result-confetti i {
+  position:absolute; top:-14px; left:var(--x);
+  width:var(--w); height:var(--h); background:var(--c); border-radius:2px;
+  opacity:0;
+  animation: confettiFall var(--t) cubic-bezier(.3,.6,.6,1) var(--delay) forwards;
+}
+@keyframes confettiFall {
+  0%   { opacity:1; transform: translate3d(0,0,0) rotate(0) rotateY(0); }
+  85%  { opacity:1; }
+  100% { opacity:0; transform: translate3d(var(--dx), 70vh, 0) rotate(720deg) rotateY(540deg); }
+}
+
 .result-msg { font-size: 15px; color: rgba(230,238,252,0.85); margin-bottom: 14px; line-height: 1.5; }
 .result-score { font-size: 14px; color: rgba(255,255,255,0.55); }
 
-@media (max-width:700px) { .countdown { font-size:48px; padding:12px 18px; } .result-card { padding:20px 24px; } .result-title { font-size:24px; } }
+@media (max-width:700px) {
+  .title { font-size: clamp(20px, 7vw, 36px); letter-spacing: 1px; }
+  .toolbar { gap: 5px; }
+  .tb-btn { width: 34px; height: 34px; font-size: 14px; border-radius: 10px; }
+  .guide-card { padding: 18px 20px 16px; }
+  .guide-title { font-size: 20px; }
+  #records-overlay { max-width: 94%; }
+  .records-card { padding: 18px 16px 14px; }
+  .ach-grid { grid-template-columns: 1fr; }
+  .ach-item { padding: 7px 9px; font-size: 11px; }
+  .ach-icon { font-size: 16px; }
+  .top5-list li { padding: 7px 10px 7px 7px; }
+  .top5-score { font-size: 16px; min-width: 56px; }
+  .top5-list li::before { width: 22px; height: 22px; font-size: 12px; }
+  .hud { gap: 5px; }
+  .hud-item { padding: 6px 8px; gap: 5px; border-radius: 10px; }
+  .hud-icon { font-size: 12px; }
+  .hud-item .value { font-size: 16px; }
+  .hud-item .label { font-size: 8px; }
+  .countdown { font-size:48px; padding:12px 18px; }
+  .result-card { padding:20px 24px; }
+  .result-title { font-size:24px; }
+}
 
 /* --- Reduced motion: kill ambient + decorative animations for users who opt out --- */
 @media (prefers-reduced-motion: reduce) {
@@ -693,11 +705,6 @@ button { padding:8px 14px; font-size:16px; cursor:pointer; margin:0 6px; border-
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
-  body::before,
-  body::after { animation: none !important; }
-  .title { animation: none !important; }
-  .big-start { animation: none !important; }
-  .ach-progress-fill { animation: none !important; }
-  .ach-progress-fill::after { animation: none !important; display: none; }
+  .ach-progress-fill::after { display: none; }
   .achievement-toast { transition: opacity 0.2s ease !important; }
 }

@@ -146,6 +146,25 @@
   letter-spacing: 0.02em;
 }
 
+.blog-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  align-self: center;
+}
+
+.blog-badge-new {
+  background: rgba(255, 77, 128, 0.15);
+  color: #ff4d80;
+}
+
+.blog-badge-read {
+  background: var(--surface-3, rgba(255, 255, 255, 0.06));
+  color: var(--text-muted);
+}
+
 .blog-card h2 {
   font-size: 1.4rem;
   margin: 0 0 10px;
@@ -483,39 +502,6 @@
 
 .blog-back:hover {
   color: #00d2ff;
-}
-
-.breadcrumbs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin-bottom: 18px;
-  align-items: center;
-}
-
-.breadcrumbs a {
-  color: #00d2ff;
-  text-decoration: none;
-}
-
-.breadcrumbs a:hover {
-  text-decoration: underline;
-}
-
-.breadcrumbs .breadcrumb-current {
-  color: var(--text-primary);
-  font-weight: 500;
-  max-width: 60ch;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.game-breadcrumbs {
-  margin-top: 4px;
-  margin-bottom: 12px;
 }
 
 @media (max-width: 640px) {

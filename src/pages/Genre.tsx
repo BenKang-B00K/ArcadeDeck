@@ -1,7 +1,7 @@
 import React, { lazy, Suspense } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { games } from '../data/games';
+import { deviceGames as games } from '../data/games';
 import { genreFromSlug } from '../utils/genres';
 import { useUiText, useLocale, getLocalizedString } from '../i18n';
 

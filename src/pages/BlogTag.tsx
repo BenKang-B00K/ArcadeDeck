@@ -2,23 +2,19 @@ import React, { useEffect } from 'react';
 import { Link, useParams, Navigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getPostsByTag, formatTagLabel } from '../data/posts';
-import { useUiText } from '../i18n';
+import { useUiText, useLocale } from '../i18n';
+import { formatPostDate } from '../utils/dates';
+import { readPosts, isRecentPost } from '../utils/readPosts';
 import './Blog.css';
 import './Home.css';
-
-const formatDate = (iso: string) =>
-  new Date(iso + 'T00:00:00Z').toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'UTC',
-  });
 
 const BlogTag: React.FC = () => {
   const { tag = '' } = useParams<{ tag: string }>();
   const normalized = tag.toLowerCase();
   const matches = getPostsByTag(normalized);
   const t = useUiText();
+  const { lang } = useLocale();
+  const [read] = React.useState(readPosts);
 
   const label = formatTagLabel(normalized);
   const url = `https://arcadedeck.net/blog/tag/${normalized}`;
@@ -93,7 +89,12 @@ const BlogTag: React.FC = () => {
           {matches.map((p) => (
             <Link key={p.slug} to={`/blog/${p.slug}`} className="blog-card">
               <div className="blog-card-meta">
-                <time dateTime={p.date}>{formatDate(p.date)}</time>
+                <time dateTime={p.date}>{formatPostDate(p.date, lang)}</time>
+                {read.has(p.slug) ? (
+                  <span className="blog-badge blog-badge-read">{t('blogBadgeRead', 'READ')}</span>
+                ) : isRecentPost(p.date) ? (
+                  <span className="blog-badge blog-badge-new">{t('blogBadgeNew', 'NEW')}</span>
+                ) : null}
                 {p.tags.slice(0, 3).map((t) => (
                   <span key={t} className="blog-tag">
                     {t}

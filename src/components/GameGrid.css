@@ -1,306 +1,48 @@
-.game-grids-container {
-  padding-bottom: 30px;
-}
-
 .game-grid-section {
-  padding: 60px 0;
+  padding: 0 0 var(--space-9);
 }
 
-.game-grid-section.dark-bg {
-  background: var(--surface-1);
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 40px;
-}
-
-/* ── New: bracketed heading w/ eyebrow + count chip ── */
-.section-heading {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
-  margin-bottom: 32px;
-  position: relative;
-}
-
-.section-eyebrow {
-  font-size: var(--text-xs);
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  font-weight: 700;
-  color: var(--primary-color);
-  padding: 3px 10px;
-  background: rgba(0, 229, 255, 0.08);
-  border: 1px solid var(--border-accent);
+.section-count {
+  padding: 2px 10px;
   border-radius: var(--radius-full);
-  text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
-}
-
-.section-title-big {
-  font-size: clamp(1.6rem, 4vw, 2.4rem);
-  font-family: var(--font-display);
-  font-weight: 800;
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  line-height: 1.1;
-  display: inline-flex;
-  align-items: baseline;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.title-bracket {
-  color: var(--primary-color);
-  filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.55));
-  font-weight: 400;
-  font-size: 0.85em;
-}
-
-.title-letters {
-  background: var(--brand-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 10px rgba(245, 197, 66, 0.35));
-}
-
-.title-letter {
-  display: inline-block;
-  white-space: pre;
-  background: var(--brand-gradient);
-  -webkit-background-clip: text;
-          background-clip: text;
-  -webkit-text-fill-color: transparent;
-  opacity: 0;
-  transform: translateY(14px);
-  animation: titleLetterIn 0.4s var(--ease-spring) forwards;
-  animation-delay: calc(var(--i, 0) * 18ms);
-}
-
-@keyframes titleLetterIn {
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .title-letter { opacity: 1 !important; transform: none !important; transition: none !important; }
-}
-
-/* Count chip — gradient ring (mask-composite) + tabular numerals */
-.section-count-chip {
-  position: relative;
-  display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
-  padding: 6px 14px;
-  margin-top: 4px;
-  border-radius: var(--radius-full);
-  background: var(--surface-1);
-  font-family: var(--font-display);
-  font-variant-numeric: tabular-nums;
-  isolation: isolate;
-  animation: countChipPopIn 0.4s var(--ease-spring);
-}
-
-.section-count-chip::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  padding: 1px;
-  background: var(--brand-gradient);
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-          mask-composite: exclude;
-  pointer-events: none;
-  z-index: -1;
-}
-
-.section-count-num {
-  font-size: 1.05rem;
-  font-weight: 800;
-  background: var(--brand-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.section-count-label {
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-
-@keyframes countChipPopIn {
-  0%   { opacity: 0; transform: scale(0.85); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .section-count-chip { animation: none; }
-}
-
-/* Navigation Buttons */
-.grid-nav-buttons {
-  display: flex;
-  gap: 15px;
-}
-
-.nav-btn {
   background: var(--surface-2);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-primary);
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 1.5rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  user-select: none;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
-.nav-btn:hover:not(:disabled) {
-  background: #00d2ff;
-  border-color: #00d2ff;
-  transform: scale(1.1);
-  box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+.game-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-5);
+  /* Skip layout work for cards far below the fold. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
 }
 
-.nav-btn:disabled {
-  opacity: 0.2;
-  cursor: not-allowed;
-}
-
-/* Empty State — arcade "no signal" CRT block */
+/* ── Empty state ── */
 .empty-state {
   grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
+  gap: var(--space-3);
+  padding: var(--space-10) var(--space-5);
   text-align: center;
-  gap: 14px;
 }
 
-.empty-state-block {
-  position: relative;
-  width: 180px;
-  height: 110px;
-  border-radius: var(--radius-md);
-  background: var(--bg-elevated);
-  border: 2px solid var(--border-default);
-  box-shadow:
-    inset 0 0 28px rgba(0, 0, 0, 0.55),
-    0 0 24px rgba(0, 229, 255, 0.08);
-  overflow: hidden;
-  margin-bottom: 4px;
+.empty-state h3 {
+  font-size: var(--text-lg);
 }
 
-.empty-state-screen {
-  position: absolute;
-  inset: 8px;
-  border-radius: 6px;
-  background:
-    radial-gradient(ellipse at 50% 50%, rgba(0, 229, 255, 0.08), transparent 60%),
-    repeating-linear-gradient(
-      180deg,
-      transparent 0 3px,
-      rgba(255, 255, 255, 0.03) 3px 4px
-    );
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.empty-state-scanlines {
-  position: absolute;
-  inset: -50% 0 -50% 0;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(0, 229, 255, 0.18) 50%,
-    transparent 100%
-  );
-  animation: emptyScanDrift 3.6s linear infinite;
-  pointer-events: none;
-}
-
-.empty-state-glitch {
-  position: relative;
-  font-family: var(--font-display);
-  font-size: 0.9rem;
-  font-weight: 800;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  color: var(--primary-color);
-  text-shadow:
-    0 0 6px rgba(0, 229, 255, 0.6),
-    1px 0 0 rgba(255, 0, 128, 0.6),
-    -1px 0 0 rgba(0, 229, 255, 0.6);
-  animation: emptyGlitch 2.4s steps(2, end) infinite;
-}
-
-@keyframes emptyScanDrift {
-  0%   { transform: translateY(-50%); }
-  100% { transform: translateY(50%); }
-}
-
-@keyframes emptyGlitch {
-  0%, 90%, 100% { transform: translate(0, 0); }
-  92%           { transform: translate(-1px, 0); }
-  94%           { transform: translate(1px, 0); }
-  96%           { transform: translate(0, 1px); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .empty-state-scanlines,
-  .empty-state-glitch { animation: none; }
-}
-
-.empty-state-title {
-  font-size: 1.3rem;
-  font-weight: 800;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.empty-state-desc {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  max-width: 320px;
-  line-height: 1.6;
-}
-
-.empty-state-suggest {
-  margin-top: var(--space-3);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.empty-state-suggest-label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+.empty-state p {
+  margin: 0;
   color: var(--text-muted);
 }
 
-.empty-state-suggest-chips {
-  display: inline-flex;
+.empty-state-chips {
+  display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
@@ -309,80 +51,20 @@
 .empty-state-chip {
   padding: 6px 14px;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, rgba(0, 229, 255, 0.12), rgba(224, 64, 251, 0.12));
-  border: 1px solid var(--border-accent);
-  color: var(--primary-color);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: transform 0.2s var(--ease-spring), box-shadow 0.2s, background 0.2s;
+  background: var(--surface-2);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  font-weight: 600;
 }
 
 .empty-state-chip:hover {
-  transform: translateY(-2px) scale(1.04);
-  background: linear-gradient(135deg, rgba(0, 229, 255, 0.22), rgba(224, 64, 251, 0.22));
-  box-shadow: 0 8px 20px rgba(0, 229, 255, 0.18);
-}
-
-/* Grid Layout Optimized */
-.game-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 30px;
-  /* Skip rendering work for cards below the viewport until they scroll close.
-     Cuts initial style/layout cost without affecting LCP or CLS. */
-  content-visibility: auto;
-  contain-intrinsic-size: auto 600px;
-}
-
-.all-games-grid {
-  grid-template-columns: repeat(4, 1fr);
-}
-
-/* Responsive Grid Adjustments */
-@media (max-width: 1200px) {
-  .game-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (max-width: 992px) {
-  .game-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-  }
-  .section-header {
-    flex-direction: column;
-    gap: 20px;
-  }
-}
-
-@media (max-width: 768px) {
-  .game-grid-section { padding: 30px 0; }
-  .section-header { margin-bottom: 20px; gap: 12px; }
-  .section-heading { margin-bottom: 20px; gap: 4px; }
-  .game-grid { gap: 16px; }
-  .nav-btn { width: 40px; height: 40px; font-size: 1.2rem; }
-  .empty-state { padding: 40px 15px; }
-  .empty-state-block { width: 150px; height: 92px; }
+  background: var(--primary-color);
+  color: var(--bg-color);
 }
 
 @media (max-width: 580px) {
   .game-grid {
-    grid-template-columns: 1fr;
-    max-width: 400px;
-    margin: 0 auto;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--space-3);
   }
-}
-
-/* ── Landscape phones ── */
-@media (orientation: landscape) and (max-height: 600px) {
-  .game-grid-section { padding: 25px 0; }
-  .section-header { margin-bottom: 15px; }
-  .section-heading { margin-bottom: 15px; }
-  .game-grid { gap: 15px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
-  .nav-btn { width: 36px; height: 36px; font-size: 1.1rem; }
-  .empty-state { padding: 30px 20px; }
 }

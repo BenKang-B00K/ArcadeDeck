@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { BookOpen, Joystick, Lightbulb, ScrollText, Sparkles } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { BookOpen, Check, Joystick, Lightbulb, ScrollText, Sparkles } from 'lucide-react';
 import type { Game } from '../../data/games';
 import type { LocaleOverlay } from '../../i18n';
 import {
@@ -21,38 +22,48 @@ interface Props {
 type Section = 'overview' | 'controls' | 'tips' | 'lore';
 type ViewMode = 'long' | 'short';
 
-// Multi-paragraph: each line/paragraph -> first sentence.
-// Single-line: split on common separators (/, ·, ;) then sentence boundaries.
+// **term** -> <strong class="kw">. Odd split() indices are the captures.
+// Author rule: never span ** across a newline or sentence end
+// (scripts/validate-games.js enforces it at build time).
+const RICH = /\*\*(.+?)\*\*/g;
+function renderRich(text: string): ReactNode[] {
+  return text.split(RICH).map((part, i) => (i % 2 ? <strong key={i} className="kw">{part}</strong> : part));
+}
+
+// Sentence end = .!? followed by whitespace, or CJK 。！？ with optional
+// whitespace. "v3.0", "1.3s", "Lv.2", "1.3초" never have whitespace after
+// the dot, so they stay intact.
+const SENT = /(?<=[.!?])\s+|(?<=[。！？])\s*/;
+const sentences = (text: string) => text.split(SENT).map(s => s.trim()).filter(Boolean);
+const paragraphs = (text: string) => text.split('\n').map(s => s.trim()).filter(Boolean);
+
+// Multi-paragraph: first sentence per paragraph. Single-line: every sentence.
 function bulletize(text: string): string[] {
-  const t = text.trim();
-  if (!t) return [];
-  const lines = t.split(/\n+/).map(s => s.trim()).filter(Boolean);
-  if (lines.length > 1) {
-    return lines.map(line => {
-      const m = line.match(/^[^.!?]*[.!?]/);
-      return (m ? m[0] : line).trim();
-    });
-  }
-  const sep = t.split(/\s*[/·;]\s*|(?<=[.!?])\s+/).map(s => s.trim()).filter(Boolean);
-  return sep.length > 1 ? sep : [t];
+  const lines = paragraphs(text);
+  return lines.length > 1 ? lines.map(l => sentences(l)[0] ?? l) : sentences(text);
+}
+
+// "Key: Action / Key: Action" -> [[key, action]]. ja/ko use fullwidth "：".
+function controlPairs(controls: string): [string, string][] {
+  return controls.split(/\s*\/\s*/).filter(Boolean).map(item => {
+    const i = item.search(/[:：]/);
+    return i < 0 ? [item, ''] : [item.slice(0, i).trim(), item.slice(i + 1).trim()];
+  });
 }
 
 const DEFAULT_VIEW: Record<Section, ViewMode> = {
-  overview: 'long', controls: 'long', tips: 'long', lore: 'long',
+  overview: 'short', controls: 'long', tips: 'long', lore: 'long',
 };
 
 function loadView(gameId: string): Record<Section, ViewMode> {
   if (typeof window === 'undefined') return DEFAULT_VIEW;
   try {
-    const raw = localStorage.getItem(`gameView_${gameId}`);
-    if (!raw) return DEFAULT_VIEW;
-    const parsed = JSON.parse(raw) as Partial<Record<Section, ViewMode>>;
-    return {
-      overview: parsed.overview === 'short' ? 'short' : 'long',
-      controls: parsed.controls === 'short' ? 'short' : 'long',
-      tips: parsed.tips === 'short' ? 'short' : 'long',
-      lore: parsed.lore === 'short' ? 'short' : 'long',
+    const parsed = JSON.parse(localStorage.getItem(`gameView_${gameId}`) ?? '{}') as Partial<Record<Section, string>>;
+    const pick = (s: Section): ViewMode => {
+      const v = parsed[s];
+      return v === 'short' || v === 'long' ? v : DEFAULT_VIEW[s];
     };
+    return { overview: pick('overview'), controls: pick('controls'), tips: pick('tips'), lore: pick('lore') };
   } catch {
     return DEFAULT_VIEW;
   }
@@ -73,6 +84,9 @@ const GameInfoTabs: React.FC<Props> = ({ game, lang, overlay, activeTab, setActi
   const hasTips = tips.length > 0;
   const hasLore = lore.length > 0;
   const hasFeatures = features.length > 0;
+  // ja/ko often lack controlsTable; the English fallback table would then hide
+  // the only localized control text, so prefer the raw string in that case.
+  const tableLocalized = lang === 'en' || Boolean(overlay?.games?.[game.id]?.controlsTable?.length);
 
   const [viewMode, setViewMode] = useState<Record<Section, ViewMode>>(() => loadView(game.id));
 
@@ -111,6 +125,18 @@ const GameInfoTabs: React.FC<Props> = ({ game, lang, overlay, activeTab, setActi
     </div>
   );
 
+  const controlsList = (
+    <ul className="short-list highlight">
+      {controlPairs(controls).map(([k, a], i) => <li key={i}><kbd>{k}</kbd> {a}</li>)}
+    </ul>
+  );
+
+  const tipsList = (
+    <ol className="tips-list">
+      {sentences(tips).map((s, i) => <li key={i}>{renderRich(s)}</li>)}
+    </ol>
+  );
+
   return (
     <div className="game-info-tabs">
       <nav className="tab-nav" aria-label={t('tabNavAriaLabel', 'Jump to game info')}>
@@ -143,19 +169,19 @@ const GameInfoTabs: React.FC<Props> = ({ game, lang, overlay, activeTab, setActi
           {renderPill('overview')}
         </header>
         {viewMode.overview === 'long' ? (
-          <>
-            <div className="detail-content">{fullDescription}</div>
-            {objectives && (
-              <aside className="objectives-callout">
-                <span className="objectives-label">🎯 {t('playerObjectives', 'Objectives')}</span>
-                <p>{objectives}</p>
-              </aside>
-            )}
-          </>
+          <div className="detail-content">
+            {paragraphs(fullDescription).map((p, i) => <p key={i}>{renderRich(p)}</p>)}
+          </div>
         ) : (
           <ul className="short-list">
-            {bulletize(fullDescription).map((line, i) => <li key={i}>{line}</li>)}
+            {bulletize(fullDescription).map((line, i) => <li key={i}>{renderRich(line)}</li>)}
           </ul>
+        )}
+        {objectives && (
+          <aside className="objectives-callout">
+            <span className="objectives-label">🎯 {t('playerObjectives', 'Objectives')}</span>
+            <p>{renderRich(objectives)}</p>
+          </aside>
         )}
       </section>
 
@@ -164,36 +190,26 @@ const GameInfoTabs: React.FC<Props> = ({ game, lang, overlay, activeTab, setActi
           <h2 className="info-section-title"><Joystick size={18} aria-hidden="true" /> {t('playerControls', 'Controls')}</h2>
           {renderPill('controls')}
         </header>
-        {viewMode.controls === 'long' ? (
-          <>
-            <div className="detail-content highlight">{controls}</div>
-            {controlsTable.length > 0 && (
-              <div className="controls-table-wrap">
-                <h3>{t('controlsTableHeading', 'Quick Reference')}</h3>
-                <table className="controls-table">
-                  <thead>
-                    <tr>
-                      <th>{t('controlsTableKey', 'Input')}</th>
-                      <th>{t('controlsTableAction', 'Action')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {controlsTable.map((row, i) => (
-                      <tr key={i}>
-                        <td className="key">{row.key}</td>
-                        <td>{row.action}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </>
-        ) : (
-          <ul className="short-list highlight">
-            {bulletize(controls).map((line, i) => <li key={i}>{line}</li>)}
-          </ul>
-        )}
+        {viewMode.controls === 'long' && controlsTable.length > 0 && tableLocalized ? (
+          <div className="controls-table-wrap">
+            <table className="controls-table">
+              <thead>
+                <tr>
+                  <th>{t('controlsTableKey', 'Input')}</th>
+                  <th>{t('controlsTableAction', 'Action')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {controlsTable.map((row, i) => (
+                  <tr key={i}>
+                    <td className="key"><kbd>{row.key}</kbd></td>
+                    <td>{row.action}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : controlsList}
       </section>
 
       {hasTips && (
@@ -202,27 +218,19 @@ const GameInfoTabs: React.FC<Props> = ({ game, lang, overlay, activeTab, setActi
             <h2 className="info-section-title"><Lightbulb size={18} aria-hidden="true" /> {t('playerTips', 'Pro Tips')}</h2>
             {renderPill('tips')}
           </header>
-          {viewMode.tips === 'long' ? (
-            <>
-              <div className="detail-content tip-highlight">{tips}</div>
-              {faq.length > 0 && (
-                <div className="faq-wrap">
-                  <h3 className="faq-heading">{t('faqHeading', 'FAQ')}</h3>
-                  <dl className="faq-list">
-                    {faq.map((entry, i) => (
-                      <div key={i} className="faq-item">
-                        <dt>{entry.q}</dt>
-                        <dd>{entry.a}</dd>
-                      </div>
-                    ))}
-                  </dl>
-                </div>
-              )}
-            </>
-          ) : (
-            <ul className="short-list tip-highlight">
-              {bulletize(tips).map((line, i) => <li key={i}>{line}</li>)}
-            </ul>
+          {tipsList}
+          {viewMode.tips === 'long' && faq.length > 0 && (
+            <div className="faq-wrap">
+              <h3 className="faq-heading">{t('faqHeading', 'FAQ')}</h3>
+              <div className="faq-list">
+                {faq.map((entry, i) => (
+                  <details key={i} className="faq-item">
+                    <summary>{entry.q}</summary>
+                    <p>{renderRich(entry.a)}</p>
+                  </details>
+                ))}
+              </div>
+            </div>
           )}
           <HelpfulThumbs gameId={game.id} section="tips" />
         </section>
@@ -236,7 +244,9 @@ const GameInfoTabs: React.FC<Props> = ({ game, lang, overlay, activeTab, setActi
           </header>
           {viewMode.lore === 'long' ? (
             <>
-              <div className="detail-content italic">{lore}</div>
+              <div className="detail-content">
+                {paragraphs(lore).map((p, i) => <p key={i}>{renderRich(p)}</p>)}
+              </div>
               {characters.length > 0 && (
                 <div className="characters-wrap">
                   <h3 className="characters-heading">{t('charactersHeading', 'Cast')}</h3>
@@ -245,7 +255,7 @@ const GameInfoTabs: React.FC<Props> = ({ game, lang, overlay, activeTab, setActi
                       <li key={i}>
                         <span className="char-name">{c.name}</span>
                         <span className="char-role">{c.role}</span>
-                        <p className="char-desc">{c.desc}</p>
+                        <p className="char-desc">{renderRich(c.desc)}</p>
                       </li>
                     ))}
                   </ul>
@@ -253,8 +263,8 @@ const GameInfoTabs: React.FC<Props> = ({ game, lang, overlay, activeTab, setActi
               )}
             </>
           ) : (
-            <ul className="short-list italic">
-              {bulletize(lore).map((line, i) => <li key={i}>{line}</li>)}
+            <ul className="short-list">
+              {bulletize(lore).map((line, i) => <li key={i}>{renderRich(line)}</li>)}
             </ul>
           )}
           <HelpfulThumbs gameId={game.id} section="lore" />
@@ -264,9 +274,9 @@ const GameInfoTabs: React.FC<Props> = ({ game, lang, overlay, activeTab, setActi
       {hasFeatures && (
         <section id="section-features" className="info-section detail-card">
           <h2 className="info-section-title"><Sparkles size={18} aria-hidden="true" /> {t('playerFeatures', 'Key Features')}</h2>
-          <ul className="feature-tags">
+          <ul className="feature-list">
             {features.map((feat, idx) => (
-              <li key={idx} className="feature-tag-item">#{feat}</li>
+              <li key={idx}><Check size={16} aria-hidden="true" /> {feat}</li>
             ))}
           </ul>
         </section>

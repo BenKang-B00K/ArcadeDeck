@@ -173,7 +173,7 @@ Two suggestions, in order of preference:
 1. Site-wide dark mode toggle in the navbar, persisted to localStorage. Defaults to dark (since most of the site already is).
 2. If a toggle is too much work, just darken the inconsistent pages to match.
 
-Bonus points: respect the user's `prefers-color-scheme` system setting as the initial default, then let the toggle override.
+Bonus points: respect the user's \`prefers-color-scheme\` system setting as the initial default, then let the toggle override.
 
 Not urgent — just a polish item. Site looks great overall.`,
   },

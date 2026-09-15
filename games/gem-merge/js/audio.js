@@ -1,5 +1,5 @@
 let ctx = null;
-export let muted = false;
+let muted = false;
 
 export function toggleMute() {
   muted = !muted;
@@ -122,5 +122,32 @@ export function playCombo(count) {
       osc.start(now + i * 0.1);
       osc.stop(now + i * 0.1 + 0.25);
     }
+  } catch (_) {}
+}
+
+// 젬 착지음: 짧고 낮은 '툭'. 큰 젬일수록 낮고 묵직하게
+export function playLand(r) {
+  try {
+    if (muted) return;
+    const ac  = getCtx();
+    const now = ac.currentTime;
+    const k   = Math.min(r / 114, 1);            // 0..1 by gem size
+    const dur = 0.09 + k * 0.08;
+
+    const osc  = ac.createOscillator();
+    const gain = ac.createGain();
+    osc.connect(gain);
+    gain.connect(ac.destination);
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(220 - k * 120, now);
+    osc.frequency.exponentialRampToValueAtTime(50, now + dur);
+
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.06 + k * 0.12, now + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+
+    osc.start(now);
+    osc.stop(now + dur);
   } catch (_) {}
 }

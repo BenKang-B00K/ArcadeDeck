@@ -1,10 +1,10 @@
-import { W, H, TIERS, COMBO_WINDOW } from './config.js';
+import { W, H, WT, TIERS, COMBO_WINDOW, hexStr } from './config.js';
 import { S } from './state.js';
-import { layerFX, bgOverlay, rebuildOverlay } from './renderer.js';
+import { layerFX, rebuildOverlay } from './renderer.js';
 import { playCombo } from './audio.js';
-import { burst, spawnRing, spawnFlash } from './fx.js';
+import { burst, spawnRing, spawnFlash, tickFade } from './fx.js';
 
-export function showTierAnnouncement(tier) {
+function showTierAnnouncement(tier) {
   const isMax = (tier === -1);
   const label = isMax ? '👑 LEGENDARY MAX!' : TIERS[tier].label;
   if (!label) return;
@@ -19,7 +19,8 @@ export function showTierAnnouncement(tier) {
   });
   txt.anchor.set(0.5); txt.x = W / 2; txt.y = H / 2;
   txt.scale.set(0.4); layerFX.addChild(txt);
-  S.announcements.push({ gfx: txt, phase: 'grow', holdTimer: 0, alpha: 1 });
+  // decay stays 0 through grow/hold; set when fade starts
+  S.announcements.push({ gfx: txt, phase: 'grow', holdTimer: 0, alpha: 1, decay: 0 });
 
   const burstColor = isMax ? 0xf9ca24 : TIERS[tier].overlay;
   const count = isMax ? 40 : 20;
@@ -37,20 +38,16 @@ export function showTierAnnouncement(tier) {
 }
 
 export function tickAnnouncements() {
-  for (let i = S.announcements.length - 1; i >= 0; i--) {
-    const a = S.announcements[i];
+  tickFade(S.announcements, a => {
     if (a.phase === 'grow') {
-      const s = Math.min(1.2, a.gfx.scale.x + 0.07);
-      a.gfx.scale.set(s);
-      if (s >= 1.2) a.phase = 'hold';
+      a.gfx.scale.set(Math.min(1.2, a.gfx.scale.x + 0.07));
+      if (a.gfx.scale.x >= 1.2) a.phase = 'hold';
     } else if (a.phase === 'hold') {
-      if (++a.holdTimer > 55) a.phase = 'fade';
+      if (++a.holdTimer > 55) { a.phase = 'fade'; a.decay = 0.022; }
     } else {
-      a.alpha -= 0.022; a.gfx.y -= 0.4;
-      a.gfx.alpha = Math.max(0, a.alpha);
-      if (a.alpha <= 0) { layerFX.removeChild(a.gfx); a.gfx.destroy(); S.announcements.splice(i,1); }
+      a.gfx.y -= 0.4;
     }
-  }
+  });
 }
 
 export function checkTier(newScore) {
@@ -81,7 +78,7 @@ export function registerCombo(px, py) {
   S.lastMergeTime = now;
 }
 
-export function spawnComboText(x, y, count) {
+function spawnComboText(x, y, count) {
   const labels = ['', '', 'COMBO!', 'COMBO ×3!', 'COMBO ×4!! 🔥', 'COMBO ×5!!! ⚡'];
   const label  = labels[Math.min(count, labels.length - 1)] || `COMBO ×${count}!!!`;
   const size   = count >= 4 ? 22 : 18;
@@ -92,36 +89,33 @@ export function spawnComboText(x, y, count) {
     dropShadow: true, dropShadowDistance: 2, dropShadowAlpha: 0.7,
   });
   txt.anchor.set(0.5, 1);
-  txt.x = x; txt.y = y - 38; layerFX.addChild(txt);
+  txt.y = y - 38; layerFX.addChild(txt);
+  txt.x = Math.max(WT + txt.width / 2, Math.min(W - WT - txt.width / 2, x)); // keep off the walls
   S.combos.push({ gfx: txt, vy: -2, alpha: 1, decay: 0.016 });
 }
 
 export function tickCombos() {
-  for (let i = S.combos.length - 1; i >= 0; i--) {
-    const p = S.combos[i]; p.gfx.y += p.vy; p.vy *= 0.93;
-    p.alpha -= p.decay; p.gfx.alpha = Math.max(0, p.alpha);
-    if (p.alpha <= 0) { layerFX.removeChild(p.gfx); p.gfx.destroy(); S.combos.splice(i,1); }
-  }
+  tickFade(S.combos, p => { p.gfx.y += p.vy; p.vy *= 0.93; });
+}
+
+// Restart a CSS animation class on el; class is removed again when it ends.
+export function replayAnim(el, cls) {
+  el.classList.remove(cls);
+  // Double rAF avoids the forced synchronous reflow of void el.offsetWidth
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    el.classList.add(cls);
+    el.addEventListener('animationend', () => el.classList.remove(cls), { once: true });
+  }));
 }
 
 export function triggerEdgeFlash(hexColor) {
   const el = document.getElementById('game-container');
-  el.style.setProperty('--flash-color', '#' + hexColor.toString(16).padStart(6,'0'));
-  el.classList.remove('edge-flash');
-  // Double rAF avoids the forced synchronous reflow of void el.offsetWidth
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    el.classList.add('edge-flash');
-    el.addEventListener('animationend', () => el.classList.remove('edge-flash'), { once: true });
-  }));
+  el.style.setProperty('--flash-color', hexStr(hexColor));
+  replayAnim(el, 'edge-flash');
 }
 
 export function triggerScorePop() {
-  const el = document.getElementById('score');
-  el.classList.remove('score-pop');
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    el.classList.add('score-pop');
-    el.addEventListener('animationend', () => el.classList.remove('score-pop'), { once: true });
-  }));
+  replayAnim(document.getElementById('score'), 'score-pop');
 }
 
 export function triggerLegendarySequence(px, py) {
@@ -130,13 +124,13 @@ export function triggerLegendarySequence(px, py) {
 
   // 6-wave burst + rings: progressive build-up
   for (let i = 0; i < 6; i++) {
-    setTimeout(() => {
+    S.fxTimers.push(setTimeout(() => {
       burst(px, py, gold, 11);
       if (i < 4) burst(px, py, cream, 9);
       spawnRing(px, py, gold,  20 + i * 25);
       if (i % 2 === 0) spawnRing(px, py, 0xffffff, 14 + i * 18);
       spawnFlash(px, py);
-    }, i * 130);
+    }, i * 130));
   }
 
   S.screenShakes.push({ frames: 30, intensity: 9 });
@@ -144,12 +138,8 @@ export function triggerLegendarySequence(px, py) {
   // Pixi-layer announcement text
   showTierAnnouncement(-1);
 
-  // CSS cinematic overlay on the game canvas
+  // CSS cinematic overlay: leaving display:none restarts its keyframes
   const cinematic = document.getElementById('legendary-cinematic');
   cinematic.classList.remove('hidden');
-  cinematic.style.animation = 'none';
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    cinematic.style.animation = '';
-    cinematic.addEventListener('animationend', () => cinematic.classList.add('hidden'), { once: true });
-  }));
+  cinematic.addEventListener('animationend', () => cinematic.classList.add('hidden'), { once: true });
 }

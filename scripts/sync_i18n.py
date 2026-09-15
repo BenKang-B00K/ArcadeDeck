@@ -3,8 +3,25 @@ import os
 import sys
 from typing import Any, Dict, Optional
 
-BASE_FILE = "en.json"
-LANGS = ["ja", "ko", "zh", "fr", "de", "es", "es-LA", "pt", "ru", "vi"]
+# The status output is emoji-tagged; a Windows console defaults to cp1252 and
+# would raise UnicodeEncodeError on the first print.
+sys.stdout.reconfigure(encoding="utf-8")
+
+# Paths resolve against the locales directory, so the script runs from anywhere.
+LOCALES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src", "i18n", "locales")
+BASE_FILE = os.path.join(LOCALES_DIR, "en.json")
+
+# Shipped locales, read off disk — a hardcoded list goes stale the moment a
+# language is added or dropped.
+LANGS = sorted(
+    f[:-5]
+    for f in os.listdir(LOCALES_DIR)
+    if f.endswith(".json")
+    and not f.startswith("_")
+    and f != "en.json"
+    and ".missing." not in f
+    and ".bak." not in f
+)
 META_KEYS = {"_comment", "label"}
 MISSING_SUFFIX = ".missing.json"
 
@@ -100,7 +117,7 @@ def prepare_missing():
     found_any = False
 
     for lang in LANGS:
-        lang_file = f"{lang}.json"
+        lang_file = os.path.join(LOCALES_DIR, f"{lang}.json")
         if not os.path.exists(lang_file):
             print(f"⚠️ {lang_file} missing — skipped")
             continue
@@ -109,7 +126,7 @@ def prepare_missing():
         missing = diff_keys(base, target)
 
         if missing:
-            out_file = f"{lang}{MISSING_SUFFIX}"
+            out_file = os.path.join(LOCALES_DIR, f"{lang}{MISSING_SUFFIX}")
             save_json(out_file, missing)
             print(f"📄 {lang_file} → {out_file} ({len(missing.get('ui', {}))} UI keys missing)")
             found_any = True
@@ -125,8 +142,8 @@ def merge_and_finalize():
     failed = False
 
     for lang in LANGS:
-        lang_file = f"{lang}.json"
-        missing_file = f"{lang}{MISSING_SUFFIX}"
+        lang_file = os.path.join(LOCALES_DIR, f"{lang}.json")
+        missing_file = os.path.join(LOCALES_DIR, f"{lang}{MISSING_SUFFIX}")
 
         if not os.path.exists(lang_file):
             continue
@@ -155,7 +172,7 @@ def merge_and_finalize():
 
     # Cleanup
     for lang in LANGS:
-        mf = f"{lang}{MISSING_SUFFIX}"
+        mf = os.path.join(LOCALES_DIR, f"{lang}{MISSING_SUFFIX}")
         if os.path.exists(mf):
             os.remove(mf)
             print(f"🧹 Cleaned up {mf}")

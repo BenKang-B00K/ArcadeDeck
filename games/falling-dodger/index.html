@@ -5,11 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#0e1230" />
 <title>Falling Dodger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
 <style>
   :root {
     --accent: #a48bff;
     --accent-2: #ff8bd0;
     --player: #7ad7ff;
+    --display: 'Lilita One', 'Segoe UI', system-ui, sans-serif;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -34,6 +38,7 @@
     align-items: center;
     justify-content: center;
   }
+  #stage { position: relative; }
   canvas {
     background: linear-gradient(180deg, #0e1230 0%, #1a0d2e 100%);
     box-shadow:
@@ -62,9 +67,7 @@
     gap: 6px;
     padding: 8px 16px;
     border-radius: 999px;
-    background: rgba(10, 8, 30, 0.55);
-    backdrop-filter: blur(10px) saturate(140%);
-    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    background: rgba(10, 8, 30, 0.78);
     border: 1px solid rgba(180, 160, 255, 0.18);
     font-size: 14px;
     letter-spacing: 1.5px;
@@ -83,8 +86,7 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: rgba(10, 8, 30, 0.55);
-    backdrop-filter: blur(10px);
+    background: rgba(10, 8, 30, 0.78);
     border: 1px solid rgba(180, 160, 255, 0.18);
     color: #fff;
     cursor: pointer;
@@ -97,16 +99,17 @@
   }
   #pauseBtn:hover { background: rgba(120, 90, 255, 0.3); }
   #pauseBtn:active { transform: scale(0.93); }
-  #pauseBtn[hidden] { display: none; }
+  #pauseBtn[hidden], #hud[hidden] { display: none; }
   #overlay {
     position: absolute;
     inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(ellipse at center, rgba(15, 10, 40, 0.78) 0%, rgba(5, 6, 15, 0.95) 80%);
-    backdrop-filter: blur(10px) saturate(140%);
-    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    background: radial-gradient(ellipse at center, rgba(15, 10, 40, 0.55) 0%, rgba(5, 6, 15, 0.88) 80%);
+    backdrop-filter: blur(3px) saturate(140%);
+    -webkit-backdrop-filter: blur(3px) saturate(140%);
+    border-radius: 14px;
     text-align: center;
     pointer-events: auto;
     padding: 24px;
@@ -118,16 +121,16 @@
     flex-direction: column;
     align-items: center;
     gap: 14px;
-    max-width: 92vw;
+    max-width: 100%;
   }
   @keyframes fadeIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
   @keyframes shimmer {
     0%, 100% { background-position: 0% 50%; }
     50%      { background-position: 100% 50%; }
   }
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-6px); }
+  @keyframes rise {
+    from { opacity: 0; translate: 0 12px; }
+    to   { opacity: 1; translate: 0 0; }
   }
   @keyframes pop {
     0%   { transform: scale(0.6); opacity: 0; }
@@ -138,57 +141,62 @@
     0%, 100% { box-shadow: 0 8px 24px rgba(120, 90, 255, 0.3), 0 0 0 0 rgba(255,139,208,0.4), inset 0 1px 0 rgba(255,255,255,0.2); }
     50%      { box-shadow: 0 10px 34px rgba(255, 139, 208, 0.5), 0 0 0 8px rgba(255,139,208,0), inset 0 1px 0 rgba(255,255,255,0.3); }
   }
+  #overlay h1, .hero-stat {
+    font-family: var(--display);
+    font-weight: 700;
+    font-synthesis: none; /* Lilita One is 400-only; real bold only on fallback */
+  }
   #overlay h1 {
     margin: 0;
-    font-size: clamp(40px, 7vw, 64px);
-    letter-spacing: 6px;
-    font-weight: 800;
+    font-size: clamp(40px, min(14vw, 11vh), 92px);
+    line-height: 0.92;
+    letter-spacing: 2px;
     background: linear-gradient(90deg, #a48bff 0%, #ff8bd0 25%, #ffd86b 50%, #ff8bd0 75%, #a48bff 100%);
     background-size: 220% 100%;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     filter: drop-shadow(0 0 24px rgba(164, 139, 255, 0.5));
-    animation: shimmer 5s ease-in-out infinite, float 4s ease-in-out infinite;
+    animation: rise 0.45s ease-out both, shimmer 5s ease-in-out infinite;
+  }
+  #overlay.over h1 {
+    background-image: linear-gradient(90deg, #ff6b9d 0%, #ff8a5c 25%, #ffd86b 50%, #ff8a5c 75%, #ff6b9d 100%);
+    filter: drop-shadow(0 0 24px rgba(255, 110, 150, 0.5));
+  }
+  #subtitle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    animation: rise 0.45s 80ms ease-out both;
   }
   #overlay p {
     margin: 0;
-    opacity: 0.78;
-    max-width: 420px;
+    opacity: 0.8;
+    max-width: 34ch;
     line-height: 1.55;
-    font-size: 14px;
+    font-size: 15px;
   }
   #overlay button {
     margin-top: 12px;
-    padding: 14px 40px;
-    font-size: 14px;
+    padding: 16px 44px;
+    font-family: inherit;
+    font-size: 15px;
     font-weight: 700;
     letter-spacing: 4px;
-    border: 1px solid rgba(180, 160, 255, 0.6);
-    background: linear-gradient(135deg, rgba(120, 90, 255, 0.4), rgba(255, 100, 200, 0.3));
+    border: 1px solid rgba(255, 200, 240, 0.5);
+    background: linear-gradient(135deg, rgba(120, 90, 255, 0.75), rgba(255, 100, 200, 0.7));
     color: #fff;
     border-radius: 999px;
     cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-    animation: btnPulse 2.6s ease-in-out infinite;
+    transition: transform 0.1s;
+    animation: rise 0.45s 240ms ease-out both, btnPulse 2.6s 240ms ease-in-out infinite;
   }
   #overlay button:hover {
-    background: linear-gradient(135deg, rgba(150, 120, 255, 0.6), rgba(255, 130, 220, 0.45));
+    background: linear-gradient(135deg, rgba(150, 120, 255, 0.9), rgba(255, 130, 220, 0.85));
   }
   #overlay button:active { transform: scale(0.97); }
   #overlay button:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 4px; }
-  .tag {
-    font-size: 11px;
-    opacity: 0.55;
-    letter-spacing: 5px;
-    font-weight: 700;
-    color: #c8c2ff;
-  }
-  .subtag {
-    font-size: 13px;
-    opacity: 0.65;
-    letter-spacing: 1px;
-  }
   .keys {
     display: flex;
     gap: 4px;
@@ -199,7 +207,9 @@
     opacity: 0.7;
     font-size: 11px;
     letter-spacing: 1.5px;
+    animation: rise 0.45s 160ms ease-out both;
   }
+  .over .keys { display: none; }
   .keys .sep { width: 1px; height: 14px; background: rgba(200,180,255,0.2); margin: 0 8px; }
   kbd {
     font-family: ui-monospace, Menlo, monospace;
@@ -213,31 +223,22 @@
     min-width: 18px;
     text-align: center;
   }
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(96px, 1fr));
-    gap: 10px;
-    margin: 6px 0 4px;
-    width: min(440px, 92vw);
+  .hero-stat {
+    font-size: clamp(64px, min(22vw, 16vh), 120px);
+    line-height: 1;
+    color: #fff;
+    text-shadow: 0 0 30px rgba(164, 139, 255, 0.6);
   }
-  .stat-card {
-    padding: 16px 8px 14px;
-    border-radius: 14px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(180,160,255,0.18);
-    text-align: center;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+  .hero-stat .u { font-size: 0.32em; opacity: 0.55; margin-left: 4px; }
+  .sub-stats {
+    display: flex;
+    gap: 26px;
+    justify-content: center;
+    font-size: 13px;
+    letter-spacing: 2px;
+    opacity: 0.65;
   }
-  .stat-card .lbl { font-size: 10px; opacity: 0.6; letter-spacing: 3px; font-weight: 700; }
-  .stat-card .val { font-size: 30px; font-weight: 800; color: #fff; margin-top: 6px; line-height: 1; letter-spacing: -1px; }
-  .stat-card .u { font-size: 13px; opacity: 0.55; margin-left: 3px; letter-spacing: 0; font-weight: 600; }
-  .stat-card.hl {
-    background: linear-gradient(135deg, rgba(255,139,208,0.22), rgba(164,139,255,0.18));
-    border-color: rgba(255,170,220,0.55);
-    box-shadow: 0 0 26px rgba(255,139,208,0.3), inset 0 1px 0 rgba(255,255,255,0.18);
-  }
-  .stat-card.hl .val { background: linear-gradient(135deg, #fff, #ffd6f0); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub-stats b { color: #fff; font-size: 15px; margin-left: 6px; letter-spacing: 0; }
   .badge {
     display: inline-flex;
     align-items: center;
@@ -253,47 +254,47 @@
     box-shadow: 0 0 26px rgba(255, 200, 130, 0.5);
     animation: pop 0.5s ease-out, shimmer 3s ease-in-out infinite;
   }
-  .divider { width: 60px; height: 1px; background: linear-gradient(90deg, transparent, rgba(200,180,255,0.5), transparent); margin: 4px 0; }
+  @media (prefers-reduced-motion: reduce) {
+    #overlay, #overlay h1, #subtitle, .keys, #overlay button, .badge { animation: none; }
+  }
 </style>
 </head>
 <body>
 <div id="wrap">
-  <canvas id="game" width="720" height="960"></canvas>
-  <div id="hud" hidden>
-    <div class="pill"><span class="lbl">DIST</span> <span class="num" id="score">0</span> m</div>
-    <div class="pill"><span class="lbl">PASS</span> <span class="num" id="passes">0</span></div>
-    <div class="pill"><span class="lbl">BEST</span> <span class="num" id="best">0</span> m</div>
-  </div>
-  <button id="pauseBtn" hidden title="Pause (P)">II</button>
-  <div id="overlay">
-    <div id="overlayInner">
-      <div class="tag">FALLING DODGER</div>
-      <h1 id="title">DROP IN</h1>
-      <div id="subtitle">
-        <p>Steer to dodge obstacles. The longer you fall, the faster it gets.</p>
+  <div id="stage">
+    <canvas id="game" width="720" height="960"></canvas>
+    <div id="overlay">
+      <div id="overlayInner">
+        <h1 id="title">FALLING<br>DODGER</h1>
+        <div id="subtitle">
+          <p data-i18n="intro">Steer to dodge obstacles. The longer you fall, the faster it gets.</p>
+        </div>
+        <div class="keys">
+          <kbd>←</kbd><kbd>→</kbd> / <kbd>A</kbd><kbd>D</kbd> <span data-i18n="steer">steer</span>
+          <span class="sep"></span>
+          <kbd>P</kbd> <span data-i18n="pause">pause</span>
+          <span class="sep"></span>
+          <span data-i18n="touch">hold a side or drag to steer</span>
+        </div>
+        <button id="startBtn" autofocus data-i18n="dropIn">DROP IN</button>
       </div>
-      <div class="keys">
-        <kbd>←</kbd><kbd>→</kbd> <span>steer</span>
-        <span class="sep"></span>
-        <kbd>A</kbd><kbd>D</kbd> <span>steer</span>
-        <span class="sep"></span>
-        <kbd>P</kbd> <span>pause</span>
-      </div>
-      <button id="startBtn" autofocus>START</button>
     </div>
   </div>
+  <div id="hud" hidden>
+    <div class="pill"><span class="lbl" data-i18n="dist">DIST</span> <span class="num" id="score">0</span> m</div>
+    <div class="pill"><span class="lbl" data-i18n="pass">PASS</span> <span class="num" id="passes">0</span></div>
+    <div class="pill"><span class="lbl" data-i18n="best">BEST</span> <span class="num" id="best">0</span> m</div>
+  </div>
+  <button id="pauseBtn" hidden>II</button>
 </div>
 
 <script type="module">
 import { createObstacleSystem } from './obstacles.js';
-async function loadConfig() {
-  const r = await fetch('./obstacles.json', { cache: 'no-cache' });
-  if (!r.ok) throw new Error(`obstacles.json fetch failed: ${r.status}`);
-  return await r.json();
-}
 let CFG;
 try {
-  CFG = await loadConfig();
+  const r = await fetch('./obstacles.json', { cache: 'no-cache' });
+  if (!r.ok) throw new Error(`obstacles.json fetch failed: ${r.status}`);
+  CFG = await r.json();
 } catch (e) {
   document.body.replaceChildren();
   const wrap = document.createElement('div');
@@ -311,6 +312,36 @@ npx serve .</pre>
   document.body.appendChild(wrap);
   throw e;
 }
+const STRINGS = {
+  en: {
+    dropIn: 'DROP IN', intro: 'Steer to dodge obstacles. The longer you fall, the faster it gets.',
+    steer: 'steer', pause: 'pause', touch: 'hold a side or drag to steer', again: 'DROP AGAIN',
+    dist: 'DIST', pass: 'PASS', best: 'BEST', pauseTitle: 'Pause (P)',
+    wiped: 'WIPED OUT', newBest: '★ NEW BEST', changer: 'SCREEN CHANGER', close: '+5 CLOSE',
+    paused: 'PAUSED', resume: 'press P or click II to resume',
+  },
+  ko: {
+    dropIn: '낙하 개시', intro: '조작해서 장애물을 피하세요. 오래 떨어질수록 빨라집니다.',
+    steer: '조작', pause: '일시정지', touch: '화면 한쪽을 누르거나 드래그해 조작', again: '다시 낙하',
+    dist: '거리', pass: '통과', best: '최고', pauseTitle: '일시정지 (P)',
+    wiped: '게임 오버', newBest: '★ 신기록', changer: '화면 전환', close: '+5 아슬아슬',
+    paused: '일시정지', resume: 'P 키 또는 II 버튼으로 재개',
+  },
+  ja: {
+    dropIn: '落下開始', intro: '操作して障害物をよけよう。落ちるほど速くなる。',
+    steer: '操作', pause: 'ポーズ', touch: '画面の片側を押すかドラッグで操作', again: 'もう一度',
+    dist: '距離', pass: '通過', best: '最高', pauseTitle: 'ポーズ (P)',
+    wiped: 'ゲームオーバー', newBest: '★ 新記録', changer: '画面転換', close: '+5 ギリギリ',
+    paused: 'ポーズ中', resume: 'Pキーか II ボタンで再開',
+  },
+};
+// ?lang=ko overrides browser locale (for embedding hosts); unknown → en
+const LANG = (new URLSearchParams(location.search).get('lang') || navigator.language || 'en').slice(0, 2);
+const t = STRINGS[LANG] || STRINGS.en;
+document.documentElement.lang = t === STRINGS.en ? 'en' : LANG;
+document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t[el.dataset.i18n]; });
+document.getElementById('pauseBtn').title = t.pauseTitle;
+
 const rng = (a, b) => a + Math.random() * (b - a);
 const sign = () => Math.random() < 0.5 ? -1 : 1;
 {
@@ -329,10 +360,12 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
   const startBtn = document.getElementById('startBtn');
 
   const STORAGE_KEY = 'falling_dodger_best';
-  let best = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
+  let best = 0;
+  try { best = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10); } catch {}
   bestEl.textContent = best;
 
   const keys = { left: false, right: false };
+  let dragDx = 0;        // world px queued by touch drag, consumed in update()
 
   const player = {
     x: W / 2,
@@ -356,6 +389,7 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
   let distance = 0;
   let nextMilestone = CFG.world.milestoneStep;
   let passCount = 0;
+  let lastScore = -1;
   let running = false;
   let paused = false;
   let dead = false;
@@ -412,6 +446,7 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
     distance = 0;
     nextMilestone = CFG.world.milestoneStep;
     passCount = 0;
+    lastScore = -1;
     passesEl.textContent = 0;
     dead = false;
     paused = false;
@@ -453,6 +488,20 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
 
   const REF_FRAME_MS = 1000 / 60;
 
+  // static gradients — inputs never change, build once
+  const VIGNETTE = ctx.createRadialGradient(W/2, H/2, H * 0.3, W/2, H/2, H * 0.75);
+  VIGNETTE.addColorStop(0, 'rgba(0,0,0,0)');
+  VIGNETTE.addColorStop(1, 'rgba(0,0,0,0.55)');
+  const BODY_GRD = (() => {
+    const r = player.r;
+    const g = ctx.createRadialGradient(-r * 0.35, -r * 0.45, r * 0.15, 0, 0, r * 1.15);
+    g.addColorStop(0, '#e8ffe8');
+    g.addColorStop(0.25, '#8effb4');
+    g.addColorStop(0.7, '#46d987');
+    g.addColorStop(1, '#1e8a55');
+    return g;
+  })();
+
   function startTransition() {
     if (transition) return;
     const targetH = !hMode;
@@ -484,14 +533,11 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
     getTimeMs: () => timeMs,
     getScrollSpeed: () => scrollSpeed,
     getHMode: () => hMode,
-    addShockwave, spawnParticles, addFloat,
-    setShake: v => { shake = Math.max(shake, v); },
-    setFlash: v => { flash = Math.max(flash, v); },
     shouldInjectChanger: () => !changerTriggered && distance >= changerTriggerDist,
     onChangerInjected: () => { changerTriggered = true; },
     onChangerCollected: () => {
       startTransition();
-      addFloat(player.x, player.y - 30, 'SCREEN CHANGER', '#e0c0ff');
+      addFloat(player.x, player.y - 30, t.changer, '#e0c0ff');
     },
     onChangerMissed: () => {
       // re-arm so next changer spawns shortly after if player dodged it
@@ -501,13 +547,51 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
     onPass: (gid, isClose) => {
       passCount++;
       passesEl.textContent = passCount;
-      if (isClose) { distance += 5; }
+      if (isClose) {
+        distance += 5;
+        addFloat(player.x + 22, player.y - 6, t.close, '#9be8ff');
+        spawnParticles(player.x, player.y - 6, '#9be8ff', 10, 2);
+      } else {
+        addFloat(player.x + 18, player.y - 6, '+1', '#ffffff');
+      }
     },
   });
 
+  function updateFx(f) {
+    const trailDecay = 0.055 * f;
+    player.trail.forEach(t => t.life -= trailDecay);
+    player.trail = player.trail.filter(t => t.life > 0);
+
+    for (const p of particles) {
+      p.vy += 0.2 * f;
+      p.x += p.vx * f;
+      p.y += p.vy * f;
+      p.life -= 0.02 * f;
+    }
+    particles = particles.filter(p => p.life > 0);
+
+    for (const sw of shockwaves) {
+      sw.r += 6 * f;
+      sw.life -= 0.04 * f;
+    }
+    shockwaves = shockwaves.filter(sw => sw.life > 0);
+
+    for (const ft of floats) {
+      ft.y += ft.vy * f;
+      ft.life -= 0.018 * f;
+    }
+    floats = floats.filter(ft => ft.life > 0);
+
+    shake *= Math.pow(0.85, f);
+    flash *= Math.pow(0.88, f);
+  }
+
   function update(dt) {
     timeMs += dt;
-    if (!running || paused || dead) return;
+    if (!running || paused) return;
+    const f = dt / REF_FRAME_MS;
+    updateFx(f);
+    if (dead) return;
 
     if (transition) {
       transition.t += dt;
@@ -520,6 +604,7 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
         player.vx = 0;
         keys.left = false;
         keys.right = false;
+        dragDx = 0;
         // re-arm for next flip 150-250m later
         changerTriggered = false;
         changerTriggerDist = distance + 150 + Math.random() * 100;
@@ -527,8 +612,7 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
       return;
     }
 
-    const f = dt / REF_FRAME_MS;
-
+    if (dragDx) { player.x += dragDx; player.vx = 0; dragDx = 0; }
     if (keys.left)  player.vx -= player.speed * f;
     if (keys.right) player.vx += player.speed * f;
     if (!keys.left && !keys.right) player.vx *= Math.pow(player.friction, f);
@@ -543,14 +627,13 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
 
     player.trail.push({ x: player.x, y: player.y, life: 1 });
     if (player.trail.length > 22) player.trail.shift();
-    const trailDecay = 0.055 * f;
-    player.trail.forEach(t => t.life -= trailDecay);
-    player.trail = player.trail.filter(t => t.life > 0);
 
+    scrollSpeed = Math.min(CFG.world.scrollMax, scrollSpeed + CFG.world.scrollAccel * f);
     const sp = scrollSpeed;
     const spStep = sp * f;
     distance += sp * 0.05 * f;
-    scoreEl.textContent = Math.floor(distance);
+    const score = Math.floor(distance);
+    if (score !== lastScore) { lastScore = score; scoreEl.textContent = score; }
 
     if (distance >= nextMilestone) {
       addFloat(W / 2, player.y - 40, nextMilestone + ' m', '#a48bff');
@@ -604,29 +687,6 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
     }
     const collResult = obstacleSys.update(dt, f);
     if (collResult.died) { die(); }
-
-    for (const p of particles) {
-      p.vy += 0.2 * f;
-      p.x += p.vx * f;
-      p.y += p.vy * f;
-      p.life -= 0.02 * f;
-    }
-    particles = particles.filter(p => p.life > 0);
-
-    for (const sw of shockwaves) {
-      sw.r += 6 * f;
-      sw.life -= 0.04 * f;
-    }
-    shockwaves = shockwaves.filter(sw => sw.life > 0);
-
-    for (const ft of floats) {
-      ft.y += ft.vy * f;
-      ft.life -= 0.018 * f;
-    }
-    floats = floats.filter(ft => ft.life > 0);
-
-    shake *= Math.pow(0.85, f);
-    flash *= Math.pow(0.88, f);
   }
 
   function die() {
@@ -640,7 +700,7 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
     spawnParticles(player.x, player.y, '#9be8ff', 24, 4);
     if (Math.floor(distance) > best) {
       best = Math.floor(distance);
-      localStorage.setItem(STORAGE_KEY, best);
+      try { localStorage.setItem(STORAGE_KEY, best); } catch {}
       bestEl.textContent = best;
     }
     setTimeout(() => {
@@ -655,26 +715,26 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
       }, '*');
 
       const newBest = score >= best && score > 0;
-      title.textContent = 'WIPED OUT';
+      overlay.classList.add('over');
+      title.textContent = t.wiped;
       subtitle.innerHTML = `
-        ${newBest ? '<div class="badge">★ NEW BEST</div>' : ''}
-        <div class="divider"></div>
-        <div class="stats">
-          <div class="stat-card${newBest ? ' hl' : ''}">
-            <div class="lbl">DIST</div>
-            <div class="val">${score}<span class="u">m</span></div>
-          </div>
-          <div class="stat-card">
-            <div class="lbl">PASS</div>
-            <div class="val">${passCount}</div>
-          </div>
-          <div class="stat-card">
-            <div class="lbl">BEST</div>
-            <div class="val">${best}<span class="u">m</span></div>
-          </div>
+        ${newBest ? `<div class="badge">${t.newBest}</div>` : ''}
+        <div class="hero-stat"><span id="heroNum">0</span><span class="u">m</span></div>
+        <div class="sub-stats">
+          <span>${t.pass}<b>${passCount}</b></span>
+          <span>${t.best}<b>${best}m</b></span>
         </div>
       `;
-      startBtn.textContent = 'DROP AGAIN';
+      // arcade tally: count distance up over ~900ms (ease-out cubic)
+      const heroNum = document.getElementById('heroNum');
+      const t0 = performance.now();
+      const instant = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      (function tick(now) {
+        const k = instant ? 1 : Math.min(1, (now - t0) / 900);
+        heroNum.textContent = Math.round(score * (1 - Math.pow(1 - k, 3)));
+        if (k < 1) requestAnimationFrame(tick);
+      })(t0);
+      startBtn.textContent = t.again;
       hudEl.hidden = true;
       pauseBtn.hidden = true;
       overlay.classList.remove('hidden');
@@ -750,7 +810,7 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
     obstacleSys.draw();
     ctx.globalAlpha = 1;
 
-    drawWalls();
+    ctx.drawImage(wallCvs, 0, 0);
 
     if (player.trail.length > 1) {
       for (let i = 1; i < player.trail.length; i++) {
@@ -841,17 +901,7 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
       ctx.translate(player.x, player.y);
 
       // counter-rotate slime so it stays upright on screen when camera rotates
-      let slimeRot = 0;
-      if (transition) {
-        const k = Math.min(1, transition.t / transition.dur);
-        const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
-        const fromR = hMode ? Math.PI / 2 : 0;
-        const toR = transition.targetH ? Math.PI / 2 : 0;
-        slimeRot = fromR + (toR - fromR) * e;
-      } else if (hMode) {
-        slimeRot = Math.PI / 2;
-      }
-      if (slimeRot !== 0) ctx.rotate(slimeRot);
+      if (camAngle !== 0) ctx.rotate(-camAngle);
 
       // flying thrust trail in horizontal mode (drawn opposite to motion / below upright slime)
       if (hMode || transition) {
@@ -887,12 +937,7 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
 
       ctx.shadowColor = 'rgba(80, 230, 140, 0.7)';
       ctx.shadowBlur = 22;
-      const body = ctx.createRadialGradient(-r * 0.35, -r * 0.45, r * 0.15, 0, 0, r * 1.15);
-      body.addColorStop(0, '#e8ffe8');
-      body.addColorStop(0.25, '#8effb4');
-      body.addColorStop(0.7, '#46d987');
-      body.addColorStop(1, '#1e8a55');
-      ctx.fillStyle = body;
+      ctx.fillStyle = BODY_GRD;
       // asymmetric body — leading side stretched, trailing pinched
       const leadL = vxNorm < 0 ? 1.15 + vxAbs * 0.25 : 1.15 - vxAbs * 0.15;
       const leadR = vxNorm > 0 ? 1.15 + vxAbs * 0.25 : 1.15 - vxAbs * 0.15;
@@ -977,10 +1022,7 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
     ctx.globalAlpha = 1;
 
     // vignette
-    const vg = ctx.createRadialGradient(W/2, H/2, H * 0.3, W/2, H/2, H * 0.75);
-    vg.addColorStop(0, 'rgba(0,0,0,0)');
-    vg.addColorStop(1, 'rgba(0,0,0,0.55)');
-    ctx.fillStyle = vg;
+    ctx.fillStyle = VIGNETTE;
     ctx.fillRect(0, 0, W, H);
 
     if (flash > 0.01) {
@@ -996,18 +1038,19 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
       ctx.textAlign = 'center';
       ctx.shadowColor = '#a48bff';
       ctx.shadowBlur = 20;
-      ctx.fillText('PAUSED', W / 2, H / 2);
+      ctx.fillText(t.paused, W / 2, H / 2);
       ctx.font = '14px "Segoe UI", system-ui, sans-serif';
       ctx.fillStyle = 'rgba(255,255,255,0.7)';
       ctx.shadowBlur = 0;
-      ctx.fillText('press P or click II to resume', W / 2, H / 2 + 32);
+      ctx.fillText(t.resume, W / 2, H / 2 + 32);
     }
 
     ctx.restore();
   }
 
-  function drawWalls() {
+  function drawWalls(ctx) {
     // walls in world coords — auto-rotate with camera (L/R vertical, T/B horizontal)
+    // ponytail: rivet pulse dropped so walls are static → rendered once to wallCvs
     const drawPanel = (x) => {
       const grd = ctx.createLinearGradient(x, 0, x + WALL_W, 0);
       grd.addColorStop(0, '#1a1530');
@@ -1041,7 +1084,7 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
       ctx.fillStyle = '#e0d6ff';
       ctx.shadowColor = '#a48bff'; ctx.shadowBlur = 6;
       for (let y = 14; y < H; y += blockH * 2) {
-        const rb = 1.6 + Math.sin(timeMs * 0.003 + y * 0.05) * 0.4;
+        const rb = 1.6;
         ctx.beginPath(); ctx.arc(x + WALL_W / 2 - 8, y, rb, 0, Math.PI * 2); ctx.fill();
         ctx.beginPath(); ctx.arc(x + WALL_W / 2 + 8, y, rb, 0, Math.PI * 2); ctx.fill();
       }
@@ -1072,6 +1115,9 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
     drawPanel(0);
     drawPanel(W - WALL_W);
   }
+  const wallCvs = document.createElement('canvas');
+  wallCvs.width = W; wallCvs.height = H;
+  drawWalls(wallCvs.getContext('2d'));
 
   function loop(t) {
     if (!lastT) lastT = t;
@@ -1115,6 +1161,50 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
     if (e.code === 'ArrowUp' || e.code === 'KeyW') keys.right = false;
     if (e.code === 'ArrowDown' || e.code === 'KeyS') keys.left = false;
   });
+
+  // Touch / mouse. Hold either half of the canvas to steer that way (top / bottom once horizontal),
+  // or drag anywhere: once a finger moves past DRAG_START it stops acting as a hold and the player
+  // follows its movement 1:1 (× DRAG_SENS) instead.
+  // ponytail: shares `keys` with the keyboard, so lifting a finger also clears a held key.
+  const DRAG_START = 10;   // css px before a hold becomes a drag
+  const DRAG_SENS = 1.3;   // world px moved per css px dragged — raise if thumb travel feels long
+  const pointers = new Map();
+  function pointerSteer() {
+    keys.left = false; keys.right = false;
+    for (const p of pointers.values()) {
+      if (p.drag) continue;
+      const side = hMode ? p.y < 0.5 : p.x >= 0.5;   // hMode: top of screen = world right
+      if (side) keys.right = true; else keys.left = true;
+    }
+  }
+  function pointerPos(e) {
+    const r = cvs.getBoundingClientRect();
+    return { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height, cx: e.clientX, cy: e.clientY, r };
+  }
+  cvs.addEventListener('pointerdown', e => {
+    const p = pointerPos(e);
+    pointers.set(e.pointerId, { ...p, sx: p.cx, sy: p.cy, drag: false });
+    pointerSteer();
+  });
+  cvs.addEventListener('pointermove', e => {
+    const prev = pointers.get(e.pointerId);
+    if (!prev) return;
+    const p = pointerPos(e);
+    const drag = prev.drag || Math.hypot(p.cx - prev.sx, p.cy - prev.sy) > DRAG_START;
+    if (drag) {
+      // screen delta → world delta; horizontal mode rotates the world so screen up = world right
+      const d = hMode
+        ? -(p.cy - prev.cy) * (cvs.height / p.r.height)
+        :  (p.cx - prev.cx) * (cvs.width / p.r.width);
+      dragDx += d * DRAG_SENS;
+    }
+    pointers.set(e.pointerId, { ...p, sx: prev.sx, sy: prev.sy, drag });
+    pointerSteer();
+  });
+  const pointerLift = e => { pointers.delete(e.pointerId); pointerSteer(); };
+  cvs.addEventListener('pointerup', pointerLift);
+  cvs.addEventListener('pointercancel', pointerLift);
+  cvs.addEventListener('pointerleave', pointerLift);
 
   window.addEventListener('contextmenu', e => e.preventDefault());
   window.addEventListener('dragstart', e => e.preventDefault());

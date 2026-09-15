@@ -66,6 +66,10 @@ language        언어 배지 ("KO", "EN", "KO/EN"). 게임 자체의 인게임
 isOriginal      직접 만든 게임이면 true (Original 배지 표시)
 aspectRatio     화면 비율 (기본값 "16/9". 세로형은 "9/16")
 badge           "POPULAR", "NEW" 등 강조 배지
+scoreTiers      개인 기록 등급 [브론즈, 실버, 골드] — 오름차순 숫자 3개.
+                게임이 부모 창으로 { type: "GAME_OVER", score } 를
+                postMessage 할 때만 넣는다. 값은 나중에 조정 가능.
+                en.json 의 scoreLabel 과 짝으로 사용.
 
 =============================================
   필드 설명 (en.json — 영어 텍스트만)
@@ -78,6 +82,8 @@ description     영문 한 줄 설명 (1~2문장. 카드/메타 description에 �
 fullDescription 영문 상세 설명 (3~6문단 권장. 게임 페이지 본문)
 controls        영문 조작법 (예: "Mouse Click: Attack / WASD: Move")
 tips            영문 전략 팁 (2~4문장)
+scoreLabel      점수의 이름 ("Depth", "Waves", "Score" 등).
+                games.json 의 scoreTiers 를 쓰는 게임만 필요.
 lore            영문 배경 스토리 (2~4문단)
 features        특징 태그 배열 (5~8개 권장)
                 ※ 모바일 지원이면 "Web & Mobile Friendly" 포함

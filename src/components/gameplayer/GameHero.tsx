@@ -1,6 +1,6 @@
 import React from 'react';
 import { Play } from 'lucide-react';
-import type { Game } from '../../data/games';
+import { TOUCH_ONLY, type Game } from '../../data/games';
 import { getLocalizedString, useUiText } from '../../i18n';
 import type { LocaleOverlay } from '../../i18n';
 
@@ -36,7 +36,10 @@ const GameHero: React.FC<Props> = ({ game, lang, overlay, onPlay }) => {
       <div className="hero-content">
         {game.genres[0] && <span className="hero-genre">{game.genres[0]}</span>}
         <h2 className="hero-title">{title}</h2>
-        <p className="hero-tagline">{description}</p>
+        {/* Hero height is fixed (16/9), so the notice takes the tagline's slot. */}
+        {TOUCH_ONLY && game.platform === 'PC'
+          ? <p className="mobile-badge pc-only">{uiT('playerPcOnlyNotice', 'Needs a keyboard or mouse — play this one on a PC.')}</p>
+          : <p className="hero-tagline">{description}</p>}
         <button
           type="button"
           className="hero-play-btn"
@@ -45,6 +48,16 @@ const GameHero: React.FC<Props> = ({ game, lang, overlay, onPlay }) => {
           <Play size={22} aria-hidden="true" />
           {uiT('playerPlayNow', 'Play Now')}
         </button>
+        {game.steamUrl && (
+          <a
+            className="hero-steam-link"
+            href={game.steamUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {uiT('playerSteam', 'Full version on Steam')}
+          </a>
+        )}
       </div>
     </div>
   );

@@ -72,5 +72,13 @@ coverage/
 # Local Firestore export (contains player nicknames)
 leaderboards-backup.json
 
+# Unversioned art and local backups parked out of the build (see _archive/)
+_archive/
+
 # wrangler local state
 .wrangler/
+
+# Kingdom of Ashes web build: 496 MB / 4124 files, and every rebuild re-hashes all of it.
+# Deployed straight off disk by `npm run deploy:games`. NOT versioned - so that command must only
+# be run from a machine that has this folder populated, or the deploy drops the game from live.
+games/kingdom-of-ashes-fallen-era/

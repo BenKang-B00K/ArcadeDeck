@@ -17,13 +17,30 @@
       { "source": "/fr", "destination": "/", "type": 301 },
       { "source": "/fr/:rest*", "destination": "/:rest*", "type": 301 },
       { "source": "/zh", "destination": "/", "type": 301 },
-      { "source": "/zh/:rest*", "destination": "/:rest*", "type": 301 }
+      { "source": "/zh/:rest*", "destination": "/:rest*", "type": 301 },
+      { "source": "/es", "destination": "/", "type": 301 },
+      { "source": "/es/:rest*", "destination": "/:rest*", "type": 301 },
+      { "source": "/es-la", "destination": "/", "type": 301 },
+      { "source": "/es-la/:rest*", "destination": "/:rest*", "type": 301 },
+      { "source": "/pt", "destination": "/", "type": 301 },
+      { "source": "/pt/:rest*", "destination": "/:rest*", "type": 301 },
+      { "source": "/ru", "destination": "/", "type": 301 },
+      { "source": "/ru/:rest*", "destination": "/:rest*", "type": 301 },
+      { "source": "/vi", "destination": "/", "type": 301 },
+      { "source": "/vi/:rest*", "destination": "/:rest*", "type": 301 },
+      { "source": "/play/endless-war", "destination": "/play/kingdom-of-ashes-endless-war", "type": 301 },
+      { "source": "/ja/play/endless-war", "destination": "/ja/play/kingdom-of-ashes-endless-war", "type": 301 },
+      { "source": "/ko/play/endless-war", "destination": "/ko/play/kingdom-of-ashes-endless-war", "type": 301 },
+      { "source": "/play/dicefall-chronicles", "destination": "/play/kingdom-of-ashes-dice-war", "type": 301 },
+      { "source": "/ja/play/dicefall-chronicles", "destination": "/ja/play/kingdom-of-ashes-dice-war", "type": 301 },
+      { "source": "/ko/play/dicefall-chronicles", "destination": "/ko/play/kingdom-of-ashes-dice-war", "type": 301 }
     ],
     "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
+      { "source": "/forum/**", "destination": "/index.html" },
+      { "source": "/{ja,ko}/forum", "destination": "/index.html" },
+      { "source": "/{ja,ko}/forum/**", "destination": "/index.html" },
+      { "source": "/{ja,ko}/{about,privacy,contact,my-games,fractured-realm,blog}", "destination": "/index.html" },
+      { "source": "/{ja,ko}/blog/**", "destination": "/index.html" }
     ],
     "cleanUrls": true,
     "trailingSlash": false,

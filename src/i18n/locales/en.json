@@ -29,6 +29,7 @@
     "gameCardCoop": "Co-op",
     "gameCardPcOnly": "PC Only",
     "gameCardMobileOnly": "Mobile Only",
+    "gameCardBoth": "PC / Mobile",
     "gameCardOriginal": "Original",
     "gameGridAll": "All",
     "gameGridGames": "Games",

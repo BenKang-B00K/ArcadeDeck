@@ -66,7 +66,7 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, onGenreCli
     ? <span className="platform-badge"><Monitor size={12} aria-hidden="true" /> {t('gameCardPcOnly', 'PC Only')}</span>
     : game.platform === 'MOBILE'
     ? <span className="platform-badge"><Smartphone size={12} aria-hidden="true" /> {t('gameCardMobileOnly', 'Mobile Only')}</span>
-    : null;
+    : <span className="platform-badge"><Monitor size={12} aria-hidden="true" /><Smartphone size={12} aria-hidden="true" /> {t('gameCardBoth', 'PC / Mobile')}</span>;
 
   const badgeClass =
     game.badge === 'POPULAR' ? 'popular'

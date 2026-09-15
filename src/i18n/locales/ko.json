@@ -29,6 +29,7 @@
     "gameCardCoop": "협동",
     "gameCardPcOnly": "PC 전용",
     "gameCardMobileOnly": "모바일 전용",
+    "gameCardBoth": "PC / 모바일",
     "gameCardOriginal": "오리지널",
     "gameGridAll": "전체",
     "gameGridGames": "게임",

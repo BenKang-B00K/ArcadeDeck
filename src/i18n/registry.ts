@@ -22,10 +22,12 @@ const DISCOVERED_OVERLAY_LANGS: string[] = Object.keys(overlayModules)
   })
   .filter((l): l is string => !!l && !l.startsWith('_'));
 
-// English first; everything else alpha-sorted.
+// Switcher order: English / Korean / Japanese; any new locale appends alpha-sorted.
+const LOCALE_ORDER = ['en', 'ko', 'ja'];
 export const SUPPORTED_LOCALES: string[] = (() => {
-  const rest = DISCOVERED_OVERLAY_LANGS.filter(l => l !== 'en').sort();
-  return ['en', ...rest];
+  const known = LOCALE_ORDER.filter(l => l === 'en' || DISCOVERED_OVERLAY_LANGS.includes(l));
+  const rest = DISCOVERED_OVERLAY_LANGS.filter(l => !known.includes(l)).sort();
+  return [...known, ...rest];
 })();
 
 // English (default locale) lives at the root; other locales sit under a

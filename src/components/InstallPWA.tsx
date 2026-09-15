@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Gamepad2, X } from 'lucide-react';
-import { useUiText } from '../i18n';
+import { useLocation } from 'react-router-dom';
+import { games } from '../data/games';
+import { useUiText, useLocale, getLocalizedString } from '../i18n';
 import './InstallPWA.css';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -57,6 +59,14 @@ const isDismissedRecently = (): boolean => {
 
 const InstallPWA: React.FC = () => {
   const t = useUiText();
+  const { lang, overlay } = useLocale();
+  const { pathname } = useLocation();
+  // On a game page the manifest is the game's own (see GameHeadMeta), so the
+  // prompt installs that game — say so.
+  const game = games.find(g => pathname.endsWith(`/play/${g.slug}`));
+  const installTitle = game
+    ? t('installGameTitle', 'Install {title}').replace('{title}', getLocalizedString(game, 'title', lang, overlay))
+    : t('installTitle', 'Install ArcadeDeck');
   const [supportsPWA, setSupportsPWA] = useState(false);
   const [promptInstall, setPromptInstall] = useState<BeforeInstallPromptEvent | null>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -137,7 +147,7 @@ const InstallPWA: React.FC = () => {
       <div className="pwa-content">
         <div className="pwa-icon"><Gamepad2 size={24} aria-hidden="true" /></div>
         <div className="pwa-text">
-          <h3>{t('installTitle', 'Install ArcadeDeck')}</h3>
+          <h3>{installTitle}</h3>
           {isIOS ? (
             <p>{t('installIosHint', 'Tap Share ↗ then Add to Home Screen')}</p>
           ) : (

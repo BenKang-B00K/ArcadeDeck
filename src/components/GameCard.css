@@ -26,7 +26,7 @@
 /* ── Title row ── */
 .card-title-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
 }
@@ -34,14 +34,19 @@
 .card-title-row h3 {
   flex: 1;
   font-size: var(--text-sm);
-  white-space: nowrap;
+  line-height: 1.3;
+  /* Always reserve 2 lines so long titles show fully and cards stay aligned */
+  min-height: 2.6em;
   overflow: hidden;
-  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .original-dot {
   width: 7px;
   height: 7px;
+  margin-top: 5px;
   border-radius: 50%;
   background: var(--gold);
   flex-shrink: 0;
@@ -49,6 +54,7 @@
 
 .game-badge {
   flex-shrink: 0;
+  margin-top: 2px;
   padding: 2px 8px;
   border-radius: var(--radius-full);
   font-size: 0.6rem;
@@ -141,12 +147,17 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px 8px;
+  gap: 6px;
   padding: var(--space-2) var(--space-4) var(--space-3);
 }
 
-/* genres[0] = main genre (tinted pill); rest = sub genres (muted text) */
+/* Every genre is a tinted pill; genres[0] = main genre, marked by a gold outline */
 .genre-tag {
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  background: hsl(var(--h) 80% 60% / 0.14);
+  color: hsl(var(--h) 90% 72%);
+  border: 1px solid hsl(var(--h) 80% 60% / 0.35);
   font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -154,63 +165,34 @@
   transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 
-.genre-tag.main {
-  padding: 3px 9px;
-  border-radius: var(--radius-full);
-  background: hsl(var(--h) 80% 60% / 0.14);
-  color: hsl(var(--h) 90% 72%);
-  border: 1px solid hsl(var(--h) 80% 60% / 0.35);
-}
-
-[data-theme="light"] .genre-tag.main {
+[data-theme="light"] .genre-tag {
   background: hsl(var(--h) 80% 50% / 0.12);
   color: hsl(var(--h) 70% 34%);
   border-color: hsl(var(--h) 70% 45% / 0.4);
 }
 
-.genre-tag.sub {
-  color: var(--text-muted);
-  font-weight: 500;
+.genre-tag.main {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold-glow);
 }
 
-.genre-tag.sub + .genre-tag.sub::before {
-  content: '·';
-  margin-right: 8px;
-  opacity: 0.5;
+[data-theme="light"] .genre-tag.main {
+  border-color: var(--gold-dark);
 }
 
 .clickable-genre {
   cursor: pointer;
 }
 
-.clickable-genre.main:hover {
+/* Hover fills the pill; border untouched so the main genre keeps its gold ring */
+.clickable-genre:hover {
   background: hsl(var(--h) 85% 62%);
-  border-color: hsl(var(--h) 85% 62%);
   color: var(--bg-color);
 }
 
-.clickable-genre.sub:hover {
-  color: hsl(var(--h) 90% 72%);
-}
-
-[data-theme="light"] .clickable-genre.sub:hover {
-  color: hsl(var(--h) 70% 34%);
-}
-
 @media (max-width: 768px) {
-  .card-title-row { padding: var(--space-2) var(--space-3); align-items: flex-start; }
-  /* Two columns leave ~110px for text — wrap to 2 lines instead of "Kingdom ..." */
-  .card-title-row h3 {
-    font-size: var(--text-xs);
-    white-space: normal;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    line-height: 1.3;
-  }
-  .original-dot, .game-badge { margin-top: 3px; }
+  .card-title-row { padding: var(--space-2) var(--space-3); }
+  .card-title-row h3 { font-size: var(--text-xs); }
   .card-tags-row { padding: var(--space-2) var(--space-3); gap: 4px; flex-wrap: nowrap; overflow: hidden; }
-  .genre-tag { white-space: nowrap; }
-  .genre-tag { font-size: 0.6rem; }
-  .genre-tag.main { padding: 2px 6px; }
+  .genre-tag { white-space: nowrap; font-size: 0.6rem; padding: 2px 6px; }
 }

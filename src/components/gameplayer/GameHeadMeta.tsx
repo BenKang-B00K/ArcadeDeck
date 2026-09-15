@@ -22,6 +22,28 @@ const GameHeadMeta: React.FC<Props> = ({ game, lang, overlay }) => {
     document.title = `${title} - Play Free on ArcadeDeck`;
   }, [title]);
 
+  // Point the install prompt at the per-game manifest (written by
+  // prerender-pages.js) so this game installs as its own app. Chrome
+  // re-evaluates installability when the manifest link's href changes.
+  // Swapping the existing link (vs. adding a second) matters: the browser
+  // only honours the first <link rel="manifest"> in the document.
+  useEffect(() => {
+    const appPath = `${lang === 'en' ? '' : '/' + lang}/play/${game.slug}`;
+    const swap = (rel: string, href: string, restore: string) => {
+      let link = document.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`);
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = rel;
+        document.head.appendChild(link);
+      }
+      link.href = href;
+      return () => { link.href = restore; };
+    };
+    const undoManifest = swap('manifest', `${appPath}/manifest.webmanifest`, '/manifest.webmanifest');
+    const undoIcon = swap('apple-touch-icon', `/play/${game.slug}/icon-192.webp`, '/images/icon-192x192.webp');
+    return () => { undoManifest(); undoIcon(); };
+  }, [game.slug, lang]);
+
   return (
     <>
       <html lang={lang} />

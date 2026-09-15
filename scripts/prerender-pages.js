@@ -11,6 +11,7 @@
  */
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'fs';
+import sharp from 'sharp';
 
 const SUPPORTED_LOCALES = readdirSync('src/i18n/locales')
   .filter(f => f.endsWith('.json') && !f.startsWith('_') && !f.includes('.missing.') && !f.includes('.bak.'))
@@ -150,6 +151,26 @@ function sameGenreLinks(game, lang, limit = 3) {
 }
 
 // =====================================================================
+// PER-GAME PWA ICONS — /play/{slug}/icon-{192,512}.webp
+// =====================================================================
+// Each game is installable on its own (per-game manifest below). Manifest
+// icons must be square, so center-crop the catalogue thumbnail at build time
+// instead of committing 2 extra files per game to public/.
+const ICON_SIZES = [192, 512];
+for (const game of playableGames) {
+  const dir = `dist/play/${game.slug}`;
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+  for (const size of ICON_SIZES) {
+    await sharp(`public/${game.thumbnail}`)
+      .resize(size, size, { fit: 'cover' })
+      .webp({ quality: 80 })
+      .toFile(`${dir}/icon-${size}.webp`);
+  }
+}
+const gameIcons = (slug) =>
+  ICON_SIZES.map(size => ({ src: `/play/${slug}/icon-${size}.webp`, sizes: `${size}x${size}`, type: 'image/webp' }));
+
+// =====================================================================
 // PER-LOCALE GAME SHELLS — /play/{slug} + /{lang}/play/{slug}
 // =====================================================================
 for (const lang of SUPPORTED_LOCALES) {
@@ -195,6 +216,30 @@ for (const lang of SUPPORTED_LOCALES) {
     const canonical = hasTranslation ? pageUrl : fullUrl('en', routePath);
     const robotsValue = hasTranslation ? 'index, follow' : 'noindex, follow';
     const ogAlts = ogLocaleAlts(lang, SUPPORTED_LOCALES.filter(l => overlays[l]?.games?.[game.id]));
+
+    // Per-game PWA manifest: distinct id + scope so a game installs as its
+    // own home-screen app next to (not instead of) the root ArcadeDeck app.
+    const appPath = `${prefix(lang)}${routePath}`;
+    writeFileSync(`${dir}/manifest.webmanifest`, JSON.stringify({
+      id: appPath,
+      name: t.title,
+      short_name: t.title,
+      description: t.description,
+      start_url: appPath,
+      scope: appPath,
+      lang,
+      dir: 'ltr',
+      theme_color: '#050507',
+      background_color: '#050507',
+      display: 'standalone',
+      display_override: ['standalone', 'minimal-ui'],
+      orientation: 'any',
+      categories: ['games', 'entertainment'],
+      icons: [
+        ...gameIcons(slug),
+        { src: '/play/' + slug + '/icon-512.webp', sizes: '512x512', type: 'image/webp', purpose: 'maskable' },
+      ],
+    }));
 
     const jsonLd = JSON.stringify({
       '@context': 'https://schema.org',
@@ -329,7 +374,8 @@ for (const lang of SUPPORTED_LOCALES) {
     <meta name="theme-color" content="#050507" />
     ${adsenseMeta}
     <link rel="icon" type="image/webp" href="/images/favicon.webp" />
-    <link rel="apple-touch-icon" href="/images/icon-192x192.webp" />
+    <link rel="manifest" href="${appPath}/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/play/${slug}/icon-192.webp" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="canonical" href="${canonical}" />
@@ -625,7 +671,6 @@ for (const lang of SUPPORTED_LOCALES) {
   const homeTitle = ui('seoHomeTitle', lang, 'ArcadeDeck | The Ultimate Free Browser Games Platform');
   const homeDesc = ui('seoHomeDescription', lang, 'Play the best free online browser games on ArcadeDeck. High-quality Action, RPG, Strategy, and Idle games. No downloads, just pure fun!');
   const heroTitle = ui('homeHeroTitle', lang, 'Welcome to');
-  const heroSub = ui('homeHeroSubtitle', lang, 'Dozens of handcrafted browser games. Pick one, jump in, and see how far you can go.');
 
   const noscriptItems = playableGames
     .map(g => {
@@ -673,7 +718,7 @@ ${noscriptItems}
   // Replace LCP shell hero text with translated version. Mirrors the <header>
   // Home.tsx renders so the static shell and the React tree share dimensions.
   const surprise = ui('homeRandomGame', lang, 'Surprise me');
-  const heroHtml = `<header class="home-hero"><div class="container home-hero-content"><h1>${heroTitle} <span>ArcadeDeck</span></h1><p>${heroSub}</p><div class="home-hero-actions"><button type="button" class="home-hero-random" disabled>${surprise}</button></div><div class="home-hero-nick"></div></div></header>`;
+  const heroHtml = `<header class="home-hero"><div class="container home-hero-content"><h1>${heroTitle} <span>ArcadeDeck</span></h1><div class="home-hero-actions"><button type="button" class="home-hero-random" disabled>${surprise}</button></div><div class="home-hero-nick"></div></div></header>`;
 
   // Visible catalogue below the hero. Without it #root carried ~115 characters
   // of text and the whole catalogue existed only in <noscript> + JSON-LD.

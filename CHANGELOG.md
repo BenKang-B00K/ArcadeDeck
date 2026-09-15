@@ -12,6 +12,7 @@ All notable changes to ArcadeDeck are documented here.
 
 ## History
 
+- **v34.14.1** (2026-09-15) — game cards: all genres as pills with gold ring on main genre, 2-line titles, PC / Mobile badge; language dropdown order English / Korean / Japanese
 - **v34.13.1** (2026-09-15) — Fruit Frenzy v1.3: shoot bombs, ammo crates, fruit moves, seeking bombs, JA locale, HiDPI + pointer lock
 - **v34.12.1** (2026-09-14) — Shadow Runner, AshenKeys, Debt & Dragons, Endless Runner; game page header redesign, read-friendly info sections
 - **v30.11.1** (2026-09-10) — Barrack Defense, Kingdom of Ashes - Fallen Era; Gate of Hell v3.0

@@ -108,7 +108,6 @@ const Home: React.FC = () => {
         <header className="home-hero">
           <div className="container home-hero-content">
             <h1>{t('homeHeroTitle', 'Welcome to')} <span>ArcadeDeck</span></h1>
-            <p>{t('homeHeroSubtitle', 'Dozens of handcrafted browser games. Pick one, jump in, and see how far you can go.')}</p>
 
             <div className="home-hero-actions">
               <button type="button" className="home-hero-random" onClick={surprise}>

@@ -27,6 +27,16 @@ firebase deploy --only firestore:rules --project ultragames-website
 
 There are no tests in this repo.
 
+## CHANGELOG (mandatory)
+
+Every user-visible change updates `CHANGELOG.md` in the same commit — do not wait to be asked. Prepend one line to `## History`:
+
+```
+- **vMAJOR.MINOR.PATCH** (YYYY-MM-DD) — short summary; semicolon-separated
+```
+
+Bump rule (counters never reset, each bumps independently — see the Versioning block in `CHANGELOG.md`): new game → MAJOR; feature / UI change / existing game update → MINOR; tuning or bug fix → PATCH. Same-day changes of the same tier fold into the existing top line instead of adding a new one. Docs-only, tooling, and refactors with no visible effect skip the changelog.
+
 ## Architecture — Big Picture
 
 **Game data is split between structural config and translatable text:**

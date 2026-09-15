@@ -162,9 +162,9 @@
 }
 .game-genres .genre-tag {
   font-size: 0.8rem;
+  padding: 4px 12px;
   text-decoration: none;
 }
-.game-genres .genre-tag.main { padding: 4px 12px; }
 
 .game-controls {
   display: flex;

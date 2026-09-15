@@ -10,11 +10,20 @@
     "myGamesSubtitle": "Your library, saved right here in this browser",
     "myGamesOperator": "Operator",
     "myGamesRecent": "Recently Played",
-    "myGamesAll": "More to Play",
-    "myGamesAllDesc": "The rest of the ArcadeDeck catalogue.",
+    "myGamesBest": "My Best Games",
+    "myGamesBestEmptyTitle": "No records yet",
+    "myGamesBestEmptyDesc": "Finish a run to set a personal best — it lands here with its Bronze / Silver / Gold tier.",
+    "myGamesBrowse": "Browse games",
     "myGamesEmptyTitle": "Nothing played yet",
-    "myGamesEmptyDesc": "Pick a game below — it will show up here next time you visit.",
+    "myGamesEmptyDesc": "Pick a game from the catalogue — it will show up here next time you visit.",
     "navBlog": "Blog",
+    "navPatchNotes": "Patch Notes",
+    "patchNotesTitle": "Patch",
+    "patchNotesSpan": "Notes",
+    "patchNotesSubtitle": "Every release, newest first. New games bump MAJOR, features bump MINOR, fixes bump PATCH.",
+    "patchTierMajor": "MAJOR",
+    "patchTierMinor": "MINOR",
+    "patchTierPatch": "PATCH",
     "navFracturedRealm": "Fractured Realm",
     "navSupport": "Support",
     "themeToLight": "Switch to light mode",
@@ -243,6 +252,7 @@
     "pbNewBest": "New best!",
     "pbNextTier": "{n} to next tier",
     "pbScore": "Score",
+    "pbToTier": "{n} to {tier}",
     "tierBronze": "Bronze",
     "tierGold": "Gold",
     "tierSilver": "Silver"
@@ -1695,90 +1705,103 @@
     },
     "18": {
       "title": "Skyfall",
-      "description": "A reflex-driven survival arcade game — read the shadows, dodge the storm, and chase the longest survival run on the leaderboard.",
-      "fullDescription": "Skyfall is a high-intensity survival arcade game that rewards reaction time, pattern recognition, and nerve. Objects of escalating size and speed descend from the top of the screen, and you have one job: **do not get hit**. Each **surviving second** adds to your score; the difficulty curve rises continuously, so a thirty-second run feels twice as fast as a fifteen-second run.\n      **Three object types** alternate through the storm. Small debris is fast but predictable. Mid-size hazards land in patterns that broadcast their target column. **Heavy crashers** shake the screen and clear nearby debris on impact — a high-risk, high-reward window if you survive the shake. **Every fifteen seconds** the storm pattern rotates, swapping spawn density and column distribution to break muscle memory.\n      Skyfall is built for short bursts. A single run rarely exceeds **two minutes**, but the loop is engineered for the next-attempt impulse — death-to-restart is one tap, your previous score sits at the top of the screen daring you, and the global leaderboard updates within seconds of a personal best.",
-      "controls": "Left / Right Arrows or A / D to slide between lanes. On mobile, large touch buttons sit at the bottom edge — held inputs slide continuously, taps step a single column. No jump, no shield, no inventory: pure movement.",
-      "tips": "Watch the **falling shadows** on the ground, not the objects in the sky — your reaction window is the shadow's travel time, and tracking objects directly causes overcorrection. Stay near the **center column** when the storm rotates: edges give you fewer escape directions when patterns shift. **Heavy crashers** clear a small area on landing — if you can survive landing next to one, the cleared zone buys you a free second to reposition. Never panic-slide more than **two columns** in one direction; momentum overshoot is the leading cause of late-run deaths.",
-      "lore": "The cities below the storm were warned the sky was falling. They did not believe it until the first crash. Now the storm is permanent, the streets are gone, and only the **dancers** remain — the few who learned to **read the shadows** and step between catastrophes.\n      You are one of them. Out here in the dust between hits, every second you survive is a small refusal to be crushed.",
+      "description": "Free-movement arcade dodge: read the telegraphs, thread meteors, pillars, cracks and homing seekers, bank close-call combos, and grab rare orb drops for the longest run.",
+      "fullDescription": "\n      Skyfall is a top-down survival arcade game about staying alive under a sky that wants you dead. You steer a tiny pilot anywhere on the ground — no lanes, no jump — and every hazard **shows you where it will land before it does**. Meteors paint a danger disc with a ring that closes onto it at impact; pillars mark their footprint with a dashed ring before shooting up as solid walls you have to slide around; ground cracks glow before they turn lethal. Read the telegraph, move early, live.\n      Hazards **unlock by level** (one level every 12 seconds): meteors from the start, **pillars rise** at level 2, **ground cracks** at level 3, and at level 8 **seekers hunt** — homing orbs that spawn at a screen edge, lock on for 5 seconds, and can only be juked, never outfought. Each hazard ramps from its own unlock with hard caps, so the pressure keeps building without ever becoming a wall.\n      Scoring rewards nerve, not just time. Surviving pays 100 points a second, and every meteor that explodes **just beside** you is a **CLOSE CALL** that pumps a decaying combo multiplier on top of a base multiplier that grows the longer you last. Every 30 seconds the game pauses and offers a choice of three **Starshards** — run-scoped upgrades such as SWIFT (+10% speed), FORESIGHT (longer warnings), SLIM (smaller hitbox), or DARING (close calls worth +50%). Finished hazards occasionally leave an **orb drop** behind: Shield, Speed, Score x2, Ghost, or Nova — grab it before it blinks out.\n      Rendered at a crisp 2x 480x270 with a PICO-8 palette, fully procedural visuals and audio, and a touch layout that works anywhere on the screen. Your best score is saved locally and counts toward your ArcadeDeck personal best.\n    ",
+      "controls": "Desktop: move the mouse — your pilot chases the pointer — or use WASD / arrow keys. Mobile: touch anywhere on the screen and drag; a virtual joystick appears under your thumb, lift to stop. Landscape only on phones. Every 30 seconds click or tap one of three Starshard cards to pick an upgrade.",
+      "tips": "Watch the **rings, not the rocks** — a meteor is only lethal at the instant its ring lands on the danger disc, so step out of the disc and step back in for a free **CLOSE CALL**. Keep the combo alive: close calls decay, so string them together in the mid-game when meteors are frequent but still slow. **Pillars are cover** against nothing — seekers ignore them — but they are walls for you, so never let one spawn between you and open ground. When **SEEKERS HUNT** at level 8, run in wide arcs; the orb is slower than you and burns out after 5 seconds. Take **FORESIGHT** or **SLIM** early and **DARING** once you are comfortable brushing meteors. An orb blinks for its last 1.2 seconds — if it is far and blinking, let it go.",
+      "lore": "\n      The cities below the storm were warned that the sky was falling. They did not believe it until the first crater. Now the storm is permanent, the ground splits and heaves, the towers rise and fall on their own, and something in the debris has learned to **hunt**.\n      Only the **dancers** remain — the few who learned to read the sky's warnings and step between catastrophes. Out here, every second is a small refusal to be crushed, and the starshards falling with the rocks are the only gift the storm ever gives.\n    ",
       "features": [
-        "Pure-Reflex Survival Arcade Loop",
-        "Three Hazard Types with Distinct Patterns",
-        "Rotating Storm Patterns Every Fifteen Seconds",
-        "Continuous Difficulty Curve — No Plateau",
-        "One-Tap Restart Loop for Burst Sessions",
-        "Responsive Keyboard and Mobile Touch Controls",
-        "Global Survival-Time Leaderboard"
+        "Free 360° Movement — Pointer, Keys, or Touch Joystick",
+        "Four Telegraphed Hazards: Meteors, Pillars, Cracks, Seekers",
+        "Level-Gated Unlocks Every 12 Seconds with Hard Caps",
+        "Close-Call Combo Multiplier for Brushing Meteors",
+        "Starshard Upgrade Pick Every 30 Seconds",
+        "Rare Orb Drops: Shield, Speed, Score x2, Ghost, Nova",
+        "Crisp 2x Retro Rendering, Procedural Art and Audio",
+        "Mobile-Ready: Landscape, Safe-Area, Touch Anywhere"
       ],
-      "objectives": "Dodge all falling hazards for as long as possible by reading shadows and moving between lanes — every **surviving second** adds to your score and pushes you up the global survival-time leaderboard.",
+      "objectives": "Survive as long as you can by reading every telegraph and moving early, brush past meteors for **close-call combos**, pick Starshards every 30 seconds, and collect orb drops to push your score and ArcadeDeck personal best higher.",
       "controlsTable": [
         {
-          "key": "Left / Right Arrows",
-          "action": "Slide between lanes"
+          "key": "Mouse",
+          "action": "Your pilot chases the pointer (desktop)"
         },
         {
-          "key": "A / D",
-          "action": "Alternative lane controls"
+          "key": "WASD / Arrow Keys",
+          "action": "Move in eight directions"
         },
         {
-          "key": "Touch (Left side)",
-          "action": "Slide left on mobile"
+          "key": "Touch + Drag",
+          "action": "Virtual joystick appears under your finger; lift to stop"
         },
         {
-          "key": "Touch (Right side)",
-          "action": "Slide right on mobile"
+          "key": "Click / Tap Shard Card",
+          "action": "Choose one of three Starshard upgrades every 30 s"
+        },
+        {
+          "key": "Click / Tap",
+          "action": "Start from the menu, retry after game over"
         }
       ],
       "faq": [
         {
-          "q": "How do I avoid the objects?",
-          "a": "Watch the falling shadows on the ground rather than the objects in the sky. Your effective reaction window is the shadow's travel time — tracking the objects directly causes overcorrection and late dodges."
+          "q": "How do I know where a meteor will hit?",
+          "a": "Every meteor paints a danger disc on the ground with a ring that shrinks onto it; the meteor is lethal only for the instant the ring lands. Leave the disc before that moment — or hover just outside its edge for a close call."
         },
         {
-          "q": "What are the three hazard types?",
-          "a": "Small debris is fast but follows predictable individual paths. Mid-size hazards land in patterns that broadcast their target column in advance. Heavy crashers shake the screen and clear nearby debris on impact, creating a dangerous but survivable window if you hold your position nearby."
+          "q": "What is a CLOSE CALL and why does it matter?",
+          "a": "A meteor that explodes right next to you without touching you. Each one adds +0.25 to a combo multiplier (capped at 1.5) that decays over time, on top of a base multiplier that grows +0.1 every 15 seconds. Late-game combos are where big scores come from."
         },
         {
-          "q": "How do storm pattern rotations work?",
-          "a": "Every fifteen seconds the storm pattern shifts — changing spawn density and column distribution to break your muscle memory. Stay near the center column when a rotation occurs since edge positions give you fewer escape directions when the pattern changes."
+          "q": "When do the other hazards appear?",
+          "a": "Levels tick every 12 seconds. Meteors fall from level 1, pillars rise from level 2, ground cracks open from level 3, and seekers start hunting at level 8. Each hazard ramps from its own unlock and hits a hard cap, so the curve stays fair."
         },
         {
-          "q": "What causes most late-run deaths?",
-          "a": "Panic-sliding more than two columns in one direction. Momentum overshoot carries you into another hazard. Commit to single-column steps rather than wide desperate slides, even when an object looks dangerously close."
+          "q": "How do I deal with seekers?",
+          "a": "Seekers are homing orbs that spawn at a screen edge, lock on after a short spawn-in, and chase you for 5 seconds. They move slower than you and pass straight through pillars, so run in wide arcs and let them burn out — never corner yourself."
         },
         {
-          "q": "Can I use heavy crashers to my advantage?",
-          "a": "Yes — heavy crashers clear a small area on landing. If you can survive landing adjacent to one, the cleared zone gives you a free second to reposition before the next pattern arrives, which is a significant breather in late-game high-density storms."
+          "q": "What are Starshards?",
+          "a": "Every 30 seconds the run pauses and you pick one of three upgrades that last for the rest of the run: SWIFT (+10% speed), FORESIGHT (+0.12 s warning), SLIM (smaller hitbox), DARING (close calls worth +50%), PRISMATIC and ECHO (mixed bonuses). Nothing carries between runs."
+        },
+        {
+          "q": "What do the orb drops do?",
+          "a": "A finished hazard has a small chance to leave an orb that lasts 4 seconds. Shield absorbs one hit, Speed gives ×1.5 movement for 2 s, Score x2 doubles time score for 5 s, Ghost makes you invulnerable for 3 s, and Nova bursts every hazard on screen. Active orbs show in the HUD with a draining ring."
+        },
+        {
+          "q": "Does it work on phones?",
+          "a": "Yes — rotate to landscape, then touch anywhere and drag. The game pauses while the phone is held in portrait, and the play area respects the notch and home bar."
         }
       ],
       "featuredComments": [
         {
-          "name": "ShadowReader",
-          "text": "Watch the shadows on the ground, not the objects falling from above. This actually works. Tracking the objects caused constant overcorrection for me. Switched to shadows and immediately cleared 10 extra seconds."
+          "name": "RingReader",
+          "text": "Once I stopped looking at the meteors and only watched the closing rings, my runs doubled. The disc is the truth; the rock is just decoration."
         },
         {
           "name": "StormDancer",
-          "text": "The only ones left after the storm are the people who learned to read shadows and step between catastrophes. This is an excellent piece of lore for a game that is essentially about reflexes.",
+          "text": "The dancers who read the sky and step between catastrophes — the lore is short but it nails the feeling of a two-minute run at level 9.",
           "badge": "Lore"
         },
         {
-          "name": "CenterLane",
-          "text": "Stay center during storm rotations. Edge positions halve your available escape directions the moment the pattern shifts. Two runs in, I realized every late death happened from being pushed to a wall."
-        },
-        {
-          "name": "CrasherEdge",
-          "text": "Surviving next to a heavy crasher landing is a high-skill play but genuinely worth practicing. The cleared zone is a free second of breathing room that can be the difference between wave 4 and wave 5 of the late storm.",
+          "name": "ComboGoblin",
+          "text": "Standing just outside the danger disc on purpose is the whole game. Chain four close calls in the mid-game and the multiplier carries you through the seeker levels.",
           "badge": "Strategy"
         },
         {
-          "name": "NoPanic",
-          "text": "Panic-sliding more than two columns is how runs die. One to two columns max, deliberate, no matter how close the object looks. Overcorrection kills you faster than the hazard."
+          "name": "PillarPanic",
+          "text": "Level 2 hits and suddenly there are walls. I kept letting pillars spawn between me and the open floor and dying to the meteor I could not reach around. Move early, keep the middle."
         },
         {
-          "name": "ReflexLoop",
-          "text": "One run rarely exceeds two minutes and the restart is instant. I lost 45 minutes without noticing. The loop is exactly as tight as the game claims."
+          "name": "GhostOrb",
+          "text": "Got a Ghost orb at level 8 with two seekers on me and just walked through everything for three seconds. Rare enough that it feels like a gift every time."
+        },
+        {
+          "name": "ThumbJoystick",
+          "text": "The touch joystick spawning wherever my thumb lands is the difference between playable and not. Landscape, one thumb, no dead zones."
         }
       ],
-      "scoreLabel": "Survival Time (s)"
+      "scoreLabel": "Score"
     },
     "19": {
       "title": "Spirit Duel",

@@ -23,24 +23,17 @@
       -webkit-touch-callout: none;
       overscroll-behavior: none;
     }
+    /* Phaser centers the canvas itself (margin-based) — no flex here, it double-offsets.
+       Fixed box inset by the safe area so its rect *is* the playable area (notch / home bar excluded). */
     #game {
-      width: 100vw;
-      height: 100vh;
-      height: 100dvh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-sizing: border-box;
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
-      padding-left: env(safe-area-inset-left);
-      padding-right: env(safe-area-inset-right);
+      position: fixed;
+      top: env(safe-area-inset-top, 0px);
+      right: env(safe-area-inset-right, 0px);
+      bottom: env(safe-area-inset-bottom, 0px);
+      left: env(safe-area-inset-left, 0px);
     }
     #game canvas {
       display: block;
-      image-rendering: pixelated;
-      image-rendering: -moz-crisp-edges;
-      image-rendering: crisp-edges;
       touch-action: none;
     }
 
@@ -86,9 +79,9 @@
       #rotate-hint { display: flex; }
       #game { visibility: hidden; }
     }
-  </style>
-  <script type="module" crossorigin src="./assets/index-Bs-zYRYM.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/phaser-BlNqK--e.js">
+  </style>
+  <script type="module" crossorigin src="./assets/index-CSole4bw.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/phaser-DdCsgmnN.js">
 </head>
 <body>
   <div id="game"></div>

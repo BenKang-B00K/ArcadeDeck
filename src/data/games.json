@@ -349,10 +349,12 @@
     "platform": "BOTH",
     "isOriginal": true,
     "scoreTiers": [
-      30,
-      60,
-      120
-    ]
+      3000,
+      8000,
+      20000
+    ],
+    "badge": "UPDATE",
+    "lastUpdated": "2026-09-15"
   },
   {
     "id": "20",

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'omok-v1';
+const CACHE_NAME = 'omok-v2';
 
 self.addEventListener('install', (e) => {
     e.waitUntil(

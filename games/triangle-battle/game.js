@@ -6,7 +6,7 @@
 
     const playTone = (freq, type, duration, volume, slide = 0) => {
       init();
-      if (ctx.state === 'suspended') ctx.resume();
+      if (ctx.state !== 'running') ctx.resume(); // 'suspended' or Safari's 'interrupted'
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = type;
@@ -39,26 +39,28 @@
   const STRINGS = {
     ko: {
       title: '트라이앵글 배틀!',
-      subtitle: '삼각형 땅따먹기',
+      guideTitle: '게임 방법',
+      guide1: 'PEG 두 개를 차례로 탭하면 선이 그어집니다.',
+      guide2: '선은 이미 있는 선과 교차할 수 없습니다.',
+      guide3: '삼각형을 완성하면 +1점, 한 번 더! 세 변이 모두 내 색이면 +2점. (안에 PEG가 있으면 무효)',
+      guide4: '더 이상 그을 선이 없으면 종료. 삼각형이 가장 많은 사람이 승리!',
+      guideTip: '보드는 드래그해서 움직일 수 있어요. 턴 시간이 끝나면 상대가 무작위 선 하나를 얻습니다.',
+      guideOk: '알겠어요!',
       playerCount: '플레이어 수',
-      players2: '2명', players3: '3명', players4: '4명',
+      players2: '2명', players3: '3명', players4: '4명', players5: '5명', players6: '6명',
       pegCount: 'PEG 수',
       pegs10: '10개', pegs15: '15개', pegs20: '20개', pegs25: '25개',
-      boardLayout: '보드 레이아웃',
-      layoutRandom: '랜덤', layoutCircle: '원형', layoutTriangle: '삼각형', layoutSquare: '사각형',
       turnTime: '턴 시간',
-      unlimited: '무제한', sec10: '10초', sec20: '20초',
+      sec10: '10초', sec20: '20초',
       startGame: '게임 시작',
-      footerHint: 'PEG를 선택하고 이어서 삼각형을 만드세요!',
       gameOver: '게임 종료!',
       playAgain: '다시 하기',
       turnOf: (name) => `${name}의 차례`,
       gameEnded: '게임 종료',
       alreadyConnected: '이미 연결된 선입니다!',
       crossesLine: '다른 선과 교차합니다!',
-      timeUp: '시간 초과!',
-      nameBanned: (name) => `"${name}" — 사용할 수 없는 이름입니다.`,
-      nameTooLong: '이름은 15자 이하로 입력해주세요.',
+      passesPeg: '다른 PEG 위를 지나갑니다!',
+      timeUp: '시간 초과! 상대에게 선 하나',
       nameDuplicate: '중복된 이름이 있습니다.',
       tie: '무승부!',
       win: '승리!',
@@ -67,26 +69,28 @@
     },
     en: {
       title: 'Triangle Battle!',
-      subtitle: 'Claim your territory!',
+      guideTitle: 'How to Play',
+      guide1: 'Tap two pegs one after another to draw a line.',
+      guide2: 'A line cannot cross any existing line.',
+      guide3: 'Close a triangle: +1 point and an extra turn. All 3 sides your color: +2. (No peg inside!)',
+      guide4: 'Game ends when no more lines fit. Most triangles wins!',
+      guideTip: 'Drag to pan the board. When the timer runs out, your opponent gets a free random line.',
+      guideOk: 'Got it!',
       playerCount: 'Players',
-      players2: '2P', players3: '3P', players4: '4P',
+      players2: '2P', players3: '3P', players4: '4P', players5: '5P', players6: '6P',
       pegCount: 'Pegs',
       pegs10: '10', pegs15: '15', pegs20: '20', pegs25: '25',
-      boardLayout: 'Board Layout',
-      layoutRandom: 'Random', layoutCircle: 'Circle', layoutTriangle: 'Triangle', layoutSquare: 'Square',
       turnTime: 'Turn Time',
-      unlimited: 'None', sec10: '10s', sec20: '20s',
+      sec10: '10s', sec20: '20s',
       startGame: 'Start Game',
-      footerHint: 'Select PEGs and connect them to form triangles!',
       gameOver: 'Game Over!',
       playAgain: 'Play Again',
       turnOf: (name) => `${name}'s turn`,
       gameEnded: 'Game Over',
       alreadyConnected: 'Already connected!',
       crossesLine: 'Lines would cross!',
-      timeUp: 'Time\'s up!',
-      nameBanned: (name) => `"${name}" — This name is not allowed.`,
-      nameTooLong: 'Name must be 15 characters or less.',
+      passesPeg: 'Line passes over a peg!',
+      timeUp: 'Time\'s up! Opponent gets a line',
       nameDuplicate: 'Duplicate names found.',
       tie: 'Tie!',
       win: 'Wins!',
@@ -112,55 +116,10 @@
   }
 
   // --- Constants ---
-  const PLAYER_COLORS = ['#e94560', '#00d2ff', '#50fa7b', '#f1fa8c'];
-  const PLAYER_COLORS_RGB = [[233,69,96],[0,210,255],[80,250,123],[241,250,140]];
-  const DEFAULT_NAMES = ['A', 'B', 'C', 'D'];
+  const PLAYER_RGB = ['233,69,96', '0,210,255', '80,250,123', '241,250,140', '189,147,249', '255,150,50'];
+  const PLAYER_COLORS = PLAYER_RGB.map(c => `rgb(${c})`);
+  const DEFAULT_NAMES = ['A', 'B', 'C', 'D', 'E', 'F'];
   let PLAYER_NAMES = [...DEFAULT_NAMES];
-
-  // --- Profanity filter ---
-  const BANNED_WORDS = [
-    '시발','씨발','시바','씨바','ㅅㅂ','ㅆㅂ','시팔','씨팔',
-    '개새끼','새끼','ㅅㄲ','개새','썅','쌍','병신','ㅂㅅ','빙신','벼신',
-    '지랄','ㅈㄹ','좆','ㅈㅇ','자지','보지','ㅂㅈ','ㅈㅈ',
-    '미친','ㅁㅊ','미챤','미쳤','미틴',
-    '꺼져','닥쳐','닥치','뒤져','뒈져','디져','디져라','뒤져라',
-    '죽어','죽여','찢어','년','놈','넘','놈아','년아',
-    '호구','또라이','돌아이','또라','등신','멍청','바보','얼간이',
-    '쓰레기','쓰래기','인간쓰레기','폐급',
-    '느금마','느금','니미','니엄','엄창','에미','애미','애비','에비',
-    '한남','한녀','맘충','김치녀','된장녀','틀딱','장애','장애인',
-    'tlqkf','Tlqkf','ㅗ','凸',
-    'fuck','fuk','fck','f u c k','fucker','fucking','fk','fking',
-    'shit','sh1t','sht','bullshit','bitch','b1tch','btch',
-    'ass','asshole','a$$','arsehole','damn','dammit','damm',
-    'dick','d1ck','dck','cock','c0ck','pussy','puss','pu$$y',
-    'whore','wh0re','slut','sl ut','bastard','b@stard',
-    'cunt','c*nt','cnt','nigger','n1gger','nigga','n1gga','negro',
-    'retard','retarded','r3tard','fag','faggot','f@g','f@ggot',
-    'stfu','gtfo','wtf','lmfao','crap','piss',
-    'kill','die','murder','suicide','rape','molest',
-    'nazi','hitler','holocaust','terrorist','bomb','shoot',
-    'くそ','クソ','ばか','バカ','しね','死ね','きもい','キモい',
-    'アホ','うざい','ウザい','ちんこ','まんこ',
-    '他妈','妈的','操','草泥马','傻逼','滚','狗','婊',
-    '@ss','b!tch','sh!t','d!ck','f*ck','a**','p*ssy',
-    '엿먹','씹','좃','잡것','잡놈','잡년','상놈',
-    '찐따','찐다','쪼다','쪼다리','구더기',
-    '걸레','화냥','화냥년','창녀','창남',
-    '변태','성추행','성폭행','꼴값','꼴통','개돼지','돼지',
-    '문디','꼬붕','앰창','좆밥','씹창',
-  ];
-  function containsBannedWord(name) {
-    const lower = name.toLowerCase().replace(/\s+/g, '');
-    for (const word of BANNED_WORDS) {
-      if (lower.includes(word.toLowerCase())) return word;
-    }
-    return null;
-  }
-
-  function isMobile() {
-    return window.matchMedia('(pointer: coarse)').matches || window.innerWidth <= 768;
-  }
 
   // --- Scaling ---
   const BOARD_MARGIN = 0.15;
@@ -172,33 +131,32 @@
 
   function updateScale() {
     PEG_RADIUS = Math.max(5, boardSize * 0.012);
-    PEG_HIT_RADIUS = Math.max(14, boardSize * 0.028);
+    PEG_HIT_RADIUS = Math.max(22, boardSize * 0.04); // >=44px touch target; peg spacing is 0.085*B so no overlap
     EDGE_WIDTH = Math.max(1.5, boardSize * EDGE_WIDTH_RATIO);
   }
 
   // --- State ---
-  let canvas, ctx, container;
   let pegs = [], edges = [], triangles = [];
   let playerCount = 2, pegCount = 15, currentPlayer = 0;
   let scores = [];
-  let consecutiveTimeouts = 0; // If all players skip consecutively, end game
   let selectedPeg = null, hoveredPeg = null;
   let gameOver = false;
 
   // Animation
-  let animTriangles = [];
   let animFrame = null;
   let xMark = null;
 
   // Particle effects
   let particles = [];       // triangle creation sparks
   let screenFlash = 0;      // flash alpha (decays)
-  let screenFlashColor = [255,255,255];
+  let screenFlashColor = '255,255,255';
   let gameEndAnim = null;   // {birth, player} for final shockwave
 
   // Pan
   let panX = 0, panY = 0;
+  let viewW = 0, viewH = 0, viewLeft = 0, viewTop = 0; // container size/offset, cached — no layout reads in the frame loop
   let dragging = false;
+  let dragPointerId = null; // ponytail: first finger wins, extra touches ignored
   let dragStartX, dragStartY, panStartX, panStartY;
   let dragMoved = false;
   const DRAG_THRESHOLD = 8;
@@ -207,13 +165,24 @@
   let timeLimit = 20; // Default 20
   let turnStartTime = 0;
   let timerInterval = null;
+  let lastTick = 0;
 
   // --- DOM ---
+  const canvas = document.getElementById('board');
+  const ctx = canvas.getContext('2d');
+  const container = document.getElementById('board-container');
+  const portraitQuery = matchMedia('(pointer: coarse) and (orientation: portrait) and (max-width: 768px)'); // same query that shows #rotate-notice
+  const minimap = document.getElementById('minimap');
+  const minimapCtx = minimap.getContext('2d');
+  const minimapMirror = document.getElementById('minimap-mirror');
+  const minimapMirrorCtx = minimapMirror.getContext('2d');
+  const triLayer = document.createElement('canvas'); // settled triangles, see drawTriangles
+  const triCtx = triLayer.getContext('2d');
+  let triLayerCount = -1; // triangles.length the layer holds; -1 = blank
   const setupScreen = document.getElementById('setup-screen');
   const gameScreen = document.getElementById('game-screen');
   const playerCountSel = document.getElementById('player-count');
   const pegCountSel = document.getElementById('peg-count');
-  const boardLayoutSel = document.getElementById('board-layout');
   const timeLimitSel = document.getElementById('time-limit');  const startBtn = document.getElementById('start-btn');
   const restartBtn = document.getElementById('restart-btn');
   const resultOverlay = document.getElementById('result-overlay');
@@ -246,11 +215,24 @@
   });
   applyI18n(); // initial
 
+  // --- Guide (how to play) ---
+  const guideOverlay = document.getElementById('guide-overlay');
+  const openGuide = () => guideOverlay.classList.remove('hidden');
+  const closeGuide = () => {
+    guideOverlay.classList.add('hidden');
+    try { localStorage.setItem('tb_guide_seen', '1'); } catch {}
+  };
+  document.getElementById('guide-btn').addEventListener('click', openGuide);
+  document.getElementById('guide-close').addEventListener('click', closeGuide);
+  guideOverlay.addEventListener('click', e => { if (e.target === guideOverlay) closeGuide(); });
+  try { if (!localStorage.getItem('tb_guide_seen')) openGuide(); } catch {}
+
   // --- Name inputs ---
   function buildNameInputs() {
     const count = parseInt(playerCountSel.value);
     nameInputsDiv.innerHTML = '';
     nameErrorDiv.classList.add('hidden');
+    nameInputsDiv.classList.toggle('two-col', count > 4); // 5-6 players: two columns so the card fits on phones
     for (let i = 0; i < count; i++) {
       const row = document.createElement('div');
       row.className = 'name-input-row';
@@ -269,25 +251,7 @@
     PLAYER_NAMES = [];
     nameErrorDiv.classList.add('hidden');
     for (let i = 0; i < count; i++)
-      document.getElementById(`name-input-${i}`).classList.remove('invalid');
-    for (let i = 0; i < count; i++) {
-      const input = document.getElementById(`name-input-${i}`);
-      let name = input.value.trim() || DEFAULT_NAMES[i];
-      if (containsBannedWord(name)) {
-        input.classList.add('invalid');
-        nameErrorDiv.textContent = t('nameBanned', name);
-        nameErrorDiv.classList.remove('hidden');
-        return false;
-      }
-      const maxLen = 15;
-      if (name.length > maxLen) {
-        input.classList.add('invalid');
-        nameErrorDiv.textContent = t('nameTooLong');
-        nameErrorDiv.classList.remove('hidden');
-        return false;
-      }
-      PLAYER_NAMES.push(name);
-    }
+      PLAYER_NAMES.push(document.getElementById(`name-input-${i}`).value.trim() || DEFAULT_NAMES[i]);
     if (new Set(PLAYER_NAMES.map(n => n.toLowerCase())).size < PLAYER_NAMES.length) {
       nameErrorDiv.textContent = t('nameDuplicate');
       nameErrorDiv.classList.remove('hidden');
@@ -302,23 +266,36 @@
     resultOverlay.classList.add('hidden');
     setupScreen.classList.remove('hidden');
     gameScreen.classList.add('hidden');
-    cancelAnimationFrame(animFrame);
+    stopAnimLoop();
     clearInterval(timerInterval);
   });
   window.addEventListener('resize', () => {
     if (!gameScreen.classList.contains('hidden')) setupBoard();
   });
+  // Mobile: edge-swipe "back" during a pan must not leave the game — re-push while playing
+  window.addEventListener('popstate', () => {
+    if (!gameScreen.classList.contains('hidden')) history.pushState('game', '');
+  });
+  // Wake lock is released when the page is hidden; re-request on return
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && !gameScreen.classList.contains('hidden')) navigator.wakeLock?.request('screen').catch(() => {});
+  });
 
   function startGame() {
     if (!validateAndSetNames()) return;
     audio.playStart();
+    // Mobile hardening (all no-ops where unsupported): keep screen on, trap back gesture,
+    // fullscreen + landscape lock (Android; iPhone has no element fullscreen)
+    navigator.wakeLock?.request('screen').catch(() => {});
+    if (history.state !== 'game') history.pushState('game', '');
+    document.documentElement.requestFullscreen?.({ navigationUI: 'hide' })
+      .then(() => screen.orientation.lock('landscape')).catch(() => {});
     playerCount = parseInt(playerCountSel.value);
     pegCount = parseInt(pegCountSel.value);
     timeLimit = parseInt(timeLimitSel.value);
     currentPlayer = 0;
-    consecutiveTimeouts = 0;
     scores = Array(playerCount).fill(0);
-    edges = []; triangles = []; animTriangles = [];
+    edges = []; triangles = [];
     selectedPeg = null; hoveredPeg = null;
     gameOver = false; xMark = null;
     particles = []; screenFlash = 0; gameEndAnim = null;
@@ -326,63 +303,50 @@
     setupScreen.classList.add('hidden');
     gameScreen.classList.remove('hidden');
 
-    initCanvas();
+    buildHUD(); // before setupBoard: HUD height decides the container size we measure
+    setupBoard();
     generatePegs();
     initBgEffects();
-    buildHUD();
     startTimer();
     startAnimLoop();
   }
 
-  function initCanvas() {
-    canvas = document.getElementById('board');
-    container = document.getElementById('board-container');
-    ctx = canvas.getContext('2d');
-    setupBoard();
-    bindInputs();
-  }
-
-  // Minimap
-  let minimap, minimapCtx;
-  let minimapMirror, minimapMirrorCtx;
   const MINIMAP_SIZE_RATIO = 0.15;
+  let minimapSize = 0;
 
   function setupBoard() {
-    const cw = container.clientWidth;
-    const ch = container.clientHeight;
-    boardSize = Math.max(cw, ch) * 0.7;
-    canvas.width = boardSize;
-    canvas.height = boardSize;
+    const rect = container.getBoundingClientRect();
+    viewW = rect.width; viewH = rect.height; viewLeft = rect.left; viewTop = rect.top;
+    boardSize = Math.max(viewW, viewH) * 0.7;
+    // ponytail: DPR capped at 2 and backing store at ~2048px — shadowBlur cost scales with pixel count
+    const dpr = Math.min(window.devicePixelRatio || 1, 2, Math.max(1, 2048 / boardSize));
+    canvas.width = canvas.height = triLayer.width = triLayer.height = boardSize * dpr;
+    canvas.style.width = canvas.style.height = boardSize + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    triCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    triLayerCount = -1; minimapKey = ''; // resized canvases are blank — force redraw
+    canvas.style.setProperty('--grid', (boardSize * 0.06) + 'px'); // CSS triangular grid spacing
     updateScale();
-    panX = (cw - boardSize) / 2;
-    panY = (ch - boardSize) / 2;
+    for (const p of pegs) { p.x = p.nx * boardSize; p.y = p.ny * boardSize; }
+    panX = (viewW - boardSize) / 2;
+    panY = (viewH - boardSize) / 2;
     clampPan();
     applyPan();
-    setupMinimap();
-  }
-
-  function setupMinimap() {
-    minimap = document.getElementById('minimap');
-    minimapMirror = document.getElementById('minimap-mirror');
-    const mSize = Math.round(Math.min(container.clientWidth, container.clientHeight) * MINIMAP_SIZE_RATIO);
+    minimapSize = Math.round(Math.min(viewW, viewH) * MINIMAP_SIZE_RATIO);
     for (const m of [minimap, minimapMirror]) {
-      m.width = mSize;
-      m.height = mSize;
-      m.style.width = mSize + 'px';
-      m.style.height = mSize + 'px';
+      m.width = m.height = minimapSize * dpr;
+      m.style.width = m.style.height = minimapSize + 'px';
     }
-    minimapCtx = minimap.getContext('2d');
-    minimapMirrorCtx = minimapMirror.getContext('2d');
+    minimapCtx.setTransform(dpr, 0, 0, dpr, 0, 0); // mirror ctx stays identity: drawImage copies device px 1:1
   }
 
   function applyPan() {
-    canvas.style.left = panX + 'px';
-    canvas.style.top = panY + 'px';
+    // transform, not left/top: moves the composited layer without re-layout or repainting the CSS box-shadows
+    canvas.style.transform = `translate3d(${panX}px,${panY}px,0)`;
   }
 
   function clampPan() {
-    const cw = container.clientWidth;
-    const ch = container.clientHeight;
+    const cw = viewW, ch = viewH;
     // If board is smaller than container in a dimension, center it
     if (boardSize <= cw) {
       panX = (cw - boardSize) / 2;
@@ -399,7 +363,7 @@
   // --- Timer ---
   function startTimer() {
     clearInterval(timerInterval);
-    turnStartTime = Date.now();
+    turnStartTime = lastTick = Date.now();
     if (timeLimit > 0) {
       timerBarWrap.classList.remove('hidden');
       timerBarWrapMirror.classList.remove('hidden');
@@ -411,13 +375,13 @@
     }
   }
 
-  function resetTurnTimer() {
-    turnStartTime = Date.now();
-  }
-
   function timerTick() {
     if (gameOver) { clearInterval(timerInterval); return; }
-    const elapsed = (Date.now() - turnStartTime) / 1000;
+    const now = Date.now();
+    // Pause while hidden/rotated; a gap > 500ms means the tab was throttled or JS suspended (iOS)
+    if (document.hidden || portraitQuery.matches || now - lastTick > 500) turnStartTime += now - lastTick;
+    lastTick = now;
+    const elapsed = (now - turnStartTime) / 1000;
     updateTimerBar();
 
     // Tick-tock when < 4s remaining
@@ -428,64 +392,63 @@
     }
 
     if (elapsed >= timeLimit) {
-      // Time's up — skip turn
+      // Time's up — opponent (next player) gets a random line, then it's their turn
       selectedPeg = null;
       showMessage(t('timeUp'));
-      consecutiveTimeouts++;
-
-      if (consecutiveTimeouts >= playerCount) {
-        // All players timed out consecutively — end game
-        gameOver = true;
-        updateHUD();
-        clearInterval(timerInterval);
-        screenFlash = 0.6;
-        screenFlashColor = [255, 255, 255];
-        gameEndAnim = { birth: performance.now(), player: currentPlayer };
-        setTimeout(showResults, 1200);
-        return;
-      }
-
-      currentPlayer = (currentPlayer + 1) % playerCount;
+      const opp = (currentPlayer + 1) % playerCount;
+      const moves = validMoves();
+      if (moves.length) placeEdge(...moves[Math.floor(Math.random() * moves.length)], opp);
+      currentPlayer = opp;
       audio.playTurn();
+      turnStartTime = Date.now();
       updateHUD();
-      resetTurnTimer();
+      wakeAnimLoop();
+      if (!validMoves().length) endGame();
     }
+  }
+
+  function endGame() {
+    gameOver = true;
+    clearInterval(timerInterval);
+    updateHUD();
+    screenFlash = 0.6;
+    screenFlashColor = '255,255,255';
+    gameEndAnim = { birth: performance.now(), player: currentPlayer };
+    setTimeout(showResults, 1200);
   }
 
   function updateTimerBar() {
     if (timeLimit <= 0) return;
     const elapsed = (Date.now() - turnStartTime) / 1000;
     const ratio = Math.max(0, 1 - elapsed / timeLimit);
-    const widthStr = (ratio * 100) + '%';
-    const [r, g, b] = PLAYER_COLORS_RGB[currentPlayer];
+    const scaleStr = `scaleX(${ratio})`; // transform, not width: compositor-only, no layout per tick
     const colorStr = ratio > 0.3
-      ? `rgba(${r},${g},${b},0.8)`
+      ? `rgba(${PLAYER_RGB[currentPlayer]},0.8)`
       : `rgba(255,${Math.round(ratio / 0.3 * 160)},60,0.9)`;
-    timerBar.style.width = widthStr;
+    timerBar.style.transform = scaleStr;
     timerBar.style.background = colorStr;
-    timerBarMirror.style.width = widthStr;
+    timerBarMirror.style.transform = scaleStr;
     timerBarMirror.style.background = colorStr;
   }
 
   // --- Input ---
-  function bindInputs() {
-    container.addEventListener('pointerdown', onPointerDown);
-    container.addEventListener('pointermove', onPointerMove);
-    container.addEventListener('pointerup', onPointerUp);
-    container.addEventListener('pointercancel', onPointerUp);
-    container.addEventListener('contextmenu', e => e.preventDefault());
-  }
+  container.addEventListener('pointerdown', onPointerDown);
+  container.addEventListener('pointermove', onPointerMove);
+  container.addEventListener('pointerup', onPointerUp);
+  container.addEventListener('pointercancel', onPointerUp);
+  container.addEventListener('contextmenu', e => e.preventDefault());
 
   function getCanvasCoords(clientX, clientY) {
-    const rect = canvas.getBoundingClientRect();
-    return {
-      x: (clientX - rect.left) * (canvas.width / rect.width),
-      y: (clientY - rect.top) * (canvas.height / rect.height)
-    };
+    return { x: clientX - viewLeft - panX, y: clientY - viewTop - panY }; // CSS px on the board; ctx is DPR-scaled
   }
 
   function onPointerDown(e) {
     if (e.button && e.button !== 0) return;
+    if (dragging) return;
+    const rect = container.getBoundingClientRect(); // one layout read per gesture, before any pan write
+    viewLeft = rect.left; viewTop = rect.top;
+    wakeAnimLoop();
+    dragPointerId = e.pointerId;
     dragging = true; dragMoved = false;
     dragStartX = e.clientX; dragStartY = e.clientY;
     panStartX = panX; panStartY = panY;
@@ -493,9 +456,10 @@
   }
 
   function onPointerMove(e) {
+    if (dragging && e.pointerId !== dragPointerId) return;
     const coords = getCanvasCoords(e.clientX, e.clientY);
     const idx = getPegAt(coords.x, coords.y);
-    if (hoveredPeg !== idx) hoveredPeg = idx;
+    if (idx !== hoveredPeg) { hoveredPeg = idx; wakeAnimLoop(); }
     if (!dragging) return;
     const dx = e.clientX - dragStartX;
     const dy = e.clientY - dragStartY;
@@ -509,8 +473,9 @@
   }
 
   function onPointerUp(e) {
-    if (!dragging) return;
+    if (!dragging || e.pointerId !== dragPointerId) return;
     dragging = false;
+    wakeAnimLoop();
     if (!dragMoved) {
       const coords = getCanvasCoords(e.clientX, e.clientY);
       handleTap(coords.x, coords.y);
@@ -531,109 +496,62 @@
   }
 
   // --- PEG Generation ---
+  // Each layout seeds a shape; the rest is filled by random scatter.
+  // Coordinates are 0..1 board-normalized. add() enforces min distance and pegCount cap.
+  const LAYOUTS = {
+    scatter: () => {},
+    circle: (add, ring) => { ring(0.5, 0.5, 0.315, Math.min(pegCount, 12)); add(0.5, 0.5); },
+    rings: (add, ring) => { ring(0.5, 0.5, 0.33, 10); ring(0.5, 0.5, 0.16, 5, Math.PI / 5); add(0.5, 0.5); },
+    hexagon: (add, ring) => { ring(0.5, 0.5, 0.33, 6, -Math.PI / 2); ring(0.5, 0.5, 0.17, 6, -Math.PI / 2 + Math.PI / 6); add(0.5, 0.5); },
+    star: (add, ring) => { ring(0.5, 0.5, 0.34, 5, -Math.PI / 2); ring(0.5, 0.5, 0.15, 5, -Math.PI / 2 + Math.PI / 5); },
+    triangle: (add, ring, poly) => poly([[0.5, 0.15], [0.15, 0.85], [0.85, 0.85]], 3),
+    diamond: (add, ring, poly) => poly([[0.5, 0.15], [0.85, 0.5], [0.5, 0.85], [0.15, 0.5]], 2),
+    square: (add, ring, poly) => poly([[0.15, 0.15], [0.85, 0.15], [0.85, 0.85], [0.15, 0.85]], 2),
+    grid: (add) => { for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) add(0.15 + c * 0.35, 0.15 + r * 0.35); },
+    cross: (add) => { for (let k = 0; k < 5; k++) { add(0.5, 0.15 + k * 0.175); add(0.15 + k * 0.175, 0.5); } },
+    xshape: (add) => { for (let k = 0; k < 5; k++) { const t = 0.15 + k * 0.175; add(t, t); add(t, 1 - t); } },
+    spiral: (add) => { for (let i = 0; i < 14; i++) { const t = i / 13, a = t * Math.PI * 4, r = 0.04 + t * 0.31; add(0.5 + Math.cos(a) * r, 0.5 + Math.sin(a) * r); } },
+  };
+
   function generatePegs() {
     pegs = [];
     const pad = BOARD_MARGIN;
     const area = (1 - pad * 2);
-    const minDist = MIN_PEG_DIST_RATIO;
-    const layout = boardLayoutSel ? boardLayoutSel.value : 'random';
 
-    const addPegIfOk = (nx, ny) => {
+    const add = (nx, ny) => {
+      if (pegs.length >= pegCount) return false;
       for (const p of pegs) {
-        if (Math.hypot(p.nx - nx, p.ny - ny) < minDist) return false;
+        if (Math.hypot(p.nx - nx, p.ny - ny) < MIN_PEG_DIST_RATIO) return false;
       }
-      pegs.push({ nx, ny, id: pegs.length });
+      pegs.push({ nx, ny, x: nx * boardSize, y: ny * boardSize, id: pegs.length }); // x,y: board CSS px, refreshed in setupBoard
       return true;
     };
-
-    if (layout === 'circle') {
-      const centerX = 0.5, centerY = 0.5;
-      const radius = area * 0.45;
-      const count = Math.min(pegCount, 12);
-      for (let i = 0; i < count; i++) {
-        const ang = (i / count) * Math.PI * 2;
-        addPegIfOk(centerX + Math.cos(ang) * radius, centerY + Math.sin(ang) * radius);
+    // n points evenly on a circle
+    const ring = (cx, cy, r, n, rot = 0) => {
+      for (let i = 0; i < n; i++) {
+        const a = rot + (i / n) * Math.PI * 2;
+        add(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
       }
-      if (pegCount > 12) addPegIfOk(centerX, centerY);
-    } else if (layout === 'triangle') {
-      const topX = 0.5, topY = pad;
-      const leftX = pad, leftY = 1 - pad;
-      const rightX = 1 - pad, rightY = 1 - pad;
-      addPegIfOk(topX, topY);
-      addPegIfOk(leftX, leftY);
-      addPegIfOk(rightX, rightY);
-      // Midpoints
-      addPegIfOk((topX + leftX) / 2, (topY + leftY) / 2);
-      addPegIfOk((topX + rightX) / 2, (topY + rightY) / 2);
-      addPegIfOk((leftX + rightX) / 2, (leftY + rightY) / 2);
-    } else if (layout === 'square') {
-      addPegIfOk(pad, pad);
-      addPegIfOk(1 - pad, pad);
-      addPegIfOk(pad, 1 - pad);
-      addPegIfOk(1 - pad, 1 - pad);
-      addPegIfOk(0.5, pad);
-      addPegIfOk(0.5, 1 - pad);
-      addPegIfOk(pad, 0.5);
-      addPegIfOk(1 - pad, 0.5);
-    }
-
-    // Fill remaining with random candidates
-    const cols = Math.ceil(Math.sqrt(pegCount * 1.5));
-    const rows = cols;
-    const cellW = area / cols;
-    const cellH = area / rows;
-    const candidates = [];
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const nx = pad + (c + 0.2 + Math.random() * 0.6) * cellW;
-        const ny = pad + (r + 0.2 + Math.random() * 0.6) * cellH;
-        candidates.push({ nx, ny });
+    };
+    // polygon corners plus `div` points spread along each side
+    const poly = (pts, div) => {
+      for (let i = 0; i < pts.length; i++) {
+        const [ax, ay] = pts[i], [bx, by] = pts[(i + 1) % pts.length];
+        for (let k = 0; k < div; k++) add(ax + (bx - ax) * k / div, ay + (by - ay) * k / div);
       }
-    }
-    // Shuffle and pick
-    for (let i = candidates.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
-    }
-    for (const c of candidates) {
-      if (pegs.length >= pegCount) break;
-      addPegIfOk(c.nx, c.ny);
-    }
+    };
 
-    // Fallback fill
+    const names = Object.keys(LAYOUTS);
+    LAYOUTS[names[Math.floor(Math.random() * names.length)]](add, ring, poly);
+
+    // Fill remaining by dart throwing — add() enforces minDist
+    // ponytail: rejection sampling; ~29% packing at 25 pegs, add Poisson-disc if pegCount grows
     let attempts = 0;
     while (pegs.length < pegCount && attempts < 2000) {
-      addPegIfOk(pad + Math.random() * area, pad + Math.random() * area);
+      add(pad + Math.random() * area, pad + Math.random() * area);
       attempts++;
     }
-
-    // Lloyd relaxation (1 pass for non-random to keep shape but fix overlaps)
-    const iters = (layout === 'random') ? 2 : 1;
-    for (let iter = 0; iter < iters; iter++) {
-      for (let i = 0; i < pegs.length; i++) {
-        let sx = 0, sy = 0, count = 0;
-        for (let j = 0; j < pegs.length; j++) {
-          if (i === j) continue;
-          const d = Math.hypot(pegs[i].nx - pegs[j].nx, pegs[i].ny - pegs[j].ny);
-          if (d < minDist * 2.5) {
-            const dx = pegs[i].nx - pegs[j].nx;
-            const dy = pegs[i].ny - pegs[j].ny;
-            const force = 1 / (d + 0.001);
-            sx += dx * force;
-            sy += dy * force;
-            count++;
-          }
-        }
-        if (count > 0) {
-          const strength = 0.015;
-          pegs[i].nx = Math.max(pad, Math.min(1 - pad, pegs[i].nx + sx * strength));
-          pegs[i].ny = Math.max(pad, Math.min(1 - pad, pegs[i].ny + sy * strength));
-        }
-      }
-    }
   }
-
-  function px(p) { return { x: p.nx * boardSize, y: p.ny * boardSize }; }
 
   // --- HUD (top + bottom mirror) ---
   function buildHUD() {
@@ -644,9 +562,7 @@
         const badge = document.createElement('div');
         badge.className = 'player-badge' + (i === currentPlayer ? ' active' : '');
         badge.dataset.player = i;
-        badge.dataset.pos = pos;
-        const [r,g,b] = PLAYER_COLORS_RGB[i];
-        badge.style.setProperty('--player-glow', `rgba(${r},${g},${b},0.5)`);
+        badge.style.setProperty('--player-glow', `rgba(${PLAYER_RGB[i]},0.5)`);
         badge.innerHTML = `<span class="dot" style="background:${PLAYER_COLORS[i]}"></span>${PLAYER_NAMES[i]}<span class="score">0</span>`;
         infoDiv.appendChild(badge);
       }
@@ -676,9 +592,10 @@
   }
 
   // --- Edge / Triangle Logic ---
-  function edgeExists(a, b) {
-    return edges.some(e => (e.a === a && e.b === b) || (e.a === b && e.b === a));
+  function findEdge(a, b) {
+    return edges.find(e => (e.a === a && e.b === b) || (e.a === b && e.b === a));
   }
+  function edgeExists(a, b) { return !!findEdge(a, b); }
   function cross2(a, b, c) {
     return (b.nx - a.nx) * (c.ny - a.ny) - (b.ny - a.ny) * (c.nx - a.nx);
   }
@@ -704,6 +621,24 @@
     }
     return false;
   }
+  const PEG_CLEARANCE = 0.03; // normalized; peg body is ~0.02, so a line must clear it with margin
+  function segPointDist(a, b, p) {
+    const dx = b.nx - a.nx, dy = b.ny - a.ny;
+    const t = Math.max(0, Math.min(1, ((p.nx - a.nx) * dx + (p.ny - a.ny) * dy) / (dx * dx + dy * dy)));
+    return Math.hypot(p.nx - (a.nx + t * dx), p.ny - (a.ny + t * dy));
+  }
+  function passesOverPeg(a, b) {
+    for (let i = 0; i < pegs.length; i++)
+      if (i !== a && i !== b && segPointDist(pegs[a], pegs[b], pegs[i]) < PEG_CLEARANCE) return true;
+    return false;
+  }
+  // The one place edge rules live. Returns an i18n key naming the violation, or null if legal.
+  function invalidReason(a, b) {
+    if (edgeExists(a, b)) return 'alreadyConnected';
+    if (wouldCrossExistingEdge(a, b)) return 'crossesLine';
+    if (passesOverPeg(a, b)) return 'passesPeg';
+    return null;
+  }
   function triangleExists(a, b, c) {
     const s = [a, b, c].sort((x, y) => x - y);
     return triangles.some(t => {
@@ -726,71 +661,77 @@
     }
     return false;
   }
-  function findNewTriangles(a, b) {
+  function findNewTriangles(a, b, player) {
     const found = [];
     for (let c = 0; c < pegs.length; c++) {
       if (c === a || c === b) continue;
       if (edgeExists(a, c) && edgeExists(b, c))
         if (!triangleExists(a, b, c) && !triangleContainsPeg(a, b, c))
-          found.push({ a, b, c, player: currentPlayer });
+          found.push({ a, b, c, player });
     }
     return found;
   }
-  function hasValidMoves() {
+  function validMoves() {
+    const moves = [];
     for (let i = 0; i < pegs.length; i++)
       for (let j = i + 1; j < pegs.length; j++)
-        if (!edgeExists(i, j) && !wouldCrossExistingEdge(i, j)) return true;
-    return false;
+        if (!invalidReason(i, j)) moves.push([i, j]);
+    return moves;
   }
 
   // --- Game actions ---
   function getPegAt(cx, cy) {
     for (let i = 0; i < pegs.length; i++) {
-      const p = px(pegs[i]);
+      const p = pegs[i];
       if (Math.hypot(p.x - cx, p.y - cy) < PEG_HIT_RADIUS) return i;
     }
     return null;
   }
 
   function tryConnect(a, b) {
-    if (edgeExists(a, b)) { showInvalidX(a, b); showMessage(t('alreadyConnected')); return; }
-    if (wouldCrossExistingEdge(a, b)) { showInvalidX(a, b); showMessage(t('crossesLine')); return; }
+    const why = invalidReason(a, b);
+    if (why) { showInvalidX(a, b); showMessage(t(why)); return; }
 
-    consecutiveTimeouts = 0; // Reset counter on valid move
-    edges.push({ a, b, player: currentPlayer, birth: performance.now() });
-    const newTris = findNewTriangles(a, b);
-    const now = performance.now();
-    if (newTris.length > 0) {
-      audio.playTriangle();
-      for (const tri of newTris) {
-        tri.number = scores[currentPlayer] + 1; // this player's Nth triangle
-        triangles.push(tri);
-        animTriangles.push({ ...tri, birth: now });
-        scores[currentPlayer]++;
-        spawnTriangleParticles(tri, currentPlayer);
-      }
-    } else {
-      audio.playConnect();
-    }
-
-    if (newTris.length > 0) {
-      const [r, g, b] = PLAYER_COLORS_RGB[currentPlayer];
-      screenFlash = 0.35;
-      screenFlashColor = [r, g, b];
-    } else {
+    if (placeEdge(a, b, currentPlayer) === 0) { // no triangle → turn passes
       currentPlayer = (currentPlayer + 1) % playerCount;
       audio.playTurn();
     }
-    resetTurnTimer();
+    turnStartTime = Date.now();
     updateHUD();
+    if (!validMoves().length) endGame();
+  }
+
+  // Commit edge a-b for `player` and score any triangles it closes. Returns the triangle count.
+  function placeEdge(a, b, player) {
+    if (invalidReason(a, b)) return 0; // never commit an illegal edge, whoever asks
+    edges.push({ a, b, player, birth: performance.now() });
+    const newTris = findNewTriangles(a, b, player);
+    const now = performance.now();
+    for (const tri of newTris) {
+      // All 3 sides this player's color → 2 points (the a-b side is theirs by construction)
+      tri.points = findEdge(tri.a, tri.c).player === player && findEdge(tri.b, tri.c).player === player ? 2 : 1;
+      tri.number = triangles.filter(t => t.player === player).length + 1; // this player's Nth triangle
+      tri.birth = now;
+      triangles.push(tri);
+      scores[player] += tri.points;
+      spawnTriangleParticles(tri, player);
+    }
+    if (newTris.length > 0) {
+      audio.playTriangle();
+      screenFlash = 0.35;
+      screenFlashColor = PLAYER_RGB[player];
+    } else {
+      audio.playConnect();
+    }
+    return newTris.length;
   }
 
   // --- Triangle creation particles ---
   function spawnTriangleParticles(tri, player) {
-    const pa = px(pegs[tri.a]), pb = px(pegs[tri.b]), pc = px(pegs[tri.c]);
+    const pa = pegs[tri.a], pb = pegs[tri.b], pc = pegs[tri.c];
     const cx = (pa.x + pb.x + pc.x) / 3;
     const cy = (pa.y + pb.y + pc.y) / 3;
-    const [r, g, b] = PLAYER_COLORS_RGB[player];
+    const color = PLAYER_RGB[player];
     const now = performance.now();
     // Burst of sparks from triangle center
     for (let i = 0; i < 18; i++) {
@@ -801,7 +742,7 @@
         vx: Math.cos(angle) * speed,
         vy: Math.sin(angle) * speed,
         r: 1.5 + Math.random() * 2.5,
-        color: [r, g, b],
+        color,
         alpha: 1,
         birth: now,
         life: 600 + Math.random() * 400
@@ -821,7 +762,7 @@
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
           r: 1 + Math.random() * 1.5,
-          color: [r, g, b],
+          color,
           alpha: 0.8,
           birth: now,
           life: 400 + Math.random() * 300
@@ -831,7 +772,7 @@
   }
 
   function showInvalidX(a, b) {
-    const pa = px(pegs[a]), pb = px(pegs[b]);
+    const pa = pegs[a], pb = pegs[b];
     xMark = { x: (pa.x + pb.x) / 2, y: (pa.y + pb.y) / 2, birth: performance.now() };
   }
 
@@ -847,11 +788,11 @@
   function showResults() {
     const ranked = scores.map((s, i) => ({ player: i, score: s }))
       .sort((a, b) => b.score - a.score);
-    const medals = ['\u{1F947}', '\u{1F948}', '\u{1F949}', '4th'];
+    const medals = ['\u{1F947}', '\u{1F948}', '\u{1F949}', '4th', '5th', '6th']; // max 6 players
     const totalTri = triangles.length;
     const totalEdges = edges.length;
     const winner = ranked[0];
-    const isTie = ranked.length > 1 && ranked[0].score === ranked[1].score;
+    const isTie = ranked[0].score === ranked[1].score;
 
     let html = '<div class="result-summary">';
     if (isTie) {
@@ -864,18 +805,37 @@
     html += `<div class="summary-stats">${t('statLines', totalEdges, totalTri)}</div></div>`;
     html += ranked.map((r, i) => `
       <div class="rank-entry">
-        <span class="medal">${medals[i] || (i+1)+'th'}</span>
+        <span class="medal">${medals[i]}</span>
         <span style="color:${PLAYER_COLORS[r.player]};font-weight:600">${PLAYER_NAMES[r.player]}</span>
         <span>\u25B2 ${r.score}</span>
       </div>`).join('');
     resultList.innerHTML = html;
-    applyI18n();
     resultOverlay.classList.remove('hidden');
+    stopAnimLoop(); // overlay covers the board; keep the GPU off the backdrop blur
   }
 
   // --- Animation Loop ---
-  function startAnimLoop() {
-    function loop(time) { draw(time); animFrame = requestAnimationFrame(loop); }
+  // ponytail: turn-based game — between moves only star twinkle runs, so idle frames drop to IDLE_FPS
+  const IDLE_FPS = 20;
+  let idleTimer = null;
+  function isAnimating(time) {
+    return dragging || particles.length > 0 || xMark !== null || screenFlash > 0.005 || gameEndAnim !== null ||
+      messageText !== '' || selectedPeg !== null || hoveredPeg !== null ||
+      (edges.length > 0 && time - edges[edges.length - 1].birth < EDGE_ANIM_DURATION) ||
+      (triangles.length > 0 && time - triangles[triangles.length - 1].birth < TRI_POP_MS);
+  }
+  function loop(time) {
+    idleTimer = null;
+    draw(time);
+    if (isAnimating(time)) animFrame = requestAnimationFrame(loop);
+    else idleTimer = setTimeout(() => { animFrame = requestAnimationFrame(loop); }, 1000 / IDLE_FPS);
+  }
+  function startAnimLoop() { stopAnimLoop(); animFrame = requestAnimationFrame(loop); }
+  function stopAnimLoop() { cancelAnimationFrame(animFrame); clearTimeout(idleTimer); idleTimer = null; }
+  // Input while idle: draw now instead of waiting out the idle delay
+  function wakeAnimLoop() {
+    if (idleTimer === null) return;
+    clearTimeout(idleTimer); idleTimer = null;
     animFrame = requestAnimationFrame(loop);
   }
 
@@ -896,10 +856,9 @@
 
   // --- Drawing ---
   function draw(time) {
-    if (!time) time = performance.now();
     const B = boardSize;
     ctx.clearRect(0, 0, B, B);
-    drawBoardBackground(time);
+    drawStars(time);
     drawTriangles(time);
     drawEdges();
     drawPreviewLine(time);
@@ -908,114 +867,70 @@
     drawParticles(time);
     drawScreenFlash();
     drawGameEndAnim(time);
-    drawVignette();
     drawMessage();
     drawMinimap();
   }
 
-  function drawBoardBackground(time) {
+  // Base fill, glow, grid and edge vignette live in CSS on canvas#board
+  // ponytail: twinkle alpha quantized to 8 buckets, one path+fill per bucket instead of 80 fillStyle strings a frame
+  const STAR_FILLS = Array.from({ length: 8 }, (_, b) => `rgba(180,200,255,${(0.08 + (b + 0.5) / 8 * 0.12).toFixed(3)})`);
+  function drawStars(time) {
     const B = boardSize;
-
-    // Base fill — dark blue
-    ctx.fillStyle = '#111a30';
-    ctx.fillRect(0, 0, B, B);
-
-    // Subtle radial gradient center glow
-    const cg = ctx.createRadialGradient(B * 0.5, B * 0.5, 0, B * 0.5, B * 0.5, B * 0.55);
-    cg.addColorStop(0, 'rgba(22,33,70,0.6)');
-    cg.addColorStop(1, 'rgba(12,16,38,0)');
-    ctx.fillStyle = cg;
-    ctx.fillRect(0, 0, B, B);
-
-    // Grid lines — very subtle
-    ctx.save();
-    const gridStep = B * 0.06;
-    ctx.strokeStyle = 'rgba(80,100,160,0.06)';
-    ctx.lineWidth = 1;
-    for (let x = gridStep; x < B; x += gridStep) {
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, B); ctx.stroke();
-    }
-    for (let y = gridStep; y < B; y += gridStep) {
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(B, y); ctx.stroke();
-    }
-    ctx.restore();
-
-    // Stars — twinkling
-    for (const s of bgStars) {
-      const twinkle = Math.sin(time * 0.001 * s.speed + s.phase) * 0.5 + 0.5;
+    for (const s of bgStars) s.bucket = Math.min(7, ((Math.sin(time * 0.001 * s.speed + s.phase) * 0.5 + 0.5) * 8) | 0);
+    for (let b = 0; b < 8; b++) {
       ctx.beginPath();
-      ctx.arc(s.x * B, s.y * B, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(180,200,255,${0.08 + twinkle * 0.12})`;
+      for (const s of bgStars) {
+        if (s.bucket !== b) continue;
+        ctx.moveTo(s.x * B + s.r, s.y * B);
+        ctx.arc(s.x * B, s.y * B, s.r, 0, Math.PI * 2);
+      }
+      ctx.fillStyle = STAR_FILLS[b];
       ctx.fill();
     }
-
-    // Corner decorations — subtle triangle outlines
-    const cornerSize = B * 0.06;
-    const cornerPad = B * 0.025;
-    ctx.save();
-    ctx.strokeStyle = 'rgba(100,120,180,0.1)';
-    ctx.lineWidth = 1.5;
-    // Top-left
-    ctx.beginPath();
-    ctx.moveTo(cornerPad, cornerPad);
-    ctx.lineTo(cornerPad + cornerSize, cornerPad);
-    ctx.lineTo(cornerPad, cornerPad + cornerSize);
-    ctx.closePath(); ctx.stroke();
-    // Top-right
-    ctx.beginPath();
-    ctx.moveTo(B - cornerPad, cornerPad);
-    ctx.lineTo(B - cornerPad - cornerSize, cornerPad);
-    ctx.lineTo(B - cornerPad, cornerPad + cornerSize);
-    ctx.closePath(); ctx.stroke();
-    // Bottom-left
-    ctx.beginPath();
-    ctx.moveTo(cornerPad, B - cornerPad);
-    ctx.lineTo(cornerPad + cornerSize, B - cornerPad);
-    ctx.lineTo(cornerPad, B - cornerPad - cornerSize);
-    ctx.closePath(); ctx.stroke();
-    // Bottom-right
-    ctx.beginPath();
-    ctx.moveTo(B - cornerPad, B - cornerPad);
-    ctx.lineTo(B - cornerPad - cornerSize, B - cornerPad);
-    ctx.lineTo(B - cornerPad, B - cornerPad - cornerSize);
-    ctx.closePath(); ctx.stroke();
-    ctx.restore();
-
   }
 
+  // Settled triangles are static: rendered once into triLayer, redrawn only when the settled set changes.
+  // Triangles are pushed in birth order, so the settled ones are always a prefix of the array.
+  // ponytail: dropped the 6% glow pulse — it cost two shadowBlur passes per triangle per frame
+  const TRI_POP_MS = 350;
   function drawTriangles(time) {
     const B = boardSize;
-    for (const t of triangles) {
-      const pa = px(pegs[t.a]), pb = px(pegs[t.b]), pc = px(pegs[t.c]);
-      const [r, g, b] = PLAYER_COLORS_RGB[t.player];
-      const cx = (pa.x + pb.x + pc.x) / 3, cy = (pa.y + pb.y + pc.y) / 3;
-      const anim = animTriangles.find(a => a.a === t.a && a.b === t.b && a.c === t.c && a.player === t.player);
-      const age = anim ? (time - anim.birth) / 1000 : 999;
-      const popScale = age < 0.35 ? easeOutBack(Math.min(age / 0.35, 1)) : 1;
-      const pulse = Math.sin(time * 0.002 + t.a + t.b) * 0.06 + 1;
-
-      ctx.save();
-      ctx.translate(cx, cy); ctx.scale(popScale, popScale); ctx.translate(-cx, -cy);
-      const glowSize = B * 0.03 * pulse;
-      ctx.shadowColor = `rgba(${r},${g},${b},0.6)`; ctx.shadowBlur = glowSize;
-      ctx.beginPath(); ctx.moveTo(pa.x, pa.y); ctx.lineTo(pb.x, pb.y); ctx.lineTo(pc.x, pc.y); ctx.closePath();
-      ctx.fillStyle = `rgba(${r},${g},${b},0.45)`; ctx.fill();
-      ctx.shadowBlur = 0;
-      const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, B * 0.12);
-      grad.addColorStop(0, `rgba(${r},${g},${b},0.3)`); grad.addColorStop(1, `rgba(${r},${g},${b},0.05)`);
-      ctx.fillStyle = grad; ctx.fill();
-      ctx.strokeStyle = `rgba(${r},${g},${b},${0.7 + 0.2 * pulse})`;
-      ctx.lineWidth = Math.max(2, EDGE_WIDTH * 0.8);
-      ctx.shadowColor = `rgba(${r},${g},${b},0.5)`; ctx.shadowBlur = glowSize * 0.7; ctx.stroke();
-      ctx.shadowBlur = 0;
-      const fontSize = Math.max(10, B * 0.016);
-      ctx.font = `bold ${fontSize}px Segoe UI, sans-serif`;
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillStyle = `rgba(${r},${g},${b},${0.7 + 0.15 * pulse})`;
-      const label = t.number ? `${PLAYER_NAMES[t.player]}#${t.number}` : PLAYER_NAMES[t.player];
-      ctx.fillText(label, cx, cy);
-      ctx.restore();
+    let settled = 0;
+    while (settled < triangles.length && time - triangles[settled].birth >= TRI_POP_MS) settled++;
+    if (settled !== triLayerCount) {
+      triCtx.clearRect(0, 0, B, B);
+      for (let i = 0; i < settled; i++) drawTriangle(triCtx, triangles[i], 1);
+      triLayerCount = settled;
     }
+    if (triLayerCount > 0) ctx.drawImage(triLayer, 0, 0, B, B);
+    for (let i = settled; i < triangles.length; i++)
+      drawTriangle(ctx, triangles[i], easeOutBack(Math.max(0, time - triangles[i].birth) / TRI_POP_MS));
+  }
+
+  function drawTriangle(c, t, popScale) {
+    const B = boardSize;
+    const pa = pegs[t.a], pb = pegs[t.b], pc = pegs[t.c];
+    const rgb = PLAYER_RGB[t.player];
+    const cx = (pa.x + pb.x + pc.x) / 3, cy = (pa.y + pb.y + pc.y) / 3;
+    c.save();
+    if (popScale !== 1) { c.translate(cx, cy); c.scale(popScale, popScale); c.translate(-cx, -cy); }
+    const glowSize = B * 0.03;
+    c.shadowColor = `rgba(${rgb},0.6)`; c.shadowBlur = glowSize;
+    c.beginPath(); c.moveTo(pa.x, pa.y); c.lineTo(pb.x, pb.y); c.lineTo(pc.x, pc.y); c.closePath();
+    c.fillStyle = `rgba(${rgb},0.45)`; c.fill();
+    c.shadowBlur = 0;
+    const grad = c.createRadialGradient(cx, cy, 0, cx, cy, B * 0.12);
+    grad.addColorStop(0, `rgba(${rgb},0.3)`); grad.addColorStop(1, `rgba(${rgb},0.05)`);
+    c.fillStyle = grad; c.fill();
+    c.strokeStyle = `rgba(${rgb},0.9)`;
+    c.lineWidth = Math.max(2, EDGE_WIDTH * 0.8);
+    c.shadowColor = `rgba(${rgb},0.5)`; c.shadowBlur = glowSize * 0.7; c.stroke();
+    c.shadowBlur = 0;
+    c.font = `bold ${Math.max(10, B * 0.016)}px Segoe UI, sans-serif`;
+    c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillStyle = `rgba(${rgb},0.85)`;
+    c.fillText(`${PLAYER_NAMES[t.player]}#${t.number}` + (t.points === 2 ? ' +2' : ''), cx, cy);
+    c.restore();
   }
 
   const EDGE_ANIM_DURATION = 200; // ms for laser draw-in
@@ -1024,8 +939,8 @@
     const now = performance.now();
     ctx.lineCap = 'round';
     for (const e of edges) {
-      const pa = px(pegs[e.a]), pb = px(pegs[e.b]);
-      const [r, g, b] = PLAYER_COLORS_RGB[e.player];
+      const pa = pegs[e.a], pb = pegs[e.b];
+      const c = PLAYER_RGB[e.player];
 
       // Laser draw-in progress (0→1)
       const age = e.birth ? now - e.birth : 9999;
@@ -1037,7 +952,7 @@
 
       // Glow behind
       ctx.beginPath(); ctx.moveTo(pa.x, pa.y); ctx.lineTo(ex, ey);
-      ctx.strokeStyle = `rgba(${r},${g},${b},0.3)`;
+      ctx.strokeStyle = `rgba(${c},0.3)`;
       ctx.lineWidth = EDGE_WIDTH * 2.5; ctx.stroke();
 
       // Main edge
@@ -1049,7 +964,7 @@
       if (progress < 1) {
         ctx.beginPath();
         ctx.arc(ex, ey, EDGE_WIDTH * 3, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${r},${g},${b},${0.5 * (1 - progress)})`;
+        ctx.fillStyle = `rgba(${c},${0.5 * (1 - progress)})`;
         ctx.fill();
         ctx.beginPath();
         ctx.arc(ex, ey, EDGE_WIDTH * 1.2, 0, Math.PI * 2);
@@ -1061,8 +976,8 @@
 
   function drawPreviewLine(time) {
     if (selectedPeg === null || hoveredPeg === null || selectedPeg === hoveredPeg) return;
-    const valid = !edgeExists(selectedPeg, hoveredPeg) && !wouldCrossExistingEdge(selectedPeg, hoveredPeg);
-    const pa = px(pegs[selectedPeg]), pb = px(pegs[hoveredPeg]);
+    const valid = !invalidReason(selectedPeg, hoveredPeg);
+    const pa = pegs[selectedPeg], pb = pegs[hoveredPeg];
     const B = boardSize;
 
     if (valid) {
@@ -1088,15 +1003,8 @@
       const signR = B * 0.022;
       ctx.translate(mx, my);
 
-      // Outer hexagon-ish warning shape
-      ctx.beginPath();
-      for (let i = 0; i < 6; i++) {
-        const a = (Math.PI * 2 / 6) * i - Math.PI / 2;
-        const hx = Math.cos(a) * signR * 1.4;
-        const hy = Math.sin(a) * signR * 1.4;
-        if (i === 0) ctx.moveTo(hx, hy); else ctx.lineTo(hx, hy);
-      }
-      ctx.closePath();
+      // Outer hexagon warning shape
+      polyPath(0, 0, signR * 1.4, 0, 6);
       ctx.fillStyle = `rgba(180,30,50,${0.15 * pulse})`;
       ctx.fill();
       ctx.strokeStyle = `rgba(255,70,90,${0.4 * pulse})`;
@@ -1146,14 +1054,7 @@
     ctx.translate(xMark.x + glitch, xMark.y);
 
     // Background — dark hexagon
-    ctx.beginPath();
-    for (let i = 0; i < 6; i++) {
-      const a = (Math.PI * 2 / 6) * i - Math.PI / 2;
-      const hx = Math.cos(a) * signR * 1.5;
-      const hy = Math.sin(a) * signR * 1.5;
-      if (i === 0) ctx.moveTo(hx, hy); else ctx.lineTo(hx, hy);
-    }
-    ctx.closePath();
+    polyPath(0, 0, signR * 1.5, 0, 6);
     ctx.fillStyle = `rgba(120,20,30,0.3)`;
     ctx.fill();
     ctx.strokeStyle = `rgba(255,70,80,0.5)`;
@@ -1188,11 +1089,11 @@
     ctx.restore();
   }
 
-  // Draw a triangle path centered at (x,y) with radius r, rotated by angle
-  function triPath(x, y, r, angle) {
+  // Draw a regular n-gon path centered at (x,y) with radius r, rotated by angle
+  function polyPath(x, y, r, angle, n = 3) {
     ctx.beginPath();
-    for (let i = 0; i < 3; i++) {
-      const a = angle + (Math.PI * 2 / 3) * i - Math.PI / 2;
+    for (let i = 0; i < n; i++) {
+      const a = angle + (Math.PI * 2 / n) * i - Math.PI / 2;
       const tx = x + Math.cos(a) * r;
       const ty = y + Math.sin(a) * r;
       if (i === 0) ctx.moveTo(tx, ty); else ctx.lineTo(tx, ty);
@@ -1202,7 +1103,7 @@
 
   function drawPegs(time) {
     for (let i = 0; i < pegs.length; i++) {
-      const p = px(pegs[i]);
+      const p = pegs[i];
       const isSelected = selectedPeg === i, isHovered = hoveredPeg === i;
       const baseR = PEG_RADIUS;
       const r = isSelected ? baseR * 2.4 : (isHovered ? baseR * 2 : baseR * 1.6);
@@ -1213,24 +1114,23 @@
 
       // Outer glow ring (selected/hovered)
       if (isSelected || isHovered) {
-        const [cr, cg, cb] = isSelected ? PLAYER_COLORS_RGB[currentPlayer] : [0, 210, 255];
+        const c = PLAYER_RGB[currentPlayer]; // hover + selection both in the mover's color
         const pulse = Math.sin(time * 0.006 + i) * 0.3 + 0.7;
 
         // Pulsing outer triangle (wireframe)
-        triPath(p.x, p.y, r * 2 * pulse, -rot * 0.5);
-        ctx.strokeStyle = `rgba(${cr},${cg},${cb},${0.3 * pulse})`;
+        polyPath(p.x, p.y, r * 2 * pulse, -rot * 0.5);
+        ctx.strokeStyle = `rgba(${c},${0.3 * pulse})`;
         ctx.lineWidth = Math.max(1.5, boardSize * 0.002);
         ctx.stroke();
 
         // Glow halo
-        ctx.shadowColor = `rgba(${cr},${cg},${cb},0.8)`;
+        ctx.shadowColor = `rgba(${c},0.8)`;
         ctx.shadowBlur = boardSize * 0.025;
       }
 
       // Main triangle body
-      triPath(p.x, p.y, r, rot);
+      polyPath(p.x, p.y, r, rot);
       if (isSelected) {
-        const [cr, cg, cb] = PLAYER_COLORS_RGB[currentPlayer];
         // Neon fill
         ctx.fillStyle = PLAYER_COLORS[currentPlayer];
         ctx.shadowColor = PLAYER_COLORS[currentPlayer];
@@ -1238,32 +1138,34 @@
         ctx.fill();
         ctx.shadowBlur = 0;
         // Edge glow stroke
-        ctx.strokeStyle = `rgba(${cr},${cg},${cb},1)`;
+        ctx.strokeStyle = PLAYER_COLORS[currentPlayer];
         ctx.lineWidth = Math.max(2, boardSize * 0.004);
         ctx.stroke();
       } else if (isHovered) {
-        ctx.fillStyle = '#d8efff';
-        ctx.shadowColor = 'rgba(0,210,255,0.7)';
+        ctx.fillStyle = '#e6ecfa';
+        ctx.shadowColor = `rgba(${PLAYER_RGB[currentPlayer]},0.7)`;
         ctx.shadowBlur = boardSize * 0.018;
         ctx.fill();
         ctx.shadowBlur = 0;
-        ctx.strokeStyle = 'rgba(0,210,255,0.8)';
+        ctx.strokeStyle = `rgba(${PLAYER_RGB[currentPlayer]},0.8)`;
         ctx.lineWidth = Math.max(1.5, boardSize * 0.003);
         ctx.stroke();
       } else {
         // Default: cyberpunk style — brighter for visibility
         ctx.fillStyle = '#3a4a6a';
         ctx.fill();
+        // ponytail: glow is one wide faint stroke — shadowBlur here was a blur pass per peg per frame
+        ctx.strokeStyle = 'rgba(80,130,220,0.12)';
+        ctx.lineWidth = Math.max(4, boardSize * 0.007);
+        ctx.stroke();
         ctx.strokeStyle = 'rgba(120,170,255,0.55)';
         ctx.lineWidth = Math.max(1.5, boardSize * 0.0025);
-        ctx.shadowColor = 'rgba(80,130,220,0.25)';
-        ctx.shadowBlur = boardSize * 0.006;
         ctx.stroke();
       }
 
       // Inner detail: smaller inverted triangle (cyber circuit feel)
       const innerR = r * 0.4;
-      triPath(p.x, p.y, innerR, rot + Math.PI);
+      polyPath(p.x, p.y, innerR, rot + Math.PI);
       if (isSelected) {
         ctx.fillStyle = 'rgba(0,0,0,0.3)';
       } else if (isHovered) {
@@ -1293,7 +1195,7 @@
   function drawMessage() {
     if (!messageText) return;
     const B = boardSize;
-    const cw = container.clientWidth, ch = container.clientHeight;
+    const cw = viewW, ch = viewH;
     const viewCenterX = -panX + cw / 2, viewCenterY = -panY + ch * 0.85;
     ctx.save();
     const fontSize = Math.max(12, B * 0.02);
@@ -1308,7 +1210,8 @@
     const radius = B * 0.008;
 
     // Glass background with border
-    roundRect(ctx, bx, by, bw, bh, radius);
+    ctx.beginPath();
+    ctx.roundRect(bx, by, bw, bh, radius);
     ctx.fillStyle = 'rgba(15,10,25,0.8)';
     ctx.fill();
     ctx.strokeStyle = 'rgba(255,80,100,0.3)';
@@ -1328,7 +1231,6 @@
     ctx.restore();
   }
 
-  // --- Vignette (edge fade for seamless blend with background) ---
   function drawParticles(time) {
     particles = particles.filter(p => {
       const age = time - p.birth;
@@ -1341,16 +1243,15 @@
       const progress = age / p.life;
       const alpha = p.alpha * (1 - progress);
       const scale = 1 + progress * 0.5;
-      const [r, g, b] = p.color;
       // Glow
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r * scale * 3, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${r},${g},${b},${alpha * 0.15})`;
+      ctx.fillStyle = `rgba(${p.color},${alpha * 0.15})`;
       ctx.fill();
       // Core
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r * scale, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
+      ctx.fillStyle = `rgba(${p.color},${alpha})`;
       ctx.fill();
       // White hot center
       if (progress < 0.3) {
@@ -1365,10 +1266,9 @@
 
   function drawScreenFlash() {
     if (screenFlash <= 0.005) return;
-    const [r, g, b] = screenFlashColor;
     ctx.save();
     ctx.globalAlpha = screenFlash;
-    ctx.fillStyle = `rgb(${r},${g},${b})`;
+    ctx.fillStyle = `rgb(${screenFlashColor})`;
     ctx.fillRect(0, 0, boardSize, boardSize);
     ctx.restore();
     screenFlash *= 0.88; // rapid decay
@@ -1400,11 +1300,10 @@
       const age2 = age - 0.15;
       const r2 = age2 * B * 0.4;
       const a2 = Math.max(0, 0.4 - age2 * 0.25);
-      const [r, g, b] = PLAYER_COLORS_RGB[gameEndAnim.player];
       ctx.save();
       ctx.beginPath();
       ctx.arc(cx, cy, r2, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(${r},${g},${b},${a2})`;
+      ctx.strokeStyle = `rgba(${PLAYER_RGB[gameEndAnim.player]},${a2})`;
       ctx.lineWidth = Math.max(1.5, B * 0.005);
       ctx.stroke();
       ctx.restore();
@@ -1430,7 +1329,7 @@
 
     // Spawn ending particles (once, at the start)
     if (age < 0.05 && particles.length < 60) {
-      const [r, g, b] = PLAYER_COLORS_RGB[gameEndAnim.player];
+      const c = PLAYER_RGB[gameEndAnim.player];
       for (let i = 0; i < 30; i++) {
         const angle = Math.random() * Math.PI * 2;
         const speed = boardSize * (0.002 + Math.random() * 0.005);
@@ -1439,7 +1338,7 @@
           vx: Math.cos(angle) * speed,
           vy: Math.sin(angle) * speed,
           r: 2 + Math.random() * 3,
-          color: i % 3 === 0 ? [255, 255, 255] : [r, g, b],
+          color: i % 3 === 0 ? '255,255,255' : c,
           alpha: 1,
           birth: time,
           life: 800 + Math.random() * 700
@@ -1448,43 +1347,13 @@
     }
   }
 
-  function drawVignette() {
-    const B = boardSize;
-    const fade = B * 0.12; // fade width
-
-    // Top
-    let g = ctx.createLinearGradient(0, 0, 0, fade);
-    g.addColorStop(0, 'rgba(10,10,26,0.8)');
-    g.addColorStop(1, 'rgba(10,10,26,0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, B, fade);
-
-    // Bottom
-    g = ctx.createLinearGradient(0, B, 0, B - fade);
-    g.addColorStop(0, 'rgba(10,10,26,0.8)');
-    g.addColorStop(1, 'rgba(10,10,26,0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(0, B - fade, B, fade);
-
-    // Left
-    g = ctx.createLinearGradient(0, 0, fade, 0);
-    g.addColorStop(0, 'rgba(10,10,26,0.8)');
-    g.addColorStop(1, 'rgba(10,10,26,0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, fade, B);
-
-    // Right
-    g = ctx.createLinearGradient(B, 0, B - fade, 0);
-    g.addColorStop(0, 'rgba(10,10,26,0.8)');
-    g.addColorStop(1, 'rgba(10,10,26,0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(B - fade, 0, fade, B);
-  }
-
   // --- Minimap ---
+  let minimapKey = ''; // state the minimap was last drawn for; only a move or a pan changes it
   function drawMinimap() {
-    if (!minimapCtx) return;
-    const mW = minimap.width, mH = minimap.height;
+    const key = `${edges.length},${triangles.length},${panX},${panY}`;
+    if (key === minimapKey) return;
+    minimapKey = key;
+    const mW = minimapSize, mH = minimapSize;
     const scale = mW / boardSize;
     const mc = minimapCtx;
 
@@ -1495,13 +1364,12 @@
     // Triangles (simplified)
     for (const t of triangles) {
       const pa = pegs[t.a], pb = pegs[t.b], pc = pegs[t.c];
-      const [r, g, b] = PLAYER_COLORS_RGB[t.player];
       mc.beginPath();
       mc.moveTo(pa.nx * mW, pa.ny * mH);
       mc.lineTo(pb.nx * mW, pb.ny * mH);
       mc.lineTo(pc.nx * mW, pc.ny * mH);
       mc.closePath();
-      mc.fillStyle = `rgba(${r},${g},${b},0.4)`;
+      mc.fillStyle = `rgba(${PLAYER_RGB[t.player]},0.4)`;
       mc.fill();
     }
 
@@ -1527,7 +1395,7 @@
     }
 
     // Viewport rectangle
-    const cw = container.clientWidth, ch = container.clientHeight;
+    const cw = viewW, ch = viewH;
     const vx = -panX * scale;
     const vy = -panY * scale;
     const vw = cw * scale;
@@ -1537,21 +1405,11 @@
     mc.strokeRect(vx, vy, vw, vh);
 
     // Copy to mirror minimap (CSS handles the 180deg rotation)
-    if (minimapMirrorCtx) {
-      minimapMirrorCtx.clearRect(0, 0, mW, mH);
-      minimapMirrorCtx.drawImage(minimap, 0, 0);
-    }
+    minimapMirrorCtx.clearRect(0, 0, minimapMirror.width, minimapMirror.height);
+    minimapMirrorCtx.drawImage(minimap, 0, 0);
   }
 
   // --- Utility ---
-  function roundRect(ctx, x, y, w, h, r) {
-    ctx.beginPath(); ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r); ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h); ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r); ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
-  }
-
   function easeOutBack(t) {
     const c = 1.7;
     return 1 + (t - 1) * (t - 1) * ((c + 1) * (t - 1) + c);

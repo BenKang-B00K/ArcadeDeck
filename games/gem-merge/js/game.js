@@ -85,7 +85,7 @@ function doGameOver() {
   document.getElementById('overlay').classList.remove('hidden');
   if (window.parent) {
     // ArcadeDeck 통합 전송 규격
-    const currentMainPoints = S.best;
+    const currentMainPoints = S.score;
     let currentExtraStats = 0;
     for (const [, e] of S.ballMap) { currentExtraStats += e.level; }
     window.parent.postMessage({

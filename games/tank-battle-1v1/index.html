@@ -3911,6 +3911,18 @@ let rouletteState = 'idle';   // 'idle' | 'spinning' | 'locked'
 let rouletteAnim = null;      // raf id
 let rouletteLastItemIdx = -1; // for tick sfx
 
+// ArcadeDeck 통합 전송 규격 — vs AI only (bot drives P2): cumulative AI match wins
+function reportAiMatch(p1Won) {
+  if (!botEnabled) return;
+  let aiWins = 0;
+  try { aiWins = Number(localStorage.getItem('tankBattle.aiWins')) || 0; } catch (e) {}
+  if (p1Won) {
+    aiWins++;
+    try { localStorage.setItem('tankBattle.aiWins', String(aiWins)); } catch (e) {}
+  }
+  try { window.parent.postMessage({ type: 'GAME_OVER', score: aiWins, subScore: scores.p1 }, '*'); } catch (e) {}
+}
+
 function showOverlay(kind, winnerName) {
   lastOverlay = { kind, winnerName };
   const lang = L();
@@ -4309,8 +4321,8 @@ function loop(now) {
     freezeTimer -= dt;
     if (freezeTimer <= 0) {
       freezeTimer = 0;
-      if (scores.p1 >= WIN_SCORE) { SFX.matchWin(); showOverlay('match', 'P1'); }
-      else if (scores.p2 >= WIN_SCORE) { SFX.matchWin(); showOverlay('match', 'P2'); }
+      if (scores.p1 >= WIN_SCORE) { SFX.matchWin(); showOverlay('match', 'P1'); reportAiMatch(true); }
+      else if (scores.p2 >= WIN_SCORE) { SFX.matchWin(); showOverlay('match', 'P2'); reportAiMatch(false); }
       else if (winner === 'draw') { SFX.drawRound(); showOverlay('draw'); }
       else { SFX.roundWin(); showOverlay('round', winner === 'p1' ? 'P1' : 'P2'); }
     }

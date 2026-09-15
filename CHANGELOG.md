@@ -12,6 +12,8 @@ All notable changes to ArcadeDeck are documented here.
 
 ## History
 
+- **v34.16.1** (2026-09-15) — score postMessage on every hosted game: 11 new hooks (Dice War, Mythic Defenders, Vault of Ashes, Fallen Era, Barrack Defense, Shadow Runner, Omok, Ashen Keys, Debt & Dragons, Tank Battle, Spirit Duel), 5 fixes (Void Survivor origin, Timing Chef keys, Fruit Frenzy/Gem Merge run score, Gate of Hell origin); Dice War PB now counts stages; Omok v1.1 lobby redesign shipped; blog posts renamed Dicefall Chronicles → Kingdom of Ashes - Dice War
+- **v34.15.1** (2026-09-15) — Kingdom of Ashes - Dice War: stage-select Dungeon map, JA locale, all-18-unit sprite art pass, 2.5D dice, rendering overhaul, tooltips + hover previews, catalogue copy rewritten against the real build; Triangle Battle v3.1: 2–6 players, +2 all-own-color bonus, timeout hands opponent a free line, How-to-Play guide, HiDPI + perf pass, catalogue copy rewritten
 - **v34.14.1** (2026-09-15) — game cards: all genres as pills with gold ring on main genre, 2-line titles, PC / Mobile badge; language dropdown order English / Korean / Japanese
 - **v34.13.1** (2026-09-15) — Fruit Frenzy v1.3: shoot bombs, ammo crates, fruit moves, seeking bombs, JA locale, HiDPI + pointer lock
 - **v34.12.1** (2026-09-14) — Shadow Runner, AshenKeys, Debt & Dragons, Endless Runner; game page header redesign, read-friendly info sections

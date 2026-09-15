@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#e94560">
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="image/main_bg.png">
+<link rel="prefetch" href="image/game_bg.webp"><!-- #game-screen is display:none until start, so its bg would otherwise load on first Start -->
+<link rel="apple-touch-icon" href="image/icon-512.png">
 <title>Triangle Battle! - 트라이앵글 배틀!</title>
 <link rel="stylesheet" href="style.css">
 </head>
@@ -27,12 +28,15 @@
   <div class="deco-tri tri-5"></div>
   <div class="deco-tri tri-6"></div>
 
-  <button id="lang-btn" title="한국어 / English">EN / 한</button>
+  <div class="top-bar">
+    <button id="guide-btn" title="How to play / 게임 방법">?</button>
+    <button id="lang-btn" title="한국어 / English">EN / 한</button>
+  </div>
 
   <div class="title-group">
-    <div class="title-glow"></div>
+    <div class="title-emblem"></div>
     <h1 data-i18n="title"></h1>
-    <p class="subtitle" data-i18n="subtitle"></p>
+    <div class="title-rule"></div>
   </div>
 
   <div class="setup-card">
@@ -42,6 +46,8 @@
           <option value="2" data-i18n="players2"></option>
           <option value="3" data-i18n="players3"></option>
           <option value="4" data-i18n="players4"></option>
+          <option value="5" data-i18n="players5"></option>
+          <option value="6" data-i18n="players6"></option>
         </select>
       </label>
       <div id="name-inputs"></div>
@@ -54,17 +60,8 @@
             <option value="25" data-i18n="pegs25"></option>
           </select>
         </label>
-        <label><span data-i18n="boardLayout"></span>
-          <select id="board-layout">
-            <option value="random" selected data-i18n="layoutRandom"></option>
-            <option value="circle" data-i18n="layoutCircle"></option>
-            <option value="triangle" data-i18n="layoutTriangle"></option>
-            <option value="square" data-i18n="layoutSquare"></option>
-          </select>
-        </label>
         <label><span data-i18n="turnTime"></span>
           <select id="time-limit">
-            <option value="0" data-i18n="unlimited"></option>
             <option value="10" data-i18n="sec10"></option>
             <option value="20" selected data-i18n="sec20"></option>
           </select>
@@ -97,12 +94,38 @@
     <div id="player-info-bottom" class="player-info"></div>
     <div id="turn-info-bottom" class="turn-info"></div>
   </div>
-  <div id="result-overlay" class="hidden">
-    <div id="result-box">
+  <div id="result-overlay" class="overlay hidden">
+    <div id="result-box" class="modal-box">
       <h2 data-i18n="gameOver"></h2>
       <div id="result-list"></div>
       <button id="restart-btn"><span data-i18n="playAgain"></span></button>
     </div>
+  </div>
+</div>
+
+<div id="guide-overlay" class="overlay hidden">
+  <div id="guide-box" class="modal-box">
+    <h2 data-i18n="guideTitle"></h2>
+    <ol class="guide-steps">
+      <li>
+        <svg viewBox="0 0 64 64"><path d="M14 44L50 20" stroke="#00d2ff" stroke-width="3" stroke-dasharray="5 4" stroke-linecap="round"/><path d="M14 36l7 12H7zM50 12l7 12H43z" fill="#3a4a6a" stroke="#8fb3ff" stroke-width="2" stroke-linejoin="round"/></svg>
+        <span data-i18n="guide1"></span>
+      </li>
+      <li>
+        <svg viewBox="0 0 64 64"><path d="M10 14l44 36" stroke="#e94560" stroke-width="3" stroke-linecap="round"/><path d="M12 50l40-36" stroke="#00d2ff" stroke-width="3" stroke-dasharray="5 4" stroke-linecap="round"/><circle cx="32" cy="32" r="10" fill="#1a0c14" stroke="#ff5566" stroke-width="2"/><path d="M27 27l10 10M37 27L27 37" stroke="#ff5566" stroke-width="3" stroke-linecap="round"/></svg>
+        <span data-i18n="guide2"></span>
+      </li>
+      <li>
+        <svg viewBox="0 0 64 64"><path d="M32 10l24 40H8z" fill="rgba(233,69,96,.35)" stroke="#e94560" stroke-width="3" stroke-linejoin="round"/><text x="32" y="45" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">+1</text></svg>
+        <span data-i18n="guide3"></span>
+      </li>
+      <li>
+        <svg viewBox="0 0 64 64"><path d="M10 48l4-26 10 10 8-16 8 16 10-10 4 26z" fill="#f1c40f" stroke="#ffe08a" stroke-width="2" stroke-linejoin="round"/><path d="M14 52h36" stroke="#ffe08a" stroke-width="3" stroke-linecap="round"/></svg>
+        <span data-i18n="guide4"></span>
+      </li>
+    </ol>
+    <p class="guide-tip" data-i18n="guideTip"></p>
+    <button id="guide-close"><span data-i18n="guideOk"></span></button>
   </div>
 </div>
 

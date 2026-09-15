@@ -881,7 +881,8 @@
           "name": "GrandScholar",
           "text": "Clean, minimalist, no noise. Just you and the board and decisions. This is a palate cleanser after every other game with a progress bar attached to it."
         }
-      ]
+      ],
+      "scoreLabel": "AI Wins"
     },
     "9": {
       "title": "40th Century: Void Survivor",
@@ -1050,98 +1051,126 @@
     },
     "11": {
       "title": "Kingdom of Ashes - Dice War",
-      "description": "A strategic dice-building roguelike adventure where every roll rewrites the run.",
-      "fullDescription": "\n      **Dicefall Chronicles** fuses deckbuilding strategy with **roguelike permadeath**, but the deck is a **pool of dice**. Each die has its own faces — damage, block, mana, status effects, hybrid utility — and the build you assemble across a run is the build you fight every encounter with. There is no perfect deck: there is the deck that survives the floor you are on right now.\n      Combat is turn-based and economy-driven. You spend rolls to deal damage, sustain block, trigger relic effects, and chain combos across your dice pool. Choose a path between elite gauntlets, merchant rests, treasure caches, and unknown events — each branch trades safety for power. Lose a run and the **meta-progression** unlocks new dice tiers, character archetypes, and starting relics for the next descent.\n      Three classes (**Berserker**, **Sage**, **Trickster**) each rewrite the math of risk: the Berserker doubles damage on max rolls, the Sage rerolls on event triggers, the Trickster banks unused faces for later. Boss fights gate each act with a phase-changing pattern that punishes one-trick builds and rewards adaptive pool composition. Can you master the chaos of the **Dicefall** and become the champion of Alea?\n    ",
-      "controls": "Mouse/Touch: Select dice and targets. Drag dice from your pool onto enemies, allies, or relics. Right-click (or long-press on touch) to inspect any die face for full effect text.",
-      "tips": "Plan two turns ahead — most deaths come from spending your block dice when you needed them for the next enemy strike. Keep at least one utility die unspent on every turn for emergencies. Boss runs reward consistency over peak damage: a pool of reliable **4–5 faces** wipes act bosses faster than swingy 1-or-10 builds. When merchant offers a die upgrade, weigh whether it raises floor or ceiling — your current floor is usually the bottleneck. **Status effects stack** — poison plus burn plus bleed shreds armored elites that resist direct damage.",
-      "lore": "\n      In the realm of Alea, chance is the only law. The **Dicefall** event shattered reality into a lattice of rolling probabilities, and every soul that survived woke up changed — bonded to a personal pool of living dice. The **Order of Outcomes** hunts the lattice for the original **First Die**, said to grant its bearer the power to fix every roll forever.\n      You are an adventurer who refuses to let fate be auctioned. Descend the shifting strata of Alea, recruit allies forged from impossible numbers, and write your own probabilities in the bones of the world.\n    ",
+      "description": "Roll five dice into a poker hand, field the squad it summons, and fight turn-based grid battles through endless chapters of monsters.",
+      "fullDescription": "Kingdom of Ashes - Dice War is a turn-based tactics roguelike where your army comes from a poker hand. Each stage opens with a roll of five coloured dice, and the hand you make — High Card up to Five of a Kind — decides which allies spawn, from a pair of Warriors up to the **Greek Hero**. Keep the dice you like and reroll the rest (one reroll by default, more with upgrades), pay 2 Gold for a **Risk Reroll** that throws all five again, or Re-color to reshuffle colours while keeping your pattern. When the dice that form your hand share a colour the whole squad gets that **colour bonus**: Red trades HP for ATK, Green adds HP and range, Blue adds movement, Purple stretches range at the cost of HP, Gold is a balanced boost.\nBattles play out on a 16×12 grid split into three zones. **Enemy territory** cuts ally stats to a fifth and drains 5 HP a turn, the neutral middle spawns **special tiles** — attack and range buffs, heal tiles, water that slows and blocks shots, lava that burns, pyramids that wall off lines of fire, one-shot invincibility — and enemies who push into your side fight at double strength. Tap a unit to see its move range, tap a red-outlined enemy to strike; anything that survives a hit **counters** for 30% of its ATK, so ranged units and positioning matter more than raw numbers.\nEvery chapter is ten stages, several with multiple waves and reinforcements, against ten monster types that each bring a mechanic: Goblin Scouts dodge, Orc Warriors enrage under half HP, Skeleton Archers block the first hit, Dark Knights lifesteal, Gargoyles shrug off 2 damage, Liches revive once, Stone Golems knock you back, Dragon Lings splash, Slimes split, and the **Void Horror** absorbs damage, phase-shifts and spreads fear. Surviving allies level up between stages (+20% HP, +15% ATK, full heal) and carry their HP forward. Clearing a stage earns Meta Points and, every second stage, a Monster Head; a chapter clear pays out Monster Cores and rolls straight into the next, harder chapter.\nProgress persists two ways. Monster Heads and Cores unlock a 70-node **Passive Tree** across four phases — pick two of four paths in Phase I, one of three in Phase II, two of four in Phase III, then the final node — with branches like Attack, Defense, Agility, Survival, Inferno and Phantom. Meta Points buy seven permanent **Meta Upgrades**: Iron Body, Sharpened Blade, Tactical Reform (extra rerolls), Flame Resist, Color Amplify, Supplies and Elite Training. The **Dungeon** screen maps every chapter's ten stages — cleared, next up, or still locked — with the enemy roster of each stage you have reached, a six-step tutorial covers dice, zones, movement, counters, waves and upgrades, and the game plays in English, Korean and Japanese.",
+      "controls": "Tap or click a unit: select it and show its blue move range / Tap a blue tile: move there / Tap a red-outlined enemy: attack it / Tap a die: keep it for the next Reroll / Re-color: reshuffle colours without changing your hand / Risk Reroll: spend 2 Gold to reroll all five dice / Mouse hover: preview any unit or tile in the Unit Info panel / Top bar icons: Passive Tree, Hand Reference, Start Battle / Battle log: mouse wheel or drag to scroll history",
+      "tips": "A **Full House** (Shieldmaiden, Sniper, Priest) is the most reliable squad — tank in front, sniper behind, healer keeping both alive. Match colours before chasing a bigger hand: **Green** (HP +8, range +1) on two Warriors outlasts a colourless Four of a Kind. Never end a turn in **enemy territory** — your stats drop to a fifth and you bleed 5 HP every turn. Let enemies come to your side instead; they fight at ×2 there but you keep full stats and the heal and range tiles are usually closer to you. **Counters** hit for 30% of ATK, so open with the Sniper or Archer from outside enemy range and let melee finish. Save a **Risk Reroll** for a Straight-or-better fishing turn when you have Gold to spare — 2 Gold is cheap compared to fighting a boss stage with two Warriors. Step on **Invincible** tiles the turn before a Dragon Ling or Void Horror reaches you. Buy **Tactical Reform** first on the Meta screen: an extra reroll every stage is worth more than any flat stat.",
+      "lore": "The Kingdom of Ashes fell long ago, and what was left of its armies fell with it. All that remains is the **Dice of Ash** — five relics that answer only to chance. Roll them on the burned stones of the old war grounds and the dead take shape again: warriors, archers, shield-bearers, priests, and if the dice align, a hero out of the oldest legends.\nBut the monsters that ended the kingdom never left. Slimes seep from the meadows, goblins raid the roads, the crypts spill out skeletons and liches, and deeper still something without a name is waking in the void. Every chapter you clear only pushes the darkness back one step. The war goes on.",
       "features": [
-        "Roguelike Deckbuilding with Dice Pools, Not Cards",
-        "Three Distinct Classes with Unique Risk Profiles",
-        "Procedurally Generated Multi-Branch Dungeon Paths",
-        "Turn-based Tactical Combat with Status Stacking",
-        "Phase-shifting Boss Battles at the End of Each Act",
-        "Persistent Meta-Progression Across Runs",
-        "Web & Mobile Friendly"
+        "Dice Poker Squad Building: 8 Hands from High Card to Five of a Kind",
+        "6 Dice Colours with Squad-Wide Stat Bonuses",
+        "16×12 Tactics Grid with Enemy, Neutral and Ally Zones",
+        "9 Special Tiles: Buffs, Heals, Water, Lava, Pyramids, Invincibility",
+        "10 Monster Types, Each with a Signature Ability",
+        "Endless Chapters of 10 Stages with Waves and Reinforcements",
+        "70-Node Passive Tree and 7 Permanent Meta Upgrades",
+        "Dungeon Progress Map, 6-Step Tutorial — EN / KO / JA"
       ],
-      "objectives": "Descend the shifting strata of Alea by building a winning dice pool across the run, defeating phase-changing act bosses, and surviving long enough to challenge the **Order of Outcomes** for control of the legendary **First Die**.",
+      "objectives": "Roll the best hand you can each stage, keep your squad alive across ten stages to clear the chapter, and spend the Heads, Cores and Meta Points you earn to push further into the next chapter — every run starts at Chapter 1, so the real goal is how deep your upgrades carry you.",
       "controlsTable": [
         {
-          "key": "Mouse Click / Touch",
-          "action": "Select a die from your pool"
+          "key": "Tap / Click",
+          "action": "Select a unit, then tap a blue tile to move or a red-outlined enemy to attack"
         },
         {
-          "key": "Drag",
-          "action": "Drop a die onto an enemy, ally, or relic to apply its face effect"
+          "key": "Tap Die",
+          "action": "Keep that die through the next Reroll"
         },
         {
-          "key": "Right-Click / Long-Press",
-          "action": "Inspect any die face for full effect description"
+          "key": "Reroll / Re-color",
+          "action": "Reroll unkept dice, or reshuffle colours while keeping the hand"
         },
         {
-          "key": "Click (Path Choice)",
-          "action": "Choose your next branch: elite, merchant, treasure, or unknown event"
+          "key": "Risk Reroll",
+          "action": "Spend 2 Gold to throw all five dice again"
+        },
+        {
+          "key": "Mouse Hover",
+          "action": "Preview any unit or tile in the Unit Info panel (PC)"
+        },
+        {
+          "key": "Wheel / Drag",
+          "action": "Scroll the battle log"
         }
       ],
       "faq": [
         {
-          "q": "How does combat work?",
-          "a": "Combat is turn-based and economy-driven. Each turn you spend dice rolls to deal damage, build block, trigger relic effects, and chain combos. You must manage your pool carefully each turn — spending all your block dice can leave you defenseless when the enemy strikes."
+          "q": "How do poker hands decide my army?",
+          "a": "The five dice are scored like poker. High Card spawns two Warriors, One Pair a Shieldmaiden and Warrior, Two Pair an Assassin and Priest, Three of a Kind a Berserker and Warrior, a Straight a Sniper, Archer and Warrior, a Full House Shieldmaiden, Sniper and Priest, Four of a Kind Berserker, Assassin, Sniper and Warrior, and Five of a Kind the Greek Hero with a Priest."
         },
         {
-          "q": "What do the three classes do differently?",
-          "a": "Berserker doubles damage on maximum-face rolls, rewarding high-risk builds. Sage triggers rerolls on event conditions, giving more control over outcomes. Trickster banks unused faces for later turns, enabling burst combos across multiple rounds."
+          "q": "What do the dice colours do?",
+          "a": "If the dice that make your hand share a colour (all of them for hands of one or two dice, at least three otherwise), every spawned unit gets that bonus: Red ATK +3 / HP −2, Green HP +8 / range +1, Blue MOV +2 / ATK −1, Purple range +2 / HP −2, Gold ATK +2 / HP +4. Mixed colours give nothing."
         },
         {
-          "q": "What is the best dice pool strategy?",
-          "a": "Consistency beats peak damage — a pool of reliable 4–5 face results clears act bosses more efficiently than swingy 1-or-10 builds. Plan two turns ahead and keep at least one utility die unspent per turn for emergencies."
+          "q": "Why are my units so weak on the left side of the grid?",
+          "a": "Columns 0–3 are enemy territory: ally stats are multiplied by 0.2 and each unit loses 5 HP per turn there. Columns 12–15 are your side, where enemies fight at double strength instead. The neutral middle is where the special tiles spawn."
         },
         {
-          "q": "How do status effects work?",
-          "a": "Status effects stack — poison, burn, and bleed applied together shred armored elites that resist direct damage. Building a status-stacking pool is one of the most effective counters to high-armor enemy types."
+          "q": "What happens when I lose?",
+          "a": "The run ends and you go to the Meta screen. Meta Points earned that run (+2 per stage, +5 per chapter) stay with you, as do Monster Heads, Cores and every Passive Tree node and Meta Upgrade you bought. The next run starts at Chapter 1 Stage 1 with all of it active."
         },
         {
-          "q": "What is meta-progression?",
-          "a": "When you lose a run, you unlock new dice tiers, character archetypes, and starting relics that persist into future attempts. Each run makes subsequent runs more powerful, so losing is part of the progression system."
+          "q": "Do my units carry over between stages?",
+          "a": "Yes. Every surviving ally levels up when the stage is cleared — +20% max HP, +15% ATK and a full heal — and keeps its HP into the next stage. New dice rolls add to the squad rather than replacing it, so protecting veterans is how you snowball."
+        },
+        {
+          "q": "Is there an ending?",
+          "a": "Clearing Chapter 1 shows a victory screen, then the war continues. Chapters are endless and enemies scale up each time, with bigger Monster Core payouts from Chapter 5 and Chapter 8 onward."
         }
       ],
       "characters": [
         {
-          "name": "The Adventurer",
-          "role": "Player character",
-          "desc": "A soul who refuses to let fate be auctioned, descended into the shifting lattice of Alea with a personal pool of living dice. Their class choice (Berserker, Sage, or Trickster) defines how they interact with probability."
+          "name": "Greek Hero",
+          "role": "Five of a Kind summon",
+          "desc": "HP 100, ATK 30, range 2. The rarest roll in the game brings the strongest unit, backed by a Priest to keep the legend standing."
         },
         {
-          "name": "Order of Outcomes",
-          "role": "Antagonist faction",
-          "desc": "A group that hunts the lattice of Alea searching for the original First Die — the artifact said to grant its bearer the power to fix every roll forever. They stand between the adventurer and true mastery of chance."
+          "name": "Shieldmaiden",
+          "role": "Frontline tank",
+          "desc": "HP 45 with only 4 ATK. Shows up on One Pair and Full House; her job is to hold the line while snipers and archers work behind her."
+        },
+        {
+          "name": "Sniper",
+          "role": "Long-range damage",
+          "desc": "ATK 10 at range 6 but cannot shoot anything closer than 2 tiles. Devastating against slow Golems and Liches, helpless if a Gargoyle lands next to her."
+        },
+        {
+          "name": "Priest",
+          "role": "Healer",
+          "desc": "Heals allies instead of attacking (range 3). Comes with Two Pair, Full House and Five of a Kind and is the reason those squads survive past stage five."
+        },
+        {
+          "name": "Void Horror",
+          "role": "Stage 10 boss",
+          "desc": "HP 200, ATK 35. Void Armor soaks 5 damage from every hit, Phase Shift makes it invincible for a turn, and its Fear Aura strips 2 ATK from nearby allies."
         }
       ],
       "featuredComments": [
         {
-          "name": "DiceFall_Sage",
-          "text": "Play the Sage on your first few runs. The reroll-on-event trigger covers for inexperience and lets you learn the enemy attack patterns without getting wiped by bad luck on turn one.",
+          "name": "FullHouseMain",
+          "text": "Stop fishing for Four of a Kind. Full House gives you Shieldmaiden + Sniper + Priest, which is the only trio that can hold a wave stage on its own. Take it every time it shows up.",
           "badge": "Strategy"
         },
         {
-          "name": "ProbabilityX",
-          "text": "Status stacking on armored elites is the answer no one talks about enough. Poison plus burn plus bleed on a single target destroys armor faster than any direct damage build I've tested."
+          "name": "GreenDice",
+          "text": "Colour matters more than the hand until chapter 3. Green on two Warriors is HP 33 with range 2, which trades with Orcs fine. Colourless Assassin + Priest just dies to the first Goblin Scout with dodge."
         },
         {
-          "name": "FirstDieHunter",
-          "text": "Always keep one utility die unspent. Every single run I've died from burning it on extra damage when I needed it for block. One die held back has saved me more times than I can count.",
+          "name": "CounterPunched",
+          "text": "Learned the hard way that counters are 30% of ATK. Charging a Dark Knight with a Warrior costs you 4-5 HP per swing before lifesteal even matters. Sniper from range 5, then Berserker to finish.",
           "badge": "Top Tip"
         },
         {
-          "name": "AleaDescend",
-          "text": "The 'chance is the only law' lore actually matters mechanically. The Dicefall shattered reality into rolling probabilities and every soul woke up bonded to dice. The worldbuilding earns the gameplay premise."
+          "name": "DungeonMapper",
+          "text": "The new Dungeon screen is great for planning. Once a stage unlocks its roster shows on the card before you roll, so when stage 7 turns out to be a Lich you know to keep a Purple hand for the range."
         },
         {
-          "name": "ReliableFour",
-          "text": "Consistent 4-5 face pool beats swingy 1-or-10 builds on boss fights. I learned this the hard way. Peak ceiling looks impressive until the boss phases and you roll a 1 three turns in a row."
+          "name": "AshRunner",
+          "text": "Tactical Reform first, then Iron Body. The extra reroll pays off on every single stage forever. The passive tree Inferno branch is worth the cores once you can reliably clear chapter 2."
         }
       ],
-      "scoreLabel": "Chapters"
+      "scoreLabel": "Stages"
     },
     "12": {
       "title": "Heroes of the Last Nexus",
@@ -1491,20 +1520,20 @@
     },
     "16": {
       "title": "Triangle Battle!",
-      "description": "A fast-paced local multiplayer arcade game where 1-4 players compete to form triangles and outsmart each other.",
-      "fullDescription": "\n      Triangle Battle! is a vibrant local multiplayer arcade game designed for **1 to 4 players** on a **single device**. The goal is simple — **form triangles** faster than your opponents — but the competition is fierce.\n      Players take turns connecting pegs into lines, claiming triangles and strategically blocking each other. Sharp spatial awareness is the key to victory. Every action is a tap or a click — **no keyboard required**, so it plays the same on a phone as on a desktop.\n      Whether you're playing solo to practice or battling friends on the couch, Triangle Battle! delivers fast rounds, colorful visuals, and endless replayability. Gather your friends and find out who's the triangle champion!\n    ",
-      "controls": "Tap or click a peg to select it, then tap a second peg to draw a line between them. Close a triangle to claim it. Drag empty space to pan the board. Hot-seat turns — 1 to 4 players share one device. No keyboard needed.",
-      "tips": "Focus on claiming **corner positions** early — they give you more triangle-forming opportunities. Watch your opponents' movements and block their potential triangles before they complete them. In 3-4 player games, **temporary alliances** can help you take down the leader.",
+      "description": "Hot-seat triangle land-grab for 2-6 players on one device: connect pegs, close triangles, and use the +2 bonus and timeout penalty to outscore everyone.",
+      "fullDescription": "\n      Triangle Battle! is a local multiplayer board game for **2 to 6 players** sharing **one device** — phone, tablet or desktop. The board is a random scatter of pegs; players take turns tapping two pegs to draw a line between them. Close a triangle and it's yours: **+1 point and an extra turn**. Close one whose three sides are all your own color and it's worth **+2**. A triangle with a peg trapped inside doesn't count, and lines can never cross.\n      Every turn runs on a **10 or 20 second clock**. Let it expire and the next player is handed a **free random line** — so hesitation actively feeds your opponent. The game ends when no legal line remains; the most points wins.\n      A built-in **How to Play** guide opens on first launch, the HUD mirrors for face-to-face phone play, and the whole thing is a lightweight installable PWA with an EN / KO toggle.\n    ",
+      "controls": "Tap or click a peg, then a second peg to draw a line between them. Tap the selected peg again to deselect. Drag empty space to pan the board; the minimap shows where you are. Hot-seat turns for 2-6 players on one device. Press ? for the in-game guide. No keyboard needed.",
+      "tips": "Never leave a triangle **two sides of your color** open — the +2 bonus goes to whoever closes it, not whoever started it. Use the **extra turn** from a closed triangle to immediately close a second one. Don't stall on the clock: a timeout hands your opponent a free line. Fewer pegs (10) makes a sharper, faster game; 25 pegs turns it into a long war of blocking.",
       "lore": "\n      In the neon-lit arenas of the **Grid**, geometric warriors compete for supremacy. The ancient **Triangle Protocol** demands that only those who can form the perfect shape will ascend.\n      Each match is a test of speed, strategy, and spatial mastery. The Grid remembers every triangle ever formed, and the greatest players are immortalized in its luminous halls.\n    ",
       "features": [
-        "Local Co-op 1~4 Players",
-        "Fast-Paced Arcade Gameplay",
-        "Touch & Mouse — No Keyboard Needed",
-        "Colorful Neon Visuals",
-        "Quick Rounds & High Replayability",
-        "Web & Mobile Friendly"
+        "Hot-Seat 2-6 Players, One Device",
+        "+1 Per Triangle, +2 for All-Own-Color, Extra Turn on Close",
+        "10s / 20s Turn Timer — Timeout Gives Opponent a Free Line",
+        "10-25 Pegs, Random Board Every Match",
+        "Mirrored HUD & Minimap for Face-to-Face Phone Play",
+        "Installable PWA, EN / KO Toggle, Built-In Guide"
       ],
-      "objectives": "Connect pegs into lines to close triangles before your opponents do, block rivals from completing their own shapes, and outscore everyone to become the triangle champion of the **Grid**.",
+      "objectives": "Draw lines between pegs to close triangles before your opponents do, chase the +2 all-own-color bonus, block rivals from finishing their shapes, and hold the highest score when no legal line remains.",
       "controlsTable": [
         {
           "key": "Tap / Click (Peg)",
@@ -1516,56 +1545,64 @@
         },
         {
           "key": "Drag (Empty Space)",
-          "action": "Pan the board when it extends past the view"
+          "action": "Pan the board; the minimap shows the visible area"
+        },
+        {
+          "key": "? Button",
+          "action": "Open the How to Play guide"
+        },
+        {
+          "key": "EN / 한 Button",
+          "action": "Switch the game language"
         },
         {
           "key": "Hot-Seat Turns",
-          "action": "Pass the device between 1 and 4 players on one screen"
+          "action": "Pass the device between 2 and 6 players on one screen"
         }
       ],
       "faq": [
         {
-          "q": "How do I form a triangle?",
-          "a": "Tap one peg to select it, then tap a second peg to draw a line between them. Once three pegs are joined by three lines, the triangle closes and is claimed for you, scoring points toward your total."
+          "q": "How do I score?",
+          "a": "Closing any triangle is +1 point and gives you another turn. If all three sides of the closed triangle are your own color it is worth +2. A triangle with another peg inside its area does not count."
         },
         {
-          "q": "What is the best starting position?",
-          "a": "Claim corner positions early — corners give you access to more triangle-forming angles than edge or center positions, so securing them before opponents restricts their options."
+          "q": "What happens when the timer runs out?",
+          "a": "The next player receives a free random line and the turn passes to them. There is no unlimited option — pick 10 or 20 seconds in setup."
         },
         {
-          "q": "How do I block an opponent?",
-          "a": "Move onto a point your opponent needs to complete their triangle. A blocked point forces them to reroute, buying you time to complete your own shape or take a more advantageous position."
+          "q": "Which lines are illegal?",
+          "a": "A line cannot cross an existing line, cannot pass over a peg, and cannot duplicate a connection that already exists. The board flashes a warning and the turn continues."
         },
         {
-          "q": "Does it work for two players?",
-          "a": "Yes — players take hot-seat turns on one device, tapping in sequence. The game scales from 1-player practice to 4-player chaos on a single screen, phone or desktop."
+          "q": "How many players can play?",
+          "a": "2 to 6 on a single device, hot-seat style. On phones the HUD, timer bar and minimap mirror so a player sitting opposite can read them."
         },
         {
-          "q": "What is a good 3-4 player strategy?",
-          "a": "In multi-player games, temporary alliances help — focus pressure on the leading player cooperatively, then break the alliance and compete once their score is reduced. Identify who is ahead and coordinate blocking."
+          "q": "When does the game end?",
+          "a": "When no legal line can be drawn anywhere on the board. The result screen ranks every player by points and shows lines drawn and triangles closed."
         }
       ],
       "featuredComments": [
         {
           "name": "GridKing",
-          "text": "Corners first. Every time. Corners have the most triangle-forming angles and locking two corners in the first fifteen seconds limits what everyone else can do for the rest of the round."
+          "text": "The +2 rule changes everything. Two of your own lines around an empty triangle is a gift to the next player — either close it now or don't start it."
         },
         {
           "name": "NeonTriangle",
-          "text": "The 4-player mode transforms it into chaos in the best way. Temporary alliances against the leader, betrayals the moment they're behind, then a three-way scramble for the last corner.",
+          "text": "6-player mode on 25 pegs is glorious chaos. Alliances against the leader, betrayals the moment they fall behind, then a four-way scramble for the last legal line.",
           "badge": "Editor's Pick"
         },
         {
-          "name": "GeometricWar",
-          "text": "WASD and Arrow Keys on the same keyboard is more comfortable than I expected. Two people leaning over the same laptop being equally tense about a triangle game is a specific kind of fun."
+          "name": "TenSecondClub",
+          "text": "Play 10s timer, 10 pegs. Nobody has time to think, someone always times out, and the free random line swings the round. Best party setting."
         },
         {
           "name": "BlockerPro",
-          "text": "Blocking is often better than scoring. If you're one triangle behind, blocking the leader's next shape and completing your own in the same two moves swings the game faster than hunting open board space."
+          "text": "Blocking is often better than scoring. Cut through the middle of their almost-triangle with a legal line of your own and their whole plan is dead."
         },
         {
           "name": "GridProtocol",
-          "text": "The ancient Triangle Protocol. The Grid remembers every triangle ever formed. This is absolutely not necessary lore for an arcade game and I respect it enormously."
+          "text": "The ancient Triangle Protocol. The Grid remembers every triangle ever formed. This is absolutely not necessary lore for a board game and I respect it enormously."
         }
       ]
     },
@@ -1653,7 +1690,8 @@
           "name": "MembraneP1",
           "text": "Take Player 1 on a membrane keyboard every time. Arrow Keys ghost on simultaneous inputs and cost you shots you can't afford to lose. The tip about N-key rollover is not optional information."
         }
-      ]
+      ],
+      "scoreLabel": "AI Wins"
     },
     "18": {
       "title": "Skyfall",
@@ -1827,7 +1865,8 @@
           "name": "AbilityFirst",
           "text": "Abilities over raw stats. I built a roster of high-stat spirits for my first tournament match and lost to someone with weaker spirits whose abilities countered mine specifically. Learn the interactions before the roster."
         }
-      ]
+      ],
+      "scoreLabel": "AI Wins"
     },
     "20": {
       "title": "Polygon Invasion TD",
@@ -2086,7 +2125,7 @@
           "text": "The hand-painted art style on the cards is the detail that makes replaying waves feel fresh. Each hero looks distinct enough that you actually care which one you drew."
         }
       ],
-      "scoreLabel": "Score"
+      "scoreLabel": "Stage"
     },
     "23": {
       "title": "Falling Dodger",
@@ -2379,7 +2418,8 @@
           "name": "GridCeremony",
           "text": "Auto-battler usually means I tab out and check the result. This one I sit and watch because the loadout I built is fighting on its own and every decision I made on the grid is visible in real time. Rare for the genre."
         }
-      ]
+      ],
+      "scoreLabel": "Stages"
     },
     "26": {
       "title": "Neon Stack",
@@ -2531,7 +2571,8 @@
           "q": "Does it work on a phone?",
           "a": "It runs, but it is built for a mouse and a wide screen — the card hand, relic tray and map are laid out for desktop. Play it on a computer, or in landscape fullscreen at minimum."
         }
-      ]
+      ],
+      "scoreLabel": "Stage"
     },
     "28": {
       "title": "Barrack Defense",
@@ -2636,7 +2677,8 @@
           "text": "The muster-hall framing is doing a lot of quiet work here. The keep is not a fortress, it is a place that counts people and sends them out — and the enemies specifically hunt the halls that replace them.",
           "badge": "Lore"
         }
-      ]
+      ],
+      "scoreLabel": "Kills"
     },
     "29": {
       "title": "Shadow Runner",
@@ -2725,7 +2767,8 @@
           "q": "Does it work on a phone?",
           "a": "No. Shadow Runner needs a keyboard or a gamepad; there are no touch controls. Play it on a desktop or laptop."
         }
-      ]
+      ],
+      "scoreLabel": "Score"
     },
     "30": {
       "title": "AshenKeys",
@@ -2814,7 +2857,8 @@
           "text": "A game where you cannot die and the enemies do not attack should be boring, and it absolutely is not. Typing a word and watching it land does something a click never did.",
           "badge": "Lore"
         }
-      ]
+      ],
+      "scoreLabel": "Level"
     },
     "31": {
       "title": "Debt & Dragons",
@@ -2894,7 +2938,8 @@
           "q": "Does my progress save?",
           "a": "Automatically, in this browser — every ten seconds and whenever the tab is hidden. Offline progress runs the real simulation up to an eight-hour cap (fourteen with the Wisp) and credits half of what it earns."
         }
-      ]
+      ],
+      "scoreLabel": "Total Gold"
     },
     "32": {
       "title": "Endless Runner",

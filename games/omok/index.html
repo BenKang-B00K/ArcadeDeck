@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Play Omok (Gomoku / Five-in-a-row) against AI or a friend">
-    <meta name="theme-color" content="#3a3a3a">
+    <meta name="theme-color" content="#2a2521">
     <link rel="manifest" href="./manifest.json">
-    <link rel="icon" href="./icon-192.svg" type="image/svg+xml">
+    <link rel="icon" href="./icon-192.png" type="image/png">
+    <link rel="apple-touch-icon" href="./icon-192.png">
     <title>Omok</title>
-  <script type="module" crossorigin src="./assets/index-BP83qOK8.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-B7t-JHBh.css">
+  <script type="module" crossorigin src="./assets/index-DAO0DMHm.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DWLQlSlB.css">
 </head>
 <body>
     <a href="#board" class="skip-link" aria-label="Skip to game board">Skip to Board</a>
@@ -23,7 +24,9 @@
 
         <!-- Lobby Screen -->
         <div id="lobby-screen" style="display: none;" role="region" aria-label="Lobby">
-            <h1 data-i18n="title">Omok</h1>
+            <div id="lobby-hero" class="has-art" aria-hidden="true"></div>
+            <h1 id="lobby-title"><img id="wordmark" src="./art/wordmark-en.webp" alt="Omok" width="288" height="96"></h1>
+            <p id="lobby-tagline" data-i18n="tagline">Five in a row wins</p>
 
             <div id="stats-display" aria-live="polite"></div>
 
@@ -32,15 +35,6 @@
                 <div class="mode-buttons">
                     <button class="mode-btn active" data-mode="AI" data-i18n="vsAI" aria-pressed="true">Vs AI</button>
                     <button class="mode-btn" data-mode="LOCAL" data-i18n="twoPlayer" aria-pressed="false">2 Player</button>
-                </div>
-            </div>
-
-            <div id="color-select" role="group" aria-label="Color selection">
-                <label data-i18n="playAs">Play as:</label>
-                <div class="color-buttons">
-                    <button class="color-btn active" data-color="RANDOM" data-i18n="random" aria-pressed="true">Random</button>
-                    <button class="color-btn" data-color="BLACK" data-i18n="blackFirst" aria-pressed="false">Black (First)</button>
-                    <button class="color-btn" data-color="WHITE" data-i18n="whiteSecond" aria-pressed="false">White (Second)</button>
                 </div>
             </div>
 
@@ -58,21 +52,30 @@
                 </div>
             </div>
 
-            <div id="lobby-options">
-                <div id="theme-select">
-                    <button id="theme-toggle-btn" aria-label="Toggle theme">Theme: Dark</button>
-                </div>
-                <div id="lang-select" role="group" aria-label="Language">
-                    <button class="lang-btn active" data-lang="en">EN</button>
-                    <button class="lang-btn" data-lang="ko">KO</button>
-                    <button class="lang-btn" data-lang="ja">JA</button>
+            <div id="color-select" role="group" aria-label="Color selection">
+                <label data-i18n="playAs">Play as:</label>
+                <div class="color-buttons">
+                    <button class="color-btn active" data-color="RANDOM" data-i18n="random" aria-pressed="true">Random</button>
+                    <button class="color-btn" data-color="BLACK" data-i18n="blackFirst" aria-pressed="false">Black (First)</button>
+                    <button class="color-btn" data-color="WHITE" data-i18n="whiteSecond" aria-pressed="false">White (Second)</button>
                 </div>
             </div>
 
             <button id="find-match-btn" data-i18n="startGame">Start Game</button>
-            <div id="lobby-extra">
-                <button id="reset-stats-btn" data-i18n="resetStats">Reset Stats</button>
-                <button id="history-btn" data-i18n="gameHistory">Game History</button>
+
+            <div id="lobby-footer">
+                <div id="lobby-options">
+                    <button id="theme-toggle-btn" aria-label="Toggle theme">Theme: Dark</button>
+                    <div id="lang-select" role="group" aria-label="Language">
+                        <button class="lang-btn active" data-lang="en">EN</button>
+                        <button class="lang-btn" data-lang="ko">KO</button>
+                        <button class="lang-btn" data-lang="ja">JA</button>
+                    </div>
+                </div>
+                <div id="lobby-extra">
+                    <button id="history-btn" data-i18n="gameHistory">Game History</button>
+                    <button id="reset-stats-btn" data-i18n="resetStats">Reset Stats</button>
+                </div>
             </div>
         </div>
 
@@ -112,6 +115,6 @@
             </div>
         </div>
     </div>
-
+
 </body>
 </html>

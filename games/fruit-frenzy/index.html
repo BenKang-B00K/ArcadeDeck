@@ -1080,8 +1080,8 @@ function gameOver() {
   // ArcadeDeck integration
   window.parent.postMessage({
     type: 'GAME_OVER',
-    score: unlockedAchievements.length,
-    subScore: best
+    score: G.score,
+    subScore: unlockedAchievements.length
   }, '*');
 
   renderGameOver();

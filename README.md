@@ -102,7 +102,7 @@ See [`RULES.md`](./RULES.md) and [`CLAUDE.md`](./CLAUDE.md) for the full set. Hi
 
 - **TypeScript:** no `any`, no `// @ts-ignore`. Type-only imports use `import type`.
 - **Firestore rules:** `leaderboards.{name, gameId}` immutable post-create. Comments ≤300 chars. Nicknames ≤30 chars.
-- **postMessage scoring:** validate `event.origin` against the iframe domain, clamp `score` to `[0, 10_000_000]`, require `isFinite`. Drop silently otherwise.
+- **postMessage scoring:** validate `event.origin` against the iframe domain, require `isFinite` and `0 < score <= 1e12` (`MAX_SCORE` in `src/utils/pb.ts`). Drop silently otherwise.
 - **i18n:** new game text goes in `en.json` only — never invent translations for other locales.
 - **Images:** WebP only, in `public/images/`. Filename = `{slug}.webp` kebab-case.
 

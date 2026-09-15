@@ -5,9 +5,9 @@
 /fonts/*  /kingdom-of-ashes-fallen-era/fonts/:splat  200
 
 # Shadow Runner does the same with the icon paths baked into its data JSON (equip/upgrade/shop/
-# meta/subweapon icons, chapter cutscenes, the scene backdrops and one tag sprite). Its index.html
+# meta/subweapon icons, chapter cutscenes, the scene backdrops, one tag sprite, badge icons). Its index.html
 # and CSS came out of Vite fully relative; only the JSON string literals stayed root-absolute.
-# These eight roots are now Shadow Runner's on this project — a future game that hardcodes one of
+# These nine roots are now Shadow Runner's on this project — a future game that hardcodes one of
 # them needs its own prefix, not a second rule here.
 /equip/*      /shadow-runner/equip/:splat      200
 /upgrade/*    /shadow-runner/upgrade/:splat    200
@@ -17,3 +17,4 @@
 /subweapon/*  /shadow-runner/subweapon/:splat  200
 /scene/*      /shadow-runner/scene/:splat      200
 /tag/*        /shadow-runner/tag/:splat        200
+/badge/*      /shadow-runner/badge/:splat      200

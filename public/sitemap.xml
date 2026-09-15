@@ -138,7 +138,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/play/omok</loc>
-    <lastmod>2026-07-24</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/omok" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/omok" />
@@ -147,7 +147,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ja/play/omok</loc>
-    <lastmod>2026-07-24</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/omok" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/omok" />
@@ -156,7 +156,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ko/play/omok</loc>
-    <lastmod>2026-07-24</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/omok" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/omok" />
@@ -219,7 +219,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/play/kingdom-of-ashes-dice-war</loc>
-    <lastmod>2026-05-26</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/kingdom-of-ashes-dice-war" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/kingdom-of-ashes-dice-war" />
@@ -228,7 +228,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ja/play/kingdom-of-ashes-dice-war</loc>
-    <lastmod>2026-05-26</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/kingdom-of-ashes-dice-war" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/kingdom-of-ashes-dice-war" />
@@ -237,7 +237,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ko/play/kingdom-of-ashes-dice-war</loc>
-    <lastmod>2026-05-26</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/kingdom-of-ashes-dice-war" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/kingdom-of-ashes-dice-war" />
@@ -627,6 +627,26 @@
     <lastmod>2026-09-09</lastmod>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/kingdom-of-ashes-fallen-era" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/kingdom-of-ashes-fallen-era" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/kingdom-of-ashes-fallen-era" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/kingdom-of-ashes-fallen-era" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ja/play/kingdom-of-ashes-fallen-era</loc>
+    <lastmod>2026-09-15</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/kingdom-of-ashes-fallen-era" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/kingdom-of-ashes-fallen-era" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/kingdom-of-ashes-fallen-era" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/kingdom-of-ashes-fallen-era" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ko/play/kingdom-of-ashes-fallen-era</loc>
+    <lastmod>2026-09-15</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/kingdom-of-ashes-fallen-era" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/kingdom-of-ashes-fallen-era" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/kingdom-of-ashes-fallen-era" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/kingdom-of-ashes-fallen-era" />
   </url>
   <url>
@@ -634,6 +654,26 @@
     <lastmod>2026-09-10</lastmod>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/barrack-defense" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/barrack-defense" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/barrack-defense" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/barrack-defense" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ja/play/barrack-defense</loc>
+    <lastmod>2026-09-15</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/barrack-defense" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/barrack-defense" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/barrack-defense" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/barrack-defense" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ko/play/barrack-defense</loc>
+    <lastmod>2026-09-15</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/barrack-defense" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/barrack-defense" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/barrack-defense" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/barrack-defense" />
   </url>
   <url>
@@ -854,7 +894,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/genre/local-co-op</loc>
-    <lastmod>2026-05-16</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/local-co-op" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/local-co-op" />
@@ -863,7 +903,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ja/genre/local-co-op</loc>
-    <lastmod>2026-05-16</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/local-co-op" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/local-co-op" />
@@ -872,7 +912,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ko/genre/local-co-op</loc>
-    <lastmod>2026-05-16</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/local-co-op" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/local-co-op" />
@@ -908,7 +948,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/genre/rpg</loc>
-    <lastmod>2026-05-26</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/rpg" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/rpg" />
@@ -917,7 +957,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ja/genre/rpg</loc>
-    <lastmod>2026-05-26</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/rpg" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/rpg" />
@@ -926,7 +966,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ko/genre/rpg</loc>
-    <lastmod>2026-05-26</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/rpg" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/rpg" />
@@ -935,7 +975,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/genre/roguelike</loc>
-    <lastmod>2026-05-26</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/roguelike" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/roguelike" />
@@ -944,7 +984,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ja/genre/roguelike</loc>
-    <lastmod>2026-05-26</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/roguelike" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/roguelike" />
@@ -953,7 +993,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ko/genre/roguelike</loc>
-    <lastmod>2026-05-26</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/roguelike" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/roguelike" />
@@ -962,7 +1002,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/genre/strategy</loc>
-    <lastmod>2026-09-14</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/strategy" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/strategy" />
@@ -971,7 +1011,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ja/genre/strategy</loc>
-    <lastmod>2026-09-14</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/strategy" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/strategy" />
@@ -980,7 +1020,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ko/genre/strategy</loc>
-    <lastmod>2026-09-14</lastmod>
+    <lastmod>2026-09-15</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/strategy" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/strategy" />

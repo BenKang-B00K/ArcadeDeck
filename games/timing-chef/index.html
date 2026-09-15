@@ -1330,8 +1330,8 @@ function sendArcadeDeckScore(eventType) {
   if (window.parent && window.parent !== window) {
     window.parent.postMessage({
       type: eventType,
-      currentMainPoints: totalStars, // 별점 총합
-      currentExtraStats: unlockedDishes // 해금된 요리 개수
+      score: totalStars, // 별점 총합
+      subScore: unlockedDishes // 해금된 요리 개수
     }, '*');
   }
 }

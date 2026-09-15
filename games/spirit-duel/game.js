@@ -1973,6 +1973,17 @@ function endMatch() {
   }
   finalScoreP1.textContent = s1;
   finalScoreP2.textContent = s2;
+  // ArcadeDeck 통합 전송 규격 — vs AI only: cumulative AI match wins (hot-seat has no single-player score)
+  if (state.vsAI) {
+    const human = state.humanPid, ai = human === 1 ? 2 : 1;
+    let aiWins = 0;
+    try { aiWins = Number(localStorage.getItem('sd_aiWins')) || 0; } catch (e) {}
+    if (state.matchScore[human] > state.matchScore[ai]) {
+      aiWins++;
+      try { localStorage.setItem('sd_aiWins', String(aiWins)); } catch (e) {}
+    }
+    try { window.parent.postMessage({ type: 'GAME_OVER', score: aiWins, subScore: state.matchScore[human] }, '*'); } catch (e) {}
+  }
   setTimeout(() => {
     hideCurtain();
     endmodal.classList.add('show');

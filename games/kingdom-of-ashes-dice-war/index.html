@@ -25,6 +25,10 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            box-sizing: border-box;
+            /* 1 logical px — same fit as the 800×600 canvas (fitScale in main.ts). All sizes below are logical. */
+            --u: min(100vw / 800, 100vh / 600);
+            padding: calc(54 * var(--u)) 0 calc(36 * var(--u));
             z-index: 9999;
             opacity: 1;
             transition: opacity 0.9s ease;
@@ -76,55 +80,55 @@
         /* Decorative corner ornaments */
         .corner-orn {
             position: absolute;
-            width: clamp(40px, 6vw, 72px);
-            height: clamp(40px, 6vw, 72px);
+            width: calc(48 * var(--u));
+            height: calc(48 * var(--u));
             border: 2px solid rgba(251, 191, 36, 0.55);
             box-shadow: 0 0 16px rgba(251, 191, 36, 0.35), inset 0 0 12px rgba(251,191,36,0.15);
             z-index: 3;
             pointer-events: none;
         }
-        .corner-orn.tl { top: 24px; left: 24px;    border-right: none; border-bottom: none; }
-        .corner-orn.tr { top: 24px; right: 24px;   border-left: none;  border-bottom: none; }
-        .corner-orn.bl { bottom: 24px; left: 24px; border-right: none; border-top: none; }
-        .corner-orn.br { bottom: 24px; right: 24px;border-left: none;  border-top: none; }
+        .corner-orn { --o: calc(24 * var(--u)); }
+        .corner-orn.tl { top: var(--o); left: var(--o);     border-right: none; border-bottom: none; }
+        .corner-orn.tr { top: var(--o); right: var(--o);    border-left: none;  border-bottom: none; }
+        .corner-orn.bl { bottom: var(--o); left: var(--o);  border-right: none; border-top: none; }
+        .corner-orn.br { bottom: var(--o); right: var(--o); border-left: none;  border-top: none; }
         .corner-orn::after {
             content: '';
             position: absolute;
-            width: 8px; height: 8px;
+            width: calc(8 * var(--u)); height: calc(8 * var(--u));
             background: #fbbf24;
             box-shadow: 0 0 12px #fbbf24, 0 0 24px rgba(251,191,36,0.6);
             transform: rotate(45deg);
         }
-        .corner-orn.tl::after { top: -5px; left: -5px; }
-        .corner-orn.tr::after { top: -5px; right: -5px; }
-        .corner-orn.bl::after { bottom: -5px; left: -5px; }
-        .corner-orn.br::after { bottom: -5px; right: -5px; }
+        .corner-orn::after { --o: calc(-5 * var(--u)); }
+        .corner-orn.tl::after { top: var(--o); left: var(--o); }
+        .corner-orn.tr::after { top: var(--o); right: var(--o); }
+        .corner-orn.bl::after { bottom: var(--o); left: var(--o); }
+        .corner-orn.br::after { bottom: var(--o); right: var(--o); }
 
         /* Lift loading content above background layers */
-        #loading-screen > *:not(.corner-orn) { position: relative; z-index: 4; }
+        #loading-screen > *:not(.corner-orn):not(.banner-bg) { position: relative; z-index: 4; }
 
         .banner-wrap {
             position: relative;
             display: inline-block;
             line-height: 0;
         }
-        #loading-screen img {
-            width: auto;
-            max-width: min(680px, 85vw);
-            max-height: min(420px, 45vh);
-            height: auto;
-            object-fit: contain;
-            filter: drop-shadow(0 0 32px rgba(124, 58, 237, 0.55));
+        /* Full-bleed banner art; vignette (::before) + embers (::after) sit above it */
+        .banner-bg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
         }
         .banner-title {
-            position: absolute;
-            top: 6%;
-            left: 50%;
-            transform: translateX(-50%);
+            position: relative;
             margin: 0;
             font-family: 'Cinzel', 'Trajan Pro', 'Georgia', serif;
             font-weight: 900;
-            font-size: clamp(20px, 4.2vw, 44px);
+            font-size: calc(34 * var(--u));
             letter-spacing: 0.08em;
             line-height: 1.05;
             text-align: center;
@@ -162,10 +166,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 14px;
-            margin-top: min(36px, 3.5vh);
-            width: 480px;
-            max-width: 88vw;
+            gap: calc(14 * var(--u));
+            margin-top: auto;   /* pushes progress + buttons to the bottom edge */
+            width: calc(480 * var(--u));
         }
         .divider .line {
             flex: 1;
@@ -173,20 +176,19 @@
             background: linear-gradient(90deg, transparent, rgba(251,191,36,0.7), transparent);
         }
         .divider .diamond {
-            width: 8px; height: 8px;
+            width: calc(8 * var(--u)); height: calc(8 * var(--u));
             background: #fbbf24;
             transform: rotate(45deg);
             box-shadow: 0 0 10px #fbbf24, 0 0 18px rgba(251,191,36,0.5);
         }
 
         .progress-wrap {
-            width: 420px;
-            max-width: 80vw;
-            height: 8px;
+            width: calc(420 * var(--u));
+            height: calc(8 * var(--u));
             background: rgba(255,255,255,0.08);
             border: 1px solid rgba(251, 191, 36, 0.25);
-            border-radius: 4px;
-            margin-top: 12px;
+            border-radius: calc(4 * var(--u));
+            margin-top: calc(12 * var(--u));
             overflow: hidden;
             position: relative;
             box-shadow: 0 0 12px rgba(124, 58, 237, 0.25), inset 0 0 6px rgba(0,0,0,0.6);
@@ -214,23 +216,23 @@
         #loading-pct {
             color: rgba(255,255,255,0.38);
             font-family: 'Segoe UI', sans-serif;
-            font-size: 13px;
+            font-size: calc(13 * var(--u));
             letter-spacing: 0.1em;
-            margin-top: min(10px, 1.5vh);
+            margin-top: calc(9 * var(--u));
             transition: opacity 0.4s ease;
         }
 
         #start-btn {
-            margin-top: min(28px, 2.5vh);
-            padding: min(14px, 1.8vh) 56px;
+            margin-top: calc(15 * var(--u));
+            padding: calc(11 * var(--u)) calc(56 * var(--u));
             background: linear-gradient(135deg, #7c3aed, #4f46e5);
             color: #fff;
             font-family: 'Cinzel', 'Segoe UI', sans-serif;
-            font-size: clamp(14px, 2.5vw, 18px);
+            font-size: calc(18 * var(--u));
             font-weight: 700;
             letter-spacing: 0.18em;
             border: 2px solid rgba(251, 191, 36, 0.6);
-            border-radius: 8px;
+            border-radius: calc(8 * var(--u));
             cursor: pointer;
             opacity: 0;
             transform: translateY(10px);
@@ -257,6 +259,35 @@
         }
         #start-btn:active {
             transform: scale(0.96);
+        }
+
+        /* ── Language picker ──────────────────────────────────────── */
+        #lang-bar {
+            display: flex;
+            gap: calc(10 * var(--u));
+            margin-top: calc(13 * var(--u));
+        }
+        #lang-bar button {
+            min-width: calc(88 * var(--u));
+            min-height: calc(38 * var(--u));
+            padding: calc(8 * var(--u)) calc(16 * var(--u));
+            background: rgba(255,255,255,0.07);
+            color: rgba(255,255,255,0.85);
+            font-family: 'Segoe UI', sans-serif;
+            font-size: calc(14 * var(--u));
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            border: 1px solid rgba(255,255,255,0.35);
+            border-radius: calc(6 * var(--u));
+            cursor: pointer;
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+        #lang-bar button:hover { background: rgba(255,255,255,0.14); }
+        #lang-bar button.active {
+            background: rgba(251, 191, 36, 0.18);
+            color: #fbbf24;
+            border-color: rgba(251, 191, 36, 0.9);
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.35);
         }
 
         /* ── Rotate-device overlay (portrait mobile) ───────────────── */
@@ -299,7 +330,7 @@
             letter-spacing: 0.04em;
         }
     </style>
-  <script type="module" crossorigin src="./assets/index-S_ytZZaM.js"></script>
+  <script type="module" crossorigin src="./assets/index-DXQWbwcp.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/Geometry-MFRJ-jpk.js">
   <link rel="modulepreload" crossorigin href="./assets/GCManagedHash-jMfNVFVu.js">
   <link rel="modulepreload" crossorigin href="./assets/getTextureBatchBindGroup-BEt_pZuD.js">
@@ -307,8 +338,8 @@
   <link rel="modulepreload" crossorigin href="./assets/GraphicsContext-Fy8loagy.js">
   <link rel="modulepreload" crossorigin href="./assets/Cache--D3xOmv3.js">
   <link rel="modulepreload" crossorigin href="./assets/Filter-DAlRG84J.js">
-  <link rel="modulepreload" crossorigin href="./assets/RenderTargetSystem-PLlHV4WO.js">
-  <link rel="modulepreload" crossorigin href="./assets/BufferResource-BACA5i3e.js">
+  <link rel="modulepreload" crossorigin href="./assets/RenderTargetSystem-Dv4I5kBU.js">
+  <link rel="modulepreload" crossorigin href="./assets/BufferResource-B6oGLkY-.js">
   <link rel="modulepreload" crossorigin href="./assets/CanvasPool-uvdH0Iih.js">
 </head>
 <body>
@@ -318,8 +349,8 @@
         <div class="corner-orn tr"></div>
         <div class="corner-orn bl"></div>
         <div class="corner-orn br"></div>
+        <img class="banner-bg" src="./kingdom-of-ashes-banner.webp" alt="" />
         <div class="banner-wrap">
-            <img src="./kingdom-of-ashes-banner.png" alt="Kingdom of Ashes - Dice War" />
             <h1 class="banner-title">Kingdom of Ashes<span class="sub">— Dice War —</span></h1>
         </div>
         <div class="divider">
@@ -332,13 +363,17 @@
         </div>
         <div id="loading-pct">Loading... 0%</div>
         <button id="start-btn">▶ START GAME</button>
-        <button id="lang-btn" onclick="(function(){var k='lang',c=localStorage.getItem(k),n=c==='ko'?'en':'ko';localStorage.setItem(k,n);location.reload();})()" style="margin-top:12px;padding:6px 18px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.55);font-family:'Segoe UI',sans-serif;font-size:12px;border:1px solid rgba(255,255,255,0.18);border-radius:6px;cursor:pointer;letter-spacing:0.08em;">한국어</button>
+        <div id="lang-bar">
+            <button data-lang="en">English</button>
+            <button data-lang="ko">한국어</button>
+            <button data-lang="ja">日本語</button>
+        </div>
     </div>
 
     <!-- Portrait-mode rotate prompt -->
     <div id="rotate-overlay">
         <span class="rotate-icon">📱</span>
-        <p class="rotate-title">화면을 가로로 돌려주세요</p>
+        <p class="rotate-title" id="rotate-title">Please rotate your device</p>
         <p class="rotate-sub" id="rotate-sub">This game is designed for landscape mode</p>
     </div>
 

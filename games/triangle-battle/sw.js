@@ -1,16 +1,25 @@
-const CACHE_NAME = 'triangle-battle-v1';
+const CACHE_NAME = 'triangle-battle-v4';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
   './game.js',
-  './image/main_bg.png',
+  './image/main_bg.webp',
+  './image/icon-512.png',
   './image/game_bg.webp'
 ];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
+  );
+});
+
+// Drop old caches — caches.match() searches every cache, so stale versions would win otherwise
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
 });
 

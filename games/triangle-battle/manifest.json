@@ -9,7 +9,7 @@
   "orientation": "landscape",
   "icons": [
     {
-      "src": "image/main_bg.png",
+      "src": "image/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

@@ -33,15 +33,9 @@ function onDepthUpdate(currentDepth, isDead = false) {
                 type: isDead ? 'GAME_OVER' : 'GATE_OF_HELL_SCORE',
                 score: currentDepth
             };
-            // Lock targetOrigin: explicit override, else parsed referrer origin. Never '*'.
-            let targetOrigin = window.allowedParentOrigin || null;
-            if (!targetOrigin && document.referrer) {
-                try { targetOrigin = new URL(document.referrer).origin; } catch (_) {}
-            }
-            if (targetOrigin) {
-                window.parent.postMessage(message, targetOrigin);
-                lastSentDepth = currentDepth;
-            }
+            // ArcadeDeck 통합 전송 규격 — '*': host origin unknown at build time, payload is public stats.
+            try { window.parent.postMessage(message, '*'); } catch (_) {}
+            lastSentDepth = currentDepth;
         }
     }
 }

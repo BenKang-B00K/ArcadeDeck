@@ -359,7 +359,7 @@
   {
     "id": "20",
     "slug": "polygon-invasion-td",
-    "language": "EN",
+    "language": "EN/KO/JA",
     "thumbnail": "images/polygon-invasion-td.webp",
     "genres": [
       "Tower Defense",
@@ -372,8 +372,8 @@
     "isOriginal": true,
     "scoreTiers": [
       10,
-      25,
-      50
+      20,
+      30
     ]
   },
   {

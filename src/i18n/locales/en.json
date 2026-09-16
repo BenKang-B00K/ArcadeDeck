@@ -1907,81 +1907,97 @@
     },
     "20": {
       "title": "Polygon Invasion TD",
-      "description": "A fast-paced tower defense game where you defend against waves of geometric invaders.",
-      "fullDescription": "\n      Polygon Invasion TD throws you into a vibrant geometric battlefield where waves of polygonal enemies advance relentlessly toward your **core**. Place towers strategically, upgrade them mid-battle, and adapt your defenses to survive ever-tougher waves.\n      Each polygon type brings its own threat — **fast triangles, armored hexagons, and swarming squares** all demand different counter-strategies. Resource management and tower placement are the keys to climbing further into the invasion.\n      How deep can you push? Reach the **peak wave**, rack up enemy kills, and claim your spot on the global leaderboard.\n    ",
-      "controls": "Mouse Click / Touch: Place towers, upgrade, and select targets",
-      "tips": "Cover **chokepoints** early. Mix tower types — **single-target for tanks, splash for swarms**. Save resources for emergency upgrades during **boss waves**.",
-      "lore": "\n      The **Polygon Dimension** has breached our reality, and its geometric inhabitants march in endless formation. Only your towers stand between order and the encroaching chaos of shapes.\n      Build, upgrade, and hold the line. Every wave repelled is a fragment of reality reclaimed.\n    ",
+      "description": "Geometric tower defense: eight polygon towers, 24 evolutions, 29 corrupted shapes and a Core that only survives 20 leaks.",
+      "fullDescription": "\n      Polygon Invasion TD is a wave-survival tower defense on a single neon path. Corrupted polygons march from the portal toward your **Core**; you drop towers beside the path, spend the **shards** every kill pays out, and push each tower to **LV3**. Waves get denser and faster every round, a **boss** arrives every fifth wave, and the run ends the moment 20 enemies leak through the gate.\n      Your arsenal is eight shapes with eight jobs — the Line fires an instant beam, the Square crushes ground swarms with splash but cannot touch air, the Pentagon is anti-air only, the Hexagon sprays, the Septagon snipes from long range, the Octagon chains three targets and the Nonagon buffs everything in its aura. Every boss kill drops an **EVO core**; spend one on a LV3 tower to pick one of three **evolutions** — 24 in total, from Siege Howitzer and Storm Crown to Wrath Aura.\n      The enemy roster grows as you go: 29 corruption types tagged **AIR, SHIELD, GHOST, HEAL, SPLIT, TANK, FAST** and **BOSS**, each logged in the in-game Corruption Logs the first time it appears. Auto-save lets you continue a run later, and your rank at game over — F to S — is decided purely by the peak wave you reached.\n    ",
+      "controls": "Mouse / Touch: click or drag to place towers; keys 2–9 pick a shape, Q upgrades, E sells, R evolves, ESC pauses",
+      "tips": "Build a **Square** at the first bend before wave 2 — ground swarms die to splash before they spread. Have one **Pentagon** covering the path by wave 3, when Sky Bishops start flying over your ground towers. Upgrade to **LV3** before buying a fourth tower, and hold every **EVO core** for the shape you have the most of.",
+      "lore": "\n      The **Polygon Dimension** did not invade with armies. It leaked — one corrupted triangle at a time, through a gate that should never have opened. Every shape that reaches the Core rewrites a little more of the world into its own geometry.\n      Your towers are the last clean shapes left. Build, upgrade, evolve and hold the gate. Every wave repelled is a fragment of reality that stays ours.\n    ",
       "features": [
-        "Strategic Tower Placement",
-        "Multiple Tower Types and Upgrades",
-        "Endless Waves of Geometric Enemies",
-        "Peak Wave & Kill Count Leaderboard",
-        "Fast-paced Tactical Gameplay",
-        "Web & Mobile Friendly"
+        "Eight polygon towers, each with a distinct role",
+        "24 evolutions unlocked with EVO cores from boss kills",
+        "29 enemy types across NORMAL, SPECIAL and BOSS tiers",
+        "Corruption Logs and Tower Archives encyclopedia",
+        "Auto-save and continue; F–S run rank by peak wave",
+        "Touch drag-to-place; English, Korean, Japanese"
       ],
-      "objectives": "Place and upgrade towers strategically to repel endless waves of geometric invaders before they reach your **core**, reaching the highest possible wave count and kill total for the global leaderboard.",
+      "objectives": "Hold the gate. Place towers along the path, upgrade them to LV3 and evolve them with EVO cores so no corrupted polygon reaches your **Core** — 20 leaks end the run. Your score is the **peak wave** you survive.",
       "controlsTable": [
         {
-          "key": "Mouse Click / Touch",
-          "action": "Select a tower type from the build menu"
+          "key": "2 – 9 / Shop tap",
+          "action": "Select a tower shape (Line, Triangle, Square, Pentagon, Hexagon, Septagon, Octagon, Nonagon)"
         },
         {
-          "key": "Mouse Click / Touch (Map)",
-          "action": "Place the selected tower on a valid tile"
+          "key": "Click / Drag & lift",
+          "action": "Place the selected tower beside the path; click an existing tower to select it"
         },
         {
-          "key": "Mouse Click / Touch (Tower)",
-          "action": "Open upgrade menu for an existing tower"
+          "key": "Q / UPGRADE",
+          "action": "Upgrade the selected tower (LV1 → LV2 → LV3)"
         },
         {
-          "key": "Mouse Click / Touch (Upgrade)",
-          "action": "Spend resources to upgrade a tower"
+          "key": "R / EVOLVE",
+          "action": "Spend one EVO core to evolve a LV3 tower into one of three forms"
+        },
+        {
+          "key": "E / SELL",
+          "action": "Recycle the selected tower for 55% of what you paid"
+        },
+        {
+          "key": "B / N",
+          "action": "Open the Tower Archives / Corruption Logs"
+        },
+        {
+          "key": "ESC / ❚❚",
+          "action": "Cancel placement or pause"
         }
       ],
       "faq": [
         {
-          "q": "How do I start defending?",
-          "a": "Select a tower from the build menu and place it on a valid tile before the first wave launches. Cover the chokepoint nearest to your core first — a single well-placed tower is more effective than several spread across the map."
+          "q": "Which tower should I build first?",
+          "a": "A Square at the first corner. Its splash hits every ground enemy within 80 units, which is exactly what the wave 1–2 swarms of Frail Pawns and Broken Squares need. Follow it with a Triangle or Hexagon for single targets, and add a Pentagon by wave 3 — the Square cannot hit air."
         },
         {
-          "q": "What do the different polygon enemy types mean?",
-          "a": "Fast triangles move quickly and can slip past poorly positioned towers. Armored hexagons resist single-target damage and need splash or concentrated fire. Swarming squares arrive in large groups and demand area-of-effect towers."
+          "q": "What are EVO cores and how do I evolve?",
+          "a": "Every boss (waves 5, 10, 15 …) drops one EVO core. Select a LV3 tower, press R or tap EVOLVE, and choose one of three evolutions for that shape — the Square, for example, becomes Siege Howitzer (long-range artillery), Pyroclasm (burning splash) or Quake Hammer (slowing splash). An evolution is permanent for that tower."
         },
         {
-          "q": "When should I upgrade versus build new towers?",
-          "a": "Upgrade chokepoint towers before building new ones in open areas. An upgraded tower at the key bottleneck blocks more enemies per resource spent than a new low-tier tower positioned away from the main path."
+          "q": "What do the enemy tags mean?",
+          "a": "AIR flies over ground-only towers (the Square cannot hit it; the Pentagon hits only it). SHIELD carries a shield worth 50% of its health that absorbs damage first — Quill Stinger pierces it. GHOST fades in and out but can be hit the whole time; Phantom Lance deals ×1.5 to it. HEAL restores nearby enemies. SPLIT bursts into Swarm Seeds on death, so kill it inside splash range. TANK is slow and heavy; FAST is the opposite."
         },
         {
-          "q": "What happens during boss waves?",
-          "a": "Boss waves feature significantly tougher enemies that require emergency upgrades. Save a resource reserve specifically for boss wave upgrades rather than spending everything between normal waves."
+          "q": "How does the run end and how is my score decided?",
+          "a": "Every enemy that reaches the gate costs one Core point and adds corruption (5 for NORMAL, 10 for SPECIAL, 15 for BOSS). At 20 leaks the Core falls. Your score is the peak wave reached; the game-over rank is F below wave 10, then D, C, B and A every five waves, and S at wave 30."
         },
         {
-          "q": "What is the leaderboard based on?",
-          "a": "The leaderboard ranks by peak wave reached as the primary metric and total enemy kills as the tiebreaker. Surviving deeper into the invasion always matters more than maximizing kills on earlier waves."
+          "q": "Does the Nonagon aura stack?",
+          "a": "Not with itself — two Nonagons covering the same tower apply only the strongest aura, so spread them over different clusters. The three Nonagon evolutions (Wrath ×4 damage, Tempo ×2.6 fire rate, Empower a mix of both) count as different types and do stack with each other."
+        },
+        {
+          "q": "Can I stop and come back later?",
+          "a": "Yes. The run auto-saves on every build, upgrade, sell, evolve and wave start; pick CONTINUE on the title screen. The save is cleared when the Core falls."
         }
       ],
       "featuredComments": [
         {
           "name": "HexArmor",
-          "text": "Armored hexagons will walk through your single-target towers like they aren't there. Splash tower at the chokepoint handles them and the swarming squares at the same time. Build splash first.",
+          "text": "Square at the first bend, Pentagon at the second. That covers ground swarms and the Sky Bishops that show up on wave 3. Everything after that is just feeding shards into LV3 upgrades.",
           "badge": "Top Tip"
         },
         {
           "name": "PolygonCore",
-          "text": "Upgrade your chokepoint tower before building anywhere else. I spread towers across the map for my first ten waves and got overrun every time. One upgraded bottleneck tower outperforms three weak ones."
+          "text": "Three LV3 towers beat six LV1 towers every time. Stats go ×1.8 then ×3.2 per level and LV3 is what unlocks evolving. Stop spreading out."
         },
         {
           "name": "GeometricOrder",
-          "text": "The Polygon Dimension breaching reality and its inhabitants marching in formation is exactly the kind of absurd one-line lore premise that works perfectly for a tower defense game."
+          "text": "Got my first EVO core on wave 5 and turned the Octagon into Storm Crown. Five-jump chain lightning through a Splitting Diamond pack is the best feeling in this game."
         },
         {
           "name": "BossReserve",
-          "text": "Keep a resource reserve specifically for boss waves. Boss enemies need emergency upgrades that normal-wave spending doesn't support. Every player who spends everything between waves learns this the same way I did."
+          "text": "The wave 10 boss is the Crystalline Tetrad and it splits into eight Swarm Seeds when it dies. Kill it inside splash range or you will leak half of them."
         },
         {
           "name": "FastTriangle",
-          "text": "Fast triangles slip through gaps in coverage that you didn't know existed until wave 8 when three of them rush through simultaneously. Single-target towers aimed at the entry chokepoint are the only reliable counter."
+          "text": "Ghost Star and Ethereal Phantom look like they are phasing out but they can be hit the whole time. Phantom Lance on the Triangle does 1.5× to them and to air — easy pick for a mixed lane."
         }
       ],
       "scoreLabel": "Peak Wave"

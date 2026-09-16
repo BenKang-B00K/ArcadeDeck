@@ -1425,108 +1425,122 @@
       "scoreLabel": "Score"
     },
     "15": {
-      "title": "Kingdom's Last Stand",
-      "description": "A strategic auto-battler roguelike where you build your army, manage formations, and defend your kingdom against endless waves of enemies.",
-      "fullDescription": "\n      The kingdom is on the brink of collapse. As the last commander, you must assemble a ragtag army and hold the line against relentless enemy forces pouring through the breach.\n      Kingdom's Last Stand is a deep **auto-battler roguelike** that combines tactical positioning with elemental strategy. Place your units across **three rows** — front, middle, and back — and watch as they fight automatically based on their abilities and formation.\n      Manage your **gold economy** wisely between rounds. Recruit powerful heroes, upgrade your forces, and exploit elemental interactions between **Fire, Nature, Lightning, and Ice** to turn the tide of battle.\n      Each stage brings tougher foes and new challenges. How far can you push before the kingdom falls?\n    ",
-      "controls": "Mouse Click: Select and place units / Drag: Rearrange formation / UI Buttons: Buy, upgrade, start battle",
-      "tips": "Balance your gold between recruiting new units and upgrading existing ones. Position tanky units in the **front row** to protect your fragile damage dealers in the back. Pay attention to elemental interactions — **Fire beats Nature, Nature beats Lightning, Lightning beats Ice, and Ice beats Fire**. Don't rush through rounds; take time to optimize your formation.",
-      "lore": "\n      For a thousand years, the Kingdom of **Aethermoor** stood as a bastion against the darkness beyond the **Veil**. Its arcane wards, powered by the four **Elemental Crystals**, kept the realm safe.\n      But treachery struck from within. The **Court Mage** shattered the Crystals, and the Veil tore open. Now hordes of corrupted beasts and fallen warriors pour through, each wave stronger than the last.\n      You are the **Shield-Captain**, chosen by the dying king with his last breath. With nothing but a handful of loyal soldiers and the scattered shards of the Crystals, you must hold the line.\n      Rally the remnants. Harness the elements. This is the kingdom's last stand.\n    ",
+      "title": "Kingdom of Ashes - Colosseum",
+      "description": "An auto-battler roguelike in the Kingdom of Ashes series — draft from 105 heroes across 8 elements, merge them to 5★, and hold a 3×3 arena for 7 rounds a stage against an enemy that drafts back.",
+      "fullDescription": "\n      Kingdom of Ashes - Colosseum is the auto-battler entry in the Kingdom of Ashes series (formerly Kingdom's Last Stand). You never swing a sword yourself: between rounds you spend gold in the shop, drag heroes onto a **3×3 grid**, then watch both sides fight it out on their own. Every stage is **7 rounds** — win 4 and you advance, pick one of three permanent rewards and take an artifact; win all 7 and take two.\n      The roster is **105 heroes** across **8 elements** — Fire, Frost, Lightning, Nature, Holy, Dark, Physical and Arcane — costing 2 to 8 gold, each with its own skill and a cinematic cut-in when it fires. Placement is decided by range: the front column for tanks and melee, mid for supports and assassins, back for ranged damage and healers. Buy a copy of a hero you already own, drop it on the original, and it stars up; a cost-6+ hero that reaches ★3 **evolves** and at ★5 **ascends**, bolting a second effect onto its skill.\n      Elements do two jobs. Affinity is a four-way cycle — Fire beats Nature beats Lightning beats Frost beats Fire — at ±30%, Holy and Dark hurt each other both ways, Physical shrugs off elemental damage and Arcane cuts through it. Synergy counts copies: two heroes of one element light Tier I, three Tier II, five Tier III, and a full mono-element grid of nine Tier IV. Fire stacks attack and burn, Frost armour and slows, Lightning speed and crits, Nature regen, Holy shields, Dark attack per kill, Physical armour pierce, Arcane cooldowns and skill damage.\n      Around the fights sits the roguelike layer: a **bench**, a **sacrifice** altar that turns a spare hero into permanent column stats, a Kingdom tab of six permanent upgrades, **33 artifacts**, eleven stage rewards from interest caps to Elemental Harmony, and an achievement wall with tiered titles. Fights that drag past turn 12 hit **enrage** — attack climbs every turn, healing and armour halve at 16 — so stalling lineups lose to fast ones. The enemy drafts against what you fielded, so the stage-25 arena is nothing like the stage-3 one. Plays in English, Korean and Japanese.\n    ",
+      "controls": "Drag: place a hero from the shop, move it, or drop it on a copy to merge / Tap or hover a hero: stats, skill, lore / Shop: Buy, Sell, Reroll, Lock / Battle Start: run the round / Speed: 1x, 1.75x, 2x",
+      "tips": "Read the range before you buy: range 1 goes front, 2 mid, 3 back, and a hero can't be dropped into the wrong column. Chase one element to three copies early — **Tier II synergy** is where the bonuses start paying for the gold. Merges need all nine grid slots filled and cap at two per round, so bench the spare copy instead of selling it. Kill gold and interest are small change; the round supply funds you, so never skip a round. When the enrage warning shows at turn 10, healing and armour are on a timer — finishers beat sustain.",
+      "lore": "\n      **Alea** settled its arguments by the roll of the dice until the **Dicefall** burned it to ash. What the fire left standing was the **Colosseum** — the one thing the old kingdom built too well to fall — and the ash-lords who hold it have made it the last court in the land. No more dice. Every claim is settled by nine champions on a marked floor.\n      You arrive with a purse and no army. The heroes who answer your gold are the leftovers of a dead kingdom — frost knights whose fortresses melted, inquisitors with no church, golems that outlived their makers — and they do not care whose banner they stand under. Each stage the ash-lords send a heavier roster, drafted against whatever you fielded last.\n      Win four rounds of seven and the arena admits you to the next tier. Lose, and your champions go back to the sand with everyone else. Rumour holds there is a floor beneath the arena where the last dice still roll. Nobody has fought deep enough to see it.\n    ",
       "features": [
-        "Deep Auto-Battler Combat System",
-        "3-Row Tactical Formation (Front/Mid/Back)",
-        "4 Elements: Fire, Nature, Lightning, Ice",
-        "Gold Economy & Unit Upgrade System",
-        "Roguelike Stage Progression",
-        "Dual Damage Types: Physical & Magical",
-        "Global Leaderboard",
-        "Web & Mobile Friendly"
+        "105 Heroes Across 8 Elements",
+        "3×3 Grid Auto-Battles, 7 Rounds per Stage",
+        "Merge to 5★ — Evolve at ★3, Ascend at ★5",
+        "Elemental Affinity + Synergy Tiers I–IV",
+        "33 Artifacts, 11 Stage Rewards, Kingdom Upgrades",
+        "Bench, Sacrifice Altar, Enemy AI That Drafts Back",
+        "Cinematic Skill Cut-ins, Achievements, Unit Codex",
+        "Landscape Mobile + PC · English / Korean / Japanese"
       ],
-      "objectives": "Assemble a formation of elemental units, defend **Aethermoor** against increasingly powerful waves of corrupted enemies, and survive as many stages as possible before the kingdom falls.",
+      "objectives": "Build a nine-hero formation, win at least **4 of 7 rounds** on every stage, and push as deep into the arena as the roster allows — the run's score is your personal best, and clearing **Stage 25** earns the Mythic Conqueror title.",
       "controlsTable": [
         {
-          "key": "Mouse Click",
-          "action": "Select a unit from the roster"
+          "key": "Drag from Shop",
+          "action": "Place a hero on the grid column that matches its range (1 front, 2 mid, 3 back)"
         },
         {
-          "key": "Mouse Click (Grid)",
-          "action": "Place selected unit in the front, middle, or back row"
+          "key": "Drag on Grid",
+          "action": "Move a hero, or drop it onto the same hero to merge (star-up)"
         },
         {
-          "key": "Drag",
-          "action": "Rearrange existing units within the formation"
+          "key": "Drag to Reserve / Sacrifice",
+          "action": "Bench a hero for later, or sacrifice it for a permanent front / mid / back column bonus"
         },
         {
-          "key": "UI Button (Buy)",
-          "action": "Recruit a new unit using gold"
+          "key": "Tap / Hover Hero",
+          "action": "Stats, skill, cooldown and lore"
         },
         {
-          "key": "UI Button (Upgrade)",
-          "action": "Upgrade an existing unit's stats"
+          "key": "Reroll / Lock",
+          "action": "Buy a new shop offer, or hold the current one through the round"
         },
         {
-          "key": "UI Button (Start)",
-          "action": "Begin the next battle round"
+          "key": "Battle Start / Speed",
+          "action": "Run the round; cycle 1x / 1.75x / 2x"
         }
       ],
       "faq": [
         {
-          "q": "How does the auto-battle system work?",
-          "a": "Once you confirm your formation and start the round, units fight automatically based on their abilities and row position. Your role is to optimize placement and gold spending between rounds — positioning is everything."
+          "q": "Is this the same game as Kingdom's Last Stand?",
+          "a": "Yes — same auto-battler, renamed and folded into the Kingdom of Ashes series. The 2026 update added Japanese, an enemy AI that drafts against your elements, the bench and evolution systems, a full balance pass (SPD is now an action rate, the DEF curve was reworked, synergy bonuses that the text promised now actually fire) and a performance pass. Your personal best on this page carries over."
         },
         {
-          "q": "What are the elemental interactions?",
-          "a": "Fire beats Nature, Nature beats Lightning, Lightning beats Ice, and Ice beats Fire. Matching your units' elements to counter the incoming wave's predominant type gives a significant advantage on each stage."
+          "q": "How does a stage work?",
+          "a": "Seven rounds. Each round you shop, arrange, and fight one auto-battle. Four wins advance you to the next stage with a reward pick and an artifact; seven of seven pays two artifacts and bonus score. Fewer than four means the stage failed — you can retry it, but that ends the scored run."
         },
         {
-          "q": "Should I recruit more units or upgrade existing ones?",
-          "a": "Balance both, but upgrades often outperform raw numbers. Concentrated firepower on fewer well-upgraded units beats spreading gold thin across many weak ones — especially against elite enemies."
+          "q": "How do I merge, and what is evolution?",
+          "a": "Buy a second copy of a hero and drop it on the first: ★1 becomes ★2 and so on up to ★5, raising HP, ATK and DEF each step. Merging needs all nine grid slots filled and is capped at two per round. Heroes costing 6 or more evolve at ★3 and ascend at ★5, which adds a second effect to their skill — the Dragon's breath sets every enemy on fire, Judgment Bolt gains an AoE wave."
         },
         {
-          "q": "Why is front-row placement important?",
-          "a": "Front-row units absorb incoming attacks and protect fragile damage dealers in the back row. Always place your tankiest units in the front. A back-row caster killed on turn one contributes nothing to the rest of the round."
+          "q": "Which elements counter which?",
+          "a": "Fire beats Nature, Nature beats Lightning, Lightning beats Frost, Frost beats Fire — +30% one way, −30% the other. Holy and Dark deal +30% to each other. Physical takes 15% less from elemental attacks; Arcane deals 15% more to elemental targets. Physical against Arcane is neutral."
         },
         {
-          "q": "How many elements should I use in one formation?",
-          "a": "Two to three elements is the recommended range. Pure mono-element builds are countered by a single bad matchup wave, while running all four spreads your units too thin to exploit any interaction effectively."
+          "q": "What triggers enrage?",
+          "a": "Turn 10 warns, turn 12 starts it: every unit on the field gains attack each turn. At turn 16 the ramp steepens, healing drops by half and all DEF is halved. It exists so two healer lines can't stall forever — build to end fights before it, or bring the Eternal Hourglass artifact, which stretches the 20-turn battle limit to 30."
+        },
+        {
+          "q": "Does the game save my run?",
+          "a": "A run is played in one sitting; the game keeps only your language and tutorial state between visits. Your score and highest stage post to your ArcadeDeck personal best after every stage clear and when the run ends."
         }
       ],
       "characters": [
         {
-          "name": "The Shield-Captain",
-          "role": "Player character",
-          "desc": "Chosen by the dying king of Aethermoor with his last breath, the Shield-Captain commands the realm's remnant forces with nothing but loyal soldiers and scattered Elemental Crystal shards."
+          "name": "The Patron",
+          "role": "Player role",
+          "desc": "You. A purse of gold, a marked 3×3 floor, and no army until you buy one. The Colosseum does not care who you were before the Dicefall — only whether your nine hold."
         },
         {
-          "name": "The Court Mage",
-          "role": "Antagonist (backstory)",
-          "desc": "The traitor who shattered Aethermoor's four Elemental Crystals from within, tearing open the Veil and allowing the corrupted hordes to pour through. The cause of the kingdom's collapse."
+          "name": "The Ash-Lords",
+          "role": "Antagonists",
+          "desc": "Masters of the arena. They send a heavier roster every stage and draft it against whatever you fielded last. They never set foot on the sand themselves."
+        },
+        {
+          "name": "The Dragon",
+          "role": "Fire · 8-cost · back row",
+          "desc": "The most expensive thing in the shop and the reason to save for it. Dragon Breath hits the whole enemy board; evolved at ★3 it sets everything it touches burning, ascended at ★5 it breathes twice."
+        },
+        {
+          "name": "Rune Warden",
+          "role": "Arcane · 8-cost · front row",
+          "desc": "An arcane wall. Arcane Fortify throws up a magic shield, has neighbouring allies soak part of what hits it, and once evolved bounces skill damage back at whoever cast it."
         }
       ],
       "featuredComments": [
         {
-          "name": "ShieldCaptain",
-          "text": "Fire beats Nature, Nature beats Lightning, Lightning beats Ice, Ice beats Fire. Learn the cycle before wave 5. The game does not explain this clearly upfront and I wasted three runs finding it out.",
+          "name": "NineOfOne",
+          "text": "Tier IV synergy is all nine slots on one element. Looks impossible until stage 8 when the shop is fat with 5-costs. Nine Frost with the DEF stacking and a slow on everything is the tankiest board I've fielded.",
           "badge": "Top Tip"
         },
         {
-          "name": "AethermoorX",
-          "text": "The Court Mage betrayal is the best villain setup in any auto-battler I've played. No dramatic cutscene, just a single paragraph of lore that explains why everything is already on fire when you start.",
+          "name": "BenchNotSell",
+          "text": "Don't sell the third copy. Bench it. Merges need the grid full and only two fire per round, so the bench is your merge queue, not a graveyard."
+        },
+        {
+          "name": "EnrageClock",
+          "text": "Turn 16 halves everyone's DEF and healing. If your comp is two priests and a wall you lose at turn 20 every time. Bring a Dragon or a mage line and end it before turn 12."
+        },
+        {
+          "name": "AshArena",
+          "text": "The rename makes sense — this was always the arena game of the series. Same thread as Dice War and Fallen Era: the Dicefall sits behind everything, and the Colosseum is what survived it.",
           "badge": "Lore"
         },
         {
-          "name": "FrontRowBrace",
-          "text": "Upgraded melee in the front row, upgraded casters safely in the back. A back-row damage dealer killed on turn one of the round contributes nothing. Frontline is not optional."
-        },
-        {
-          "name": "TwoElement",
-          "text": "Two or three elements max in one formation. Four elements and you're spreading too thin to exploit any interaction. Mono-element gets countered by one bad matchup. Two-element with a splash of a third is the answer."
-        },
-        {
-          "name": "GoldBalance",
-          "text": "Upgrades over volume. Three upgraded units beat six weak ones in the elite waves every time. It feels wrong to not spend gold, but concentrated firepower on your strongest unit is almost always right."
+          "name": "AssassinRow",
+          "text": "Ninja, Rogue and Shadow Stalker go for the enemy back line when the enemy's front cell in their row is empty. Line your assassin up with the row where they have no tank and their healer dies in round one."
         }
       ],
-      "scoreLabel": "Stage"
+      "scoreLabel": "Score"
     },
     "16": {
       "title": "Triangle Battle!",

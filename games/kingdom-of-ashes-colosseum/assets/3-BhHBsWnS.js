@@ -1,0 +1,1 @@
+var e=``+new URL(`3-oggRLXSG.webp`,import.meta.url).href;export{e as default};

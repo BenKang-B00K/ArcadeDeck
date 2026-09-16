@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#1a1614">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="apple-touch-icon" href="./icon-180.png">
+    <meta name="description" content="KINGDOM of ASHES - COLOSSEUM: auto-battler grid strategy">
+    <title>KINGDOM of ASHES - COLOSSEUM</title>
+    <link rel="icon" type="image/webp" sizes="16x16" href="./favicon_16x16.webp">
+    <link rel="icon" type="image/webp" sizes="32x32" href="./favicon_32x32.webp">
+    <link rel="icon" type="image/webp" sizes="64x64" href="./favicon_64x64.webp">
+    <link rel="icon" type="image/webp" href="./favicon.webp">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Cinzel+Decorative:wght@700;900&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;700&family=Noto+Sans+JP:wght@400;700&family=Noto+Serif+KR:wght@400;700&family=Noto+Serif+JP:wght@400;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Cinzel+Decorative:wght@700;900&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;700&family=Noto+Sans+JP:wght@400;700&family=Noto+Serif+KR:wght@400;700&family=Noto+Serif+JP:wght@400;700&display=swap"></noscript>
+  <script type="module" crossorigin src="./assets/index-C5YTMv3n.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-C5BBr5_l.css">
+</head>
+<body>
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Mobile portrait → landscape prompt -->
+    <div id="rotate-overlay">
+      <div class="rotate-content">
+        <div class="rotate-ico">📱↔️</div>
+        <div class="rotate-text" data-i18n="ui.rotate.text">Please rotate your screen</div>
+        <div class="rotate-sub" data-i18n="ui.rotate.sub">This game is optimized for landscape mode</div>
+      </div>
+    </div>
+
+    <div id="unit-overlay" aria-hidden="true">
+        <div class="overlay-card">
+            <button class="close-btn" id="close-overlay" data-i18n-attr="aria-label=ui.btn.close" aria-label="Close">×</button>
+            <div id="overlay-content"></div>
+        </div>
+    </div>
+
+    <div id="skill-cutin" class="cutin-layer" aria-hidden="true">
+        <div class="cutin-bg"></div>
+        <div class="cutin-content">
+            <img id="cutin-img" src="" alt="">
+            <div class="cutin-info">
+                <div id="cutin-unit-name" class="unit-name"></div>
+                <div id="cutin-stars" class="cutin-stars"></div>
+                <div id="cutin-skill-name" class="skill-name"></div>
+                <div id="cutin-skill-desc" class="skill-desc"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 속성 정보 오버레이 -->
+    <div id="element-overlay" class="element-overlay" style="display:none;">
+        <div class="element-overlay-card">
+            <button class="close-btn" id="element-close">×</button>
+            <h2 class="element-overlay-title" data-i18n="ui.overlay.element_title">⚔ Elemental Affinity</h2>
+            <div class="element-overlay-content" id="element-overlay-content"></div>
+        </div>
+    </div>
+
+    <!-- ═══ 로딩 화면 ═══ -->
+    <div id="loading-screen">
+      <div class="ls-bg"></div>
+
+      <!-- Top/bottom heraldic banners -->
+      <div class="ls-banner ls-banner-top" aria-hidden="true">
+        <i class="ls-banner-line"></i>
+        <i class="ls-banner-glyph">⚜</i>
+        <i class="ls-banner-line"></i>
+      </div>
+      <div class="ls-banner ls-banner-bottom" aria-hidden="true">
+        <i class="ls-banner-line"></i>
+        <i class="ls-banner-glyph">⚔</i>
+        <i class="ls-banner-line"></i>
+      </div>
+
+      <!-- Full-screen ambient ember motes -->
+      <div class="ls-ambient" aria-hidden="true">
+        <span class="ls-amb ls-amb-1"></span>
+        <span class="ls-amb ls-amb-2"></span>
+        <span class="ls-amb ls-amb-3"></span>
+        <span class="ls-amb ls-amb-4"></span>
+        <span class="ls-amb ls-amb-5"></span>
+        <span class="ls-amb ls-amb-6"></span>
+        <span class="ls-amb ls-amb-7"></span>
+        <span class="ls-amb ls-amb-8"></span>
+        <span class="ls-amb ls-amb-9"></span>
+        <span class="ls-amb ls-amb-10"></span>
+      </div>
+
+      <!-- 좌측 유닛 -->
+      <div class="ls-unit-side ls-unit-left">
+        <div class="ls-unit-showcase">
+          <img class="ls-unit-img" id="ls-unit-img-l" src="" alt="">
+          <span class="ls-mote ls-mote-1"></span>
+          <span class="ls-mote ls-mote-2"></span>
+          <span class="ls-mote ls-mote-3"></span>
+          <span class="ls-mote ls-mote-4"></span>
+          <span class="ls-mote ls-mote-5"></span>
+          <span class="ls-mote ls-mote-6"></span>
+          <span class="ls-spark ls-spark-1"></span>
+          <span class="ls-spark ls-spark-2"></span>
+          <span class="ls-spark ls-spark-3"></span>
+          <span class="ls-spark ls-spark-4"></span>
+          <span class="ls-pulse ls-pulse-1"></span>
+          <span class="ls-pulse ls-pulse-2"></span>
+          <span class="ls-twinkle ls-twinkle-1"></span>
+          <span class="ls-twinkle ls-twinkle-2"></span>
+          <span class="ls-twinkle ls-twinkle-3"></span>
+          <span class="ls-twinkle ls-twinkle-4"></span>
+          <span class="ls-twinkle ls-twinkle-5"></span>
+          <span class="ls-ember ls-ember-1"></span>
+          <span class="ls-ember ls-ember-2"></span>
+          <span class="ls-ember ls-ember-3"></span>
+          <span class="ls-flare"></span>
+          <span class="ls-inner-aura"></span>
+        </div>
+        <div class="ls-unit-name" id="ls-unit-name-l"></div>
+        <div class="ls-lore" id="ls-lore-l"></div>
+        <div class="ls-skill" id="ls-skill-l"></div>
+      </div>
+
+      <!-- 중앙 콘텐츠 -->
+      <div class="ls-content">
+        <div class="ls-title">
+          <h1>
+            <span class="ls-title-main">
+              <i class="ls-tm-word">KINGDOM</i>
+              <em class="ls-tm-of">of</em>
+              <i class="ls-tm-word">ASHES</i>
+            </span>
+            <span class="ls-title-orn" aria-hidden="true">
+              <i class="ls-orn-line"></i>
+              <i class="ls-orn-mark">✦</i>
+              <i class="ls-orn-line"></i>
+            </span>
+            <span class="ls-title-sub">COLOSSEUM</span>
+          </h1>
+        </div>
+
+        <div class="ls-element-chart">
+          <div class="ls-el-row">
+            <span class="ls-el" style="color:#e85030">🔥</span>
+            <span class="ls-el-arrow">→</span>
+            <span class="ls-el" style="color:#50c070">🌿</span>
+            <span class="ls-el-arrow">→</span>
+            <span class="ls-el" style="color:#f0d040">⚡</span>
+            <span class="ls-el-arrow">→</span>
+            <span class="ls-el" style="color:#60b8e8">❄️</span>
+            <span class="ls-el-arrow">→</span>
+            <span class="ls-el" style="color:#e85030">🔥</span>
+          </div>
+          <div class="ls-el-row">
+            <span class="ls-el" style="color:#f0d880">☀️</span>
+            <span class="ls-el-arrow dual">⇄</span>
+            <span class="ls-el" style="color:#a070c0">💀</span>
+            <span class="ls-el-sep">|</span>
+            <span class="ls-el" style="color:#c0b0a0">⚔️<small>-15%</small></span>
+            <span class="ls-el-sep">·</span>
+            <span class="ls-el" style="color:#8080e0">🔮<small>+15%</small></span>
+          </div>
+        </div>
+
+        <div class="ls-spinner">
+          <div class="ls-shuriken">✦</div>
+        </div>
+
+        <div class="ls-progress-wrap">
+          <i class="ls-prog-cap ls-prog-cap-l" aria-hidden="true">◆</i>
+          <div class="ls-progress">
+            <div class="ls-progress-fill" id="ls-progress-fill"></div>
+            <span class="ls-prog-tick" style="left:25%"></span>
+            <span class="ls-prog-tick" style="left:50%"></span>
+            <span class="ls-prog-tick" style="left:75%"></span>
+          </div>
+          <i class="ls-prog-cap ls-prog-cap-r" aria-hidden="true">◆</i>
+        </div>
+        <div class="ls-status" id="ls-status" data-i18n="ui.loading.default">Loading data...</div>
+        <button id="ls-start-btn" class="ls-start-btn" data-i18n="ui.loading.start_btn" aria-hidden="true">START</button>
+      </div>
+
+      <!-- 우측 유닛 -->
+      <div class="ls-unit-side ls-unit-right">
+        <div class="ls-unit-showcase">
+          <img class="ls-unit-img" id="ls-unit-img-r" src="" alt="">
+          <span class="ls-mote ls-mote-1"></span>
+          <span class="ls-mote ls-mote-2"></span>
+          <span class="ls-mote ls-mote-3"></span>
+          <span class="ls-mote ls-mote-4"></span>
+          <span class="ls-mote ls-mote-5"></span>
+          <span class="ls-mote ls-mote-6"></span>
+          <span class="ls-spark ls-spark-1"></span>
+          <span class="ls-spark ls-spark-2"></span>
+          <span class="ls-spark ls-spark-3"></span>
+          <span class="ls-spark ls-spark-4"></span>
+          <span class="ls-pulse ls-pulse-1"></span>
+          <span class="ls-pulse ls-pulse-2"></span>
+          <span class="ls-twinkle ls-twinkle-1"></span>
+          <span class="ls-twinkle ls-twinkle-2"></span>
+          <span class="ls-twinkle ls-twinkle-3"></span>
+          <span class="ls-twinkle ls-twinkle-4"></span>
+          <span class="ls-twinkle ls-twinkle-5"></span>
+          <span class="ls-ember ls-ember-1"></span>
+          <span class="ls-ember ls-ember-2"></span>
+          <span class="ls-ember ls-ember-3"></span>
+          <span class="ls-flare"></span>
+          <span class="ls-inner-aura"></span>
+        </div>
+        <div class="ls-unit-name" id="ls-unit-name-r"></div>
+        <div class="ls-lore" id="ls-lore-r"></div>
+        <div class="ls-skill" id="ls-skill-r"></div>
+      </div>
+    </div>
+
+    <div id="app-wrapper">
+        <div id="stage-bg" aria-hidden="true"><div class="sbg"></div><div class="sbg"></div></div>
+        <main id="app">
+            <!-- ═══ LEFT SIDEBAR: Title + Shop ═══ -->
+            <aside class="sidebar-panel sidebar-left">
+                <header class="sp-header">
+                    <div class="sp-header-ornament"></div>
+                    <h1 class="sp-title">KINGDOM of ASHES<br><span>COLOSSEUM</span></h1>
+                    <p class="sp-subtitle" data-i18n="ui.title.subtitle">Auto-Battle · Roguelike</p>
+                </header>
+
+                <div class="sp-hud">
+                    <div class="hud-left"></div>
+                </div>
+
+                <div class="sp-divider"></div>
+
+                <section id="shop">
+                    <div class="sidebar-header">
+                        <div class="header-top-row">
+                            <div class="gold-display" id="gold-disp">💰 10</div>
+                        </div>
+                    </div>
+                </section>
+            </aside>
+
+            <!-- ═══ CENTER: Labels + Grids + Battle Button ═══ -->
+            <section class="main-content">
+                <!-- 상단: 진영 표시 + 열 라벨 -->
+                <div class="grid-header">
+                    <div class="grid-header-side">
+                        <div class="side-title-wrap">
+                            <h3 class="side-title ally" id="ally-title-text" data-i18n="ui.side.ally">Ally</h3>
+                            <div class="synergy-tooltip" id="ally-synergy-tt"></div>
+                        </div>
+                        <div class="grid-labels ally-labels">
+                            <span data-i18n="ui.col.back">Back</span><span data-i18n="ui.col.mid">Mid</span><span data-i18n="ui.col.front">Front</span>
+                        </div>
+                    </div>
+                    <div class="grid-header-vs"></div>
+                    <div class="grid-header-side">
+                        <div class="side-title-wrap">
+                            <h3 class="side-title enemy" id="enemy-title-text" data-i18n="ui.side.enemy">Enemy</h3>
+                            <div class="synergy-tooltip" id="enemy-synergy-tt"></div>
+                        </div>
+                        <div class="grid-labels enemy-labels">
+                            <span data-i18n="ui.col.front">Front</span><span data-i18n="ui.col.mid">Mid</span><span data-i18n="ui.col.back">Back</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 중단: 3x3 그리드 영역 -->
+                <div class="battlefield">
+                    <div class="grid-area ally-area">
+                        <div class="grid" id="ag"></div>
+                    </div>
+                    <div class="vs-divider"><span class="vs-glyph">VS</span></div>
+                    <div class="grid-area enemy-area">
+                        <div class="grid" id="eg"></div>
+                    </div>
+                </div>
+
+                <!-- 하단 단일 행: 대기석(좌) + 전투 시작(우) -->
+                <div class="bottom-row">
+                    <div class="waiting-area" id="bench">
+                        <div class="waiting-label" data-i18n="ui.bench.label">Reserve</div>
+                        <div class="waiting-slots"></div>
+                    </div>
+                    <div class="sacrifice-area" id="sacrifice">
+                        <div class="sacrifice-label" data-i18n="ui.sacrifice.label">Sacrifice</div>
+                        <div class="sacrifice-slot" id="sacrifice-slot" data-sacrifice-slot>
+                            <span class="sacrifice-ico">🔥</span>
+                            <span class="sacrifice-hint" data-i18n="ui.sacrifice.hint">Drop hero</span>
+                        </div>
+                    </div>
+                    <div class="battle-controls">
+                        <button class="battle-start-btn" id="sbtn">
+                            <span class="battle-start-ico">⚔</span>
+                            <span class="battle-start-text" data-i18n="ui.battle.start">Battle Start</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ═══ RIGHT SIDEBAR: Info/Log Toggle ═══ -->
+            <aside class="sidebar-panel sidebar-right">
+                <!-- 탭 전환 버튼 -->
+                <div class="rp-tab-bar">
+                    <button class="rp-tab-btn active" id="rp-tab-info" data-tab="info" data-i18n="ui.tab.info">Info</button>
+                    <button class="rp-tab-btn" id="rp-tab-log" data-tab="log" data-i18n="ui.tab.log">Battle Log</button>
+                </div>
+
+                <!-- 정보 탭 -->
+                <div class="rp-tab-content rp-tab-info active" id="rp-panel-info">
+                    <div class="rp-header">
+                        <div class="rp-stage-label" id="rp-stage"></div>
+                        <div class="rp-round-label" id="rp-round"></div>
+                    </div>
+
+                    <div class="sp-divider"></div>
+
+                    <div class="rp-section">
+                        <div class="sp-section-label" data-i18n="ui.section.round_progress">Round Progress</div>
+                        <div class="round-row" id="rpips" style="justify-content: center;"></div>
+                    </div>
+
+                    <div class="rp-section rp-synergy-section">
+                        <div class="sp-section-label rp-label-ally" data-i18n="ui.side.ally_synergy">🛡 Ally Synergy</div>
+                        <div class="rp-synergy-list" id="rp-ally-synergy"></div>
+                        <div class="rp-syn-divider"></div>
+                        <div class="sp-section-label rp-label-enemy" data-i18n="ui.side.enemy_synergy">💀 Enemy Synergy</div>
+                        <div class="rp-synergy-list" id="rp-enemy-synergy"></div>
+                    </div>
+
+                    <div class="sp-divider"></div>
+
+                    <div class="rp-section rp-rewards-section">
+                        <div class="sp-section-label" data-i18n="ui.section.rewards">📜 Rewards</div>
+                        <div class="rp-rewards-list" id="rp-rewards"></div>
+                    </div>
+
+                    <div class="rp-bottom-bar">
+                        <div class="rp-speed-bar">
+                            <span class="rp-speed-label" data-i18n="ui.battle.speed">Speed</span>
+                            <button class="rp-speed-btn active" data-speed="1">1x</button>
+                            <button class="rp-speed-btn" data-speed="1.75">1.75x</button>
+                            <button class="rp-speed-btn" data-speed="2">2x</button>
+                        </div>
+                        <div class="rp-bottom-btns">
+                            <button class="rp-element-btn ico-btn" id="codex-btn" data-ico="book" data-i18n-attr="data-tip=ui.btn.codex"></button>
+                            <button class="rp-element-btn ico-btn" id="element-info-btn" data-ico="swords" data-i18n-attr="data-tip=ui.btn.element"></button>
+                            <button class="rp-element-btn ico-btn" id="achievement-btn" data-ico="trophy" data-i18n-attr="data-tip=ui.btn.achievement"></button>
+                        </div>
+                        <div class="score-display" id="score-disp"></div>
+                    </div>
+                </div>
+
+                <!-- 로그 탭 -->
+                <div class="rp-tab-content rp-tab-log" id="rp-panel-log">
+                    <div class="log-timer-header" id="battle-timer" style="display:none;">
+                        <div class="rp-timer">
+                            <span class="log-timer-label">⏱</span>
+                            <div class="timer-bar-container">
+                                <div id="timer-fill" class="timer-fill"></div>
+                            </div>
+                            <span id="timer-text" class="timer-text">0/20</span>
+                        </div>
+                    </div>
+                    <div id="log" role="log" aria-live="polite"></div>
+                    <div class="rp-bottom-bar rp-log-bottom">
+                        <div class="rp-speed-bar">
+                            <span class="rp-speed-label" data-i18n="ui.battle.speed">Speed</span>
+                            <button class="rp-speed-btn" data-speed="1">1x</button>
+                            <button class="rp-speed-btn" data-speed="1.75">1.75x</button>
+                            <button class="rp-speed-btn" data-speed="2">2x</button>
+                        </div>
+                        <div class="rp-bottom-btns">
+                            <button class="rp-element-btn ico-btn" id="codex-btn-log" data-ico="book" data-i18n-attr="data-tip=ui.btn.codex"></button>
+                            <button class="rp-element-btn ico-btn" id="element-info-btn-log" data-ico="swords" data-i18n-attr="data-tip=ui.btn.element"></button>
+                            <button class="rp-element-btn ico-btn" id="achievement-btn-log" data-ico="trophy" data-i18n-attr="data-tip=ui.btn.achievement"></button>
+                        </div>
+                        <div class="score-display" id="score-disp-log"></div>
+                    </div>
+                </div>
+            </aside>
+        </main>
+        <div class="credit">Created by BenjaminK</div>
+    </div>
+
+</body>
+</html>

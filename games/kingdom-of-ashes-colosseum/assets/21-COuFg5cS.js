@@ -1,0 +1,1 @@
+var e=``+new URL(`21-CTGt91ws.webp`,import.meta.url).href;export{e as default};

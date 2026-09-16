@@ -254,23 +254,23 @@
   },
   {
     "id": "15",
-    "slug": "kingdoms-last-stand",
+    "slug": "kingdom-of-ashes-colosseum",
     "language": "KO",
-    "thumbnail": "images/kingdoms-last-stand.webp",
+    "thumbnail": "images/kingdom-of-ashes-colosseum.webp",
     "genres": [
       "Strategy",
       "Roguelike"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/kingdoms-last-stand/",
+    "gameUrl": "https://arcadedeck-games.pages.dev/kingdom-of-ashes-colosseum/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
     "platform": "BOTH",
     "isOriginal": true,
-    "badge": "POPULAR",
+    "badge": "UPDATE",
     "scoreTiers": [
-      5,
-      15,
-      30
+      600,
+      2000,
+      4000
     ]
   },
   {

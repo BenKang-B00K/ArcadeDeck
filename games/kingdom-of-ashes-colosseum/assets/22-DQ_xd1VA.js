@@ -1,0 +1,1 @@
+var e=``+new URL(`22-CxaSLMUx.webp`,import.meta.url).href;export{e as default};

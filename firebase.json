@@ -33,7 +33,10 @@
       { "source": "/ko/play/endless-war", "destination": "/ko/play/kingdom-of-ashes-endless-war", "type": 301 },
       { "source": "/play/dicefall-chronicles", "destination": "/play/kingdom-of-ashes-dice-war", "type": 301 },
       { "source": "/ja/play/dicefall-chronicles", "destination": "/ja/play/kingdom-of-ashes-dice-war", "type": 301 },
-      { "source": "/ko/play/dicefall-chronicles", "destination": "/ko/play/kingdom-of-ashes-dice-war", "type": 301 }
+      { "source": "/ko/play/dicefall-chronicles", "destination": "/ko/play/kingdom-of-ashes-dice-war", "type": 301 },
+      { "source": "/play/kingdoms-last-stand", "destination": "/play/kingdom-of-ashes-colosseum", "type": 301 },
+      { "source": "/ja/play/kingdoms-last-stand", "destination": "/ja/play/kingdom-of-ashes-colosseum", "type": 301 },
+      { "source": "/ko/play/kingdoms-last-stand", "destination": "/ko/play/kingdom-of-ashes-colosseum", "type": 301 }
     ],
     "rewrites": [
       { "source": "/forum/**", "destination": "/index.html" },

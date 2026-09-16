@@ -153,7 +153,7 @@
   {
     "id": "10",
     "slug": "kingdom-of-ashes-endless-war",
-    "language": "EN",
+    "language": "EN/KO/JA",
     "thumbnail": "images/kingdom-of-ashes-endless-war.webp",
     "genres": [
       "Strategy",
@@ -165,7 +165,7 @@
     "platform": "BOTH",
     "isOriginal": true,
     "badge": "UPDATE",
-    "lastUpdated": "2026-05-26",
+    "lastUpdated": "2026-09-15",
     "scoreTiers": [
       10,
       25,

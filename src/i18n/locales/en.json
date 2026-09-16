@@ -983,78 +983,96 @@
     },
     "10": {
       "title": "Kingdom of Ashes - Endless War",
-      "description": "Macro-scale faction war for the ruins of Alea — direct the Golden Army or the Infernal Legion across an endless wave-survival simulation.",
-      "fullDescription": "\n      Kingdom of Ashes - Endless War is the strategy entry in the Kingdom of Ashes series. After the **Dicefall** shattered Alea, two surviving orders rose from the ash and turned the ruined kingdom into a permanent battlefield. You are an **Arbiter** — neither side claims you, both sides answer to you — and your job is to keep the war from ending.\n      You do not command individual soldiers. You set the divine laws, tactical formations, and deployment cadence for entire legions. Wave after wave, the **Golden Army** of the surviving spires and the **Infernal Legion** of the ash-pits trade ground across the **Threshold**, a malleable plane where every prayer and every sin takes physical form as a warrior.\n      Combat runs as a continuous simulation. You pick your starting roster, set the **Karma** balance between the two factions, react to dynamic battlefield events, and adjust formations as the enemy composition shifts. Wave depth, battles won, and Karma swings all feed the persistent global war progress tracker.\n      Three pressure points define every run: the Karma meter (centered unlocks the **Divine Storm** screen-clear), the ranged/melee balance (a **40/60 split** is the floor, not the ceiling), and timing your surges around **Solar Flares** and **Abyssal Rifts**. Master those three and the wave count climbs. Ignore any one and the ash takes you.\n    ",
-      "controls": "Mouse: Navigate menus and direct souls / Keyboard: Hotkeys for formation orders and unit management",
-      "tips": "Diversify your army — a mix of ranged and melee is essential against the evolving wave compositions. Keep the **Karma** meter centered to retain the **Divine Storm** screen-clear; over-committing to one faction locks you out of it. Read incoming wave composition before the wave hits — adjusting on the fly is where the game lives. Time your unit surges with **Solar Flares** and **Abyssal Rifts** to compound their event buffs.",
-      "lore": "\n      The **Dicefall** ended Alea as a realm. It did not end the war for it.\n      Two orders survived the shattering. The **Golden Army** gathered in the last unburned spires and took the dawn for their banner. The **Infernal Legion** crawled out of the ash-pits beneath the broken cities and claimed the night. Between them lies the **Threshold** — a plane that bends to belief, where every prayer and every sin from the old world surfaces as a warrior with a sword in its hand.\n      You are the **Arbiter**. You did not choose this title; the Dicefall did, the same way it chose the dice-bonded survivors in the rest of Alea. Your purpose is not to win the war for either side. Your purpose is to keep it going — because the moment one faction takes the Threshold, the ash falls everywhere, and what little remains of Alea finally goes silent.\n    ",
+      "description": "Endless wave survival for the ash-plains of Alea — summon a Golden Army of eight classes, harvest souls, and grow an Ascendant Tree that outlives every defeat.",
+      "fullDescription": "\n      Kingdom of Ashes - Endless War is the idle-strategy entry in the Kingdom of Ashes series. After the **Dicefall** shattered Alea, the demons of the ash-pits poured onto the plains between the holy ground and the lava. Someone has to hold the line. You do not swing a sword — you **summon** the army, **upgrade** it, and watch the wave play out.\n      Each wave you spend **Soul Energy** on allies from eight classes — Priest, Knight, Paladin, Monk and Valkyrie hold the front; Magician, Archer and Druid fire over it. Every summon of a class raises its next price, RANDOM rolls a cheap mystery unit with ten times the odds of a **Legendary** (double stats, gold crown), and UPGRADE gives every ally +10% HP / +8% ATK, alive or not yet summoned. Press Start and the two lines charge; kills pay souls, with the first kills of a wave paying full and the last a trickle, so pushing deeper beats farming.\n      The enemy is not a fixed script. Seventeen demon types unlock from wave 1 (Demon) to wave 20 (Demon King), and the Wave panel shows both sides' DPS before you commit: outpace the base roster by 30% and it **reinforces** to match you — sometimes a MASSIVE INCURSION at 1.5×. A rare **CURSED WAVE** buffs everything by 30%. Lose your whole army and the wave simply replays; you keep your souls and re-summon.\n      Every third wave (more on 5th, 10th and 25th) drops **Aether Shards** for the **Ascendant Tree**: four arms — Offense, Defense, Economy, Mystic — of minor, notable and keystone nodes leading through four gates to the **Ascendant Convergence** ultimate. The tree is saved in your browser and survives RESET, so each run starts stronger than the last. Playable in English, Korean and Japanese, mouse or touch.\n    ",
+      "controls": "Mouse: Click SUMMON / RANDOM / UPGRADE / TREE, click a unit for stats, drag to pan, wheel to zoom / Touch: tap buttons, drag to pan, pinch to zoom",
+      "tips": "Summon before you Start — the countdown after a win is only two seconds, so toggle **AUTO** off while you build. Watch the **Ally DPS vs Enemy DPS** readout: passing the enemy by 30% invites reinforcements, so spend on UPGRADE (HP too) rather than pure attack. Take the **Economy** arm first for soul reward and shard drop chance — shards compound across every future run. **RANDOM** is the cheapest way to fish for a Legendary (10× odds); Keystones like **Berserker's Heart** trade harder waves for power, read them before allocating.",
+      "lore": "\n      The **Dicefall** ended Alea as a realm. It did not end the war for it.\n      Between the last holy ground in the west and the lava fields in the east lies a strip of scorched plain. The ash-pits beneath the broken cities empty onto it every dawn — grunts, skeletons, wraiths, and behind them the things with names: the Magic King, the Lich, the Demon King himself. Whatever crosses the plain reaches the spires. Whatever holds the plain buys another day.\n      You are the one who holds it. Not with a blade, but with the souls the dead leave behind: every demon that falls on the plain leaves a little of itself, and you spend it summoning the next line — priests, knights, valkyries, drawn from the light and bound to the war. Most of them will not see the next wave. The Ascendant Tree remembers what they earned, and grows.\n      There is no last wave. There is only the next one.\n    ",
       "features": [
-        "Massive-scale Faction Battle Simulation",
-        "Karma Balance System with Divine Storm Screen-Clear",
-        "Over 30 Golden and Infernal Unit Types",
-        "Dynamic Battlefield Events: Solar Flares and Abyssal Rifts",
-        "Deep Tactical Formations and Macro Orders",
-        "Persistent Global War Progress Tracker"
+        "Endless waves against 17 demon types, from wave-1 grunts to the Demon King at 20",
+        "Eight ally classes — five melee, three ranged — with rising per-class summon costs",
+        "Legendary summons (1%, 10× on RANDOM) with double stats",
+        "Adaptive enemy: reinforces when your DPS outpaces theirs, MASSIVE INCURSION and CURSED WAVE events",
+        "Ascendant Tree — four branches, keystones, gates and the Ascendant Convergence ultimate, saved across runs",
+        "Souls decay per kill within a wave, so pushing deeper pays more than farming",
+        "Playable in English, Korean and Japanese; mouse or touch with pan and pinch-zoom"
       ],
-      "objectives": "Direct the fallen souls of Alea into the **Golden Army** or the **Infernal Legion**, manage the **Karma** meter to hold the **Threshold**, and survive as many waves as possible while keeping the war from ending in either side's favor.",
+      "objectives": "Summon and upgrade an army with **Soul Energy**, survive as many waves as you can, and spend **Aether Shards** on the **Ascendant Tree** so the next run pushes further. Your best score is the highest wave reached.",
       "controlsTable": [
         {
-          "key": "Mouse Click",
-          "action": "Navigate menus and select unit types to deploy"
+          "key": "SUMMON / RANDOM",
+          "action": "Open the class picker or roll a random ally (10× Legendary odds)"
         },
         {
-          "key": "Keyboard Hotkeys",
-          "action": "Issue formation orders and manage unit commands"
+          "key": "UPGRADE",
+          "action": "+10% HP / +8% ATK for every ally, alive or future"
         },
         {
-          "key": "Mouse Click (Karma)",
-          "action": "Direct souls toward Golden or Infernal sides to adjust Karma"
+          "key": "TREE",
+          "action": "Open the Ascendant Tree and spend Aether Shards"
+        },
+        {
+          "key": "Start Wave / AUTO",
+          "action": "Launch the wave; AUTO starts the next one after a 2-second countdown"
+        },
+        {
+          "key": "Click / tap a unit",
+          "action": "Show its class, stats and lore"
+        },
+        {
+          "key": "Drag / wheel · pinch",
+          "action": "Pan the battlefield and zoom"
+        },
+        {
+          "key": "EN · SFX · HUD",
+          "action": "Cycle EN / KO / JA, mute sound, hide the HUD"
         }
       ],
       "faq": [
         {
-          "q": "How do I start the simulation?",
-          "a": "Select your starting unit mix from the Golden and Infernal rosters, then confirm deployment. The simulation begins automatically and you manage formations and orders as waves progress."
+          "q": "What happens when my whole army dies?",
+          "a": "The wave replays. You keep your Soul Energy and your wave number — summon a new line, upgrade, and press Start again. Only RESET wipes the run, and even then the Ascendant Tree stays."
         },
         {
-          "q": "What is the Karma meter?",
-          "a": "Karma tracks your balance between directing souls to the Golden Army versus the Infernal Legion. Keeping it centered unlocks the Divine Storm ability, which clears an entire screen of enemies and is one of the strongest tools the Arbiter has."
+          "q": "Why did the enemy suddenly get bigger?",
+          "a": "The Wave panel compares Ally DPS with Enemy DPS before each wave. If yours is more than 30% ahead, the roster reinforces to match you (up to 5×), and about one in seven of those becomes a MASSIVE INCURSION at 1.5×. A CURSED WAVE (3% per wave) gives every enemy +30% stats."
         },
         {
-          "q": "What army composition works best?",
-          "a": "Diversify between ranged and melee units. A melee-only or ranged-only force gets countered by later wave compositions. At least a 40/60 split between the two types covers most threat profiles."
+          "q": "How do I get Aether Shards?",
+          "a": "Clear a wave. Every 3rd wave drops one, every 5th adds one, every 10th adds two and every 25th adds five. The Economy branch of the tree raises the drop chance further."
         },
         {
-          "q": "What are Abyssal Rifts and Solar Flares?",
-          "a": "Dynamic battlefield events that spawn mid-wave and alter conditions. Solar Flares buff Golden units briefly; Abyssal Rifts empower Infernal forces. Timing your unit surges around these events is a key tactical skill."
+          "q": "What is a Legendary unit?",
+          "a": "A 1% roll on any summon (10× on RANDOM, higher with the Mystic branch) that gives that unit double stats and a gold crown. The Veil-Breaker keystone raises the odds permanently."
         },
         {
-          "q": "Is there a win condition?",
-          "a": "No. The conflict is an eternal simulation — the Arbiter's job is to keep the war going, not end it. The score is how many waves and battles you hold the Threshold before one side breaks through."
+          "q": "Does the Ascendant Tree persist?",
+          "a": "Yes — it is saved in your browser, survives RESET, and you can refund single nodes or reset the whole tree for a full shard refund."
         }
       ],
       "featuredComments": [
         {
-          "name": "KarmaArbiter",
-          "text": "Keep the Karma meter centered and you unlock Divine Storm when you need it most. I ran Golden-heavy for 10 waves thinking it would help — it just locked me out of the ability and the ash-pits steamrolled me.",
+          "name": "SoulTrickle",
+          "text": "Souls decay per kill inside a wave — the first demon pays 10, the last pays almost nothing. Stop farming wave 6 and push; the next wave resets the multiplier.",
           "badge": "Top Tip"
         },
         {
-          "name": "ThresholdVex",
-          "text": "Every prayer and sin from old Alea surfacing as a warrior on a plane where time is malleable — the lore is doing real work under what is, mechanically, a wave survival sim.",
+          "name": "DpsWatcher",
+          "text": "The DPS readout is the whole game. I was 40% over the enemy and every wave came reinforced. Backed off upgrades, sat at +25%, and the waves went back to base size.",
+          "badge": "Top Tip"
+        },
+        {
+          "name": "AshPlainsLore",
+          "text": "Priests first, then valkyries, then the Demon King walks out of the ash at wave 20 — the unit lore lines on tap are short but they land. The plain between holy tile and lava tells the story on its own.",
           "badge": "Lore"
         },
         {
-          "name": "InfernalRange",
-          "text": "40/60 melee to ranged is the floor, not the ceiling. Some waves skew heavily toward fast Infernal units that melt melee — reading the incoming composition and adjusting before the wave hits is where the game actually is."
+          "name": "RandomFisher",
+          "text": "RANDOM at 22 souls for 10× Legendary odds is the best deal on the bar. Got a Legendary Paladin on wave 4 and it carried to wave 15."
         },
         {
-          "name": "SolarAbyssal",
-          "text": "Abyssal Rifts and Solar Flares — timing your surges around them is huge. The game basically tells you which faction to pump for the next 15 seconds. Listen to it."
-        },
-        {
-          "name": "MacroStrategist",
-          "text": "The macro framing makes Kingdom of Ashes feel right. You're not micromanaging soldiers, you're adjusting divine laws and formations across the Threshold. The scale lands because of it."
+          "name": "TreeFirst",
+          "text": "Economy arm first. Soul Harvest plus the shard-drop notable means every run after that starts richer. Offense keystone can wait — Berserker's Heart makes waves harder."
         }
       ],
       "scoreLabel": "Waves"

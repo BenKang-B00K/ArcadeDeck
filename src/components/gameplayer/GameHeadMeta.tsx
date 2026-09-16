@@ -78,7 +78,7 @@ const GameHeadMeta: React.FC<Props> = ({ game, lang, overlay }) => {
             "@type": "Organization",
             "name": "ArcadeDeck",
             "url": "https://arcadedeck.net",
-            "sameAs": ["https://www.wikidata.org/wiki/Q139585213"]
+            "sameAs": ["https://www.wikidata.org/wiki/Q141473972"]
           },
           "publisher": {
             "@type": "Organization",
@@ -88,7 +88,7 @@ const GameHeadMeta: React.FC<Props> = ({ game, lang, overlay }) => {
               "@type": "ImageObject",
               "url": "https://arcadedeck.net/images/icon-512x512.webp"
             },
-            "sameAs": ["https://www.wikidata.org/wiki/Q139585213"]
+            "sameAs": ["https://www.wikidata.org/wiki/Q141473972"]
           },
           "offers": {
             "@type": "Offer",

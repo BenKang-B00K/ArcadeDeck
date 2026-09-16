@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Stack
 
-React 19 + TypeScript + Vite 7. Firebase Firestore for comments/forum. Deployed via Firebase Hosting (`firebase deploy --only hosting`, custom domain `arcadedeck.net`). PWA via `vite-plugin-pwa`. Security headers (CSP, HSTS, COOP, XFO) in `firebase.json`.
+React 19 + TypeScript + Vite 7. Firebase Firestore for comments/forum/leaderboard. Site deployed via Firebase Hosting (`firebase deploy --only hosting`, custom domain `arcadedeck.net`); hosted game builds deployed separately to Cloudflare Pages (see **Hosted games**). PWA via `vite-plugin-pwa`. Security headers (CSP, HSTS, COOP, XFO) in `firebase.json`.
+
+Locales on disk are `en`, `ja`, `ko` only — README.md and RULES.md still say "11 locales"; that list is stale, trust `src/i18n/locales/`.
 
 ## Commands
 
@@ -14,7 +16,8 @@ npm run validate     # Lint games.json (warnings only)
 npm run build        # validate → sitemap → rss → tsc -b → vite build → prerender
 npm run lint         # ESLint flat config
 npm run preview      # Preview production build
-npm run deploy       # Build + Firebase Hosting publish
+npm run deploy       # Build + Firebase Hosting publish (site only)
+npm run deploy:games # wrangler pages deploy games/ → Cloudflare Pages project arcadedeck-games
 npm run indexnow         # Ping IndexNow for changed URLs (full set)
 npm run indexnow:posts   # Ping IndexNow for blog posts only
 npm run indexnow:all     # Ping IndexNow for every URL in sitemap
@@ -27,6 +30,8 @@ firebase deploy --only firestore:rules --project ultragames-website
 
 There are no tests in this repo.
 
+One-off helpers (run manually, not part of build): `python scripts/sync_i18n.py` reports ja/ko keys missing vs `en.json`; `node scripts/seed-leaderboard.mjs [n]` seeds fake leaderboard rows through the client SDK; `scripts/seed-forum.js` needs a Firebase Admin key; `scripts/sky-puff-textures.cjs` keys black-background cloud art to alpha WebP.
+
 ## CHANGELOG (mandatory)
 
 Every user-visible change updates `CHANGELOG.md` in the same commit — do not wait to be asked. Prepend one line to `## History`:
@@ -36,6 +41,8 @@ Every user-visible change updates `CHANGELOG.md` in the same commit — do not w
 ```
 
 Bump rule (counters never reset, each bumps independently — see the Versioning block in `CHANGELOG.md`): new game → MAJOR; feature / UI change / existing game update → MINOR; tuning or bug fix → PATCH. Same-day changes of the same tier fold into the existing top line instead of adding a new one. Docs-only, tooling, and refactors with no visible effect skip the changelog.
+
+The format is load-bearing: `src/pages/PatchNote.tsx` imports `CHANGELOG.md?raw` and renders `/patchnote` from the regex `^- \*\*v(\d+)\.(\d+)\.(\d+)\*\* \((\d{4}-\d{2}-\d{2})\) — (.+)$` — bold version, ISO date in parens, an em dash (`—`, not `-`), one line per release. Items split on `; `. Tier colour is derived from which counter moved vs. the previous line. English game titles in the text auto-link to `/play/{slug}` (matched against `en.json` titles), so write titles as they appear in the catalogue. Keep line endings LF.
 
 ## Architecture — Big Picture
 
@@ -57,11 +64,17 @@ Adding a new game: edit `games.json` (structural) + `en.json` `games` block (tex
 
 **Sitemap:** `scripts/generate-sitemap.js` writes `public/sitemap.xml` from `games.json` on every build, with `xhtml:hreflang` alternates per locale. `scripts/generate-rss.js` emits the blog feed. Do not edit either output by hand — they're regenerated.
 
-**Game iframes:** Games run in iframes hosted elsewhere (`gameUrl`), behind a click-to-start gate in `GamePlayer`.
+**Hosted games (`games/`):** Games run in iframes (`gameUrl`) behind a click-to-start gate in `GamePlayer` (split into `src/components/gameplayer/*`). Most `gameUrl`s point at `https://arcadedeck-games.pages.dev/{slug}/` — that origin is one Cloudflare Pages project served from the `games/` directory of this repo (`games/{slug}/` = **built** output only; game sources are not in this repo). A handful of older titles still live on external hosts. Deploy with `npm run deploy:games` (independent of the site deploy). `games/_headers` sets immutable caching for `/:slug/assets/*`; `games/_redirects` holds 200-rewrites for games whose builds hardcode root-absolute asset paths (`/sound`, `/fonts` → Kingdom of Ashes; `/equip`, `/shop`, … → Shadow Runner). Those roots are taken — a new game must ship relative or slug-prefixed asset paths, not another rewrite. Hosted games must not gate on their own `requestFullscreen` when embedded (the host owns fullscreen; nested requests hang in Chrome).
 
-**Personal bests (no leaderboard):** Every hosted game posts `{ type: 'GAME_OVER', score, subScore }` to the parent frame with targetOrigin `'*'` (`GAME_SCORE` / `SCORE_UPDATE` / `gameOver` also accepted; `subScore` is a secondary stat, unused today, reserved for a future leaderboard). Hot-seat titles post only human-vs-AI results; idle titles post a 5 s heartbeat + `pagehide`. `GamePlayer` accepts the message only from the game's own origin and stores the best run in `localStorage` via `src/utils/pb.ts`. Nothing is submitted anywhere — there is no global ranking, no Firestore, no Cloud Functions. `scoreTiers` in `games.json` (bronze/silver/gold, ascending — a tuning knob) drives the mastery badge; `scoreLabel` in `en.json` names the score. Deck Level on `/my-games` is XP summed from games played, tiers earned, and best streak.
+**Personal bests + global leaderboard:** Every hosted game posts `{ type: 'GAME_OVER', score, subScore }` to the parent frame with targetOrigin `'*'` (`GAME_SCORE` / `SCORE_UPDATE` / `gameOver` also accepted; `subScore` is a secondary stat, unused today, reserved for a future leaderboard). Hot-seat titles post only human-vs-AI results; idle titles post a 5 s heartbeat + `pagehide`. `GamePlayer` accepts the message only from the game's own origin and stores the best run in `localStorage` via `src/utils/pb.ts`. Raw scores never leave the browser; the only thing published is the derived Deck XP: `src/utils/leaderboard.ts` upserts one Firestore `leaderboard/{uuid}` row per browser (nickname, xp, level, played, mastered) on new PB / nickname change / My Games visit, and rank = `getCount(xp > mine) + 1`. No auth, so rules validate shape only (see the `ponytail:` note in that file). Home shows the cached rank chip and refreshes it via dynamic import so Firestore stays out of the Home chunk. `scoreTiers` in `games.json` (5 non-decreasing anchors `[Bronze 1, Silver 1, Gold 1, Gold 10, Diamond]`, expanded to 31 tiers by `pb.ts`; capped games repeat the cap so a full clear is Diamond — a tuning knob) drives the mastery badge; `scoreLabel` in `en.json` names the score. Deck Level on `/my-games` is XP summed from games played, tiers earned, and best streak.
 
 **Caching:** `CommentSection` loads latest 20 with cursor pagination (`startAfter`). Do not switch to `onSnapshot` (cost/perf).
+
+**Firestore circuit breaker:** `src/utils/firestoreCircuit.ts` — on `resource-exhausted` / `unavailable` it sets a localStorage flag and short-circuits Firestore calls for 1 h so the UI degrades to cached/empty instead of red errors. `CommentSection` and `leaderboard.ts` already go through it; any new Firestore read/write must too (`circuitOpen()` before, `isQuotaError()` in the catch).
+
+**Blog:** `src/data/posts.json` is the whole blog — one object per post (`slug`, `title`, `date`, `author`, `tags`, `relatedGames` (game ids), `coverImage`, `coverImageAlt`, `excerpt`, `content`). Posts are English-only (no `posts` block in the locales); `generate-rss.js` and the prerender read the same file. `src/utils/readPosts.ts` drives the NEW badge (unread + < 30 days, localStorage). `RelatedPosts` on a game page = posts whose `relatedGames` include that id.
+
+**Toasts:** global `ToastContext` (`src/contexts/`) — use `useToast()`; don't add per-component toast state.
 
 ## Conventions (from RULES.md)
 
@@ -79,3 +92,4 @@ Adding a new game: edit `games.json` (structural) + `en.json` `games` block (tex
 - `index.html` head: `msvalidate.01` (Bing) and `google-adsense-account` meta tags.
 - `public/BingSiteAuth.xml` — Bing Webmaster verification file.
 - Domain DNS verification for Bing requires a DNS-only (un-proxied) CNAME on Cloudflare.
+- Wikidata entity for the site is **Q141473972** — referenced as `sameAs` / `identifier` in the WebSite + Organization JSON-LD (`prerender-pages.js`, `GameHeadMeta.tsx`, `BlogPost.tsx`) and linked from `/about`. Change it in all four places or nowhere.

@@ -252,11 +252,11 @@ for (const lang of SUPPORTED_LOCALES) {
       image: thumbUrl,
       url: pageUrl,
       inLanguage: lang,
-      author: { '@type': 'Organization', name: 'ArcadeDeck', url: SITE, sameAs: ['https://www.wikidata.org/wiki/Q139585213'] },
+      author: { '@type': 'Organization', name: 'ArcadeDeck', url: SITE, sameAs: ['https://www.wikidata.org/wiki/Q141473972'] },
       publisher: {
         '@type': 'Organization', name: 'ArcadeDeck', url: SITE,
         logo: { '@type': 'ImageObject', url: `${SITE}/images/icon-512x512.webp` },
-        sameAs: ['https://www.wikidata.org/wiki/Q139585213'],
+        sameAs: ['https://www.wikidata.org/wiki/Q141473972'],
       },
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD', availability: 'https://schema.org/InStock' },
       // Ties the free web edition to its paid PC release so the two are not read as rival pages.
@@ -630,9 +630,9 @@ const homeJsonLd = (lang) => [
     alternateName: '아케이드덱',
     url: `${SITE}/`,
     logo: `${SITE}/images/icon-512x512.webp`,
-    identifier: { '@type': 'PropertyValue', propertyID: 'wikidata', value: 'Q139585213' },
+    identifier: { '@type': 'PropertyValue', propertyID: 'wikidata', value: 'Q141473972' },
     sameAs: [
-      'https://www.wikidata.org/wiki/Q139585213',
+      'https://www.wikidata.org/wiki/Q141473972',
       'https://arcadedeck.itch.io',
       'https://ko-fi.com/developer_benjamink',
     ],
@@ -856,7 +856,7 @@ const routeShells = {
         <h2>Verified Profiles</h2>
         <p>ArcadeDeck is registered as a public knowledge entity on Wikidata.</p>
         <ul>
-          <li><a href="https://www.wikidata.org/wiki/Q139585213" rel="me noopener" target="_blank">Wikidata: Q139585213</a></li>
+          <li><a href="https://www.wikidata.org/wiki/Q141473972" rel="me noopener" target="_blank">Wikidata: Q141473972</a></li>
           <li><a href="https://arcadedeck.itch.io" rel="me noopener" target="_blank">itch.io: arcadedeck.itch.io</a></li>
           <li><a href="https://ko-fi.com/developer_benjamink" rel="me noopener" target="_blank">Ko-fi: developer_benjamink</a></li>
         </ul>
@@ -1104,7 +1104,7 @@ ${relatedGames
     publisher: {
       '@type': 'Organization', name: 'ArcadeDeck', url: SITE,
       logo: { '@type': 'ImageObject', url: `${SITE}/images/icon-512x512.webp` },
-      sameAs: ['https://www.wikidata.org/wiki/Q139585213'],
+      sameAs: ['https://www.wikidata.org/wiki/Q141473972'],
     },
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
     articleSection,

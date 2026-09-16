@@ -137,7 +137,7 @@ const BlogPost: React.FC = () => {
         '@type': 'ImageObject',
         url: 'https://arcadedeck.net/images/icon-512x512.webp',
       },
-      sameAs: ['https://www.wikidata.org/wiki/Q139585213'],
+      sameAs: ['https://www.wikidata.org/wiki/Q141473972'],
     },
     mainEntityOfPage: { '@type': 'WebPage', '@id': url },
     articleSection,

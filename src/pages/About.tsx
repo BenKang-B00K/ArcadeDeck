@@ -74,12 +74,12 @@ const About: React.FC = () => {
           <ul>
             <li>
               <a
-                href="https://www.wikidata.org/wiki/Q139585213"
+                href="https://www.wikidata.org/wiki/Q141473972"
                 target="_blank"
                 rel="me noopener noreferrer"
                 style={{ color: '#00d2ff' }}
               >
-                Wikidata: Q139585213
+                Wikidata: Q141473972
               </a>
             </li>
             <li>

@@ -2494,65 +2494,66 @@
     },
     "26": {
       "title": "Neon Stack",
-      "description": "A neon timing arcade game — drop glowing blocks onto a rising tower, nail perfect aligns to chain combos, and stack as high as your reflexes allow.",
-      "fullDescription": "\n      Neon Stack is a **one-tap timing game** wrapped in a synthwave skyline. A glowing block slides back and forth above your tower — tap to drop it. Land it **dead-center** and the next block keeps full width; miss, and the **overhang** shears off, leaving you a narrower platform to aim at.\n      Two numbers define your run: **total blocks stacked** and your **best combo streak**. Blocks stacked is the primary score, but the leaderboard uses your best combo as the **tiebreaker** — so a clean run of perfect aligns always outranks a sloppy tower of the same height.\n      Every flawless drop tightens the rhythm and feeds your **combo multiplier**. Break the chain and the tower keeps growing, but your **streak resets to zero**. The tower never stops rising and the block never stops moving — there is no safe moment, only the next drop.\n      Simple to start, brutal to master. How high can you build before one mistimed tap topples the run?\n    ",
-      "controls": "Mouse Click / Tap / Spacebar: Drop the moving block onto the stack. Time the release so the block lands flush over the one below — perfect aligns keep full width and build your combo.",
-      "tips": "Watch the **block's edge**, not its center — your eyes track edges faster and that's where the **overhang** gets sheared. Find the tower's rhythm and **tap on the beat** rather than reacting; the speed is constant until you break a combo. A perfect align **restores no width**, so protect the platform you have — one greedy drop can leave a sliver that ends the run. Best combo is the leaderboard **tiebreaker**, so chase clean chains even when height feels safe.",
-      "lore": "\n      Above the synthwave city, the **old broadcast tower** fell dark decades ago. The signal that built it never stopped transmitting — block by block, frequency by frequency, it still tries to climb back toward the channel it lost.\n      Every player who taps in lends the signal a hand. Each clean align is a frequency locked, each combo a verse of the song that once lit the whole skyline. Miss the rhythm and the tower narrows, the neon dims, and the signal starts again.\n      No one has reached the top. The leaderboard is just a list of how close the signal got before the rhythm broke.\n    ",
+      "description": "A one-tap neon stacking arcade — drop sliding slabs onto a rising tower, slice off every overhang, and chain perfect drops to regrow your width as the slab gets faster.",
+      "fullDescription": "\n      Neon Stack is a **one-tap timing game** set over a synthwave skyline. A glowing slab slides back and forth above your tower — tap to drop it. Whatever hangs past the block below is **sliced off and falls as debris**, and the trimmed piece becomes your next, narrower target. Miss the tower completely, or leave a sliver under 8 px wide, and the run is over.\n      Land within **7 px** of dead-center (10 px on touch) and it counts as a **perfect drop**: the slab snaps flush, nothing is cut, and the tower **regrows 6 px** of width — up to its starting size. Consecutive perfects build a **combo counter**; any imperfect drop resets it. Your score is simply **blocks stacked**, and your **best combo streak** is saved alongside it as a secondary stat.\n      The slab speeds up with every level — **230 px/s** at the base, +9 px/s per block, capped at **620 px/s** — and alternates its entry side each row, so the rhythm you find early won't hold forever. Pseudo-3D neon blocks, depth fog down the tower, shard bursts on every cut and a self-playing demo behind the menu keep the skyline alive.\n      Simple to start, brutal to master. How high can you build before one mistimed tap topples the run?\n    ",
+      "controls": "Click / Tap / Space / Enter / Down Arrow: drop the sliding slab onto the stack. Time the release so it lands flush over the block below — a perfect drop keeps everything, regrows width and extends your combo. Language and mute toggles sit in the top corners.",
+      "tips": "Watch the **slab's edge**, not its center — edges are where the overhang gets sheared. Perfect drops **regrow 6 px** of width, so a run of clean chains can rescue a narrowed tower; protect what you have, because one greedy drop leaves a sliver that nothing regrows in time. The slab **accelerates every level** and swaps its entry side each row — re-find the beat after every few blocks instead of tapping on the old rhythm. On phones the perfect window is wider (10 px), so trust your finger a little more than your eyes.",
+      "lore": "\n      Above the synthwave city, the **old broadcast tower** fell dark decades ago. The signal that built it never stopped transmitting — block by block, frequency by frequency, it still tries to climb back toward the channel it lost.\n      Every player who taps in lends the signal a hand. Each clean align is a frequency locked, each combo a verse of the song that once lit the whole skyline. Miss the rhythm and the tower narrows, the neon dims, and the signal starts again.\n      No one has reached the top. Your best is just how close the signal got before the rhythm broke.\n    ",
       "features": [
         "One-Tap Timing Arcade",
-        "Blocks + Best Combo Dual Scoring",
-        "Perfect-Align Combo Chains",
-        "Neon Synthwave Aesthetic",
-        "Constant Escalating Tempo",
-        "Global Leaderboard",
-        "Web & Mobile Friendly"
+        "Overhang Slicing with Falling Debris",
+        "Perfect Drops Regrow Width",
+        "Accelerating Slab, Alternating Sides",
+        "Combo Streak Counter",
+        "Synthwave Pseudo-3D Neon Look",
+        "Haptics + Wider Touch Window on Mobile",
+        "In-game English / Korean / Japanese"
       ],
-      "objectives": "Drop glowing blocks onto a rising tower with precise timing, landing each one flush over the last to keep full width and chain combo multipliers — maximizing **total blocks stacked** as your primary score and **best combo streak** as the leaderboard **tiebreaker**.",
+      "objectives": "Drop the sliding slab flush onto the tower as it speeds up, keeping enough width to survive — every placed block scores one point, and consecutive perfect drops build the combo streak saved as your secondary stat.",
       "controlsTable": [
         {
           "key": "Mouse Click",
-          "action": "Drop the moving block onto the stack"
+          "action": "Drop the sliding slab onto the stack"
         },
         {
-          "key": "Spacebar",
-          "action": "Drop the moving block (keyboard)"
+          "key": "Space / Enter / ↓",
+          "action": "Drop the sliding slab (keyboard)"
         },
         {
           "key": "Tap (Mobile)",
-          "action": "Drop the moving block onto the stack"
+          "action": "Drop the slab — 10 px perfect window instead of 7"
         },
         {
-          "key": "Perfect Align",
-          "action": "Land dead-center to keep full width and extend your combo"
+          "key": "Top-left / Top-right",
+          "action": "Cycle language EN → 한국어 → 日本語 / toggle sound"
         }
       ],
       "faq": [
         {
           "q": "How is my score calculated?",
-          "a": "Total blocks stacked is your primary score — every block you land successfully adds one. Your best combo streak (the longest run of consecutive perfect aligns) is the leaderboard tiebreaker, so when two players reach the same height, the cleaner run with the higher combo ranks above the sloppier one."
+          "a": "Every block you place adds one — that is the score. Your best combo streak (the longest run of consecutive perfect drops) is tracked separately and reported as a secondary stat; it does not multiply the score."
         },
         {
-          "q": "What counts as a perfect align?",
-          "a": "Dropping a block so it lands flush over the one below it, with no overhang sheared off. A perfect align keeps the platform at full width and increments your combo multiplier. A partial landing keeps the run alive but cuts the overhang away, narrowing your next target."
+          "q": "What counts as a perfect drop?",
+          "a": "Releasing the slab within 7 px of dead-center over the block below (10 px on touch). It snaps flush, nothing is sliced, the tower regrows 6 px of width (up to its starting size) and your combo counter goes up. Any wider offset slices the overhang off as debris and resets the combo."
         },
         {
-          "q": "Why did my tower get so narrow?",
-          "a": "Each imperfect drop shears off the part of the block hanging past the platform, so the tower can only get narrower, never wider. A string of small misses compounds into a sliver that's nearly impossible to hit — protect your width by aiming for perfect aligns, not just survivable ones."
+          "q": "Can I recover a narrow tower?",
+          "a": "Yes — each perfect drop regrows 6 px, capped at the starting width, so a chain of clean drops slowly rebuilds a platform. The run ends when a placed block would be under 8 px wide or the slab misses the tower entirely."
         },
         {
           "q": "Does the game get faster?",
-          "a": "The block's sliding speed stays constant through a run — the difficulty comes from the platform narrowing as you miss, not from acceleration. This means the best strategy is to find the steady rhythm early and tap on the beat rather than reacting to each block individually."
+          "a": "Yes. The slab starts at 230 px/s and gains 9 px/s per placed block, capped at 620 px/s, and it enters from the opposite side each level. Expect to re-time your taps as the tower climbs."
         },
         {
           "q": "Does it work on mobile?",
-          "a": "Yes. Neon Stack is built for both desktop and mobile — tap anywhere on the screen to drop on touch devices, or use a mouse click or the spacebar on desktop. The one-input design plays identically across both."
+          "a": "Yes. Tap anywhere to drop; touch drops get a wider 10 px perfect window to absorb finger latency, a haptic tick fires on each drop (Android), and iOS plays audio even with the ringer on silent. Desktop uses click, Space, Enter or Down Arrow."
         }
       ],
       "featuredComments": [
         {
           "name": "PerfectDrop",
-          "text": "Watch the edge of the block, not the center. Your eyes track edges way faster and the overhang gets sheared from the edge anyway. Switching my focus point doubled my best height in one session.",
+          "text": "Watch the edge of the slab, not the center. The overhang gets sheared from the edge anyway. Switching my focus point doubled my best height in one session.",
           "badge": "Top Tip"
         },
         {
@@ -2562,12 +2563,12 @@
         },
         {
           "name": "ComboChain",
-          "text": "Best combo is the tiebreaker, so don't get complacent once you're tall. I lost a top-10 spot to someone the same height because my combo was trash. Chase the clean chain even when height feels safe.",
+          "text": "Perfects regrow width, so a narrow tower isn't dead — I clawed back from a 40 px sliver with six perfects in a row. Chase the clean chain, it's the only way the tower ever gets wider.",
           "badge": "Strategy"
         },
         {
           "name": "RhythmTap",
-          "text": "Stop reacting and start tapping on the beat. The speed is constant, so it's a rhythm game pretending to be a stacking game. Once it clicked I stopped panicking on every block."
+          "text": "It gets faster every block and swaps sides each row, so the beat you found at level 5 is wrong by level 20. Reset your rhythm every few drops instead of trusting the old one."
         },
         {
           "name": "NarrowLedge",

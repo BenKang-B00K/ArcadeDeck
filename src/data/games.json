@@ -488,7 +488,7 @@
   {
     "id": "26",
     "slug": "neon-stack",
-    "language": "EN",
+    "language": "EN/KO/JA",
     "thumbnail": "images/neon-stack.webp",
     "genres": [
       "Arcade",
@@ -499,13 +499,14 @@
     "status": "PLAYABLE",
     "platform": "BOTH",
     "isOriginal": true,
-    "badge": "NEW",
+    "badge": "UPDATE",
     "autoFullscreen": false,
     "scoreTiers": [
       10,
       25,
       50
-    ]
+    ],
+    "lastUpdated": "2026-09-15"
   },
   {
     "id": "27",

@@ -1,82 +1,32 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-# Dependencies
 node_modules
-
-# Build output
 dist
-dist-ssr
 *.tsbuildinfo
+*.log
 
-# Environment & secrets
-*.local
+# Secrets
 .env*
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Firebase service account keys (NEVER commit these)
+*.local
 *-firebase-adminsdk-*.json
 service-account*.json
 serviceAccountKey.json
-firebase-debug.log
-.firebase/
-
-# Local reference files
-leaderboard.txt
 googleadsense.txt
 
-# Local backups & i18n helper scripts (not for repo)
-*.bak.json
-src/i18n/locales/*.py
-src/i18n/locales/language_addition.txt
-
-# Claude Code local files
+# Tool state
+.firebase/
+.wrangler/
+.idx/
 .agents/
 skills-lock.json
 .claude/settings.local.json
 .claude/skills/*
 !.claude/skills/code-reviewer/
 
-# IDX cloud editor
-.idx/
-
-# OS generated files
+# OS
 .DS_Store
 Thumbs.db
-Desktop.ini
-*.lnk
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# Coverage & test output
-coverage/
-*.lcov
-
-# Local Firestore export (contains player nicknames)
-leaderboards-backup.json
-
-# Unversioned art and local backups parked out of the build (see _archive/)
+# Unversioned art and local backups parked out of the build
 _archive/
-
-# wrangler local state
-.wrangler/
 
 # Kingdom of Ashes web build: 496 MB / 4124 files, and every rebuild re-hashes all of it.
 # Deployed straight off disk by `npm run deploy:games`. NOT versioned - so that command must only

@@ -93,6 +93,7 @@
       "Strategy",
       "Local Co-op"
     ],
+    "players": [2, 2],
     "gameUrl": "https://games.arcadedeck.net/omok/",
     "aspectRatio": "1/1",
     "status": "PLAYABLE",
@@ -275,6 +276,7 @@
       "PvP",
       "Local Co-op"
     ],
+    "players": [2, 6],
     "gameUrl": "https://games.arcadedeck.net/triangle-battle/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
@@ -292,6 +294,7 @@
       "PvP",
       "Local Co-op"
     ],
+    "players": [2, 2],
     "gameUrl": "https://games.arcadedeck.net/tank-battle-1v1/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
@@ -317,6 +320,7 @@
       "PvP",
       "Local Co-op"
     ],
+    "players": [2, 2],
     "gameUrl": "https://games.arcadedeck.net/spirit-duel/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
@@ -767,6 +771,7 @@
       "Puzzle",
       "Local Co-op"
     ],
+    "players": [2, 2],
     "gameUrl": "https://games.arcadedeck.net/tandem/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",

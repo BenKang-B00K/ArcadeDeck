@@ -681,6 +681,23 @@
     box-shadow: 0 0 14px rgba(245, 215, 66, 0.45), inset 0 1px 0 rgba(255,255,255,0.4);
   }
   .audio-toggle { padding: 0 8px; }
+  .link-toggle.active {
+    background: linear-gradient(180deg, #86efac, #22c55e);
+    color: #0f2e1a;
+    box-shadow: 0 0 14px rgba(74, 222, 128, 0.45), inset 0 1px 0 rgba(255,255,255,0.35);
+  }
+  body.linked .bot-toggle { display: none; }
+  .link-panel { width: 270px; }
+  .link-panel p { font-size: 13px; line-height: 1.45; color: #ddd; margin-bottom: 10px; }
+  .link-panel .link-code { display: block; margin: 6px 0; font-size: 30px; font-weight: 800; letter-spacing: 8px; text-align: center; color: var(--gold); }
+  .link-row { display: flex; gap: 6px; }
+  .link-panel button { flex: 1; height: 40px; border-radius: 8px; border: 1px solid var(--panel-border); background: rgba(255,255,255,0.08); color: #eee; font-weight: 700; font-size: 13px; cursor: pointer; }
+  .link-panel button:hover { background: rgba(255,255,255,0.16); }
+  .link-panel input { width: 84px; height: 40px; text-align: center; font-size: 18px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; border-radius: 8px; border: 1px solid var(--panel-border); background: rgba(0,0,0,0.3); color: #fff; }
+  #linkLeave { width: 100%; }
+  .link-wait { display: none; }
+  body.guest .link-wait { display: block; }
+  body.guest #nextBtn, body.guest #keyHint { display: none; }
   .audio-toggle.muted { opacity: 0.6; }
   .lang-toggle { display: flex; overflow: hidden; padding: 3px; gap: 2px; }
   .lang-toggle button {
@@ -987,12 +1004,23 @@
   <button class="tb-btn aim-toggle" id="aimToggle"></button>
   <button class="tb-btn bot-toggle" id="botToggle"></button>
   <button class="tb-btn face-toggle" id="faceToggle"></button>
+  <button class="tb-btn link-toggle" id="linkToggle" aria-haspopup="true" aria-controls="linkPanel"></button>
   <button class="tb-btn audio-toggle" id="audioToggle" aria-haspopup="true" aria-controls="audioPanel"></button>
   <div class="lang-toggle" role="group" aria-label="Language">
     <button data-lang="en" lang="en">EN</button>
     <button data-lang="ko" lang="ko">한</button>
     <button data-lang="ja" lang="ja">日</button>
   </div>
+</div>
+
+<div class="audio-panel link-panel" id="linkPanel" role="dialog">
+  <p id="linkStatus"></p>
+  <div class="link-row" id="linkIdle">
+    <button id="linkHost"></button>
+    <input id="linkCode" maxlength="4" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABCD">
+    <button id="linkJoin"></button>
+  </div>
+  <button id="linkLeave" hidden></button>
 </div>
 
 <div class="audio-panel" id="audioPanel" role="dialog">
@@ -1095,6 +1123,7 @@
     <button id="statsBtn" class="secondary hidden"></button>
   </div>
   <p class="key-hint" id="keyHint"></p>
+  <p class="key-hint link-wait" id="linkWait"></p>
  </div>
 </div>
 
@@ -1175,6 +1204,17 @@ const I18N = {
     fire:      '발사',
     faceLabel: '마주보기',
     faceTitle: '마주보기 모드 (기기를 테이블에 눕혀 두고 양쪽에서 플레이)',
+    linkLabel: '연결', linkTitle: '폰 두 대 연결 (같은 Wi-Fi)',
+    linkIntro: '폰 두 대로 대전. 같은 Wi-Fi 또는 핫스팟에 연결하세요.',
+    linkHost: '방 만들기', linkJoin: '참가', linkLeave: '연결 끊기',
+    linkMaking: '방 만드는 중…', linkJoining: '연결 중…',
+    linkShare: (c) => `방 코드 <b class="link-code">${c}</b>다른 폰에서 이 코드를 입력하세요.`,
+    linkOn: (host) => host ? '연결됨 — 당신은 P1 (초록)' : '연결됨 — 당신은 P2 (파랑)',
+    linkBadCode: '방을 찾을 수 없어요. 코드를 확인하세요.',
+    linkFail: '연결 실패. 공유기가 기기 간 연결을 막고 있을 수 있어요. 한 폰의 핫스팟에 다른 폰을 연결해 보세요.',
+    linkServer: '방 서버에 연결할 수 없어요. 인터넷 연결을 확인하고 다시 시도하세요.',
+    linkLost: '연결이 끊겼어요.',
+    linkWait: '호스트가 다음 라운드를 시작하길 기다리는 중…',
   },
   en: {
     title: 'TANK BATTLE',
@@ -1237,6 +1277,17 @@ const I18N = {
     fire:      'Fire',
     faceLabel: 'FACE',
     faceTitle: 'Face-to-face mode (device flat on a table, players on opposite sides)',
+    linkLabel: 'LINK', linkTitle: 'Link two phones (same Wi-Fi)',
+    linkIntro: 'Play on two phones. Join the same Wi-Fi or hotspot.',
+    linkHost: 'Host', linkJoin: 'Join', linkLeave: 'Disconnect',
+    linkMaking: 'Creating room…', linkJoining: 'Connecting…',
+    linkShare: (c) => `Room code <b class="link-code">${c}</b>Enter this code on the other phone.`,
+    linkOn: (host) => host ? 'Linked — you are P1 (green)' : 'Linked — you are P2 (blue)',
+    linkBadCode: 'Room not found. Check the code.',
+    linkFail: 'Could not connect. Your router may block device-to-device traffic — try joining one phone to the other\'s hotspot.',
+    linkServer: 'Can\'t reach the room server. Check your internet and try again.',
+    linkLost: 'Connection lost.',
+    linkWait: 'Waiting for the host to start the next round…',
   },
   ja: {
     title: 'タンクバトル',
@@ -1299,6 +1350,17 @@ const I18N = {
     fire:      '発射',
     faceLabel: '対面',
     faceTitle: '対面モード (端末をテーブルに置き、向かい合ってプレイ)',
+    linkLabel: '接続', linkTitle: 'スマホ2台で接続 (同じWi-Fi)',
+    linkIntro: 'スマホ2台で対戦。同じWi-Fiかテザリングに接続してください。',
+    linkHost: 'ルーム作成', linkJoin: '参加', linkLeave: '切断',
+    linkMaking: 'ルーム作成中…', linkJoining: '接続中…',
+    linkShare: (c) => `ルームコード <b class="link-code">${c}</b>もう一台でこのコードを入力してください。`,
+    linkOn: (host) => host ? '接続完了 — あなたは P1 (緑)' : '接続完了 — あなたは P2 (青)',
+    linkBadCode: 'ルームが見つかりません。コードを確認してください。',
+    linkFail: '接続できません。ルーターが端末間の通信を遮断している可能性があります。片方のスマホのテザリングにもう一台を接続してみてください。',
+    linkServer: 'ルームサーバーに接続できません。インターネット接続を確認して再試行してください。',
+    linkLost: '接続が切れました。',
+    linkWait: 'ホストが次のラウンドを始めるのを待っています…',
   },
 };
 
@@ -2091,6 +2153,7 @@ const ICON_SVGS = {
   trophy:   `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#fbbf24" stroke="#78350f" stroke-width="0.9" stroke-linejoin="round"><path d="M7 3h10v5a5 5 0 0 1-10 0z"/><path d="M3 5h4v3a2 2 0 0 1-4 0z M17 5h4v3a2 2 0 0 1-4 0z" fill="#d97706"/><path d="M10 13h4l-1 4h-2z"/><path d="M7 19h10v2H7z"/></g></svg>`,
   stats:    `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g fill="#60a5fa" stroke="#1e3a8a" stroke-width="0.9"><rect x="3" y="13" width="4" height="8"/><rect x="10" y="8" width="4" height="13"/><rect x="17" y="4" width="4" height="17"/></g></svg>`,
   swords:   `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><g stroke="#374151" stroke-width="0.9" stroke-linejoin="round"><path d="M3 3l11 11-2 2L1 5z" fill="#cbd5e1"/><path d="M21 3L10 14l2 2L23 5z" fill="#cbd5e1"/></g></svg>`,
+  link:     `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="7" height="14" rx="1.6"/><rect x="14.5" y="5" width="7" height="14" rx="1.6"/><path d="M9.5 10.5c1.6-1.4 3.4-1.4 5 0M9.5 13.5c1.6 1.4 3.4 1.4 5 0"/></svg>`,
   robot:    `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 13v1M15 13v1M9 17h6"/><circle cx="12" cy="3.5" r="1.2" fill="currentColor"/></svg>`,
   tank:     `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="12" width="18" height="7" rx="3.5"/><path d="M7 12V9.5A1.5 1.5 0 0 1 8.5 8H14v4M14 10h7"/><circle cx="7.5" cy="15.5" r="1" fill="currentColor"/><circle cx="12" cy="15.5" r="1" fill="currentColor"/><circle cx="16.5" cy="15.5" r="1" fill="currentColor"/></svg>`,
   crosshair:`<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><path d="M12 1.5v4M12 18.5v4M1.5 12h4M18.5 12h4"/></svg>`,
@@ -2483,6 +2546,10 @@ const MAPS = [
 let walls = MAPS[0].walls;         // mutable pointer — set by loadMap()
 let currentMap = MAPS[0];
 let mapPool = [];                  // remaining unused map IDs for this match
+
+// Two-phone link (see "Two-phone link" section): null | 'host' | 'guest'
+let netRole = null;
+const netInput = { dx: 0, dy: 0, fire: false };   // guest's stick, applied to tank2 on the host
 
 // AI opponent toggle — persisted to localStorage
 let botEnabled = false;
@@ -3049,6 +3116,8 @@ function updateTank(t, other, dt) {
   if (t.ai) {
     const intent = runAI(t, other, dt);
     dx = intent.dx; dy = intent.dy; fireBtn = intent.fire;
+  } else if (netRole === 'host' && t === tank2) {
+    dx = netInput.dx; dy = netInput.dy; fireBtn = netInput.fire;
   } else {
     if (keys[t.up]) dy -= 1;
     if (keys[t.down]) dy += 1;
@@ -6021,7 +6090,7 @@ document.getElementById('statsModal').addEventListener('click', (e) => {
 
 function advanceFromOverlay() {
   const overlayEl = document.getElementById('overlay');
-  if (overlayEl.classList.contains('hidden')) return;
+  if (netRole === 'guest' || overlayEl.classList.contains('hidden')) return;
 
   // If roulette is still spinning, skip instead of proceeding
   if (rouletteState === 'spinning') {
@@ -6101,7 +6170,10 @@ function loop(now) {
   updateHitVignettes(rawDt);
   updateAmbient(rawDt);
 
-  if (roundActive) {
+  if (netRole === 'host') netBeginFrame();
+  if (netRole === 'guest') {
+    netSendInput(now);   // state arrives from the host in onmessage
+  } else if (roundActive) {
     if (countdownTimer > 0) {
       // Countdown phase: freeze gameplay, tick the countdown by seconds
       countdownTimer -= dt;
@@ -6142,7 +6214,7 @@ function loop(now) {
   updateGhosts(dt);
   updateFloatingTexts(dt);
   draw();
-  if (!roundActive && freezeTimer > 0) {
+  if (netRole !== 'guest' && !roundActive && freezeTimer > 0) {
     freezeTimer -= dt;
     if (freezeTimer <= 0) {
       freezeTimer = 0;
@@ -6152,6 +6224,7 @@ function loop(now) {
       else { SFX.roundWin(); showOverlay('round', winner === 'p1' ? 'P1' : 'P2'); }
     }
   }
+  if (netRole === 'host') netEndFrame(now);
   rafId = requestAnimationFrame(loop);
 }
 
@@ -6190,8 +6263,10 @@ function refreshToggles() {
   if (tank2) tank2.ai = botEnabled;
   if (typeof syncSplitMode === 'function') syncSplitMode();
   if (typeof refreshFaceToggle === 'function') refreshFaceToggle();
+  if (typeof refreshLink === 'function') refreshLink();
 }
 botBtn.addEventListener('click', () => {
+  if (netRole) return;
   botEnabled = !botEnabled;
   try { localStorage.setItem('tankBattle.bot', botEnabled ? '1' : '0'); } catch (e) {}
   refreshToggles();
@@ -6222,7 +6297,7 @@ function resetTouchInputs() {
 let faceEnabled = false;
 try { faceEnabled = localStorage.getItem('tankBattle.face') === '1'; } catch (e) {}
 function syncSplitMode() {
-  const split = isTouchDevice && !botEnabled;
+  const split = isTouchDevice && !botEnabled && !netRole;
   const face = split && faceEnabled;
   if (document.body.classList.contains('split') !== split ||
       document.body.classList.contains('face') !== face) resetTouchInputs();
@@ -6319,6 +6394,336 @@ new MutationObserver(syncTouchVisibility).observe(document.getElementById('overl
 // Haptic nudge when P1 gets hit (Android; iOS Safari ignores vibrate).
 // Off in split mode — one shared device can't tell players apart by buzz.
 function haptic(ms) { if (isTouchDevice && !document.body.classList.contains('split') && navigator.vibrate) navigator.vibrate(ms); }
+
+// --- Two-phone link (WebRTC DataChannel, host-authoritative) ---
+// Host runs the whole simulation; the guest only sends its stick/fire and
+// renders what the host streams back. Each host frame sends one message:
+//   { e: [[fnName, args], ...], s: snapshot }
+// e = mirrored side-effect calls (SFX, particles, round/overlay flow) replayed
+// on the guest; s = authoritative state (tanks, bullets, pickups, stars, timers).
+// Signaling (offer/answer swap) goes through a Firestore `coop/{code}` doc via
+// REST, once; after that no server is involved.
+// ponytail: STUN only, no TURN — same Wi-Fi / hotspot works, strict-NAT cellular
+// pairs fail. Add a TURN server to NET_ICE if cross-network play matters.
+const NET_FS = 'https://firestore.googleapis.com/v1/projects/ultragames-website/databases/(default)/documents/coop';
+const NET_KEY = 'AIzaSyDFwB-Yt7ARcMZoPD6-1vI892PXyLEvdcU';   // public web key (same as arcadedeck.net)
+const NET_ICE = [{ urls: 'stun:stun.l.google.com:19302' }];
+const NET_CODE_CHARS = 'ACDEFHJKMNPRTWXY';   // no look-alikes (0/O, 1/I, B/8…)
+let netPc = null, netDc = null, netDepth = 0, netInFrame = false, netLastSend = 0;
+let netEvents = [];
+let netNextMap = null;            // guest: map the host's pickNextMap() rolled
+let netLastInput = '', netLastInputAt = 0;
+let netStatus = ['linkIntro'];
+let netBotBefore = false;
+let netRoom = null;               // host: room code, deleted once linked
+
+// Tanks and maps travel as tags so references (bullet owner, star owner,
+// initRound(map)) resolve to the guest's own objects.
+const netReplacer = (k, v) => v === tank1 ? '$p1' : v === tank2 ? '$p2'
+  : (v && v.walls && v.spawn1) ? '$m:' + v.id : v;
+const netReviver = (k, v) => v === '$p1' ? tank1 : v === '$p2' ? tank2
+  : (typeof v === 'string' && v.startsWith('$m:')) ? MAPS.find(m => '$m:' + m.id === v) : v;
+
+// Wrap a side-effect function so the host records its outermost calls.
+// `always` = record even outside the game loop (round flow triggered by clicks).
+const NET_FN = {};
+function netWrap(name, fn, always) {
+  NET_FN[name] = fn;
+  return function (...a) {
+    if (netRole !== 'host') return fn.apply(this, a);
+    const record = netDepth === 0 && (always || netInFrame);
+    netDepth++;
+    try { return fn.apply(this, a); }
+    finally { netDepth--; if (record) netEvents.push([name, a]); }
+  };
+}
+for (const k of Object.keys(SFX)) SFX[k] = netWrap('SFX.' + k, SFX[k]);
+spawnExplosion = netWrap('spawnExplosion', spawnExplosion);
+spawnMuzzleFlash = netWrap('spawnMuzzleFlash', spawnMuzzleFlash);
+spawnRicochetSparks = netWrap('spawnRicochetSparks', spawnRicochetSparks);
+spawnPickupBurst = netWrap('spawnPickupBurst', spawnPickupBurst);
+spawnShieldBreak = netWrap('spawnShieldBreak', spawnShieldBreak);
+spawnHitVignette = netWrap('spawnHitVignette', spawnHitVignette);
+spawnFloatingText = netWrap('spawnFloatingText', spawnFloatingText);
+spawnFireText = netWrap('spawnFireText', spawnFireText);
+addShake = netWrap('addShake', addShake);
+paintScorch = netWrap('paintScorch', paintScorch);
+paintTreadMarks = netWrap('paintTreadMarks', paintTreadMarks);
+initRound = netWrap('initRound', initRound, true);
+showOverlay = netWrap('showOverlay', showOverlay, true);
+skipRoulette = netWrap('skipRoulette', skipRoulette, true);
+// The guest must land on the host's roll, not its own.
+const netPickOrig = pickNextMap;
+pickNextMap = function () {
+  if (netRole === 'guest' && netNextMap) { const m = netNextMap; netNextMap = null; return m; }
+  const m = netPickOrig();
+  if (netRole === 'host') netEvents.push(['$map', [m]]);
+  return m;
+};
+
+// Inline particles.push / ghosts.push inside the sim (bullet trails, laser beam,
+// tank ghosts) aren't function calls — hook the arrays themselves.
+function netHookArray(arr, name) {
+  if (arr._net) return;
+  Object.defineProperty(arr, '_net', { value: true });
+  arr.push = function (...a) {
+    if (netInFrame && netDepth === 0) netEvents.push([name, a]);
+    return Array.prototype.push.apply(this, a);
+  };
+}
+function netBeginFrame() {
+  netHookArray(particles, '$particles');
+  netHookArray(ghosts, '$ghosts');
+  netInFrame = true;
+}
+function netEndFrame(now) {
+  netInFrame = false;
+  if (!netDc || netDc.readyState !== 'open' || now - netLastSend < 15) return;
+  netLastSend = now;
+  const s = {
+    t1: { ...tank1 }, t2: { ...tank2 }, b: bullets, pu: powerups, st: stars,
+    rt: roundTimer, ct: countdownTimer, cs: countdownStep, ra: roundActive,
+    w: winner, ft: freezeTimer, sm: slowmoTimer, sc: scores,
+    stats: roundActive ? undefined : stats,   // stats modal only opens between rounds
+  };
+  netDc.send(JSON.stringify({ e: netEvents, s }, netReplacer));
+  netEvents = [];
+}
+
+function netSyncTank(t, s) {
+  for (const k in t) if (!(k in s)) delete t[k];
+  Object.assign(t, s);
+}
+function netApply(msg) {
+  for (const [name, a] of msg.e) {
+    if (name === '$map') netNextMap = a[0];
+    else if (name === '$particles') particles.push(...a);
+    else if (name === '$ghosts') ghosts.push(...a);
+    else if (name.startsWith('SFX.')) SFX[name.slice(4)](...a);
+    else {
+      if (name === 'initRound') {   // host advanced: drop the overlay
+        document.getElementById('overlay').classList.add('hidden');
+        hideStatsModal(); cancelRouletteAnim(); rouletteState = 'idle'; lastOverlay = null;
+      }
+      NET_FN[name](...a);
+    }
+  }
+  const s = msg.s;
+  netSyncTank(tank1, s.t1); netSyncTank(tank2, s.t2);
+  bullets = s.b; powerups = s.pu; stars = s.st;
+  roundTimer = s.rt; countdownTimer = s.ct; countdownStep = s.cs; roundActive = s.ra;
+  winner = s.w; freezeTimer = s.ft; slowmoTimer = s.sm;
+  Object.assign(scores, s.sc);
+  if (s.stats) stats = s.stats;
+  updateHUD();
+}
+
+// Guest: keyboard (either key set) or the on-screen pad → host, on change + 10 Hz keepalive.
+function netSendInput(now) {
+  if (!netDc || netDc.readyState !== 'open') return;
+  let dx = 0, dy = 0;
+  if (keys.w || keys.arrowup) dy -= 1;
+  if (keys.s || keys.arrowdown) dy += 1;
+  if (keys.a || keys.arrowleft) dx -= 1;
+  if (keys.d || keys.arrowright) dx += 1;
+  let fire = !!(keys.g || keys['/']);
+  const ti = touchInputs.p1;
+  if (ti.active) {
+    if (!dx && !dy) { dx = ti.dx; dy = ti.dy; }
+    fire = fire || ti.fire;
+  }
+  const msg = JSON.stringify({ i: [+dx.toFixed(3), +dy.toFixed(3), fire ? 1 : 0] });
+  if (msg === netLastInput && now - netLastInputAt < 100) return;
+  netLastInput = msg; netLastInputAt = now;
+  netDc.send(msg);
+}
+
+// --- Signaling: Firestore REST (no SDK in this build) ---
+async function netFsGet(code) {
+  const r = await fetch(`${NET_FS}/${code}?key=${NET_KEY}`);
+  if (r.status === 404) return null;
+  if (!r.ok) throw new Error('fs ' + r.status);
+  return (await r.json()).fields || null;
+}
+function netFsCreate(code, offer) {
+  return fetch(`${NET_FS}?documentId=${code}&key=${NET_KEY}`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields: {
+      offer: { stringValue: offer },
+      expireAt: { timestampValue: new Date(Date.now() + 3600e3).toISOString() },
+    } }),
+  });
+}
+function netFsDelete(code) {
+  return fetch(`${NET_FS}/${code}?key=${NET_KEY}`, { method: 'DELETE' });
+}
+function netFsAnswer(code, answer) {
+  return fetch(`${NET_FS}/${code}?updateMask.fieldPaths=answer&currentDocument.exists=true&key=${NET_KEY}`, {
+    method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fields: { answer: { stringValue: answer } } }),
+  });
+}
+// Non-trickle ICE: wait for all candidates so one doc write carries everything.
+function netGathered(pc) {
+  return new Promise((res) => {
+    if (pc.iceGatheringState === 'complete') return res();
+    const t = setTimeout(res, 3000);
+    pc.addEventListener('icegatheringstatechange', () => {
+      if (pc.iceGatheringState === 'complete') { clearTimeout(t); res(); }
+    });
+  });
+}
+const netSleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+function netNewPc() {
+  netClose();
+  const pc = netPc = new RTCPeerConnection({ iceServers: NET_ICE });
+  pc.addEventListener('connectionstatechange', () => {
+    if (pc !== netPc) return;
+    if (pc.connectionState === 'failed' || pc.connectionState === 'closed') netDrop(netRole ? 'linkLost' : 'linkFail');
+  });
+  return pc;
+}
+function netWire(dc, role) {
+  netDc = dc;
+  dc.onopen = () => netStart(role);
+  dc.onclose = () => { if (dc === netDc) netDrop('linkLost'); };
+  dc.onmessage = (e) => {
+    const msg = JSON.parse(e.data, netReviver);
+    if (role === 'host') { if (msg.i) { netInput.dx = msg.i[0]; netInput.dy = msg.i[1]; netInput.fire = !!msg.i[2]; } }
+    else if (msg.s) netApply(msg);
+  };
+}
+
+async function netHost() {
+  const pc = netNewPc();
+  netWire(pc.createDataChannel('game'), 'host');
+  setLinkStatus('linkMaking');
+  try {
+    await pc.setLocalDescription(await pc.createOffer());
+    await netGathered(pc);
+    let code = null;
+    for (let i = 0; i < 5 && !code; i++) {
+      const c = Array.from({ length: 4 }, () => NET_CODE_CHARS[Math.floor(Math.random() * NET_CODE_CHARS.length)]).join('');
+      const r = await netFsCreate(c, JSON.stringify(pc.localDescription));
+      if (r.ok) code = c;
+      else if (r.status !== 409) throw new Error('create ' + r.status);
+      // Code taken: recycle it if the old room is answered or expired (rules allow that delete).
+      else if ((await netFsDelete(c)).ok && (await netFsCreate(c, JSON.stringify(pc.localDescription))).ok) code = c;
+    }
+    if (!code) throw new Error('no code');
+    netRoom = code;
+    setLinkStatus('linkShare', code);
+    for (let i = 0; i < 180 && pc === netPc && !netRole; i++) {   // poll up to 3 min
+      await netSleep(1000);
+      const f = await netFsGet(code);
+      if (f && f.answer) { await pc.setRemoteDescription(JSON.parse(f.answer.stringValue)); return; }
+    }
+    if (pc === netPc && !netRole) netDrop('linkFail');
+  } catch (e) { if (pc === netPc) netDrop('linkServer'); }
+}
+
+async function netJoin(code) {
+  code = code.trim().toUpperCase();
+  if (code.length !== 4) return setLinkStatus('linkBadCode');
+  setLinkStatus('linkJoining');
+  let f;
+  try { f = await netFsGet(code); } catch (e) { return setLinkStatus('linkServer'); }
+  if (!f || !f.offer || f.answer) return setLinkStatus('linkBadCode');
+  const pc = netNewPc();
+  pc.ondatachannel = (e) => netWire(e.channel, 'guest');
+  try {
+    await pc.setRemoteDescription(JSON.parse(f.offer.stringValue));
+    await pc.setLocalDescription(await pc.createAnswer());
+    await netGathered(pc);
+    const r = await netFsAnswer(code, JSON.stringify(pc.localDescription));
+    if (!r.ok) throw new Error('answer ' + r.status);
+    await netSleep(15000);
+    if (pc === netPc && !netRole) netDrop('linkFail');
+  } catch (e) { if (pc === netPc) netDrop('linkServer'); }
+}
+
+function netStart(role) {
+  netRole = role;
+  netBotBefore = botEnabled;
+  botEnabled = false;   // not persisted — restored on disconnect
+  document.body.classList.add('linked', role);
+  for (const k in keys) keys[k] = false;
+  resetTouchInputs();
+  refreshToggles();
+  setLinkStatus('linkOn', role === 'host');
+  if (role === 'host' && netRoom) { netFsDelete(netRoom).catch(() => {}); netRoom = null; }
+  if (role === 'host') netFreshMatch();
+}
+// Host: start a fresh match (mirrored to the guest through initRound).
+function netFreshMatch() {
+  document.getElementById('overlay').classList.add('hidden');
+  hideStatsModal(); cancelRouletteAnim(); rouletteState = 'idle'; lastOverlay = null;
+  scores.p1 = 0; scores.p2 = 0; mapPool = []; decidedNextMap = null; stats = makeFreshStats();
+  initRound();
+}
+function netClose() {
+  const pc = netPc, dc = netDc;
+  netPc = null; netDc = null;
+  try { if (dc) dc.close(); } catch (e) {}
+  try { if (pc) pc.close(); } catch (e) {}
+}
+function netDrop(statusKey) {
+  const wasLinked = !!netRole;
+  netClose();
+  netEvents = []; netNextMap = null;
+  Object.assign(netInput, { dx: 0, dy: 0, fire: false });
+  if (wasLinked) {
+    netRole = null;
+    botEnabled = netBotBefore;
+    document.body.classList.remove('linked', 'host', 'guest');
+    refreshToggles();
+    netFreshMatch();
+  }
+  setLinkStatus(statusKey || 'linkIntro');
+}
+
+// --- Link panel UI ---
+const linkBtn = document.getElementById('linkToggle');
+const linkPanel = document.getElementById('linkPanel');
+const linkCodeEl = document.getElementById('linkCode');
+function setLinkStatus(key, arg) { netStatus = [key, arg]; refreshLink(); }
+function refreshLink() {
+  const lang = L();
+  linkBtn.innerHTML = `${iconHTML('link', 18)}<span class="tb-label">${lang.linkLabel}</span>`;
+  linkBtn.classList.toggle('active', !!netRole);
+  linkBtn.title = lang.linkTitle;
+  linkBtn.setAttribute('aria-label', lang.linkTitle);
+  const v = lang[netStatus[0]];
+  document.getElementById('linkStatus').innerHTML = typeof v === 'function' ? v(netStatus[1]) : v;
+  document.getElementById('linkHost').textContent = lang.linkHost;
+  document.getElementById('linkJoin').textContent = lang.linkJoin;
+  document.getElementById('linkLeave').textContent = lang.linkLeave;
+  document.getElementById('linkWait').textContent = lang.linkWait;
+  const busy = !!netPc;
+  document.getElementById('linkIdle').hidden = busy;
+  document.getElementById('linkLeave').hidden = !busy;
+}
+linkBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  linkBtn.setAttribute('aria-expanded', linkPanel.classList.toggle('open'));
+});
+document.addEventListener('pointerdown', (e) => {
+  if (!linkPanel.contains(e.target) && !linkBtn.contains(e.target)) {
+    linkPanel.classList.remove('open');
+    linkBtn.setAttribute('aria-expanded', 'false');
+  }
+});
+document.getElementById('linkHost').addEventListener('click', () => netHost());
+document.getElementById('linkJoin').addEventListener('click', () => netJoin(linkCodeEl.value));
+document.getElementById('linkLeave').addEventListener('click', () => netDrop('linkIntro'));
+linkCodeEl.addEventListener('keydown', (e) => {
+  e.stopPropagation();   // typing the code must not drive the tank
+  if (e.key === 'Enter') netJoin(linkCodeEl.value);
+});
+linkCodeEl.addEventListener('keyup', (e) => e.stopPropagation());
+refreshLink();
+
 
 // --- PWA: offline cache + install ---
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {

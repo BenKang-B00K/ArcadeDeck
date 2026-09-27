@@ -60,8 +60,11 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, onGenreCli
   };
 
   // Platform badge from structural config, not translatable copy.
+  const players = game.players
+    ? (game.players[0] === game.players[1] ? `${game.players[0]}P` : `${game.players[0]}–${game.players[1]}P`)
+    : null;
   const platformBadge = game.genres.includes('Local Co-op')
-    ? <span className="platform-badge"><Gamepad2 size={12} aria-hidden="true" /> {t('gameCardCoop', 'Co-op')}</span>
+    ? <span className="platform-badge"><Gamepad2 size={12} aria-hidden="true" /> {t('gameCardCoop', 'Co-op')}{players && <b className="players-chip">{players}</b>}</span>
     : game.platform === 'PC'
     ? <span className="platform-badge"><Monitor size={12} aria-hidden="true" /> {t('gameCardPcOnly', 'PC Only')}</span>
     : game.platform === 'MOBILE'

@@ -72,6 +72,17 @@ for (const g of games) {
     error(label, `Invalid platform: "${g.platform}" (must be ${validPlatforms.join(', ')})`);
   }
 
+  // Player count [min, max] — drives the "Co-op · 2P" card badge
+  const coop = (g.genres || []).includes('Local Co-op');
+  if (g.players !== undefined) {
+    const [min, max] = Array.isArray(g.players) ? g.players : [];
+    if (g.players.length !== 2 || !Number.isInteger(min) || !Number.isInteger(max) || min < 1 || max < min) {
+      error(label, `Invalid players: ${JSON.stringify(g.players)} (use [min, max])`);
+    }
+  } else if (coop) {
+    warn(label, 'Local Co-op game missing players [min, max]');
+  }
+
   // Aspect ratio
   if (g.aspectRatio && !validAspectRatios.includes(g.aspectRatio)) {
     warn(label, `Unusual aspectRatio: "${g.aspectRatio}" (common: ${validAspectRatios.join(', ')})`);

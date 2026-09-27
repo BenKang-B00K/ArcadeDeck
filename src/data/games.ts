@@ -9,6 +9,8 @@ export interface Game {
   thumbnail: string;
   pageBg?: string;
   genres: string[];
+  // Player count [min, max] for Local Co-op games; shown as "2P" / "2–6P" on the card.
+  players?: [number, number];
   gameUrl: string;
   aspectRatio?: string;
   status?: string;

@@ -51,6 +51,29 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Two-phone link signaling (Tank Battle): host creates {offer, expireAt},
+    // guest writes `answer` once. Codes are 4 chars. No TTL (needs billing):
+    // the host deletes its room once linked, and recycles a code whose old
+    // room is answered or expired.
+    match /coop/{code} {
+      allow get: if true;
+
+      allow create: if code.size() == 4
+        && request.resource.data.keys().hasOnly(['offer', 'expireAt'])
+        && request.resource.data.offer is string
+        && request.resource.data.offer.size() < 20000
+        && request.resource.data.expireAt is timestamp
+        && request.resource.data.expireAt < request.time + duration.value(2, 'h');
+
+      allow update: if !('answer' in resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['answer'])
+        && request.resource.data.answer is string
+        && request.resource.data.answer.size() < 20000;
+
+      allow delete: if 'answer' in resource.data || resource.data.expireAt < request.time;
+      allow list: if false;
+    }
+
     // Default deny for everything else
     match /{document=**} {
       allow read, write: if false;

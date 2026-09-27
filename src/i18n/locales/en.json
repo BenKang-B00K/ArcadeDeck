@@ -61,6 +61,7 @@
     "homeNickPrefix": "Playing as",
     "homeRandomGame": "Surprise me",
     "homeGenresAria": "Game genres",
+    "homeCoopTitle": "Local Co-op",
     "homeFeaturedTitle": "Featured",
     "homeFeaturedSpan": "Game",
     "homeRecentTitle": "Jump",
@@ -1449,87 +1450,87 @@
     },
     "17": {
       "title": "Tank Battle: 1v1",
-      "description": "An intense same-screen 1v1 tank duel built for couch rivalries — destructible cover, ricochet shots, no luck involved.",
-      "fullDescription": "\n      Tank Battle: 1v1 is a fast-paced couch-multiplayer arena game designed for **two players sharing the same keyboard**. There is no online matchmaking, no account, no waiting room — pull up a friend, pick a side, and start firing. Each round resets in seconds so a single sitting easily turns into thirty matches.\n      Maps mix solid walls, **destructible crates**, and **ricochet pads**. Crates absorb one shot and then collapse, shifting cover lines mid-round so static defenders die. **Ricochet pads** bounce projectiles at fixed angles, enabling bank shots around corners — a core skill for higher-level play. Tanks have a brief **reload window** between shots, which means winning a round is usually about controlling your opponent's reload timer, not raw aim.\n      Three arena layouts ship with the game (**Symmetric Wedge, Open Plains, Maze**) and unlock as you progress. **Win streaks** build a small momentum bonus that grants slightly faster reload — the only catch-up mechanic in an otherwise pure-skill game. Strategy is everything: rush the opponent before they set up cover, or stake out a sightline and punish their reload? Read your friend, not the screen.\n    ",
-      "controls": "Player 1: WASD to move, Space to fire. Player 2: Arrow Keys to move, Enter to fire. Best on a keyboard with N-key rollover — membrane keyboards drop simultaneous inputs and cause lost shots.",
-      "tips": "Never sit still during the enemy's reload — the **catch-up reload bonus** rewards aggression, not entrenchment. Use **destructible crates** as one-shot decoys: fire a probe round into a crate to break cover the opponent was leaning on. **Ricochet pads** beat direct shots on the Maze layout because corridors funnel return fire. On membrane keyboards, choose **Player 1 (WASD)** — Arrow Keys are more likely to ghost on simultaneous-press inputs. Most experienced players win by controlling **map center**, not by sniping from the edges.",
+      "description": "A fast 1v1 tank duel: same keyboard, split-screen phone, or vs an AI with a new personality each round. 17 arenas, 8 weapons, and stars to grab for the win.",
+      "fullDescription": "\n      Tank Battle: 1v1 is a fast arena duel for **two players on one device**, or one player against an **AI bot**. Share a keyboard, split a phone screen, or lay a tablet flat between you in **face-to-face mode**. No account, no matchmaking. Rounds take seconds and the first to 3 round wins takes the match.\n      There are two ways to win a round. Destroy the other tank, or collect **3 of the 5 stars** spread around the arena. You collect a star by staying in its zone for 3 seconds. The ring drains when you leave and freezes while both tanks are inside. Stars you collect follow your tank, so both players always know the count.\n      The 17 arenas each have their own ground, walls, weather and music, from Caldera lava rivers and a neon Grid to a lunar Moonbase and a zen Shrine. A slot-style draw picks the map each round. Pickups add **Rapid, Speed, Triple, Shield** and weapons such as **Shotgun, Homing, Laser and Pierce**. Bullets bounce off walls, so bank shots work.\n      The AI rolls a new personality each round. The **Collector** goes for stars, the **Hunter** chases you, the **Guardian** contests every capture and the **Scavenger** takes every pickup. It routes around walls, but its aim wobbles and it reacts late, so you can beat it.\n    ",
+      "controls": "Keyboard: P1 (green) moves with WASD and fires with G. P2 (blue) moves with the arrow keys and fires with /. Space or Enter continues after a round. Touch: a virtual joystick and fire button. With the AI off, the phone splits into left and right halves, one for each player. Face-to-face mode puts P2's controls on the top edge, facing the other way.",
+      "tips": "Stars are often better than kills: **3 stars** win the round even at low HP, and on a timeout with tied HP the tank with more stars wins. Stand in a star zone the opponent is capturing to **freeze their ring**. **Bank shots** off walls reach tanks hiding behind cover, and Pierce goes through one wall. Check the AI's **personality tag**: kite a Hunter, block a Collector's star, and take the pickups away from a Scavenger. Save **Shield** for when you are capturing a star in the open.",
       "lore": "\n      The **Tank Arena** is the proving ground of the last age of armor — a sealed crucible where two commanders fight not for territory but for legend. Above the arena, every duel is broadcast to the cities that no longer remember why the war began.\n      Every shot counts. Every move is recorded. Only one tank leaves the dust under its own power, and only one name is written into the **iron ledger**.\n    ",
       "features": [
-        "Local 1v1 PvP — One Keyboard, Two Players",
-        "Three Arena Layouts with Destructible Cover",
-        "Ricochet Mechanics for Skill-Based Bank Shots",
-        "Catch-Up Reload Bonus to Reward Aggression",
-        "Reload-Timing Combat (No RNG)",
-        "Optimized for N-Key Rollover Keyboards",
-        "Clean Minimalist Design",
-        "PC Only — Keyboard Required"
+        "Local 1v1: Shared Keyboard, Split-Screen Phone, or Face-to-Face Tablet",
+        "AI Opponent with 4 Personalities (Collector, Hunter, Guardian, Scavenger)",
+        "Star Capture: Hold 3 of 5 Stars to Win the Round",
+        "17 Themed Arenas with Their Own Ground, Weather and Music",
+        "8 Pickups: Rapid, Speed, Triple, Shield, Shotgun, Homing, Laser, Pierce",
+        "Wall-Bounce Bank Shots and Match Stats Screen",
+        "D Dorian Soundtrack with Master/BGM/SFX Volume",
+        "English, Korean, Japanese; Installable, Works Offline"
       ],
-      "objectives": "Outmaneuver and outshoot your opponent across arena rounds, exploiting **reload windows**, **destructible cover**, and **ricochet angles** to land the decisive shot first and win the duel.",
+      "objectives": "Win 3 rounds. Win a round by destroying the other tank or by holding **3 of the 5 stars** for 3 seconds each. On a timeout, the tank with more HP wins, then the one with more stars.",
       "controlsTable": [
         {
           "key": "WASD",
-          "action": "Move Player 1's tank"
+          "action": "Move Player 1 (green)"
         },
         {
-          "key": "Spacebar",
+          "key": "G",
           "action": "Player 1 fires"
         },
         {
           "key": "Arrow Keys",
-          "action": "Move Player 2's tank"
+          "action": "Move Player 2 (blue)"
         },
         {
-          "key": "Enter",
+          "key": "/",
           "action": "Player 2 fires"
+        },
+        {
+          "key": "Space / Enter",
+          "action": "Next round / skip the map draw"
+        },
+        {
+          "key": "Touch",
+          "action": "Joystick moves, button fires (split-screen when AI is off)"
         }
       ],
       "faq": [
         {
-          "q": "How do rounds work?",
-          "a": "Each round ends when one tank is destroyed. Rounds reset in seconds, and a session easily runs to thirty or more matches. Win streaks build a small momentum bonus that gives slightly faster reload speed."
+          "q": "How do I win a round?",
+          "a": "Destroy the other tank, or collect 3 of the 5 stars. You collect a star by staying in its zone for 3 seconds. If time runs out, the tank with more HP wins. If HP is tied, the tank with more stars wins. The first player to 3 round wins takes the match."
         },
         {
-          "q": "What are ricochet pads and how do I use them?",
-          "a": "Ricochet pads bounce projectiles at fixed angles, enabling bank shots around corners. On the Maze layout especially, bounced shots beat direct fire because corridors funnel opponents into predictable positions — practicing fixed-angle bank shots is a high-return skill."
+          "q": "Can I play on a phone or tablet?",
+          "a": "Yes. Touch devices get a virtual joystick and a fire button, and the AI is on by default. Turn the AI off to split the screen, with P1 on the left half and P2 on the right. For a tablet lying flat on a table, turn on face-to-face mode so P2 plays from the top edge."
         },
         {
-          "q": "How do destructible crates affect strategy?",
-          "a": "Crates absorb exactly one shot and then collapse, eliminating that cover. Fire a probe shot into a crate your opponent is leaning on to remove their protection mid-round. Static defenders relying on crates are particularly vulnerable to this."
+          "q": "What do the AI personalities do?",
+          "a": "The bot rolls a new personality each round, never the same one twice in a row. The Collector goes for stars and fights from range. The Hunter ignores stars and chases you. The Guardian contests any star being captured. The Scavenger grabs every pickup before going for stars."
         },
         {
-          "q": "What is the key to winning firefights?",
-          "a": "Control your opponent's reload timer. Never sit still during their reload — aggression during that window prevents them from setting up advantageous angles. Most rounds are decided by who exploits the reload gap better, not who aims best."
+          "q": "What pickups are there?",
+          "a": "Four buffs: Rapid (faster fire), Speed, Triple (3-shell fan) and Shield. Four weapons with limited ammo: Shotgun, Homing missile, Laser and Pierce, which goes through one wall. Each pickup shows its name on the field."
         },
         {
-          "q": "Does keyboard type matter?",
-          "a": "Yes — N-key rollover keyboards register all simultaneous inputs. Membrane keyboards may drop inputs when both players press simultaneously, which causes missed shots. If you can choose, take Player 1 (WASD) on a membrane board, as Arrow Keys ghost more easily."
+          "q": "What counts toward my personal best?",
+          "a": "Match wins against the AI. Local 2-player matches are not counted."
         }
       ],
       "featuredComments": [
         {
-          "name": "IronLedger",
-          "text": "Fire a probe shot into the crate your opponent is leaning on. They reposition, you advance. This single trick won me six straight rounds before my friend figured out what I was doing.",
+          "name": "StarThief",
+          "text": "Won a round with one HP left because I parked on the third star while my friend was reloading. Stars change everything. You can't just camp and trade shots anymore.",
           "badge": "Top Tip"
         },
         {
-          "name": "ReloadEdge",
-          "text": "The entire game is about their reload timer. Rush during their reload, fall back during yours. Every round I've lost was because I went passive when I should have been aggressive. Never sit still."
+          "name": "GuardianHater",
+          "text": "The Guardian AI drives straight into your star zone the moment the ring starts filling. Bait it to one star, then take the other side of the map."
         },
         {
-          "name": "MazeRicochet",
-          "text": "Ricochet pads on the Maze layout are genuinely high-skill. A bank shot around a corner that your opponent can't see coming is the most satisfying thing in this entire game."
+          "name": "TableTopTanks",
+          "text": "Face-to-face mode on an iPad lying flat is the best way to play this. Both of us sat on opposite sides of the table, and the countdown flips so each of us can read it."
         },
         {
-          "name": "WedgePusher",
-          "text": "Map center control on Symmetric Wedge. Edges give you one or two firing angles. Center gives you four and pressure in every direction. This is the first thing I teach anyone new to the game."
-        },
-        {
-          "name": "ArmorDuel",
-          "text": "A sealed crucible where two commanders fight not for territory but for legend. Every shot recorded. The melodramatic lore framing makes hitting a ricochet shot feel ten times more dramatic than it has any right to."
-        },
-        {
-          "name": "MembraneP1",
-          "text": "Take Player 1 on a membrane keyboard every time. Arrow Keys ghost on simultaneous inputs and cost you shots you can't afford to lose. The tip about N-key rollover is not optional information."
+          "name": "BankShot",
+          "text": "Pierce plus a wall bounce is awful to play against. Learn the angles on Grid first, because the neon walls make the bounces easy to read."
         }
       ],
       "scoreLabel": "AI Wins"
@@ -2944,7 +2945,6 @@
         }
       ]
     },
-    "_comment": "Per-game canonical English. Translators mirror this in {lang}.json.",
     "34": {
       "title": "Personal Travel Diary",
       "description": "A travel planner and tracker, not a game: plan a trip or log one you took on a 3D map that zooms from a spinning globe down to street-level buildings. Type a place, it lands on the map with the route drawn from your last stop — flight arcs, train lines, local hops — then press play and watch the traveler fly through your days.",
@@ -3114,6 +3114,197 @@
           "a": "No. The board needs right-click to sell, drag to lay walls and a hover-driven detail panel, and the 19×15 grid is laid out for a desktop screen. Play it on a computer."
         }
       ]
-    }
+    },
+    "35": {
+      "title": "Color Spin Rush",
+      "description": "A one-touch reflex arcade game: colored marbles drop toward a spinning disk and you hold the screen to turn it, catching each marble in the slot of its own color. Combos multiply every catch, new colors join as your score climbs, three misses end the run. 55 skins to collect, each a full theme.",
+      "fullDescription": "\n      Color Spin Rush is a **one-touch reflex arcade game**. A ring with five colored slots sits near the bottom of the screen and marbles fall toward it from above. **Hold to spin** — the longer you hold, the faster the disk turns; let go and it glides to a stop. Line up the slot that matches the falling marble's color before it lands and it drops through for points. Catch it in the wrong color, or let it miss, and you lose one of **three lives**.\n      Every catch in a row raises your **combo**, and each catch pays **10 × combo** points, so a long streak is worth far more than careful singles. The run starts with two colors; a new one joins every 150 points until all five are in play, and marbles already in the air are cleared without penalty when the disk reshuffles. Levels climb with your score, marbles arrive more often, and fall speed rises until level 8 — fall time scales to your screen, so a small phone and a tall tablet get the same reaction window.\n      Every 500 points earns a **coin**, and a daily bonus adds five more. Coins unlock **55 skins**, and each one is a whole theme rather than a recolor: its own marble art (pixel, gem, candy, planet, lava, circuit and more), disk design, animated backdrop and button style. The game over screen counts up your final score and shows your best combo, level reached and coins earned. Music and effects are written in C Dorian with separate volume sliders; plays in English, Korean and Japanese, installs as an app and works offline.\n    ",
+      "controls": "Hold the screen (or Space / Enter): Spin the disk — hold longer to spin faster, release to slow down / Pause button or Esc: Pause. Works on phones, tablets and desktop.",
+      "scoreLabel": "Score",
+      "tips": "**Tap in short bursts** — the disk keeps gliding after you let go, so a quick tap moves it one slot while a long hold overshoots. **Watch the lowest marble**, not the newest one; it lands first. **Protect the combo**: each catch pays 10 × combo, so a 20-catch streak is worth more than a hundred careful singles. When a **new color joins**, the marbles in the air are cleared for free — use the pause to re-read the slot order. Claim the **daily bonus** for five coins toward the next skin. The **ink** skin gives every color its own pattern, which helps if some colors are hard to tell apart.",
+      "lore": "\n      The ring does not care what you meant to do. It only knows where it stopped. Every marble is a question with one right answer, and you have about a second to find it with a thumb.\n      Two colors is a warm-up. Five colors is a conversation. Somewhere past a thirty-catch combo the spinning stops feeling like reaction and starts feeling like rhythm.\n    ",
+      "features": [
+        "One-Touch Control: Hold to Spin, Release to Glide",
+        "Catch Each Marble in the Slot of Its Own Color",
+        "Combo Scoring: Every Catch Pays 10 × Combo",
+        "Two Colors to Start, Up to Five as Your Score Climbs",
+        "Same Reaction Time on Every Screen Size",
+        "55 Skins, Each With Its Own Marbles, Disk, Backdrop and UI",
+        "Coins Every 500 Points Plus a Daily Bonus",
+        "C Dorian Music and Effects With Separate Volume Sliders",
+        "Phone, Tablet and Desktop — Installable, Plays Offline",
+        "English, Korean and Japanese"
+      ],
+      "objectives": "Spin the disk so every falling marble lands in the **slot of its own color**. Build a long **combo** — each catch pays 10 × combo — survive as up to **five colors** join, and set a new best before your **three lives** run out. Spend the coins you earn on new skins.",
+      "controlsTable": [
+        {
+          "key": "Hold screen",
+          "action": "Spin the disk — the longer you hold, the faster it turns"
+        },
+        {
+          "key": "Release",
+          "action": "The disk glides and slows to a stop"
+        },
+        {
+          "key": "Space  /  Enter",
+          "action": "Hold to spin on a keyboard"
+        },
+        {
+          "key": "Pause  /  Esc",
+          "action": "Pause, resume or return to the menu"
+        }
+      ],
+      "faq": [
+        {
+          "q": "How is my score calculated?",
+          "a": "Each marble caught in the matching slot is worth 10 × your current combo. The combo goes up by one with every catch in a row and resets to 1 on a wrong color or a miss. Your best score is saved in this browser."
+        },
+        {
+          "q": "Why did the marbles in the air disappear?",
+          "a": "A new color joined. The slot layout changes when that happens, so marbles already falling are cleared with a sparkle and no life lost, and a new marble drops soon after. The game also waits if a marble is about to land, so the disk never reshuffles right before a catch."
+        },
+        {
+          "q": "How do I unlock skins?",
+          "a": "With coins. You earn one coin every 500 points in a run, plus five from the daily bonus on the start screen. The preview shows a locked skin's marbles, disk and backdrop before you buy it."
+        },
+        {
+          "q": "Does it work on a phone?",
+          "a": "Yes — it was built for phones first. Hold anywhere on the screen to spin. It also plays on tablets and on desktop with Space or Enter, and can be installed to your home screen to play offline."
+        }
+      ]
+    },
+    "36": {
+      "title": "Build Site Clicker",
+      "description": "A 3D construction clicker: every tap hires a worker who walks to the build site and hammers the landmark one floor at a time. Spend clicks on build power, crew, walk speed, payroll and lucky swings, finish the landmark and move on to the next — 45 building types from pyramids to wind turbines.",
+      "fullDescription": "\n      Build Site Clicker is a **3D construction clicker** set on a floating island under a purple night sky. **Every tap hires a worker**: a chibi builder drops in on a beam of light, walks to the scaffold and swings an energy hammer at the floor being built. Each hit adds build points; fill a floor and the next one lights up in the glowing cyan build plan. Top off the last floor and the landmark is done — fireworks, a fade, and a new area with a new landmark to build.\n      Taps are also your **currency**. Spend them in the shop on five upgrades: **Build power** (+1 point per hit and +8 % compounding), **Crew** (more workers per tap — tiers let one worker carry a whole crew), **Walk speed**, **Payroll** (hits pay back 1 % of their build points as clicks) and the late-game **Lucky swing** (a chance for a hit to count ×5). A Buy max toggle spends everything you can afford in one go.\n      The first five levels are handcrafted — a tower, a pyramid, a lighthouse, a skyscraper and a bridge — and every level after that is **generated** from its number, cycling through **45 building types**: pagodas, ziggurats, rockets, castles, a pencil, an ice cream cone, a robot, a wedding cake, a Gothic cathedral, a trophy, a wind turbine and more. Each landmark is bigger than the last, so a steady run reaches level 10 in about eight minutes and level 30 in about an hour. A tower crane follows the build, workers hammer from wrap-around scaffolding, and every hit throws sparks, dust and debris. Progress saves in your browser automatically. Synthesized D Dorian effects with a volume slider; plays in English, Korean and Japanese, installs as an app and works offline.\n    ",
+      "controls": "Tap or click: Hire a worker / Drag: Orbit the camera / Pinch or scroll: Zoom / Q / E: Rotate, A / D: Pan, W / S: Zoom (keyboard). Works on phones, tablets and desktop.",
+      "scoreLabel": "Landmarks Built",
+      "tips": "**Build power first** — it multiplies every hit from every worker, and its +8 % compounds, so it stays the best buy for the whole game. **Crew** comes next: each level adds one worker's worth to every tap. **Walk speed** caps at 20 and **Payroll** at 10, so finish them and pour the rest into power and crew. **Lucky swing** starts at 5,000 clicks — save it for later levels. Turn on **Buy max** once upgrades get cheap relative to your clicks. Tapping with **several fingers** counts every finger, but auto-clickers are ignored — more than 20 taps a second or a machine-steady rhythm will not count.",
+      "lore": "\n      Nobody on the island remembers who drew the plans. They just glow there, cyan outlines of floors that do not exist yet, waiting for someone to swing a hammer at them.\n      So the crews keep coming, one tap at a time. A tower, then a pyramid, then a lighthouse on a rock in the sky. After the fiftieth landmark the foreman stops asking what the next one will be and starts asking how tall.\n    ",
+      "features": [
+        "Every Tap Hires a Worker Who Walks Over and Hammers",
+        "Floating-Island 3D Build Site With Toon Shading and Bloom",
+        "5 Upgrades: Build Power, Crew, Walk Speed, Payroll, Lucky Swing",
+        "45 Building Types, Endless Generated Levels",
+        "Tower Crane That Follows the Build, Wrap-Around Scaffolding",
+        "Sparks, Dust, Debris and Fireworks on Every Clear",
+        "Buy Max Toggle and Compact Big Numbers",
+        "Synthesized D Dorian Sound With a Volume Slider",
+        "Phone, Tablet and Desktop — Installable, Plays Offline",
+        "English, Korean and Japanese"
+      ],
+      "objectives": "Tap to **hire workers** and hammer each landmark to completion, **floor by floor**. Spend clicks on upgrades so every hit counts for more, and see how many **landmarks** you can build — each one is bigger than the last.",
+      "controlsTable": [
+        {
+          "key": "Tap  /  Left click",
+          "action": "Hire a worker — every finger counts on touch screens"
+        },
+        {
+          "key": "Drag",
+          "action": "Orbit the camera around the build site"
+        },
+        {
+          "key": "Pinch  /  Scroll",
+          "action": "Zoom in and out"
+        },
+        {
+          "key": "Q  /  E",
+          "action": "Rotate the camera"
+        },
+        {
+          "key": "A  /  D",
+          "action": "Pan left / right"
+        },
+        {
+          "key": "W  /  S",
+          "action": "Zoom in / out"
+        }
+      ],
+      "faq": [
+        {
+          "q": "What does my score count?",
+          "a": "Landmarks built — the number of levels you have finished. ArcadeDeck reads it from the game every few seconds while you play, so your best is saved even though a clicker never ends."
+        },
+        {
+          "q": "Does it keep building while I am away?",
+          "a": "No. Workers only come when you tap, and workers already on the way finish their swing. Your clicks, upgrades and progress on the current landmark are saved in this browser automatically."
+        },
+        {
+          "q": "Why did some of my taps not count?",
+          "a": "The game ignores auto-clickers: more than 20 taps a second, or a perfectly steady machine rhythm, does not earn clicks. Normal tapping, even fast multi-finger drumming, always counts."
+        },
+        {
+          "q": "Does it work on a phone?",
+          "a": "Yes. Tap anywhere to hire workers, drag to orbit and pinch to zoom. It also runs on tablets and desktop, and can be installed to your home screen to play offline."
+        }
+      ]
+    },
+    "37": {
+      "title": "Tandem",
+      "description": "A two-player local co-op puzzle platformer: a red and a blue jelly climb 21 floating-ruin stages that neither can finish alone. Stand on each other's heads, hold pressure plates open, pass through your own color's barriers and time your crossings past saws, crushers and cannons. Both must reach the exit.",
+      "fullDescription": "\n      Tandem is a **two-player local co-op puzzle platformer** for one keyboard, two gamepads or one touch screen. Player 1 is a red jelly, Player 2 a blue one, and a stage only clears when **both reach the glowing exit**. Nothing in it can be solved alone.\n      The tools are simple and they stack. **Stand on your partner's head** to reach a ledge that is too high. **Pressure plates** open doors, raise bridges and build steps, but only while someone stands on them — so one player holds the way open while the other crosses, then you swap. **Red passes red barriers, blue passes blue**, and each color can stand on the other's barrier as a floor. Later stages add saw drones, crushers and cannons that fire on a beat, so the player holding a plate has to dodge while the other runs.\n      **21 stages** in three tiers: nine Basics that teach one idea at a time, nine Advanced stages that combine them, and three Expert stages that stack timing hazards on top of co-op tasks. Every stage has gems to collect and a best clear time to beat, and clearing a stage unlocks the next. Set in dusk-lit floating ruins with a shader sky, waterfalls and glowing jelly characters; music and effects are written in D Dorian with separate volume sliders. Plays in English, Korean and Japanese, installs as an app and works offline.\n    ",
+      "controls": "Player 1 (Red): A / D move, W jump / Player 2 (Blue): ← / → move, ↑ jump / Gamepads: first pad = P1, second pad = P2 / Touch: left buttons = P1, right buttons = P2 / R: Restart stage / Esc or P: Pause",
+      "scoreLabel": "Stages cleared",
+      "tips": "**Talk to each other** — most stages are about who goes first. **Boost before you build**: one player stands on the other's head to reach a ledge, then holds a plate so the partner can follow. On a **door that is also a floor**, check where your partner stands before stepping off the plate. **Colored barriers work both ways**: red walks through red but can stand on blue. Under **crushers and cannons**, count the beat before you move — the plate holder jumps the bolts, the runner crosses between shots. Press **R** to restart instantly instead of walking back.",
+      "lore": "\n      High above the clouds, the old ruins still remember two of everything: two doors, two plates, two colors of light. They were built for a pair.\n      Red and Blue woke up on the same ledge at dusk. Neither can reach the exit alone, and the ruins will not open for one. So they climb together — one holding the door, one running through, and then the other way round.\n    ",
+      "features": [
+        "Two-Player Local Co-op: One Keyboard, Two Gamepads or One Touch Screen",
+        "21 Stages in Basics, Advanced and Expert Tiers",
+        "Boost Off Your Partner's Head to Reach High Ledges",
+        "Pressure Plates That Open Doors, Raise Bridges and Build Steps",
+        "Red and Blue Color Barriers — Pass Your Own, Stand on the Other",
+        "Saw Drones, Crushers and Cannons That Fire on a Beat",
+        "Gems and a Best Clear Time on Every Stage",
+        "D Dorian Music and Effects With Separate Volume Sliders",
+        "Phone, Tablet and Desktop — Installable, Plays Offline",
+        "English, Korean and Japanese"
+      ],
+      "objectives": "Get **both players to the exit** of every stage. Use each other as a step, hold **pressure plates** for your partner, cross through your own **color's barriers**, and dodge the saws, crushers and cannons. Collect every **gem** and beat your **best time** on all **21 stages**.",
+      "controlsTable": [
+        {
+          "key": "A / D  ·  W",
+          "action": "Player 1 (Red): move left / right, jump"
+        },
+        {
+          "key": "← / →  ·  ↑",
+          "action": "Player 2 (Blue): move left / right, jump"
+        },
+        {
+          "key": "Gamepads",
+          "action": "First pad controls P1, second pad controls P2"
+        },
+        {
+          "key": "Touch",
+          "action": "Left-side buttons for P1, right-side buttons for P2"
+        },
+        {
+          "key": "R",
+          "action": "Restart the stage"
+        },
+        {
+          "key": "Esc  /  P",
+          "action": "Pause"
+        }
+      ],
+      "faq": [
+        {
+          "q": "Can I play it alone?",
+          "a": "Not really — every stage needs two players working together, and the exit only opens when both reach it. One person can steer both characters on a keyboard (A/D/W and the arrow keys), but it is designed for two people on one device."
+        },
+        {
+          "q": "How do we play on a phone or tablet?",
+          "a": "Turn the device to landscape. The buttons on the left control Player 1 and the buttons on the right control Player 2, so two people can share one screen. Gamepads also work: the first connected pad is P1 and the second is P2."
+        },
+        {
+          "q": "What counts toward my personal best?",
+          "a": "The number of stages you have cleared, out of 21. Gems and best clear times are saved per stage in this browser and shown on the stage select screen."
+        },
+        {
+          "q": "Why won't the stage end when I reach the exit?",
+          "a": "Both players have to be at the exit. When only one is there, a reminder appears — go back and help your partner across."
+        }
+      ]
+    },
+    "_comment": "Per-game canonical English. Translators mirror this in {lang}.json."
   }
 }

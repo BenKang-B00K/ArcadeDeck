@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="75%">
+      <stop offset="0" stop-color="#34345e"/>
+      <stop offset="1" stop-color="#12121f"/>
+    </radialGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#86efac"/>
+      <stop offset="0.5" stop-color="#4ade80"/>
+      <stop offset="1" stop-color="#22a255"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <circle cx="256" cy="270" r="170" fill="#f5d742" opacity="0.10"/>
+  <g transform="translate(256 280) rotate(-30)">
+    <rect x="-120" y="-100" width="240" height="44" rx="10" fill="#1a1a1a"/>
+    <rect x="-120" y="56" width="240" height="44" rx="10" fill="#1a1a1a"/>
+    <g fill="#3a3a3a">
+      <rect x="-110" y="-94" width="20" height="32" rx="3"/><rect x="-78" y="-94" width="20" height="32" rx="3"/><rect x="-46" y="-94" width="20" height="32" rx="3"/><rect x="-14" y="-94" width="20" height="32" rx="3"/><rect x="18" y="-94" width="20" height="32" rx="3"/><rect x="50" y="-94" width="20" height="32" rx="3"/><rect x="82" y="-94" width="20" height="32" rx="3"/>
+      <rect x="-110" y="62" width="20" height="32" rx="3"/><rect x="-78" y="62" width="20" height="32" rx="3"/><rect x="-46" y="62" width="20" height="32" rx="3"/><rect x="-14" y="62" width="20" height="32" rx="3"/><rect x="18" y="62" width="20" height="32" rx="3"/><rect x="50" y="62" width="20" height="32" rx="3"/><rect x="82" y="62" width="20" height="32" rx="3"/>
+    </g>
+    <rect x="-108" y="-62" width="216" height="124" rx="14" fill="url(#body)" stroke="#166534" stroke-width="8"/>
+    <rect x="16" y="-12" width="150" height="24" rx="6" fill="#2a2a2a" stroke="#111" stroke-width="4"/>
+    <rect x="150" y="-16" width="22" height="32" rx="4" fill="#1a1a1a"/>
+    <circle r="50" fill="#22c55e" stroke="#166534" stroke-width="8"/>
+    <path d="M-38 -12a40 40 0 0 1 70 -18" stroke="#bbf7d0" stroke-width="8" fill="none" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(410 118)" fill="#ffe267">
+    <path d="M0 -52l14 36 38 4-29 24 9 38L0 30l-32 20 9-38-29-24 38-4z" stroke="#b8860b" stroke-width="4" stroke-linejoin="round"/>
+  </g>
+</svg>

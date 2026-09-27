@@ -9,6 +9,7 @@ interface GameGridProps {
   searchQuery?: string;
   onProductionClick?: () => void;
   onGenreClick?: (genre: string) => void;
+  excludeGenre?: string;
 }
 
 // Top 3 genres by game count — suggested when a search comes up empty.
@@ -18,7 +19,7 @@ const TOP_GENRES: string[] = (() => {
   return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([genre]) => genre);
 })();
 
-const GameGrid: React.FC<GameGridProps> = ({ selectedGenre = 'All', searchQuery = '', onProductionClick, onGenreClick }) => {
+const GameGrid: React.FC<GameGridProps> = ({ selectedGenre = 'All', searchQuery = '', onProductionClick, onGenreClick, excludeGenre }) => {
   const t = useUiText();
   const { lang, overlay } = useLocale();
 
@@ -26,7 +27,7 @@ const GameGrid: React.FC<GameGridProps> = ({ selectedGenre = 'All', searchQuery 
     const q = searchQuery.trim().toLowerCase();
     const filtered = games.filter(g => {
       const matchesGenre = selectedGenre === 'All' || g.genres.includes(selectedGenre);
-      if (!matchesGenre) return false;
+      if (!matchesGenre || (excludeGenre && g.genres.includes(excludeGenre))) return false;
       if (!q) return true;
       const haystack = [
         getLocalizedString(g, 'title', 'en', null),
@@ -38,7 +39,7 @@ const GameGrid: React.FC<GameGridProps> = ({ selectedGenre = 'All', searchQuery 
       return haystack.includes(q);
     });
     return filtered.sort((a, b) => parseInt(b.id) - parseInt(a.id));
-  }, [selectedGenre, searchQuery, lang, overlay]);
+  }, [selectedGenre, searchQuery, lang, overlay, excludeGenre]);
 
   const title = selectedGenre !== 'All'
     ? `${selectedGenre} ${t('gameGridGames', 'Games')}`

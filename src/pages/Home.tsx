@@ -17,6 +17,8 @@ import './Home.css';
 const ALL_GENRES = ['All', ...new Set(deviceGames.flatMap(g => g.genres))];
 const PLAYABLE = deviceGames.filter(g => g.status !== 'IN PRODUCTION' && g.gameUrl);
 const FEATURED = deviceGames.filter(g => g.featured);
+const COOP_GENRE = 'Local Co-op';
+const COOP = deviceGames.filter(g => g.genres.includes(COOP_GENRE)).sort((a, b) => parseInt(b.id) - parseInt(a.id));
 
 // Full-width spotlight for the Featured Game section. Thumbnail is 640w, so the
 // image column caps at ~half the container; description fills the rest.
@@ -112,6 +114,7 @@ const Home: React.FC = () => {
   const unfiltered = genre === 'All';
   const showRecent = recent.length > 0 && unfiltered;
   const showFeatured = FEATURED.length > 0 && unfiltered;
+  const showCoop = COOP.length > 0 && unfiltered;
 
   // Head meta / JSON-LD are baked by scripts/prerender-pages.js. The static
   // shell in index.html mirrors this <header> so the LCP element is stable.
@@ -182,9 +185,21 @@ const Home: React.FC = () => {
                 </div>
               </section>
             )}
+
+            {showCoop && (
+              <section className="recent-section">
+                <h2 className="section-title">
+                  {t('homeCoopTitle', 'Local Co-op')} {t('gameGridGames', 'Games')}
+                  <span className="section-count">{COOP.length}</span>
+                </h2>
+                <div className="game-grid">
+                  {COOP.map(g => <GameCard key={g.id} game={g} onProductionClick={comingSoon} onGenreClick={pickGenre} />)}
+                </div>
+              </section>
+            )}
           </div>
 
-          <GameGrid selectedGenre={genre} onProductionClick={comingSoon} onGenreClick={pickGenre} />
+          <GameGrid selectedGenre={genre} excludeGenre={showCoop ? COOP_GENRE : undefined} onProductionClick={comingSoon} onGenreClick={pickGenre} />
 
           <div className="container">
             <AdBanner slot={AD_SLOTS.HOME_BOTTOM} />

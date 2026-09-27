@@ -285,7 +285,7 @@
   {
     "id": "17",
     "slug": "tank-battle-1v1",
-    "language": "KO/EN",
+    "language": "EN/KO/JA",
     "thumbnail": "images/tank-battle-1v1.webp",
     "genres": [
       "Action",
@@ -295,10 +295,10 @@
     "gameUrl": "https://games.arcadedeck.net/tank-battle-1v1/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
-    "platform": "PC",
+    "platform": "BOTH",
     "isOriginal": true,
     "badge": "UPDATE",
-    "lastUpdated": "2026-05-16",
+    "lastUpdated": "2026-09-27",
     "scoreTiers": [
       3,
       10,
@@ -711,5 +711,74 @@
     "platform": "BOTH",
     "isOriginal": true,
     "badge": "NEW"
+  },
+  {
+    "id": "35",
+    "slug": "color-spin-rush",
+    "language": "EN/KO/JA",
+    "thumbnail": "images/color-spin-rush.webp",
+    "genres": [
+      "Arcade",
+      "Casual"
+    ],
+    "gameUrl": "https://games.arcadedeck.net/color-spin-rush/",
+    "aspectRatio": "9/16",
+    "status": "PLAYABLE",
+    "platform": "BOTH",
+    "isOriginal": true,
+    "badge": "NEW",
+    "scoreTiers": [
+      300,
+      1500,
+      5000,
+      15000,
+      30000
+    ]
+  },
+  {
+    "id": "36",
+    "slug": "build-site-clicker",
+    "language": "EN/KO/JA",
+    "thumbnail": "images/build-site-clicker.webp",
+    "genres": [
+      "Idle",
+      "Casual"
+    ],
+    "gameUrl": "https://games.arcadedeck.net/build-site-clicker/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "platform": "BOTH",
+    "isOriginal": true,
+    "badge": "NEW",
+    "scoreTiers": [
+      1,
+      5,
+      15,
+      35,
+      50
+    ]
+  },
+  {
+    "id": "37",
+    "slug": "tandem",
+    "language": "EN/KO/JA",
+    "thumbnail": "images/tandem.webp",
+    "genres": [
+      "Puzzle",
+      "Local Co-op"
+    ],
+    "gameUrl": "https://games.arcadedeck.net/tandem/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "platform": "BOTH",
+    "isOriginal": true,
+    "badge": "NEW",
+    "scoreTiers": [
+      1,
+      5,
+      12,
+      18,
+      21
+    ]
   }
 ]

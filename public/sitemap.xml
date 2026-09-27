@@ -354,7 +354,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/play/tank-battle-1v1</loc>
-    <lastmod>2026-05-16</lastmod>
+    <lastmod>2026-09-27</lastmod>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/tank-battle-1v1" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/tank-battle-1v1" />
@@ -363,7 +363,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ja/play/tank-battle-1v1</loc>
-    <lastmod>2026-05-16</lastmod>
+    <lastmod>2026-09-27</lastmod>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/tank-battle-1v1" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/tank-battle-1v1" />
@@ -372,7 +372,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ko/play/tank-battle-1v1</loc>
-    <lastmod>2026-05-16</lastmod>
+    <lastmod>2026-09-27</lastmod>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/tank-battle-1v1" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/tank-battle-1v1" />
@@ -839,8 +839,89 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/travel-diary" />
   </url>
   <url>
+    <loc>https://arcadedeck.net/play/color-spin-rush</loc>
+    <lastmod>2026-09-27</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/color-spin-rush" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/color-spin-rush" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/color-spin-rush" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/color-spin-rush" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ja/play/color-spin-rush</loc>
+    <lastmod>2026-09-27</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/color-spin-rush" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/color-spin-rush" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/color-spin-rush" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/color-spin-rush" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ko/play/color-spin-rush</loc>
+    <lastmod>2026-09-27</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/color-spin-rush" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/color-spin-rush" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/color-spin-rush" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/color-spin-rush" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/play/build-site-clicker</loc>
+    <lastmod>2026-09-27</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/build-site-clicker" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/build-site-clicker" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/build-site-clicker" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/build-site-clicker" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ja/play/build-site-clicker</loc>
+    <lastmod>2026-09-27</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/build-site-clicker" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/build-site-clicker" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/build-site-clicker" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/build-site-clicker" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ko/play/build-site-clicker</loc>
+    <lastmod>2026-09-27</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/build-site-clicker" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/build-site-clicker" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/build-site-clicker" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/build-site-clicker" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/play/tandem</loc>
+    <lastmod>2026-09-27</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/tandem" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/tandem" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/tandem" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/tandem" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ja/play/tandem</loc>
+    <lastmod>2026-09-27</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/tandem" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/tandem" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/tandem" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/tandem" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ko/play/tandem</loc>
+    <lastmod>2026-09-27</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/tandem" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/tandem" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/tandem" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/tandem" />
+  </url>
+  <url>
     <loc>https://arcadedeck.net/genre/action</loc>
-    <lastmod>2026-09-15</lastmod>
+    <lastmod>2026-09-27</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/action" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/action" />
@@ -849,7 +930,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ja/genre/action</loc>
-    <lastmod>2026-09-15</lastmod>
+    <lastmod>2026-09-27</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/action" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/action" />
@@ -858,7 +939,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ko/genre/action</loc>
-    <lastmod>2026-09-15</lastmod>
+    <lastmod>2026-09-27</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/action" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/action" />
@@ -948,7 +1029,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/genre/local-co-op</loc>
-    <lastmod>2026-09-16</lastmod>
+    <lastmod>2026-09-27</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/local-co-op" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/local-co-op" />
@@ -957,7 +1038,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ja/genre/local-co-op</loc>
-    <lastmod>2026-09-16</lastmod>
+    <lastmod>2026-09-27</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/local-co-op" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/local-co-op" />
@@ -966,7 +1047,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ko/genre/local-co-op</loc>
-    <lastmod>2026-09-16</lastmod>
+    <lastmod>2026-09-27</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/local-co-op" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/local-co-op" />
@@ -975,7 +1056,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/genre/pvp</loc>
-    <lastmod>2026-09-16</lastmod>
+    <lastmod>2026-09-27</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/pvp" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/pvp" />
@@ -984,7 +1065,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ja/genre/pvp</loc>
-    <lastmod>2026-09-16</lastmod>
+    <lastmod>2026-09-27</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/pvp" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/pvp" />
@@ -993,7 +1074,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ko/genre/pvp</loc>
-    <lastmod>2026-09-16</lastmod>
+    <lastmod>2026-09-27</lastmod>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/pvp" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/pvp" />

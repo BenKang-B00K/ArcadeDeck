@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0d0d1a">
+  <meta name="description" content="Color Spin Rush — spin the disk, catch the marbles with the matching color. Free, offline, installable.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Color Spin">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/png" href="./icons/favicon.png">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <title>Color Spin Rush</title>
+  <script type="module" crossorigin src="./assets/index-CB3_qUuT.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DTYgBOGm.css">
+</head>
+<body>
+
+<!-- ── SVG ICON DEFS ── -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-sound-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+  </symbol>
+  <symbol id="i-sound-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>
+  </symbol>
+  <symbol id="i-sound-low" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+  </symbol>
+  <symbol id="i-music" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+  </symbol>
+  <symbol id="i-sfx" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="2.5"/>
+  </symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></symbol>
+  <symbol id="i-owned" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5 5.5-6"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+</svg>
+
+<!-- ── START SCREEN ── -->
+<div id="start-screen" class="screen active">
+  <div class="lang-switcher">
+    <button class="lang-btn" data-lang="ko" aria-label="한국어">KO</button>
+    <button class="lang-btn" data-lang="en" aria-label="English">EN</button>
+    <button class="lang-btn" data-lang="ja" aria-label="日本語">JA</button>
+  </div>
+  <button class="sound-btn sound-btn-start" id="sound-toggle-start" aria-label="Sound" aria-haspopup="dialog" aria-controls="sound-panel">
+    <svg class="ico on"><use href="#i-sound-on"/></svg><svg class="ico low"><use href="#i-sound-low"/></svg><svg class="ico off"><use href="#i-sound-off"/></svg>
+  </button>
+
+  <div class="title-group">
+    <div class="game-title" data-i18n="title">컬러<br>스핀 러시</div>
+    <div class="game-sub" data-i18n="subtitle">COLOR · SPIN · RUSH</div>
+  </div>
+
+  <canvas id="preview-canvas" width="280" height="280"></canvas>
+
+  <div class="skin-selector">
+    <button class="skin-btn" id="prev-skin-btn" aria-label="Previous skin"><svg class="ico"><use href="#i-left"/></svg></button>
+    <div class="skin-name" id="skin-name">클래식</div>
+    <button class="skin-btn" id="next-skin-btn" aria-label="Next skin"><svg class="ico"><use href="#i-right"/></svg></button>
+  </div>
+
+  <div class="skins-owned"><span data-i18n="skins_owned">보유 스킨</span> <b id="owned-display">0 / 0</b><i id="owned-bar"></i><button class="skin-btn owned-btn" id="owned-skin-btn" aria-label="Next owned skin"><svg class="ico"><use href="#i-owned"/></svg></button></div>
+
+  <div class="coin-display">
+    <span class="coin-icon">🪙</span>
+    <span class="coin-count">0</span>
+  </div>
+
+  <div class="best-score">
+    <span data-i18n="best_score">최고 기록</span> &nbsp; <span id="best-display">0</span>
+  </div>
+
+  <div class="btn-group">
+    <button class="btn btn-primary" id="start-game-btn" data-i18n="start_game">게임 시작</button>
+    <button class="btn btn-primary btn-unlock" id="skin-unlock-btn" style="display:none" data-i18n="unlock">해금 (10 코인)</button>
+    <button class="btn btn-secondary btn-gold" id="daily-gift-btn" data-i18n="daily_gift">🎁 오늘의 보너스 +5</button>
+    <button class="btn btn-secondary" id="show-howto-btn" data-i18n="how_to">게임 방법</button>
+    <button class="btn btn-secondary" id="install-btn" hidden data-i18n="install_app">📲 앱으로 설치</button>
+  </div>
+
+  <p class="start-hint" data-i18n="tap_hint_start">
+    화면을 탭하여 원판을 회전하고<br>같은 색 구슬을 통과시키세요
+  </p>
+</div>
+
+<!-- ── HOW-TO MODAL ── -->
+<div class="howto-overlay" id="howto-overlay">
+  <div class="howto-modal">
+    <div class="howto-header">
+      <div class="howto-title" data-i18n="howto_title">🎮 게임 방법</div>
+      <button class="howto-close" id="close-howto-btn" aria-label="Close"><svg class="ico"><use href="#i-close"/></svg></button>
+    </div>
+    <div class="howto-body">
+      <div class="howto-step">
+        <div class="step-icon purple">🔮</div>
+        <div class="step-text">
+          <div class="step-title" data-i18n="howto_step1_title">구슬 낙하</div>
+          <div class="step-desc" data-i18n="howto_step1_desc">화면 상단에서 컬러 구슬이 내려옵니다. 점수가 오를수록 색상 종류와 속도가 증가합니다.</div>
+        </div>
+      </div>
+      <div class="howto-step">
+        <div class="step-icon blue">👆</div>
+        <div class="step-text">
+          <div class="step-title" data-i18n="howto_step2_title">탭해서 회전</div>
+          <div class="step-desc" data-i18n="howto_step2_desc">화면을 <strong style="color:#74b9ff">길게 누를수록</strong> 원판이 빠르게 회전합니다. 손을 떼면 서서히 감속합니다.</div>
+        </div>
+      </div>
+      <div class="howto-step">
+        <div class="step-icon green">🎯</div>
+        <div class="step-text">
+          <div class="step-title" data-i18n="howto_step3_title">색상 매칭</div>
+          <div class="step-desc" data-i18n="howto_step3_desc">구슬 색과 <strong style="color:#55efc4">같은 색 슬롯</strong>으로 받아내세요. 정확히 맞추면 점수 획득!</div>
+        </div>
+      </div>
+      <div class="howto-step">
+        <div class="step-icon gold">⚡</div>
+        <div class="step-text">
+          <div class="step-title" data-i18n="howto_step4_title">콤보 보너스</div>
+          <div class="step-desc" data-i18n="howto_step4_desc">연속 성공할수록 콤보가 쌓입니다. 점수 폭발!</div>
+        </div>
+      </div>
+      <div class="howto-step">
+        <div class="step-icon red">❤️</div>
+        <div class="step-text">
+          <div class="step-title" data-i18n="howto_step5_title">목숨 관리</div>
+          <div class="step-desc" data-i18n="howto_step5_desc">색상을 틀리거나 구슬을 놓치면 목숨 감소. <strong style="color:#ff6b6b">3번</strong> 실패하면 게임 오버!</div>
+        </div>
+      </div>
+    </div>
+    <div class="howto-footer">
+      <button class="howto-start-btn" id="howto-start-btn" data-i18n="howto_start">바로 시작하기 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── GAME SCREEN ── -->
+<div id="game-screen" class="screen">
+  <div class="hud">
+    <!-- Score -->
+    <div class="hud-card score-card">
+      <div class="hud-label" data-i18n="score">점수</div>
+      <div class="hud-score" id="score-display">0</div>
+    </div>
+
+    <!-- Center: lives + level -->
+    <div class="hud-center">
+      <div class="hud-lives-row" id="lives-display"></div>
+      <div class="level-badge" id="level-badge">LV 1</div>
+    </div>
+
+    <!-- Combo + sound + pause -->
+    <div class="hud-right">
+      <div class="hud-btns">
+      <button class="sound-btn" id="pause-btn" aria-label="Pause"><svg class="ico"><use href="#i-pause"/></svg></button>
+      <button class="sound-btn" id="sound-toggle-game" aria-label="Sound" aria-haspopup="dialog" aria-controls="sound-panel">
+        <svg class="ico on"><use href="#i-sound-on"/></svg><svg class="ico low"><use href="#i-sound-low"/></svg><svg class="ico off"><use href="#i-sound-off"/></svg>
+      </button>
+      </div>
+      <div class="hud-card combo-card" id="combo-card">
+        <div class="hud-label" data-i18n="combo">콤보</div>
+        <div class="hud-combo" id="combo-display">×1</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Speed bar -->
+  <div class="speed-bar-wrap">
+    <div class="speed-bar-track">
+      <div class="speed-bar-fill" id="speed-bar" style="width:5%"></div>
+    </div>
+    <div class="speed-bar-label">
+      <span data-i18n="speed">속도</span>
+      <span id="speed-label">LV 1</span>
+    </div>
+  </div>
+
+  <canvas id="game-canvas"></canvas>
+  <div class="pause-overlay" id="pause-overlay">
+    <div class="pause-card">
+      <div class="pause-title" data-i18n="paused">일시정지</div>
+      <button class="btn btn-primary" id="resume-btn" data-i18n="resume">계속하기</button>
+      <button class="btn btn-secondary" id="quit-btn" data-i18n="main_menu">메인 화면</button>
+      <div class="pause-hint" data-i18n="tap_resume">빈 곳을 탭하면 계속</div>
+    </div>
+  </div>
+  <div class="tap-hint" data-i18n="tap_hint_game">누르고 있으면 회전 &nbsp;·&nbsp; 같은 색 슬롯에 받아내세요</div>
+</div>
+
+<!-- ── RESULT SCREEN ── -->
+<div id="result-screen" class="screen">
+  <div class="result-verdict" id="result-verdict" data-i18n="game_over">게임 오버</div>
+  <div class="result-hero">
+    <div class="res-label" data-i18n="final_score">최종 점수</div>
+    <div class="res-score" id="res-score">0</div>
+    <div class="res-newbest" id="res-newbest" data-i18n="new_best" hidden>최고 기록 갱신!</div>
+    <div class="res-best" id="res-best-wrap">
+      <div class="res-best-row"><span data-i18n="best_score">최고 기록</span><b id="res-best">0</b></div>
+      <i class="res-bar"><i id="res-bar"></i></i>
+    </div>
+  </div>
+  <div class="result-stats">
+    <div class="stat-tile"><span class="stat-value" id="res-combo">×1</span><span class="stat-label" data-i18n="max_combo">최고 콤보</span></div>
+    <div class="stat-tile"><span class="stat-value" id="res-level">1</span><span class="stat-label" data-i18n="level">레벨</span></div>
+    <div class="stat-tile"><span class="stat-value" id="res-coins">+0</span><span class="stat-label" data-i18n="coins_earned">획득 코인</span></div>
+  </div>
+  <div class="btn-group">
+    <button class="btn btn-primary" id="restart-btn" data-i18n="restart">다시 하기</button>
+    <button class="btn btn-secondary" id="main-menu-btn" data-i18n="main_menu">메인 화면</button>
+  </div>
+</div>
+
+<!-- ── SOUND PANEL (shared popover) ── -->
+<div class="sound-panel" id="sound-panel" role="dialog" aria-label="Sound">
+  <div class="sp-head">
+    <span data-i18n="sound">사운드</span>
+    <button class="sound-btn" id="sp-mute" aria-label="Mute">
+      <svg class="ico on"><use href="#i-sound-on"/></svg><svg class="ico low"><use href="#i-sound-low"/></svg><svg class="ico off"><use href="#i-sound-off"/></svg>
+    </button>
+  </div>
+  <label class="sp-row"><svg class="ico" aria-hidden="true"><use href="#i-music"/></svg><span class="sp-name" data-i18n="music">음악</span><input type="range" id="vol-bgm" min="0" max="100" step="1"><output id="vol-bgm-out"></output></label>
+  <label class="sp-row"><svg class="ico" aria-hidden="true"><use href="#i-sfx"/></svg><span class="sp-name" data-i18n="sfx">효과음</span><input type="range" id="vol-sfx" min="0" max="100" step="1"><output id="vol-sfx-out"></output></label>
+</div>
+
+</body>
+</html>

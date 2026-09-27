@@ -38,7 +38,7 @@ const FeaturedCard: React.FC<{ game: Game }> = ({ game }) => {
         </div>
         <h3>{title}</h3>
         <p>{description}</p>
-        <span className="play-btn">{t('gameCardPlayNow', 'Play Now')}</span>
+        <span className="play-btn">{game.kind === 'app' ? t('gameCardOpenApp', 'Open') : t('gameCardPlayNow', 'Play Now')}</span>
       </div>
     </Link>
   );

@@ -360,7 +360,7 @@ const GamePlayer: React.FC = () => {
                 title={getLocalizedString(game, 'title', 'en', null)}
                 frameBorder="0"
                 allowFullScreen
-                allow="fullscreen; autoplay; gamepad; clipboard-write"
+                allow="fullscreen; autoplay; gamepad; clipboard-write; web-share"
                 className="game-iframe"
                 onLoad={() => {
                   setIframeLoading(false);

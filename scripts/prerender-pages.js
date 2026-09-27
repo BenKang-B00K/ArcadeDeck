@@ -183,10 +183,12 @@ for (const lang of SUPPORTED_LOCALES) {
     const tEn = txt(game.id, 'en');
     // Self-contained per locale — ja/ko put "ArcadeDeck" at the front, so the
     // template must not append it again.
-    const playFreeOn = ui('seoPlayFreeOn', lang, 'Play Free on ArcadeDeck');
-    const playPrefix = ui('seoPlayPrefix', lang, 'Play');
+    // kind 'app' = a tool, not a game: no Play wording, WebApplication JSON-LD.
+    const isApp = game.kind === 'app';
+    const playFreeOn = isApp ? ui('seoFreeOnApp', lang, 'Free on ArcadeDeck') : ui('seoPlayFreeOn', lang, 'Play Free on ArcadeDeck');
+    const playPrefix = isApp ? '' : ui('seoPlayPrefix', lang, 'Play') + ' ';
     const aboutH2 = ui('seoAboutThisGame', lang, 'About This Game');
-    const howToH2 = ui('seoHowToPlay', lang, 'How to Play');
+    const howToH2 = isApp ? ui('seoHowToUse', lang, 'How to Use') : ui('seoHowToPlay', lang, 'How to Play');
     const tipsH2 = ui('seoProTips', lang, 'Pro Tips');
     const loreH2 = ui('seoWorldLore', lang, 'World Lore');
     const featH2 = ui('seoKeyFeatures', lang, 'Key Features');
@@ -195,7 +197,7 @@ for (const lang of SUPPORTED_LOCALES) {
     const genresLabel = ui('seoGenres', lang, 'Genres');
 
     const title = `${t.title} - ${playFreeOn}`;
-    const desc = `${playPrefix} ${t.title}: ${t.description} ${ui('seoFreeOnlineGame', lang, 'Free online browser game on ArcadeDeck.')}`;
+    const desc = `${playPrefix}${t.title}: ${t.description} ${isApp ? ui('seoFreeOnlineApp', lang, 'Free browser app on ArcadeDeck. No download, no sign-up.') : ui('seoFreeOnlineGame', lang, 'Free online browser game on ArcadeDeck.')}`;
     const thumbUrl = `${SITE}/${encodeURI(game.thumbnail)}`;
     const pageUrl = fullUrl(lang, routePath);
     // Hero banner is the LCP element on the click-to-start page. Preload it
@@ -233,7 +235,7 @@ for (const lang of SUPPORTED_LOCALES) {
       display: 'standalone',
       display_override: ['standalone', 'minimal-ui'],
       orientation: 'any',
-      categories: ['games', 'entertainment'],
+      categories: isApp ? ['travel', 'utilities'] : ['games', 'entertainment'],
       icons: [
         ...gameIcons(slug),
         { src: '/play/' + slug + '/icon-512.webp', sizes: '512x512', type: 'image/webp', purpose: 'maskable' },
@@ -242,11 +244,11 @@ for (const lang of SUPPORTED_LOCALES) {
 
     const jsonLd = JSON.stringify({
       '@context': 'https://schema.org',
-      '@type': 'VideoGame',
+      '@type': isApp ? 'WebApplication' : 'VideoGame',
       name: t.title,
       description: t.description,
       genre: game.genres,
-      applicationCategory: 'GameApplication',
+      applicationCategory: isApp ? 'TravelApplication' : 'GameApplication',
       operatingSystem: 'Web Browser',
       image: thumbUrl,
       url: pageUrl,

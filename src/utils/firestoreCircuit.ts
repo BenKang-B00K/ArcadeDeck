@@ -52,11 +52,10 @@ export async function safeRead<T>(fn: () => Promise<T>, fallback: T): Promise<T>
   try {
     return await fn();
   } catch (err) {
-    if (isQuotaError(err)) {
-      openCircuit();
-      return fallback;
-    }
-    throw err;
+    if (isQuotaError(err)) openCircuit();
+    // Reads are best-effort: any failure (quota, missing index, offline) degrades to fallback.
+    else console.warn('[firestore] read failed', err);
+    return fallback;
   }
 }
 

@@ -1,0 +1,1364 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d1424">
+<title>Personal Travel Diary</title>
+<style>
+:root{--paper:#f5eee0;--paper2:#ebe1cd;--card:#fff8ea;--ink:#2b2420;--muted:#7b6f63;--line:#dccfb6;--accent:#d2452d;--sea:#0d1424}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:var(--sea);color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI","Hiragino Sans","Apple SD Gothic Neo","Malgun Gothic","Yu Gothic",sans-serif;-webkit-tap-highlight-color:transparent}
+#map{position:fixed;inset:0;background:radial-gradient(120% 90% at 60% 40%,#17223a 0%,#0d1424 55%,#070b15 100%)}
+#panel{position:fixed;left:16px;top:16px;bottom:16px;width:340px;background:var(--paper);border-radius:14px;
+  box-shadow:0 24px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;overflow:hidden;z-index:2}
+header{padding:20px 20px 14px;border-bottom:1px dashed var(--line);position:relative}
+.kicker{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;font-family:inherit;border:0;background:none;padding:4px 6px;margin:-4px -6px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.kicker svg{width:14px;height:14px}
+.kicker:hover,.kicker:focus-visible{background:var(--paper2);outline:none}
+.steps:empty::after{content:attr(data-empty);display:block;padding:12px 10px;font-size:13px;color:var(--muted);font-style:italic}
+.privacy{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:12px;color:var(--muted);line-height:1.3}
+.privacy>svg{width:14px;height:14px;flex:none}
+#privText{flex:1}
+.pill{flex:none;display:inline-flex;align-items:center;gap:5px;height:32px;padding:0 12px;border-radius:999px;border:0;background:var(--ink);color:var(--paper);font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.pill[hidden]{display:none}
+.pill svg{width:14px;height:14px}
+.pill:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+body.ro .grip,body.ro .acts,body.ro #add,body.ro #newDay{display:none}
+body.ro .privacy{color:var(--accent);font-weight:600}
+#sh{margin:auto;border:0;border-radius:14px;background:var(--paper);color:var(--ink);padding:20px;width:min(92vw,400px);box-shadow:0 30px 80px rgba(0,0,0,.5)}
+#sh::backdrop{background:rgba(5,8,15,.8)}
+#sh h3{font-family:Georgia,"Hiragino Mincho ProN","Yu Mincho","Batang",serif;font-size:22px;margin-bottom:8px}
+.shNote{font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.45}
+.shBtns{display:flex;flex-direction:column;gap:8px}
+.shBtns button{display:flex;align-items:center;gap:10px;height:48px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);font:inherit;font-size:15px;color:var(--ink);cursor:pointer;text-align:left}
+.shBtns button:hover,.shBtns button:focus-visible{border-color:var(--accent);outline:none}
+#shUrl{width:100%;margin-top:10px;height:40px;border:1px solid var(--line);border-radius:8px;background:var(--card);padding:0 10px;font:inherit;font-size:13px;color:var(--ink)}
+#shMsg{font-size:13px;color:var(--accent);min-height:18px;margin-top:8px}
+.shWarn{font-size:12px;color:var(--muted);background:var(--paper2);border-radius:8px;padding:8px 10px;margin-top:6px;line-height:1.45}
+.linkBtn{border:0 !important;background:none !important;padding:0 !important;color:var(--accent) !important;text-decoration:underline;font-weight:600}
+h1{font-family:Georgia,"Hiragino Mincho ProN","Yu Mincho","Batang",serif;font-size:28px;line-height:1.15;margin-top:6px;padding-right:96px}
+.langs{position:absolute;right:14px;top:14px;display:flex;gap:2px;background:var(--paper2);border-radius:9px;padding:2px}
+.langs button{border:0;background:none;font-family:inherit;font-weight:600;font-size:12px;color:var(--muted);min-width:30px;height:28px;border-radius:7px;cursor:pointer}
+.langs button[aria-pressed=true]{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+#tripSel{margin:10px 20px 0;font:inherit;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--card)}
+#days{list-style:none;padding:4px 12px 16px;overflow:auto;flex:1;overscroll-behavior:contain}
+.day h2{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:14px 8px 6px;display:flex;gap:10px;align-items:center}
+.day.target h2{color:var(--accent)}
+.day h2{cursor:pointer}
+.day h2::after{content:"";flex:1;border-top:1px solid var(--line)}
+.steps{list-style:none}
+.steps li{position:relative}
+.steps li:not(:last-child)::before{content:"";position:absolute;left:27px;top:48px;bottom:-8px;border-left:2px dotted var(--line)}
+.step{display:flex;gap:12px;width:100%;text-align:left;padding:10px;border-radius:10px;border:0;background:none;font:inherit;color:inherit;cursor:pointer;align-items:flex-start;min-height:56px}
+.step:hover{background:rgba(255,248,234,.7)}
+.step:focus-visible,.ctrl button:focus-visible,.langs button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.step .ic{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--paper2);position:relative;z-index:1;transition:background .2s,color .2s}
+.step b{font-weight:600;font-size:15px;line-height:1.35}
+.step small{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.step.on{background:var(--card);box-shadow:inset 3px 0 0 var(--accent)}
+.step.on .ic{background:var(--accent);color:#fff}
+.step.plan b::after{content:attr(data-plan);margin-left:6px;font-size:10px;font-weight:700;color:var(--accent);border:1px solid var(--accent);border-radius:4px;padding:1px 4px;vertical-align:2px}
+#add{position:relative;padding:10px 16px 0;border-top:1px dashed var(--line)}
+#add .row{display:flex;gap:6px}
+#add .sm{align-items:center;justify-content:space-between;font-size:12px;color:var(--muted);padding:6px 2px 0;gap:10px}
+#add .sm label{display:flex;align-items:center;gap:5px;cursor:pointer;min-height:32px}
+#status{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#q{flex:1;min-width:0;height:44px;border:1px solid var(--line);border-radius:10px;background:var(--card);padding:0 12px;font:inherit;font-size:16px;color:var(--ink)}
+#q:focus,#kind:focus{outline:2px solid var(--accent);outline-offset:1px}
+#kind{height:44px;border:1px solid var(--line);border-radius:10px;background:var(--card);font:inherit;font-size:14px;padding:0 6px;color:var(--ink)}
+#newDay{border:1px solid var(--line);background:none;border-radius:8px;height:32px;padding:0 10px;font:inherit;font-size:12px;color:var(--ink);cursor:pointer}
+#sugg{position:absolute;left:16px;right:16px;bottom:calc(100% - 4px);list-style:none;background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:0 -10px 30px rgba(0,0,0,.18);max-height:260px;overflow-y:auto;z-index:3}
+#sugg button{display:block;width:100%;text-align:left;border:0;background:none;padding:10px 12px;font:inherit;color:inherit;cursor:pointer;min-height:44px}
+#sugg button:hover,#sugg button:focus-visible{background:var(--paper2);outline:none}
+#sugg b{font-size:14px;font-weight:600}
+#sugg small{display:block;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.steps li{display:grid;grid-template-columns:20px 1fr auto;align-items:start;border-radius:10px}
+.steps li:not(:last-child)::before{left:47px}
+.grip{width:20px;height:56px;border:0;background:none;color:var(--muted);cursor:grab;touch-action:none;display:grid;place-items:center;opacity:.45;border-radius:6px}
+.grip:hover,.grip:focus-visible{opacity:1;outline:none;background:var(--paper2)}
+.grip svg{width:16px;height:16px;stroke-width:3}
+.acts{display:flex;flex-direction:column;padding-top:4px}
+.act{flex:none;width:32px;height:32px;border:0;background:none;color:var(--muted);border-radius:8px;cursor:pointer;display:grid;place-items:center;opacity:.55}
+.act:hover,.act:focus-visible{opacity:1;background:var(--paper2);outline:none}
+.act svg{width:17px;height:17px}
+.thumbs{grid-column:2/4;display:flex;gap:6px;overflow-x:auto;padding:0 8px 8px 56px;scrollbar-width:thin}
+.th{flex:none;width:56px;height:56px;border:0;padding:0;border-radius:8px;overflow:hidden;cursor:zoom-in;background:var(--paper2)}
+.th img{width:100%;height:100%;object-fit:cover;display:block}
+.th:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.steps li.dragging{opacity:.35}
+.steps li.drop-before{box-shadow:inset 0 3px 0 var(--accent)}
+.steps li.drop-after{box-shadow:inset 0 -3px 0 var(--accent)}
+.day.drop-into .steps{outline:2px dashed var(--accent);outline-offset:2px;border-radius:10px}
+.steps:empty{min-height:44px}
+#lb{margin:auto;border:0;padding:0;background:#0b0f1a;border-radius:12px;max-width:min(94vw,1100px);max-height:92vh;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+#lb::backdrop,#nd::backdrop{background:rgba(5,8,15,.8)}
+#nd h4{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:12px 0 6px}
+.dl{list-style:none;display:flex;flex-direction:column;gap:6px}
+.dl li{display:flex;gap:6px;align-items:stretch}
+.dl .dlDel{flex:none;width:44px;min-height:52px;display:grid;place-items:center;padding:0;color:var(--muted)}
+.dl .dlDel:hover,.dl .dlDel:focus-visible{color:var(--accent)}
+.dl button{width:100%;text-align:left;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:10px 12px;font:inherit;color:var(--ink);cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center;min-height:52px}
+.dl button:hover,.dl button:focus-visible{border-color:var(--accent);outline:none}
+.dl b{font-size:15px;font-weight:600}
+.dl small{grid-column:1;font-size:12px;color:var(--muted)}
+.dl .cur{grid-row:1/3;grid-column:2;font-size:11px;font-weight:700;color:var(--accent)}
+.ndSep{border:0;border-top:1px dashed var(--line);margin:16px 0 14px}
+#nd{max-height:90vh;overflow:auto;margin:auto;border:0;border-radius:14px;background:var(--paper);color:var(--ink);padding:20px;width:min(92vw,380px);box-shadow:0 30px 80px rgba(0,0,0,.5)}
+#nd h3{font-family:Georgia,"Hiragino Mincho ProN","Yu Mincho","Batang",serif;font-size:22px;margin-bottom:14px}
+#nd label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);margin-bottom:12px;flex:1}
+#nd input{height:44px;border:1px solid var(--line);border-radius:10px;background:var(--card);padding:0 10px;font:inherit;font-size:16px;color:var(--ink);width:100%}
+#nd input:focus{outline:2px solid var(--accent);outline-offset:1px}
+#nd .dates{display:flex;gap:10px}
+.ndBtns{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}
+.ndBtns button{height:44px;padding:0 18px;border-radius:10px;border:1px solid var(--line);background:var(--card);font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
+.ndBtns .primary{background:var(--accent);border-color:var(--accent);color:#fff}
+#lbImg{display:block;max-width:min(94vw,1100px);max-height:calc(92vh - 56px);object-fit:contain;margin:auto}
+.lbbar{display:flex;align-items:center;gap:6px;padding:6px 8px;color:var(--paper);font-size:13px}
+.lbbar button{width:44px;height:44px;border:0;background:none;color:var(--paper);border-radius:8px;cursor:pointer;display:grid;place-items:center}
+.lbbar button:hover,.lbbar button:focus-visible{background:rgba(255,255,255,.1);outline:none}
+.ctrl{display:flex;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px dashed var(--line)}
+.ctrl button{flex:1;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;cursor:pointer;color:var(--ink)}
+.ctrl #play{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.lbl{pointer-events:none}
+.lbl span{display:block;transform:translateY(-22px);font:600 12px/1 system-ui,sans-serif;color:var(--paper);background:rgba(13,20,36,.82);
+  border:1px solid rgba(245,238,224,.22);padding:6px 9px;border-radius:999px;white-space:nowrap;backdrop-filter:blur(4px)}
+.lbl.city span{background:none;border:0;padding:0;backdrop-filter:none;transform:translateY(-50%);font-size:11px;letter-spacing:.04em;color:rgba(214,224,245,.85);text-shadow:0 1px 3px #0d1424,0 0 8px #0d1424}
+.lbl.lm span{transform:translateY(10px);background:rgba(52,36,12,.85);border-color:rgba(232,184,74,.45);color:#f6dca0;font-size:11px;padding:4px 7px}
+.lbl.on span{background:var(--accent);border-color:transparent;color:#fff}
+#attr{position:fixed;right:8px;bottom:6px;z-index:1;font-size:10px;color:rgba(245,238,224,.6);background:rgba(13,20,36,.6);padding:2px 6px;border-radius:4px}
+#attr a{color:inherit}
+@media (max-width:700px){
+  #attr{bottom:auto;top:calc(6px + env(safe-area-inset-top))}
+  #panel{left:0;right:0;bottom:0;top:auto;width:auto;max-height:52vh;border-radius:16px 16px 0 0}
+  header{padding:14px 16px 10px}
+  h1{font-size:22px}
+  .ctrl{padding-top:10px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+}}
+</script>
+</head>
+<body>
+<div id="map"></div>
+<aside id="panel">
+  <header>
+    <button class="kicker" id="newTrip"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4M12 13v4M10 15h4"/></svg><span data-t="subtitle"></span></button>
+    <h1 id="title"></h1>
+    <div class="privacy">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+      <span id="privText"></span>
+      <button type="button" id="shareBtn" class="pill"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg><span data-t="share"></span></button>
+      <button type="button" id="saveCopy" class="pill" hidden data-t="saveCopy"></button>
+    </div>
+    <div class="langs" role="group" aria-label="Language">
+      <button data-lang="en">EN</button><button data-lang="ko">한</button><button data-lang="ja">日</button>
+    </div>
+  </header>
+  <select id="tripSel" hidden></select>
+  <ol id="days"></ol>
+  <form id="add" autocomplete="off">
+    <ul id="sugg" role="listbox" hidden></ul>
+    <div class="row">
+      <input id="q" type="search" enterkeyhint="search">
+      <select id="kind"></select>
+    </div>
+    <div class="row sm">
+      <label><input type="checkbox" id="plan"> <span data-t="planLbl"></span></label>
+      <span id="status" aria-live="polite"></span>
+      <button type="button" id="newDay" data-t="newDay"></button>
+    </div>
+  </form>
+  <nav class="ctrl">
+    <button id="prev"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <button id="play"></button>
+    <button id="next"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+    <button id="ovw"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg></button>
+  </nav>
+</aside>
+<dialog id="nd">
+  <form method="dialog">
+    <h3 data-t="myDiaries"></h3>
+    <div id="ndLists"></div>
+    <hr class="ndSep">
+    <h3 data-t="newTrip"></h3>
+    <label><span data-t="tripName"></span><input id="ndName" maxlength="60" autocomplete="off"></label>
+    <div class="dates">
+      <label><span data-t="start"></span><input type="date" id="ndStart" required></label>
+      <label><span data-t="end"></span><input type="date" id="ndEnd"></label>
+    </div>
+    <div class="ndBtns"><button type="button" id="ndImport" class="linkBtn" data-t="importFile"></button><span style="flex:1"></span><button value="cancel" formnovalidate data-t="cancel"></button><button value="ok" class="primary" data-t="create"></button></div>
+  </form>
+</dialog>
+<dialog id="sh">
+  <form method="dialog">
+    <h3 data-t="shareTitle"></h3>
+    <p class="shNote" data-t="shareNote"></p>
+    <div class="shBtns">
+      <button type="button" id="shLink"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/></svg><span data-t="copyLink"></span></button>
+      <button type="button" id="shFile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg><span data-t="downloadFile"></span></button>
+      <button type="button" id="shNative" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg><span data-t="nativeShare"></span></button>
+    </div>
+    <input id="shUrl" readonly hidden aria-label="Link">
+    <p id="shMsg" aria-live="polite"></p>
+    <p id="shWarn" class="shWarn" hidden data-t="localWarn"></p>
+    <div class="ndBtns"><button value="close" data-t="close"></button></div>
+  </form>
+</dialog>
+<dialog id="lb">
+  <img id="lbImg" alt="">
+  <div class="lbbar">
+    <button id="lbPrev"></button><span id="lbN"></span><button id="lbNext"></button>
+    <span style="flex:1"></span>
+    <button id="lbDel"></button><button id="lbClose"></button>
+  </div>
+</dialog>
+<div id="attr">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</div>
+
+<script src="mapdata.js"></script>
+<script src="worlddata.js"></script>
+<script type="module">
+import * as THREE from 'three';
+import { MapControls } from 'three/addons/controls/MapControls.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+import { Line2 } from 'three/addons/lines/Line2.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
+import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
+import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
+
+// ─── DATA ─── diaries live only in this browser (localStorage + IndexedDB photos); nothing hard-coded.
+// Each step = arrival at `to`; route leg starts at previous step's `to` (first leg: trip.start). Order = diary order.
+const PLACES = {}, TRIPS = [];
+
+// ─── I18N ───
+const T = {
+  en: { subtitle: 'Personal Travel Diary', day: n => `Day ${n}`, overview: 'Overview', play: 'Play', pause: 'Pause', prev: 'Previous', next: 'Next', planned: 'PLAN',
+        placeholder: 'Type a place name…', planLbl: 'Plan', newDay: '+ Day', searching: 'Searching…', none: 'No results', err: 'Search unavailable', del: 'Remove', kindLbl: 'Type', move: 'Drag to reorder (or ↑/↓)', addPhoto: 'Add photos', delPhoto: 'Delete photo', delPhotoQ: 'Delete this photo?', delStepQ: 'Remove this stop and its photos?', close: 'Close', photoErr: 'Some photos could not be read', newTrip: 'Start a new diary', myDiaries: 'My diaries', now: 'Traveling now', upcoming: 'Upcoming plans', previous: 'Previous diaries', undated: 'No dates', current: 'Open', delDiary: 'Delete diary', delDiaryQ: n => `Delete "${n}" and its photos? This cannot be undone.`, stops: n => `${n} ${n === 1 ? 'stop' : 'stops'}`, inDays: n => n === 1 ? 'tomorrow' : `in ${n} days`, tripName: 'Diary name (optional)', start: 'Start date', end: 'End date', cancel: 'Cancel', create: 'Start', untitled: d => `Trip from ${d}`, emptyHint: 'Type a place below to add it',
+        private: 'No one but you can see this until you share', sharedNote: 'Shared — anyone with your link or file can see the copy you sent', share: 'Share',
+        shareTitle: 'Share this diary', shareNote: 'Sharing sends a copy of this diary. Edits you make later stay private until you share again.',
+        copyLink: 'Copy link (no photos)', downloadFile: 'Download file (with photos)', nativeShare: 'Share…', copied: 'Link copied', copyManual: 'Copy the link below',
+        fileSaved: 'File saved — send it to anyone', localWarn: 'This app runs only on your computer, so links open only here. Send the file instead, or put the app online (e.g. GitHub Pages) to share links.',
+        viewing: 'Shared diary — view only', saveCopy: 'Save to my diaries', importFile: 'Open a shared file', badFile: 'Could not read this diary', sharedTitle: 'Shared diary',
+        kind: { visit: 'Visit', eat: 'Eat', stay: 'Stay', train: 'Train', flight: 'Flight' },
+        tpl: { visit: p => `Visited ${p}`, eat: p => `Ate at ${p}`, stay: p => `Stayed at ${p}`, train: p => `Took the train to ${p}`, flight: p => `Flew to ${p}` } },
+  ko: { subtitle: '나의 여행 일기', day: n => `${n}일차`, overview: '전체 보기', play: '재생', pause: '일시정지', prev: '이전', next: '다음', planned: '계획',
+        placeholder: '장소 이름 입력…', planLbl: '계획', newDay: '+ 일차', searching: '검색 중…', none: '결과 없음', err: '검색 불가', del: '삭제', kindLbl: '유형', move: '끌어서 순서 변경 (또는 ↑/↓)', addPhoto: '사진 추가', delPhoto: '사진 삭제', delPhotoQ: '이 사진을 삭제할까요?', delStepQ: '이 장소와 사진을 삭제할까요?', close: '닫기', photoErr: '일부 사진을 읽을 수 없습니다', newTrip: '새 일기 시작', myDiaries: '내 일기', now: '여행 중', upcoming: '다가오는 계획', previous: '지난 일기', undated: '날짜 없음', current: '보는 중', delDiary: '일기 삭제', delDiaryQ: n => `"${n}"와(과) 사진을 삭제할까요? 되돌릴 수 없어요.`, stops: n => `${n}곳`, inDays: n => n === 1 ? '내일' : `${n}일 후`, tripName: '일기 이름 (선택)', start: '시작일', end: '종료일', cancel: '취소', create: '시작', untitled: d => `${d} 여행`, emptyHint: '아래에 장소를 입력해 추가하세요',
+        private: '공유하기 전까지는 나만 볼 수 있어요', sharedNote: '공유됨 — 링크나 파일을 받은 사람은 보낸 사본을 볼 수 있어요', share: '공유',
+        shareTitle: '이 일기 공유하기', shareNote: '공유하면 이 일기의 사본이 전달돼요. 이후 수정한 내용은 다시 공유하기 전까지 비공개예요.',
+        copyLink: '링크 복사 (사진 제외)', downloadFile: '파일 다운로드 (사진 포함)', nativeShare: '공유…', copied: '링크를 복사했어요', copyManual: '아래 링크를 복사하세요',
+        fileSaved: '파일을 저장했어요 — 누구에게나 보낼 수 있어요', localWarn: '이 앱은 내 컴퓨터에서만 실행 중이라 링크는 이 기기에서만 열려요. 파일을 보내거나, 앱을 온라인에 올리면(예: GitHub Pages) 링크로 공유할 수 있어요.',
+        viewing: '공유받은 일기 — 보기 전용', saveCopy: '내 일기에 저장', importFile: '공유받은 파일 열기', badFile: '이 일기를 읽을 수 없어요', sharedTitle: '공유받은 일기',
+        kind: { visit: '방문', eat: '식사', stay: '숙박', train: '기차', flight: '비행기' },
+        tpl: { visit: p => `${p} 방문`, eat: p => `${p}에서 식사`, stay: p => `${p} 숙박`, train: p => `기차로 ${p} 이동`, flight: p => `비행기로 ${p} 이동` } },
+  ja: { subtitle: '私の旅日記', day: n => `${n}日目`, overview: '全体表示', play: '再生', pause: '一時停止', prev: '前へ', next: '次へ', planned: '予定',
+        placeholder: '場所名を入力…', planLbl: '予定', newDay: '+ 日', searching: '検索中…', none: '見つかりません', err: '検索できません', del: '削除', kindLbl: '種類', move: 'ドラッグで並べ替え（または ↑/↓）', addPhoto: '写真を追加', delPhoto: '写真を削除', delPhotoQ: 'この写真を削除しますか？', delStepQ: 'この場所と写真を削除しますか？', close: '閉じる', photoErr: '一部の写真を読み込めませんでした', newTrip: '新しい日記を始める', myDiaries: 'マイ日記', now: '旅行中', upcoming: 'これからの予定', previous: '過去の日記', undated: '日付なし', current: '表示中', delDiary: '日記を削除', delDiaryQ: n => `「${n}」と写真を削除しますか？元に戻せません。`, stops: n => `${n}か所`, inDays: n => n === 1 ? '明日' : `${n}日後`, tripName: '日記の名前（任意）', start: '開始日', end: '終了日', cancel: 'キャンセル', create: '開始', untitled: d => `${d}からの旅`, emptyHint: '下に場所を入力して追加',
+        private: '共有するまで、あなた以外は見られません', sharedNote: '共有済み — リンクやファイルを受け取った人は、送ったコピーを見られます', share: '共有',
+        shareTitle: 'この日記を共有', shareNote: '共有するとこの日記のコピーが送られます。その後の編集は、再度共有するまで非公開です。',
+        copyLink: 'リンクをコピー（写真なし）', downloadFile: 'ファイルをダウンロード（写真付き）', nativeShare: '共有…', copied: 'リンクをコピーしました', copyManual: '下のリンクをコピーしてください',
+        fileSaved: 'ファイルを保存しました — 誰にでも送れます', localWarn: 'このアプリはあなたのパソコンだけで動いているため、リンクはこの端末でしか開けません。ファイルを送るか、アプリをオンラインに公開（例: GitHub Pages）するとリンクで共有できます。',
+        viewing: '共有された日記 — 閲覧のみ', saveCopy: '自分の日記に保存', importFile: '共有ファイルを開く', badFile: 'この日記を読み込めません', sharedTitle: '共有された日記',
+        kind: { visit: '訪問', eat: '食事', stay: '宿泊', train: '電車', flight: '飛行機' },
+        tpl: { visit: p => `${p}を訪問`, eat: p => `${p}で食事`, stay: p => `${p}に宿泊`, train: p => `電車で${p}へ`, flight: p => `飛行機で${p}へ` } },
+};
+const store = { get(k) { try { return localStorage.getItem(k) } catch { return null } }, set(k, v) { try { localStorage.setItem(k, v) } catch {} } };
+let lang = store.get('lang') || (/^ko/.test(navigator.language) ? 'ko' : /^ja/.test(navigator.language) ? 'ja' : 'en');
+const L = o => o[lang] ?? o.en;
+const esc = s => String(s).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`); // geocoder names are untrusted
+const stepText = s => s.text ? L(s.text) : T[lang].tpl[s.kind](L(PLACES[s.to].name));
+
+const ICON = {
+  flight: '<path d="M10.5 3.5a1.5 1.5 0 0 1 3 0V9l8 5v2l-8-2.5V19l2 1.5V22l-3.5-1-3.5 1v-1.5l2-1.5v-5.5L3 16v-2l7.5-5z"/>',
+  train: '<rect x="5" y="3" width="14" height="13" rx="3"/><path d="M5 10h14M8.5 13.5h.01M15.5 13.5h.01M8 20l1.5-4M16 20l-1.5-4"/>',
+  local: '<circle cx="13" cy="4" r="1.6"/><path d="M11 21l2-6-3-3 1-4 3 3 3 1M10 8l-3 2-1 4"/>',
+  stay: '<path d="M3 19V6M3 14h18v5M21 14a3 3 0 0 0-3-3h-7v3"/><circle cx="7" cy="11" r="1.6"/>',
+  eat: '<path d="M3 12h18a9 7 0 0 1-18 0zM9 8l3-5M13 8l4-5"/>',
+  visit: '<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+  x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  grip: '<circle cx="9" cy="6" r=".6"/><circle cx="15" cy="6" r=".6"/><circle cx="9" cy="12" r=".6"/><circle cx="15" cy="12" r=".6"/><circle cx="9" cy="18" r=".6"/><circle cx="15" cy="18" r=".6"/>',
+  camera: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+  trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+  left: '<path d="M15 6l-6 6 6 6"/>', right: '<path d="M9 6l6 6-6 6"/>',
+  play: '<path d="M7 4.5v15l12-7.5z"/>',
+  pause: '<path d="M8 5v14M16 5v14"/>',
+};
+const svg = k => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}</svg>`;
+const MODE_COLOR = { flight: '#ffb347', train: '#5ec4ff', local: '#b8f28a' };
+
+// ─── PROJECTION ─── Web Mercator (matches baked OSM data), 1 unit = 1 km near origin, origin at Higashi-Ginza (float precision at street zoom)
+const LAT0 = 35.6694, LON0 = 139.7671, KX = 111.32 * Math.cos(LAT0 * Math.PI / 180);
+const mercDeg = lat => Math.log(Math.tan(Math.PI / 4 + lat * Math.PI / 360)) * 180 / Math.PI;
+const M0 = mercDeg(LAT0);
+const SEAM = LON0 - 180; // Pacific-centred flat map: edge in the Atlantic, so Tokyo→Calgary crosses the Pacific (match tools/bake_world.py)
+const wrapLon = lon => ((lon - SEAM) % 360 + 360) % 360 + SEAM;
+const proj = (lat, lon) => new THREE.Vector3((wrapLon(lon) - LON0) * KX, 0, -(mercDeg(Math.max(-84, Math.min(84, lat))) - M0) * KX);
+const P = id => proj(...PLACES[id].ll);
+
+// ─── SCENE ───
+const $ = s => document.querySelector(s);
+const mapEl = $('#map'), panel = $('#panel');
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+mapEl.appendChild(renderer.domElement);
+const labelR = new CSS2DRenderer();
+Object.assign(labelR.domElement.style, { position: 'absolute', inset: '0', pointerEvents: 'none' });
+mapEl.appendChild(labelR.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(45, 1, 0.01, 1e5);
+const DIR = new THREE.Vector3(0.15, 1, 0.75).normalize();
+camera.position.copy(DIR).multiplyScalar(6000);
+const controls = new MapControls(camera, renderer.domElement);
+const FLAT_MAX = 5000; // km camera distance; zooming out past it switches to the globe
+Object.assign(controls, { enableDamping: true, minDistance: 0.05, maxDistance: FLAT_MAX, maxPolarAngle: 1.25 });
+
+// multi-scale grid: spacing snaps to powers of 10 of camera distance
+const grid = new THREE.Mesh(new THREE.PlaneGeometry(40000, 40000).rotateX(-Math.PI / 2), new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false, // depth-tested → hidden behind buildings
+  uniforms: { uH: { value: 1 }, uC: { value: new THREE.Vector2() }, uS: { value: 1 }, uT: { value: 0 }, uF: { value: new THREE.Vector4() } },
+  vertexShader: `varying vec2 vP;void main(){vec4 w=modelMatrix*vec4(position,1.);vP=w.xz;gl_Position=projectionMatrix*viewMatrix*w;}`,
+  // cell phase (uF) computed in JS doubles: vP/s alone loses float32 precision far from origin (e.g. Europe, ~11 000 km)
+  fragmentShader: `uniform float uH,uS,uT;uniform vec2 uC;uniform vec4 uF;varying vec2 vP;
+    float g(float s,vec2 o){vec2 c=(vP-uC)/s+o;vec2 d=abs(fract(c-.5)-.5)/fwidth(c);return 1.-min(min(d.x,d.y),1.);}
+    void main(){float s=uS,t=uT;
+      float a=g(s,uF.xy)*(1.-t)*.14+g(s*10.,uF.zw)*.3;
+      a*=1.-smoothstep(uH*1.,uH*3.5,length(vP-uC));
+      gl_FragColor=vec4(.55,.68,.9,a);}`,
+}));
+grid.renderOrder = -100;
+scene.add(grid);
+scene.fog = new THREE.Fog(0x0d1424, 1, 2);
+
+// ─── VECTOR MAP ─── real OSM geometry baked into mapdata.js by tools/bake_map.py (no map API at runtime).
+// Units in data = meters; world = km.
+const MD = window.MAPDATA || {};
+// opaque (not transparent) so they draw in opaque pass, ordered by renderOrder, before buildings
+const ground = color => new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide, depthTest: false, depthWrite: false });
+function ribbons(lines, w) { // polylines → flat quads; w = meters, or null = per-line width in l[0]
+  const pos = [];
+  for (const l of lines ?? []) {
+    const o = w == null ? 1 : 0, hw = (w ?? l[0]) / 2000;
+    for (let i = o; i + 3 < l.length; i += 2) {
+      let ax = l[i] / 1000, az = l[i + 1] / 1000, bx = l[i + 2] / 1000, bz = l[i + 3] / 1000;
+      const len = Math.hypot(bx - ax, bz - az) || 1, ux = (bx - ax) / len * hw, uz = (bz - az) / len * hw;
+      ax -= ux; az -= uz; bx += ux; bz += uz; // extend by half width → covers joints
+      pos.push(ax - uz, 0, az + ux, ax + uz, 0, az - ux, bx - uz, 0, bz + ux, bx - uz, 0, bz + ux, ax + uz, 0, az - ux, bx + uz, 0, bz - ux);
+    }
+  }
+  return new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+}
+const ring = l => { const v = []; for (let i = 0; i < l.length; i += 2) v.push(new THREE.Vector2(l[i] / 1000, l[i + 1] / 1000)); return v; };
+const polys = list => new THREE.ShapeGeometry((list ?? []).map(l => new THREE.Shape(ring(l).map(p => new THREE.Vector2(p.x, -p.y))))).rotateX(-Math.PI / 2);
+function buildingGeo(list) { // extruded footprints, baked directional shading in vertex colors (no lights needed)
+  const pos = [], col = [], wall = new THREE.Color(0x1e2741), roof = new THREE.Color(0x323f63), c = new THREE.Color();
+  for (const b of list ?? []) {
+    const h = b[0] / 1000, pts = ring(b.slice(1));
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i], d = pts[(i + 1) % pts.length], len = Math.hypot(d.x - a.x, d.y - a.y) || 1;
+      c.copy(wall).multiplyScalar(.7 + .6 * Math.abs((d.y - a.y) * .6 - (d.x - a.x) * .8) / len);
+      pos.push(a.x, 0, a.y, d.x, 0, d.y, d.x, h, d.y, a.x, 0, a.y, d.x, h, d.y, a.x, h, a.y);
+      for (let k = 0; k < 6; k++) col.push(c.r * (k === 2 || k > 3 ? 1.25 : 1), c.g * (k === 2 || k > 3 ? 1.25 : 1), c.b * (k === 2 || k > 3 ? 1.25 : 1));
+    }
+    c.copy(roof).multiplyScalar(.85 + Math.min(h / .12, 1) * .45); // taller → brighter roof
+    for (const t of THREE.ShapeUtils.triangulateShape(pts, [])) for (const k of t) { pos.push(pts[k].x, h, pts[k].y); col.push(c.r, c.g, c.b); }
+  }
+  return new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)).setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+}
+function segLines(lines, color, linewidth, extra = {}) { // many polylines → one screen-space-width draw call
+  const pos = [];
+  for (const l of lines ?? []) for (let i = 0; i + 3 < l.length; i += 2) pos.push(l[i] / 1000, 0, l[i + 1] / 1000, l[i + 2] / 1000, 0, l[i + 3] / 1000);
+  const m = new LineSegments2(new LineSegmentsGeometry().setPositions(pos), new LineMaterial({ color, linewidth, resolution: res, transparent: true, depthWrite: false, ...extra }));
+  m.computeLineDistances(); return m;
+}
+const res = new THREE.Vector2(innerWidth, innerHeight);
+const layer = (obj, order, maxD = Infinity) => { obj.renderOrder = order; obj.userData.maxD = maxD; scene.add(obj); return obj; };
+const mapLayers = [
+  layer(new THREE.Mesh(polys(MD.park), ground(0x1a3127)), -90, 40),
+  layer(new THREE.Mesh(ribbons(MD.taxiway, null), ground(0x2c3650)), -86, 60),
+  layer(new THREE.Mesh(ribbons(MD.runway, null), ground(0x3d4865)), -85, 200),
+  layer(new THREE.Mesh(ribbons(MD.path, 2.5), ground(0x28324d)), -84, 4),
+  layer(new THREE.Mesh(ribbons(MD.minor, 7), ground(0x34415f)), -83, 15),
+  layer(new THREE.Mesh(ribbons(MD.major, 16), ground(0x5b5140)), -82, 40),
+  layer(segLines(MD.regionRoad, 0x5b5140, 1.2, { opacity: .8 }), -81),
+  layer(segLines([...(MD.regionRail ?? []), ...(MD.rail ?? [])], 0x8b95b5, 1.4, { opacity: .75 }), -80),
+  layer(segLines(MD.subway, 0x7084b8, 1.4, { opacity: .6, dashed: true, dashSize: .03, gapSize: .02 }), -80, 20),
+  layer(new THREE.Mesh(buildingGeo(MD.building), new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide })), 0, 12),
+];
+
+// ─── WORLD BASE ─── Natural Earth 1:50m baked in worlddata.js (offline): land, country borders, deserts, ice, urban areas, low-poly mountains
+const WD = window.WORLD || {};
+const wPt = (l, i) => proj(l[i + 1] / 100, l[i] / 100);
+function wPoly(list, color, order) {
+  const shapes = (list ?? []).map(l => { const v = []; for (let i = 0; i < l.length; i += 2) { const p = wPt(l, i); v.push(new THREE.Vector2(p.x, -p.z)); } return new THREE.Shape(v); });
+  const m = new THREE.Mesh(new THREE.ShapeGeometry(shapes).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color, depthTest: false, depthWrite: false, side: THREE.DoubleSide }));
+  m.renderOrder = order; scene.add(m); return m;
+}
+function wLines(list, closed) { // polylines → segment pairs
+  const pos = [];
+  for (const l of list ?? []) {
+    const n = l.length / 2;
+    for (let i = 0; i < n - (closed ? 0 : 1); i++) { const a = wPt(l, i * 2), b = wPt(l, ((i + 1) % n) * 2); pos.push(a.x, 0, a.z, b.x, 0, b.z); }
+  }
+  return pos;
+}
+const landMat = wPoly(WD.land, 0x1d2944, -99).material;
+wPoly(WD.desert, 0x262633, -98);
+wPoly(WD.ice, 0x2b3854, -98);
+wPoly(WD.urban, 0x243157, -97.5); // city outlines (Natural Earth urban areas)
+const urbanMat = new THREE.LineBasicMaterial({ color: 0x6a82bd, transparent: true, depthWrite: false });
+const urbanLine = new THREE.LineSegments(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(wLines(WD.urban, true), 3)), urbanMat);
+urbanLine.renderOrder = -96; scene.add(urbanLine);
+const coastMat = new THREE.LineBasicMaterial({ color: 0x46608f, transparent: true, depthWrite: false });
+const coast = new THREE.LineSegments(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(wLines(WD.land, true), 3)), coastMat);
+coast.renderOrder = -96; scene.add(coast);
+const borderMat = new LineMaterial({ color: 0x9fb2e0, linewidth: 1.3, resolution: res, transparent: true, depthWrite: false, opacity: .75 });
+const borders = new LineSegments2(new LineSegmentsGeometry().setPositions(wLines(WD.borders, false)), borderMat); // country outlines
+borders.renderOrder = -95; scene.add(borders);
+
+// low-poly mountains: 5-sided cones, snow-tinted tips, flat shaded (needs lights; MeshBasic layers ignore them)
+scene.add(new THREE.HemisphereLight(0xb8c8f0, 0x141a2a, .75));
+const flatSun = new THREE.DirectionalLight(0xffffff, 1.1); flatSun.position.set(-1, 2, 1); scene.add(flatSun);
+const coneGeo = (() => {
+  // 3 height rings: snow only on the top third, rock below
+  const g = new THREE.ConeGeometry(1, 1, 5, 3).translate(0, .5, 0).toNonIndexed(), p = g.attributes.position, c = [];
+  for (let i = 0; i < p.count; i++) { const y = p.getY(i); c.push(...(y > .99 ? [.86, .9, .98] : y > .6 ? [.42, .48, .64] : [.27, .32, .45])); }
+  g.setAttribute('color', new THREE.Float32BufferAttribute(c, 3)); g.computeVertexNormals(); return g;
+})();
+const peakMat = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true });
+const PK = WD.peaks ?? [], nPK = PK.length / 3;
+function peakMesh(place) { // place(i, lat, lon, size, m4)
+  const m = new THREE.InstancedMesh(coneGeo, peakMat, nPK), m4 = new THREE.Matrix4();
+  for (let i = 0; i < nPK; i++) { place(PK[i * 3 + 1] / 100, PK[i * 3] / 100, PK[i * 3 + 2] / 100, m4); m.setMatrixAt(i, m4); }
+  return m;
+}
+const ONE = new THREE.Quaternion(), UP = new THREE.Vector3(0, 1, 0);
+// ponytail: stylised, not real elevation — cone size from range rank; flat: r 11 km / h 12 km × size
+const flatPeaks = peakMesh((lat, lon, sz, m4) => m4.compose(proj(lat, lon), ONE, new THREE.Vector3(11 * sz, 12 * sz, 11 * sz)));
+scene.add(flatPeaks);
+
+function dotTex(glow) {
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const x = c.getContext('2d');
+  if (glow) {
+    const g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+    g.addColorStop(0, '#fff'); g.addColorStop(.25, 'rgba(255,255,255,.85)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+    x.fillStyle = g; x.fillRect(0, 0, 64, 64);
+  } else {
+    x.beginPath(); x.arc(32, 32, 22, 0, 7); x.fillStyle = '#fff'; x.fill();
+    x.lineWidth = 8; x.strokeStyle = '#0d1424'; x.stroke();
+  }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+const DOT = dotTex(false), GLOW = dotTex(true);
+const traveler = new THREE.Sprite(new THREE.SpriteMaterial({ map: GLOW, sizeAttenuation: false, fog: false, depthTest: false, transparent: true }));
+traveler.renderOrder = 10; traveler.visible = false;
+scene.add(traveler);
+
+// ─── GLOBE ─── far view: lit sphere + world painted on a canvas texture, low-poly mountains, great-circle routes
+const R = 6371, D2R = Math.PI / 180;
+const sph = (lat, lon, r = R) => new THREE.Vector3(r * Math.cos(lat * D2R) * Math.sin(lon * D2R), r * Math.sin(lat * D2R), r * Math.cos(lat * D2R) * Math.cos(lon * D2R));
+const llOf = v => { const n = v.clone().normalize(); return [Math.asin(n.y) / D2R, Math.atan2(n.x, n.z) / D2R]; };
+const gScene = new THREE.Scene(), gCamera = new THREE.PerspectiveCamera(45, 1, 50, 2e5);
+const gSun = new THREE.DirectionalLight(0xffffff, 2.3); gSun.position.set(-.6, .7, 1); gCamera.add(gSun); // light follows the view
+gScene.add(gCamera, new THREE.AmbientLight(0x8a9ac0, 1.2));
+const gControls = new OrbitControls(gCamera, renderer.domElement);
+Object.assign(gControls, { enabled: false, enableDamping: true, enablePan: false, minDistance: R * 1.3, maxDistance: R * 6, rotateSpeed: .45, zoomSpeed: .8 });
+const gGroup = new THREE.Group(); gScene.add(gGroup);
+const gLabelR = new CSS2DRenderer();
+Object.assign(gLabelR.domElement.style, { position: 'absolute', inset: '0', pointerEvents: 'none', display: 'none' });
+mapEl.appendChild(gLabelR.domElement);
+const gTraveler = new THREE.Sprite(new THREE.SpriteMaterial({ map: GLOW, sizeAttenuation: false, transparent: true, depthWrite: false }));
+gTraveler.renderOrder = 10; gTraveler.visible = false; gScene.add(gTraveler);
+let globeBuilt = false, mode = 'flat', gfly = null;
+function buildGlobe() {
+  if (globeBuilt) return; globeBuilt = true;
+  const TW = Math.min(renderer.capabilities.maxTextureSize, innerWidth < 700 ? 2048 : 4096), c = document.createElement('canvas');
+  c.width = TW; c.height = TW / 2;
+  const x = c.getContext('2d');
+  const trace = (l, close) => { // equirectangular; pieces baked east of 180° shift back by 360
+    let sh = 0; for (let i = 0; i < l.length; i += 2) if (l[i] > 18050) { sh = -360; break; }
+    x.beginPath();
+    for (let i = 0; i < l.length; i += 2) { const px = (l[i] / 100 + sh + 180) / 360 * TW, py = (90 - l[i + 1] / 100) / 180 * TW / 2; i ? x.lineTo(px, py) : x.moveTo(px, py); }
+    if (close) x.closePath();
+  };
+  const fill = (list, color) => { x.fillStyle = color; for (const l of list ?? []) { trace(l, true); x.fill(); } };
+  x.fillStyle = '#132a4d'; x.fillRect(0, 0, TW, TW / 2);
+  fill(WD.land, '#2c3e62');
+  x.strokeStyle = '#4b6798'; x.lineWidth = TW / 4096; for (const l of WD.land ?? []) { trace(l, true); x.stroke(); }
+  fill(WD.desert, '#4d4852'); fill(WD.ice, '#c9d5e8'); fill(WD.urban, '#445a8a');
+  x.strokeStyle = '#94acdf'; x.lineWidth = TW / 4096; for (const l of WD.urban ?? []) { trace(l, true); x.stroke(); }
+  x.strokeStyle = 'rgba(176,195,236,.85)'; x.lineWidth = TW / 2600; for (const l of WD.borders ?? []) { trace(l, false); x.stroke(); } // country outlines
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  const globe = new THREE.Mesh(new THREE.SphereGeometry(R, 128, 64), new THREE.MeshLambertMaterial({ map: tex }));
+  globe.rotation.y = -Math.PI / 2; // SphereGeometry u=0 sits at -x; align texture with sph()
+  const atmo = new THREE.Mesh(new THREE.SphereGeometry(R * 1.07, 64, 32), new THREE.ShaderMaterial({
+    side: THREE.BackSide, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    vertexShader: 'varying vec3 vN;void main(){vN=normalize(normalMatrix*normal);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+    fragmentShader: 'varying vec3 vN;void main(){float i=pow(max(0.,.72-dot(vN,vec3(0.,0.,1.))),3.);gl_FragColor=vec4(.35,.6,1.,1.)*i;}',
+  }));
+  const q = new THREE.Quaternion(), sc = new THREE.Vector3();
+  // exaggerated ×~5 vs flat so ranges read at planet scale
+  const gPeaks = peakMesh((lat, lon, sz, m4) => { const n = sph(lat, lon, 1); m4.compose(n.clone().multiplyScalar(R * .999), q.setFromUnitVectors(UP, n), sc.set(32 * sz, 40 * sz, 32 * sz)); });
+  gScene.add(globe, atmo, gPeaks);
+}
+// ─── LANDMARKS ─── low-poly models from primitives, in meters. Real size up close; scaled up when zoomed out
+// so each stays ~46 px (flat) / 28 px (globe) on screen. ponytail: proportions eyeballed, not surveyed.
+const lmMats = {};
+const lmMat = (c, ds) => lmMats[c + ds] ??= new THREE.MeshLambertMaterial({ color: c, flatShading: true, side: ds ? THREE.DoubleSide : THREE.FrontSide });
+const part = (geo, c, x = 0, y = 0, z = 0, ds = false) => { const m = new THREE.Mesh(geo, lmMat(c, ds)); m.position.set(x, y, z); return m; };
+// bottom-anchored primitives; 4-sided ones turned 45° so they read as square
+const frustum = (rt, rb, h, c, x = 0, y = 0, z = 0, seg = 4) => part(new THREE.CylinderGeometry(rt, rb, h, seg).rotateY(seg === 4 ? Math.PI / 4 : 0).translate(0, h / 2, 0), c, x, y, z);
+const box = (w, h, d, c, x = 0, y = 0, z = 0) => part(new THREE.BoxGeometry(w, h, d).translate(0, h / 2, 0), c, x, y, z);
+const cone = (r, h, c, seg = 4, x = 0, y = 0, z = 0) => part(new THREE.ConeGeometry(r, h, seg).rotateY(seg === 4 ? Math.PI / 4 : 0).translate(0, h / 2, 0), c, x, y, z);
+const dome = (r, c, x = 0, y = 0, z = 0) => part(new THREE.SphereGeometry(r, 10, 5, 0, Math.PI * 2, 0, Math.PI / 2), c, x, y, z);
+const tiers = (list, c, x = 0, seg = 8, taper = .92) => { const o = []; let y = 0; for (const [r, h] of list) { o.push(frustum(r * taper, r, h, c, x, y, 0, seg)); y += h; } return [o, y]; };
+const LM_BUILD = {
+  eiffel: () => [frustum(20, 45, 57, '#8b6a47'), box(52, 4, 52, '#6e5236', 0, 57), frustum(9, 22, 58, '#8b6a47', 0, 61), box(26, 3, 26, '#6e5236', 0, 119),
+    frustum(1.5, 9, 175, '#8b6a47', 0, 122), frustum(.4, .8, 27, '#cfc6b8', 0, 297)],
+  tokyoTower: () => [frustum(22, 42, 70, '#e0452b'), box(46, 8, 46, '#f3efe8', 0, 70), frustum(12, 22, 70, '#e0452b', 0, 78), box(30, 10, 30, '#f3efe8', 0, 148),
+    frustum(3, 12, 80, '#e0452b', 0, 158), box(8, 6, 8, '#f3efe8', 0, 238), frustum(.6, 3, 89, '#e0452b', 0, 244)],
+  liberty: () => [box(30, 12, 30, '#9c8f7a'), frustum(8, 11, 35, '#b3a78f', 0, 12, 0, 8), frustum(4, 6.5, 30, '#5fa58c', 0, 47, 0, 7),
+    part(new THREE.SphereGeometry(3.2, 8, 6), '#5fa58c', 0, 80, 0), frustum(.8, 1, 12, '#5fa58c', 3.5, 72, 0, 5), cone(2.2, 4, '#e8b84a', 6, 3.5, 84, 0)],
+  bigBen: () => [box(110, 24, 28, '#c8ad7f', 60, 0, 0), box(12, 62, 12, '#cfb584'), box(14, 12, 14, '#e6d3a8', 0, 62), cone(10, 22, '#3a4150', 4, 0, 74)],
+  pyramids: () => [cone(163, 139, '#d9bf86'), cone(152, 136, '#cfb57c', 4, -330, 0, 340), cone(74, 65, '#d4ba82', 4, -560, 0, 700)],
+  taj: () => [box(95, 7, 95, '#efe9df'), box(57, 28, 57, '#f6f1e8', 0, 7), frustum(15, 15, 8, '#f6f1e8', 0, 35, 0, 12), dome(17, '#fbf8f2', 0, 43),
+    cone(1.5, 10, '#d9c38c', 6, 0, 59), ...[[-40, -40], [40, -40], [-40, 40], [40, 40]].map(([x, z]) => frustum(2.5, 3.2, 40, '#f3eee4', x, 7, z, 8))],
+  opera: () => [box(190, 6, 120, '#cdb99a'), ...[[-55, 34], [-18, 46], [20, 40], [58, 28]].map(([x, h], i) => { const m = cone(26, h, '#f7f4ee', 3, x, 6, -12 + (i % 2) * 24); m.rotation.z = -.4; return m; })],
+  colosseum: () => [94, 70].map((r, i) => { const h = i ? 30 : 48, m = part(new THREE.CylinderGeometry(r, r, h, 28, 1, true).translate(0, h / 2, 0), i ? '#b8966a' : '#c9a877', 0, 0, 0, true); m.scale.z = .83; return m; }),
+  burj: () => { const [o, y] = tiers([[32, 160], [26, 140], [20, 130], [15, 110], [10, 100], [6, 80]], '#c9d3de', 0, 6, .85); return [...o, frustum(.5, 5, 828 - y, '#dfe6ee', 0, y, 0, 6)]; },
+  christ: () => [cone(500, 700, '#3f5a3a', 7), frustum(3, 4, 30, '#eeeae2', 0, 700, 0, 6), box(28, 3, 3, '#eeeae2', 0, 723), part(new THREE.SphereGeometry(2, 6, 4), '#eeeae2', 0, 732, 0)],
+  goldenGate: () => {
+    const o = [-640, 640].map(z => box(22, 227, 10, '#c0392b', 0, 0, z));
+    o.push(box(27, 5, 2700, '#b5362a', 0, 67, 0));
+    const cable = new THREE.CatmullRomCurve3([[-1350, 70], [-640, 227], [0, 76], [640, 227], [1350, 70]].map(([z, y]) => new THREE.Vector3(0, y, z)));
+    for (const x of [-12, 12]) o.push(part(new THREE.TubeGeometry(cable, 48, 3, 4), '#c0392b', x));
+    return o;
+  },
+  fuji: () => [frustum(3700, 18000, 3000, '#4a5a6a', 0, 0, 0, 18), cone(3700, 776, '#f3f6fb', 18, 0, 3000)],
+  seoulTower: () => [cone(420, 240, '#3e6b45', 8), frustum(4, 6, 150, '#e9e6df', 0, 240, 0, 8), frustum(12, 10, 18, '#d8d4cc', 0, 390, 0, 10), frustum(.6, 2, 40, '#e9e6df', 0, 408, 0, 6)],
+  cnTower: () => [frustum(5, 14, 340, '#b9b6ae', 0, 0, 0, 3), frustum(22, 18, 22, '#a8a49b', 0, 340, 0, 12), frustum(3, 4, 85, '#b9b6ae', 0, 362, 0, 6), frustum(.6, 1.5, 106, '#e0ddd6', 0, 447, 0, 6)],
+  calgaryTower: () => [frustum(6, 8, 160, '#cfc8b8', 0, 0, 0, 8), frustum(15, 11, 16, '#d8d0bf', 0, 160, 0, 12), frustum(13, 15, 6, '#c0392b', 0, 176, 0, 12), cone(3, 9, '#e14b3b', 8, 0, 182)],
+  greatWall: () => {
+    const o = [], pts = [[-300, 0], [-150, 80], [0, -20], [160, 60], [300, -40]];
+    for (let i = 1; i < pts.length; i++) {
+      const [x0, z0] = pts[i - 1], [x1, z1] = pts[i], m = box(6, 8, Math.hypot(x1 - x0, z1 - z0), '#9d8f78', (x0 + x1) / 2, 0, (z0 + z1) / 2);
+      m.rotation.y = Math.atan2(x1 - x0, z1 - z0); o.push(m);
+    }
+    return [...o, ...pts.map(([x, z]) => box(12, 14, 12, '#8e8068', x, 0, z))];
+  },
+  petronas: () => [-30, 30].flatMap(x => { const [o, y] = tiers([[23, 170], [20, 110], [16, 60], [12, 40], [8, 25]], '#c7ced8', x); return [...o, frustum(.5, 3, 452 - y, '#dfe4ea', x, y, 0, 6)]; }).concat(box(58, 5, 4, '#9aa3ae', 0, 170, 0)),
+  pisa: () => { const m = frustum(8, 8.5, 56, '#f1ece2', 0, 0, 0, 14); m.rotation.z = .07; return [m]; },
+};
+const LANDMARKS = [
+  { b: 'eiffel', ll: [48.8584, 2.2945], name: { en: 'Eiffel Tower', ko: '에펠탑', ja: 'エッフェル塔' } },
+  { b: 'liberty', ll: [40.6892, -74.0445], name: { en: 'Statue of Liberty', ko: '자유의 여신상', ja: '自由の女神像' } },
+  { b: 'tokyoTower', ll: [35.6586, 139.7454], name: { en: 'Tokyo Tower', ko: '도쿄 타워', ja: '東京タワー' } },
+  { b: 'bigBen', ll: [51.5007, -0.1246], name: { en: 'Big Ben', ko: '빅벤', ja: 'ビッグ・ベン' } },
+  { b: 'pyramids', ll: [29.9792, 31.1342], name: { en: 'Pyramids of Giza', ko: '기자 피라미드', ja: 'ギザのピラミッド' } },
+  { b: 'taj', ll: [27.1751, 78.0421], name: { en: 'Taj Mahal', ko: '타지마할', ja: 'タージ・マハル' } },
+  { b: 'opera', ll: [-33.8568, 151.2153], name: { en: 'Sydney Opera House', ko: '시드니 오페라 하우스', ja: 'シドニー・オペラハウス' } },
+  { b: 'colosseum', ll: [41.8902, 12.4922], name: { en: 'Colosseum', ko: '콜로세움', ja: 'コロッセオ' } },
+  { b: 'burj', ll: [25.1972, 55.2744], name: { en: 'Burj Khalifa', ko: '부르즈 할리파', ja: 'ブルジュ・ハリファ' } },
+  { b: 'christ', ll: [-22.9519, -43.2105], name: { en: 'Christ the Redeemer', ko: '구원의 그리스도상', ja: 'コルコバードのキリスト像' } },
+  { b: 'goldenGate', ll: [37.8199, -122.4783], rot: .3, name: { en: 'Golden Gate Bridge', ko: '금문교', ja: 'ゴールデン・ゲート・ブリッジ' } },
+  { b: 'fuji', ll: [35.3606, 138.7274], fixed: true, name: { en: 'Mount Fuji', ko: '후지산', ja: '富士山' } }, // real size, no scaling / not on globe
+  { b: 'seoulTower', ll: [37.5512, 126.9882], name: { en: 'N Seoul Tower', ko: 'N서울타워', ja: 'Nソウルタワー' } },
+  { b: 'cnTower', ll: [43.6426, -79.3871], name: { en: 'CN Tower', ko: 'CN 타워', ja: 'CNタワー' } },
+  { b: 'calgaryTower', ll: [51.0443, -114.0631], name: { en: 'Calgary Tower', ko: '캘거리 타워', ja: 'カルガリー・タワー' } },
+  { b: 'greatWall', ll: [40.4319, 116.5704], name: { en: 'Great Wall (Mutianyu)', ko: '만리장성 (무톈위)', ja: '万里の長城（慕田峪）' } },
+  { b: 'petronas', ll: [3.1579, 101.7116], name: { en: 'Petronas Towers', ko: '페트로나스 트윈 타워', ja: 'ペトロナス・ツインタワー' } },
+  { b: 'pisa', ll: [43.7230, 10.3966], name: { en: 'Leaning Tower of Pisa', ko: '피사의 사탑', ja: 'ピサの斜塔' } },];
+const mkLabel = (cls, name, pos, globe, extra = {}) => {
+  const el = document.createElement('div'); el.className = 'lbl ' + cls; el.innerHTML = '<span></span>';
+  const obj = new CSS2DObject(el); obj.position.copy(pos);
+  return { el, obj, w: 0, name, globe, ...extra };
+};
+const lmFlat = [], lmGlobe = [], lmLabels = [], lmGLabels = [], szTmp = new THREE.Vector3();
+for (const lm of LANDMARKS) {
+  const make = () => { const inner = new THREE.Group(); inner.add(...LM_BUILD[lm.b]()); inner.scale.setScalar(.001); inner.rotation.y = lm.rot ?? 0; return new THREE.Group().add(inner); }; // m → km
+  const fg = make();
+  lm.size = Math.max(...new THREE.Box3().setFromObject(fg).getSize(szTmp).toArray()); // km, largest extent
+  fg.position.copy(proj(...lm.ll)); scene.add(fg); lmFlat.push({ lm, g: fg });
+  const fl = mkLabel('lm', lm.name, fg.position, false); scene.add(fl.obj); lmLabels.push(fl);
+  if (lm.fixed) continue;
+  const gg = make(), n = sph(...lm.ll, 1);
+  gg.position.copy(n).multiplyScalar(R); gg.quaternion.setFromUnitVectors(UP, n);
+  gScene.add(gg); lmGlobe.push({ lm, g: gg });
+  const gl = mkLabel('lm', lm.name, gg.position, true, { ref: gg }); gScene.add(gl.obj); lmGLabels.push(gl); // label follows model visibility
+}
+function scaleLandmarks(list, cam, px, globe) { // keep ≥ px on screen: size_needed = dist · 2tan(fov/2)/H · px
+  const k = 2 * Math.tan(cam.fov * D2R / 2) / innerHeight * px;
+  for (const { lm, g } of list) {
+    if (lm.fixed) continue;
+    // globe: hide near the limb, where upright models would poke out sideways
+    if (globe) { g.visible = toCam.subVectors(cam.position, g.position).normalize().dot(szTmp.copy(g.position).normalize()) > .35; if (!g.visible) continue; }
+    g.scale.setScalar(Math.max(1, cam.position.distanceTo(g.position) * k / lm.size));
+  }
+}
+
+// city names (Natural Earth populated places ≥1M or capitals); bigger cities stay visible further out
+const cityLbl = [], cityGLbl = [];
+for (const [lo, la, pop, en, ko, ja] of WD.cities ?? []) {
+  const name = { en, ko, ja }, lat = la / 100, lon = lo / 100;
+  const f = mkLabel('city', name, proj(lat, lon), false, { maxD: pop >= 100 ? Infinity : pop >= 30 ? 2500 : 900 });
+  const g = mkLabel('city', name, sph(lat, lon, R * 1.001), true, { maxD: pop >= 100 ? Infinity : pop >= 30 ? 7000 : 3500 });
+  scene.add(f.obj); gScene.add(g.obj); cityLbl.push(f); cityGLbl.push(g);
+}
+
+function gArc(a, b, flight) { // great circle, lifted: flights arc high, ground legs hug the surface
+  const va = sph(...a, 1), vb = sph(...b, 1), ang = va.angleTo(vb), n = Math.max(2, Math.ceil(ang / D2R) * 2), qab = new THREE.Quaternion().setFromUnitVectors(va, vb), pts = [];
+  for (let i = 0; i <= n; i++) {
+    const t = i / n, v = va.clone().applyQuaternion(new THREE.Quaternion().slerp(qab, t));
+    pts.push(v.multiplyScalar(R * (1.004 + (flight ? ang * .12 : .002) * Math.sin(Math.PI * t))));
+  }
+  return pts;
+}
+
+// ─── TRIP BUILD ───
+let trip, FLAT = [], routes = [], marks = {}, labels = [], gMarks = {}, gLabels = [], cur = -1, playing = false, playT = 0, fly = null;
+const tripGroup = new THREE.Group(); scene.add(tripGroup);
+function curveOf(s) {
+  const a = P(s.from), b = P(s.to);
+  if (s.mode !== 'flight') return new THREE.LineCurve3(a, b);
+  return new THREE.QuadraticBezierCurve3(a, a.clone().lerp(b, .5).setY(a.distanceTo(b) * .18), b);
+}
+
+let tripIdx = 0;
+const newId = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+// ponytail: transport guessed from distance (>300 km flight, >2.5 km train, else local); pick Train/Flight to force
+const autoMode = (a, b) => { const km = P(a).distanceTo(P(b)); return km > 300 ? 'flight' : km > 2.5 ? 'train' : 'local'; };
+function buildTrip(i) {
+  trip = TRIPS[tripIdx = i];
+  if (!trip.shared) store.set('trip', i);
+  for (const g of [tripGroup, gGroup]) { g.traverse(o => { o.geometry?.dispose(); o.material?.dispose(); }); g.clear(); }
+  FLAT = trip.days.flatMap(d => d.steps);
+  FLAT.forEach((s, i) => { // legs follow diary order → reordering just works
+    s.from = i ? FLAT[i - 1].to : trip.start ?? s.to;
+    if (s.auto) s.mode = autoMode(s.from, s.to);
+  });
+  routes = FLAT.map(s => {
+    const curve = curveOf(s), pts = curve.getPoints(s.mode === 'flight' ? 64 : 1), len = curve.getLength();
+    const geo = new LineGeometry().setPositions(pts.flatMap(p => [p.x, p.y, p.z]));
+    const dashed = s.mode === 'local' || !!s.planned;
+    const mat = new LineMaterial({ color: MODE_COLOR[s.mode], linewidth: 2.5, transparent: true, depthTest: false, resolution: res, dashed, dashSize: Math.max(len / 12, .001), gapSize: Math.max(len / 18, .001) });
+    const line = new Line2(geo, mat); line.computeLineDistances(); line.renderOrder = 6;
+    tripGroup.add(line);
+    const gpts = gArc(PLACES[s.from].ll, PLACES[s.to].ll, s.mode === 'flight');
+    const gmat = new LineMaterial({ color: MODE_COLOR[s.mode], linewidth: 2.5, transparent: true, resolution: res, dashed, dashSize: 60, gapSize: 40 });
+    const gline = new Line2(new LineGeometry().setPositions(gpts.flatMap(p => [p.x, p.y, p.z])), gmat); gline.computeLineDistances(); gline.renderOrder = 6;
+    gGroup.add(gline);
+    return { curve, mat, gmat, gpts, s };
+  });
+  marks = {}; labels = []; gMarks = {}; gLabels = [];
+  for (const id of new Set(FLAT.flatMap(s => [s.from, s.to]))) {
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: DOT, sizeAttenuation: false, fog: false, depthTest: false, color: 0xf5eee0 }));
+    sp.position.copy(P(id)); sp.scale.setScalar(.016); sp.renderOrder = 5;
+    const el = document.createElement('div'); el.className = 'lbl'; el.innerHTML = '<span></span>';
+    const obj = new CSS2DObject(el); obj.position.copy(sp.position);
+    tripGroup.add(sp, obj);
+    marks[id] = sp; labels.push({ id, el, obj, w: 0 });
+    const gsp = new THREE.Sprite(new THREE.SpriteMaterial({ map: DOT, sizeAttenuation: false, transparent: true, depthWrite: false, color: 0xf5eee0 }));
+    gsp.position.copy(sph(...PLACES[id].ll, R * 1.004)); gsp.scale.setScalar(.016); gsp.renderOrder = 5;
+    const gel = document.createElement('div'); gel.className = 'lbl'; gel.innerHTML = '<span></span>';
+    const gobj = new CSS2DObject(gel); gobj.position.copy(gsp.position);
+    gGroup.add(gsp, gobj);
+    gMarks[id] = gsp; gLabels.push({ id, el: gel, obj: gobj, w: 0, globe: true });
+  }
+  cur = -1; playing = false;
+  renderText(); overview();
+}
+
+// ─── UI ───
+function renderText() {
+  const t = T[lang];
+  document.documentElement.lang = lang;
+  $('#title').textContent = L(trip.title);
+  document.title = `${t.subtitle} · ${L(trip.title)}`;
+  document.querySelectorAll('[data-t]').forEach(e => e.textContent = t[e.dataset.t]);
+  document.querySelectorAll('.langs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === lang));
+  for (const k of ['prev', 'next', 'ovw']) $('#' + k).setAttribute('aria-label', t[k === 'ovw' ? 'overview' : k]);
+  const sel = $('#tripSel');
+  sel.hidden = TRIPS.length < 2;
+  sel.innerHTML = TRIPS.map((tr, i) => `<option value="${i}"${tr === trip ? ' selected' : ''}>${esc(L(tr.title))}</option>`).join('');
+  $('#q').placeholder = t.placeholder; $('#q').setAttribute('aria-label', t.placeholder);
+  const k = $('#kind'), kv = k.value || 'visit';
+  k.innerHTML = Object.entries(t.kind).map(([v, n]) => `<option value="${v}">${n}</option>`).join(''); k.value = kv; k.setAttribute('aria-label', t.kindLbl);
+  $('#days').innerHTML = trip.days.map((day, d) => `<li class="day" data-day="${d}"><h2>${t.day(d + 1)}${day.date ? ` · ${fmtDate(day.date)}` : ''}</h2><ol class="steps" data-empty="${t.emptyHint}">${
+    day.steps.map(s => { const i = FLAT.indexOf(s), ph = photos[s.id] ?? []; return `<li data-i="${i}">
+      <button class="grip" aria-label="${t.move}" title="${t.move}">${svg('grip')}</button>
+      <button class="step${s.planned ? ' plan' : ''}" data-plan="${t.planned}" data-i="${i}">
+      <span class="ic">${svg(s.icon || s.mode)}</span>
+      <span><b>${esc(stepText(s))}</b><small>${s.from === s.to ? '' : esc(L(PLACES[s.from].name)) + ' → '}${esc(L(PLACES[s.to].name))}</small></span></button>
+      <div class="acts"><button class="act cam" aria-label="${t.addPhoto}" title="${t.addPhoto}">${svg('camera')}</button>${
+      s.user ? `<button class="act del" aria-label="${t.del}" title="${t.del}">${svg('x')}</button>` : ''}</div>${
+      ph.length ? `<div class="thumbs">${ph.map(p => `<button class="th" data-ph="${p.id}"><img src="${p.url}" alt="" loading="lazy"></button>`).join('')}</div>` : ''}</li>`; }).join('')
+  }</ol></li>`).join('');
+  $('#newTrip').title = t.myDiaries;
+  document.body.classList.toggle('ro', !!trip.shared);
+  $('#privText').textContent = trip.shared ? t.viewing : trip.sharedAt ? t.sharedNote : t.private;
+  $('#shareBtn').hidden = !!trip.shared; $('#saveCopy').hidden = !trip.shared;
+  $('#lbPrev').setAttribute('aria-label', t.prev); $('#lbNext').setAttribute('aria-label', t.next);
+  $('#lbDel').setAttribute('aria-label', t.delPhoto); $('#lbClose').setAttribute('aria-label', t.close);
+  for (const l of [...labels, ...gLabels]) { l.el.firstChild.textContent = L(PLACES[l.id].name); l.w = 0; }
+  for (const l of [...lmLabels, ...lmGLabels, ...cityLbl, ...cityGLbl]) { l.el.firstChild.textContent = L(l.name); l.w = 0; }
+  updPlay(); highlight(); markDay();
+}
+function updPlay() {
+  const b = $('#play'); b.innerHTML = svg(playing ? 'pause' : 'play');
+  b.setAttribute('aria-label', T[lang][playing ? 'pause' : 'play']);
+}
+function highlight() {
+  document.querySelectorAll('.step').forEach(b => {
+    const on = +b.dataset.i === cur;
+    b.classList.toggle('on', on); b.setAttribute('aria-current', on ? 'step' : 'false');
+    if (on) b.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  });
+  const act = cur >= 0 ? [FLAT[cur].from, FLAT[cur].to] : [];
+  routes.forEach((r, i) => {
+    r.mat.linewidth = i === cur ? 5 : 2.5;
+    r.mat.opacity = r.gmat.opacity = (cur < 0 || i === cur ? 1 : .35) * (r.s.planned ? .6 : 1);
+    r.gmat.linewidth = r.mat.linewidth;
+  });
+  for (const [id, sp] of [...Object.entries(marks), ...Object.entries(gMarks)]) {
+    const on = act.includes(id);
+    sp.material.color.set(on ? 0xff6a4d : 0xf5eee0); sp.scale.setScalar(on ? .024 : .016);
+  }
+  for (const l of [...labels, ...gLabels]) l.el.classList.toggle('on', act.includes(l.id));
+  traveler.visible = gTraveler.visible = cur >= 0;
+  if (cur >= 0) { traveler.material.color.set(MODE_COLOR[FLAT[cur].mode]); gTraveler.material.color.set(MODE_COLOR[FLAT[cur].mode]); }
+}
+
+function focus(steps) { // fit steps: flat map if it fits, else globe
+  const pts = steps.flatMap(s => routes[FLAT.indexOf(s)].curve.getPoints(32));
+  if (!pts.length) return;
+  const box = new THREE.Box3().setFromPoints(pts), c = box.getCenter(new THREE.Vector3()), sz = box.getSize(new THREE.Vector3());
+  c.y = 0;
+  const r = panel.getBoundingClientRect(), sheet = r.width >= innerWidth - 1;
+  // fit box into visible map area (pixels) — world size per px at dist d = 2·d·tan(fov/2)/H
+  const visW = sheet ? innerWidth : innerWidth - r.right, visH = sheet ? r.top : innerHeight;
+  const k = innerHeight / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
+  const d = Math.max(Math.max(sz.x / visW, Math.max(sz.z, sz.y * 1.6) / visH) * k * 1.3, .8);
+  if (d < FLAT_MAX * .8) {
+    if (mode === 'globe') toFlat(c, FLAT_MAX * .8);
+    return flyTo(c, d);
+  }
+  const vs = steps.flatMap(s => [s.from, s.to]).map(id => sph(...PLACES[id].ll, 1));
+  const mid = vs.reduce((a, v) => a.add(v), new THREE.Vector3()).normalize();
+  const spread = Math.max(...vs.map(v => v.angleTo(mid)));
+  gFlyTo(mid, R * THREE.MathUtils.clamp(1.45 + spread * 2, 1.7, 5.5));
+}
+function setMode(m) {
+  if (mode === m) return;
+  mode = m;
+  controls.enabled = m === 'flat'; gControls.enabled = m === 'globe';
+  labelR.domElement.style.display = m === 'flat' ? '' : 'none';
+  gLabelR.domElement.style.display = m === 'globe' ? '' : 'none';
+  mapEl.animate?.([{ opacity: .3 }, { opacity: 1 }], { duration: 380, easing: 'ease-out' }); // soft cut between views
+}
+function toGlobe(dir, dist) { buildGlobe(); fly = null; gfly = null; gCamera.position.copy(dir).setLength(dist); gControls.update(); setMode('globe'); }
+function toFlat(c, d) { gfly = null; controls.target.copy(c); camera.position.copy(c).addScaledVector(DIR, d); controls.update(); setMode('flat'); }
+function gFlyTo(dir, dist) {
+  if (mode !== 'globe') toGlobe(sph(...flatLL(), 1), R + FLAT_MAX * 1.2);
+  gfly = { t: 0, a: gCamera.position.clone().normalize(), b: dir.clone().normalize(), d0: gCamera.position.length(), d1: dist };
+}
+function flyTo(b, d1) {
+  fly = { t: 0, a: controls.target.clone(), b, d0: camera.position.distanceTo(controls.target), d1,
+    dir: camera.position.clone().sub(controls.target).normalize() };
+}
+function setStep(i) {
+  if (!FLAT.length) return;
+  cur = Math.max(0, Math.min(FLAT.length - 1, i));
+  highlight(); focus([FLAT[cur]]);
+}
+function overview() {
+  cur = -1; highlight();
+  focus(FLAT); // empty new diary: keeps current view
+}
+function togglePlay() {
+  if (!FLAT.length) return;
+  playing = !playing; playT = 0;
+  if (playing && (cur < 0 || cur === FLAT.length - 1)) setStep(0);
+  updPlay();
+}
+
+// new places go to the last tapped day (step or heading); default: first empty day, else last day
+let activeDay = null;
+const targetDay = () => trip.days.includes(activeDay) ? activeDay
+  : trip.days.find(d => !d.steps.length) ?? trip.days.at(-1) ?? (trip.days.push({ user: true, steps: [] }), trip.days[0]);
+const markDay = () => document.querySelectorAll('.day').forEach(el => el.classList.toggle('target', trip.days.length > 1 && trip.days[+el.dataset.day] === targetDay()));
+$('#days').addEventListener('click', e => {
+  const dayEl = e.target.closest('.day');
+  if (dayEl) { activeDay = trip.days[+dayEl.dataset.day]; markDay(); }
+  const s = FLAT[+e.target.closest('[data-i]')?.dataset.i];
+  if (!s) return;
+  if (e.target.closest('.del')) return removeStep(s);
+  if (e.target.closest('.cam')) { photoStep = s.id; return fileIn.click(); }
+  const th = e.target.closest('.th'); if (th) return openLb(s.id, th.dataset.ph);
+  if (e.target.closest('.step')) { playing = false; updPlay(); setStep(FLAT.indexOf(s)); }
+});
+$('#prev').onclick = () => { playing = false; updPlay(); setStep(cur - 1); };
+$('#next').onclick = () => { playing = false; updPlay(); setStep(cur + 1); };
+$('#ovw').onclick = () => { playing = false; updPlay(); overview(); };
+$('#play').onclick = togglePlay;
+$('#tripSel').onchange = e => buildTrip(+e.target.value);
+document.querySelectorAll('.langs button').forEach(b => b.onclick = () => { lang = b.dataset.lang; store.set('lang', lang); renderText(); });
+addEventListener('keydown', e => {
+  if (e.target.closest('input,select,textarea') || lb.open || nd.open || sh.open) return;
+  if (e.key === 'ArrowRight') $('#next').click();
+  else if (e.key === 'ArrowLeft') $('#prev').click();
+  else if (e.key === ' ' && !e.target.closest('button')) { e.preventDefault(); togglePlay(); }
+});
+controls.addEventListener('start', () => { fly = null; if (playing) { playing = false; updPlay(); } });
+gControls.addEventListener('start', () => { gfly = null; if (playing) { playing = false; updPlay(); } });
+
+// ─── ADD PLACE ─── type → instant diary matches + Photon prefix autocomplete (biased to map view, max 5) → pick → appended to last day, saved locally
+const SAVE_KEY = 'diary.v2';
+function save() { // whole diary (order, days, added stops) + places it references; photos live in IndexedDB
+  const keep = TRIPS.filter(tr => !tr.shared && !(tr.blank && !tr.days.some(d => d.steps.length)));
+  for (const tr of keep) delete tr.blank; // used once → a real diary
+  const ids = new Set(keep.flatMap(tr => [tr.start, ...tr.days.flatMap(d => d.steps.map(s => s.to))]).filter(Boolean));
+  store.set(SAVE_KEY, JSON.stringify({
+    trips: keep.map(tr => ({ user: true, title: tr.title, start: tr.start, ...(tr.sharedAt && { sharedAt: tr.sharedAt }),
+      days: tr.days.map(d => ({ ...(d.user && { user: true }), ...(d.date && { date: d.date }), steps: d.steps.map(({ from, ...st }) => st) })) })),
+    places: Object.fromEntries([...ids].map(id => [id, PLACES[id]])),
+  }));
+}
+function load() {
+  try {
+    const sv = JSON.parse(store.get(SAVE_KEY) || 'null');
+    if (sv) {
+      Object.assign(PLACES, sv.places);
+      let legacy = false;
+      for (const tr of sv.trips) {
+        const days = Array.isArray(tr) ? tr : tr.days; // early v2 saves: bare day arrays
+        // ponytail: one-time shim — the removed hard-coded diary was saved without title/start; keep the user's copy of it
+        if (!tr.user) legacy = true;
+        TRIPS.push({ user: true, days, ...(tr.sharedAt && { sharedAt: tr.sharedAt }),
+          title: tr.user ? tr.title : { en: 'Travel in Japan', ko: '일본 여행', ja: '日本の旅' },
+          start: tr.user ? tr.start : PLACES.icn ? 'icn' : undefined });
+      }
+      if (legacy) save(); // rewrite in the new shape so the shim never runs again
+    }
+  } catch (e) { console.warn('saved diary unreadable, ignored', e); }
+}
+function removeStep(s) {
+  if (photos[s.id]?.length && !confirm(T[lang].delStepQ)) return;
+  for (const p of photos[s.id] ?? []) { idb('readwrite', o => o.delete(p.id)); URL.revokeObjectURL(p.url); }
+  delete photos[s.id];
+  for (const d of trip.days) { const i = d.steps.indexOf(s); if (i >= 0) d.steps.splice(i, 1); }
+  trip.days = trip.days.filter(d => !d.user || d.date || d.steps.length); // keep calendar days even when empty
+  save(); buildTrip(tripIdx);
+}
+
+// ─── REORDER ─── pointer-based drag on grip (works with touch; HTML5 DnD doesn't on mobile). Also ↑/↓ on focused grip.
+const daysEl = $('#days');
+let drag = null;
+const clearDrop = () => daysEl.querySelectorAll('.drop-before,.drop-after,.drop-into').forEach(x => x.classList.remove('drop-before', 'drop-after', 'drop-into'));
+daysEl.addEventListener('pointerdown', e => {
+  const g = e.target.closest('.grip'); if (!g) return;
+  e.preventDefault(); g.setPointerCapture(e.pointerId);
+  const li = g.closest('li');
+  drag = { s: FLAT[+li.dataset.i], li, target: null };
+  li.classList.add('dragging');
+});
+daysEl.addEventListener('pointermove', e => {
+  if (!drag) return;
+  const r = daysEl.getBoundingClientRect(); // auto-scroll near list edges
+  if (e.clientY < r.top + 32) daysEl.scrollTop -= 10; else if (e.clientY > r.bottom - 32) daysEl.scrollTop += 10;
+  clearDrop();
+  const el = document.elementFromPoint(e.clientX, e.clientY), li = el?.closest('.steps > li'), day = el?.closest('.day');
+  if (li && li !== drag.li) {
+    const b = li.getBoundingClientRect(), after = e.clientY > b.top + b.height / 2;
+    li.classList.add(after ? 'drop-after' : 'drop-before');
+    drag.target = { s: FLAT[+li.dataset.i], after };
+  } else if (day && !li) { day.classList.add('drop-into'); drag.target = { day: +day.dataset.day }; }
+  else drag.target = null;
+});
+function endDrag(cancel) {
+  if (!drag) return;
+  const { s, target, li } = drag; drag = null;
+  li.classList.remove('dragging'); clearDrop();
+  if (target && !cancel) moveStep(s, target);
+}
+daysEl.addEventListener('pointerup', () => endDrag(false));
+daysEl.addEventListener('pointercancel', () => endDrag(true));
+daysEl.addEventListener('keydown', e => {
+  const g = e.target.closest('.grip'); if (!g || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
+  e.preventDefault();
+  const s = FLAT[+g.closest('li').dataset.i], i = FLAT.indexOf(s), up = e.key === 'ArrowUp', nb = FLAT[up ? i - 1 : i + 1];
+  if (!nb) return;
+  moveStep(s, { s: nb, after: !up });
+  daysEl.querySelector(`li[data-i="${FLAT.indexOf(s)}"] .grip`)?.focus();
+});
+function moveStep(s, tg) {
+  if (tg.s === s) return;
+  for (const d of trip.days) { const i = d.steps.indexOf(s); if (i >= 0) d.steps.splice(i, 1); }
+  if (tg.s) { const d = trip.days.find(d => d.steps.includes(tg.s)); d.steps.splice(d.steps.indexOf(tg.s) + (tg.after ? 1 : 0), 0, s); }
+  else trip.days[tg.day].steps.push(s);
+  save(); buildTrip(tripIdx); setStep(FLAT.indexOf(s));
+}
+
+// ─── PHOTOS ─── IndexedDB blobs (localStorage too small), resized to ≤1600px JPEG before storing
+const photos = {}; // stepId → [{ id, url }]
+const dbP = new Promise((res, rej) => {
+  const r = indexedDB.open('personal-travel-diary', 1);
+  r.onupgradeneeded = () => r.result.createObjectStore('photos', { keyPath: 'id' });
+  r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+});
+async function idb(mode, fn) {
+  const t = (await dbP).transaction('photos', mode), req = fn(t.objectStore('photos'));
+  return new Promise((res, rej) => { t.oncomplete = () => res(req.result); t.onerror = () => rej(t.error); });
+}
+async function loadPhotos() {
+  try { for (const p of await idb('readonly', o => o.getAll())) (photos[p.step] ??= []).push({ id: p.id, url: URL.createObjectURL(p.blob) }); }
+  catch (e) { console.warn('photo storage unavailable', e); }
+}
+async function shrink(file) {
+  const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  const k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height)), c = document.createElement('canvas');
+  c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+  c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height); bmp.close();
+  return new Promise((res, rej) => c.toBlob(b => b ? res(b) : rej(new Error('encode failed')), 'image/jpeg', .85));
+}
+const fileIn = Object.assign(document.createElement('input'), { type: 'file', accept: 'image/*', multiple: true });
+let photoStep = null;
+fileIn.onchange = async () => {
+  let failed = 0;
+  for (const f of fileIn.files) {
+    try {
+      const blob = await shrink(f), id = newId('p');
+      await idb('readwrite', o => o.put({ id, step: photoStep, blob, ts: Date.now() }));
+      (photos[photoStep] ??= []).push({ id, url: URL.createObjectURL(blob) });
+    } catch (e) { failed++; console.warn('photo skipped', f.name, e); }
+  }
+  fileIn.value = ''; renderText();
+  if (failed) setStatus('photoErr');
+};
+// lightbox: native <dialog> (Esc, focus trap, backdrop for free)
+// ─── NEW DIARY ─── click "Personal Travel Diary" → dialog with native calendar pickers → one day per date
+const pad = n => String(n).padStart(2, '0');
+const isoOf = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const dateOf = iso => { const [y, m, d] = iso.split('-').map(Number); return new Date(y, m - 1, d); }; // local, not UTC
+const addDays = (iso, n) => { const d = dateOf(iso); d.setDate(d.getDate() + n); return isoOf(d); };
+const fmtDate = iso => new Intl.DateTimeFormat(lang, { month: 'short', day: 'numeric', weekday: 'short' }).format(dateOf(iso));
+const nd = $('#nd'), ndStart = $('#ndStart'), ndEnd = $('#ndEnd');
+$('#newTrip').onclick = () => {
+  $('#ndName').value = ''; ndStart.value = isoOf(new Date()); ndEnd.value = ''; ndEnd.min = ndStart.value;
+  renderDiaryList(); nd.returnValue = ''; nd.showModal();
+};
+function newDiary(start, n = 1, name = '') {
+  const title = {};
+  for (const l of ['en', 'ko', 'ja']) title[l] = name || T[l].untitled(new Intl.DateTimeFormat(l, { month: 'short', day: 'numeric' }).format(dateOf(start)));
+  return { user: true, title, days: Array.from({ length: n }, (_, i) => ({ user: true, date: addDays(start, i), steps: [] })) };
+}
+function dropBlank() { // untouched starter diary disappears once a real one exists
+  const i = TRIPS.findIndex(tr => tr.blank && !tr.days.some(d => d.steps.length));
+  if (i >= 0) TRIPS.splice(i, 1);
+}
+function ensureDiary() { // first run / last one deleted → empty diary for today (not saved until used)
+  if (!TRIPS.some(tr => !tr.shared)) TRIPS.unshift({ ...newDiary(isoOf(new Date())), blank: true });
+}
+function deleteDiary(i) {
+  const tr = TRIPS[i];
+  if (!confirm(T[lang].delDiaryQ(L(tr.title)))) return;
+  for (const st of tr.days.flatMap(d => d.steps)) {
+    for (const ph of photos[st.id] ?? []) { idb('readwrite', o => o.delete(ph.id)); URL.revokeObjectURL(ph.url); }
+    delete photos[st.id];
+  }
+  const wasOpen = tr === trip;
+  TRIPS.splice(i, 1); ensureDiary(); save();
+  if (wasOpen) buildTrip(0); else { tripIdx = TRIPS.indexOf(trip); store.set('trip', tripIdx); renderText(); }
+  renderDiaryList();
+}
+// diary hub: grouped by date vs today; undated diaries count as plans when every stop is planned
+const tripRange = tr => { const ds = tr.days.map(d => d.date).filter(Boolean).sort(); return ds.length ? [ds[0], ds.at(-1)] : null; };
+function renderDiaryList() {
+  const t = T[lang], today = isoOf(new Date()), groups = { now: [], upcoming: [], previous: [] };
+  TRIPS.forEach((tr, i) => {
+    if (tr.shared) return;
+    const r = tripRange(tr), steps = tr.days.flatMap(d => d.steps);
+    const g = r ? (r[0] > today ? 'upcoming' : r[1] < today ? 'previous' : 'now') : steps.length && steps.every(s => s.planned) ? 'upcoming' : 'previous';
+    groups[g].push({ tr, i, r, n: steps.length });
+  });
+  groups.upcoming.sort((a, b) => (a.r?.[0] ?? '~').localeCompare(b.r?.[0] ?? '~')); // soonest first
+  groups.previous.sort((a, b) => (b.r?.[1] ?? '').localeCompare(a.r?.[1] ?? '')); // most recent first
+  const f = new Intl.DateTimeFormat(lang, { year: 'numeric', month: 'short', day: 'numeric' });
+  const fmtR = ([a, b]) => a === b ? f.format(dateOf(a)) : f.formatRange(dateOf(a), dateOf(b));
+  $('#ndLists').innerHTML = ['now', 'upcoming', 'previous'].filter(g => groups[g].length).map(g => `<h4>${t[g]}</h4><ul class="dl">${
+    groups[g].map(({ tr, i, r, n }) => {
+      const soon = g === 'upcoming' && r ? Math.round((dateOf(r[0]) - dateOf(today)) / 864e5) : null;
+      return `<li><button type="button" data-trip="${i}"><b>${esc(L(tr.title))}</b><small>${r ? fmtR(r) : t.undated} · ${t.stops(n)}${soon ? ' · ' + t.inDays(soon) : ''}</small>${
+        tr === trip ? `<span class="cur">${t.current}</span>` : ''}</button><button type="button" class="dlDel" data-del-trip="${i}" aria-label="${t.delDiary}" title="${t.delDiary}">${svg('trash')}</button></li>`;
+    }).join('')}</ul>`).join('');
+}
+$('#ndLists').addEventListener('click', e => {
+  const del = e.target.closest('[data-del-trip]'); if (del) return deleteDiary(+del.dataset.delTrip);
+  const b = e.target.closest('[data-trip]'); if (b) { nd.close(); buildTrip(+b.dataset.trip); }
+});
+ndStart.onchange = () => { ndEnd.min = ndStart.value; if (ndEnd.value && ndEnd.value < ndStart.value) ndEnd.value = ndStart.value; };
+nd.addEventListener('close', () => {
+  if (nd.returnValue !== 'ok' || !ndStart.value) return;
+  const start = ndStart.value, end = ndEnd.value >= start ? ndEnd.value : start;
+  const n = Math.min(Math.round((dateOf(end) - dateOf(start)) / 864e5) + 1, 90); // ponytail: cap 90 days
+  dropBlank();
+  TRIPS.push(newDiary(start, n, $('#ndName').value.trim()));
+  save(); buildTrip(TRIPS.length - 1);
+  q.focus();
+});
+
+// ─── SHARE ─── no server: link = diary compressed into the URL hash (no photos); file = JSON with photos (data URLs).
+// Everything else stays in this browser — hence "no one but you can see this until you share".
+function diaryPayload(tr) {
+  const ids = new Set([tr.start, ...tr.days.flatMap(d => d.steps.map(s => s.to))].filter(Boolean));
+  return { v: 1, title: tr.title, start: tr.start,
+    days: tr.days.map(d => ({ ...(d.date && { date: d.date }), steps: d.steps.map(({ from, user, ...st }) => st) })),
+    places: Object.fromEntries([...ids].map(id => [id, PLACES[id]])) };
+}
+async function pack(obj) { // JSON → deflate-raw → base64url
+  const buf = new Uint8Array(await new Response(new Blob([JSON.stringify(obj)]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer());
+  let bin = ''; for (const b of buf) bin += String.fromCharCode(b);
+  return btoa(bin).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/, '');
+}
+async function unpack(str) {
+  const bytes = Uint8Array.from(atob(str.replaceAll('-', '+').replaceAll('_', '/')), c => c.charCodeAt(0));
+  return JSON.parse(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text());
+}
+// untrusted input (someone else's link/file): rebuild every field from an allow-list, cap sizes
+const str = (x, n = 200) => typeof x === 'string' ? x.slice(0, n) : '';
+function names(o) {
+  if (!o || typeof o !== 'object') return null;
+  const en = str(o.en), ko = str(o.ko), ja = str(o.ja), any = en || ko || ja;
+  return any ? { en: en || any, ko: ko || any, ja: ja || any } : null;
+}
+function readDiary(o) {
+  if (o?.v !== 1 || !Array.isArray(o.days)) throw new Error('not a diary');
+  const places = {};
+  for (const [id, pl] of Object.entries(o.places ?? {}).slice(0, 2000)) {
+    const ll = pl?.ll;
+    if (/^[\w-]{1,40}$/.test(id) && Array.isArray(ll) && Number.isFinite(ll[0]) && Number.isFinite(ll[1]) && Math.abs(ll[0]) <= 90 && Math.abs(ll[1]) <= 360)
+      places[id] = { ll: [ll[0], ll[1]], name: names(pl.name) ?? { en: id, ko: id, ja: id } };
+  }
+  const days = o.days.slice(0, 120).map(d => ({ user: true, ...(/^\d{4}-\d{2}-\d{2}$/.test(d?.date) && { date: d.date }),
+    steps: (Array.isArray(d?.steps) ? d.steps : []).filter(st => places[st?.to]).slice(0, 300).map(st => {
+      const text = names(st.text), kind = ['visit', 'eat', 'stay', 'train', 'flight'].includes(st.kind) ? st.kind : null;
+      return { id: newId('s'), user: true, to: st.to, src: str(st.id, 60),
+        mode: ['flight', 'train', 'local'].includes(st.mode) ? st.mode : 'local',
+        ...(st.auto === true && { auto: true }), ...(st.planned === true && { planned: true }),
+        ...(['visit', 'eat', 'stay'].includes(st.icon) && { icon: st.icon }),
+        ...(text ? { text } : { kind: kind ?? 'visit' }), ...(text && kind && { kind }) };
+    }) }));
+  if (!days.length) days.push({ user: true, steps: [] });
+  return { title: names(o.title) ?? { en: T.en.sharedTitle, ko: T.ko.sharedTitle, ja: T.ja.sharedTitle }, start: places[o.start] ? o.start : undefined, days, places };
+}
+const sh = $('#sh'), shMsg = $('#shMsg'), shUrl = $('#shUrl');
+const isLocalApp = location.protocol === 'file:' || /^(localhost|127\.|\[::1\])/.test(location.hostname);
+const markShared = () => { trip.sharedAt = Date.now(); save(); renderText(); };
+const fileName = tr => (L(tr.title).replace(/[\\/:*?"<>|]+/g, ' ').trim() || 'diary') + '.diary.json';
+const blobToData = b => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error); r.readAsDataURL(b); });
+async function diaryFile(tr) {
+  const pl = diaryPayload(tr); pl.photos = [];
+  for (const st of tr.days.flatMap(d => d.steps)) for (const ph of photos[st.id] ?? []) pl.photos.push({ step: st.id, data: await blobToData(await (await fetch(ph.url)).blob()) });
+  return new File([JSON.stringify(pl)], fileName(tr), { type: 'application/json' });
+}
+const shareLink = async tr => location.href.split('#')[0] + '#d=' + await pack(diaryPayload(tr));
+$('#shareBtn').onclick = () => {
+  shMsg.textContent = ''; shUrl.hidden = true;
+  $('#shWarn').hidden = !isLocalApp;
+  $('#shNative').hidden = !navigator.share;
+  sh.showModal();
+};
+$('#shLink').onclick = async () => {
+  const url = await shareLink(trip);
+  shUrl.value = url; shUrl.hidden = false;
+  try { await navigator.clipboard.writeText(url); shMsg.textContent = T[lang].copied; }
+  catch { shUrl.select(); shMsg.textContent = T[lang].copyManual; } // file:// has no clipboard API
+  markShared();
+};
+$('#shFile').onclick = async () => {
+  const f = await diaryFile(trip), a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(f), download: f.name });
+  a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  shMsg.textContent = T[lang].fileSaved; markShared();
+};
+$('#shNative').onclick = async () => {
+  try {
+    const f = await diaryFile(trip);
+    if (navigator.canShare?.({ files: [f] })) await navigator.share({ files: [f], title: L(trip.title) });
+    else await navigator.share({ title: L(trip.title), url: await shareLink(trip) });
+    markShared();
+  } catch (e) { if (e.name !== 'AbortError') shMsg.textContent = e.message; }
+};
+shUrl.onfocus = () => shUrl.select();
+
+// receiving: file (with photos) via new-diary dialog; link opens view-only until "Save to my diaries"
+const importIn = Object.assign(document.createElement('input'), { type: 'file', accept: '.json,application/json' });
+$('#ndImport').onclick = () => importIn.click();
+importIn.onchange = async () => {
+  const f = importIn.files[0]; importIn.value = '';
+  if (!f) return;
+  try {
+    const raw = JSON.parse(await f.text()), d = readDiary(raw), bySrc = {};
+    for (const st of d.days.flatMap(x => x.steps)) { if (st.src) bySrc[st.src] = st.id; delete st.src; }
+    for (const ph of (Array.isArray(raw.photos) ? raw.photos : []).slice(0, 500)) {
+      const step = bySrc[ph?.step];
+      if (!step || typeof ph.data !== 'string' || !ph.data.startsWith('data:image/')) continue;
+      const blob = await (await fetch(ph.data)).blob(), id = newId('p');
+      await idb('readwrite', o => o.put({ id, step, blob, ts: Date.now() }));
+      (photos[step] ??= []).push({ id, url: URL.createObjectURL(blob) });
+    }
+    for (const [id, pl] of Object.entries(d.places)) PLACES[id] ??= pl;
+    TRIPS.push({ user: true, title: d.title, start: d.start, days: d.days });
+    nd.close(); save(); buildTrip(TRIPS.length - 1);
+  } catch (e) { console.warn('import failed', e); alert(T[lang].badFile); }
+};
+async function openSharedLink() {
+  if (!location.hash.startsWith('#d=')) return null;
+  try {
+    const d = readDiary(await unpack(location.hash.slice(3)));
+    for (const st of d.days.flatMap(x => x.steps)) delete st.src;
+    for (const [id, pl] of Object.entries(d.places)) PLACES[id] ??= pl;
+    TRIPS.push({ shared: true, title: d.title, start: d.start, days: d.days });
+    return TRIPS.length - 1;
+  } catch (e) { console.warn('bad shared link', e); return null; }
+}
+$('#saveCopy').onclick = () => {
+  delete trip.shared; trip.user = true;
+  history.replaceState(null, '', location.pathname + location.search);
+  save(); renderText();
+};
+addEventListener('hashchange', () => { if (location.hash.startsWith('#d=')) location.reload(); });
+
+const lb = $('#lb');
+[['lbPrev', 'left'], ['lbNext', 'right'], ['lbDel', 'trash'], ['lbClose', 'x']].forEach(([id, ic]) => $('#' + id).innerHTML = svg(ic));
+let lbList = [], lbI = 0;
+function openLb(stepId, pid) { lbList = photos[stepId]; lbI = Math.max(0, lbList.findIndex(p => p.id === pid)); showLb(); lb.showModal(); }
+function showLb() { const p = lbList[lbI]; if (!p) return lb.close(); $('#lbImg').src = p.url; $('#lbN').textContent = `${lbI + 1} / ${lbList.length}`; }
+const lbStep = d => { lbI = (lbI + d + lbList.length) % lbList.length; showLb(); };
+$('#lbPrev').onclick = () => lbStep(-1);
+$('#lbNext').onclick = () => lbStep(1);
+$('#lbClose').onclick = () => lb.close();
+lb.addEventListener('click', e => { if (e.target === lb) lb.close(); });
+lb.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') lbStep(-1); if (e.key === 'ArrowRight') lbStep(1); });
+$('#lbDel').onclick = async () => {
+  if (!confirm(T[lang].delPhotoQ)) return;
+  const [p] = lbList.splice(lbI, 1);
+  await idb('readwrite', o => o.delete(p.id)); URL.revokeObjectURL(p.url);
+  lbI = Math.min(lbI, lbList.length - 1); renderText();
+  lbList.length ? showLb() : lb.close();
+};
+
+function flatLL() { // inverse projection of flat camera target → [lat, lon]
+  const t = controls.target, md = -t.z / KX + M0;
+  return [(2 * Math.atan(Math.exp(md * Math.PI / 180)) - Math.PI / 2) * 180 / Math.PI, t.x / KX + LON0];
+}
+const viewLL = () => { const [la, lo] = mode === 'globe' ? llOf(gCamera.position) : flatLL(); return [la, ((lo + 540) % 360) - 180]; };
+const norm = s => s.normalize('NFKC').toLowerCase();
+const latin = s => /^[\x00-\x7f]/.test(s);
+// "starts with" for short input; any word start once 3+ chars typed ("tow" → "Tokyo Tower")
+const prefixHit = (name, text) => { const n = norm(name), t = norm(text); return n.startsWith(t) || (t.length > 2 && n.split(/[\s\-]+/).some(w => w.startsWith(t))); };
+function localMatches(text) { // diary places: instant, offline
+  return Object.entries(PLACES).filter(([, p]) => Object.values(p.name).some(n => prefixHit(n, text)))
+    .map(([id, p]) => ({ id, ll: p.ll, name: p.name, sub: '★ ' + T[lang].subtitle }));
+}
+const nearKm = () => mode === 'globe' ? 3000 : Math.max(camera.position.distanceTo(controls.target) * 3, 50);
+async function photon(text, signal) { // prefix autocomplete, biased toward where the map is looking
+  const [lat, lon] = viewLL();
+  const r = await fetch(`https://photon.komoot.io/api/?limit=25&lang=${latin(text) ? 'en' : 'default'}&lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}&q=${encodeURIComponent(text)}`, { signal });
+  if (!r.ok) throw new Error(r.status);
+  const seen = new Set();
+  return (await r.json()).features.flatMap(f => {
+    const pr = f.properties, n = pr.name, osm = pr.osm_type + pr.osm_id, key = n + '|' + (pr.city || pr.county || pr.state);
+    if (!n || [...n].length < 2 || seen.has(key)) return []; // dedupe same-name hits in same city (stations/exits)
+    const ll = [f.geometry.coordinates[1], f.geometry.coordinates[0]];
+    // Latin input: enforce prefix. Non-Latin: Photon only knows local-script names (Korean text → places in Korea),
+    // so keep only hits near the view; far ones are noise. Enter falls back to Nominatim (knows name:ko/ja).
+    if (latin(text) ? !prefixHit(n, text) : proj(...ll).distanceTo(controls.target) > nearKm()) return [];
+    seen.add(key);
+    return [{ osm, ll,
+      sub: [pr.city || pr.county, pr.state, pr.country].filter(x => x && x !== n).join(', '), name: { en: n, ko: n, ja: n } }];
+  });
+}
+async function nominatim(text, signal) { // full search, explicit Enter only (Nominatim policy: no autocomplete)
+  const r = await fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&namedetails=1&accept-language=${lang}&q=${encodeURIComponent(text)}`, { signal });
+  if (!r.ok) throw new Error(r.status);
+  return (await r.json()).map(x => ({ ll: [+x.lat, +x.lon], sub: x.display_name, name: namesOf(x.namedetails, x.name) }));
+}
+function namesOf(nd = {}, fb = '') { // OSM may hold several values "a;b" → first
+  const f = v => v?.split(';')[0].trim(), b = f(nd.name) || fb;
+  return { en: f(nd['name:en']) || b, ko: f(nd['name:ko']) || b, ja: f(nd['name:ja']) || b };
+}
+async function lookupNames(osm, fallback) { // one call on pick → EN/KO/JA names
+  try {
+    const r = await fetch(`https://nominatim.openstreetmap.org/lookup?format=jsonv2&namedetails=1&osm_ids=${osm}`, { signal: AbortSignal.timeout(3000) });
+    const nd = (await r.json())[0]?.namedetails;
+    return nd ? namesOf(nd, fallback.en) : fallback;
+  } catch { return fallback; }
+}
+let results = [], ctl, timer;
+const q = $('#q'), sugg = $('#sugg'), status = $('#status');
+const setStatus = k => status.textContent = k ? T[lang][k] : '';
+function showSugg() {
+  sugg.hidden = !results.length;
+  sugg.innerHTML = results.map((r, i) => `<li><button type="button" data-r="${i}"><b>${esc(L(r.name))}</b><small>${esc(r.sub)}</small></button></li>`).join('');
+}
+async function suggest() {
+  const text = q.value.trim();
+  ctl?.abort();
+  if (!text) { results = []; showSugg(); return setStatus(); }
+  const local = localMatches(text);
+  results = local.slice(0, 5); showSugg();
+  ctl = new AbortController(); setStatus('searching');
+  try {
+    const remote = await photon(text, ctl.signal), have = new Set(local.map(r => L(r.name)));
+    results = [...local, ...remote.filter(r => !have.has(L(r.name)))].slice(0, 5);
+    setStatus(results.length ? '' : 'none'); showSugg();
+  } catch (e) { if (e.name !== 'AbortError') setStatus(local.length ? '' : 'err'); }
+}
+q.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(suggest, 200); });
+q.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { results = []; showSugg(); }
+  if (e.key === 'ArrowDown') { e.preventDefault(); sugg.querySelector('button')?.focus(); }
+});
+sugg.addEventListener('keydown', e => {
+  const li = e.target.closest('li');
+  if (e.key === 'ArrowDown') { e.preventDefault(); li?.nextElementSibling?.querySelector('button').focus(); }
+  if (e.key === 'ArrowUp') { e.preventDefault(); (li?.previousElementSibling?.querySelector('button') ?? q).focus(); }
+  if (e.key === 'Escape') q.focus();
+});
+$('#add').addEventListener('submit', async e => {
+  e.preventDefault(); clearTimeout(timer);
+  const text = q.value.trim(); if (!text) return;
+  // Enter: top suggestion only if it really starts with the full typed text; else full-text search
+  const hit = results.find(r => Object.values(r.name).some(n => norm(n).startsWith(norm(text))));
+  if (hit) return addPlace(hit);
+  ctl?.abort(); ctl = new AbortController(); setStatus('searching');
+  try { results = await nominatim(text, ctl.signal); } catch (err) { if (err.name !== 'AbortError') setStatus('err'); return; }
+  if (results.length) addPlace(results[0]); else setStatus('none');
+});
+sugg.addEventListener('click', e => { const b = e.target.closest('[data-r]'); if (b) addPlace(results[+b.dataset.r]); });
+$('#newDay').onclick = () => { const last = trip.days.at(-1)?.date; trip.days.push({ user: true, steps: [], ...(last && { date: addDays(last, 1) }) }); activeDay = trip.days.at(-1); save(); renderText(); $('#days').lastElementChild?.scrollIntoView({ block: 'nearest' }); };
+
+async function addPlace(r) {
+  ctl?.abort(); results = []; showSugg(); q.value = ''; setStatus();
+  let id = r.id; // diary place picked → reuse it
+  if (!id) {
+    id = 'u' + Date.now().toString(36);
+    PLACES[id] = { ll: r.ll, name: r.osm ? await lookupNames(r.osm, r.name) : r.name };
+  }
+  const kind = $('#kind').value, forced = kind === 'flight' || kind === 'train';
+  const step = { id: newId('s'), user: true, kind, to: id, ...(forced ? { mode: kind } : { auto: true, icon: kind }), ...($('#plan').checked ? { planned: true } : {}) };
+  targetDay().steps.push(step);
+  save();
+  buildTrip(tripIdx); setStep(FLAT.indexOf(step));
+}
+
+// keep focus centered in the visible map area (right of panel on desktop, above sheet on mobile)
+function resize() {
+  const W = innerWidth, H = innerHeight, r = panel.getBoundingClientRect(), sheet = r.width >= W - 1;
+  renderer.setSize(W, H); labelR.setSize(W, H); gLabelR.setSize(W, H); res.set(W, H);
+  for (const sc of [scene, gScene]) sc.traverse(o => o.material?.isLineMaterial && o.material.resolution.set(W, H)); // LineMaterial copies res, not refs it
+  for (const cam of [camera, gCamera]) { cam.aspect = W / H; cam.setViewOffset(W, H, sheet ? 0 : -r.right / 2, sheet ? (H - r.top) / 2 : 0, W, H); }
+}
+new ResizeObserver(resize).observe(panel);
+addEventListener('resize', resize);
+
+// ─── LOOP ───
+const v = new THREE.Vector3(), clock = new THREE.Clock();
+const ease = t => t < .5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2;
+const toCam = new THREE.Vector3();
+function declutter(list, cam, dist) { // list order = priority (places → landmarks → cities, biggest first)
+  // ponytail: O(n²) box check, fine for dozens of places; grid bucket if hundreds
+  const W = innerWidth, H = innerHeight, shown = [];
+  const act = cur >= 0 ? [FLAT[cur].from, FLAT[cur].to] : [];
+  for (const l of [...list].sort((a, b) => act.includes(b.id) - act.includes(a.id))) {
+    if (dist > (l.maxD ?? Infinity) || (l.ref && !l.ref.visible) || (l.globe && toCam.subVectors(cam.position, l.obj.position).dot(l.obj.position) < 0)) { l.obj.visible = false; continue; } // zoomed out / far side
+    v.copy(l.obj.position).project(cam);
+    if (v.z > 1 || Math.abs(v.x) > 1.05 || Math.abs(v.y) > 1.05) { l.obj.visible = false; continue; } // off-screen
+    const x = (v.x + 1) * W / 2, y = (1 - v.y) * H / 2, w = l.w ||= l.el.firstChild.offsetWidth || 90;
+    const hit = shown.some(s => Math.abs(s.x - x) < (s.w + w) / 2 + 4 && Math.abs(s.y - y) < 26);
+    l.obj.visible = !hit;
+    if (!hit) shown.push({ x, y, w });
+  }
+}
+const qTmp = new THREE.Quaternion(), qFly = new THREE.Quaternion();
+renderer.setAnimationLoop(() => {
+  const dt = Math.min(clock.getDelta(), .05);
+  if (mode === 'globe') return globeFrame(dt);
+  if (fly) {
+    fly.t = Math.min(1, fly.t + dt / 1.8);
+    const e = ease(fly.t);
+    controls.target.lerpVectors(fly.a, fly.b, e);
+    camera.position.copy(controls.target).addScaledVector(fly.dir, Math.exp(THREE.MathUtils.lerp(Math.log(fly.d0), Math.log(fly.d1), e)));
+    if (fly.t === 1) fly = null;
+  }
+  controls.update();
+  const d = camera.position.distanceTo(controls.target);
+  camera.near = d / 400; camera.far = d * 120; camera.updateProjectionMatrix();
+  grid.material.uniforms.uH.value = d;
+  scene.fog.near = d * 1.8; scene.fog.far = d * 4.5;
+  for (const o of mapLayers) o.visible = d < o.userData.maxD;
+  { const u = grid.material.uniforms, l = Math.log10(d), f = Math.floor(l), sz = 10 ** (f - 1), fr = x => x - Math.floor(x), tx = controls.target.x, tz = controls.target.z;
+    u.uC.value.set(tx, tz); u.uS.value = sz; u.uT.value = l - f; u.uF.value.set(fr(tx / sz), fr(tz / sz), fr(tx / sz / 10), fr(tz / sz / 10)); }
+  coastMat.opacity = THREE.MathUtils.smoothstep(d, 4, 25);
+  borderMat.opacity = .75 * THREE.MathUtils.smoothstep(d, 3, 15); // coarse 1:50m lines: fade at street zoom
+  flatPeaks.visible = d > 20; // no 16 km cones at street level
+  if (!fly && d > FLAT_MAX * .97) toGlobe(sph(...flatLL(), 1), R + d * 1.2); // zoomed out past flat map
+
+  if (playing && !fly && (playT += dt) > 2.2) {
+    playT = 0;
+    if (cur < FLAT.length - 1) setStep(cur + 1); else { playing = false; updPlay(); }
+  }
+  if (cur >= 0) {
+    const t = (clock.elapsedTime % 2.6) / 2.6;
+    traveler.position.copy(routes[cur].curve.getPointAt(ease(t)));
+    traveler.scale.setScalar(.045 + Math.sin(clock.elapsedTime * 6) * .006);
+  }
+  urbanMat.opacity = THREE.MathUtils.smoothstep(d, 2, 10);
+  scaleLandmarks(lmFlat, camera, 46);
+  declutter([...labels, ...lmLabels, ...cityLbl], camera, d);
+  renderer.render(scene, camera);
+  labelR.render(scene, camera);
+});
+function globeFrame(dt) {
+  if (gfly) {
+    gfly.t = Math.min(1, gfly.t + dt / 2);
+    const e = ease(gfly.t);
+    qFly.setFromUnitVectors(gfly.a, gfly.b);
+    gCamera.position.copy(gfly.a).applyQuaternion(qTmp.identity().slerp(qFly, e))
+      .setLength(Math.exp(THREE.MathUtils.lerp(Math.log(gfly.d0), Math.log(gfly.d1), e)));
+    if (gfly.t === 1) gfly = null;
+  }
+  gControls.update();
+  if (!gfly && gCamera.position.length() < R * 1.33) { // zoomed into the globe → flat map at that spot
+    toFlat(proj(...llOf(gCamera.position)), FLAT_MAX * .8); return;
+  }
+  if (playing && !gfly && (playT += dt) > 2.2) {
+    playT = 0;
+    if (cur < FLAT.length - 1) setStep(cur + 1); else { playing = false; updPlay(); }
+  }
+  if (cur >= 0) {
+    const gp = routes[cur].gpts, t = ease((clock.elapsedTime % 2.6) / 2.6) * (gp.length - 1), i = Math.min(Math.floor(t), gp.length - 2);
+    gTraveler.position.lerpVectors(gp[i], gp[i + 1], t - i);
+    gTraveler.scale.setScalar(.045 + Math.sin(clock.elapsedTime * 6) * .006);
+  }
+  scaleLandmarks(lmGlobe, gCamera, 28, true);
+  declutter([...gLabels, ...lmGLabels, ...cityGLbl], gCamera, gCamera.position.length() - R);
+  renderer.render(gScene, gCamera);
+  gLabelR.render(gScene, gCamera);
+}
+
+resize();
+load();
+await loadPhotos();
+ensureDiary(); // before the shared view is appended, so indexes stay put
+buildTrip((await openSharedLink()) ?? Math.min(+store.get('trip') || 0, TRIPS.length - 1));
+</script>
+</body>
+</html>

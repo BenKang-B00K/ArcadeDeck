@@ -186,6 +186,11 @@
     "seoPlayFreeOn": "Play Free on ArcadeDeck",
     "seoPlayPrefix": "Play",
     "seoFreeOnlineGame": "Free online browser game on ArcadeDeck.",
+    "seoFreeOnApp": "Free on ArcadeDeck",
+    "seoHowToUse": "How to Use",
+    "seoFreeOnlineApp": "Free browser app on ArcadeDeck. No download, no sign-up.",
+    "playerOpenApp": "Open App",
+    "gameCardOpenApp": "Open",
     "seoAboutThisGame": "About This Game",
     "seoHowToPlay": "How to Play",
     "seoProTips": "Pro Tips",
@@ -2940,6 +2945,86 @@
       ]
     },
     "_comment": "Per-game canonical English. Translators mirror this in {lang}.json.",
+    "34": {
+      "title": "Personal Travel Diary",
+      "description": "A travel planner and tracker, not a game: plan a trip or log one you took on a 3D map that zooms from a spinning globe down to street-level buildings. Type a place, it lands on the map with the route drawn from your last stop — flight arcs, train lines, local hops — then press play and watch the traveler fly through your days.",
+      "fullDescription": "\n      Personal Travel Diary is a **travel planner and tracker** on a 3D map you fill yourself — not a game. Start a diary with a name and a start and end date and it lays out one day per date. Type a place into the search box — suggestions appear from the first letter, biased to wherever the map is looking — and it becomes a stop on the chosen day, with the leg from your previous stop drawn in. Transport is guessed by distance (**flight** over 300 km, **train** over 2.5 km, otherwise local) and you can change it; tick **Plan** and the stop draws dashed with a PLAN badge, so the same diary works before and after the trip.\n      The map is built in Three.js. Zoomed out it is a **lit globe** with country borders, city outlines, low-poly mountains and **18 low-poly landmarks** — Eiffel Tower, Statue of Liberty, Tokyo Tower, Taj Mahal, Mount Fuji and more; zoom in and it flattens into a map, and around Tokyo, Ginza, Ueno, Narita and Incheon down to extruded 3D buildings, roads and rail lines. Routes follow great circles and flights arc above the surface. Press **play** and the camera flies stop to stop with a little traveler marking the way.\n      Every stop can hold **photos** (resized and kept in your browser), stops drag between days to reorder and the route redraws, and **My diaries** sorts your trips into Traveling now, Upcoming plans and Previous diaries. Nothing leaves your device until you choose **Share**: a link carries the diary (without photos) packed into the URL, or a file carries it with photos, and whoever opens it gets a view-only copy they can save. Place and city names are shown in English, Korean and Japanese.\n    ",
+      "controls": "Search Box: Type a place, pick a suggestion or press Enter to add it / Drag Handle: Move a stop within or between days / Camera Button: Add photos to a stop / Mouse or Touch: Drag to pan, right-drag or two fingers to rotate, wheel or pinch to zoom / ← →: Previous / next stop / Space: Play the trip / Title: Open My diaries or start a new diary",
+      "tips": "Pan the map near where you are going **before** typing — suggestions favour what is on screen. Tap a **day heading** first to send new stops to that day. Mark future stops as **Plan** and untick them as you go; a diary with only planned stops is filed under **Upcoming plans**. Use **Download file** to share with photos — the link version keeps the diary small by leaving them out. Your diaries live in this browser: clearing site data or a private window wipes them, so download a file of anything you want to keep.",
+      "features": [
+        "3D Globe That Zooms Down to Street-Level Buildings",
+        "Type-Ahead Place Search Biased to the Map View",
+        "Auto-Drawn Flight Arcs, Train Lines and Local Legs",
+        "Plan Mode: Dashed Stops for Trips Not Taken Yet",
+        "Photos on Every Stop, Stored Only in Your Browser",
+        "Drag to Reorder Stops Between Days",
+        "18 Low-Poly Landmarks and 492 Named Cities",
+        "Play Button Flies the Camera Through Your Trip",
+        "Share by Link or File — View-Only Copies",
+        "English, Korean and Japanese Place Names"
+      ],
+      "objectives": "Build a **day-by-day diary** of a trip — past or planned — with the route drawn between every stop, photos on the moments that mattered, and a **play-through** that flies the camera from the first stop to the last.",
+      "controlsTable": [
+        {
+          "key": "Search box",
+          "action": "Type a place; pick a suggestion or press Enter to add it"
+        },
+        {
+          "key": "Drag handle",
+          "action": "Move a stop within a day or into another day"
+        },
+        {
+          "key": "Camera button",
+          "action": "Add photos to a stop"
+        },
+        {
+          "key": "Drag / Wheel",
+          "action": "Pan / zoom the map (pinch on touch)"
+        },
+        {
+          "key": "Right-drag",
+          "action": "Rotate the view (two fingers on touch)"
+        },
+        {
+          "key": "←  /  →",
+          "action": "Previous / next stop"
+        },
+        {
+          "key": "Space",
+          "action": "Play the trip"
+        },
+        {
+          "key": "Diary title",
+          "action": "Open My diaries, start or delete a diary"
+        }
+      ],
+      "faq": [
+        {
+          "q": "Is this a game?",
+          "a": "No. It is a travel planner and tracker on an interactive 3D map — there is no score or win condition, so there is no personal best or leaderboard entry for it."
+        },
+        {
+          "q": "Who can see my diary?",
+          "a": "No one. Diaries and photos are stored only in your browser. They leave your device only when you use Share, and then only the copy you send."
+        },
+        {
+          "q": "What happens when I share a link?",
+          "a": "The diary is compressed into the link itself — no server stores it. Photos are left out to keep it short; use Download file to send one with photos. Whoever opens it sees a view-only copy and can save it to their own diaries."
+        },
+        {
+          "q": "Will my diaries survive clearing my browser?",
+          "a": "No. Clearing site data, private windows and switching devices all start empty. Download a file of any diary you want to keep and open it again from the Start a new diary dialog."
+        },
+        {
+          "q": "Why do some cities have 3D buildings and others do not?",
+          "a": "Street-level buildings, roads and rail are baked for Tokyo (Ginza, Ueno), Narita and Incheon. Everywhere else shows the world map with borders, city outlines, mountains and landmarks."
+        },
+        {
+          "q": "Does it work on a phone?",
+          "a": "Yes. On a phone the diary becomes a bottom sheet under the map, with touch pan, rotate and pinch zoom."
+        }
+      ]
+    },
     "33": {
       "title": "Flux Tower Defense",
       "description": "A grid tower defense where the maze is yours to draw: towers block the path, traps sit on it, and every run hands you a random arsenal to build around. Elemental attributes at Lv 5, Tier 2 abilities at Lv 10, natural disasters you click away, ten elite modifiers on the way. This is the free web edition of the Steam release — waves 1 to 10.",

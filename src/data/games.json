@@ -695,5 +695,21 @@
       10,
       10
     ]
+  },
+  {
+    "id": "34",
+    "slug": "travel-diary",
+    "kind": "app",
+    "language": "EN/KO/JA",
+    "thumbnail": "images/travel-diary.webp",
+    "genres": [
+      "Travel Planner"
+    ],
+    "gameUrl": "https://games.arcadedeck.net/travel-diary/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "platform": "BOTH",
+    "isOriginal": true,
+    "badge": "NEW"
   }
 ]

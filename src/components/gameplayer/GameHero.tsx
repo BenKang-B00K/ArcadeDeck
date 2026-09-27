@@ -46,7 +46,7 @@ const GameHero: React.FC<Props> = ({ game, lang, overlay, onPlay }) => {
           onClick={onPlay}
         >
           <Play size={22} aria-hidden="true" />
-          {uiT('playerPlayNow', 'Play Now')}
+          {game.kind === 'app' ? uiT('playerOpenApp', 'Open App') : uiT('playerPlayNow', 'Play Now')}
         </button>
         {game.steamUrl && (
           <a

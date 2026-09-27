@@ -103,7 +103,7 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, onGenreCli
         {platformBadge}
         {isInProduction && <span className="status-badge">{t('gameCardComingSoon', 'Coming Soon')}</span>}
         <div className="card-overlay" aria-hidden="true">
-          <span className="play-btn">{isInProduction ? t('gameCardComingSoon', 'Coming Soon') : t('gameCardPlayNow', 'Play Now')}</span>
+          <span className="play-btn">{isInProduction ? t('gameCardComingSoon', 'Coming Soon') : game.kind === 'app' ? t('gameCardOpenApp', 'Open') : t('gameCardPlayNow', 'Play Now')}</span>
         </div>
       </div>
 

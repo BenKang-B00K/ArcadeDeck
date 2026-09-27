@@ -3,6 +3,7 @@ import type { Game } from '../../data/games';
 import type { LocaleOverlay } from '../../i18n';
 import { getLocalizedString } from '../../i18n';
 import { genreSlug } from '../../utils/genres';
+import { useUiText } from '../../i18n/useUiText';
 
 interface Props {
   game: Game;
@@ -17,10 +18,13 @@ const GameHeadMeta: React.FC<Props> = ({ game, lang, overlay }) => {
   const desc = getLocalizedString(game, 'description', lang, overlay);
   const imageUrl = `https://arcadedeck.net/${encodeURI(game.thumbnail)}`;
   const pageUrl = `https://arcadedeck.net/play/${game.slug}`;
+  const isApp = game.kind === 'app';
+  const uiT = useUiText();
+  const playFreeOn = isApp ? uiT('seoFreeOnApp', 'Free on ArcadeDeck') : uiT('seoPlayFreeOn', 'Play Free on ArcadeDeck');
 
   useEffect(() => {
-    document.title = `${title} - Play Free on ArcadeDeck`;
-  }, [title]);
+    document.title = `${title} - ${playFreeOn}`;
+  }, [title, playFreeOn]);
 
   // Point the install prompt at the per-game manifest (written by
   // prerender-pages.js) so this game installs as its own app. Chrome
@@ -65,12 +69,12 @@ const GameHeadMeta: React.FC<Props> = ({ game, lang, overlay }) => {
       <script type="application/ld+json">
         {JSON.stringify({
           "@context": "https://schema.org",
-          "@type": "VideoGame",
+          "@type": isApp ? "WebApplication" : "VideoGame",
           "name": titleEn,
           "alternateName": title !== titleEn ? title : undefined,
           "description": descEn,
           "genre": game.genres,
-          "applicationCategory": "GameApplication",
+          "applicationCategory": isApp ? "TravelApplication" : "GameApplication",
           "operatingSystem": "Web Browser",
           "image": imageUrl,
           "url": pageUrl,

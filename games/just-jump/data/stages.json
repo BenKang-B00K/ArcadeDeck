@@ -3,7 +3,7 @@
     "id": "twilight",
     "name": "TWILIGHT",
     "color": "#7df",
-    "startSpeed": 6,
+    "startSpeed": 5,
     "obstacleIds": ["spike", "doubleSpike", "bat"],
     "coinIds":     ["gold"]
   },
@@ -11,7 +11,7 @@
     "id": "storm",
     "name": "STORM",
     "color": "#a0e0ff",
-    "startSpeed": 6,
+    "startSpeed": 5,
     "obstacleIds": ["spike", "doubleSpike", "bat", "saw", "hover"],
     "coinIds":     ["gold", "silver"]
   },
@@ -19,7 +19,7 @@
     "id": "inferno",
     "name": "INFERNO",
     "color": "#ff8a40",
-    "startSpeed": 6,
+    "startSpeed": 5,
     "obstacleIds": ["spike", "bat", "saw", "hover", "rocket", "faller"],
     "coinIds":     ["gold", "silver", "ruby"]
   },
@@ -27,7 +27,7 @@
     "id": "void",
     "name": "VOID",
     "color": "#c080ff",
-    "startSpeed": 6,
+    "startSpeed": 5,
     "obstacleIds": ["spike", "saw", "rocket", "faller", "wall", "tower", "hover"],
     "coinIds":     ["gold", "silver", "gem"]
   },
@@ -35,7 +35,7 @@
     "id": "aurora",
     "name": "AURORA",
     "color": "#a0e8ff",
-    "startSpeed": 6,
+    "startSpeed": 5,
     "obstacleIds": ["spike", "saw", "iceShard", "glacier", "faller"],
     "coinIds":     ["gold", "silver", "frost"]
   },
@@ -43,7 +43,7 @@
     "id": "nexus",
     "name": "NEXUS",
     "color": "#ff60c0",
-    "startSpeed": 6,
+    "startSpeed": 5,
     "obstacleIds": ["rocket", "hover", "drone", "laserGate", "wall"],
     "coinIds":     ["gold", "silver", "gem", "chrono"]
   },
@@ -51,7 +51,7 @@
     "id": "abyss",
     "name": "ABYSS",
     "color": "#40c8d8",
-    "startSpeed": 6,
+    "startSpeed": 5,
     "obstacleIds": ["spike", "saw", "bubble", "tentacle", "jellyfish"],
     "coinIds":     ["gold", "silver", "frost"]
   },
@@ -59,7 +59,7 @@
     "id": "mirage",
     "name": "MIRAGE",
     "color": "#ffc060",
-    "startSpeed": 6,
+    "startSpeed": 5,
     "obstacleIds": ["spike", "saw", "cactus", "sandTwister", "scorpion"],
     "coinIds":     ["gold", "silver", "ruby"]
   },
@@ -67,7 +67,7 @@
     "id": "chronos",
     "name": "CHRONOS",
     "color": "#a8a8c8",
-    "startSpeed": 6,
+    "startSpeed": 5,
     "obstacleIds": ["wall", "saw", "gear", "hourglass", "pendulum"],
     "coinIds":     ["gold", "silver", "chrono"]
   },
@@ -75,7 +75,7 @@
     "id": "grove",
     "name": "GROVE",
     "color": "#88d860",
-    "startSpeed": 6,
+    "startSpeed": 5,
     "obstacleIds": ["spike", "thornVine", "acornDrop", "bramblePatch", "bat"],
     "coinIds":     ["gold", "silver"]
   },
@@ -83,7 +83,7 @@
     "id": "crystal",
     "name": "CRYSTAL",
     "color": "#c0a8ff",
-    "startSpeed": 6,
+    "startSpeed": 5,
     "obstacleIds": ["spike", "stalactite", "prismShard", "crystalCluster", "saw"],
     "coinIds":     ["gold", "silver", "gem"]
   },
@@ -91,7 +91,7 @@
     "id": "cathedral",
     "name": "CATHEDRAL",
     "color": "#d8b048",
-    "startSpeed": 6,
+    "startSpeed": 5,
     "obstacleIds": ["spike", "gargoyle", "candelabra", "organPipe", "wall"],
     "coinIds":     ["gold", "silver", "ruby"]
   },
@@ -99,7 +99,7 @@
     "id": "genesis",
     "name": "GENESIS",
     "color": "#fff080",
-    "startSpeed": 6,
+    "startSpeed": 5,
     "obstacleIds": ["tower", "faller", "meteor", "singularity", "drone", "iceShard"],
     "coinIds":     ["gold", "silver", "gem", "chrono"]
   }

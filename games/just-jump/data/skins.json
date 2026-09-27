@@ -26,7 +26,7 @@
     "blush":   "rgba(255,80,80,0.55)",
     "accessories": {
       "helm":   { "type": "horned", "color": "#3a1208", "accent": "#ffb040", "outline": "#1a0604" },
-      "weapon": { "type": "sword", "blade": "#ffe080", "accent": "#ff5028", "outline": "#3a1208" },
+      "weapon": { "type": "flamberge", "blade": "#ffe080", "accent": "#ff5028", "grip": "#3a1208", "outline": "#3a1208" },
       "vfx":    { "type": "fire", "color": "#ff8040", "hot": "#ffe080" }
     }
   },
@@ -61,8 +61,8 @@
     "mouth":   { "stroke": "#000", "open": "#100020" },
     "blush":   "rgba(220,140,255,0.5)",
     "accessories": {
-      "helm":   { "type": "horned", "color": "#1a0828", "accent": "#c080ff", "outline": "#000" },
-      "weapon": { "type": "staff", "handle": "#2a1a3a", "accent": "#c080ff", "outline": "#100018" },
+      "helm":   { "type": "shadowCowl", "color": "#1a0828", "accent": "#c080ff", "outline": "#000" },
+      "weapon": { "type": "voidOrb", "color": "#1a0828", "accent": "#c080ff", "outline": "#100018" },
       "vfx":    { "type": "shadow", "color": "#c080ff", "ring": "rgba(140,60,200," }
     }
   },
@@ -98,7 +98,7 @@
     "blush":   "rgba(220,140,60,0.4)",
     "accessories": {
       "helm":   { "type": "jackal", "color": "#0a0604", "accent": "#ffd060", "outline": "#000", "innerEar": "#a83040", "jewel": "#ff5050" },
-      "weapon": { "type": "staff", "handle": "#0a0604", "accent": "#ffd060", "outline": "#000" },
+      "weapon": { "type": "flail", "color": "#0a0604", "accent": "#ffd060", "outline": "#000" },
       "vfx":    { "type": "gold", "color": "#ffd060" }
     }
   },
@@ -133,7 +133,7 @@
     "mouth":   { "stroke": "#021830", "open": "#082040" },
     "blush":   "rgba(120,200,255,0.5)",
     "accessories": {
-      "helm":   { "type": "horned", "color": "#0a3858", "accent": "#a8e8ff", "outline": "#021830" },
+      "helm":   { "type": "coralCrown", "color": "#ff9868", "band": "#0a3858", "pearl": "#fff8f0", "shell": "#ffd8c0", "outline": "#021830" },
       "weapon": { "type": "trident", "head": "#c89858", "handle": "#3a1808", "accent": "#ffd860", "outline": "#021830" },
       "vfx":    { "type": "water", "color": "#3098e0" }
     }
@@ -152,7 +152,7 @@
     "blush":   "rgba(255,200,120,0.45)",
     "accessories": {
       "helm":   { "type": "crown", "color": "#ffd860", "accent": "#a07020", "outline": "#3a2a08" },
-      "weapon": { "type": "sword", "blade": "#fff8a0", "accent": "#ffd860", "grip": "#a07020", "outline": "#3a2a08" },
+      "weapon": { "type": "thunderbolt", "bolt": "#fff8a0", "accent": "#ffd860", "outline": "#3a2a08" },
       "vfx":    { "type": "lightning", "color": "#ffffff" }
     }
   },
@@ -169,8 +169,8 @@
     "mouth":   { "stroke": "#0a3858", "open": "#102030" },
     "blush":   "rgba(160,210,255,0.5)",
     "accessories": {
-      "helm":   { "type": "winged", "color": "#dde8f0", "accent": "#80e0ff", "outline": "#0a3858", "highlight": "rgba(255,255,255,0.55)" },
-      "weapon": { "type": "dagger", "blade": "#dde8f0", "accent": "#80e0ff", "handle": "#3a6a90", "outline": "#0a3858" },
+      "helm":   { "type": "petasos", "color": "#dde8f0", "accent": "#80e0ff", "outline": "#0a3858" },
+      "weapon": { "type": "caduceus", "rod": "#3a6a90", "snake": "#80e0ff", "wing": "#dde8f0", "outline": "#0a3858" },
       "vfx":    { "type": "lightning", "color": "#a0e8ff" }
     }
   },
@@ -187,8 +187,8 @@
     "mouth":   { "stroke": "#5a3008", "open": "#3a1808" },
     "blush":   "rgba(255,200,140,0.5)",
     "accessories": {
-      "helm":   { "type": "leafCrown", "color": "#ffe070", "accent": "#a06010", "band": "#5a3008", "outline": "#5a3008", "berry": "#ff8040" },
-      "weapon": { "type": "sword", "blade": "#fff8c0", "accent": "#ffd060", "grip": "#a06010", "outline": "#5a3008" },
+      "helm":   { "type": "laurel", "color": "#ffe070", "accent": "#a06010", "outline": "#5a3008" },
+      "weapon": { "type": "bow", "wood": "#ffd060", "accent": "#fff8c0", "fletch": "#ff8040", "grip": "#a06010", "outline": "#5a3008" },
       "vfx":    { "type": "sunburst", "color": "#ffd060", "ray": "#fff8c0" }
     }
   },
@@ -205,8 +205,8 @@
     "mouth":   { "stroke": "#0a1838", "open": "#10204a" },
     "blush":   "rgba(180,210,255,0.45)",
     "accessories": {
-      "helm":   { "type": "winged", "color": "#dde4ec", "accent": "#ffd060", "outline": "#0a1838", "highlight": "rgba(255,255,255,0.55)" },
-      "weapon": { "type": "sword", "blade": "#fff8e0", "accent": "#ffd060", "grip": "#1a3868", "outline": "#0a1838" },
+      "helm":   { "type": "plume", "color": "#dde4ec", "accent": "#ffd060", "crest": "#d83040", "outline": "#0a1838" },
+      "weapon": { "type": "aegis", "shield": "#dde4ec", "rim": "#ffd060", "emblem": "#3a4a78", "outline": "#0a1838" },
       "vfx":    { "type": "feather", "color": "#dde4ec", "trim": "#3a4a78" }
     }
   },
@@ -223,8 +223,8 @@
     "mouth":   { "stroke": "#021838", "open": "#102040" },
     "blush":   "rgba(160,210,255,0.45)",
     "accessories": {
-      "helm":   { "type": "winged", "color": "#fff8e0", "accent": "#c08020", "outline": "#021838", "highlight": "rgba(255,240,200,0.55)" },
-      "weapon": { "type": "sword", "blade": "#fff8c0", "accent": "#ffd060", "grip": "#a07020", "outline": "#021838" },
+      "helm":   { "type": "falcon", "color": "#fff8e0", "accent": "#c08020", "beak": "#ffd060", "outline": "#021838" },
+      "weapon": { "type": "khopesh", "blade": "#ffd060", "grip": "#0a3870", "accent": "#c08020", "outline": "#021838" },
       "vfx":    { "type": "feather", "color": "#fff8e0", "trim": "#a07020" }
     }
   },
@@ -241,8 +241,8 @@
     "mouth":   { "stroke": "#0a1428", "open": "#10182a" },
     "blush":   "rgba(180,200,255,0.45)",
     "accessories": {
-      "helm":   { "type": "twistedHorns", "color": "#0a1428", "horn": "#dde4ec", "accent": "#a0d0ff", "outline": "#0a1428" },
-      "weapon": { "type": "sword", "blade": "#fff", "accent": "#a0d0ff", "outline": "#0a1428" },
+      "helm":   { "type": "kabuto", "color": "#2a3850", "accent": "#a0d0ff", "horn": "#dde4ec", "outline": "#0a1428" },
+      "weapon": { "type": "katana", "blade": "#fff", "accent": "#a0d0ff", "grip": "#1a2848", "outline": "#0a1428" },
       "vfx":    { "type": "lightning", "color": "#c0e0ff" }
     }
   },
@@ -259,8 +259,8 @@
     "mouth":   { "stroke": "#3a1004", "open": "#3a0808" },
     "blush":   "rgba(255,140,80,0.5)",
     "accessories": {
-      "helm":   { "type": "leafCrown", "color": "#ffd060", "accent": "#a04008", "band": "#3a1004", "outline": "#3a1004", "berry": "#ff3010" },
-      "weapon": { "type": "staff", "handle": "#a04008", "accent": "#ffd060", "outline": "#3a1004" },
+      "helm":   { "type": "sunDisk", "color": "#ffd060", "accent": "#a04008", "horn": "#fff0c0", "cobra": "#40c070", "outline": "#3a1004" },
+      "weapon": { "type": "ankh", "color": "#ffd060", "accent": "#a04008", "outline": "#3a1004" },
       "vfx":    { "type": "fire", "color": "#ff8040", "hot": "#fff8c0" }
     }
   },
@@ -277,8 +277,8 @@
     "mouth":   { "stroke": "#021808", "open": "#0a2010" },
     "blush":   "rgba(160,255,180,0.5)",
     "accessories": {
-      "helm":   { "type": "leafCrown", "color": "#40b870", "accent": "#ffd060", "band": "#a04008", "outline": "#021808", "berry": "#ff3060" },
-      "weapon": { "type": "staff", "handle": "#0a4828", "accent": "#ffd060", "outline": "#021808" },
+      "helm":   { "type": "featherHeaddress", "color": "#40b870", "accent": "#ffd060", "tip": "#2080ff", "band": "#a04008", "jade": "#60e0a0", "outline": "#021808" },
+      "weapon": { "type": "macuahuitl", "color": "#a06010", "accent": "#1a1028", "outline": "#021808" },
       "vfx":    { "type": "leaf", "color": "#a8f088", "vein": "#0a4828", "petal": "#ffd060" }
     }
   },
@@ -295,8 +295,8 @@
     "mouth":   { "stroke": "#1a0204", "open": "#3a0808" },
     "blush":   "rgba(255,100,40,0.6)",
     "accessories": {
-      "helm":   { "type": "leafCrown", "color": "#ff5028", "accent": "#3a0408", "band": "#5a1810", "outline": "#1a0204", "berry": "#ffd060" },
-      "weapon": { "type": "staff", "handle": "#3a0808", "accent": "#ff8030", "outline": "#1a0204" },
+      "helm":   { "type": "flameHair", "color": "#ff5028", "hot": "#ffe080", "outline": "#1a0204" },
+      "weapon": { "type": "fireWhip", "color": "#3a0808", "accent": "#ff4020", "hot": "#fff070", "outline": "#1a0204" },
       "vfx":    { "type": "fire", "color": "#ff4020", "hot": "#fff070" }
     }
   },
@@ -313,8 +313,8 @@
     "mouth":   { "stroke": "#000", "open": "#3a0810" },
     "blush":   "rgba(200,40,80,0.5)",
     "accessories": {
-      "helm":   { "type": "horned", "color": "#1a0828", "accent": "#ff3060", "outline": "#000" },
-      "weapon": { "type": "dagger", "blade": "#dde8f0", "accent": "#ff3060", "handle": "#1a0828", "outline": "#000" },
+      "helm":   { "type": "skullCrown", "color": "#1a0828", "gem": "#ff3060", "skull": "#f0ead8", "outline": "#000" },
+      "weapon": { "type": "khadga", "blade": "#dde8f0", "accent": "#ff3060", "handle": "#1a0828", "outline": "#000" },
       "vfx":    { "type": "darkfire", "color": "#a020c0", "hot": "#ff3060" }
     }
   },
@@ -331,8 +331,8 @@
     "mouth":   { "stroke": "#5a3008", "open": "#3a1010" },
     "blush":   "rgba(255,180,180,0.55)",
     "accessories": {
-      "helm":   { "type": "leafCrown", "color": "#fff8c0", "accent": "#c83030", "band": "#ffd060", "outline": "#5a3008", "berry": "#c83030" },
-      "weapon": { "type": "sword", "blade": "#ffffff", "accent": "#ffd060", "grip": "#c83030", "outline": "#5a3008" },
+      "helm":   { "type": "sunHalo", "color": "#ffd060", "accent": "#c83030", "band": "#ffd060", "outline": "#5a3008" },
+      "weapon": { "type": "suzu", "bell": "#ffd060", "ribbon": "#c83030", "handle": "#5a3008", "outline": "#5a3008" },
       "vfx":    { "type": "fire", "color": "#fff8c0", "hot": "#ffffff" }
     }
   },
@@ -349,7 +349,7 @@
     "mouth":   { "stroke": "#0a1428", "open": "#10182a" },
     "blush":   "rgba(220,160,160,0.45)",
     "accessories": {
-      "helm":   { "type": "winged", "color": "#dde4ec", "accent": "#a01818", "outline": "#0a1428", "highlight": "rgba(255,255,255,0.55)" },
+      "helm":   { "type": "nasalHelm", "color": "#dde4ec", "accent": "#a01818", "rivet": "#f0e8d8", "outline": "#0a1428" },
       "weapon": { "type": "sword", "blade": "#fff", "accent": "#ffd060", "grip": "#5a1818", "outline": "#0a1428" },
       "vfx":    { "type": "rune", "color": "#dde8ff", "glow": "#80a8ff" }
     }
@@ -367,8 +367,8 @@
     "mouth":   { "stroke": "#000", "open": "#200" },
     "blush":   "rgba(255,150,80,0.45)",
     "accessories": {
-      "helm":   { "type": "jackal", "color": "#080000", "accent": "#ffd060", "outline": "#000", "innerEar": "#ff80a0", "jewel": "#40e090" },
-      "weapon": { "type": "dagger", "blade": "#fff", "accent": "#ffd060", "handle": "#1a0810", "outline": "#000" },
+      "helm":   { "type": "catEars", "color": "#080000", "accent": "#ffd060", "outline": "#000", "innerEar": "#ff80a0", "jewel": "#40e090" },
+      "weapon": { "type": "sistrum", "frame": "#ffd060", "rod": "#dde8f0", "handle": "#3a2818", "outline": "#000" },
       "vfx":    { "type": "gold", "color": "#ffd060" }
     }
   },
@@ -385,8 +385,8 @@
     "mouth":   { "stroke": "#3a2008", "open": "#3a2008" },
     "blush":   "rgba(255,200,140,0.5)",
     "accessories": {
-      "helm":   { "type": "winged", "color": "#ffd060", "accent": "#1a5828", "outline": "#3a2008", "highlight": "rgba(255,255,210,0.55)" },
-      "weapon": { "type": "sword", "blade": "#fff8c0", "accent": "#ffd060", "grip": "#1a5828", "outline": "#3a2008" },
+      "helm":   { "type": "triskelCrown", "color": "#ffd060", "accent": "#1a5828", "outline": "#3a2008" },
+      "weapon": { "type": "sling", "cord": "#8ad060", "pouch": "#a07020", "stone": "#c8c8c8", "outline": "#3a2008" },
       "vfx":    { "type": "sunburst", "color": "#ffd060", "ray": "#fff8c0" }
     }
   },
@@ -403,8 +403,8 @@
     "mouth":   { "stroke": "#1a0428", "open": "#3a1840" },
     "blush":   "rgba(220,140,200,0.5)",
     "accessories": {
-      "helm":   { "type": "leafCrown", "color": "#7ccc4a", "accent": "#1a3818", "band": "#a060c8", "outline": "#1a0428", "berry": "#ff3060" },
-      "weapon": { "type": "staff", "handle": "#3a1058", "accent": "#ff5070", "outline": "#1a0428" },
+      "helm":   { "type": "flowerCrown", "color": "#fff8e0", "band": "#3a7028", "accent": "#ff5070", "petal2": "#fff8f0", "leaf": "#3a7028", "outline": "#1a0428" },
+      "weapon": { "type": "pomegranate", "color": "#3a1058", "accent": "#a83050", "seed": "#ff3060", "outline": "#1a0428" },
       "vfx":    { "type": "leaf", "color": "#a8e070", "vein": "#1a3818", "petal": "#ff5070" }
     }
   },
@@ -421,8 +421,8 @@
     "mouth":   { "stroke": "#021830", "open": "#102040" },
     "blush":   "rgba(160,210,255,0.5)",
     "accessories": {
-      "helm":   { "type": "crown", "color": "#dde8f0", "accent": "#7df", "outline": "#021830" },
-      "weapon": { "type": "trident", "head": "#fff", "handle": "#1a4870", "accent": "#7df", "outline": "#021830" },
+      "helm":   { "type": "furHood", "color": "#80c8e8", "fur": "#ffffff", "outline": "#021830" },
+      "weapon": { "type": "harpoon", "color": "#f0e8d8", "accent": "#7df", "outline": "#021830" },
       "vfx":    { "type": "water", "color": "#a0e8ff" }
     }
   },
@@ -440,7 +440,7 @@
     "blush":   "rgba(255,140,80,0.55)",
     "accessories": {
       "helm":   { "type": "circlet", "color": "#ffd060", "accent": "#a06010", "outline": "#3a1004", "gem": "#a01818" },
-      "weapon": { "type": "staff", "handle": "#7a3008", "accent": "#ffd060", "outline": "#3a1004" },
+      "weapon": { "type": "ruyi", "color": "#a01818", "accent": "#ffd060", "outline": "#3a1004" },
       "vfx":    { "type": "cloud", "color": "#ffd060", "trim": "#a06010" }
     }
   },
@@ -457,8 +457,8 @@
     "mouth":   { "stroke": "#021830", "open": "#102040" },
     "blush":   "rgba(120,200,210,0.45)",
     "accessories": {
-      "helm":   { "type": "horned", "color": "#1a6850", "accent": "#a0e8d0", "outline": "#021830" },
-      "weapon": { "type": "staff", "handle": "#0a4070", "accent": "#7df", "outline": "#021830" },
+      "helm":   { "type": "goggleMask", "color": "#1a6850", "accent": "#a0e8d0", "feather": "#40c0ff", "outline": "#021830" },
+      "weapon": { "type": "rainJar", "color": "#a0603a", "accent": "#80d8ff", "outline": "#021830" },
       "vfx":    { "type": "water", "color": "#80d8ff" }
     }
   },
@@ -475,8 +475,8 @@
     "mouth":   { "stroke": "#3a0808", "open": "#3a0808" },
     "blush":   "rgba(255,150,120,0.55)",
     "accessories": {
-      "helm":   { "type": "jackal", "color": "#ffffff", "accent": "#c01828", "outline": "#3a0808", "innerEar": "#ff8090", "jewel": "#ffd060" },
-      "weapon": { "type": "dagger", "blade": "#fff", "accent": "#ffd060", "handle": "#a04018", "outline": "#3a0808" },
+      "helm":   { "type": "foxMask", "color": "#ffffff", "accent": "#c01828", "outline": "#3a0808" },
+      "weapon": { "type": "fan", "paper": "#ffffff", "pattern": "#c01828", "rib": "#a04018", "outline": "#3a0808" },
       "vfx":    { "type": "foxfire", "color": "#80b8ff", "hot": "#fff8c0", "trim": "#3060a0" }
     }
   },
@@ -493,8 +493,8 @@
     "mouth":   { "stroke": "#000", "open": "#1a0020" },
     "blush":   "rgba(180,80,200,0.4)",
     "accessories": {
-      "helm":   { "type": "crown", "color": "#1a0a28", "accent": "#c050ff", "outline": "#000" },
-      "weapon": { "type": "trident", "head": "#3a1058", "handle": "#080010", "accent": "#c050ff", "outline": "#000" },
+      "helm":   { "type": "shadeHelm", "color": "#1a0a28", "visor": "#0a0410", "accent": "#c050ff", "outline": "#000" },
+      "weapon": { "type": "scythe", "handle": "#080010", "blade": "#3a1058", "accent": "#c050ff", "outline": "#000" },
       "vfx":    { "type": "darkfire", "color": "#9040ff", "hot": "#ff60c0" }
     }
   },
@@ -511,8 +511,8 @@
     "mouth":   { "stroke": "#080810", "open": "#1a1820" },
     "blush":   "rgba(160,170,200,0.45)",
     "accessories": {
-      "helm":   { "type": "horned", "color": "#2a3048", "accent": "#ffd060", "outline": "#080810" },
-      "weapon": { "type": "staff", "handle": "#5a3818", "accent": "#ffd060", "outline": "#080810" },
+      "helm":   { "type": "wanderHat", "color": "#2a3048", "accent": "#ffd060", "patch": "#1a1a28", "outline": "#080810" },
+      "weapon": { "type": "spear", "handle": "#5a3818", "blade": "#dde8f0", "accent": "#ffd060", "outline": "#080810" },
       "vfx":    { "type": "raven", "color": "#0a0612", "accent": "#ffd060", "haze": "rgba(80,90,120," }
     }
   },
@@ -529,8 +529,8 @@
     "mouth":   { "stroke": "#3a1838", "open": "#3a1038" },
     "blush":   "rgba(255,160,180,0.55)",
     "accessories": {
-      "helm":   { "type": "crown", "color": "#ffd060", "accent": "#1a3878", "outline": "#3a1838" },
-      "weapon": { "type": "sword", "blade": "#fff8e0", "accent": "#ffd060", "grip": "#1a3878", "outline": "#3a1838" },
+      "helm":   { "type": "starTiara", "color": "#ffd060", "accent": "#1a3878", "outline": "#3a1838" },
+      "weapon": { "type": "ringRod", "rod": "#ffd060", "ring": "#1a3878", "outline": "#3a1838" },
       "vfx":    { "type": "sunburst", "color": "#ffd060", "ray": "#ff80a0" }
     }
   },
@@ -547,8 +547,8 @@
     "mouth":   { "stroke": "#3a1808", "open": "#3a1808" },
     "blush":   "rgba(255,160,140,0.55)",
     "accessories": {
-      "helm":   { "type": "winged", "color": "#ffd860", "accent": "#a04020", "outline": "#3a1808", "highlight": "rgba(255,250,210,0.55)" },
-      "weapon": { "type": "sword", "blade": "#fff8e0", "accent": "#ffd060", "grip": "#a04020", "outline": "#3a1808" },
+      "helm":   { "type": "braidCrown", "color": "#ffd860", "accent": "#a04020", "flower": "#fff8e0", "outline": "#3a1808" },
+      "weapon": { "type": "distaff", "wood": "#a06820", "wool": "#fff8e0", "accent": "#ffd060", "outline": "#3a1808" },
       "vfx":    { "type": "petals", "color": "#ffb070", "petal": "#ffd060" }
     }
   },
@@ -565,8 +565,8 @@
     "mouth":   { "stroke": "#021830", "open": "#102040" },
     "blush":   "rgba(180,220,255,0.5)",
     "accessories": {
-      "helm":   { "type": "horned", "color": "#dde8f0", "accent": "#a0d8ff", "outline": "#021830" },
-      "weapon": { "type": "dagger", "blade": "#dceeff", "accent": "#a0d8ff", "handle": "#1a3858", "outline": "#021830" },
+      "helm":   { "type": "wolfPelt", "color": "#dde8f0", "fur": "#ffffff", "innerEar": "#a0d8ff", "outline": "#021830" },
+      "weapon": { "type": "axe", "handle": "#1a3858", "head": "#dde8f0", "accent": "#a0d8ff", "outline": "#021830" },
       "vfx":    { "type": "frost", "color": "#dceeff", "crystal": "#a0d8ff", "haze": "rgba(180,220,255," }
     }
   },
@@ -583,8 +583,8 @@
     "mouth":   { "stroke": "#2a0408", "open": "#3a0808" },
     "blush":   "rgba(255,140,80,0.55)",
     "accessories": {
-      "helm":   { "type": "crown", "color": "#ffd060", "accent": "#a01818", "outline": "#2a0408" },
-      "weapon": { "type": "hammer", "head": "#a01818", "handle": "#2a0408", "accent": "#ffd060", "outline": "#2a0408" },
+      "helm":   { "type": "tieredHorns", "color": "#ffd060", "accent": "#a01818", "horn": "#fff0c0", "outline": "#2a0408" },
+      "weapon": { "type": "marru", "handle": "#2a0408", "color": "#ffd060", "accent": "#a01818", "outline": "#2a0408" },
       "vfx":    { "type": "sunburst", "color": "#ffd060", "ray": "#fff8c0" }
     }
   },
@@ -601,8 +601,8 @@
     "mouth":   { "stroke": "#000", "open": "#200" },
     "blush":   "rgba(220,140,80,0.45)",
     "accessories": {
-      "helm":   { "type": "crown", "color": "#0a0604", "accent": "#ffd060", "outline": "#000" },
-      "weapon": { "type": "dagger", "blade": "#dde8f0", "accent": "#ffd060", "handle": "#1a0a04", "outline": "#000" },
+      "helm":   { "type": "spiderCap", "color": "#1a0a04", "accent": "#ffd060", "eye": "#ff3030", "outline": "#000" },
+      "weapon": { "type": "drum", "body": "#5a3818", "skin": "#e8c890", "string": "#1a0a04", "stick": "#3a1c08", "outline": "#000" },
       "vfx":    { "type": "web", "color": "#e8e0c8", "silk": "rgba(220,210,180,", "spider": "#1a0a04", "accent": "#a01818" }
     }
   },
@@ -619,8 +619,8 @@
     "mouth":   { "stroke": "#021838", "open": "#102040" },
     "blush":   "rgba(160,200,255,0.5)",
     "accessories": {
-      "helm":   { "type": "crown", "color": "#ffd860", "accent": "#1a3878", "outline": "#3a2008" },
-      "weapon": { "type": "staff", "handle": "#0a2860", "accent": "#ffd860", "outline": "#021838" },
+      "helm":   { "type": "mukuta", "color": "#ffd860", "accent": "#1a3878", "gem": "#ff4060", "outline": "#3a2008" },
+      "weapon": { "type": "gada", "color": "#ffd860", "accent": "#1a3878", "handle": "#0a2860", "outline": "#021838" },
       "vfx":    { "type": "chakra", "color": "#ffd060", "blade": "#fff8c0", "ring": "rgba(255,210,90," }
     }
   },
@@ -637,8 +637,8 @@
     "mouth":   { "stroke": "#3a1004", "open": "#3a0808" },
     "blush":   "rgba(255,160,80,0.55)",
     "accessories": {
-      "helm":   { "type": "leafCrown", "color": "#3a8030", "accent": "#1a5828", "band": "#a04008", "outline": "#3a1004", "berry": "#ffb050" },
-      "weapon": { "type": "hammer", "head": "#7a4818", "handle": "#3a2008", "accent": "#ffb050", "outline": "#3a1004" },
+      "helm":   { "type": "strawCross", "color": "#c89030", "accent": "#e8c060", "flame": "#ffb050", "outline": "#3a1004" },
+      "weapon": { "type": "tongs", "color": "#9aa4b0", "accent": "#ffb050", "outline": "#3a1004" },
       "vfx":    { "type": "fire", "color": "#ffb050", "hot": "#fff0c8" }
     }
   },
@@ -655,8 +655,8 @@
     "mouth":   { "stroke": "#1a0604", "open": "#3a0808" },
     "blush":   "rgba(220,140,80,0.5)",
     "accessories": {
-      "helm":   { "type": "jackal", "color": "#a04018", "accent": "#ffd060", "outline": "#1a0604", "innerEar": "#3a1004", "jewel": "#ff3010" },
-      "weapon": { "type": "staff", "handle": "#3a1004", "accent": "#ffd060", "outline": "#1a0604" },
+      "helm":   { "type": "setBeast", "color": "#a04018", "accent": "#ffd060", "outline": "#1a0604" },
+      "weapon": { "type": "wasScepter", "color": "#ffd060", "accent": "#a04018", "outline": "#1a0604" },
       "vfx":    { "type": "sandstorm", "color": "#d8a060", "dust": "rgba(200,150,80," }
     }
   },
@@ -673,8 +673,8 @@
     "mouth":   { "stroke": "#08000a", "open": "#1a0828" },
     "blush":   "rgba(180,120,200,0.5)",
     "accessories": {
-      "helm":   { "type": "circlet", "color": "#c0b0d0", "accent": "#3a0860", "outline": "#08000a", "gem": "#c050ff" },
-      "weapon": { "type": "dagger", "blade": "#dde8f0", "accent": "#c050ff", "handle": "#1a0828", "outline": "#08000a" },
+      "helm":   { "type": "tripleMoon", "color": "#c0b0d0", "gem": "#e8d8ff", "accent": "#3a0860", "outline": "#08000a" },
+      "weapon": { "type": "torch", "handle": "#1a0828", "flame": "#c050ff", "hot": "#fff0ff", "accent": "#c0b0d0", "outline": "#08000a" },
       "vfx":    { "type": "eclipse", "corona": "#dde8ff", "dark": "#08000a", "halo": "rgba(80,40,120," }
     }
   },
@@ -691,8 +691,8 @@
     "mouth":   { "stroke": "#000", "open": "#1a0808" },
     "blush":   "rgba(180,180,180,0.4)",
     "accessories": {
-      "helm":   { "type": "jackal", "color": "#080608", "accent": "#ffd060", "outline": "#000", "innerEar": "#c84060", "jewel": "#80c8e0" },
-      "weapon": { "type": "dagger", "blade": "#1a2030", "accent": "#ffd060", "handle": "#080000", "outline": "#000" },
+      "helm":   { "type": "jaguarHelm", "color": "#c89050", "spot": "#1a0a04", "outline": "#000" },
+      "weapon": { "type": "smokeMirror", "disc": "#1a2030", "rim": "#80c8e0", "smoke": "#8890a0", "handle": "#080000", "outline": "#000" },
       "vfx":    { "type": "mirror", "color": "#80a8c0", "glow": "#dcecff", "dark": "rgba(40,30,60," }
     }
   },
@@ -709,8 +709,8 @@
     "mouth":   { "stroke": "#040618", "open": "#10184a" },
     "blush":   "rgba(180,200,255,0.45)",
     "accessories": {
-      "helm":   { "type": "crown", "color": "#ffd860", "accent": "#1a2870", "outline": "#040618" },
-      "weapon": { "type": "staff", "handle": "#1a2870", "accent": "#ffd860", "outline": "#040618" },
+      "helm":   { "type": "starVeil", "color": "#1a2870", "accent": "#ffd860", "outline": "#040618" },
+      "weapon": { "type": "starWand", "color": "#1a2870", "accent": "#ffd860", "outline": "#040618" },
       "vfx":    { "type": "starfield", "color": "#fff8c0", "dust": "rgba(160,180,255,", "accent": "#ffd860", "nebula": "rgba(120,80,200," }
     }
   }

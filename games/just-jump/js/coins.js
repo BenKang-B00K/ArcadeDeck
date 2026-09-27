@@ -90,7 +90,7 @@
     return { x: o.x + 2, y: o.y + 2, w: o.w - 4, h: o.h - 4 };
   }
 
-  W.Coins = { register, loadFromArray, spawn, update, draw, hitbox, all: () => Array.from(registry.values()) };
+  W.Coins = { loadFromArray, spawn, update, draw, hitbox };
 
   // ---------- drawing helpers ----------
   function coinDisc(ctx, cx, cy, r, rot, palette) {

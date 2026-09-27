@@ -52,5 +52,5 @@
     } catch (_) {}
   }
 
-  W.Skins = { register, loadFromArray, get, all, setActive, active, isUnlocked, unlock };
+  W.Skins = { loadFromArray, get, all, setActive, active, isUnlocked, unlock };
 })();

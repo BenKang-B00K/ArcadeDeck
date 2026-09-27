@@ -2,18 +2,32 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a14">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Just Jump">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <title>Just Jump</title>
 <style>
+  /* KO/JA pixel fonts — CJK-only subsets (tools/subset_fonts.py); Latin falls through to monospace */
+  @font-face { font-family: 'Galmuri11'; font-weight: 400; font-display: swap; src: url(fonts/galmuri11.woff2) format('woff2'); }
+  @font-face { font-family: 'Galmuri11'; font-weight: 700; font-display: swap; src: url(fonts/galmuri11-bold.woff2) format('woff2'); }
+  @font-face { font-family: 'DotGothic16'; font-display: swap; src: url(fonts/dotgothic16.woff2) format('woff2'); }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html, body {
     width: 100%; height: 100%; overflow: hidden;
     background: #0a0a14; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none; overscroll-behavior: none; -webkit-text-size-adjust: 100%;
   }
   #wrap {
     position: fixed; inset: 0;
-    touch-action: manipulation;
+    touch-action: none;
   }
   canvas {
     display: block;
@@ -28,6 +42,8 @@
 <body>
 <div id="wrap"><canvas id="g"></canvas></div>
 <div id="hint">TAP / SPACE to JUMP</div>
+<script src="js/i18n.js"></script>
+<script src="js/audio.js"></script>
 <script src="js/skins.js"></script>
 <script src="js/player_sprite.js"></script>
 <script src="js/obstacles.js"></script>
@@ -48,10 +64,14 @@ async function bootstrap() {
   window.OneJump.Obstacles.loadFromArray(obstaclesData);
   startGame();
 }
+// installable app / offline play (needs http(s); no-op on file://)
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
 bootstrap().catch(err => {
   console.error('Bootstrap failed:', err);
   document.body.innerHTML = '<div style="color:#fff;padding:20px;font-family:monospace">' +
-    'Failed to load game data. Run via local HTTP server (e.g. python -m http.server).<br>' +
+    window.OneJump.I18N.t('Failed to load game data. Run via local HTTP server (e.g. python -m http.server).') + '<br>' +
     String(err) + '</div>';
 });
 
@@ -60,7 +80,7 @@ function startGame() {
   const { Skins, PlayerSprite, Obstacles, Coins, Stages, UI } = window.OneJump;
   const { SPR_OFFX, SPR_OFFY } = PlayerSprite;
   const cvs = document.getElementById('g');
-  const ctx = cvs.getContext('2d');
+  const ctx = cvs.getContext('2d', { alpha: false });  // opaque: every frame paints full raster
   const hint = document.getElementById('hint');
 
   // Design dimensions switch with orientation. Camera scales to fit viewport.
@@ -69,6 +89,8 @@ function startGame() {
   let W = DESIGN_PORTRAIT.W, H = DESIGN_PORTRAIT.H;
   let cameraScale = 1, cameraOffX = 0, cameraOffY = 0;
   let pendingDesignChange = false;
+  let grads = null;         // cached static gradients; nulled on resize
+  let pauseDrawn = false;   // paused frame already painted
 
   function pickDesign() {
     const ar = window.innerWidth / window.innerHeight;
@@ -83,8 +105,12 @@ function startGame() {
       GROUND_Y = H - 120;
       pendingDesignChange = true;  // rebuild bg layers + reset player after init
     }
-    cvs.width = window.innerWidth;
-    cvs.height = window.innerHeight;
+    // backing store at device pixels (capped 2x for fill-rate) → crisp on retina
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const cw = Math.round(window.innerWidth * dpr), ch = Math.round(window.innerHeight * dpr);
+    if (!orientationChanged && cw === cvs.width && ch === cvs.height) return;
+    cvs.width = cw; cvs.height = ch;
+    grads = null; pauseDrawn = false;
     const sx = cvs.width / W, sy = cvs.height / H;
     cameraScale = Math.min(sx, sy);
     cameraOffX = (cvs.width  / cameraScale - W) / 2;
@@ -102,11 +128,13 @@ function startGame() {
   // ---- Game state ----
   const STATE = { READY: 0, PLAY: 1, DEAD: 2 };
   let state = STATE.READY;
+  let paused = false;  // set on visibility hidden during PLAY; cleared by next tap
 
   let GROUND_Y = H - 120;
-  const GRAVITY = 0.9;
-  const JUMP_V = -16;
-  const DOUBLE_JUMP_V = -13;
+  const GRAVITY = 1.0;
+  // apex ≈ 91px single, ≈ 141px single+double, 28f airtime. Tallest ground obstacle must stay ≤ ~128.
+  const JUMP_V = -14;
+  const DOUBLE_JUMP_V = -10.5;
 
   const PLAYER_SCALE = 0.78;
   const player = {
@@ -117,12 +145,21 @@ function startGame() {
     deadRotVel: 0,     // angular velocity
   };
 
+  // Ghost: previous run replayed in lane below ground. Flat [y, pose, y, pose...] per frame.
+  // pose 0 = ground, 1 = rising, 2 = falling. One run back, saved in jj_ghost.
+  let ghostRec = [];
+  let lastGhost = null;
+  try {
+    const g = JSON.parse(localStorage.getItem('jj_ghost'));
+    if (Array.isArray(g) && g.length >= 2) lastGhost = g;
+  } catch (_) {}
+
   let obstacles = [];
   let particles = [];
   let clouds = [];
   let stars = [];
-  let speed = 6;
-  let baseSpeed = 6;
+  let speed = 5;
+  let baseSpeed = 5;
   let stageScore = 0;             // resets each stage clear (drives speed ramp)
 
   // Stage state
@@ -134,13 +171,7 @@ function startGame() {
   let tierBanner = null;           // {label, color, life, age} — small top-right
   const tierCongrats = new Set();  // tier thresholds reached this run
   const STAGE_UNLOCK_SCORE = 2550;  // PLATINUM tier — gates next-stage unlock
-  const TIER_THRESHOLDS = [
-    { score: 2550, label: 'PLATINUM', color: '#e0e8f0' },
-    { score: 2900, label: 'SAPPHIRE', color: '#5080ff' },
-    { score: 3200, label: 'EMERALD',  color: '#50e090' },
-    { score: 3450, label: 'RUBY',     color: '#ff5070' },
-    { score: 3650, label: 'DIAMOND',  color: '#9ee0ff' },
-  ];
+  const TIER_THRESHOLDS = UI.TIERS.filter(t => t.score >= STAGE_UNLOCK_SCORE).reverse();
   try {
     const savedStage = localStorage.getItem('jj_stage');
     if (savedStage != null) {
@@ -161,6 +192,7 @@ function startGame() {
     while (!Stages.isUnlocked(stageList[i].id) && safety++ < n) {
       i = ((i + dir) % n + n) % n;
     }
+    if (i !== startStageIdx) Sfx.play('tick', dir > 0 ? 11 : 8);
     startStageIdx = i;
     try { localStorage.setItem('jj_stage', String(startStageIdx)); } catch (_) {}
   }
@@ -168,16 +200,24 @@ function startGame() {
     stageBanner = { text, sub: sub || '', color: color || '#ffd060', life: 90, age: 0 };
   }
   let score = 0;
+  // storage may throw (blocked/private) or hold junk → fall back to default
+  function loadNum(key, def) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw != null && Number.isFinite(+raw) ? +raw : def;
+    } catch (_) { return def; }
+  }
   // per-stage best score
   const STAGE_BEST_KEY = 'jj_best_per_stage';
   let bestPerStage = {};
   try {
     const raw = localStorage.getItem(STAGE_BEST_KEY);
-    if (raw) bestPerStage = JSON.parse(raw) || {};
+    const m = raw && JSON.parse(raw);
+    if (m && typeof m === 'object' && !Array.isArray(m)) bestPerStage = m;
   } catch (_) {}
   // legacy migration: seed from old single-best key into twilight if no map yet
   if (!Object.keys(bestPerStage).length) {
-    const legacy = +(localStorage.getItem('onejump_best') || 0);
+    const legacy = loadNum('onejump_best', 0);
     if (legacy > 0) bestPerStage['twilight'] = legacy;
   }
   function getStageBest(stageId) { return bestPerStage[stageId] || 0; }
@@ -187,13 +227,13 @@ function startGame() {
   }
   // lifetime total score (sum of every run score across all stages)
   const TOTAL_SCORE_KEY = 'jj_total_score';
-  let totalScore = +(localStorage.getItem(TOTAL_SCORE_KEY) || 0);
+  let totalScore = loadNum(TOTAL_SCORE_KEY, 0);
   function addToTotal(sc) {
     totalScore += sc;
     try { localStorage.setItem(TOTAL_SCORE_KEY, String(totalScore)); } catch (_) {}
   }
-  let coinBalance = +(localStorage.getItem('jj_coins') || 0);
-  let coinMultiplier = +(localStorage.getItem('jj_mult') || 1) || 1;
+  let coinBalance = Math.max(0, loadNum('jj_coins', 0));
+  let coinMultiplier = loadNum('jj_mult', 1) || 1;
   let coins = [];           // active coin entities in world
   let coinSpawnTimer = 0;
   let coinSpawnGap = 130;
@@ -204,21 +244,9 @@ function startGame() {
     try { localStorage.setItem('jj_mult', String(coinMultiplier)); } catch (_) {}
   }
   // Multiplier earned by previous run. Higher score = bigger next-run boost.
-  // boost tiers aligned with medal tiers (UI.medalForScore)
-  function multiplierForScore(s) {
-    if (s >= 3650) return 3.00;  // DIAMOND
-    if (s >= 3450) return 2.70;  // RUBY
-    if (s >= 3200) return 2.40;  // EMERALD
-    if (s >= 2900) return 2.10;  // SAPPHIRE
-    if (s >= 2550) return 1.85;  // PLATINUM
-    if (s >= 2150) return 1.60;  // GOLD
-    if (s >= 1700) return 1.40;  // SILVER
-    if (s >= 1200) return 1.25;  // BRONZE
-    if (s >=  600) return 1.10;  // IRON
-    return 1.00;                 // ROOKIE
-  }
+  const multiplierForScore = s => UI.medalForScore(s).mult;
 
-  // Speed → km/h (factor tuned so baseSpeed 6 ≈ 36 km/h, max ≈ 84 km/h)
+  // Speed → km/h (factor tuned so baseSpeed 5 ≈ 30 km/h, max ≈ 60 km/h)
   const KMH_FACTOR = 6;
   function toKmh(s) { return s * KMH_FACTOR; }
 
@@ -228,7 +256,7 @@ function startGame() {
     floaters.push({ x, y, vy: -1.4, text, color: color || '#ffd060', life: 60, age: 0 });
   }
   let spawnTimer = 0;
-  let spawnGap = 90;
+  let spawnGap = 80;
   let frame = 0;
   let worldOffset = 0;     // accumulates only during PLAY, drives parallax
   let shake = 0;
@@ -266,11 +294,13 @@ function startGame() {
         puffs,
         tint: Math.random() < 0.3 ? 'pink' : 'cool',
       });
+      bakeCloud(clouds[clouds.length - 1]);
     }
-    const starCount = Math.max(60, Math.floor(W * H / 5000));
+    // ponytail: stars span [-W/2, 1.5W] — covers letterbox bands up to W/2 each side
+    const starCount = 2 * Math.max(60, Math.floor(W * H / 5000));
     for (let i = 0; i < starCount; i++) {
       stars.push({
-        x: Math.random() * W,
+        x: (Math.random() * 2 - 0.5) * W,
         y: Math.random() * (GROUND_Y - 50),
         r: 0.4 + Math.random() * 1.4,
         tw: Math.random() * Math.PI * 2,
@@ -283,35 +313,40 @@ function startGame() {
         x: Math.random() * W * 1.2,
         w: 30 + Math.random() * 40,
         h: 40 + Math.random() * 80,
+        roof: Math.floor(Math.random() * 4),  // silhouette variant 0..3, per-stage meaning in CITY
+        seed: Math.random() * 1e4,
       });
     }
+    buildings.sort((a, b) => b.h - a.h);  // tall first → short ones overlap in front
     mountains = [
-      buildMountainLayer(0.18, 80,  '#1a1a35', Math.max(4, Math.floor(W / 120))),
-      buildMountainLayer(0.32, 110, '#252548', Math.max(3, Math.floor(W / 150))),
-      buildMountainLayer(0.55, 70,  '#34345a', Math.max(3, Math.floor(W / 200))),
+      buildMountainLayer(0.12, 130, '#1e1c3e', 0),
+      buildMountainLayer(0.28, 100, '#17162f', 1),
+      buildMountainLayer(0.5,  70,  '#100f22', 2),
     ];
+    bgTiles.clear();
   }
-  function buildMountainLayer(parallax, height, color, count) {
-    const peaks = [];
-    const span = W * 1.5 / count;
-    for (let i = 0; i < count + 1; i++) {
-      peaks.push({
-        x: i * span + (Math.random() - 0.5) * span * 0.4,
-        h: height * (0.7 + Math.random() * 0.6),
-      });
+  // Ridge = sum of |sin| harmonics with integer freq over tile width → seamless wrap.
+  function buildMountainLayer(parallax, height, color, depth) {
+    const harm = [];
+    const baseF = 3 + depth;
+    for (let k = 0; k < 4; k++) {
+      harm.push({ f: baseF * (k + 1) + Math.floor(Math.random() * 2), a: 1 / (k + 1.3), ph: Math.random() * Math.PI });
     }
-    return { parallax, color, peaks, baseY: GROUND_Y + 40, height };
+    return { parallax, color, harm, depth, baseY: GROUND_Y + 40, height };
   }
+  const bgTiles = new Map();  // `${stageId}` → baked mountain/city tiles, cleared on layer rebuild
   // declare lazy buildings array first
   const buildings = [];
   rebuildBgLayers();
 
   function reset() {
     player.y = GROUND_Y; player.vy = 0; player.jumps = 0; player.onGround = true; player.trail = [];
+    if (ghostRec.length) lastGhost = ghostRec;
+    ghostRec = [];
     obstacles = []; particles = []; coins = []; floaters = [];
     currentStageIdx = startStageIdx;
     baseSpeed = currentStage().startSpeed;
-    speed = baseSpeed; score = 0; stageScore = 0; spawnTimer = 0; spawnGap = 90; frame = 0;
+    speed = baseSpeed; score = 0; stageScore = 0; spawnTimer = 0; spawnGap = 80; frame = 0;
     worldOffset = 0;
     coinSpawnTimer = 0; coinSpawnGap = 130;
     shake = 0;
@@ -322,20 +357,25 @@ function startGame() {
     stats = { jumps: 0, doubles: 0, dodged: 0, runFrames: 0, maxSpeed: 0, coins: 0, stagesCleared: 0 };
   }
 
+  const Sfx = OneJump.Audio;
   function jump() {
+    if (paused) { paused = false; Sfx.play('resume'); return; }  // first tap after resume only unpauses
     if (state === STATE.READY) {
       state = STATE.PLAY;
       hint.style.display = 'none';
       reset();
+      Sfx.play('start');
       player.vy = JUMP_V;
       player.onGround = false;
       player.jumps = 1;
       return;
     }
     if (state === STATE.DEAD) {
+      if (deadFrame < 45) return;  // swallow jump-mash taps so results screen isn't skipped
       state = STATE.READY;
+      Sfx.play('tick', 7);
       hint.style.display = 'block';
-      hint.textContent = 'TAP / SPACE to JUMP';
+      hint.textContent = OneJump.I18N.t('TAP / SPACE to JUMP');
       return;
     }
     if (state === STATE.PLAY) {
@@ -344,11 +384,13 @@ function startGame() {
         player.onGround = false;
         player.jumps = 1;
         stats.jumps++;
+        Sfx.play('jump');
         burstParticles(player.x + player.w/2, player.y + player.h, '#fff', 8);
       } else if (player.jumps < 2) {
         player.vy = DOUBLE_JUMP_V;
         player.jumps = 2;
         stats.doubles++;
+        Sfx.play('doubleJump');
         burstParticles(player.x + player.w/2, player.y + player.h/2, '#7df', 12);
       }
     }
@@ -358,7 +400,7 @@ function startGame() {
   let skinIdx = 0;             // preview index — may point at locked skin
   const skinIds = Skins.all().map(s => s.id);
   // hit-rects for start screen interactive elements (UI module writes to these)
-  const hits = { arrowL: null, arrowR: null, stageL: null, stageR: null, ctaRect: null, boost: null, moon: null };
+  const hits = { arrowL: null, arrowR: null, stageL: null, stageR: null, ctaRect: null, boost: null, moon: null, lang: null, vol: null, stagePill: null, hover: null };
 
   function previewSkin() { return Skins.get(skinIds[skinIdx]); }
   function previewLocked() { return !Skins.isUnlocked(skinIds[skinIdx]); }
@@ -367,9 +409,10 @@ function startGame() {
     if (state !== STATE.READY) return false;
     skinIdx = (skinIdx + dir + skinIds.length) % skinIds.length;
     const id = skinIds[skinIdx];
+    Sfx.play('tick', dir > 0 ? 12 : 9);
     if (Skins.isUnlocked(id)) {
       setSkin(id);
-      try { localStorage.setItem('onejump_skin', id); } catch (_) {}
+      try { localStorage.setItem('jj_skin', id); } catch (_) {}
     }
     // locked: UI's atlasFor cache handles preview rendering on demand
     return true;
@@ -379,12 +422,13 @@ function startGame() {
     const id = skinIds[skinIdx];
     const skin = Skins.get(id);
     if (!skin || Skins.isUnlocked(id)) return false;
-    if (coinBalance < skin.cost) return false;
+    if (coinBalance < skin.cost) { Sfx.play('denied'); return false; }
+    Sfx.play('buy');
     coinBalance -= skin.cost;
     saveCoins();
     Skins.unlock(id);
     setSkin(id);
-    try { localStorage.setItem('onejump_skin', id); } catch (_) {}
+    try { localStorage.setItem('jj_skin', id); } catch (_) {}
     burstParticles(W/2, H/2 - 50, '#ffd060', 30);
     flashAlpha = 0.4;
     return true;
@@ -392,7 +436,7 @@ function startGame() {
 
   // restore last-used skin (only if unlocked)
   try {
-    const saved = localStorage.getItem('onejump_skin');
+    const saved = localStorage.getItem('jj_skin') || localStorage.getItem('onejump_skin');  // legacy key
     if (saved && skinIds.includes(saved) && Skins.isUnlocked(saved)) {
       skinIdx = skinIds.indexOf(saved);
       setSkin(saved);
@@ -417,11 +461,13 @@ function startGame() {
   // ---- Input ----
   window.addEventListener('keydown', e => {
     if (e.code === 'Space') { e.preventDefault(); jump(); return; }
+    if (e.code === 'KeyM') { Sfx.cycleVolume(); return; }
     if (state === STATE.READY) {
       if (e.code === 'ArrowLeft')  { e.preventDefault(); cycleSkin(-1); }
       else if (e.code === 'ArrowRight') { e.preventDefault(); cycleSkin(+1); }
       else if (e.code === 'ArrowDown')  { e.preventDefault(); setStartStage(startStageIdx + 1); }
       else if (e.code === 'ArrowUp')    { e.preventDefault(); setStartStage(startStageIdx - 1); }
+      else if (e.code === 'KeyL')       { OneJump.I18N.cycle(); Sfx.play('tick', 10); }
     } else {
       // ArrowUp doubles as jump during play
       if (e.code === 'ArrowUp') { e.preventDefault(); jump(); }
@@ -431,6 +477,8 @@ function startGame() {
     e.preventDefault();
     if (state === STATE.READY) {
       const p = canvasPointFromEvent(e);
+      if (pointInRect(p, hits.lang))   { OneJump.I18N.cycle(); Sfx.play('tick', 10); return; }
+      if (pointInRect(p, hits.vol))    { Sfx.cycleVolume(); return; }
       if (pointInRect(p, hits.arrowL)) { cycleSkin(-1); return; }
       if (pointInRect(p, hits.arrowR)) { cycleSkin(+1); return; }
       if (pointInRect(p, hits.stageL)) { setStartStage(startStageIdx - 1); return; }
@@ -447,29 +495,62 @@ function startGame() {
     }
     jump();
   });
+  // mouse hover point for UI tooltips (touch/pen skipped — no hover there)
+  cvs.addEventListener('pointermove', e => { hits.hover = e.pointerType === 'mouse' ? canvasPointFromEvent(e) : null; });
+  cvs.addEventListener('pointerleave', () => { hits.hover = null; });
   document.addEventListener('touchstart', e => { e.preventDefault(); }, { passive: false });
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  // auto-pause when app is backgrounded (home button, call, lock screen)
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) return;
+    if (state === STATE.PLAY) { paused = true; pauseDrawn = false; }
+    saveCoins();  // mid-run pickups; app may be killed while backgrounded
+  });
 
   // ---- Spawn ----
   function obstacleEnv() {
     const st = currentStage();
     return {
-      W, H, GROUND_Y, player, speed, frame, score,
+      W: W + cameraOffX, H, GROUND_Y, player, speed, frame, score,  // spawn past right-most visible edge
       allowedIds: st.obstacleIds,
       coinIds: st.coinIds,
     };
   }
 
+  // Low ground obstacle = hitbox top ≤ 58px over ground (at rest for fallers). Solver-checked: two of
+  // these 80–160px apart stay clearable at every speed 5–10; anything taller/airborne can make an
+  // impossible pair (e.g. tower+tower needs ~27f between, cluster gives 8–16f).
+  function isLowGround(o) {
+    const hb = Obstacles.hitbox(o.targetY != null ? Object.assign({}, o, { y: o.targetY }) : o);
+    return GROUND_Y + player.h - hb.y <= 58;
+  }
+  // Fallers drop at fixed gravity but travel time shrinks with speed → at high speed (portrait) they
+  // were still mid-air passing the player and landed behind. Pre-advance so they land by 70% of travel.
+  function settleFallers(list, env) {
+    for (const o of list) {
+      if (o.landed !== false) continue;
+      const c = Object.assign({}, o);
+      let n = 0;
+      while (!c.landed && n < 300) { Obstacles.update(c, env); n++; }
+      for (let k = n - Math.floor((o.x - player.x) / speed * 0.7); k > 0; k--) Obstacles.update(o, env);
+    }
+  }
   function spawnObstacle() {
     const env = obstacleEnv();
     const newOnes = Obstacles.spawn(env);
+    settleFallers(newOnes, env);
     for (const o of newOnes) obstacles.push(o);
-    // cluster: chance to spawn extra obstacle offset behind, scales with stageScore
+    // cluster: chance to spawn extra obstacle offset behind, scales with stageScore. Low pairs only.
     const clusterChance = Math.min(0.45, stageScore / 3500);
-    if (Math.random() < clusterChance) {
+    if (Math.random() < clusterChance && newOnes.every(isLowGround)) {
       const offset = 80 + Math.random() * 80;
       const env2 = Object.assign({}, env, { W: env.W + offset });
       const extra = Obstacles.spawn(env2);
-      for (const o of extra) obstacles.push(o);
+      if (extra.every(isLowGround)) {
+        settleFallers(extra, env2);
+        for (const o of extra) obstacles.push(o);
+        spawnTimer = -Math.round(offset / speed);  // keep full spawnGap after the trailing obstacle
+      }
     }
   }
 
@@ -492,6 +573,7 @@ function startGame() {
     shake = 18;
     flashAlpha = 0.6;
     deadFrame = 0;
+    Sfx.play('death');
     // ragdoll launch
     player.vy = -11;
     player.deadRot = 0;
@@ -509,6 +591,9 @@ function startGame() {
         size: 4 + Math.random() * 3,
       });
     }
+    saveCoins();
+    // ponytail: ~12 chars/frame → 10-min run ≈ 450KB; downsample if runs get longer
+    try { localStorage.setItem('jj_ghost', JSON.stringify(ghostRec)); } catch (_) {}
     const stageId = currentStage().id;
     const prev = getStageBest(stageId);
     const nb = score > prev;
@@ -536,11 +621,18 @@ function startGame() {
       prevMultiplier: oldMult,
       multiplierChanged: Math.abs(newMult - oldMult) > 0.001,
     };
-    if (nb) UI.spawnConfetti();
+    // skin collection — shown on game over as a replay goal
+    const allSkins = Skins.all();
+    const skinsUnlocked = allSkins.filter(s => Skins.isUnlocked(s.id)).length;
+    const locked = allSkins.filter(s => !Skins.isUnlocked(s.id));
+    lastRun.skinsOwned = skinsUnlocked;
+    lastRun.skinsTotal = allSkins.length;
+    lastRun.nextSkinCost = locked.length ? Math.min(...locked.map(s => s.cost)) : 0;
+    lastRun.coinBalance = coinBalance;
+    if (nb) { UI.spawnConfetti(); Sfx.play('newBest'); }
     hint.style.display = 'none';
     // ArcadeDeck.net leaderboard
     try {
-      const skinsUnlocked = Skins.all().filter(s => Skins.isUnlocked(s.id)).length;
       window.parent.postMessage({
         type: 'GAME_OVER',
         score: totalScore,
@@ -557,8 +649,8 @@ function startGame() {
       pendingDesignChange = false;
       rebuildBgLayers();
       // discard offscreen-left from new design
-      obstacles = obstacles.filter(o => o.x < W);
-      coins = coins.filter(c => c.x < W);
+      obstacles = obstacles.filter(o => o.x < W + cameraOffX);
+      coins = coins.filter(c => c.x < W + cameraOffX);
       if (state !== STATE.PLAY) player.y = GROUND_Y;
     }
     // bg — clouds drift only during PLAY (or READY for ambient feel), frozen on DEAD
@@ -566,7 +658,7 @@ function startGame() {
       const drift = state === STATE.PLAY ? 1 : 0.3;
       for (const c of clouds) {
         c.x -= c.s * drift;
-        if (c.x + c.w < 0) { c.x = W + Math.random() * 100; c.y = 60 + Math.random() * 200; }
+        if (c.x + c.w < -cameraOffX) { c.x = W + cameraOffX + Math.random() * 100; c.y = 60 + Math.random() * 200; }
       }
     }
     // stars twinkle continues regardless (no horizontal motion)
@@ -610,8 +702,8 @@ function startGame() {
     }
 
     // difficulty ramp (per-stage local progress)
-    speed = baseSpeed + Math.min(8, stageScore / 400);
-    spawnGap = Math.max(45, 90 - stageScore / 80);
+    speed = baseSpeed + Math.min(5, stageScore / 400);
+    spawnGap = Math.max(40, 80 - stageScore / 80);
 
     // unlock threshold = PLATINUM tier (score >= 2550). Banner + confetti once per run.
     // Run continues on SAME stage (no auto-advance). Player picks unlocked stage next run.
@@ -623,12 +715,13 @@ function startGame() {
       if (hasNext) {
         const nextStage = stageList[currentStageIdx + 1];
         Stages.unlock(nextStage.id);
-        showStageBanner('STAGE CLEARED!', 'UNLOCKED  ▶  ' + nextStage.name, st.color);
+        showStageBanner(OneJump.I18N.t('STAGE CLEARED!'), OneJump.I18N.t('UNLOCKED  ▶  {0}', nextStage.name), st.color);
         stats.stagesCleared++;
       } else {
-        showStageBanner('STAGE MASTERED!', 'FINAL STAGE COMPLETE', st.color);
+        showStageBanner(OneJump.I18N.t('STAGE MASTERED!'), OneJump.I18N.t('FINAL STAGE COMPLETE'), st.color);
       }
       UI.spawnConfetti();
+      Sfx.play('stageClear');
     }
 
     // player
@@ -638,11 +731,13 @@ function startGame() {
       player.y = GROUND_Y;
       player.vy = 0;
       if (!player.onGround) {
+        Sfx.play('land');
         burstParticles(player.x + player.w/2, player.y + player.h, '#aac', 6);
       }
       player.onGround = true;
       player.jumps = 0;
     }
+    ghostRec.push(Math.round(player.y), player.onGround ? 0 : player.vy < 0 ? 1 : 2);
 
     // trail
     player.trail.push({ x: player.x + player.w/2, y: player.y + player.h/2, life: 12 });
@@ -659,9 +754,15 @@ function startGame() {
     for (const o of obstacles) {
       o.x -= speed;
       Obstacles.update(o, env);
-      if (!o.passed && o.x + o.w < player.x) { o.passed = true; stats.dodged++; }
+      if (!o.passed && o.x + o.w < player.x) {
+        o.passed = true; stats.dodged++;
+        // single live toast: back-to-back dodges (doubleSpike, clusters) restart it instead of stacking
+        floaters = floaters.filter(f => !f.dodge);
+        addFloater(player.x + player.w / 2, player.y - 8, OneJump.I18N.t('DODGE!'), '#7df');
+        floaters[floaters.length - 1].dodge = true;
+      }
     }
-    obstacles = obstacles.filter(o => o.x + o.w > -10);
+    obstacles = obstacles.filter(o => o.x + o.w > -cameraOffX - 10);
 
     // collisions
     for (const o of obstacles) {
@@ -680,14 +781,14 @@ function startGame() {
       c.x -= speed;
       Coins.update(c, env);
     }
-    coins = coins.filter(c => c.x + c.w > -10 && !c._collected);
+    coins = coins.filter(c => c.x + c.w > -cameraOffX - 10 && !c._collected);
     for (const c of coins) {
       if (rectHit(player, Coins.hitbox(c))) {
         c._collected = true;
         const earned = Math.round(c.value * coinMultiplier);
         coinBalance += earned;
-        stats.coins += earned;
-        saveCoins();
+        stats.coins += earned;  // persisted in die() / on background — no sync localStorage write mid-run
+        Sfx.play('coin');
         burstParticles(c.x + c.w/2, c.y + c.h/2, '#ffd060', 10);
         addFloater(c.x + c.w/2, c.y, '+' + earned, '#ffd060');
       }
@@ -728,6 +829,7 @@ function startGame() {
       if (score >= tier.score && !tierCongrats.has(tier.score)) {
         tierCongrats.add(tier.score);
         tierBanner = { label: tier.label, color: tier.color, life: 130, age: 0 };
+        if (tier.score > STAGE_UNLOCK_SCORE) Sfx.play('tier');  // 2550 already gets stageClear
       }
     }
     if (speed > stats.maxSpeed) stats.maxSpeed = speed;
@@ -749,11 +851,8 @@ function startGame() {
   function draw() {
     // clear full raster + paint extended sky so letterbox feels seamless
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    const fullSky = ctx.createLinearGradient(0, 0, 0, cvs.height);
-    fullSky.addColorStop(0, '#0d1230');
-    fullSky.addColorStop(0.5, '#1a2552');
-    fullSky.addColorStop(1, '#0a0818');
-    ctx.fillStyle = fullSky;
+    if (!grads) grads = buildGrads();
+    ctx.fillStyle = grads.fullSky;
     ctx.fillRect(0, 0, cvs.width, cvs.height);
 
     ctx.save();
@@ -767,10 +866,11 @@ function startGame() {
     drawBackground();
     drawGround();
 
-    // trail
+    // trail — tinted by active skin's aura
+    const [tr, tg, tb] = Skins.active().aura.rgb;
     for (const t of player.trail) {
       const a = t.life / 12 * 0.4;
-      ctx.fillStyle = `rgba(120,200,255,${a})`;
+      ctx.fillStyle = `rgba(${tr},${tg},${tb},${a})`;
       ctx.beginPath(); ctx.arc(t.x, t.y, 6 * (t.life / 12), 0, Math.PI * 2); ctx.fill();
     }
 
@@ -781,8 +881,9 @@ function startGame() {
       for (const c of coins) Coins.draw(ctx, c, env);
     }
 
-    // player
-    drawPlayer();
+    // player (READY: start-screen preview is the character; skip duplicate behind panel)
+    if (state === STATE.PLAY) drawGhost();
+    if (state !== STATE.READY) drawPlayer();
 
     // particles
     for (const p of particles) {
@@ -811,7 +912,7 @@ function startGame() {
     // flash
     if (flashAlpha > 0.01) {
       ctx.fillStyle = `rgba(255,80,100,${flashAlpha})`;
-      ctx.fillRect(0, 0, W, H);
+      ctx.fillRect(-cameraOffX, -cameraOffY, W + 2 * cameraOffX, H + 2 * cameraOffY);
     }
 
     // confetti (PLAY congrats + DEAD newBest both draw it; gameOver overlay also calls)
@@ -834,22 +935,58 @@ function startGame() {
     ctx.restore();
   }
 
-  // ---- Background ----
-  function drawBackground() {
-    // sky gradient
-    const sky = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
-    sky.addColorStop(0, '#0d1230');
-    sky.addColorStop(0.5, '#1a2552');
-    sky.addColorStop(1, '#3a3070');
-    ctx.fillStyle = sky;
-    ctx.fillRect(0, 0, W, GROUND_Y + player.h);
-
-    // distant nebula glow
+  // Static gradients depend only on canvas/design size → built once per resize, not per frame.
+  function buildGrads() {
+    const lin = (x0, y0, x1, y1, stops) => {
+      const g = ctx.createLinearGradient(x0, y0, x1, y1);
+      for (const [o, c] of stops) g.addColorStop(o, c);
+      return g;
+    };
+    const groundTop = GROUND_Y + player.h;
     const neb = ctx.createRadialGradient(W * 0.7, 120, 30, W * 0.7, 120, 260);
     neb.addColorStop(0, 'rgba(180,80,200,0.18)');
     neb.addColorStop(1, 'rgba(180,80,200,0)');
-    ctx.fillStyle = neb;
-    ctx.fillRect(0, 0, W, GROUND_Y);
+    return {
+      fullSky: lin(0, 0, 0, cvs.height, [[0, '#0d1230'], [0.5, '#1a2552'], [1, '#0a0818']]),
+      sky: lin(0, 0, 0, GROUND_Y, [[0, '#0d1230'], [0.5, '#1a2552'], [1, '#3a3070']]),
+      neb,
+      horizon: lin(0, GROUND_Y - 30, 0, groundTop,
+        [[0, 'rgba(255,150,200,0)'], [0.7, 'rgba(255,120,180,0.25)'], [1, 'rgba(180,60,120,0.4)']]),
+      edge: lin(0, groundTop - 4, 0, groundTop + 6,
+        [[0, 'rgba(255,160,210,0)'], [0.5, 'rgba(255,160,210,0.7)'], [1, 'rgba(120,100,180,0.3)']]),
+      ground: lin(0, groundTop, 0, H, [[0, '#1a1830'], [0.4, '#252040'], [1, '#0a0818']]),
+    };
+  }
+
+  // ---- Background ----
+  function drawBackground() {
+    // sky gradient
+    // bg spans full visible width: design rect + letterbox bands (cameraOffX each side)
+    const X0 = -cameraOffX, VW = W + 2 * cameraOffX;
+    ctx.fillStyle = grads.sky;
+    ctx.fillRect(X0, 0, VW, GROUND_Y + player.h);
+
+    // distant nebula glow
+    ctx.fillStyle = grads.neb;
+    ctx.fillRect(X0, 0, VW, GROUND_Y);
+
+    // stage-tinted atmosphere: nebula wash behind moon, faint left cloud, horizon bloom
+    const stage = bgStage();
+    if (grads.stageId !== stage.id) {
+      const c = hexRgb(stage.color);
+      const rad = (x, y, r, a) => {
+        const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+        g.addColorStop(0, rgbaStr(c, a)); g.addColorStop(0.5, rgbaStr(c, a * 0.35)); g.addColorStop(1, rgbaStr(c, 0));
+        return g;
+      };
+      grads.stageId = stage.id;
+      grads.tintNeb = rad(W - 80, 100, W * 0.55, 0.16);
+      grads.tintNeb2 = rad(W * 0.15, GROUND_Y * 0.3, W * 0.4, 0.07);
+      grads.tintHorizon = rad(W * 0.5, GROUND_Y + 40, W * 0.75, 0.2);
+    }
+    ctx.fillStyle = grads.tintNeb;  ctx.fillRect(X0, 0, VW, GROUND_Y + player.h);
+    ctx.fillStyle = grads.tintNeb2; ctx.fillRect(X0, 0, VW, GROUND_Y);
+    ctx.fillStyle = grads.tintHorizon; ctx.fillRect(X0, GROUND_Y - W * 0.75 + 40, VW, W * 0.75 + player.h);
 
     // stars
     for (const s of stars) {
@@ -865,34 +1002,53 @@ function startGame() {
     }
     ctx.globalAlpha = 1;
 
-    // stage-specific moon
-    drawStageMoon();
-
-    // mountain layers (parallax, far to near)
-    for (const layer of mountains) {
-      drawMountainLayer(layer);
+    // shooting star — deterministic from uiFrame (no state), one streak every ~7s
+    {
+      const PERIOD = 420, LIFE = 36;
+      const cyc = Math.floor(uiFrame / PERIOD), k = uiFrame % PERIOD;
+      if (k < LIFE) {
+        const rnd = (n) => { const v = Math.sin(cyc * 127.1 + n * 311.7) * 43758.5453; return v - Math.floor(v); };
+        const p = k / LIFE;
+        const sx = W * (0.25 + rnd(1) * 0.6), sy = 30 + rnd(2) * GROUND_Y * 0.3;
+        const len = 70 + rnd(3) * 50;
+        const hx = sx - p * 160, hy = sy + p * 70;           // head travels down-left
+        const tx = hx + len * 0.92 * (1 - p * 0.4), ty = hy - len * 0.4 * (1 - p * 0.4);
+        const a = Math.sin(p * Math.PI);
+        const g = ctx.createLinearGradient(hx, hy, tx, ty);
+        g.addColorStop(0, `rgba(255,255,255,${0.9 * a})`);
+        g.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.strokeStyle = g; ctx.lineWidth = 1.5; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(tx, ty); ctx.stroke();
+        ctx.lineCap = 'butt';
+      }
     }
 
+    // mountain layers (parallax, far to near)
+    // tiles span wider than visible → clip vertically to design rect
+    ctx.save();
+    ctx.beginPath(); ctx.rect(X0, 0, VW, H); ctx.clip();
+    const tiles = bgTilesFor(stage);
+    mountains.forEach((layer, i) => drawMountainLayer(layer, tiles.mtn[i]));
+
     // city silhouette
-    drawCitySilhouette();
+    drawCitySilhouette(tiles.city);
+    ctx.restore();
 
     // clouds — layered: bottom shadow, body w/ radial soft edges, top highlight
     for (const c of clouds) drawCloud(c);
 
+    // stage-specific moon — drawn after mountains/clouds so nothing in the bg covers it
+    drawStageMoon();
+
     // horizon glow strip
-    const horizon = ctx.createLinearGradient(0, GROUND_Y - 30, 0, GROUND_Y + player.h);
-    horizon.addColorStop(0, 'rgba(255,150,200,0)');
-    horizon.addColorStop(0.7, 'rgba(255,120,180,0.25)');
-    horizon.addColorStop(1, 'rgba(180,60,120,0.4)');
-    ctx.fillStyle = horizon;
-    ctx.fillRect(0, GROUND_Y - 30, W, 30 + player.h);
+    ctx.fillStyle = grads.horizon;
+    ctx.fillRect(X0, GROUND_Y - 30, VW, 30 + player.h);
   }
 
   // ---- Stage-specific moon ----
   function drawStageMoon() {
     const moonX = W - 80, moonY = 100, moonR = 36;
-    const stage = (state === STATE.READY) ? stageList[startStageIdx] : currentStage();
-    const id = stage.id;
+    const id = bgStage().id;
     const t = uiFrame * 0.02;
     if (state === STATE.READY) {
       hits.moon = { x: moonX - moonR, y: moonY - moonR, w: moonR * 2, h: moonR * 2 };
@@ -915,6 +1071,56 @@ function startGame() {
       case 'genesis':   drawGenesisMoon(moonX, moonY, moonR, t); break;
       default:          drawBloodMoon(moonX, moonY, moonR);
     }
+    if (state === STATE.PLAY) drawMoonMe(moonX, moonY - moonR + 1);
+  }
+
+  // Tiny "me" on top of the moon — idle, hops while cheering (~every 12–24s, ~2.5s).
+  const MOON_ME_SCALE = 0.3;
+  const CHEERS = ['GO GO GO!', 'YOU GOT THIS!', 'NICE JUMP!', 'KEEP GOING!', 'SO FAST!', "DON'T STOP!", 'FIGHTING!'];
+  const CHEER_LEN = 150;
+  let cheerText = null, cheerAt = 0, cheerNext = 0;
+  function drawMoonMe(cx, feet) {
+    if (!cheerNext) cheerNext = uiFrame + 720 + Math.random() * 720;
+    if (uiFrame >= cheerNext) {
+      cheerText = OneJump.I18N.t(CHEERS[Math.floor(Math.random() * CHEERS.length)]);
+      cheerAt = uiFrame;
+      cheerNext = uiFrame + 720 + Math.random() * 720;
+    }
+    const age = uiFrame - cheerAt;
+    const cheering = cheerText && age <= CHEER_LEN;
+    const k = MOON_ME_SCALE, s = PLAYER_SCALE * k;
+    const lift = cheering ? -Math.abs(Math.sin(age * Math.PI / 18)) * 7 : 0;  // hop every 18 frames
+    const x = cx - player.w * k / 2;
+    const y = feet - player.h * k;
+    ctx.fillStyle = `rgba(0,0,0,${0.35 * (1 + lift / 14)})`;
+    ctx.beginPath(); ctx.ellipse(cx, feet, player.w * k / 2, 1.5, 0, 0, Math.PI * 2); ctx.fill();
+    const spr = lift < -1 ? sprites.jump : sprites.idle[Math.floor(uiFrame / 6) % sprites.idle.length];
+    ctx.drawImage(spr, x - SPR_OFFX * s, y + lift - SPR_OFFY * s, 72 * s, 80 * s);
+    if (cheering) drawMoonCheer(cx, y, age);
+  }
+
+  function drawMoonCheer(cx, headY, age) {
+    const pop = Math.min(1, age / 8), fade = Math.min(1, (CHEER_LEN - age) / 15);
+    ctx.save();
+    ctx.globalAlpha = fade;
+    ctx.font = 'bold 8px monospace';
+    const tw = ctx.measureText(cheerText).width;
+    const bw = tw + 14, bh = 16;
+    const bx = cx - bw / 2 - 14, by = headY - bh / 2 - 12 - Math.sin(age * 0.15) * 1;
+    ctx.translate(bx, by); ctx.scale(pop, pop);
+    // cloud = row of puffs over a body + 2 trailing puffs toward the head
+    const puffs = [[0, 0, bh / 2 + 1]];
+    for (let i = 0, n = Math.max(2, Math.round(bw / 12)); i <= n; i++) {
+      const px = -bw / 2 + 4 + (bw - 8) * i / n;
+      puffs.push([px, -bh / 2 + 3 - (i % 2) * 2, 6], [px, bh / 2 - 3 + (i % 2) * 1.5, 5.5]);
+    }
+    puffs.push([bw / 2 - 4, 0, 6], [-bw / 2 + 4, 0, 6], [bw / 2 + 3, bh / 2 + 5, 2.5], [bw / 2 + 8, bh / 2 + 9, 1.5]);
+    const body = () => { ctx.beginPath(); ctx.roundRect(-bw / 2 + 2, -bh / 2 + 2, bw - 4, bh - 4, 5); for (const [x, y, r] of puffs) { ctx.moveTo(x + r, y); ctx.arc(x, y, r, 0, Math.PI * 2); } };
+    body(); ctx.strokeStyle = '#1a1030'; ctx.lineWidth = 3; ctx.stroke();  // outline = stroke under fill
+    body(); ctx.fillStyle = '#fffaf0'; ctx.fill();
+    ctx.fillStyle = '#ff5a8a'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(cheerText, 0, 0.5);
+    ctx.restore();
   }
 
   function drawBloodMoon(mx, my, mr) {
@@ -930,12 +1136,13 @@ function startGame() {
     ctx.fillStyle = ring;
     ctx.beginPath(); ctx.arc(mx, my, mr * 1.4, 0, Math.PI*2); ctx.fill();
     const disc = ctx.createRadialGradient(mx - mr*0.2, my - mr*0.2, mr*0.1, mx, my, mr);
-    disc.addColorStop(0, '#a83020'); disc.addColorStop(0.5, '#6a1a10'); disc.addColorStop(1, '#2a0808');
+    disc.addColorStop(0, '#d04a30'); disc.addColorStop(0.5, '#8a2616'); disc.addColorStop(1, '#3a0c08');
     ctx.fillStyle = disc;
     ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI*2); ctx.fill();
     ctx.strokeStyle = 'rgba(255,140,60,0.35)'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(mx, my, mr - 1, 0, Math.PI*2); ctx.stroke();
     drawCraters(mx, my, [[-14,4,4],[-8,18,3],[-18,-8,3],[6,-12,2],[14,6,3],[-2,-2,2]], 'rgba(40,8,4,0.7)', 'rgba(255,120,60,0.3)');
+    moonSurface(mx, my, mr, 'rock', 1);
     const flare = ctx.createLinearGradient(mx - mr*2.5, my, mx + mr*2.5, my);
     flare.addColorStop(0, 'rgba(255,80,40,0)');
     flare.addColorStop(0.45, 'rgba(255,140,80,0.18)');
@@ -955,6 +1162,136 @@ function startGame() {
     }
   }
 
+  // Shared surface pass for celestial bodies — baked once per (kind, radius), drawn clipped to disc.
+  //  rock  : maria + small craters + speckle, sphere shading, lit rim (light from upper-left)
+  //  star  : granulation + sunspot, limb darkening (no terminator — self-lit)
+  //  gas   : sphere shading + rim
+  //  face  : soft shading + specular (clock / rose window stay legible)
+  //  glass : shading + specular + rim
+  const moonSurfCache = new Map();
+  function moonSurface(mx, my, mr, kind, seed) {
+    const key = kind + ':' + mr + ':' + seed;
+    let img = moonSurfCache.get(key);
+    if (!img) { img = bakeMoonSurface(mr, kind, seed); moonSurfCache.set(key, img); }
+    ctx.drawImage(img, mx - mr, my - mr, mr * 2, mr * 2);
+  }
+  function bakeMoonSurface(mr, kind, seed) {
+    const S = 4;  // camera can scale design ~3x on large screens
+    const cv = document.createElement('canvas');
+    cv.width = cv.height = Math.ceil(mr * 2 * S);
+    const g = cv.getContext('2d');
+    g.scale(S, S); g.translate(mr, mr);
+    let sd = seed * 9301 + 49297;
+    const rnd = () => { sd = (sd * 16807) % 2147483647; return sd / 2147483647; };
+    const soft = (x, y, r, c0, c1) => {
+      const rg = g.createRadialGradient(x, y, 0, x, y, r);
+      rg.addColorStop(0, c0); rg.addColorStop(1, c1);
+      g.fillStyle = rg; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+    };
+    if (kind === 'rock') {
+      for (let i = 0; i < 7; i++) {  // maria
+        const a = rnd() * Math.PI * 2, d = rnd() * mr * 0.65;
+        soft(Math.cos(a) * d, Math.sin(a) * d, mr * (0.22 + rnd() * 0.3), 'rgba(10,6,20,0.38)', 'rgba(10,6,20,0)');
+      }
+      for (let i = 0; i < 16; i++) {  // craters: dark bowl + lit lower-right lip
+        const a = rnd() * Math.PI * 2, d = Math.sqrt(rnd()) * mr * 0.85, r = 0.8 + rnd() * 2.6;
+        const x = Math.cos(a) * d, y = Math.sin(a) * d;
+        g.fillStyle = 'rgba(10,6,20,0.35)';
+        g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+        g.strokeStyle = 'rgba(255,255,255,0.35)'; g.lineWidth = 0.7;
+        g.beginPath(); g.arc(x, y, r, -0.2, Math.PI * 0.7); g.stroke();
+      }
+      for (let i = 0; i < 140; i++) {  // regolith speckle
+        const a = rnd() * Math.PI * 2, d = Math.sqrt(rnd()) * mr;
+        g.fillStyle = rnd() < 0.5 ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.08)';
+        g.fillRect(Math.cos(a) * d, Math.sin(a) * d, 0.7, 0.7);
+      }
+    } else if (kind === 'star') {
+      for (let i = 0; i < 170; i++) {  // granulation
+        const a = rnd() * Math.PI * 2, d = Math.sqrt(rnd()) * mr * 0.95;
+        soft(Math.cos(a) * d, Math.sin(a) * d, 1.2 + rnd() * 2.2, 'rgba(255,255,210,0.18)', 'rgba(255,255,210,0)');
+      }
+      const sx = mr * 0.25, sy = mr * 0.3;  // sunspot w/ penumbra
+      soft(sx, sy, 4.5, 'rgba(90,20,0,0.35)', 'rgba(90,20,0,0)');
+      g.fillStyle = 'rgba(60,10,0,0.55)'; g.beginPath(); g.arc(sx, sy, 1.6, 0, Math.PI * 2); g.fill();
+    }
+    const L = -0.5;  // light dir: upper-left (unit-ish, in mr units)
+    if (kind === 'star') {
+      // self-lit: strong limb darkening + hot spot nudged toward viewer-light → reads as a ball, not a disc
+      const limb = g.createRadialGradient(L * mr * 0.3, L * mr * 0.3, 0, 0, 0, mr);
+      limb.addColorStop(0, 'rgba(255,255,235,0.45)');
+      limb.addColorStop(0.55, 'rgba(255,210,130,0)');
+      limb.addColorStop(0.85, 'rgba(160,40,0,0.25)');
+      limb.addColorStop(1, 'rgba(90,10,0,0.7)');
+      g.fillStyle = limb; g.fillRect(-mr, -mr, mr * 2, mr * 2);
+    } else {
+      const soft3d = kind === 'face' || kind === 'glass';
+      // 1) diffuse falloff centered on light point
+      const diff = g.createRadialGradient(L * mr, L * mr, 0, L * mr * 0.6, L * mr * 0.6, mr * 1.7);
+      diff.addColorStop(0, 'rgba(255,255,255,0.18)');
+      diff.addColorStop(0.35, 'rgba(8,6,24,0)');
+      diff.addColorStop(1, `rgba(8,6,24,${soft3d ? 0.25 : 0.38})`);
+      g.fillStyle = diff; g.fillRect(-mr, -mr, mr * 2, mr * 2);
+      // 2) terminator: soft-edged night side on lower-right
+      const term = g.createRadialGradient(L * mr, L * mr, mr * 0.85, L * mr, L * mr, mr * 1.8);
+      term.addColorStop(0, 'rgba(6,4,18,0)');
+      term.addColorStop(0.3, `rgba(6,4,18,${soft3d ? 0.32 : 0.55})`);
+      term.addColorStop(1, `rgba(6,4,18,${soft3d ? 0.5 : 0.82})`);
+      g.fillStyle = term; g.fillRect(-mr, -mr, mr * 2, mr * 2);
+      // 3) reflected sky light on the dark limb (bounce) — separates night side from the sky
+      g.lineWidth = 1.6;
+      for (let i = 0; i < 10; i++) {
+        const a0 = Math.PI * (-0.15 + i * 0.07);
+        g.strokeStyle = `rgba(150,170,255,${0.28 * Math.sin((i + 0.5) / 10 * Math.PI)})`;
+        g.beginPath(); g.arc(0, 0, mr - 1, a0, a0 + Math.PI * 0.075); g.stroke();
+      }
+      // 4) specular: tight for glass/face, broad + faint for rock/gas
+      soft(L * mr * 0.9, L * mr * 0.9, mr * (soft3d ? 0.32 : 0.5), `rgba(255,255,255,${soft3d ? 0.5 : 0.16})`, 'rgba(255,255,255,0)');
+      if (soft3d) soft(L * mr * 0.9, L * mr * 0.9, mr * 0.09, 'rgba(255,255,255,0.8)', 'rgba(255,255,255,0)');
+      // 5) lit rim, fading along the limb
+      if (kind !== 'face') {
+        g.lineWidth = 1.5;
+        for (let i = 0; i < 12; i++) {
+          const a0 = Math.PI * (0.8 + i * 0.07);
+          g.strokeStyle = `rgba(255,255,255,${0.7 * Math.sin((i + 0.5) / 12 * Math.PI)})`;
+          g.beginPath(); g.arc(0, 0, mr - 0.8, a0, a0 + Math.PI * 0.075); g.stroke();
+        }
+      }
+    }
+    g.globalCompositeOperation = 'destination-in';  // clip everything to disc (opaque mask!)
+    g.fillStyle = '#000';
+    g.beginPath(); g.arc(0, 0, mr, 0, Math.PI * 2); g.fill();
+    return cv;
+  }
+
+  // Tapered radial beams (wide at limb, fading to a point). len(i) → beam length past the limb.
+  function drawSunRays(mx, my, mr, n, rot, len, halfW, rgb) {
+    const [r, g, b] = rgb;
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2 + rot;
+      const L = mr + len(i);
+      const x0 = mx + Math.cos(a) * mr * 0.9, y0 = my + Math.sin(a) * mr * 0.9;
+      const grd = ctx.createLinearGradient(x0, y0, mx + Math.cos(a) * L, my + Math.sin(a) * L);
+      grd.addColorStop(0, `rgba(${r},${g},${b},0.75)`);
+      grd.addColorStop(1, `rgba(${r},${g},${b},0)`);
+      ctx.fillStyle = grd;
+      ctx.beginPath();
+      ctx.moveTo(mx + Math.cos(a - halfW) * mr * 0.9, my + Math.sin(a - halfW) * mr * 0.9);
+      ctx.lineTo(mx + Math.cos(a) * L, my + Math.sin(a) * L);
+      ctx.lineTo(mx + Math.cos(a + halfW) * mr * 0.9, my + Math.sin(a + halfW) * mr * 0.9);
+      ctx.closePath(); ctx.fill();
+    }
+  }
+  // Banded ring arc (a0→a1 half of the ellipse), outer→inner bands w/ Cassini-style gap.
+  function drawPlanetRings(mx, my, mr, a0, a1, alpha) {
+    const bands = [[1.78, 2, 'rgba(200,180,140,'], [1.66, 3, 'rgba(255,232,185,'], [1.52, 1, 'rgba(120,100,80,'], [1.42, 3.5, 'rgba(235,210,160,'], [1.3, 1.5, 'rgba(190,170,130,']];
+    for (const [k, w, c] of bands) {
+      ctx.strokeStyle = c + (alpha * 0.85) + ')';
+      ctx.lineWidth = w;
+      ctx.beginPath(); ctx.ellipse(mx, my, mr * k, mr * k * 0.25, -0.12, a0, a1); ctx.stroke();
+    }
+  }
+
   // STORM — pale moon obscured by drifting cloud strips + lightning flicker
   function drawStormMoon(mx, my, mr, t) {
     const halo = ctx.createRadialGradient(mx, my, mr, mx, my, mr * 2.5);
@@ -968,6 +1305,7 @@ function startGame() {
     ctx.fillStyle = disc;
     ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI*2); ctx.fill();
     drawCraters(mx, my, [[-12,6,3],[8,-8,2.5],[4,12,2]], 'rgba(50,60,80,0.5)', 'rgba(255,255,255,0.3)');
+    moonSurface(mx, my, mr, 'rock', 2);
     // cloud strips drifting across
     ctx.save();
     ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI*2); ctx.clip();
@@ -1000,18 +1338,8 @@ function startGame() {
     corona.addColorStop(1, 'rgba(180,40,0,0)');
     ctx.fillStyle = corona;
     ctx.beginPath(); ctx.arc(mx, my, mr * 3.2, 0, Math.PI*2); ctx.fill();
-    // solar flares
-    for (let i = 0; i < 8; i++) {
-      const a = (i / 8) * Math.PI * 2 + t;
-      const r1 = mr * 1.05;
-      const r2 = mr * (1.4 + Math.sin(t * 2 + i) * 0.15);
-      ctx.strokeStyle = 'rgba(255,180,60,0.55)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(mx + Math.cos(a) * r1, my + Math.sin(a) * r1);
-      ctx.lineTo(mx + Math.cos(a) * r2, my + Math.sin(a) * r2);
-      ctx.stroke();
-    }
+    // solar flares — tapered flame tongues, lengths flicker independently
+    drawSunRays(mx, my, mr, 12, t * 0.5, (i) => mr * (0.35 + 0.25 * Math.abs(Math.sin(t * 1.7 + i * 2.3))), 0.2, [255, 170, 50]);
     // disc — molten
     const disc = ctx.createRadialGradient(mx - mr*0.3, my - mr*0.3, mr*0.2, mx, my, mr);
     disc.addColorStop(0, '#fff8a0'); disc.addColorStop(0.4, '#ff8030'); disc.addColorStop(1, '#a01010');
@@ -1022,9 +1350,10 @@ function startGame() {
       const a = i * 1.3 + t * 0.6;
       const sx = mx + Math.cos(a) * mr * 0.55;
       const sy = my + Math.sin(a) * mr * 0.4;
-      ctx.fillStyle = `rgba(150,30,0,${0.5 + Math.sin(t * 3 + i) * 0.3})`;
-      ctx.beginPath(); ctx.arc(sx, sy, 3, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = `rgba(255,230,120,${0.25 + Math.sin(t * 3 + i) * 0.15})`;
+      ctx.beginPath(); ctx.arc(sx, sy, 3.5, 0, Math.PI*2); ctx.fill();
     }
+    moonSurface(mx, my, mr, 'star', 3);
   }
 
   // VOID — total eclipse: black disc, glowing white ring
@@ -1035,12 +1364,25 @@ function startGame() {
     corona.addColorStop(1, 'rgba(80,40,160,0)');
     ctx.fillStyle = corona;
     ctx.beginPath(); ctx.arc(mx, my, mr * 2.6, 0, Math.PI*2); ctx.fill();
+    // coronal streamers — fixed pseudo-random lengths, slow breathing
+    ctx.lineCap = 'round';
+    for (let i = 0; i < 28; i++) {
+      const a = (i / 28) * Math.PI * 2 + Math.sin(i * 7.3) * 0.12;
+      const len = mr * (1.25 + ((i * 37) % 11) / 11 * 0.9 + Math.sin(t + i) * 0.06);
+      const sg = ctx.createLinearGradient(mx + Math.cos(a) * mr, my + Math.sin(a) * mr, mx + Math.cos(a) * len, my + Math.sin(a) * len);
+      sg.addColorStop(0, 'rgba(235,225,255,0.4)'); sg.addColorStop(1, 'rgba(160,130,255,0)');
+      ctx.strokeStyle = sg; ctx.lineWidth = 1 + (i % 3) * 0.6;
+      ctx.beginPath(); ctx.moveTo(mx + Math.cos(a) * mr, my + Math.sin(a) * mr); ctx.lineTo(mx + Math.cos(a) * len, my + Math.sin(a) * len); ctx.stroke();
+    }
+    ctx.lineCap = 'butt';
     // bright ring
     ctx.strokeStyle = `rgba(255,255,255,${0.7 + Math.sin(t * 2) * 0.2})`;
     ctx.lineWidth = 3;
     ctx.beginPath(); ctx.arc(mx, my, mr * 1.05, 0, Math.PI*2); ctx.stroke();
     // black disc
-    ctx.fillStyle = '#040008';
+    const vd = ctx.createRadialGradient(mx - mr * 0.35, my - mr * 0.35, 0, mx, my, mr);
+    vd.addColorStop(0, '#1a1030'); vd.addColorStop(0.6, '#07030f'); vd.addColorStop(1, '#010004');
+    ctx.fillStyle = vd;  // faint earthshine → dark sphere, not a hole
     ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI*2); ctx.fill();
     // diamond ring — bright spot at one point
     const beadAngle = t * 1.5;
@@ -1085,6 +1427,7 @@ function startGame() {
     ctx.fillStyle = disc;
     ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI*2); ctx.fill();
     drawCraters(mx, my, [[-12,6,4],[8,-10,3],[14,8,2.5],[-4,-12,2]], 'rgba(80,100,140,0.5)', 'rgba(255,255,255,0.4)');
+    moonSurface(mx, my, mr, 'rock', 5);
   }
 
   // NEXUS — cyber wireframe moon
@@ -1118,6 +1461,7 @@ function startGame() {
       ctx.moveTo(mx - w, yy); ctx.lineTo(mx + w, yy);
       ctx.stroke();
     }
+    moonSurface(mx, my, mr, 'glass', 6);
     // ring outline
     ctx.strokeStyle = '#80f0ff';
     ctx.lineWidth = 1.5;
@@ -1155,6 +1499,7 @@ function startGame() {
     ctx.fillStyle = disc;
     ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI*2); ctx.fill();
     drawCraters(mx, my, [[-10,8,3],[12,-6,2.5],[6,14,2]], 'rgba(20,60,100,0.55)', 'rgba(220,240,255,0.4)');
+    moonSurface(mx, my, mr, 'rock', 7);
     // bubble streams
     for (let i = 0; i < 4; i++) {
       const a = t * 0.8 + i * 1.5;
@@ -1173,23 +1518,14 @@ function startGame() {
     corona.addColorStop(1, 'rgba(255,160,80,0)');
     ctx.fillStyle = corona;
     ctx.beginPath(); ctx.arc(mx, my, mr * 3, 0, Math.PI*2); ctx.fill();
-    // ray spikes
-    for (let i = 0; i < 16; i++) {
-      const a = (i / 16) * Math.PI * 2 + t * 0.3;
-      const r1 = mr * 1.05;
-      const r2 = mr * 1.45;
-      ctx.strokeStyle = 'rgba(255,230,150,0.45)';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(mx + Math.cos(a) * r1, my + Math.sin(a) * r1);
-      ctx.lineTo(mx + Math.cos(a) * r2, my + Math.sin(a) * r2);
-      ctx.stroke();
-    }
+    // ray spikes — long/short alternating tapered beams
+    drawSunRays(mx, my, mr, 16, t * 0.15, (i) => mr * (i % 2 ? 0.45 : 0.85) * (1 + Math.sin(t * 2 + i) * 0.06), 0.09, [255, 230, 150]);
     // disc — bright sun
     const disc = ctx.createRadialGradient(mx, my, mr * 0.1, mx, my, mr);
     disc.addColorStop(0, '#ffffe0'); disc.addColorStop(0.6, '#ffd060'); disc.addColorStop(1, '#c07020');
     ctx.fillStyle = disc;
     ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI*2); ctx.fill();
+    moonSurface(mx, my, mr, 'star', 8);
     // heat shimmer line below
     ctx.strokeStyle = 'rgba(255,200,120,0.4)';
     ctx.lineWidth = 1;
@@ -1214,6 +1550,7 @@ function startGame() {
     disc.addColorStop(0, '#fff8e8'); disc.addColorStop(0.7, '#dcc8a0'); disc.addColorStop(1, '#7a6850');
     ctx.fillStyle = disc;
     ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI*2); ctx.fill();
+    moonSurface(mx, my, mr, 'face', 9);
     // gold rim
     ctx.strokeStyle = '#a07020'; ctx.lineWidth = 2.5;
     ctx.beginPath(); ctx.arc(mx, my, mr - 1, 0, Math.PI*2); ctx.stroke();
@@ -1259,11 +1596,7 @@ function startGame() {
     ctx.fillStyle = halo;
     ctx.beginPath(); ctx.arc(mx, my, mr * 2.5, 0, Math.PI*2); ctx.fill();
     // back ring half
-    ctx.strokeStyle = 'rgba(220,200,150,0.7)';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.ellipse(mx, my, mr * 1.6, mr * 0.4, 0, Math.PI, Math.PI * 2);
-    ctx.stroke();
+    drawPlanetRings(mx, my, mr, Math.PI, Math.PI * 2, 0.7);
     // planet body (banded)
     const disc = ctx.createLinearGradient(mx, my - mr, mx, my + mr);
     disc.addColorStop(0, '#dce8ff');
@@ -1287,15 +1620,18 @@ function startGame() {
     ctx.ellipse(mx + mr * 0.2 + Math.sin(t) * 2, my + mr * 0.15, mr * 0.18, mr * 0.1, 0, 0, Math.PI*2);
     ctx.fill();
     ctx.restore();
+    moonSurface(mx, my, mr, 'gas', 13);
     // rim
     ctx.strokeStyle = 'rgba(20,40,80,0.7)'; ctx.lineWidth = 1.2;
     ctx.beginPath(); ctx.arc(mx, my, mr - 0.5, 0, Math.PI*2); ctx.stroke();
     // front ring half
-    ctx.strokeStyle = 'rgba(255,230,180,0.85)';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.ellipse(mx, my, mr * 1.6, mr * 0.4, 0, 0, Math.PI);
-    ctx.stroke();
+    // ring shadow cast on the planet (just below front ring)
+    ctx.save();
+    ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI*2); ctx.clip();
+    ctx.strokeStyle = 'rgba(10,20,50,0.35)'; ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.ellipse(mx + 2, my + 5, mr * 1.55, mr * 1.55 * 0.25, -0.12, 0, Math.PI); ctx.stroke();
+    ctx.restore();
+    drawPlanetRings(mx, my, mr, 0, Math.PI, 1);
     // tiny moonlet
     const moonletA = t * 0.6;
     const mlx = mx + Math.cos(moonletA) * mr * 1.7;
@@ -1349,6 +1685,7 @@ function startGame() {
       ctx.fill();
     }
     ctx.restore();
+    moonSurface(mx, my, mr, 'rock', 10);
     // rim
     ctx.strokeStyle = 'rgba(40,80,30,0.7)';
     ctx.lineWidth = 1.2;
@@ -1407,6 +1744,7 @@ function startGame() {
     ctx.fillStyle = core;
     ctx.beginPath(); ctx.arc(mx, my, mr * 0.5, 0, Math.PI*2); ctx.fill();
     ctx.restore();
+    moonSurface(mx, my, mr, 'glass', 11);
     // shell rim
     ctx.strokeStyle = '#1a0a18'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.arc(mx, my, mr, 0, Math.PI*2); ctx.stroke();
@@ -1481,6 +1819,7 @@ function startGame() {
     ctx.strokeRect(mx - 1.5, my - mr * 0.3, 3, mr * 0.6);
     ctx.strokeRect(mx - mr * 0.18, my - 1.5, mr * 0.36, 3);
     ctx.restore();
+    moonSurface(mx, my, mr, 'face', 12);
     // outer rim — heavy lead
     ctx.strokeStyle = '#1a1018';
     ctx.lineWidth = 2;
@@ -1497,98 +1836,437 @@ function startGame() {
     }
   }
 
-  function drawCloud(c) {
+  // paint cloud centered on its local origin into g (offscreen)
+  function paintCloud(g, c) {
     const palette = c.tint === 'pink'
       ? { shadow: 'rgba(80,40,90,0.18)', body: 'rgba(255,200,220,0.16)', edge: 'rgba(255,200,220,0)', hi: 'rgba(255,230,240,0.18)' }
       : { shadow: 'rgba(40,40,80,0.22)', body: 'rgba(220,220,255,0.18)', edge: 'rgba(220,220,255,0)', hi: 'rgba(255,255,255,0.22)' };
 
     // shadow puff (offset down)
     for (const p of c.puffs) {
-      const px = c.x + p.dx, py = c.y + p.dy + 4;
-      const sg = ctx.createRadialGradient(px, py, p.r * 0.2, px, py, p.r);
+      const px = p.dx, py = p.dy + 4;
+      const sg = g.createRadialGradient(px, py, p.r * 0.2, px, py, p.r);
       sg.addColorStop(0, palette.shadow);
       sg.addColorStop(1, 'rgba(40,40,80,0)');
-      ctx.fillStyle = sg;
-      ctx.beginPath(); ctx.arc(px, py, p.r, 0, Math.PI * 2); ctx.fill();
+      g.fillStyle = sg;
+      g.beginPath(); g.arc(px, py, p.r, 0, Math.PI * 2); g.fill();
     }
     // body — soft radial fill per puff
     for (const p of c.puffs) {
-      const px = c.x + p.dx, py = c.y + p.dy;
-      const bg = ctx.createRadialGradient(px, py - p.r * 0.2, p.r * 0.1, px, py, p.r);
+      const px = p.dx, py = p.dy;
+      const bg = g.createRadialGradient(px, py - p.r * 0.2, p.r * 0.1, px, py, p.r);
       bg.addColorStop(0, palette.body);
       bg.addColorStop(0.7, palette.body);
       bg.addColorStop(1, palette.edge);
-      ctx.fillStyle = bg;
-      ctx.beginPath(); ctx.arc(px, py, p.r, 0, Math.PI * 2); ctx.fill();
+      g.fillStyle = bg;
+      g.beginPath(); g.arc(px, py, p.r, 0, Math.PI * 2); g.fill();
     }
     // top highlight — small bright caps on upper puffs only
     for (const p of c.puffs) {
       if (p.dy > 0) continue;
-      const px = c.x + p.dx, py = c.y + p.dy - p.r * 0.35;
-      const hg = ctx.createRadialGradient(px, py, 0, px, py, p.r * 0.55);
+      const px = p.dx, py = p.dy - p.r * 0.35;
+      const hg = g.createRadialGradient(px, py, 0, px, py, p.r * 0.55);
       hg.addColorStop(0, palette.hi);
       hg.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.fillStyle = hg;
-      ctx.beginPath(); ctx.arc(px, py, p.r * 0.55, 0, Math.PI * 2); ctx.fill();
+      g.fillStyle = hg;
+      g.beginPath(); g.arc(px, py, p.r * 0.55, 0, Math.PI * 2); g.fill();
     }
   }
 
-  function drawMountainLayer(layer) {
-    const off = (-worldOffset * layer.parallax) % (W * 1.5);
-    const baseY = layer.baseY;
-    ctx.fillStyle = layer.color;
-    ctx.beginPath();
-    ctx.moveTo(-W, baseY);
-    for (const p of layer.peaks) {
-      ctx.lineTo(p.x + off,             baseY - p.h);
-      ctx.lineTo(p.x + off + 60,        baseY - p.h * 0.4);
+  function bakeCloud(c) {
+    const RES = 2;  // soft gradients — 2x design res stays smooth after camera scale (literal: runs before later consts init)
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const p of c.puffs) {
+      x0 = Math.min(x0, p.dx - p.r); x1 = Math.max(x1, p.dx + p.r);
+      y0 = Math.min(y0, p.dy - p.r); y1 = Math.max(y1, p.dy + p.r + 4);  // +4 shadow offset
     }
-    // wrap-around copy
-    for (const p of layer.peaks) {
-      ctx.lineTo(p.x + off + W * 1.5,   baseY - p.h);
-      ctx.lineTo(p.x + off + W * 1.5 + 60, baseY - p.h * 0.4);
-    }
-    ctx.lineTo(W * 2, baseY);
-    ctx.closePath();
-    ctx.fill();
-    // rim light on near side
-    ctx.strokeStyle = 'rgba(255,150,200,0.18)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
+    const cv = document.createElement('canvas');
+    cv.width = Math.ceil((x1 - x0) * RES);
+    cv.height = Math.ceil((y1 - y0) * RES);
+    const g = cv.getContext('2d');
+    g.scale(RES, RES);
+    g.translate(-x0, -y0);
+    paintCloud(g, c);
+    c.img = cv; c.ox = x0; c.oy = y0; c.iw = x1 - x0; c.ih = y1 - y0;
+  }
+  function drawCloud(c) {
+    ctx.drawImage(c.img, c.x + c.ox, c.y + c.oy, c.iw, c.ih);
   }
 
-  function drawCitySilhouette() {
-    // Simple flat silhouette — no per-window detail (avoids strobing at high speed).
-    const baseY = GROUND_Y + player.h - 10;
-    const off = (-worldOffset * 0.7) % (W * 1.2);
-    ctx.fillStyle = '#0a0a18';
-    for (let pass = 0; pass < 2; pass++) {
-      const px = off + pass * W * 1.2;
-      for (const b of buildings) {
-        const x = (b.x + px) % (W * 1.2) - 30;
-        ctx.fillRect(x, baseY - b.h, b.w, b.h);
+  // ---- Baked parallax tiles (mountains + city), tinted per stage ----
+  const BG_RES = 2;
+  const BG_TILE_MAX = 2;  // ~12MB per stage set → keep current + previous only
+  function bgStage() { return state === STATE.READY ? stageList[startStageIdx] : currentStage(); }
+  function hexRgb(h) {
+    h = h.replace('#', '');
+    if (h.length === 3) h = h.replace(/./g, '$&$&');
+    const n = parseInt(h, 16);
+    return [n >> 16 & 255, n >> 8 & 255, n & 255];
+  }
+  const rgbaStr = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+  const mixRgb = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+  function bgCanvas(w, h) {
+    const cv = document.createElement('canvas');
+    cv.width = Math.ceil(w * BG_RES); cv.height = Math.ceil(h * BG_RES);
+    const g = cv.getContext('2d'); g.scale(BG_RES, BG_RES);
+    return [cv, g];
+  }
+  function bgTilesFor(stage) {
+    let t = bgTiles.get(stage.id);
+    if (t) { bgTiles.delete(stage.id); }
+    else {
+      const tint = hexRgb(stage.color);
+      t = { mtn: mountains.map(l => bakeMountain(l, tint)), city: bakeCity(tint, stage.id) };
+    }
+    bgTiles.set(stage.id, t);
+    if (bgTiles.size > BG_TILE_MAX) bgTiles.delete(bgTiles.keys().next().value);
+    return t;
+  }
+
+  function bakeMountain(l, tint) {
+    const P = W * 1.5, top = l.height * 1.35, hgt = top + 6;
+    const [cv, g] = bgCanvas(P, hgt);
+    const STEP = 2, n = Math.round(P / STEP);
+    const hs = []; let lo = Infinity, hi = -Infinity;
+    for (let i = 0; i <= n; i++) {
+      const x = i * STEP;
+      let s = 0, sa = 0;
+      for (const h of l.harm) { s += h.a * Math.pow(1 - Math.abs(Math.sin(Math.PI * h.f * x / P + h.ph)), 1.6); sa += h.a; }
+      hs.push(s / sa); lo = Math.min(lo, s / sa); hi = Math.max(hi, s / sa);
+    }
+    const ys = hs.map(v => hgt - (0.35 + 0.65 * (v - lo) / (hi - lo || 1)) * top);
+    const haze = mixRgb([58, 48, 112], tint, 0.25);   // sky-bottom #3a3070 nudged to stage tint
+    const fog = [0.3, 0.14, 0.03][l.depth];           // far layers fade into haze
+    const base = hexRgb(l.color);
+    const body = g.createLinearGradient(0, hgt - top, 0, hgt);
+    body.addColorStop(0, rgbaStr(mixRgb(mixRgb(base, tint, 0.12), haze, fog), 1));
+    body.addColorStop(1, rgbaStr(mixRgb(base, haze, fog + 0.3), 1));
+    g.fillStyle = body;
+    g.beginPath(); g.moveTo(0, hgt);
+    for (let i = 0; i <= n; i++) g.lineTo(i * STEP, ys[i]);
+    g.lineTo(P, hgt); g.closePath(); g.fill();
+    // valley mist, clipped to silhouette
+    g.globalCompositeOperation = 'source-atop';
+    const mist = g.createLinearGradient(0, hgt - top * 0.45, 0, hgt);
+    mist.addColorStop(0, rgbaStr(haze, 0));
+    mist.addColorStop(1, rgbaStr(haze, 0.3 - l.depth * 0.08));
+    g.fillStyle = mist; g.fillRect(0, 0, P, hgt);
+    g.globalCompositeOperation = 'source-over';
+    // rim light only on slopes facing the moon (right side, descending left→right)
+    const lit = mixRgb(tint, [255, 255, 255], 0.35);
+    g.strokeStyle = rgbaStr(lit, 0.14 + l.depth * 0.08);
+    g.lineWidth = 1.2; g.lineCap = 'round';
+    g.beginPath();
+    for (let i = 0; i < n; i++) {
+      if (ys[i + 1] > ys[i]) { g.moveTo(i * STEP, ys[i] + 0.6); g.lineTo((i + 1) * STEP, ys[i + 1] + 0.6); }
+    }
+    g.stroke();
+    // faint shadow-side edge so dark slopes still separate from the sky
+    g.strokeStyle = rgbaStr(lit, 0.04);
+    g.beginPath();
+    for (let i = 0; i < n; i++) {
+      if (ys[i + 1] <= ys[i]) { g.moveTo(i * STEP, ys[i] + 0.6); g.lineTo((i + 1) * STEP, ys[i + 1] + 0.6); }
+    }
+    g.stroke();
+    return { cv, P, h: hgt };
+  }
+
+  // ---- Per-stage city silhouettes ----
+  // shape(p, x, y, w, h, v): builds Path2D; y = roof line, y+h = ground, v = b.roof variant 0..3.
+  // All subpaths wind clockwise on screen (up left side, across top, down right) → nonzero fill = union.
+  // Extras above roof line must stay ≤ 20px (tile has 22px headroom).
+  // win: window grid (cw/ch pitch, ww/wh size, s: 0 rect 1 round 2 arch 3 full-width strip).
+  // deco(g, x, y, w, h, v, tint): lights/glows painted on the body layer.
+  const poly = (p, ...a) => { p.moveTo(a[0], a[1]); for (let i = 2; i < a.length; i += 2) p.lineTo(a[i], a[i + 1]); p.closePath(); };
+  const circ = (p, x, y, r) => { p.moveTo(x + r, y); p.arc(x, y, r, 0, Math.PI * 2); };
+  const dome = (p, x, y, rx, ry) => { p.moveTo(x - rx, y); p.ellipse(x, y, rx, ry, 0, Math.PI, 0); p.closePath(); };
+  const prism = (p, x, w, top, B) => poly(p, x, B, x, top + w * 0.6, x + w / 2, top, x + w, top + w * 0.6, x + w, B);
+  function glow(g, x, y, r, c, a) {
+    const gr = g.createRadialGradient(x, y, 0, x, y, r);
+    gr.addColorStop(0, rgbaStr(c, a)); gr.addColorStop(1, rgbaStr(c, 0));
+    g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2);
+  }
+  const CITY = {
+    twilight: {  // modern downtown: flat / antenna / stepped / spire
+      shape(p, x, y, w, h, v) {
+        p.rect(x, y, w, h);
+        if (v === 1) p.rect(x + w * 0.3, y - 14, 1.5, 14);
+        else if (v === 2) p.rect(x + w * 0.2, y - 8, w * 0.6, 8);
+        else if (v === 3) poly(p, x + w * 0.35, y, x + w * 0.5, y - 20, x + w * 0.65, y);
+      },
+      deco(g, x, y, w, h, v) { if (v === 1) { g.fillStyle = 'rgba(255,90,90,0.9)'; g.fillRect(x + w * 0.3 - 0.5, y - 16, 2.5, 2.5); } },
+    },
+    storm: {  // storm-battered towers: slant roofs, lattice masts, lightning rods, water tanks
+      shape(p, x, y, w, h, v) {
+        p.rect(x + w * 0.1, y, w * 0.8, h);
+        if (v === 0) poly(p, x + w * 0.1, y, x + w * 0.9, y - 10, x + w * 0.9, y);
+        else if (v === 1) poly(p, x + w * 0.5 - 3, y, x + w * 0.5, y - 20, x + w * 0.5 + 3, y);
+        else if (v === 2) p.rect(x + w * 0.5 - 0.75, y - 18, 1.5, 18);
+        else { p.rect(x + w * 0.25, y - 14, w * 0.5, 9); p.rect(x + w * 0.3, y - 5, 1.5, 5); p.rect(x + w * 0.7 - 1.5, y - 5, 1.5, 5); }
+      },
+      deco(g, x, y, w, h, v) {
+        if (v === 1) { g.fillStyle = 'rgba(255,90,90,0.9)'; g.fillRect(x + w * 0.5 - 1, y - 21, 2, 2); }
+        if (v === 2) glow(g, x + w * 0.5, y - 18, 6, [190, 230, 255], 0.8);
+      },
+      win: { cw: 8, ch: 11, ww: 3, wh: 4, dens: 0.14, warm: [190, 220, 255] },
+    },
+    inferno: {  // foundries: sawtooth roofs, smokestacks, kiln cones, stepped forges
+      shape(p, x, y, w, h, v) {
+        if (v === 2) { poly(p, x, y + h, x + w * 0.25, y, x + w * 0.75, y, x + w, y + h); return; }
+        if (v === 3) { p.rect(x, y + h * 0.3, w, h * 0.7); p.rect(x + w * 0.15, y, w * 0.7, h * 0.3); return; }
+        p.rect(x, y, w, h);
+        if (v === 0) { const n = Math.max(2, Math.floor(w / 12)), tw = w / n; for (let i = 0; i < n; i++) poly(p, x + i * tw, y, x + i * tw, y - 8, x + (i + 1) * tw, y); }
+        else { p.rect(x + w * 0.15, y - 20, w * 0.14, 20); p.rect(x + w * 0.55, y - 14, w * 0.12, 14); }
+      },
+      deco(g, x, y, w, h, v) {
+        const ember = [255, 110, 40];
+        if (v === 1) { glow(g, x + w * 0.22, y - 20, 7, ember, 0.7); glow(g, x + w * 0.61, y - 14, 6, ember, 0.6); }
+        if (v === 2) glow(g, x + w * 0.5, y, w * 0.3, ember, 0.55);
+      },
+      win: { cw: 9, ch: 8, ww: 5, wh: 2, dens: 0.22, warm: [255, 120, 40] },
+    },
+    void: {  // floating monoliths: obelisks, diamonds, twin shards, inverted pyramids (8px hover gap)
+      shape(p, x, y, w, h, v) {
+        const F = y + h - 8;
+        if (v === 0) { poly(p, x + w * 0.2, F, x + w * 0.35, y + 10, x + w * 0.5, y, x + w * 0.65, y + 10, x + w * 0.8, F); poly(p, x + w * 0.3, F, x + w * 0.7, F, x + w * 0.5, F + 6); }
+        else if (v === 1) poly(p, x + w * 0.1, y + h * 0.45, x + w * 0.5, y, x + w * 0.9, y + h * 0.45, x + w * 0.5, F);
+        else if (v === 2) { poly(p, x, F, x + w * 0.25, y, x + w * 0.45, F); poly(p, x + w * 0.5, F, x + w * 0.75, y + h * 0.3, x + w, F); }
+        else poly(p, x, y, x + w, y, x + w * 0.5, F);
+      },
+      deco(g, x, y, w, h, v, tint) { glow(g, x + w * 0.5, y + h - 3, w * 0.35, mixRgb(tint, [255, 255, 255], 0.2), 0.35); },
+      win: { cw: 6, ch: 12, ww: 1.5, wh: 6, dens: 0.16, warm: [200, 140, 255] },
+    },
+    aurora: {  // arctic outpost: igloos, ice spires, snow-capped A-frames, ice towers
+      shape(p, x, y, w, h, v) {
+        const B = y + h;
+        if (v === 0) dome(p, x + w / 2, B, w / 2, Math.min(h, w * 0.5));
+        else if (v === 1) poly(p, x + w * 0.2, B, x + w * 0.5, y - 15, x + w * 0.8, B);
+        else if (v === 2) poly(p, x, B, x + w / 2, B - Math.min(h, w * 1.1), x + w, B);
+        else { p.rect(x + w * 0.2, y + 10, w * 0.6, h - 10); poly(p, x + w * 0.2, y + 10, x + w * 0.5, y - 8, x + w * 0.8, y + 10); }
+      },
+      deco(g, x, y, w, h, v) {
+        if (v !== 2) return;
+        const B = y + h, t = B - Math.min(h, w * 1.1);
+        g.strokeStyle = 'rgba(235,248,255,0.45)'; g.lineWidth = 2.5; g.lineCap = 'round';
+        g.beginPath(); g.moveTo(x + w * 0.3, t + (B - t) * 0.6); g.lineTo(x + w / 2, t + 1); g.lineTo(x + w * 0.7, t + (B - t) * 0.6); g.stroke();
+      },
+      win: { cw: 8, ch: 8, ww: 3, wh: 3, dens: 0.2, warm: [255, 200, 120] },
+    },
+    nexus: {  // cyberpunk megatowers: setbacks, antenna clusters, slant tops, holo billboards
+      shape(p, x, y, w, h, v) {
+        if (v === 0) { p.rect(x, y + h * 0.35, w, h * 0.65); p.rect(x + w * 0.15, y + h * 0.12, w * 0.7, h * 0.23); p.rect(x + w * 0.35, y - 10, w * 0.3, h * 0.12 + 10); return; }
+        if (v === 2) { poly(p, x, y + h, x, y + 12, x + w, y, x + w, y + h); return; }
+        p.rect(x, y, w, h);
+        if (v === 1) { p.rect(x + w * 0.2, y - 18, 1.5, 18); p.rect(x + w * 0.5, y - 12, 1.5, 12); p.rect(x + w * 0.75, y - 20, 1.5, 20); }
+      },
+      deco(g, x, y, w, h, v, tint) {
+        g.fillStyle = 'rgba(80,240,255,0.35)'; g.fillRect(x + 1, y + h * 0.4, 1, h * 0.6);  // neon edge strip
+        if (v === 3) { g.fillStyle = rgbaStr(tint, 0.5); g.fillRect(x + w * 0.15, y + 8, w * 0.5, 10); glow(g, x + w * 0.4, y + 13, w * 0.4, tint, 0.25); }
+        if (v === 1) { g.fillStyle = rgbaStr(tint, 0.9); g.fillRect(x + w * 0.75 - 0.5, y - 22, 2.5, 2.5); }
+      },
+      win: { ch: 7, wh: 1.2, s: 3, dens: 0.3, warm: [80, 240, 255] },
+    },
+    abyss: {  // sunken habitats: domes, bulb tubes, ruined columns, coral
+      shape(p, x, y, w, h, v) {
+        const cx = x + w / 2;
+        if (v === 0) { const d = Math.min(w / 2, h * 0.5); p.rect(x, y + d, w, h - d); dome(p, cx, y + d, w / 2, d); }
+        else if (v === 1) { p.rect(cx - w * 0.15, y + w * 0.3, w * 0.3, h - w * 0.3); circ(p, cx, y + w * 0.3, w * 0.3); }
+        else if (v === 2) poly(p, x + w * 0.15, y + h, x + w * 0.15, y + 6, x + w * 0.35, y, x + w * 0.5, y + 10, x + w * 0.7, y + 3, x + w * 0.85, y + 14, x + w * 0.85, y + h);
+        else {
+          p.rect(cx - 3, y + h * 0.3, 6, h * 0.7);
+          p.rect(x + w * 0.15, y + h * 0.1, 5, h * 0.35); p.rect(x + w * 0.15, y + h * 0.4, cx - x - w * 0.15, 4);
+          p.rect(x + w * 0.7, y, 5, h * 0.5); p.rect(cx, y + h * 0.45, x + w * 0.7 + 5 - cx, 4);
+          circ(p, x + w * 0.15 + 2.5, y + h * 0.1, 3.5); circ(p, x + w * 0.7 + 2.5, y, 3.5);
+        }
+      },
+      deco(g, x, y, w, h, v) { if (v === 1) glow(g, x + w / 2, y + w * 0.3, w * 0.45, [120, 240, 230], 0.3); },
+      win: { cw: 9, ch: 11, ww: 3.4, wh: 3.4, s: 1, dens: 0.22, warm: [120, 240, 230] },
+    },
+    mirage: {  // desert city: crenellated adobe, onion domes, minarets, ziggurats
+      shape(p, x, y, w, h, v) {
+        const cx = x + w / 2;
+        if (v === 0) { p.rect(x, y, w, h); for (let tx = x; tx + 4 <= x + w; tx += 8) p.rect(tx, y - 4, 4, 4); }
+        else if (v === 1) {
+          const d = y + w * 0.55;
+          p.rect(x, d, w, h - w * 0.55);
+          p.moveTo(x + w * 0.1, d);
+          p.bezierCurveTo(x - w * 0.05, y + w * 0.2, cx - w * 0.1, y + w * 0.1, cx, y - 6);
+          p.bezierCurveTo(cx + w * 0.1, y + w * 0.1, x + w * 1.05, y + w * 0.2, x + w * 0.9, d);
+          p.closePath();
+          p.rect(cx - 0.75, y - 14, 1.5, 8);
+        } else if (v === 2) {
+          p.rect(x, y + h * 0.6, w, h * 0.4);
+          p.rect(cx - w * 0.12, y + 8, w * 0.24, h - 8); dome(p, cx, y + 8, w * 0.12, 8);
+          p.rect(cx - w * 0.18, y + h * 0.3, w * 0.36, 3);
+        } else { p.rect(x, y + h * 0.66, w, h * 0.34); p.rect(x + w * 0.12, y + h * 0.33, w * 0.76, h * 0.33); p.rect(x + w * 0.24, y, w * 0.52, h * 0.33); }
+      },
+      win: { cw: 9, ch: 12, ww: 3, wh: 5, s: 2, dens: 0.18, warm: [255, 190, 110] },
+    },
+    chronos: {  // clockwork quarter: clock towers, gear crowns, belfries, stepped halls
+      shape(p, x, y, w, h, v) {
+        const cx = x + w / 2;
+        if (v === 0) { p.rect(x + w * 0.2, y, w * 0.6, h); poly(p, x + w * 0.15, y, cx, y - 18, x + w * 0.85, y); return; }
+        p.rect(x, y, w, h);
+        if (v === 1) {
+          const R = Math.min(w * 0.3, 16), pts = [];
+          for (let i = 0; i < 24; i++) { const a = Math.PI + i / 24 * Math.PI * 2, r = (i >> 1) % 2 ? R : R * 0.75; pts.push(cx + Math.cos(a) * r, y + Math.sin(a) * r); }
+          poly(p, ...pts);
+        } else if (v === 2) poly(p, x, y, cx, y - 12, x + w, y);
+        else p.rect(x + w * 0.3, y - 10, w * 0.4, 10);
+      },
+      deco(g, x, y, w, h, v) {
+        if (v !== 0) return;
+        const cx = x + w / 2, cy = y + w * 0.35, r = w * 0.2;
+        g.fillStyle = 'rgba(230,230,255,0.45)'; g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.fill();
+        g.strokeStyle = 'rgba(20,20,40,0.9)'; g.lineWidth = 1; g.lineCap = 'round';
+        g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx, cy - r * 0.75); g.moveTo(cx, cy); g.lineTo(cx + r * 0.5, cy + r * 0.2); g.stroke();
+      },
+      win: { cw: 8, ch: 13, ww: 2, wh: 7, dens: 0.18, warm: [220, 220, 255] },
+    },
+    grove: {  // forest village: mushroom houses, canopy trees, round huts, treehouses
+      shape(p, x, y, w, h, v) {
+        const cx = x + w / 2;
+        if (v === 0) { p.rect(cx - w * 0.2, y + h * 0.3, w * 0.4, h * 0.7); dome(p, cx, y + h * 0.3, w * 0.55, Math.min(h * 0.3, 22)); }
+        else if (v === 1) { p.rect(cx - 4, y + h * 0.4, 8, h * 0.6); circ(p, cx, y + h * 0.25, w * 0.4); circ(p, cx - w * 0.25, y + h * 0.4, w * 0.28); circ(p, cx + w * 0.25, y + h * 0.38, w * 0.3); }
+        else if (v === 2) { p.rect(x + w * 0.1, y + h * 0.5, w * 0.8, h * 0.5); dome(p, cx, y + h * 0.5, w * 0.45, h * 0.3); }
+        else { p.rect(cx - 3, y + h * 0.45, 6, h * 0.55); p.rect(x + w * 0.1, y + h * 0.15, w * 0.8, h * 0.3); poly(p, x, y + h * 0.15, cx, y, x + w, y + h * 0.15); }
+      },
+      deco(g, x, y, w, h, v) {
+        if (v !== 0) return;
+        g.fillStyle = 'rgba(255,255,255,0.14)';
+        for (const [dx, dy] of [[-0.25, 0.22], [0.05, 0.12], [0.3, 0.24]]) { g.beginPath(); g.arc(x + w * (0.5 + dx), y + h * dy + 4, 2.5, 0, Math.PI * 2); g.fill(); }
+      },
+      win: { cw: 9, ch: 10, ww: 3, wh: 3, s: 1, dens: 0.16, warm: [230, 255, 140] },
+    },
+    crystal: {  // crystal spires: prisms, clusters, tilted shards, faceted geodes
+      shape(p, x, y, w, h, v) {
+        const B = y + h;
+        if (v === 0) prism(p, x + w * 0.15, w * 0.7, y, B);
+        else if (v === 1) { prism(p, x, w * 0.35, y + h * 0.35, B); prism(p, x + w * 0.25, w * 0.45, y, B); prism(p, x + w * 0.6, w * 0.4, y + h * 0.2, B); }
+        else if (v === 2) poly(p, x, B, x + w * 0.55, y, x + w * 0.85, y + 10, x + w * 0.6, B);
+        else poly(p, x, B, x + w * 0.1, y + h * 0.5, x + w * 0.35, y + h * 0.3, x + w * 0.65, y + h * 0.25, x + w * 0.9, y + h * 0.45, x + w, B);
+      },
+      deco(g, x, y, w, h, v, tint) {
+        if (v !== 0) return;
+        g.strokeStyle = rgbaStr(mixRgb(tint, [255, 255, 255], 0.5), 0.22); g.lineWidth = 1;
+        g.beginPath(); g.moveTo(x + w * 0.5, y); g.lineTo(x + w * 0.5, y + h); g.stroke();
+      },
+      win: { cw: 7, ch: 10, ww: 1.5, wh: 5, dens: 0.2, warm: [210, 180, 255] },
+    },
+    cathedral: {  // gothic: twin-spire facades, spire towers, buttressed naves, domed basilicas
+      shape(p, x, y, w, h, v) {
+        const cx = x + w / 2;
+        if (v === 0) { p.rect(x, y, w, h); poly(p, x, y, x + w * 0.12, y - 20, x + w * 0.24, y); poly(p, x + w * 0.76, y, x + w * 0.88, y - 20, x + w, y); poly(p, x + w * 0.24, y, cx, y - 10, x + w * 0.76, y); }
+        else if (v === 1) { p.rect(x, y + h * 0.5, w, h * 0.5); p.rect(x + w * 0.25, y + 12, w * 0.5, h - 12); poly(p, x + w * 0.25, y + 12, cx, y - 20, x + w * 0.75, y + 12); }
+        else if (v === 2) { p.rect(x, y, w, h); poly(p, x, y, cx, y - 14, x + w, y); p.rect(x - 3, y + h * 0.4, 3, h * 0.6); p.rect(x + w, y + h * 0.4, 3, h * 0.6); }
+        else { p.rect(x, y + 10, w, h - 10); dome(p, cx, y + 10, w * 0.35, 14); p.rect(cx - 0.75, y - 12, 1.5, 8); p.rect(cx - 3, y - 10, 6, 1.5); }
+      },
+      deco(g, x, y, w, h, v) {
+        if (v !== 0) return;
+        g.strokeStyle = 'rgba(255,200,110,0.55)'; g.lineWidth = 1.2;
+        g.beginPath(); g.arc(x + w / 2, y + 12, Math.min(w * 0.18, 8), 0, Math.PI * 2); g.stroke();
+      },
+      win: { cw: 8, ch: 14, ww: 3, wh: 8, s: 2, dens: 0.2, warm: [255, 200, 110] },
+    },
+    genesis: {  // cosmic monuments: orb pylons, ringed towers, capstone pyramids, needles
+      shape(p, x, y, w, h, v) {
+        const cx = x + w / 2, B = y + h;
+        if (v === 0) { poly(p, x + w * 0.2, B, x + w * 0.4, y, x + w * 0.6, y, x + w * 0.8, B); circ(p, cx, y - 9, 5); }
+        else if (v === 1) p.rect(x + w * 0.3, y, w * 0.4, h);
+        else if (v === 2) poly(p, x, B, cx, y, x + w, B);
+        else { p.rect(x, y + h * 0.7, w, h * 0.3); poly(p, x + w * 0.35, B, cx, y - 18, x + w * 0.65, B); }
+      },
+      deco(g, x, y, w, h, v) {
+        const gold = [255, 240, 150], cx = x + w / 2;
+        if (v === 0) glow(g, cx, y - 9, 12, gold, 0.6);
+        else if (v === 1) { g.strokeStyle = 'rgba(255,240,150,0.5)'; g.lineWidth = 1.2; g.beginPath(); g.ellipse(cx, y + h * 0.3, w * 0.5, 4, 0, 0, Math.PI * 2); g.stroke(); }
+        else if (v === 2) glow(g, cx, y, 9, gold, 0.7);
+        else glow(g, cx, y - 18, 7, gold, 0.6);
+      },
+      win: { cw: 6, ch: 8, ww: 1.5, wh: 1.5, dens: 0.14, warm: [255, 245, 190] },
+    },
+  };
+  const WIN_DEF = { cw: 7, ch: 9, ww: 2.5, wh: 3.5, s: 0, dens: 0.2, warm: [255, 214, 150] };
+
+  function bakeCity(tint, stageId) {
+    const st = CITY[stageId] || CITY.twilight;
+    const win = { ...WIN_DEF, ...st.win };
+    const P = W * 1.2;
+    let maxH = 0; for (const b of buildings) maxH = Math.max(maxH, b.h);
+    const hgt = maxH + 22;
+    const [cv, g] = bgCanvas(P, hgt);
+    const [wcv, wg] = bgCanvas(P, hgt);  // windows on own layer → faded with speed (no strobing)
+    const topC = rgbaStr(mixRgb([10, 10, 24], tint, 0.06), 1);
+    const edge = rgbaStr(mixRgb(tint, [255, 255, 255], 0.3), 0.16);
+    const accent = mixRgb(tint, [255, 255, 255], 0.4);
+    for (const b of buildings) {
+      const y = hgt - b.h;
+      const grad = g.createLinearGradient(0, y, 0, hgt);
+      grad.addColorStop(0, topC); grad.addColorStop(1, '#0a0a18');
+      const strip = win.s === 3;
+      const cols = strip ? 1 : Math.floor((b.w - 6) / win.cw), rows = Math.floor((b.h - 8) / win.ch);
+      const ww = strip ? b.w - 8 : win.ww;
+      for (const x of [b.x, b.x - P]) {  // wrap copy for seamless tile
+        const p = new Path2D();
+        st.shape(p, x, y, b.w, b.h, b.roof);
+        // body, then rim: edge tint under a (-1,+1)-shifted body fill → lit crescent on top + moon side
+        g.fillStyle = grad; g.fill(p);
+        g.fillStyle = edge; g.fill(p);
+        g.save(); g.translate(-1, 1); g.fillStyle = grad; g.fill(p); g.restore();
+        if (st.deco) st.deco(g, x, y, b.w, b.h, b.roof, tint);
+        // windows: erase windows of buildings behind, then draw own clipped to silhouette
+        wg.globalCompositeOperation = 'destination-out';
+        wg.fill(p);
+        wg.globalCompositeOperation = 'source-over';
+        wg.save(); wg.clip(p);
+        let seed = Math.floor(b.seed) + 1;  // same sequence for both copies
+        const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed % 1000) / 1000; };
+        for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+          const v = rnd();
+          if (v > win.dens) continue;
+          wg.fillStyle = rgbaStr(v < 0.06 ? accent : win.warm, 0.45 + v * 2);
+          const wx = x + 4 + c * win.cw, wy = y + 6 + r * win.ch;
+          if (win.s === 1) { wg.beginPath(); wg.arc(wx + ww / 2, wy + win.wh / 2, ww / 2, 0, Math.PI * 2); wg.fill(); }
+          else if (win.s === 2) { wg.beginPath(); wg.arc(wx + ww / 2, wy + ww / 2, ww / 2, Math.PI, 0); wg.lineTo(wx + ww, wy + win.wh); wg.lineTo(wx, wy + win.wh); wg.fill(); }
+          else wg.fillRect(wx, wy, ww, win.wh);
+        }
+        wg.restore();
       }
     }
+    return { cv, wcv, P, h: hgt };
+  }
+
+  function drawTiled(img, P, off, y, h) {
+    // step back to left band edge, then tile until right band edge (0.5 overlap hides seam hairline)
+    let x = off;
+    while (x > -cameraOffX) x -= P - 0.5;
+    for (; x < W + cameraOffX; x += P - 0.5) ctx.drawImage(img, x, y, P, h);
+  }
+  function drawMountainLayer(layer, tile) {
+    const off = (-worldOffset * layer.parallax) % tile.P;
+    drawTiled(tile.cv, tile.P, off, layer.baseY - tile.h, tile.h);
+  }
+
+  function drawCitySilhouette(tile) {
+    const baseY = GROUND_Y + player.h - 10;
+    const off = (-worldOffset * 0.7) % tile.P - 30;
+    drawTiled(tile.cv, tile.P, off, baseY - tile.h, tile.h);
+    ctx.globalAlpha = Math.max(0.35, 1 - (speed - 5) / 5 * 0.65);  // dim windows at speed → no strobing
+    drawTiled(tile.wcv, tile.P, off, baseY - tile.h, tile.h);
+    ctx.globalAlpha = 1;
   }
 
   // ---- Ground ----
   function drawGround() {
     const groundTop = GROUND_Y + player.h;
+    const X0 = -cameraOffX, X1 = W + cameraOffX, VW = X1 - X0;
     // top edge glow
-    const edgeGrd = ctx.createLinearGradient(0, groundTop - 4, 0, groundTop + 6);
-    edgeGrd.addColorStop(0, 'rgba(255,160,210,0)');
-    edgeGrd.addColorStop(0.5, 'rgba(255,160,210,0.7)');
-    edgeGrd.addColorStop(1, 'rgba(120,100,180,0.3)');
-    ctx.fillStyle = edgeGrd;
-    ctx.fillRect(0, groundTop - 4, W, 10);
+    ctx.fillStyle = grads.edge;
+    ctx.fillRect(X0, groundTop - 4, VW, 10);
 
     // ground gradient (perspective fade: dark near, lighter mid, dark far-down)
-    const g = ctx.createLinearGradient(0, groundTop, 0, H);
-    g.addColorStop(0, '#1a1830');
-    g.addColorStop(0.4, '#252040');
-    g.addColorStop(1, '#0a0818');
-    ctx.fillStyle = g;
-    ctx.fillRect(0, groundTop, W, H - groundTop);
+    ctx.fillStyle = grads.ground;
+    ctx.fillRect(X0, groundTop, VW, H - groundTop);
 
     // grid pattern (perspective faux 3D)
     const off = (worldOffset) % 40;
@@ -1596,7 +2274,7 @@ function startGame() {
     ctx.lineWidth = 1;
     // vertical receding lines
     const groundH = H - groundTop;
-    for (let i = -1; i < W / 40 + 2; i++) {
+    for (let i = Math.floor(X0 / 40) - 1; i < X1 / 40 + 2; i++) {
       const xTop = i * 40 - off;
       const xBot = (i * 40 - off - W/2) * 1.6 + W/2; // exaggerate
       ctx.beginPath();
@@ -1610,31 +2288,37 @@ function startGame() {
       const r = i / 5;
       const y = groundTop + Math.pow(r, 1.7) * groundH;
       ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(W, y);
+      ctx.moveTo(X0, y);
+      ctx.lineTo(X1, y);
       ctx.stroke();
     }
 
     // top edge bright line
     ctx.fillStyle = '#ff85b8';
-    ctx.fillRect(0, groundTop - 0.5, W, 1.5);
+    ctx.fillRect(X0, groundTop - 0.5, VW, 1.5);
     // secondary line
     ctx.fillStyle = 'rgba(255,210,80,0.6)';
-    ctx.fillRect(0, groundTop + 2, W, 1);
+    ctx.fillRect(X0, groundTop + 2, VW, 1);
 
     // moving dashes on near-ground
     const dashOff = (-worldOffset) % 32;
     ctx.fillStyle = 'rgba(255,210,80,0.65)';
-    for (let i = -1; i < W / 32 + 1; i++) {
+    for (let i = Math.floor(X0 / 32) - 1; i < X1 / 32 + 1; i++) {
       ctx.fillRect(i * 32 + dashOff, groundTop + 16, 16, 2);
     }
   }
 
   // ---- Sprite cache (built from active skin via PlayerSprite module) ----
   const skinAtlasCache = new Map();
+  // LRU-capped: hi-res atlases are ~4MB each; browsing 40 skins must not keep all.
+  const ATLAS_CACHE_MAX = 8;
   function atlasFor(id) {
-    if (!skinAtlasCache.has(id)) skinAtlasCache.set(id, PlayerSprite.build(Skins.get(id)));
-    return skinAtlasCache.get(id);
+    let a = skinAtlasCache.get(id);
+    if (a) skinAtlasCache.delete(id);  // re-insert → most recent
+    else a = PlayerSprite.build(Skins.get(id));
+    skinAtlasCache.set(id, a);
+    if (skinAtlasCache.size > ATLAS_CACHE_MAX) skinAtlasCache.delete(skinAtlasCache.keys().next().value);
+    return a;
   }
   let sprites = atlasFor(Skins.active().id);
 
@@ -1655,6 +2339,37 @@ function startGame() {
     // running on ground — speed-scaled cycle
     const idx = Math.floor(frame * (speed / 6) / 3) % sprites.run.length;
     return sprites.run[idx];
+  }
+
+  const GHOST_SCALE = 0.6;
+  const GHOST_LANE = 46;  // ghost feet below ground top line
+  function drawGhost() {
+    if (!lastGhost) return;
+    const n = lastGhost.length / 2;
+    const i = Math.max(0, ghostRec.length / 2 - 1);
+    let alpha = 0.35, spr;
+    if (i >= n) {
+      // ghost died here — fade its dead pose out over 60 frames
+      alpha *= 1 - (i - n) / 60;
+      if (alpha <= 0) return;
+      spr = sprites.dead;
+    }
+    const k = Math.min(i, n - 1) * 2;
+    const gy = lastGhost[k], pose = lastGhost[k + 1];
+    if (!spr) spr = pose === 1 ? sprites.jump : pose === 2 ? sprites.fall
+      : sprites.run[Math.floor(frame * (speed / 6) / 3) % sprites.run.length];
+    const s = PLAYER_SCALE * GHOST_SCALE;
+    const feet = GROUND_Y + player.h + GHOST_LANE + (gy - GROUND_Y) * GHOST_SCALE;
+    const x = player.x + player.w * (1 - GHOST_SCALE) / 2;
+    ctx.globalAlpha = alpha;
+    ctx.drawImage(spr, x - SPR_OFFX * s, feet - player.h * GHOST_SCALE - SPR_OFFY * s, 72 * s, 80 * s);
+    ctx.globalAlpha = alpha * 1.6;
+    ctx.fillStyle = '#cfe0ff';
+    ctx.font = 'bold 7px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(OneJump.I18N.t('PREVIOUS ME'), x + player.w * GHOST_SCALE / 2, feet + 3);
+    ctx.globalAlpha = 1;
   }
 
   function drawPlayer() {
@@ -1694,6 +2409,8 @@ function startGame() {
   const uiRef = {
     get W() { return W; },
     get H() { return H; },
+    get OX() { return cameraOffX; },  // letterbox band size (design px) each side
+    get OY() { return cameraOffY; },
     get GROUND_Y() { return GROUND_Y; },
     get state() { return state; },
     STATE,
@@ -1731,12 +2448,33 @@ function startGame() {
   const MAX_STEPS_PER_TICK = 6;    // hard cap to keep frame budget bounded
   let lastTime = 0;
   let acc = 0;
+  function drawPauseOverlay() {
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = 'rgba(5,8,16,0.6)';
+    ctx.fillRect(0, 0, cvs.width, cvs.height);
+    ctx.fillStyle = '#ffd060';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `bold ${Math.round(28 * cameraScale)}px monospace`;
+    ctx.fillText(OneJump.I18N.t('PAUSED'), cvs.width / 2, cvs.height / 2 - 18 * cameraScale);
+    ctx.fillStyle = '#fff';
+    ctx.font = `bold ${Math.round(14 * cameraScale)}px monospace`;
+    ctx.fillText(OneJump.I18N.t('TAP TO RESUME'), cvs.width / 2, cvs.height / 2 + 18 * cameraScale);
+    ctx.restore();
+  }
   function loop(now) {
     if (!lastTime) lastTime = now;
     let delta = now - lastTime;
     lastTime = now;
     if (delta > MAX_FRAME_MS) delta = MAX_FRAME_MS;
     acc += delta;
+    if (paused) {
+      acc = 0;
+      if (!pauseDrawn) { draw(); drawPauseOverlay(); pauseDrawn = true; }
+      requestAnimationFrame(loop);
+      return;
+    }
     let steps = 0;
     while (acc >= STEP_MS && steps < MAX_STEPS_PER_TICK) {
       update();

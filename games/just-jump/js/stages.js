@@ -1,5 +1,5 @@
 // Stage registry. Pure data, loaded from data/stages.json.
-// Schema: id, name, color, startSpeed, targetSpeed, obstacleIds[], coinIds[]
+// Schema: id, name, color, startSpeed, obstacleIds[], coinIds[]
 (() => {
   const W = (window.OneJump = window.OneJump || {});
 
@@ -22,13 +22,6 @@
   }
 
   function all()        { return list.slice(); }
-  function get(id)      { return byId.get(id); }
-  function getByIndex(i){ return list[Math.max(0, Math.min(list.length - 1, i))]; }
-  function indexOf(id)  { return list.findIndex(s => s.id === id); }
-  function next(id) {
-    const i = indexOf(id);
-    return i >= 0 && i < list.length - 1 ? list[i + 1] : null;
-  }
   function isUnlocked(id) { return unlocked.has(id); }
   function unlock(id) {
     if (!byId.has(id) || unlocked.has(id)) return false;
@@ -48,5 +41,5 @@
     } catch (_) {}
   }
 
-  W.Stages = { register, loadFromArray, all, get, getByIndex, indexOf, next, isUnlocked, unlock };
+  W.Stages = { loadFromArray, all, isUnlocked, unlock };
 })();

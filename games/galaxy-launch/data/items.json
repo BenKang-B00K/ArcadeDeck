@@ -1,0 +1,38 @@
+{
+    "neon": {
+        "name": "NEON OVERDRIVE",
+        "icon": "⚡",
+        "color": "#00f2fe",
+        "desc": "Ships +25% Speed",
+        "duration": 25000,
+        "limit": 3,
+        "key": "1"
+    },
+    "green": {
+        "name": "BIO-RECYCLE",
+        "icon": "🍃",
+        "color": "#2ecc71",
+        "desc": "Pine Drop +50%",
+        "duration": 25000,
+        "limit": 3,
+        "key": "2"
+    },
+    "gray": {
+        "name": "GEAR-SYNC",
+        "icon": "⚙️",
+        "color": "#95a5a6",
+        "desc": "Double Gear Drop",
+        "duration": 25000,
+        "limit": 2,
+        "key": "3"
+    },
+    "dark": {
+        "name": "VOID-X STIM",
+        "icon": "🔮",
+        "color": "#9b59b6",
+        "desc": "Crit Mult x1.5",
+        "duration": 15000,
+        "limit": 2,
+        "key": "4"
+    }
+}

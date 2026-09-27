@@ -5,7 +5,7 @@ import { Home } from 'lucide-react';
 // The one microsite this site hosts. A second one earns a config object; one
 // does not.
 const TITLE = 'The Fractured Realm — Web MMO';
-const DESCRIPTION = 'Explore The Fractured Realm, a browser-based MMO adventure.';
+const DESCRIPTION = 'Explore The Fractured Realm, a browser-based MMO adventure on ArcadeDeck. Quest, fight, and level up alongside other players — no download or install required.';
 const EMBED_URL = 'https://the-fractured-realm-webmmo.pages.dev/';
 const THEME_COLOR = '#0a0a12';
 

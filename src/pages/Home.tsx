@@ -11,6 +11,7 @@ import { useToast } from '../contexts/useToast';
 import { BANNED_WORDS, AD_SLOTS } from '../constants/gameConstants';
 import { useUiText, useLocale, getLocalizedString } from '../i18n';
 import { readNickname, saveNickname } from '../hooks/useNickname';
+import { deckStats, readCachedRank } from '../utils/pb';
 import './Home.css';
 
 const ALL_GENRES = ['All', ...new Set(deviceGames.flatMap(g => g.genres))];
@@ -27,7 +28,7 @@ const FeaturedCard: React.FC<{ game: Game }> = ({ game }) => {
   return (
     <Link to={`/play/${game.slug}`} className="featured-card">
       <div className="featured-card-image">
-        <img src={`${import.meta.env.BASE_URL}${game.thumbnail}`} alt={title} width="640" height="360" decoding="async" />
+        <img src={`${import.meta.env.BASE_URL}${game.thumbnail}`} alt={title} width="640" height="360" decoding="async" fetchPriority="high" />
       </div>
       <div className="featured-card-body">
         <div className="card-tags-row">
@@ -54,6 +55,21 @@ const Home: React.FC = () => {
   const [genre, setGenre] = useState('All');
   const [nickname, setNickname] = useState(readNickname);
   const [editing, setEditing] = useState(false);
+  const [rank, setRank] = useState(readCachedRank);
+  const [unranked] = useState(() => deckStats().xp <= 0);
+
+  // Global rank: cached value paints instantly, then one aggregation read
+  // refreshes it. Dynamic import keeps Firestore out of the Home chunk, and
+  // players with no XP yet skip the fetch entirely.
+  useEffect(() => {
+    if (deckStats().xp <= 0) return;
+    let live = true;
+    void import('../utils/leaderboard')
+      .then(m => m.syncLeaderboard().then(() => m.fetchMyRank()))
+      .then(r => { if (live) setRank(r); })
+      .catch(() => { /* offline — keep cached rank */ });
+    return () => { live = false; };
+  }, [nickname]);
 
   const recent = useMemo(
     // Stored newest-first (GamePlayer prepends on play); show the 4 latest.
@@ -125,11 +141,14 @@ const Home: React.FC = () => {
                   <button type="button" className="home-hero-nick-cancel" onClick={() => setEditing(false)} aria-label={t('homeNicknameCancel', 'Cancel')}><X size={16} aria-hidden="true" /></button>
                 </form>
               ) : (
-                <button type="button" className="home-hero-nick-card home-hero-nick-btn" onClick={() => setEditing(true)} aria-label={t('homeNicknameChangeAria', 'Click to change nickname')}>
+                <button type="button" className="home-hero-nick-card home-hero-nick-btn" onClick={() => setEditing(true)} title={t('homeNicknameChangeAria', 'Click to change nickname')}>
                   <span className="home-hero-nick-avatar" aria-hidden="true">{nickname.charAt(0).toUpperCase()}</span>
                   <span className="home-hero-nick-text">
                     <small>{t('homeNickPrefix', 'Playing as')}</small>
-                    <strong>{nickname}</strong>
+                    <strong>
+                      {nickname}
+                      <span className="home-hero-rank" title={t(unranked ? 'homeRankUnranked' : 'homeRankTitle', 'Global rank')}>#{rank ?? '???'}</span>
+                    </strong>
                   </span>
                   <Edit3 size={14} aria-hidden="true" />
                 </button>

@@ -1,0 +1,303 @@
+:root {
+    --neon: #00f2fe;
+    --damage: #ff4757;
+    --gold: #f1c40f;
+    --pine: #2ecc71;
+    --unlock: #ff00ff;
+    --gear: #95a5a6;
+    --colony: #e67e22;
+    --dark: #8e44ad;
+    --ui-scale: 1.0;
+}
+
+body {
+    margin: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #02020a;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', 'Consolas', sans-serif;
+    overflow: hidden;
+    user-select: none;
+    transition: 0.5s;
+    touch-action: manipulation;
+}
+
+#stardust {
+    text-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+    transition: all 0.2s ease;
+}
+
+#starfield {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    background: radial-gradient(circle at center, #0a0a20 0%, #02020a 100%);
+}
+
+#game-container {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    pointer-events: none;
+    z-index: 10;
+}
+
+#pixi-canvas {
+    filter: brightness(1.05) contrast(1.05) saturate(1.1) drop-shadow(0 0 2px var(--neon));
+}
+
+/* CRT Overlay System */
+#crt-overlay::before {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+    background-size: 100% 2px, 2px 100%;
+    z-index: 10000;
+    pointer-events: none;
+}
+
+#crt-overlay::after {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: rgba(18, 16, 16, 0.03);
+    z-index: 10001;
+    pointer-events: none;
+    animation: crtFlicker 0.1s infinite;
+}
+
+@keyframes crtFlicker {
+    0% { opacity: 0.1; }
+    50% { opacity: 0.2; }
+    100% { opacity: 0.1; }
+}
+
+.author-signature {
+    position: absolute;
+    bottom: -15px;
+    right: 0;
+    font-size: 8px;
+    color: rgba(255, 255, 255, 0.2);
+    white-space: nowrap;
+    font-family: 'Consolas', monospace;
+    letter-spacing: 1px;
+    pointer-events: none;
+}
+
+/* Boot / Loading Screen */
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #02020a;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.5s ease, visibility 0.5s;
+    overflow: hidden;
+}
+
+.bridge-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background:
+        linear-gradient(rgba(0, 242, 254, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 242, 254, 0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+    perspective: 1000px;
+    transform-style: preserve-3d;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.bridge-overlay::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle, transparent 40%, #000 100%);
+}
+
+#intro-ship-container {
+    position: absolute;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 60px;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.intro-ship {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 10px var(--neon));
+}
+
+@keyframes launchCurve {
+    0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+    30% { transform: translate(0, -200px) scale(1.2) rotate(0deg); }
+    100% { transform: translate(300px, -800px) scale(0.2) rotate(45deg); opacity: 0; }
+}
+
+@keyframes warpSpeed {
+    0% { transform: scale(1); opacity: 0.5; }
+    100% { transform: scale(5); opacity: 0; }
+}
+
+.loader-content {
+    text-align: center;
+    z-index: 5;
+    position: relative;
+    background: rgba(0, 5, 10, 0.8);
+    padding: 40px;
+    border: 1px solid var(--neon);
+    border-radius: 10px;
+    box-shadow: 0 0 30px rgba(0, 242, 254, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.loader-logo {
+    font-size: 60px;
+    margin-bottom: 20px;
+    animation: loaderLaunch 2s infinite ease-in-out;
+}
+
+@keyframes loaderLaunch {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+.loader-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+    letter-spacing: 4px;
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px var(--neon);
+}
+
+.loader-bar-bg {
+    width: 250px;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    margin: 0 auto 15px;
+    overflow: hidden;
+}
+
+.loader-bar {
+    width: 0%;
+    height: 100%;
+    background: var(--neon);
+    box-shadow: 0 0 10px var(--neon);
+    transition: width 0.3s ease;
+}
+
+.loader-status {
+    font-size: 10px;
+    color: #555;
+    font-family: 'Consolas', monospace;
+    letter-spacing: 1px;
+}
+
+#start-btn {
+    background: transparent;
+    border: 2px solid var(--neon);
+    color: var(--neon);
+    padding: 12px 40px;
+    font-size: 18px;
+    font-weight: bold;
+    font-family: 'Consolas', monospace;
+    letter-spacing: 4px;
+    cursor: pointer;
+    border-radius: 30px;
+    transition: 0.3s;
+    text-shadow: 0 0 10px var(--neon);
+    box-shadow: 0 0 15px rgba(0, 242, 254, 0.2);
+    animation: btnPulse 2s infinite;
+}
+
+#start-btn:hover {
+    background: var(--neon);
+    color: #000;
+    box-shadow: 0 0 30px var(--neon);
+}
+
+@keyframes btnPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 242, 254, 0.2); }
+    50% { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 242, 254, 0.4); }
+}
+
+/* Mobile Scaling & Optimization */
+@media screen and (max-width: 900px) {
+    :root {
+        --ui-scale: 0.75;
+    }
+    .ui-container.left-panels { left: 0; padding-left: 10px; }
+    .ui-container.right-panels { right: 0; padding-right: 10px; }
+
+    .ui-box {
+        width: 180px;
+        font-size: 11px;
+        padding: 8px;
+    }
+    .panel-title {
+        font-size: 11px !important;
+    }
+    .tech-btn {
+        padding: 6px !important;
+        margin-bottom: 6px !important;
+    }
+    .tech-icon {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 14px !important;
+    }
+    .tech-name {
+        font-size: 10px !important;
+    }
+    .tech-cost, .tech-stat {
+        font-size: 8.5px !important;
+    }
+    #target-area {
+        transform: translate(-50%, -50%) scale(0.7);
+    }
+}
+
+@media screen and (max-height: 500px) {
+    /* Landscape mobile optimizations */
+    .ui-container {
+        top: 5px;
+        height: calc(100vh - 10px);
+        gap: 5px;
+    }
+    .ui-box {
+        max-height: calc(100vh - 10px);
+    }
+    #item-slots {
+        bottom: 5px;
+        gap: 5px;
+        padding: 4px 10px;
+    }
+    .mini-slot {
+        padding: 2px 5px !important;
+        font-size: 10px !important;
+    }
+    .mini-tooltip {
+        bottom: 35px !important;
+        font-size: 8px !important;
+        padding: 4px 8px !important;
+    }
+}

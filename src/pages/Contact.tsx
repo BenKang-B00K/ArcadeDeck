@@ -13,7 +13,7 @@ const Contact: React.FC = () => {
   return (
     <div className="contact-page" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <>
-        <meta name="description" content="Get in touch with the ArcadeDeck team for support, feedback, or game submissions. We'd love to hear from you!" />
+        <meta name="description" content="Contact ArcadeDeck — email help@arcadedeck.net for player support, bug reports, partnership inquiries, or to submit your own original browser game for review." />
         <meta property="og:title" content="Contact Us | ArcadeDeck" />
         <meta property="og:url" content="https://arcadedeck.net/contact" />
       </>
@@ -25,7 +25,7 @@ const Contact: React.FC = () => {
 
           <div style={{ marginTop: '40px', background: 'var(--surface-2)', padding: '30px', borderRadius: '15px' }}>
             <h3 style={{ color: '#00d2ff' }}>Player Support &amp; Bug Reports</h3>
-            <p>For gameplay bugs, comment or forum problems, or general questions:</p>
+            <p>For gameplay bugs, comment problems, or general questions:</p>
             <p style={{ fontSize: '1.4rem' }}><a href="mailto:help@arcadedeck.net" style={{ color: 'var(--text-primary)', textDecoration: 'none' }}>help@arcadedeck.net</a></p>
             <p style={{ fontSize: '0.95rem', opacity: 0.8 }}>When reporting a bug, please include: your Gamer ID, the game name, the device and browser you were using, and a brief description of what went wrong. Screenshots or short screen recordings help us reproduce the problem faster.</p>
 
@@ -38,11 +38,11 @@ const Contact: React.FC = () => {
           </div>
 
           <h2 style={{ marginTop: '50px', color: '#00d2ff' }}>Response Times</h2>
-          <p>We typically respond within 24–48 hours on business days. Replies may take longer on weekends and public holidays. If your message is time-sensitive (e.g., an inappropriate comment or forum post that needs moderation), please mention "urgent" in the subject line.</p>
+          <p>We typically respond within 24–48 hours on business days. Replies may take longer on weekends and public holidays. If your message is time-sensitive (e.g., an inappropriate comment that needs moderation), please mention "urgent" in the subject line.</p>
 
           <h2 style={{ marginTop: '40px', color: '#00d2ff' }}>Frequently Asked Questions</h2>
           <p><strong>Are the games really free?</strong> Yes. Every game on ArcadeDeck is free to play with no downloads, sign-ups, or paywalls. ArcadeDeck is supported by ads.</p>
-          <p><strong>How do I change my Gamer ID?</strong> Click the edit icon next to your name on the homepage. Comments and forum posts keep the name they were submitted under.</p>
+          <p><strong>How do I change my Gamer ID?</strong> Click the edit icon next to your name on the homepage. Comments keep the name they were submitted under.</p>
           <p><strong>Can I switch the site language?</strong> Yes. Use the language switcher in the navbar to pick from English, Korean, or Japanese. Each locale has its own URL path so you can share or bookmark links in your preferred language.</p>
           <p><strong>I spotted a translation error — what should I do?</strong> Email <a href="mailto:help@arcadedeck.net" style={{ color: '#00d2ff' }}>help@arcadedeck.net</a> with the locale code (e.g., <code>ja</code>, <code>de</code>), the game or page, and the suggested correction. Native-speaker fixes ship fast.</p>
           <p><strong>Can I submit my own game?</strong> Yes — see the Business &amp; Game Submissions email above. Include a playable build link, a short description, and your contact info.</p>

@@ -2,30 +2,56 @@
 const SFX = (() => {
   let ctx = null;
   let masterGain = null;
-  let muted = false;
+  let vol = 1;         // 0 = mute, 0.5 = half, 1 = full
+  let noiseBuf = null; // 1s white noise, generated once — any slice is valid noise
+  const MASTER = 0.35;
+
+  // D Dorian (D E F G A B C). N(deg): 0 = D4 293.66Hz, ±7 = octave. 모든 SFX 음정은 이 스케일에서만 고름 → 소리끼리 화음 충돌 없음
+  const DORIAN = [0, 2, 3, 5, 7, 9, 10];
+  const N = deg => 293.66 * 2 ** ((DORIAN[((deg % 7) + 7) % 7] + 12 * Math.floor(deg / 7)) / 12);
 
   function getCtx() {
     if (!ctx) {
       try {
         ctx = new (window.AudioContext || window.webkitAudioContext)();
         masterGain = ctx.createGain();
-        masterGain.gain.value = 0.35;
-        masterGain.connect(ctx.destination);
+        masterGain.gain.value = MASTER * vol;
+        // 리미터: 단일 SFX 피크(≤ -13dBFS)는 안 건드리고, 블록+카운터+히트 겹칠 때만 눌러줌
+        const comp = ctx.createDynamicsCompressor();
+        comp.threshold.value = -12; comp.knee.value = 6; comp.ratio.value = 8;
+        comp.attack.value = 0.002; comp.release.value = 0.12;
+        masterGain.connect(comp);
+        comp.connect(ctx.destination);
       } catch(e) {
         console.warn('Web Audio 미지원');
         return null;
       }
     }
-    if (ctx.state === 'suspended') ctx.resume();
+    if (ctx.state !== 'running') ctx.resume(); // iOS: 통화/백그라운드 후 'interrupted' 상태도 복구
     return ctx;
   }
 
+  // ADSR 지점을 시간순으로 고정: attack+decay 가 dur-release 를 넘으면 decay 를 잘라냄.
+  // 안 그러면 fade-out 뒤에 게인이 다시 튀어올라 osc.stop 에서 딱 소리(클릭) 남.
+  function envelope(g, now, dur, vol, attack, decay, sustain, release) {
+    const end = now + dur;
+    const peakAt = now + attack;
+    const relAt = Math.max(peakAt, end - release);
+    const decAt = Math.min(peakAt + decay, relAt);
+    const sus = decAt > peakAt ? vol * sustain : vol;
+    g.setValueAtTime(0, now);
+    g.linearRampToValueAtTime(vol, peakAt);
+    g.linearRampToValueAtTime(sus, decAt);
+    g.setValueAtTime(sus, relAt);
+    g.linearRampToValueAtTime(0, end);
+  }
+
   function tone(opts) {
-    if (muted) return;
+    if (!vol) return;
     const c = getCtx();
     if (!c) return;
     const {
-      freq = 440, type = 'sine', dur = 0.2, vol = 0.3,
+      freq = 440, type = 'sine', dur = 0.2, vol: v = 0.3,
       attack = 0.005, decay = 0.05, sustain = 0.7, release = 0.1,
       freqEnd = null, detune = 0, filter = null, delay = 0
     } = opts;
@@ -39,12 +65,7 @@ const SFX = (() => {
       osc.frequency.exponentialRampToValueAtTime(Math.max(1, freqEnd), now + dur);
     }
     osc.detune.value = detune;
-
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(vol, now + attack);
-    gain.gain.linearRampToValueAtTime(vol * sustain, now + attack + decay);
-    gain.gain.setValueAtTime(vol * sustain, now + dur - release);
-    gain.gain.linearRampToValueAtTime(0, now + dur);
+    envelope(gain.gain, now, dur, v, attack, decay, sustain, release);
 
     let dest = gain;
     if (filter) {
@@ -63,23 +84,25 @@ const SFX = (() => {
   }
 
   function noise(opts) {
-    if (muted) return;
+    if (!vol) return;
     const c = getCtx();
     if (!c) return;
     const {
-      dur = 0.2, vol = 0.2,
+      dur = 0.2, vol: v = 0.2,
       filterFreq = 800, filterFreqEnd = null, filterType = 'bandpass', filterQ = 1,
       attack = 0.005, release = 0.1, delay = 0
     } = opts;
 
     const now = c.currentTime + delay;
-    const bufferSize = Math.floor(c.sampleRate * dur);
-    const buffer = c.createBuffer(1, bufferSize, c.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+    if (!noiseBuf) {
+      noiseBuf = c.createBuffer(1, c.sampleRate, c.sampleRate);
+      const data = noiseBuf.getChannelData(0);
+      for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    }
 
     const src = c.createBufferSource();
-    src.buffer = buffer;
+    src.buffer = noiseBuf;
+    src.loop = true; // dur 은 항상 1s 미만이지만 안전망
 
     const filt = c.createBiquadFilter();
     filt.type = filterType;
@@ -90,10 +113,7 @@ const SFX = (() => {
     filt.Q.value = filterQ;
 
     const gain = c.createGain();
-    gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(vol, now + attack);
-    gain.gain.setValueAtTime(vol, now + dur - release);
-    gain.gain.linearRampToValueAtTime(0, now + dur);
+    envelope(gain.gain, now, dur, v, attack, 0, 1, release);
 
     src.connect(filt);
     filt.connect(gain);
@@ -102,106 +122,129 @@ const SFX = (() => {
     src.stop(now + dur + 0.05);
   }
 
+  // 톱니파는 고역이 거칠어서 lowpass 로 다듬음
+  const SAW_LP = { type: 'lowpass', freq: 1800, q: 0.7 };
+
   return {
-    setMuted(m) { muted = m; },
-    isMuted() { return muted; },
+    setVolume(v) { vol = v; if (masterGain) masterGain.gain.value = MASTER * v; },
     init() { getCtx(); },
 
-    uiClick() { tone({ freq: 880, type: 'triangle', dur: 0.05, vol: 0.15, attack: 0.001, release: 0.03 }); },
+    // ── UI ──
+    uiClick() { tone({ freq: N(11), type: 'triangle', dur: 0.05, vol: 0.15, attack: 0.001, release: 0.03 }); },            // A5
     uiSlot() {
-      tone({ freq: 660, type: 'sine', dur: 0.08, vol: 0.2, attack: 0.002, release: 0.05 });
-      tone({ freq: 990, type: 'sine', dur: 0.1, vol: 0.1, attack: 0.002, release: 0.06, delay: 0.02 });
+      tone({ freq: N(8), type: 'sine', dur: 0.08, vol: 0.2, attack: 0.002, release: 0.05 });                               // E5
+      tone({ freq: N(12), type: 'sine', dur: 0.1, vol: 0.1, attack: 0.002, release: 0.06, delay: 0.02 });                  // B5
     },
-    uiUndo() { tone({ freq: 440, freqEnd: 280, type: 'triangle', dur: 0.12, vol: 0.15, release: 0.08 }); },
+    uiUndo() { tone({ freq: N(4), freqEnd: N(0), type: 'triangle', dur: 0.12, vol: 0.15, release: 0.08 }); },             // A4 → D4
     uiConfirm() {
-      tone({ freq: 523.25, type: 'sine', dur: 0.1, vol: 0.18 });
-      tone({ freq: 659.25, type: 'sine', dur: 0.14, vol: 0.18, delay: 0.06 });
+      tone({ freq: N(11), type: 'sine', dur: 0.1, vol: 0.18 });                                                            // A5
+      tone({ freq: N(14), type: 'sine', dur: 0.14, vol: 0.18, delay: 0.06 });                                              // D6
     },
-    sfxMove() { noise({ dur: 0.2, vol: 0.08, filterType: 'bandpass', filterFreq: 400, filterFreqEnd: 1200, filterQ: 3, release: 0.1 }); },
+    // ── 전투 ──
+    sfxMove() { noise({ dur: 0.2, vol: 0.22, filterType: 'bandpass', filterFreq: 400, filterFreqEnd: 1200, filterQ: 2, release: 0.1 }); },
     sfxAttack() {
       noise({ dur: 0.18, vol: 0.22, filterType: 'bandpass', filterFreq: 2000, filterFreqEnd: 4000, filterQ: 2, release: 0.08 });
-      tone({ freq: 1200, freqEnd: 400, type: 'sawtooth', dur: 0.12, vol: 0.08, release: 0.08, delay: 0.02 });
+      tone({ freq: N(14), freqEnd: N(3), type: 'sawtooth', dur: 0.12, vol: 0.08, release: 0.08, delay: 0.02, filter: SAW_LP }); // D6 → G4
     },
     sfxBlock() {
-      tone({ freq: 1320, type: 'sine', dur: 0.3, vol: 0.22, attack: 0.001, release: 0.2 });
-      tone({ freq: 1760, type: 'sine', dur: 0.25, vol: 0.14, attack: 0.001, release: 0.2, delay: 0.01 });
+      tone({ freq: N(15), type: 'sine', dur: 0.3, vol: 0.16, attack: 0.001, release: 0.2 });                               // E6
+      tone({ freq: N(18), type: 'sine', dur: 0.25, vol: 0.1, attack: 0.001, release: 0.2, delay: 0.01 });                  // A6
       noise({ dur: 0.05, vol: 0.15, filterType: 'highpass', filterFreq: 3000, filterQ: 1, release: 0.03 });
     },
     sfxCounter() {
-      tone({ freq: 200, freqEnd: 80, type: 'sawtooth', dur: 0.2, vol: 0.25, release: 0.12 });
-      tone({ freq: 1500, freqEnd: 600, type: 'triangle', dur: 0.18, vol: 0.18, release: 0.1, delay: 0.02 });
+      tone({ freq: N(-4), freqEnd: N(-14), type: 'sawtooth', dur: 0.2, vol: 0.25, release: 0.12, filter: SAW_LP });       // G3 → D2
+      tone({ freq: N(17), freqEnd: N(7), type: 'triangle', dur: 0.18, vol: 0.18, release: 0.1, delay: 0.02 });             // G6 → D5
       noise({ dur: 0.1, vol: 0.2, filterType: 'bandpass', filterFreq: 1500, filterQ: 2, delay: 0.02 });
     },
     sfxHit() {
-      tone({ freq: 140, freqEnd: 60, type: 'sawtooth', dur: 0.18, vol: 0.28, attack: 0.001, release: 0.12 });
+      tone({ freq: N(-7), freqEnd: N(-14), type: 'sawtooth', dur: 0.18, vol: 0.28, attack: 0.001, release: 0.12, filter: SAW_LP }); // D3 → D2
       noise({ dur: 0.12, vol: 0.2, filterType: 'lowpass', filterFreq: 600, filterQ: 1, release: 0.08 });
     },
     sfxMiss() { noise({ dur: 0.22, vol: 0.1, filterType: 'highpass', filterFreq: 1500, filterQ: 1, release: 0.12 }); },
     sfxCornerDmg() {
-      tone({ freq: 80, type: 'sine', dur: 0.4, vol: 0.2, attack: 0.05, release: 0.25 });
-      tone({ freq: 1800, type: 'sine', dur: 0.35, vol: 0.1, release: 0.25, delay: 0.05 });
-      tone({ freq: 2400, type: 'sine', dur: 0.3, vol: 0.08, release: 0.22, delay: 0.1 });
+      // 저음은 triangle: 80Hz sine 은 폰 스피커에서 안 들림, 배음 있어야 존재감 생김
+      tone({ freq: N(-7), freqEnd: N(-14), type: 'triangle', dur: 0.4, vol: 0.22, attack: 0.05, release: 0.25 });         // D3 → D2
+      tone({ freq: N(18), type: 'sine', dur: 0.35, vol: 0.1, release: 0.25, delay: 0.05 });                                // A6
+      tone({ freq: N(21), type: 'sine', dur: 0.3, vol: 0.07, release: 0.22, delay: 0.1 });                                 // D7
     },
+    // ── 흐름 ──
     sfxTurnStart() {
-      tone({ freq: 587.33, type: 'sine', dur: 0.12, vol: 0.18 });
-      tone({ freq: 880, type: 'sine', dur: 0.18, vol: 0.14, delay: 0.05 });
+      tone({ freq: N(7), type: 'sine', dur: 0.12, vol: 0.18 });                                                            // D5
+      tone({ freq: N(11), type: 'sine', dur: 0.18, vol: 0.14, delay: 0.05 });                                              // A5
     },
-    sfxDrawTick() { tone({ freq: 1200, type: 'square', dur: 0.04, vol: 0.12, attack: 0.001, release: 0.02 }); },
+    sfxDrawTick(isP1) { tone({ freq: isP1 ? N(15) : N(13), type: 'triangle', dur: 0.04, vol: 0.12, attack: 0.001, release: 0.02 }); }, // E6 / C6 — 깜빡이는 쪽 음
     sfxDrawComplete(isP1) {
-      const baseFreq = isP1 ? 659.25 : 523.25;
-      tone({ freq: baseFreq, type: 'sine', dur: 0.8, vol: 0.3, attack: 0.005, release: 0.5 });
-      tone({ freq: baseFreq * 1.5, type: 'sine', dur: 0.8, vol: 0.2, release: 0.5, delay: 0.05 });
-      tone({ freq: baseFreq * 2, type: 'sine', dur: 0.7, vol: 0.12, release: 0.5, delay: 0.1 });
+      const d = isP1 ? 8 : 6;                                                                                              // E5 / C5 + 5도 + 옥타브
+      tone({ freq: N(d), type: 'sine', dur: 0.8, vol: 0.3, attack: 0.005, release: 0.5 });
+      tone({ freq: N(d + 4), type: 'sine', dur: 0.8, vol: 0.2, release: 0.5, delay: 0.05 });
+      tone({ freq: N(d + 7), type: 'sine', dur: 0.7, vol: 0.12, release: 0.5, delay: 0.1 });
     },
-    sfxRoundWin(pid) {
-      const base = 440;
-      tone({ freq: base, type: 'sine', dur: 0.5, vol: 0.22, release: 0.3 });
-      tone({ freq: base * 1.25, type: 'sine', dur: 0.5, vol: 0.2, release: 0.3, delay: 0.08 });
-      tone({ freq: base * 1.5, type: 'sine', dur: 0.55, vol: 0.2, release: 0.35, delay: 0.16 });
+    sfxRoundWin() {
+      [7, 9, 11].forEach((deg, i) => {                                                                                     // D5 F5 A5 (i 화음)
+        tone({ freq: N(deg), type: 'sine', dur: 0.5 + i * 0.03, vol: 0.2, release: 0.3, delay: i * 0.08 });
+      });
     },
     sfxRoundDraw() {
-      tone({ freq: 330, type: 'sine', dur: 0.8, vol: 0.2, release: 0.5 });
-      tone({ freq: 247, type: 'sine', dur: 0.8, vol: 0.15, release: 0.5, delay: 0.05 });
+      tone({ freq: N(1), type: 'sine', dur: 0.8, vol: 0.2, release: 0.5 });                                                // E4
+      tone({ freq: N(-2), type: 'sine', dur: 0.8, vol: 0.15, release: 0.5, delay: 0.05 });                                 // B3 — 미해결 4도
     },
     sfxPipWin() {
-      tone({ freq: 1760, type: 'sine', dur: 0.2, vol: 0.2, attack: 0.001, release: 0.15 });
-      tone({ freq: 2637, type: 'sine', dur: 0.15, vol: 0.1, release: 0.1, delay: 0.04 });
+      tone({ freq: N(18), type: 'sine', dur: 0.2, vol: 0.14, attack: 0.001, release: 0.15 });                              // A6
+      tone({ freq: N(22), type: 'sine', dur: 0.15, vol: 0.07, release: 0.1, delay: 0.04 });                                // E7
     },
     sfxMatchWin() {
-      const base = 523.25;
-      const notes = [base, base * 1.25, base * 1.5, base * 2];
-      notes.forEach((f, i) => {
-        tone({ freq: f, type: 'sine', dur: 1.6, vol: 0.2, attack: 0.01, release: 1.2, delay: i * 0.08 });
+      [7, 9, 11, 12, 14].forEach((deg, i) => {                                                                             // D5 F5 A5 B5 D6 — 도리안 6도 포함
+        tone({ freq: N(deg), type: 'sine', dur: 1.6, vol: 0.16, attack: 0.01, release: 1.2, delay: i * 0.08 });
       });
-      tone({ freq: base / 2, type: 'triangle', dur: 1.8, vol: 0.14, release: 1.4, delay: 0.02 });
+      tone({ freq: N(0), type: 'triangle', dur: 1.8, vol: 0.14, release: 1.4, delay: 0.02 });                              // D4 베이스
     }
   };
 })();
 
-// 음소거 토글
+// 볼륨: 슬라이더(레벨) + 버튼(음소거). 둘 다 localStorage 에 기억
 const soundToggle = document.getElementById('soundToggle');
-const soundIcon = document.getElementById('soundIcon');
-let savedMuted = false;
+const volSlider = document.getElementById('volSlider');
+let volLevel = 1, volMuted = false;
+try {
+  const v = parseFloat(localStorage.getItem('sd_vol'));
+  if (v >= 0 && v <= 1) volLevel = v;
+  volMuted = localStorage.getItem('sd_mute') === '1';
+} catch (e) {}
+function applyVolume() {
+  const eff = volMuted ? 0 : volLevel;
+  SFX.setVolume(eff);
+  volSlider.value = Math.round(volLevel * 100);
+  soundToggle.classList.toggle('half', eff > 0 && eff < 0.5);
+  soundToggle.classList.toggle('muted', eff === 0);
+  try {
+    localStorage.setItem('sd_vol', String(volLevel));
+    localStorage.setItem('sd_mute', volMuted ? '1' : '0');
+  } catch (e) {}
+}
+applyVolume();
 soundToggle.addEventListener('click', () => {
-  savedMuted = !savedMuted;
-  SFX.setMuted(savedMuted);
-  soundToggle.classList.toggle('muted', savedMuted);
-  soundIcon.textContent = savedMuted ? '♪̸' : '♪';
-  if (!savedMuted) {
+  const silent = volMuted || volLevel === 0;
+  volMuted = !silent;
+  if (silent && volLevel === 0) volLevel = 1; // 슬라이더 0 상태에서 켜면 최대로
+  applyVolume();
+  if (!volMuted) {
     SFX.init();
     SFX.uiClick();
   }
 });
+volSlider.addEventListener('input', () => {
+  volLevel = volSlider.value / 100;
+  volMuted = false;
+  applyVolume();
+});
+volSlider.addEventListener('change', () => { SFX.init(); SFX.uiClick(); }); // 놓을 때 레벨 미리듣기
 
+const UNLOCK_EVENTS = ['click', 'keydown', 'touchstart'];
 const unlockAudio = () => {
   SFX.init();
-  document.removeEventListener('click', unlockAudio);
-  document.removeEventListener('keydown', unlockAudio);
-  document.removeEventListener('touchstart', unlockAudio);
+  UNLOCK_EVENTS.forEach(ev => document.removeEventListener(ev, unlockAudio));
 };
-document.addEventListener('click', unlockAudio);
-document.addEventListener('keydown', unlockAudio);
-document.addEventListener('touchstart', unlockAudio);
+UNLOCK_EVENTS.forEach(ev => document.addEventListener(ev, unlockAudio));
 
 // ==================== 규칙 모달 ====================
 const helpToggle = document.getElementById('helpToggle');
@@ -227,8 +270,10 @@ helpModal.addEventListener('click', (e) => {
 const langToggle = document.getElementById('langToggle');
 langToggle.addEventListener('click', () => {
   SFX.uiClick();
-  const next = getLocale() === 'en' ? 'ko' : 'en';
+  const locales = Object.keys(I18N);
+  const next = locales[(locales.indexOf(getLocale()) + 1) % locales.length];
   setLocale(next);
+  try { localStorage.setItem('sd_locale', next); } catch (e) {}
 });
 
 // 로케일이 바뀔 때 동적 뷰 재렌더 (i18n.js가 호출)
@@ -246,6 +291,7 @@ const DECISIVE_ROUND = 3;
 const START_POS_P1 = 2; // 셀 3 (0-indexed)
 const START_POS_P2 = 6; // 셀 7 (0-indexed)
 
+const SAFE_CELLS = [3, 4, 5]; // 셀 4·5·6 — 영구 안전
 const STARDUST_EXPANSION = [
   { turn: 4, cells: [1, 7] },
   { turn: 7, cells: [2, 6] }
@@ -255,7 +301,6 @@ const state = {
   round: 1,
   matchScore: { 1: 0, 2: 0 },
   firstPlayer: 1,
-  matchOver: false,
   turn: 1,
   phase: 'first_input',
   players: {
@@ -263,7 +308,6 @@ const state = {
     2: { hp: MAX_HP, pos: START_POS_P2, actions: [], penalty: 0, cornerTurns: 0, stars: 0 }
   },
   currentPlayer: 1,
-  winner: null,
   inputLocked: false,
   vsAI: false,
   humanPid: 1,
@@ -300,7 +344,7 @@ const roundWinnerTitle = document.getElementById('roundWinnerTitle');
 const roundScoreP1 = document.getElementById('roundScoreP1');
 const roundScoreP2 = document.getElementById('roundScoreP2');
 const roundNextInfo = document.getElementById('roundNextInfo');
-const logEl = null; // 로그 패널 제거됨
+const fxLayer = document.getElementById('fxLayer');
 const endmodal = document.getElementById('endmodal');
 const winnerText = document.getElementById('winnerText');
 const winnerName = document.getElementById('winnerName');
@@ -316,6 +360,7 @@ const p2Pips = document.getElementById('p2Pips');
 const p1StarsEl = document.getElementById('p1Stars');
 const p2StarsEl = document.getElementById('p2Stars');
 const roundLabelEl = document.getElementById('roundLabel');
+const actionBtns = Array.from(document.querySelectorAll('.action-btn'));
 
 // 보드 셀 생성
 for (let i = 0; i < BOARD_SIZE; i++) {
@@ -328,6 +373,7 @@ for (let i = 0; i < BOARD_SIZE; i++) {
   cell.appendChild(num);
   board.appendChild(cell);
 }
+const cells = Array.from(board.children).filter(el => el.classList.contains('cell'));
 
 // 정령 토큰 (룬 심볼)
 const RUNE_P1 = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -395,7 +441,6 @@ function getMaxActions(round) { return round === DECISIVE_ROUND ? 3 : 2; }
 
 // ==================== 렌더링 ====================
 function renderBoard() {
-  const cells = board.querySelectorAll('.cell');
   cells[state.players[1].pos].appendChild(spirit1);
   cells[state.players[2].pos].appendChild(spirit2);
 }
@@ -441,11 +486,8 @@ function renderStars(justGainedPid) {
       if (i < count) {
         s.classList.add('filled');
         if (count >= STAR_CAP) s.classList.add('full');
-        if (justGainedPid === pid && i >= prevCount) {
-          // 최근 획득 별은 팝 애니메이션
-        } else {
-          s.style.animation = 'none';
-        }
+        // 최근 획득 별만 팝 애니메이션
+        if (!(justGainedPid === pid && i >= prevCount)) s.style.animation = 'none';
       }
       container.appendChild(s);
     }
@@ -498,19 +540,19 @@ function renderTurnInfo() {
   };
 
   if (state.phase === 'first_input') {
-    inputPanel.style.display = 'block';
+    inputPanel.style.visibility = '';
     state.currentPlayer = state.firstPlayer;
     const pid = state.currentPlayer;
     inputPanel.className = 'input-panel ' + (pid === 1 ? 'p1-turn' : 'p2-turn');
     setTurnLabel(t('ui.turnLabel.first', { name: t(`player.${pid}`) }));
   } else if (state.phase === 'second_input') {
-    inputPanel.style.display = 'block';
+    inputPanel.style.visibility = '';
     state.currentPlayer = state.firstPlayer === 1 ? 2 : 1;
     const pid = state.currentPlayer;
     inputPanel.className = 'input-panel ' + (pid === 1 ? 'p1-turn' : 'p2-turn');
     setTurnLabel(t('ui.turnLabel.second', { name: t(`player.${pid}`) }));
   } else {
-    inputPanel.style.display = 'none';
+    inputPanel.style.visibility = 'hidden'; // 레이아웃 유지 — display:none 이면 보드가 점프
   }
 
   // 화살표 방향 - 상대 위치 기준 동적 결정
@@ -554,6 +596,9 @@ function renderSlots() {
   slots.forEach((el, idx) => {
     if (!el) return;
     if (idx >= baseMax) return;
+    // data-action → CSS 가 액션 컬러(--ac) 적용
+    const a = p.actions[idx] === 'leap_hold' ? 'leap' : p.actions[idx];
+    if (a) el.dataset.action = a; else delete el.dataset.action;
     if (idx >= maxActions) {
       el.textContent = '✕';
       el.className = 'slot';
@@ -578,7 +623,7 @@ function renderSlots() {
   const starsAvailable = p.stars - (pierceAlreadyPicked ? PIERCE_COST : 0);
   const canUsePierce = starsAvailable >= PIERCE_COST;
 
-  document.querySelectorAll('.action-btn').forEach(btn => {
+  actionBtns.forEach(btn => {
     const action = btn.dataset.action;
     const slotFull = p.actions.length >= maxActions;
     if (action === 'pierce') {
@@ -593,23 +638,15 @@ function renderSlots() {
   });
 }
 
-function logMsg(_html) {
-  // 로그 패널 제거 — no-op. 호출부 다 보존하여 동작 깨지지 않도록 유지.
-}
-
 function pname(pid) {
   const name = t(`player.${pid}`);
   const cls = pid === 1 ? 'p1c' : 'p2c';
   return `<span class="${cls}">${name}</span>`;
 }
 
-function showFx(pid, _text) {
-  // 인라인 텍스트 fx 더는 사용 안 함 — showActionChip 으로 대체
-}
-
 // 보드 위 정령 머리 위에 짧은 효과 문구 (피해 / 막기 / 카운터 / 빗나감 등)
 function floatText(pid, text, type = 'info') {
-  const cell = board.querySelectorAll('.cell')[state.players[pid].pos];
+  const cell = cells[state.players[pid].pos];
   if (!cell) return;
   const el = document.createElement('div');
   el.className = `float-text float-${type}`;
@@ -625,7 +662,7 @@ function clearActionChips() {
 
 function showActionChip(pid, action) {
   if (!action) return;
-  const cell = board.querySelectorAll('.cell')[state.players[pid].pos];
+  const cell = cells[state.players[pid].pos];
   if (!cell) return;
   const cp = state.players[pid];
   const op = state.players[pid === 1 ? 2 : 1];
@@ -658,13 +695,13 @@ function flashSpirit(pid) {
 
 // ==================== 전투 시각 효과 ====================
 function getCellRect(idx) {
-  const cells = board.querySelectorAll('.cell');
   const cell = cells[idx];
   const boardRect = board.getBoundingClientRect();
   const cellRect = cell.getBoundingClientRect();
   // .wrap 에 transform: scale 적용된 상태 — getBoundingClientRect 는 시각 좌표 반환.
   // 보드 내부의 absolute 자식은 layout(언스케일) 좌표 기준이므로 1/scale 로 환산.
-  const scale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--app-scale')) || 1;
+  // fit() 이 inline style 로 세팅하므로 getComputedStyle(→ 강제 style recalc) 대신 inline 값을 읽음
+  const scale = parseFloat(document.documentElement.style.getPropertyValue('--app-scale')) || 1;
   const inv = scale ? 1 / scale : 1;
   const left = (cellRect.left - boardRect.left) * inv;
   const top = (cellRect.top - boardRect.top) * inv;
@@ -685,7 +722,6 @@ function showSlashEffect(attackerPid, isPierce = false) {
 
   const aRect = getCellRect(attackerPos);
   const tRect = getCellRect(targetPos);
-  const fxLayer = document.getElementById('fxLayer');
 
   const baseColor = isPierce ? '#e8c87a' : (attackerPid === 1 ? '#b5d4ee' : '#f0bb95');
   const baseRgba  = isPierce ? 'rgba(232,200,122,0.9)' : (attackerPid === 1 ? 'rgba(141,183,217,0.95)' : 'rgba(217,152,118,0.95)');
@@ -708,7 +744,8 @@ function showSlashEffect(attackerPid, isPierce = false) {
     const sw = isPierce ? 6 : 5 - i;
     const innerSw = Math.max(1, sw / 2.5);
     slash.innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none">
-      <path d="${arcPath}" stroke="${baseColor}" stroke-width="${sw + 3}" fill="none" stroke-linecap="round" opacity="0.35" style="filter: blur(2.5px);"/>
+      <path d="${arcPath}" stroke="${baseColor}" stroke-width="${sw + 9}" fill="none" stroke-linecap="round" opacity="0.12"/>
+      <path d="${arcPath}" stroke="${baseColor}" stroke-width="${sw + 4}" fill="none" stroke-linecap="round" opacity="0.25"/>
       <path class="slash-line" d="${arcPath}" stroke="${baseColor}" stroke-width="${sw}" fill="none" stroke-linecap="round" opacity="0.95"/>
       <path class="slash-line" d="${arcPath}" stroke="#ffffff" stroke-width="${innerSw}" fill="none" stroke-linecap="round" opacity="0.95"/>
     </svg>`;
@@ -741,7 +778,6 @@ function showSlashEffect(attackerPid, isPierce = false) {
 
 // 방사형 스파크 파편
 function spawnSparks(cx, cy, color, count = 8, dist = 28) {
-  const fxLayer = document.getElementById('fxLayer');
   for (let i = 0; i < count; i++) {
     const s = document.createElement('div');
     s.className = 'fx-spark';
@@ -768,7 +804,6 @@ function showLightningArc(attackerPid) {
   const targetCellIdx = attackerPos + direction * 2;
 
   const srcRect = getCellRect(attackerPos);
-  const fxLayer = document.getElementById('fxLayer');
 
   const x1 = srcRect.centerX;
   const y1 = srcRect.centerY;
@@ -860,7 +895,6 @@ function showLightningArc(attackerPid) {
 function showShieldEffect(pid) {
   const pos = state.players[pid].pos;
   const rect = getCellRect(pos);
-  const fxLayer = document.getElementById('fxLayer');
 
   const size = rect.width * 0.85;
   const shield = document.createElement('div');
@@ -895,7 +929,6 @@ function showShieldEffect(pid) {
 function showCounterEffect(pid) {
   const pos = state.players[pid].pos;
   const rect = getCellRect(pos);
-  const fxLayer = document.getElementById('fxLayer');
 
   const baseColor = pid === 1 ? '#b5d4ee' : '#f0bb95';
   const goldColor = '#e8c87a';
@@ -941,7 +974,8 @@ function showCounterEffect(pid) {
   // 반사 호 방향: counter 사용자→상대 방향으로 호가 휘어짐
   const arcPath = direction > 0 ? `M 14 16 Q 92 50 14 84` : `M 86 16 Q 8 50 86 84`;
   reflectArc.innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none">
-    <path d="${arcPath}" stroke="${goldColor}" stroke-width="8" fill="none" stroke-linecap="round" opacity="0.4" style="filter: blur(3px);"/>
+    <path d="${arcPath}" stroke="${goldColor}" stroke-width="14" fill="none" stroke-linecap="round" opacity="0.14"/>
+    <path d="${arcPath}" stroke="${goldColor}" stroke-width="9" fill="none" stroke-linecap="round" opacity="0.3"/>
     <path class="slash-line" d="${arcPath}" stroke="${goldColor}" stroke-width="5" fill="none" stroke-linecap="round" opacity="1"/>
     <path class="slash-line" d="${arcPath}" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.95"/>
   </svg>`;
@@ -955,7 +989,6 @@ function showCounterEffect(pid) {
 function showImpactEffect(pid) {
   const pos = state.players[pid].pos;
   const rect = getCellRect(pos);
-  const fxLayer = document.getElementById('fxLayer');
 
   for (let i = 0; i < 2; i++) {
     const size = rect.width * 0.9;
@@ -973,7 +1006,6 @@ function showImpactEffect(pid) {
 function showStardustEffect(pid) {
   const pos = state.players[pid].pos;
   const rect = getCellRect(pos);
-  const fxLayer = document.getElementById('fxLayer');
 
   const container = document.createElement('div');
   container.className = 'fx-stardust';
@@ -998,7 +1030,6 @@ function showStardustEffect(pid) {
 
 function showExpansionEffect(cellIdx) {
   const rect = getCellRect(cellIdx);
-  const fxLayer = document.getElementById('fxLayer');
 
   const ring = document.createElement('div');
   ring.className = 'fx-expansion-ring';
@@ -1037,7 +1068,6 @@ function showCollisionEffect(pos1, pos2) {
   const r2 = getCellRect(pos2);
   const centerX = (r1.centerX + r2.centerX) / 2;
   const centerY = (r1.centerY + r2.centerY) / 2;
-  const fxLayer = document.getElementById('fxLayer');
 
   const fx = document.createElement('div');
   fx.className = 'fx-collision';
@@ -1048,9 +1078,80 @@ function showCollisionEffect(pos1, pos2) {
   setTimeout(() => fx.remove(), 800);
 }
 
+// ==================== 액션 미리보기 (hover / long-press) ====================
+// 빈 슬롯에 액션 이름 고스트 + 보드에 대상 칸 하이라이트. 이미 예약된 내 이동은 반영, 상대 이동은 무시.
+const LONG_PRESS_MS = 350;
+let previewTimer = null;
+let previewActive = false;
+let previewConsumedClick = false;
+
+function previewTargets(pid, action) {
+  const p = state.players[pid];
+  let pos = p.pos;
+  for (const a of p.actions) pos = computeMove(pid, pos, a);
+  const dir = state.players[pid === 1 ? 2 : 1].pos > pos ? 1 : -1;
+  const target = action === 'attack' || action === 'pierce' ? pos + dir
+               : action === 'ranged' ? pos + dir * 2
+               : action === 'block' || action === 'counter' ? pos
+               : computeMove(pid, pos, action);
+  return target >= 0 && target < BOARD_SIZE ? [target] : [];
+}
+
+function clearPreview() {
+  clearTimeout(previewTimer);
+  previewTimer = null;
+  if (!previewActive) return;
+  previewActive = false;
+  document.querySelectorAll('.cell.preview').forEach(el => {
+    el.classList.remove('preview');
+    delete el.dataset.action;
+  });
+  renderSlots(); // 슬롯 고스트 원복
+}
+
+function showPreview(action) {
+  clearPreview();
+  previewActive = true;
+  const pid = state.currentPlayer;
+  const p = state.players[pid];
+  const slots = [slot1El, slot2El, slot3El];
+  const n = action === 'leap' ? 2 : 1;
+  for (let i = 0; i < n; i++) {
+    const el = slots[p.actions.length + i];
+    if (!el) break;
+    el.textContent = actionName(action);
+    el.dataset.action = action;
+    el.className = 'slot preview';
+  }
+  previewTargets(pid, action).forEach(idx => {
+    cells[idx].dataset.action = action;
+    cells[idx].classList.add('preview');
+  });
+}
+
+actionBtns.forEach(btn => {
+  const canPreview = () => !btn.disabled && !state.inputLocked;
+  // 마우스: hover 즉시
+  btn.addEventListener('pointerenter', e => {
+    if (e.pointerType === 'mouse' && canPreview()) showPreview(btn.dataset.action);
+  });
+  // 터치/펜: long-press 후 미리보기, 손 떼면 클릭 무시
+  btn.addEventListener('pointerdown', e => {
+    previewConsumedClick = false;
+    if (e.pointerType === 'mouse' || !canPreview()) return;
+    previewTimer = setTimeout(() => {
+      previewTimer = null;
+      previewConsumedClick = true;
+      showPreview(btn.dataset.action);
+    }, LONG_PRESS_MS);
+  });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => btn.addEventListener(ev, clearPreview));
+});
+
 // ==================== 입력 처리 ====================
-document.querySelectorAll('.action-btn').forEach(btn => {
+actionBtns.forEach(btn => {
   btn.addEventListener('click', () => {
+    if (previewConsumedClick) { previewConsumedClick = false; return; }
     if (state.inputLocked) return;
     const action = btn.dataset.action;
     const p = state.players[state.currentPlayer];
@@ -1065,6 +1166,9 @@ document.querySelectorAll('.action-btn').forEach(btn => {
     }
     SFX.uiSlot();
     renderSlots();
+    // 마우스가 아직 올라가 있으면 다음 슬롯 미리보기 갱신
+    if (matchMedia('(hover: hover)').matches && btn.matches(':hover') && !btn.disabled) showPreview(action);
+    else clearPreview();
   });
 });
 
@@ -1103,6 +1207,12 @@ document.addEventListener('keydown', (e) => {
     return;
   }
 
+  if (e.key === 'm' || e.key === 'M') { // 볼륨은 어느 화면에서든
+    e.preventDefault();
+    soundToggle.click();
+    return;
+  }
+
   if (endmodal.classList.contains('show')) {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -1133,14 +1243,12 @@ document.addEventListener('keydown', (e) => {
   } else if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault();
     if (!confirmBtn.disabled) confirmBtn.click();
-  } else if (e.key === 'm' || e.key === 'M') {
-    e.preventDefault();
-    soundToggle.click();
   }
 });
 
 confirmBtn.addEventListener('click', () => {
   if (state.inputLocked) return;
+  clearPreview();
   if (state.phase === 'first_input') {
     SFX.uiConfirm();
     if (state.vsAI && state.firstPlayer === state.humanPid) {
@@ -1167,75 +1275,18 @@ confirmBtn.addEventListener('click', () => {
   }
 });
 
-// 양쪽 입력 완료 후 "결과 공개" 커튼 — 양 쪽 액션을 화려하게 보여주고 클릭 시 resolveActions()
-function showResultCurtain(onContinue) {
-  showCurtain({
-    mode: 'reveal',
-    actions1: state.players[1].actions.slice(),
-    actions2: state.players[2].actions.slice(),
-    btnText: t('btn.viewResult'),
-  }, onContinue);
-}
-
-// reveal 커튼 액션 칩 채우기
-function populateRevealCurtain(actions1, actions2) {
-  const c1 = document.getElementById('revealP1Actions');
-  const c2 = document.getElementById('revealP2Actions');
-  if (!c1 || !c2) return;
-  c1.innerHTML = '';
-  c2.innerHTML = '';
-
-  const buildChip = (act, idx, pid) => {
-    const cp = state.players[pid];
-    const op = state.players[pid === 1 ? 2 : 1];
-    const oppIsRight = op.pos > cp.pos;
-
-    let icon = ACTIONS[act] ? ACTIONS[act].icon : '·';
-    if (act === 'moveL') icon = oppIsRight ? '▶' : '◀';
-    if (act === 'moveR') icon = oppIsRight ? '◀' : '▶';
-
-    const chip = document.createElement('div');
-    chip.className = `reveal-chip reveal-chip-p${pid} reveal-chip-${act}`;
-    // 페이즈 순서대로 약간씩 늦게 등장
-    chip.style.animationDelay = `${0.2 + idx * 0.28}s`;
-
-    chip.innerHTML = `
-      <span class="reveal-chip-phase">${idx + 1}</span>
-      <span class="reveal-chip-icon">${icon}</span>
-      <span class="reveal-chip-name">${actionName(act)}</span>
-    `;
-    return chip;
-  };
-
-  const renderSide = (container, actions, pid) => {
-    let visibleIdx = 0;
-    actions.forEach((act) => {
-      if (act === 'leap_hold') return; // leap 점유 슬롯은 별도 표시 안 함
-      container.appendChild(buildChip(act, visibleIdx, pid));
-      visibleIdx++;
-    });
-  };
-
-  renderSide(c1, actions1, 1);
-  renderSide(c2, actions2, 2);
-}
-
 function showCurtain(opts, onContinue) {
   curtainDefault.style.display = 'block';
   curtainDraw.style.display = 'none';
   curtainRound.style.display = 'none';
   curtainSetup.style.display = 'none';
-  const curtainReveal = document.getElementById('curtainReveal');
-  if (curtainReveal) curtainReveal.style.display = 'none';
   curtainBtn.style.display = 'inline-block';
 
   const mode = opts.mode || 'handoff';
 
   // theme: player-colored handoff overhaul
   curtain.removeAttribute('data-theme');
-  if (mode === 'handoff' && opts.themePid) {
-    curtain.setAttribute('data-theme', `p${opts.themePid}`);
-  }
+  if (opts.themePid) curtain.setAttribute('data-theme', `p${opts.themePid}`);
 
   if (mode === 'handoff') {
     curtainDefault.style.display = 'block';
@@ -1260,11 +1311,6 @@ function showCurtain(opts, onContinue) {
     curtainSetup.style.display = 'block';
     curtainBtn.textContent = t('btn.continue');
     curtainBtn.style.display = 'none'; // 정령 선택 전엔 버튼 숨김
-  } else if (mode === 'reveal') {
-    curtainDefault.style.display = 'none';
-    if (curtainReveal) curtainReveal.style.display = 'block';
-    populateRevealCurtain(opts.actions1 || [], opts.actions2 || []);
-    curtainBtn.textContent = opts.btnText || t('btn.viewResult');
   }
 
   curtain.classList.add('show');
@@ -1282,18 +1328,7 @@ function showCurtain(opts, onContinue) {
 }
 
 function updateInputLock() {
-  const locked = state.inputLocked;
-  document.querySelectorAll('.action-btn').forEach(btn => {
-    if (locked) btn.classList.add('locked');
-    else btn.classList.remove('locked');
-  });
-  if (locked) {
-    confirmBtn.classList.add('locked');
-    undoBtn.classList.add('locked');
-  } else {
-    confirmBtn.classList.remove('locked');
-    undoBtn.classList.remove('locked');
-  }
+  inputPanel.querySelectorAll('button').forEach(btn => btn.classList.toggle('locked', state.inputLocked));
 }
 
 function hideCurtain() {
@@ -1311,7 +1346,7 @@ function triggerAIIfNeeded() {
 }
 
 // ==================== 동시 처리 로직 ====================
-async function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 function gainStar(pid) {
   const p = state.players[pid];
@@ -1367,8 +1402,6 @@ function playBattleFx(a1, a2, result) {
 }
 
 async function resolveActions() {
-  logMsg(`<span class="gold-c">${t('log.turnResolve', { n: state.turn })}</span>`);
-
   const newPenalty = { 1: 0, 2: 0 };
 
   const p1 = state.players[1];
@@ -1382,12 +1415,6 @@ async function resolveActions() {
     const a2 = normalizeAction(p2.actions[phase]) || null;
 
     if (!a1 && !a2) continue;
-
-    logMsg(t('log.phase', {
-      n: phase + 1,
-      a1name: pname(1), a1action: a1 ? actionName(a1) : t('action.wait'),
-      a2name: pname(2), a2action: a2 ? actionName(a2) : t('action.wait')
-    }));
 
     clearActionChips(); // 직전 페이즈 잔존 칩 제거 (결정 라운드 등 빠른 연속 페이즈 보호)
     if (a1) showActionChip(1, a1);
@@ -1404,8 +1431,8 @@ async function resolveActions() {
     const isMoveAction = a => a === 'moveL' || a === 'moveR' || a === 'leap';
     if (isMoveAction(a1) || isMoveAction(a2)) SFX.sfxMove();
     handleMovement(a1, a2);
-    if (a1 === 'leap') { logMsg(t('battle.leaped', { leaper: pname(1), over: pname(2) })); floatText(1, t('float.leap'), 'leap'); }
-    if (a2 === 'leap') { logMsg(t('battle.leaped', { leaper: pname(2), over: pname(1) })); floatText(2, t('float.leap'), 'leap'); }
+    if (a1 === 'leap') floatText(1, t('float.leap'), 'leap');
+    if (a2 === 'leap') floatText(2, t('float.leap'), 'leap');
     renderBoard();
     await sleep(850);   // 이동 후 위치 확인 시간
 
@@ -1424,17 +1451,13 @@ async function resolveActions() {
     if (result.dmg1 > 0) {
       p1.hp -= result.dmg1;
       flashSpirit(1);
-      logMsg(t('log.damage', { name: pname(1), n: result.dmg1 }));
       setTimeout(() => floatText(1, `−${result.dmg1}`, 'damage'), 320);
     }
     if (result.dmg2 > 0) {
       p2.hp -= result.dmg2;
       flashSpirit(2);
-      logMsg(t('log.damage', { name: pname(2), n: result.dmg2 }));
       setTimeout(() => floatText(2, `−${result.dmg2}`, 'damage'), 320);
     }
-    if (result.note) logMsg(`<em>${result.note}</em>`);
-
     renderHP();
 
     let starChanges = [];
@@ -1490,8 +1513,6 @@ async function resolveActions() {
 
   const newExpansion = STARDUST_EXPANSION.find(p => p.turn === state.turn);
   if (newExpansion) {
-    const cellNums = newExpansion.cells.map(c => c + 1).join(' · ');
-    logMsg(`<span class="gold-c">${t('log.expansion', { cells: cellNums })}</span>`);
     SFX.sfxCornerDmg();
     for (const cellIdx of newExpansion.cells) {
       showExpansionEffect(cellIdx);
@@ -1535,47 +1556,43 @@ function getNextExpansionInfo(turn) {
   return null;
 }
 
-function isCorner(pos) {
-  return pos === 0 || pos === BOARD_SIZE - 1;
-}
-
 async function handleCornerPenalty() {
   for (const pid of [1, 2]) {
     const p = state.players[pid];
-    if (isStardust(p.pos, state.turn)) {
-      p.cornerTurns += 1;
-      if (p.cornerTurns >= 3) {
-        SFX.sfxCornerDmg();
-        p.hp -= 1;
-        flashSpirit(pid);
-        floatText(pid, t('float.stardust'), 'stardust');
-        setTimeout(() => floatText(pid, '−1', 'damage'), 240);
-        logMsg(t('log.stardustConsumed', { name: pname(pid) }));
-        showStardustEffect(pid);
-        renderHP();
-        await sleep(700);
-      } else if (p.cornerTurns === 2) {
-        floatText(pid, t('float.stardustWarn'), 'whiff');
-        logMsg(t('log.stardustThickening', { name: pname(pid) }));
-      } else {
-        logMsg(t('log.stardustLingers', { name: pname(pid) }));
-      }
-    } else {
-      if (p.cornerTurns > 0) p.cornerTurns = 0;
+    if (!isStardust(p.pos, state.turn)) { p.cornerTurns = 0; continue; }
+    p.cornerTurns += 1;
+    if (p.cornerTurns >= 3) {
+      SFX.sfxCornerDmg();
+      p.hp -= 1;
+      flashSpirit(pid);
+      floatText(pid, t('float.stardust'), 'stardust');
+      setTimeout(() => floatText(pid, '−1', 'damage'), 240);
+      showStardustEffect(pid);
+      renderHP();
+      await sleep(700);
+    } else if (p.cornerTurns === 2) {
+      floatText(pid, t('float.stardustWarn'), 'whiff');
     }
   }
   renderCornerStates();
 }
 
 function renderCornerStates() {
-  const cells = board.querySelectorAll('.cell');
   cells.forEach(c => {
     c.classList.remove('corner-warning', 'corner-danger', 'corner-base', 'stardust-outer', 'stardust-mid');
     const mark = c.querySelector('.corner-mark');
     if (mark) mark.remove();
-    const baseMark = c.querySelector('.corner-base-mark');
+    const baseMark = c.querySelector('.corner-base-mark, .safe-mark');
     if (baseMark) baseMark.remove();
   });
+
+  // 영구 안전 칸 (4·5·6) — 별빛 확장 대상이 아님
+  for (const pos of SAFE_CELLS) {
+    const m = document.createElement('span');
+    m.className = 'corner-base-mark safe-mark';
+    m.textContent = t('cell.safe');
+    cells[pos].appendChild(m);
+  }
 
   const stardustCells = getStardustCells(state.turn);
   for (const pos of stardustCells) {
@@ -1621,207 +1638,51 @@ function addCornerMark(cell, text) {
 
 function resolvePhase(a1, a2, newPenalty, prevPos1, prevPos2) {
   const result = {
-    dmg1: 0, dmg2: 0, note: null,
+    dmg1: 0, dmg2: 0,
     blockSuccess1: false, blockSuccess2: false,
     piercedBlock1: false, piercedBlock2: false,
     floats: []
   };
   const flt = (pid, key) => result.floats.push({ pid, key });
-  const p1 = state.players[1];
-  const p2 = state.players[2];
-  const dist = Math.abs(p1.pos - p2.pos);
-
-  const isPierce = a => a === 'pierce';
-  const isRanged = a => a === 'ranged';
-  const isAggressive = a => a === 'attack' || a === 'pierce' || a === 'ranged';
-  const isBlk = a => a === 'block';
-  const isCtr = a => a === 'counter';
-  const isMove = a => a === 'moveL' || a === 'moveR' || a === 'leap';
-
-  const inRange = (a, d) => {
-    if (a === 'attack' || a === 'pierce') return d === 1;
-    if (a === 'ranged') return d === 2;
-    return false;
-  };
-
-  const p1Moved = isMove(a1);
-  const p2Moved = isMove(a2);
+  const dist = Math.abs(state.players[1].pos - state.players[2].pos);
   const prevDist = Math.abs(prevPos1 - prevPos2);
 
-  const atkName = (a, pid) => {
-    const name = pname(pid);
-    if (a === 'pierce') return t('atk.name.pierce', { name });
-    if (a === 'ranged') return t('atk.name.ranged', { name });
-    return t('atk.name.attack', { name });
-  };
-  const hitVerb = (a) => {
-    if (a === 'pierce') return t('atk.verb.pierce');
-    if (a === 'ranged') return t('atk.verb.ranged');
-    return t('atk.verb.attack');
-  };
+  const isAggressive = a => a === 'attack' || a === 'pierce' || a === 'ranged';
+  const isMove = a => a === 'moveL' || a === 'moveR' || a === 'leap';
+  const inRange = (a, d) => (a === 'ranged' ? d === 2 : d === 1);
 
-  const a1Hits = isAggressive(a1) && inRange(a1, dist);
-  const a2Hits = isAggressive(a2) && inRange(a2, dist);
-
-  // 양쪽 다 공격성
-  if (isAggressive(a1) && isAggressive(a2)) {
-    if (a1Hits && a2Hits) {
-      result.dmg1 = 1; result.dmg2 = 1;
-      if (isPierce(a1) && isPierce(a2)) result.note = t('battle.bothPierceHit');
-      else if (isRanged(a1) && isRanged(a2)) result.note = t('battle.bothRangedHit');
-      else result.note = t('battle.bothHit');
-    } else if (a1Hits && !a2Hits) {
-      result.dmg2 = 1;
-      result.note = t('battle.onlyOneHit', { atk1: atkName(a1, 1), verb1: hitVerb(a1), atk2: atkName(a2, 2) });
-      flt(2, 'miss');
-    } else if (!a1Hits && a2Hits) {
-      result.dmg1 = 1;
-      result.note = t('battle.onlyOneHit', { atk1: atkName(a2, 2), verb1: hitVerb(a2), atk2: atkName(a1, 1) });
-      flt(1, 'miss');
-    } else {
-      result.note = t('battle.bothMiss');
-      flt(1, 'miss'); flt(2, 'miss');
+  // 한쪽(me) 시점의 판정 — 양쪽에 대해 한 번씩 호출하면 전체 매트릭스가 됨
+  const side = (me, opp, a, b) => {
+    if (!isAggressive(a)) {
+      // 막기 vs 카운터: 카운터 헛손질 → 다음 턴 액션 -1
+      if (a === 'block' && b === 'counter') { newPenalty[opp] += 1; flt(opp, 'whiff'); }
+      return;
     }
-  }
-  // 공격성 vs 막기
-  else if (isAggressive(a1) && isBlk(a2)) {
-    if (!a1Hits) {
-      result.note = t('battle.outOfReach', { atk: atkName(a1, 1) });
-      flt(1, 'miss');
-    } else if (isPierce(a1)) {
-      result.dmg2 = 1;
-      result.note = t('battle.piercedBlock', { atk: atkName(a1, 1) });
-      result.piercedBlock2 = true;
-      flt(1, 'pierce'); flt(2, 'pierced');
-    } else {
-      const key = isRanged(a1) ? 'battle.blocked.wave' : 'battle.blocked.attack';
-      result.note = t(key, { defender: pname(2) });
-      result.blockSuccess2 = true;
-      flt(2, 'blocked');
-    }
-  }
-  else if (isAggressive(a2) && isBlk(a1)) {
-    if (!a2Hits) {
-      result.note = t('battle.outOfReach', { atk: atkName(a2, 2) });
-      flt(2, 'miss');
-    } else if (isPierce(a2)) {
-      result.dmg1 = 1;
-      result.note = t('battle.piercedBlock', { atk: atkName(a2, 2) });
-      result.piercedBlock1 = true;
-      flt(2, 'pierce'); flt(1, 'pierced');
-    } else {
-      const key = isRanged(a2) ? 'battle.blocked.wave' : 'battle.blocked.attack';
-      result.note = t(key, { defender: pname(1) });
-      result.blockSuccess1 = true;
-      flt(1, 'blocked');
-    }
-  }
-  // 공격성 vs 카운터
-  else if (isAggressive(a1) && isCtr(a2)) {
-    if (a1Hits) {
-      result.dmg1 = 1;
-      const key = isPierce(a1) ? 'battle.countered.pierce'
-                : isRanged(a1) ? 'battle.countered.ranged'
-                : 'battle.countered.attack';
-      result.note = t(key, { defender: pname(2) });
-      flt(2, 'counter');
-    } else {
-      result.note = t('battle.counterWasted', { atk: atkName(a1, 1) });
-      flt(1, 'miss'); flt(2, 'whiff');
-    }
-  }
-  else if (isAggressive(a2) && isCtr(a1)) {
-    if (a2Hits) {
-      result.dmg2 = 1;
-      const key = isPierce(a2) ? 'battle.countered.pierce'
-                : isRanged(a2) ? 'battle.countered.ranged'
-                : 'battle.countered.attack';
-      result.note = t(key, { defender: pname(1) });
-      flt(1, 'counter');
-    } else {
-      result.note = t('battle.counterWasted', { atk: atkName(a2, 2) });
-      flt(2, 'miss'); flt(1, 'whiff');
-    }
-  }
-  // 막기 vs 카운터
-  else if (isBlk(a1) && isCtr(a2)) {
-    newPenalty[2] += 1;
-    result.note = t('battle.counterPenalty', { name: pname(2) });
-    flt(2, 'whiff');
-  }
-  else if (isBlk(a2) && isCtr(a1)) {
-    newPenalty[1] += 1;
-    result.note = t('battle.counterPenalty', { name: pname(1) });
-    flt(1, 'whiff');
-  }
-  // 한쪽만 공격성 (상대 이동/대기)
-  else if (isAggressive(a1) && !isAggressive(a2) && !isBlk(a2) && !isCtr(a2)) {
-    if (a1Hits) {
-      result.dmg2 = 1;
-      if (isPierce(a1)) {
-        result.note = t('battle.pierceHit', { attacker: pname(1), defender: pname(2) });
-        flt(1, 'pierce');
-      } else if (isRanged(a1)) {
-        result.note = t('battle.rangedHit', { attacker: pname(1), defender: pname(2) });
-      } else if (p2Moved && prevDist > 1) {
-        result.note = t('battle.closedInHit', { attacker: pname(1), defender: pname(2) });
-      } else if (p1Moved) {
-        result.note = t('battle.chargedInHit', { attacker: pname(1) });
+    const hits = inRange(a, dist);
+    if (isAggressive(b)) {
+      if (hits) result[`dmg${opp}`] = 1; else flt(me, 'miss');
+    } else if (b === 'block') {
+      if (!hits) flt(me, 'miss');
+      else if (a === 'pierce') {
+        result[`dmg${opp}`] = 1; result[`piercedBlock${opp}`] = true;
+        flt(me, 'pierce'); flt(opp, 'pierced');
       } else {
-        result.note = t('battle.strikeHit', { attacker: pname(1) });
+        result[`blockSuccess${opp}`] = true; flt(opp, 'blocked');
       }
-    } else if (a2) {
-      if (p2Moved && inRange(a1, prevDist)) {
-        result.note = isRanged(a1)
-          ? t('battle.evadedWave', { defender: pname(2) })
-          : t('battle.evadedAttack', { defender: pname(2) });
-        flt(2, 'evade'); flt(1, 'miss');
-      } else {
-        result.note = t('battle.outOfReach', { atk: atkName(a1, 1) });
-        flt(1, 'miss');
-      }
+    } else if (b === 'counter') {
+      if (hits) { result[`dmg${me}`] = 1; flt(opp, 'counter'); }
+      else { flt(me, 'miss'); flt(opp, 'whiff'); }
+    } else if (hits) {
+      // 상대는 이동/대기
+      result[`dmg${opp}`] = 1;
+      if (a === 'pierce') flt(me, 'pierce');
+    } else if (b) {
+      if (isMove(b) && inRange(a, prevDist)) flt(opp, 'evade');
+      flt(me, 'miss');
     }
-  }
-  else if (isAggressive(a2) && !isAggressive(a1) && !isBlk(a1) && !isCtr(a1)) {
-    if (a2Hits) {
-      result.dmg1 = 1;
-      if (isPierce(a2)) {
-        result.note = t('battle.pierceHit', { attacker: pname(2), defender: pname(1) });
-        flt(2, 'pierce');
-      } else if (isRanged(a2)) {
-        result.note = t('battle.rangedHit', { attacker: pname(2), defender: pname(1) });
-      } else if (p1Moved && prevDist > 1) {
-        result.note = t('battle.closedInHit', { attacker: pname(2), defender: pname(1) });
-      } else if (p2Moved) {
-        result.note = t('battle.chargedInHit', { attacker: pname(2) });
-      } else {
-        result.note = t('battle.strikeHit', { attacker: pname(2) });
-      }
-    } else if (a1) {
-      if (p1Moved && inRange(a2, prevDist)) {
-        result.note = isRanged(a2)
-          ? t('battle.evadedWave', { defender: pname(1) })
-          : t('battle.evadedAttack', { defender: pname(1) });
-        flt(1, 'evade'); flt(2, 'miss');
-      } else {
-        result.note = t('battle.outOfReach', { atk: atkName(a2, 2) });
-        flt(2, 'miss');
-      }
-    }
-  }
-  // 한쪽만 카운터/막기
-  else if (isCtr(a1) && !isAggressive(a2)) {
-    result.note = t('battle.counterEmpty', { attacker: pname(1) });
-  }
-  else if (isCtr(a2) && !isAggressive(a1)) {
-    result.note = t('battle.counterEmpty', { attacker: pname(2) });
-  }
-  else if (isBlk(a1) && !isAggressive(a2)) {
-    result.note = t('battle.defensive', { name: pname(1) });
-  }
-  else if (isBlk(a2) && !isAggressive(a1)) {
-    result.note = t('battle.defensive', { name: pname(2) });
-  }
+  };
+  side(1, 2, a1, a2);
+  side(2, 1, a2, a1);
   return result;
 }
 
@@ -1845,31 +1706,19 @@ function handleMovement(a1, a2) {
 }
 
 function computeMove(pid, pos, action) {
-  const oppPid = pid === 1 ? 2 : 1;
-  const oppPos = state.players[oppPid].pos;
-  if (action === 'moveL') {
-    // 전진 — 상대 방향으로 1칸 (위치 기준 동적 결정)
-    const dir = oppPos > pos ? 1 : -1;
-    const next = pos + dir;
-    if (next < 0 || next >= BOARD_SIZE) return pos;
-    return next;
-  }
-  if (action === 'moveR') {
-    // 후퇴 — 상대 반대 방향으로 1칸
-    const dir = oppPos > pos ? -1 : 1;
-    const next = pos + dir;
-    if (next < 0 || next >= BOARD_SIZE) return pos;
-    return next;
+  const oppPos = state.players[pid === 1 ? 2 : 1].pos;
+  const dir = oppPos > pos ? 1 : -1; // 상대 방향 (위치 기준 동적 결정)
+  const inBoard = i => i >= 0 && i < BOARD_SIZE;
+  if (action === 'moveL' || action === 'moveR') {
+    // 전진: 상대 쪽 1칸 / 후퇴: 반대 1칸. 벽이면 제자리.
+    const next = pos + (action === 'moveL' ? dir : -dir);
+    return inBoard(next) ? next : pos;
   }
   if (action === 'leap') {
     // 인접한 상대 너머로 도약 — 우선 상대 + 2칸 (사이 1칸 공백).
     // 보드 밖이면 폴백: 상대 + 1칸 (바로 뒤). 이마저 보드 밖이면 leap 무효.
-    const dir = oppPos > pos ? 1 : -1;
-    const land2 = pos + dir * 3;
-    const land1 = pos + dir * 2;
-    if (land2 >= 0 && land2 < BOARD_SIZE) return land2;
-    if (land1 >= 0 && land1 < BOARD_SIZE) return land1;
-    return pos;
+    if (inBoard(pos + dir * 3)) return pos + dir * 3;
+    if (inBoard(pos + dir * 2)) return pos + dir * 2;
   }
   return pos;
 }
@@ -1879,22 +1728,8 @@ async function endRound() {
   state.phase = 'end';
   const p1Dead = state.players[1].hp <= 0;
   const p2Dead = state.players[2].hp <= 0;
-
-  let roundWinner = null;
-  let narrative = '';
-
-  if (p1Dead && p2Dead) {
-    roundWinner = null;
-    narrative = t('log.narrative.mutual');
-  } else if (p1Dead) {
-    roundWinner = 2;
-    narrative = t('log.narrative.p2Win');
-  } else {
-    roundWinner = 1;
-    narrative = t('log.narrative.p1Win');
-  }
-
-  logMsg(`<span class="gold-c">${t('log.roundEnd', { n: state.round, narrative })}</span>`);
+  // 동시 산화 = 무승부(null)
+  const roundWinner = p1Dead && p2Dead ? null : p1Dead ? 2 : 1;
 
   if (roundWinner) SFX.sfxRoundWin(roundWinner);
   else SFX.sfxRoundDraw();
@@ -1926,7 +1761,7 @@ async function endRound() {
   roundScoreP2.textContent = state.matchScore[2];
   roundNextInfo.textContent = t('curtain.round.nextFirst', { name: t(`player.${state.firstPlayer}`) });
 
-  showCurtain({ mode: 'round' }, () => {
+  showCurtain({ mode: 'round', themePid: roundWinner }, () => {
     startNextRound();
   });
 }
@@ -1938,10 +1773,6 @@ function startNextRound() {
   state.players[1] = { hp: MAX_HP, pos: START_POS_P1, actions: [], penalty: 0, cornerTurns: 0, stars: 0 };
   state.players[2] = { hp: MAX_HP, pos: START_POS_P2, actions: [], penalty: 0, cornerTurns: 0, stars: 0 };
 
-  logMsg(`<span class="gold-c">${t('log.roundBegin', { n: state.round })}</span>`);
-  if (state.round === DECISIVE_ROUND) {
-    logMsg(t('log.decisiveNote'));
-  }
   renderAll();
 
   const firstName = t('curtain.turnName', { name: t(`player.${state.firstPlayer}`) });
@@ -1955,20 +1786,21 @@ function startNextRound() {
 }
 
 function endMatch() {
-  state.matchOver = true;
   state.phase = 'end';
   const s1 = state.matchScore[1];
   const s2 = state.matchScore[2];
+  endmodal.removeAttribute('data-theme');
+  winnerText.style.color = '';
   if (s1 === s2) {
     winnerText.textContent = t('end.draw');
     winnerName.textContent = t('end.drawSub');
-    logMsg(`<span class="gold-c">${t('log.matchDraw', { s1, s2 })}</span>`);
     SFX.sfxRoundDraw();
   } else {
     const matchWinner = s1 > s2 ? 1 : 2;
     winnerText.textContent = t(`player.${matchWinner}.formal`);
+    winnerText.style.color = matchWinner === 1 ? 'var(--p1-glow)' : 'var(--p2-glow)';
+    endmodal.setAttribute('data-theme', `p${matchWinner}`);
     winnerName.textContent = t('end.winnerSub');
-    logMsg(`<span class="gold-c">${t('log.matchWin', { name: t(`player.${matchWinner}`) })}</span>`);
     SFX.sfxMatchWin();
   }
   finalScoreP1.textContent = s1;
@@ -2022,7 +1854,7 @@ function weightedRandom(weights) {
   return entries[entries.length - 1][0];
 }
 
-function pickAIAction(aiPid, aiPos, oppPos, stars, aiHp, oppHp, cornerTurns, turn, round, difficulty, canLeap) {
+function pickAIAction(aiPos, oppPos, stars, aiHp, oppHp, cornerTurns, turn, round, difficulty, canLeap) {
   const dist = Math.abs(aiPos - oppPos);
   const inStardust = isStardust(aiPos, turn);
   const hpDiff = aiHp - oppHp;
@@ -2142,7 +1974,7 @@ function generateAIActions(aiPid) {
   for (let i = 0; i < maxActions; i++) {
     const dist = Math.abs(simPos - opp.pos);
     const canLeap = i === 0 && maxActions >= 2 && dist === 1;
-    const a = pickAIAction(aiPid, simPos, opp.pos, simStars, ai.hp, opp.hp, ai.cornerTurns, state.turn, state.round, state.aiDifficulty, canLeap);
+    const a = pickAIAction(simPos, opp.pos, simStars, ai.hp, opp.hp, ai.cornerTurns, state.turn, state.round, state.aiDifficulty, canLeap);
     if (a === 'leap') {
       actions.push('leap');
       actions.push('leap_hold');
@@ -2163,7 +1995,6 @@ function runSetupScreen() {
 
   const modePVP = document.getElementById('setupModePVP');
   const modeCPU = document.getElementById('setupModeCPU');
-  const setupSubText = document.getElementById('setupSubText');
   const diffSelect = document.getElementById('setupDiffSelect');
   const diffBtns = { normal: document.getElementById('setupDiffNormal'), advanced: document.getElementById('setupDiffAdvanced'), master: document.getElementById('setupDiffMaster') };
   let pendingCPU = false;
@@ -2172,7 +2003,6 @@ function runSetupScreen() {
 
   modePVP.classList.add('active');
   modeCPU.classList.remove('active');
-  if (setupSubText) setupSubText.textContent = t('setup.sub');
   if (diffSelect) diffSelect.style.display = 'none';
   Object.values(diffBtns).forEach(b => b && b.classList.remove('active'));
   if (diffBtns.normal) diffBtns.normal.classList.add('active');
@@ -2192,7 +2022,6 @@ function runSetupScreen() {
     modePVP.classList.add('active');
     modeCPU.classList.remove('active');
     if (diffSelect) diffSelect.style.display = 'none';
-    if (setupSubText) setupSubText.textContent = t('setup.sub');
     resetPick();
   };
 
@@ -2202,7 +2031,6 @@ function runSetupScreen() {
     modeCPU.classList.add('active');
     modePVP.classList.remove('active');
     if (diffSelect) diffSelect.style.display = 'flex';
-    if (setupSubText) setupSubText.textContent = t('setup.sub.cpu');
     resetPick();
   };
 
@@ -2270,7 +2098,7 @@ async function runFirstPlayerDraw() {
       drawP2.classList.add('blinking');
       drawP1.classList.remove('blinking');
     }
-    SFX.sfxDrawTick();
+    SFX.sfxDrawTick(step % 2 === 0);
     const delay = 80 + step * 20;
     await sleep(delay);
     step++;
@@ -2284,6 +2112,7 @@ async function runFirstPlayerDraw() {
   const chosenName = t(`player.${chosen}`);
   if (chosen === 1) drawP1.classList.add('chosen');
   else drawP2.classList.add('chosen');
+  curtain.setAttribute('data-theme', `p${chosen}`);
   drawResult.textContent = '';
   drawTitle.textContent = t('curtain.draw.result', { name: chosenName });
   SFX.sfxDrawComplete(chosen === 1);
@@ -2306,13 +2135,11 @@ async function runFirstPlayerDraw() {
 restartBtn.addEventListener('click', () => {
   state.round = 1;
   state.matchScore = { 1: 0, 2: 0 };
-  state.matchOver = false;
   state.turn = 1;
   state.phase = 'first_input';
   state.firstPlayer = 1;
   state.players[1] = { hp: MAX_HP, pos: START_POS_P1, actions: [], penalty: 0, cornerTurns: 0, stars: 0 };
   state.players[2] = { hp: MAX_HP, pos: START_POS_P2, actions: [], penalty: 0, cornerTurns: 0, stars: 0 };
-  state.winner = null;
   endmodal.classList.remove('show');
   renderAll();
   runSetupScreen();
@@ -2328,8 +2155,13 @@ function renderAll() {
   renderMatchScore(null);
 }
 
-// 로케일 적용 후 초기 렌더
-setLocale('en');
+// 로케일 적용 후 초기 렌더 — 저장값 > 브라우저 언어 > en
+(function initLocale() {
+  let loc = null;
+  try { loc = localStorage.getItem('sd_locale'); } catch (e) {}
+  if (!loc) loc = (navigator.language || 'en').slice(0, 2);
+  setLocale(I18N[loc] ? loc : 'en');
+})();
 renderAll();
 runSetupScreen();
 
@@ -2341,23 +2173,10 @@ runSetupScreen();
   // 드래그 차단 (이미지/토큰/SVG 드래그 방지)
   document.addEventListener('dragstart', (e) => e.preventDefault());
 
-  // 텍스트 선택 차단 (input/textarea 없으니 안전)
-  document.addEventListener('selectstart', (e) => e.preventDefault());
-
   // iOS Safari: 두 손가락 핀치 줌 차단 (gesture* 이벤트)
   ['gesturestart', 'gesturechange', 'gestureend'].forEach(ev => {
     document.addEventListener(ev, (e) => e.preventDefault());
   });
-
-  // iOS Safari: 더블 탭 줌 차단 (300ms 내 두 번째 탭)
-  let lastTouchEnd = 0;
-  document.addEventListener('touchend', (e) => {
-    const now = Date.now();
-    if (now - lastTouchEnd <= 350) {
-      e.preventDefault();
-    }
-    lastTouchEnd = now;
-  }, { passive: false });
 
   // 안드로이드: pull-to-refresh 보강 (overscroll-behavior CSS 가 주, 폴백)
   document.addEventListener('touchmove', (e) => {
@@ -2367,7 +2186,7 @@ runSetupScreen();
 
 // ==================== 뷰포트 자동 조절 ====================
 // 화면비에 따라 --app-scale 산출. transform: scale + origin center 로 시각만 축소.
-// .wrap, .curtain-inner, .endmodal-inner 셋 다 같은 스케일 공유.
+// .wrap 은 --app-scale, .curtain-inner/.endmodal-inner 는 --overlay-scale (별도 산출).
 // 모바일 세로(coarse + portrait)면 CSS 회전 안내가 뜸 → 스케일 1 유지.
 (function setupViewportFit() {
   const root = document.documentElement;
@@ -2392,6 +2211,7 @@ runSetupScreen();
 
     // 자연 크기 측정용으로 일단 스케일 1 적용
     root.style.setProperty('--app-scale', '1');
+    root.style.setProperty('--overlay-scale', '1');
 
     // 강제 layout flush
     void wrap.offsetHeight;
@@ -2407,17 +2227,20 @@ runSetupScreen();
       cW = curtainInner.offsetWidth;
     }
 
-    const targetW = Math.max(naturalW, cW);
-    const targetH = Math.max(naturalH, cH);
-
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const sx = (vw - MARGIN_X) / targetW;
-    const sy = (vh - MARGIN_Y) / targetH;
+    // 노치/펀치홀 (viewport-fit=cover) — CSS env() 를 커스텀 프로퍼티로 읽음
+    const cs = getComputedStyle(root);
+    const safe = (n) => parseFloat(cs.getPropertyValue(n)) || 0;
+    const vw = window.innerWidth - safe('--safe-l') - safe('--safe-r');
+    const vh = window.innerHeight - safe('--safe-t') - safe('--safe-b');
     // 큰 화면에서도 콘텐츠가 viewport 채우도록 업스케일 허용 (캡 1.7)
     const MAX_SCALE = 1.7;
-    const scale = Math.min(MAX_SCALE, sx, sy);
-    root.style.setProperty('--app-scale', scale.toFixed(4));
+    const scaleFor = (w, h) => Math.min(MAX_SCALE, (vw - MARGIN_X) / w, (vh - MARGIN_Y) / h);
+    root.style.setProperty('--app-scale', scaleFor(naturalW, naturalH).toFixed(4));
+    // 커튼/종료 모달은 보드보다 훨씬 작아 별도 스케일 — 폰 가로에서 Ready 버튼이 보드 축소율에 끌려가지 않음
+    const endInner = document.querySelector('.endmodal-inner');
+    const oW = Math.max(cW, endInner ? endInner.offsetWidth : 0, 1);
+    const oH = Math.max(cH, endInner ? endInner.offsetHeight : 0, 1);
+    root.style.setProperty('--overlay-scale', scaleFor(oW, oH).toFixed(4));
   }
 
   function schedule() {
@@ -2428,11 +2251,12 @@ runSetupScreen();
 
   window.addEventListener('resize', schedule);
   window.addEventListener('orientationchange', () => setTimeout(fit, 150));
-  // 커튼/모달 토글 직후도 재계산 필요 — class 변경 감지
+  // 커튼/모달 토글 직후도 재계산 필요 — class 변경 감지.
+  // subtree: 커튼 내부 섹션(셋업 난이도 행 등) display 토글로 자연 크기가 바뀌어도 --overlay-scale 재산출
   const observerTargets = ['curtain', 'endmodal'].map(id => document.getElementById(id)).filter(Boolean);
   if (observerTargets.length && 'MutationObserver' in window) {
     const mo = new MutationObserver(schedule);
-    observerTargets.forEach(el => mo.observe(el, { attributes: true, attributeFilter: ['class', 'style'] }));
+    observerTargets.forEach(el => mo.observe(el, { attributes: true, attributeFilter: ['class', 'style'], subtree: true }));
   }
 
   // 초기 계산 — 폰트 로드 후 다시 한번

@@ -1,0 +1,55 @@
+<svg width="720" height="1020" viewBox="0 0 720 1020" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Dark Volcanic Ground Gradient -->
+    <linearGradient id="groundGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a0505;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#0d0d0d;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#050000;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Red Glow for Cracks -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Base Ground -->
+  <rect width="720" height="1020" fill="url(#groundGrad)"/>
+
+  <!-- Jagged Rock Formations (Silhouettes) -->
+  <path d="M0 100 L50 40 L120 80 L200 20 L300 90 L450 30 L600 110 L720 50 V0 H0 Z" fill="#000" opacity="0.5"/>
+
+  <!-- Glowing Lava Cracks -->
+  <g filter="url(#glow)">
+    <path d="M100 200 L150 450 L120 700 L180 950" fill="none" stroke="#660000" stroke-width="2" opacity="0.6"/>
+    <path d="M600 150 L550 400 L580 650 L520 900" fill="none" stroke="#440000" stroke-width="1.5" opacity="0.4"/>
+    <path d="M300 300 L350 550 L320 800" fill="none" stroke="#880000" stroke-width="1" opacity="0.5"/>
+    
+    <!-- Hot Spots -->
+    <circle cx="150" cy="450" r="2" fill="#ff3300" opacity="0.4"/>
+    <circle cx="550" cy="400" r="1.5" fill="#ff3300" opacity="0.3"/>
+  </g>
+
+  <!-- Scattered Bones / Skulls (Stylized Minimalist) -->
+  <g fill="#333" opacity="0.4">
+    <!-- Skull silhouette 1 -->
+    <circle cx="200" cy="800" r="10"/>
+    <rect x="194" y="808" width="12" height="6" rx="2"/>
+    
+    <!-- Bone 1 -->
+    <rect x="500" y="600" width="30" height="4" rx="2" transform="rotate(30 500 600)"/>
+    <circle cx="498" cy="598" r="4" transform="rotate(30 500 600)"/>
+    <circle cx="532" cy="602" r="4" transform="rotate(30 500 600)"/>
+
+    <!-- Skull silhouette 2 -->
+    <circle cx="650" cy="350" r="8"/>
+    <rect x="645" y="356" width="10" height="5" rx="2"/>
+  </g>
+
+  <!-- Dark Vignette for depth -->
+  <rect width="720" height="1020" fill="none" stroke="black" stroke-width="100" opacity="0.2"/>
+</svg>

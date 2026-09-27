@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="./favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flux Tower Defense</title>
+    <style>
+      /* Pre-React splash — paints before the bundle parses so the
+         window isn't blank for the bootstrap window. React mounts on
+         top of #root and its own LoadingScreen takes over (same look,
+         continuous transition into the menu fade). */
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: #0f0f1b;
+        color: #e6f7f0;
+        font-family: 'Inter', system-ui, sans-serif;
+        overflow: hidden;
+      }
+      #boot-splash {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 24px;
+        background: radial-gradient(circle at 50% 30%, #1a1a2e 0%, #0f0f1b 60%, #07070f 100%);
+        z-index: 3000;
+      }
+      #boot-splash .bs-logo {
+        width: 120px;
+        height: 120px;
+        border: 2px solid #4ecca3;
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: bs-spin 1.4s linear infinite;
+        box-shadow: 0 0 24px rgba(78, 204, 163, 0.4);
+      }
+      #boot-splash .bs-title {
+        font-size: clamp(20px, 2.4vw, 32px);
+        font-weight: 700;
+        letter-spacing: 0.32em;
+        color: #4ecca3;
+        text-shadow: 0 0 12px rgba(78, 204, 163, 0.55);
+      }
+      @keyframes bs-spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
+    <script type="module" crossorigin src="./assets/index-DdSa3fSY.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/preload-helper-xBbMyY7u.js">
+    <link rel="modulepreload" crossorigin href="./assets/jsx-runtime-H9qROYLs.js">
+    <link rel="modulepreload" crossorigin href="./assets/EnemyPreviewCanvas-5iO2CWEV.js">
+    <link rel="modulepreload" crossorigin href="./assets/tauri-ChdGYhAR.js">
+    <link rel="modulepreload" crossorigin href="./assets/window-BBJw-MSv.js">
+    <link rel="modulepreload" crossorigin href="./assets/sound-BD0J9UMs.js">
+    <link rel="modulepreload" crossorigin href="./assets/achievements-CtB4rEPE.js">
+    <link rel="modulepreload" crossorigin href="./assets/cloud-NVYcQgLe.js">
+    <link rel="modulepreload" crossorigin href="./assets/timeline-BEHGA5ID.js">
+    <link rel="stylesheet" crossorigin href="./assets/index-B4kJL_Go.css">
+  </head>
+  <body>
+    <div id="boot-splash">
+      <div class="bs-logo"></div>
+      <div class="bs-title">FLUX TOWER DEFENSE</div>
+    </div>
+    <div id="root"></div>
+  </body>
+</html>

@@ -121,16 +121,16 @@ for (const g of games) {
     warn(label, `platform is "PC" but en.json features do not say so`);
   }
 
-  // Personal-best tiers: ascending, positive, bronze/silver/gold. The values
+  // Personal-best anchors: non-decreasing, positive, [bronze1, silver1, gold1, gold10, diamond]. The values
   // themselves are a tuning knob — only the shape is checked here.
   if (g.scoreTiers !== undefined) {
     const tiers = g.scoreTiers;
-    if (!Array.isArray(tiers) || tiers.length !== 3) {
-      error(label, `scoreTiers must be 3 numbers [bronze, silver, gold]`);
+    if (!Array.isArray(tiers) || tiers.length !== 5) {
+      error(label, `scoreTiers must be 5 numbers [bronze1, silver1, gold1, gold10, diamond]`);
     } else if (!tiers.every(t => typeof t === 'number' && Number.isFinite(t) && t > 0)) {
       error(label, `scoreTiers must all be positive numbers: ${JSON.stringify(tiers)}`);
-    } else if (!(tiers[0] < tiers[1] && tiers[1] < tiers[2])) {
-      error(label, `scoreTiers must ascend: ${JSON.stringify(tiers)}`);
+    } else if (!tiers.every((t, i) => i === 0 || tiers[i - 1] <= t)) {
+      error(label, `scoreTiers must not decrease: ${JSON.stringify(tiers)}`);
     } else if (!enGames[g.id]?.scoreLabel) {
       warn(label, `scoreTiers set but en.json has no scoreLabel (the score's name)`);
     }

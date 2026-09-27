@@ -128,8 +128,8 @@ for (const genre of indexableGenres) {
 
 // English-only routes
 const englishOnlyRoutes = [
-  { path: '/forum', priority: '0.7' },
   { path: '/blog', priority: '0.7', lastmod: newest(posts.map(p => p.date)) },
+  { path: '/patchnote', priority: '0.6', lastmod: newest([...readFileSync('CHANGELOG.md', 'utf-8').matchAll(/\((\d{4}-\d{2}-\d{2})\)/g)].map(m => m[1])) },
   { path: '/about', priority: '0.6' },
   { path: '/contact', priority: '0.5' },
   { path: '/privacy', priority: '0.4' },

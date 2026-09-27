@@ -13,7 +13,7 @@ export const formatPostDate = (
     timeZone: 'UTC',
   });
 
-// Relative stamp for comments and forum posts; falls back to an absolute date
+// Relative stamp for comments; falls back to an absolute date
 // past a week, where "8d ago" stops being useful.
 export function timeAgo(date: Date): string {
   const sec = Math.floor((Date.now() - date.getTime()) / 1000);

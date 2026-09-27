@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { User, Gamepad2, Sun, Moon, Heart, BookOpen, MessageSquare, Swords } from 'lucide-react';
+import { User, Gamepad2, Sun, Moon, Heart, BookOpen, Swords, FileText } from 'lucide-react';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useUiText } from '../i18n';
 import './Navbar.css';
@@ -109,8 +109,8 @@ const Navbar: React.FC = () => {
         <ul className={`nav-links ${isMenuOpen ? 'open' : ''}`}>
           <li><Link to="/"           className={isActive('/')           ? 'nav-active' : ''} onClick={closeMenu}>{t('navGames', 'Games')}</Link></li>
           <li><Link to="/my-games"   className={isActive('/my-games')   ? 'nav-active' : ''} onClick={closeMenu}><User size={16} aria-hidden="true" /> {t('navMyGames', 'My Games')}</Link></li>
-          <li><Link to="/forum" className={isActive('/forum') ? 'nav-active' : ''} onClick={closeMenu}><MessageSquare size={16} aria-hidden="true" /> {t('navForum', 'Forum')}</Link></li>
           <li><Link to="/blog" className={isActive('/blog') ? 'nav-active' : ''} onClick={closeMenu}><BookOpen size={16} aria-hidden="true" /> {t('navBlog', 'Blog')}</Link></li>
+          <li><Link to="/patchnote" className={isActive('/patchnote') ? 'nav-active' : ''} onClick={closeMenu}><FileText size={16} aria-hidden="true" /> {t('navPatchNotes', 'Patch Notes')}</Link></li>
           <li><Link to="/fractured-realm" className={isActive('/fractured-realm') ? 'nav-active' : ''} onClick={closeMenu}><Swords size={16} aria-hidden="true" /> {t('navFracturedRealm', 'Fractured Realm')}</Link></li>
           <li><a href="https://ko-fi.com/developer_benjamink" target="_blank" rel="noopener noreferrer" className="nav-support" onClick={closeMenu}><Heart size={16} aria-hidden="true" /> {t('navSupport', 'Support')}</a></li>
         </ul>

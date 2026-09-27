@@ -6,7 +6,7 @@
  *   - /play/{slug}   + /{lang}/play/{slug}
  *
  * English-only prerender (hreflang only points at self):
- *   - /about, /privacy, /contact, /my-games
+ *   - /about, /privacy, /contact, /my-games, /patchnote
  *   - /blog, /blog/{slug}, /blog/tag/{tag}
  */
 
@@ -61,7 +61,6 @@ function txt(id, lang) {
     controlsTable: pickArr('controlsTable'),
     faq: pickArr('faq'),
     characters: pickArr('characters'),
-    featuredComments: pickArr('featuredComments'),
   };
 }
 
@@ -324,24 +323,18 @@ for (const lang of SUPPORTED_LOCALES) {
     const faqStaticHtml = (Array.isArray(t.faq) && t.faq.length)
       ? `<h2 style="margin-top:32px;font-size:1.3rem;">${faqStaticHeading}</h2><dl style="line-height:1.7;">${t.faq.map(p => `<dt style="font-weight:700;color:#00d2ff;margin-top:12px;">${p.q}</dt><dd style="margin:4px 0 0 0;">${rich(p.a)}</dd>`).join('')}</dl>`
       : '';
-    const featuredCommentsHeading = ui('seoPlayerHighlights', lang, 'Player Highlights');
-    const featuredCommentsHtml = (Array.isArray(t.featuredComments) && t.featuredComments.length)
-      ? `<h2 style="margin-top:32px;font-size:1.3rem;">${featuredCommentsHeading}</h2>${t.featuredComments.map(c => `<blockquote style="border-left:3px solid #00d2ff;background:rgba(0,210,255,0.04);padding:12px 16px;margin:12px 0;border-radius:0 8px 8px 0;"><p style="margin:0 0 6px;line-height:1.6;">"${c.text}"</p><cite style="color:#9aa;font-style:normal;font-size:0.85rem;">— ${c.name}${c.badge ? ` <span style=\"color:#00d2ff;font-weight:700;\">(${c.badge})</span>` : ''}</cite></blockquote>`).join('')}`
-      : '';
 
     // UGC pointers — give crawlers a visible, indexable anchor for the
-    // community surfaces (comments, forum). The actual data is rendered
+    // community surface (comments). The actual data is rendered
     // client-side from Firestore, but the prerender at least tells crawlers
     // that the page has user-generated content tied to it.
     const ugcCommunityH2 = ui('seoCommunityTitle', lang, 'Community');
     const ugcCommentsLine = ui(
       'seoCommentsIntro', lang,
-      `Players share strategies, post personal-best replays, and discuss tactics in the comments section below the game frame.`,
+      `Have a tip, a question or a bug report? Leave a comment below the game frame.`,
     );
-    const ugcForumLink = ui('seoForumLinkLabel', lang, 'Visit the ArcadeDeck player forum');
     const ugcHtml = `<h2 style="margin-top:32px;font-size:1.3rem;">${ugcCommunityH2}</h2>
-        <p style="line-height:1.7;">${ugcCommentsLine}</p>
-        <p style="line-height:1.7;"><a href="${fullUrl(lang, '/forum')}" style="color:#00d2ff;">${ugcForumLink}</a></p>`;
+        <p style="line-height:1.7;">${ugcCommentsLine}</p>`;
 
     const gameRelatedPosts = postsForGame(slug);
     const relatedPostsHtml = gameRelatedPosts.length
@@ -436,7 +429,6 @@ for (const lang of SUPPORTED_LOCALES) {
 
         ${ugcHtml}
 
-        ${featuredCommentsHtml}
 
         ${crossLinksHtml}
 
@@ -699,8 +691,14 @@ ${noscriptItems}
   shell = shell.replace(/<title>[\s\S]*?<\/title>/, `<title>${escAttr(homeTitle)}</title>`);
   shell = shell.replace(/(<meta name="description" content=")[^"]*(")/, `$1${escAttr(homeDesc)}$2`);
 
-  // Canonical + hreflang
-  const canonicalBlock = `<link rel="canonical" href="${homeUrl}" />\n    ${hreflangBlock('/', null)}`;
+  // Canonical + hreflang. The Featured Game thumbnail is the mobile LCP
+  // element and React only renders it after hydration — preload it from the
+  // shell so the fetch starts with HTML parsing (Lighthouse: LCP request discovery).
+  const featured = games.find((g) => g.featured);
+  const featuredPreload = featured
+    ? `\n    <link rel="preload" as="image" href="/${featured.thumbnail.replace(/^\//, '')}" fetchpriority="high" />`
+    : '';
+  const canonicalBlock = `<link rel="canonical" href="${homeUrl}" />${featuredPreload}\n    ${hreflangBlock('/', null)}`;
   shell = shell.replace(/<link rel="canonical" href="[^"]*" \/>/, canonicalBlock);
 
   // og + twitter
@@ -758,7 +756,7 @@ ${catalogueItems}
 
 // =====================================================================
 // ENGLISH-ONLY STATIC ROUTES — about / privacy / contact / my-games /
-// blog (list).
+// blog (list) / patchnote.
 // =====================================================================
 const formatPostDate = (iso) =>
   new Date(iso + 'T00:00:00Z').toLocaleDateString('en-US', {
@@ -804,17 +802,38 @@ const blogItemListLd = JSON.stringify({
   })),
 });
 
+// CHANGELOG.md `## History` lines — same regex as src/pages/PatchNote.tsx.
+const CHANGELOG_LINE = /^- \*\*(v\d+\.\d+\.\d+)\*\* \((\d{4}-\d{2}-\d{2})\) — (.+)$/gm;
+const releases = [...readFileSync('CHANGELOG.md', 'utf-8').matchAll(CHANGELOG_LINE)]
+  .map(([, version, date, body]) => ({ version, date, body }));
+const patchNoteNoscript = `
+      <div style="background:#171424;color:#eaeaf0;font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;">
+        <h1>ArcadeDeck Patch Notes</h1>
+        <p>Every release, newest first. New games bump MAJOR, features bump MINOR, fixes bump PATCH.</p>
+${releases
+  .map((r) => `        <h2>${r.version} — <em>${formatPostDate(r.date)}</em></h2>\n        <p>${escAttr(r.body)}</p>`)
+  .join('\n')}
+        <p><a href="/">Browse all games</a> · <a href="/blog">Blog</a></p>
+      </div>`;
+
 const routeShells = {
+  patchnote: {
+    title: 'Patch Notes | ArcadeDeck',
+    description: 'Every ArcadeDeck release in one place: new games, features, UI changes, and balance fixes, newest first. MAJOR for games, MINOR for features, PATCH for fixes.',
+    canonical: `${SITE}/patchnote`,
+    noscript: patchNoteNoscript,
+    extraLd: [breadcrumbLdFor('Patch Notes', `${SITE}/patchnote`)],
+  },
   blog: {
     title: 'Blog | ArcadeDeck Devlog & Game Updates',
-    description: 'The ArcadeDeck devlog: patch notes, game design deep-dives, and strategy guides.',
+    description: 'The ArcadeDeck devlog: patch notes for every release, game design deep-dives on how our browser games are built, strategy guides, and Steam launch news.',
     canonical: `${SITE}/blog`,
     noscript: blogListNoscript,
     extraLd: [blogItemListLd, breadcrumbLdFor('Blog', `${SITE}/blog`)],
   },
   'my-games': {
     title: 'My Games | ArcadeDeck',
-    description: 'Your personal ArcadeDeck library. Recently played games, liked titles, and your active Gamer ID — all stored in your browser.',
+    description: 'Your personal ArcadeDeck library: recently played games, liked titles, personal bests, mastery badges, Deck Level, and your Gamer ID, all in your browser.',
     canonical: `${SITE}/my-games`,
     // Renders a per-visitor localStorage library: empty for every crawler, and
     // the prerendered copy describes a page no visitor actually sees. Keep it
@@ -838,7 +857,7 @@ const routeShells = {
   },
   about: {
     title: 'About | ArcadeDeck',
-    description: 'About ArcadeDeck — a curated home for original, free-to-play browser games with zero sign-up friction.',
+    description: 'About ArcadeDeck — a curated home for original, free-to-play browser games. No downloads, no installs, no sign-up walls: pick a game, hit play, and you are in.',
     canonical: `${SITE}/about`,
     extraLd: [breadcrumbLdFor('About', `${SITE}/about`)],
     noscript: `
@@ -848,7 +867,7 @@ const routeShells = {
         <h2>What We Stand For</h2>
         <p>We believe casual browser games deserve the same craft and polish as their console and mobile counterparts. Each ArcadeDeck game is hand-selected for tight controls, fair difficulty curves, and replay value. You will find Action, RPG, Strategy, Idle, Roguelike, Tower Defense, Puzzle, and Casual genres represented, with new titles added regularly.</p>
         <h2>No Accounts, No Friction</h2>
-        <p>There is no sign-up, no email capture, and no paywall. Pick a nickname if you want to comment or post on the forum — everything else is stored locally in your browser and stays there.</p>
+        <p>There is no sign-up, no email capture, and no paywall. Pick a nickname if you want to comment — everything else is stored locally in your browser and stays there.</p>
         <h2>Built for Speed</h2>
         <p>The site is a React 19 single-page app deployed on Firebase Hosting with aggressive code splitting, image optimisation, and pre-rendered HTML for every game page. Lighthouse performance scores are a first-class concern — we want you in the game, not staring at a loader.</p>
         <h2>Contact</h2>
@@ -865,7 +884,7 @@ const routeShells = {
   },
   privacy: {
     title: 'Privacy Policy | ArcadeDeck',
-    description: 'Read the ArcadeDeck Privacy Policy: data we collect, cookies, Google AdSense, Google Analytics, Firebase, GDPR/CCPA rights, and contact details.',
+    description: 'Read the ArcadeDeck Privacy Policy: what data we collect, cookies, Google AdSense, Google Analytics, Firebase, your GDPR/CCPA rights, and how to contact us.',
     canonical: `${SITE}/privacy`,
     extraLd: [breadcrumbLdFor('Privacy', `${SITE}/privacy`)],
     noscript: `
@@ -873,11 +892,11 @@ const routeShells = {
         <h1>ArcadeDeck Privacy Policy</h1>
         <p>This page summarises what data ArcadeDeck collects, how it is used, and the choices you have. Load the page with JavaScript enabled to view the fully formatted policy with all sections and links.</p>
         <h2>What We Collect</h2>
-        <p>We collect only the minimum needed to operate the service: your self-chosen Gamer ID (nickname), comments and forum posts you voluntarily submit, and standard automatic browser data (user-agent, screen size, language, approximate location from IP). We never ask for your real name, email, or password.</p>
+        <p>We collect only the minimum needed to operate the service: your self-chosen Gamer ID (nickname), comments you voluntarily submit, and standard automatic browser data (user-agent, screen size, language, approximate location from IP). We never ask for your real name, email, or password.</p>
         <h2>Cookies and Local Storage</h2>
         <p>Strictly necessary localStorage holds your Gamer ID, language, recently played games, and liked games. Google Analytics sets cookies for aggregate traffic measurement. Google AdSense and its partners may set cookies to deliver and measure ads.</p>
         <h2>Third-Party Services</h2>
-        <p>ArcadeDeck relies on Google AdSense (advertising), Google Analytics (traffic measurement), Google Firebase / Firestore (comment and forum storage), and Google Fonts (typography). Each operates under its own privacy policy.</p>
+        <p>ArcadeDeck relies on Google AdSense (advertising), Google Analytics (traffic measurement), Google Firebase / Firestore (comment storage), and Google Fonts (typography). Each operates under its own privacy policy.</p>
         <h2>Your Rights</h2>
         <p>Under GDPR and CCPA you may request access, correction, or deletion of your data, object to processing, withdraw advertising consent, or lodge a complaint with your local data protection authority. Email <a href="mailto:help@arcadedeck.net">help@arcadedeck.net</a> with your Gamer ID to exercise these rights.</p>
         <h2>Children</h2>
@@ -886,32 +905,9 @@ const routeShells = {
         <p>Privacy questions: <a href="mailto:help@arcadedeck.net">help@arcadedeck.net</a>.</p>
       </div>`,
   },
-  forum: {
-    title: 'Player Forum | ArcadeDeck Community',
-    description: 'Discuss games, share strategies, and connect with other ArcadeDeck players in the community forum.',
-    canonical: `${SITE}/forum`,
-    extraLd: [breadcrumbLdFor('Forum', `${SITE}/forum`)],
-    noscript: `
-      <div style="background:#171424;color:#eaeaf0;font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;">
-        <nav aria-label="Breadcrumb" style="color:#9aa;font-size:0.85rem;margin-bottom:12px;">
-          <a href="/" style="color:#00d2ff;">Home</a> &rsaquo;
-          <span>Forum</span>
-        </nav>
-        <h1>ArcadeDeck Player Forum</h1>
-        <p>Talk about games, share tips, post strategies, and meet other players on the ArcadeDeck community forum. No account required — pick a nickname and post.</p>
-        <h2>Categories</h2>
-        <ul>
-          <li><strong>General</strong> — anything ArcadeDeck-related.</li>
-          <li><strong>Game Talk</strong> — discuss specific games in the catalogue.</li>
-          <li><strong>Suggestions</strong> — feature ideas, new games, site feedback.</li>
-          <li><strong>Off-Topic</strong> — everything else gamers care about.</li>
-        </ul>
-        <p>Enable JavaScript to browse threads, post new topics, and reply to other players. <a href="/" style="color:#00d2ff;">Browse all games</a> · <a href="/blog" style="color:#00d2ff;">Read the blog</a></p>
-      </div>`,
-  },
   'fractured-realm': {
     title: 'The Fractured Realm — Web MMO | ArcadeDeck',
-    description: 'Explore The Fractured Realm, a browser-based MMO adventure hosted on ArcadeDeck.',
+    description: 'Explore The Fractured Realm, a browser-based MMO adventure on ArcadeDeck. Quest, fight, and level up alongside other players — no download or install required.',
     canonical: `${SITE}/fractured-realm`,
     // Renders as a bare fullscreen iframe of an external build with no text of
     // its own. The prerendered description would be copy the visitor never
@@ -934,12 +930,12 @@ const routeShells = {
           <li>Real-time exploration and combat in a fractured fantasy realm.</li>
           <li>No installs, no sign-ups required — just pick a name and play.</li>
         </ul>
-        <p><a href="/" style="color:#00d2ff;">Browse all ArcadeDeck games</a> · <a href="/forum" style="color:#00d2ff;">Player forum</a></p>
+        <p><a href="/" style="color:#00d2ff;">Browse all ArcadeDeck games</a></p>
       </div>`,
   },
   contact: {
     title: 'Contact | ArcadeDeck',
-    description: 'Contact ArcadeDeck — email help@arcadedeck.net for support, bug reports, partnership inquiries, or game submissions.',
+    description: 'Contact ArcadeDeck — email help@arcadedeck.net for player support, bug reports, partnership inquiries, or to submit your own original browser game for review.',
     canonical: `${SITE}/contact`,
     extraLd: [breadcrumbLdFor('Contact', `${SITE}/contact`)],
     noscript: `
@@ -1037,7 +1033,7 @@ for (const post of posts) {
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 
   const url = `${SITE}/blog/${post.slug}`;
-  const title = `${post.title} | ArcadeDeck Blog`;
+  const title = post.title; // ponytail: no brand suffix — Bing flags titles >= 70 chars
   const tagsHtml = post.tags
     .map((t) => `<a href="/blog/tag/${t}" style="color:#00d2ff;text-decoration:none;">#${t}</a>`)
     .join(' ');
@@ -1186,7 +1182,7 @@ for (const tag of allTags) {
   const tagUrl = `${SITE}/blog/tag/${tag}`;
   const label = formatTagLabel(tag);
   const tagTitle = `${label} | ArcadeDeck Blog`;
-  const tagDesc = `All ArcadeDeck blog posts tagged "${label}" — strategy guides, design notes, patch notes, and recaps.`;
+  const tagDesc = `All ArcadeDeck blog posts tagged "${label}" — strategy guides, game design notes, patch notes, Steam launch news, and monthly Hall of Fame recaps from the ArcadeDeck team.`;
 
   const tagNoscript = `
       <div style="background:#171424;color:#eaeaf0;font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;">

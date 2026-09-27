@@ -12,6 +12,10 @@
         "destination": "/",
         "type": 301
       },
+      { "regex": "^/(?P<lang>ja|ko)/play/(idle-avatar-rpg|trade-tycoon)/?$", "destination": "/:lang/", "type": 301 },
+      { "regex": "^/play/(idle-avatar-rpg|trade-tycoon)/?$", "destination": "/", "type": 301 },
+      { "regex": "^/(?P<lang>ja|ko)/forum(/.*)?$", "destination": "/:lang/", "type": 301 },
+      { "regex": "^/forum(/.*)?$", "destination": "/", "type": 301 },
       { "source": "/de", "destination": "/", "type": 301 },
       { "source": "/de/:rest*", "destination": "/:rest*", "type": 301 },
       { "source": "/fr", "destination": "/", "type": 301 },
@@ -39,9 +43,6 @@
       { "source": "/ko/play/kingdoms-last-stand", "destination": "/ko/play/kingdom-of-ashes-colosseum", "type": 301 }
     ],
     "rewrites": [
-      { "source": "/forum/**", "destination": "/index.html" },
-      { "source": "/{ja,ko}/forum", "destination": "/index.html" },
-      { "source": "/{ja,ko}/forum/**", "destination": "/index.html" },
       { "source": "/{ja,ko}/{about,privacy,contact,my-games,fractured-realm,blog}", "destination": "/index.html" },
       { "source": "/{ja,ko}/blog/**", "destination": "/index.html" }
     ],
@@ -57,7 +58,7 @@
           { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
           { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
           { "key": "Permissions-Policy", "value": "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()" },
-          { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.doubleclick.net https://*.adtrafficquality.google; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; media-src 'self' https:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebase.com https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com https://analytics.google.com https://stats.g.doubleclick.net https://www.google.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.adtrafficquality.google; frame-src 'self' https:; child-src 'self' https:; worker-src 'self' blob:; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests" }
+          { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://fundingchoicesmessages.google.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.doubleclick.net https://*.adtrafficquality.google; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; media-src 'self' https:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebase.com https://fundingchoicesmessages.google.com https://www.google-analytics.com https://*.google-analytics.com https://*.googletagmanager.com https://analytics.google.com https://stats.g.doubleclick.net https://www.google.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.adtrafficquality.google; frame-src 'self' https:; child-src 'self' https:; worker-src 'self' blob:; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests" }
         ]
       },
       {

@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { Rocket, Flame, Gamepad2, Trophy, Share2 } from 'lucide-react';
+import { Rocket, Flame, Gamepad2, Trophy, Share2, Medal, Globe } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import { games, deviceGames } from '../data/games';
+import { games } from '../data/games';
 import type { Game } from '../data/games';
 import { thumb360, SRCSET_SIZES } from '../utils/thumb';
 import { useNickname } from '../hooks/useNickname';
 import { getCurrentStreak, readStreak } from '../utils/streak';
-import { TIER_META, XP_PER_LEVEL, deckStats, formatScore, readPB, tierOf } from '../utils/pb';
+import { XP_PER_LEVEL, deckStats, formatScore, nextTierAt, readCachedRank, readPB, tierLabel, tierMeta, tierOf, tierProgress } from '../utils/pb';
+import { fetchMyRank, fetchTop, playerId, syncLeaderboard } from '../utils/leaderboard';
+import type { LbRow } from '../utils/leaderboard';
 import { useUiText, useLocale, getLocalizedString } from '../i18n';
 import './MyGames.css';
 
@@ -29,6 +31,20 @@ const MyGames = () => {
   const [streak] = useState(() => ({ current: getCurrentStreak(), best: readStreak().best }));
   const deck = useMemo(() => deckStats(), []);
   const [copied, setCopied] = useState(false);
+  const [top, setTop] = useState<LbRow[] | null>(null);
+  const [rank, setRank] = useState(readCachedRank);
+  const me = useMemo(() => playerId(), []);
+  const rankTitle = t(rank === null && deck.xp <= 0 ? 'homeRankUnranked' : 'homeRankTitle', 'Global rank');
+
+  // Push our row (no-op when unchanged), then read the top table + our rank.
+  useEffect(() => {
+    let live = true;
+    syncLeaderboard()
+      .then(() => Promise.all([fetchTop(), fetchMyRank()]))
+      .then(([rows, r]) => { if (live) { setTop(rows); setRank(r); } })
+      .catch(() => { if (live) setTop([]); });
+    return () => { live = false; };
+  }, []);
 
   // ponytail: native share sheet where it exists, clipboard everywhere else.
   const handleShareDeck = async () => {
@@ -50,25 +66,40 @@ const MyGames = () => {
       // user dismissed the share sheet, or clipboard is blocked — nothing to do
     }
   };
-  const recentGames = useMemo(() => readRecentlyPlayed(), []);
-  const otherGames = useMemo(
-    () => deviceGames.filter(g => !recentGames.some(r => r.id === g.id)),
-    [recentGames],
+  const recentGames = useMemo(() => readRecentlyPlayed().slice(0, 5), []);
+  // Scores aren't comparable across games, so rank by tier, then how close to
+  // the next one, then raw score as a last tiebreak.
+  const bestGames = useMemo(
+    () => games
+      .map(g => ({ g, pb: readPB(g.id) }))
+      .filter(x => x.pb > 0)
+      .map(x => ({ ...x, tier: tierOf(x.g.id, x.pb), pct: tierProgress(x.g.id, x.pb) }))
+      .sort((a, b) => b.tier - a.tier || b.pct - a.pct || b.pb - a.pb)
+      .slice(0, 5)
+      .map(x => x.g),
+    [],
   );
 
   useEffect(() => {
     document.title = 'My Games | ArcadeDeck';
   }, []);
 
-  const renderCard = (game: Game) => {
+  const renderCard = (game: Game, rank?: number) => {
     const title = getLocalizedString(game, 'title', lang, overlay);
     const pb = readPB(game.id);
-    const meta = TIER_META[tierOf(game.id, pb)];
+    const tier = tierOf(game.id, pb);
+    const meta = tierMeta(tier);
+    const next = pb > 0 ? nextTierAt(game.id, pb) : null;
+    // Tier the next threshold actually lands on — capped games collapse
+    // several tiers onto one score, so this can be well past tier + 1.
+    const nextMeta = next !== null ? tierMeta(tierOf(game.id, next)) : null;
+    const pct = tierProgress(game.id, pb);
     // Absolute path, or a locale-prefixed URL (/ja/my-games) resolves the
     // relative "images/…" against the prefix and 404s.
     const thumbUrl = `${import.meta.env.BASE_URL}${game.thumbnail}`;
     return (
-      <Link key={game.id} to={`/play/${game.slug}`} className="mini-game-card">
+      <Link key={game.id} to={`/play/${game.slug}`} className={`mini-game-card ${meta ? meta.cls : ''}`}>
+        {rank !== undefined && <span className="mini-rank" aria-hidden="true">{rank}</span>}
         <img
           src={thumbUrl}
           srcSet={`${import.meta.env.BASE_URL}${thumb360(game.thumbnail)} 360w, ${thumbUrl} 640w`}
@@ -81,19 +112,30 @@ const MyGames = () => {
         />
         <div className="mini-info">
           <h4>{title}</h4>
-          <span className="genre-tag">{game.genres[0]}</span>
-          {pb > 0 && (
-            <span className="mini-pb">
-              {getLocalizedString(game, 'scoreLabel', lang, overlay) || t('pbScore', 'Score')} {formatScore(pb)}
-            </span>
+          <div className="mini-meta">
+            <span className="genre-tag">{game.genres[0]}</span>
+            {pb > 0 && (
+              <span className="mini-pb">
+                {getLocalizedString(game, 'scoreLabel', lang, overlay) || t('pbScore', 'Score')} <strong>{formatScore(pb)}</strong>
+              </span>
+            )}
+          </div>
+          {next !== null && nextMeta && (
+            <div className="mini-next">
+              <span className="mini-next-bar" aria-hidden="true"><span style={{ width: `${pct}%` }} /></span>
+              <span className="mini-next-label">
+                {t('pbToTier', '{n} to {tier}').replace('{n}', formatScore(next - pb)).replace('{tier}', tierLabel(nextMeta, t))}
+              </span>
+            </div>
           )}
         </div>
         {meta && (
-          <span className={`mini-tier ${meta.cls}`} title={t(meta.key, meta.en)}>
-            <Trophy size={13} aria-hidden="true" />
+          <span className={`mini-tier ${meta.cls}`}>
+            <Trophy size={14} aria-hidden="true" />
+            <span>{tierLabel(meta, t)}</span>
           </span>
         )}
-        <span className="go-arrow">→</span>
+        <span className="go-arrow" aria-hidden="true">→</span>
       </Link>
     );
   };
@@ -101,7 +143,7 @@ const MyGames = () => {
   return (
     <div className="my-games-page">
       <>
-        <meta name="description" content="Your personal ArcadeDeck library — recently played games and your Gamer ID, stored in your browser." />
+        <meta name="description" content="Your personal ArcadeDeck library: recently played games, liked titles, personal bests, mastery badges, Deck Level, and your Gamer ID, all in your browser." />
         <meta property="og:title" content="My Games | ArcadeDeck" />
         <meta property="og:url" content="https://arcadedeck.net/my-games" />
         <meta name="robots" content="noindex, follow" />
@@ -111,9 +153,11 @@ const MyGames = () => {
         <header className="my-games-header">
           <h1>{t('myGamesTitle', 'My')} <span>{t('myGamesSpan', 'Games')}</span></h1>
           <p className="subtitle">{t('myGamesSubtitle', 'Your library, saved right here in this browser')}</p>
-          <div className="nickname-badge">{t('myGamesOperator', 'Operator')}: {nickname}</div>
+        </header>
 
-          <div className="deck-panel">
+        <section className="deck-wall" aria-label={t('deckLevel', 'Deck Level')}>
+          <div className="deck-wall-inner">
+            <div className="nickname-badge">{t('myGamesOperator', 'Operator')}: {nickname}</div>
             <div className="deck-level">
               <span className="deck-level-num">{deck.level}</span>
               <span className="deck-level-word">{t('deckLevel', 'Deck Level')}</span>
@@ -130,46 +174,89 @@ const MyGames = () => {
               <li><strong>{deck.mastered}</strong> {t('deckMastered', 'mastered')}</li>
               <li><strong>{deck.bestStreak}</strong> {t('deckBestStreak', 'best streak')}</li>
             </ul>
+            {streak.best > 0 && (
+              <div className="ach-row" aria-label={t('myAchAriaLabel', 'Achievements')}>
+                {streak.current >= 3 && (
+                  <span className="ach-badge tier-flame">
+                    <Flame size={14} aria-hidden="true" />
+                    <span className="ach-label">{t('myAchStreak', '{n}-Day Streak').replace('{n}', String(streak.current))}</span>
+                  </span>
+                )}
+                {streak.best > streak.current && streak.best >= 3 && (
+                  <span className="ach-badge tier-bronze" title={t('myAchBestStreak', 'Best Streak')}>
+                    <Flame size={14} aria-hidden="true" />
+                    <span className="ach-label">{t('myAchBestStreakLabel', 'Best: {n} days').replace('{n}', String(streak.best))}</span>
+                  </span>
+                )}
+              </div>
+            )}
             <button type="button" className="deck-share" onClick={handleShareDeck}>
               <Share2 size={15} aria-hidden="true" /> {copied ? t('deckShareCopied', 'Copied!') : t('deckShare', 'Share my deck')}
             </button>
           </div>
-          {streak.best > 0 && (
-            <div className="ach-row" aria-label={t('myAchAriaLabel', 'Achievements')}>
-              {streak.current >= 3 && (
-                <span className="ach-badge tier-flame">
-                  <Flame size={14} aria-hidden="true" />
-                  <span className="ach-label">{t('myAchStreak', '{n}-Day Streak').replace('{n}', String(streak.current))}</span>
-                </span>
-              )}
-              {streak.best > streak.current && streak.best >= 3 && (
-                <span className="ach-badge tier-bronze" title={t('myAchBestStreak', 'Best Streak')}>
-                  <Flame size={14} aria-hidden="true" />
-                  <span className="ach-label">{t('myAchBestStreakLabel', 'Best: {n} days').replace('{n}', String(streak.best))}</span>
-                </span>
-              )}
-            </div>
-          )}
-        </header>
+        </section>
 
-        <div className="my-games-content">
-          {recentGames.length > 0 ? (
-            <section className="no-rank-section">
-              <h2 className="section-title"><Gamepad2 size={20} aria-hidden="true" /> {t('myGamesRecent', 'Recently Played')}</h2>
-              <div className="my-games-list">{recentGames.map(renderCard)}</div>
-            </section>
+        <section className="lb-section" aria-label={t('lbTitle', 'Global Leaderboard')}>
+          <h2 className="section-title">
+            <Globe size={20} aria-hidden="true" /> {t('lbTitle', 'Global Leaderboard')}
+            <span className="section-count" title={rankTitle}>{t('lbYourRank', 'You: #{n}').replace('{n}', String(rank ?? '???'))}</span>
+          </h2>
+          {top === null ? (
+            <p className="lb-empty">{t('lbLoading', 'Loading…')}</p>
+          ) : top.length === 0 ? (
+            <p className="lb-empty">{t('lbEmpty', 'No one ranked yet — finish a run to claim the first spot.')}</p>
           ) : (
-            <div className="my-games-empty empty-state">
-              <Rocket size={40} aria-hidden="true" />
-              <h2>{t('myGamesEmptyTitle', 'Nothing played yet')}</h2>
-              <p>{t('myGamesEmptyDesc', 'Pick a game below — it will show up here next time you visit.')}</p>
-            </div>
+            <ol className="lb-list">
+              {top.map((row, i) => (
+                <li key={row.id} className={row.id === me ? 'lb-me' : ''}>
+                  <span className="lb-rank">{i + 1}</span>
+                  <span className="lb-nick">{row.nickname}{row.id === me && <small>{t('lbYou', 'you')}</small>}</span>
+                  <span className="lb-level">{t('lbLevel', 'Lv {n}').replace('{n}', String(row.level))}</span>
+                  <span className="lb-xp">{formatScore(row.xp)} XP</span>
+                </li>
+              ))}
+              {!top.some(r => r.id === me) && (
+                <li className="lb-gap" aria-hidden="true">…</li>
+              )}
+              {!top.some(r => r.id === me) && (
+                <li className="lb-me" title={rankTitle}>
+                  <span className="lb-rank">{rank ?? '???'}</span>
+                  <span className="lb-nick">{nickname}<small>{t('lbYou', 'you')}</small></span>
+                  <span className="lb-level">{t('lbLevel', 'Lv {n}').replace('{n}', String(deck.level))}</span>
+                  <span className="lb-xp">{formatScore(deck.xp)} XP</span>
+                </li>
+              )}
+            </ol>
           )}
+        </section>
+
+        <div className="my-games-cols">
+          <section className="no-rank-section">
+            <h2 className="section-title"><Medal size={20} aria-hidden="true" /> {t('myGamesBest', 'My Best Games')} <span className="section-count">{bestGames.length}</span></h2>
+            {bestGames.length > 0 ? (
+              <div className="my-games-list">{bestGames.map((g, i) => renderCard(g, i + 1))}</div>
+            ) : (
+              <div className="my-games-empty empty-state">
+                <Trophy size={40} aria-hidden="true" />
+                <h2>{t('myGamesBestEmptyTitle', 'No records yet')}</h2>
+                <p>{t('myGamesBestEmptyDesc', 'Finish a run to set a personal best — it lands here with its Bronze / Silver / Gold tier.')}</p>
+                <Link to="/" className="empty-cta-btn">{t('myGamesBrowse', 'Browse games')}</Link>
+              </div>
+            )}
+          </section>
 
           <section className="no-rank-section">
-            <h2 className="section-title"><Rocket size={20} aria-hidden="true" /> {t('myGamesAll', 'More to Play')}</h2>
-            <p className="section-desc">{t('myGamesAllDesc', 'The rest of the ArcadeDeck catalogue.')}</p>
-            <div className="my-games-list">{otherGames.map(renderCard)}</div>
+            <h2 className="section-title"><Gamepad2 size={20} aria-hidden="true" /> {t('myGamesRecent', 'Recently Played')} <span className="section-count">{recentGames.length}</span></h2>
+            {recentGames.length > 0 ? (
+              <div className="my-games-list">{recentGames.map(g => renderCard(g))}</div>
+            ) : (
+              <div className="my-games-empty empty-state">
+                <Rocket size={40} aria-hidden="true" />
+                <h2>{t('myGamesEmptyTitle', 'Nothing played yet')}</h2>
+                <p>{t('myGamesEmptyDesc', 'Pick a game from the catalogue — it will show up here next time you visit.')}</p>
+                <Link to="/" className="empty-cta-btn">{t('myGamesBrowse', 'Browse games')}</Link>
+              </div>
+            )}
           </section>
         </div>
       </main>

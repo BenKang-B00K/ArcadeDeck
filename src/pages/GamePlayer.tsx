@@ -15,8 +15,8 @@ import RelatedGames from '../components/gameplayer/RelatedGames';
 import RelatedPosts from '../components/gameplayer/RelatedPosts';
 import { useNickname } from '../hooks/useNickname';
 import { AD_SLOTS } from '../constants/gameConstants';
-import { MAX_SCORE, TIER_META, formatScore, nextTierAt, readPB, recordPlayed, savePB, tierOf } from '../utils/pb';
-import { useUiText, useLocale, getLocalizedString, getLocalizedObjects } from '../i18n';
+import { MAX_SCORE, formatScore, nextTierAt, readPB, recordPlayed, savePB, tierLabel, tierMeta, tierOf } from '../utils/pb';
+import { useUiText, useLocale, getLocalizedString } from '../i18n';
 import { genreSlug } from '../utils/genres';
 import '../components/GameCard.css';
 import './GamePlayer.css';
@@ -66,7 +66,8 @@ const GamePlayer: React.FC = () => {
   }, [id, game]);
 
   // Personal best. Games post their final score to the parent frame; we keep
-  // the best one in localStorage. Nothing leaves the browser.
+  // the best one in localStorage and push the resulting Deck XP to the global
+  // leaderboard.
   useEffect(() => {
     if (!game) return;
     setPb(readPB(game.id));
@@ -90,6 +91,7 @@ const GamePlayer: React.FC = () => {
       if (savePB(game.id, score)) {
         setPb(score);
         setIsNewBest(true);
+        void import('../utils/leaderboard').then(m => m.syncLeaderboard());
       }
     };
 
@@ -296,7 +298,7 @@ const GamePlayer: React.FC = () => {
 
           {pb > 0 && (() => {
             const tier = tierOf(game.id, pb);
-            const meta = TIER_META[tier];
+            const meta = tierMeta(tier);
             const next = nextTierAt(game.id, pb);
             const label = getLocalizedString(game, 'scoreLabel', lang, overlay) || uiT('pbScore', 'Score');
             return (
@@ -304,7 +306,7 @@ const GamePlayer: React.FC = () => {
                 <span className={`pb-chip ${meta ? meta.cls : ''}`}>
                   <Trophy size={14} aria-hidden="true" />
                   <span>{uiT('pbBest', 'Best')} {label}: <strong>{formatScore(pb)}</strong></span>
-                  {meta && <span className="pb-tier">{uiT(meta.key, meta.en)}</span>}
+                  {meta && <span className="pb-tier">{tierLabel(meta, uiT)}</span>}
                 </span>
                 {isNewBest && <span className="pb-new">{uiT('pbNewBest', 'New best!')}</span>}
                 {next !== null && (
@@ -373,13 +375,9 @@ const GamePlayer: React.FC = () => {
           {(!gameStarted || !iframeLoading) && <AdBanner slot={AD_SLOTS.GAME_PLAYER} style={{ margin: '0' }} />}
         </div>
 
-        <GameInfoTabs game={game} lang={lang} overlay={overlay} activeTab={activeTab} setActiveTab={setActiveTab} />
+        <GameInfoTabs game={game} lang={lang} overlay={overlay} activeTab={activeTab} setActiveTab={setActiveTab} pb={pb} />
 
-        <CommentSection
-          gameId={game.id}
-          currentNickname={nickname}
-          featured={getLocalizedObjects(game, 'featuredComments', lang, overlay)}
-        />
+        <CommentSection gameId={game.id} currentNickname={nickname} />
 
         <RelatedPosts gameSlug={game.slug} />
         <RelatedGames current={game} />

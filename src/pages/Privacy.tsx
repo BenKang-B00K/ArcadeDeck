@@ -29,7 +29,7 @@ const Privacy: React.FC = () => {
           <p>We collect only the minimum information needed to operate the Service.</p>
           <h3 style={{ marginTop: '16px', color: '#00d2ff' }}>2.1 Information You Provide</h3>
           <ul>
-            <li><strong>Gamer ID (nickname):</strong> A self-chosen display name shown on comments and forum posts. We never ask for your real name.</li>
+            <li><strong>Gamer ID (nickname):</strong> A self-chosen display name shown on comments. We never ask for your real name.</li>
             <li><strong>Comments:</strong> Any text you voluntarily post in a game's comment section.</li>
           </ul>
           <h3 style={{ marginTop: '16px', color: '#00d2ff' }}>2.2 Information Collected Automatically</h3>
@@ -41,7 +41,7 @@ const Privacy: React.FC = () => {
 
           <h2 style={{ marginTop: '24px' }}>3. How We Use Your Information</h2>
           <ul>
-            <li>Operate the Service (save preferences, render comments and forum threads).</li>
+            <li>Operate the Service (save preferences, render comments).</li>
             <li>Maintain and improve the Service (debug errors, measure usage trends).</li>
             <li>Serve relevant advertisements through Google AdSense.</li>
             <li>Detect, prevent, and address abuse, spam, or unauthorized use.</li>
@@ -63,7 +63,7 @@ const Privacy: React.FC = () => {
           <ul>
             <li><strong>Google AdSense</strong> — serves ads on the Service. Google, as a third-party vendor, uses cookies to serve ads based on your visit to this and other sites on the Internet. You may opt out of personalized advertising by visiting <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener noreferrer" style={{ color: '#00d2ff' }}>Google Ads Settings</a>, or use <a href="https://www.aboutads.info/" target="_blank" rel="noopener noreferrer" style={{ color: '#00d2ff' }}>aboutads.info</a> to opt out of third-party vendor cookies.</li>
             <li><strong>Google Analytics</strong> — measures site traffic and engagement. Data is processed per the <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" style={{ color: '#00d2ff' }}>Google Privacy Policy</a>.</li>
-            <li><strong>Google Firebase (Firestore)</strong> — stores comments and forum posts. Hosted by Google; subject to the <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener noreferrer" style={{ color: '#00d2ff' }}>Firebase Privacy Notice</a>.</li>
+            <li><strong>Google Firebase (Firestore)</strong> — stores comments and leaderboard rows. Hosted by Google; subject to the <a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener noreferrer" style={{ color: '#00d2ff' }}>Firebase Privacy Notice</a>.</li>
             <li><strong>Google Fonts</strong> — serves typography assets used on the Service.</li>
           </ul>
 
@@ -82,7 +82,7 @@ const Privacy: React.FC = () => {
           <p>To exercise any of these rights, email us at <a href="mailto:help@arcadedeck.net" style={{ color: '#00d2ff' }}>help@arcadedeck.net</a>. Because we identify users only by self-chosen Gamer IDs, please include your Gamer ID and the affected game(s) so we can locate the relevant records.</p>
 
           <h2 style={{ marginTop: '24px' }}>8. Data Retention</h2>
-          <p>Comments and forum posts are retained indefinitely so the discussion history of the Service remains intact. You may request deletion of records associated with your Gamer ID at any time (see Section 7).</p>
+          <p>Comments are retained indefinitely so the discussion history of the Service remains intact. You may request deletion of records associated with your Gamer ID at any time (see Section 7).</p>
 
           <h2 style={{ marginTop: '24px' }}>9. Data Security</h2>
           <p>We use industry-standard security measures provided by Google Cloud / Firebase to protect data in transit and at rest. However, no method of transmission over the internet is 100% secure, and we cannot guarantee absolute security.</p>

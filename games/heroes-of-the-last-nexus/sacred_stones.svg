@@ -1,0 +1,56 @@
+<svg width="720" height="60" viewBox="0 0 720 60" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="stoneGlow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Sacred Edge (Connecting Beam) -->
+  <g filter="url(#stoneGlow)">
+    <path d="M0 30 L720 30" fill="none" stroke="#00ffff" stroke-width="2" opacity="0.4">
+      <animate attributeName="stroke-width" values="1;4;1" dur="2s" repeatCount="indefinite" />
+      <animate attributeName="opacity" values="0.2;0.6;0.2" dur="2s" repeatCount="indefinite" />
+    </path>
+    <!-- Secondary thinner beam for extra shine -->
+    <path d="M0 30 L720 30" fill="none" stroke="white" stroke-width="0.5" opacity="0.6">
+      <animate attributeName="opacity" values="0.3;0.8;0.3" dur="1.5s" repeatCount="indefinite" />
+    </path>
+  </g>
+  
+  <!-- Lined up stones with slight variations -->
+  <g filter="url(#stoneGlow)">
+    <!-- Generating a row of floating geometric stones -->
+    <path d="M40 30 L55 15 L70 30 L55 45 Z" fill="#2c3e50" stroke="#00ffff" stroke-width="1" opacity="0.8">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 0,-5; 0,0" dur="3s" repeatCount="indefinite" />
+    </path>
+    <path d="M140 35 L160 20 L180 35 L160 50 Z" fill="#34495e" stroke="#00ffff" stroke-width="1" opacity="0.9">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 0,-3; 0,0" dur="4s" repeatCount="indefinite" />
+    </path>
+    <path d="M240 25 L260 10 L280 25 L260 40 Z" fill="#2c3e50" stroke="#00ffff" stroke-width="1.5" opacity="0.8">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 0,-6; 0,0" dur="2.5s" repeatCount="indefinite" />
+    </path>
+    <path d="M340 30 L365 15 L390 30 L365 45 Z" fill="#34495e" stroke="#00ffff" stroke-width="2" opacity="1">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 0,-4; 0,0" dur="3.5s" repeatCount="indefinite" />
+    </path>
+    <path d="M440 25 L460 10 L480 25 L460 40 Z" fill="#2c3e50" stroke="#00ffff" stroke-width="1.5" opacity="0.8">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 0,-6; 0,0" dur="2.8s" repeatCount="indefinite" />
+    </path>
+    <path d="M540 35 L560 20 L580 35 L560 50 Z" fill="#34495e" stroke="#00ffff" stroke-width="1" opacity="0.9">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 0,-3; 0,0" dur="4.2s" repeatCount="indefinite" />
+    </path>
+    <path d="M640 30 L655 15 L670 30 L655 45 Z" fill="#2c3e50" stroke="#00ffff" stroke-width="1" opacity="0.8">
+      <animateTransform attributeName="transform" type="translate" values="0,0; 0,-5; 0,0" dur="3.2s" repeatCount="indefinite" />
+    </path>
+  </g>
+  
+  <!-- Subtle Rune-like highlights on stones -->
+  <g fill="#00ffff" opacity="0.5">
+    <rect x="362" y="28" width="6" height="2" />
+    <rect x="258" y="23" width="4" height="2" />
+    <rect x="458" y="23" width="4" height="2" />
+  </g>
+</svg>

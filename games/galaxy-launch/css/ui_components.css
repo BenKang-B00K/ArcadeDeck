@@ -1,0 +1,341 @@
+/* UI COMPONENTS (Stats, Command Tabs, Active Effects) */
+
+.stat-val { 
+    font-size: 24px; 
+    font-weight: bold; 
+    color: var(--gold); 
+    display: block; 
+    margin-bottom: 5px; 
+}
+
+.stat-label { 
+    font-size: 10px; 
+    color: #888; 
+    text-transform: uppercase; 
+    letter-spacing: 1px; 
+}
+
+.panel-title { 
+    font-weight: bold; 
+    margin-bottom: 10px; 
+    text-align: center; 
+    font-size: 14px; 
+    border-bottom: 1px solid #333; 
+    padding-bottom: 5px;
+    font-family: 'Consolas', monospace;
+}
+
+/* Command Center Groups */
+.stat-group {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(0, 242, 254, 0.1);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+    position: relative;
+}
+
+.group-label {
+    position: absolute;
+    top: -7px;
+    left: 10px;
+    background: #0a0a1a;
+    padding: 0 5px;
+    font-size: 9px;
+    color: var(--neon);
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.stat-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.stat-icon {
+    font-size: 24px;
+    filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));
+}
+
+.stat-val-large {
+    font-size: 20px;
+    font-weight: bold;
+    color: #9b59b6;
+    display: block;
+    text-shadow: 0 0 10px rgba(155, 89, 182, 0.5);
+}
+
+.stat-val-mid {
+    font-size: 16px;
+    font-weight: bold;
+    display: block;
+}
+
+.stat-val-small {
+    font-size: 14px;
+    font-weight: bold;
+    display: block;
+    color: #eee;
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.stat-item {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 10px;
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 50px;
+}
+
+.stat-item::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 2px; height: 100%;
+    background: var(--neon);
+    opacity: 0.5;
+}
+
+.stat-item:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.stat-item:hover::before {
+    opacity: 1;
+    box-shadow: 0 0 8px var(--neon);
+}
+
+/* Specific Stat Item Colors */
+.stat-item:nth-child(1)::before { background: var(--pine); }
+.stat-item:nth-child(2)::before { background: var(--gear); }
+.stat-item:nth-child(3)::before { background: var(--dark); }
+.stat-item:nth-child(4)::before { background: var(--damage); }
+
+.stat-label {
+    font-size: 10px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+/* Value Styling adjustments */
+.stat-val-mid {
+    font-size: 15px;
+    font-family: 'Consolas', monospace;
+    letter-spacing: -0.5px;
+}
+
+.stat-val-small {
+    font-size: 13px;
+    font-family: 'Consolas', monospace;
+}
+
+/* Tab Content Visibility */
+.cmd-tab-content {
+    display: none;
+}
+
+.cmd-tab-content.active {
+    display: block;
+}
+
+/* Action Buttons */
+.prestige-action-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 8px;
+    background: linear-gradient(135deg, #2b0f4c 0%, #1a0a30 100%);
+    border: 1px solid #9b59b6;
+    color: #fff;
+    font-family: 'Consolas', monospace;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: 0.3s;
+}
+
+.prestige-action-btn:hover:not(:disabled) {
+    box-shadow: 0 0 15px rgba(155, 89, 182, 0.4);
+    transform: translateY(-1px);
+}
+
+.artifact-toggle-btn {
+    width: 100%;
+    background: #111;
+    border: 1px solid #333;
+    color: #aaa;
+    padding: 8px;
+    font-size: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-top: 5px;
+}
+
+/* Optimization for small heights */
+@media screen and (max-height: 700px) {
+    .stat-group {
+        padding: 8px;
+        margin-bottom: 8px;
+    }
+    .stat-grid {
+        gap: 5px;
+    }
+    .stat-item {
+        padding: 6px;
+        min-height: 40px;
+    }
+    .stat-icon {
+        font-size: 18px;
+    }
+    .stat-val-large {
+        font-size: 16px;
+    }
+    .stat-val {
+        font-size: 18px;
+    }
+    .group-label {
+        font-size: 8px;
+    }
+    .cmd-tab-content > div[style*="margin-top: 15px"] {
+        margin-top: 8px !important;
+    }
+}
+
+/* Active Effects Display */
+#active-effects-ui {
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+    zoom: var(--ui-scale);
+}
+
+.active-potion-chip {
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid currentColor;
+    border-radius: 4px;
+    padding: 5px 10px;
+    color: #fff;
+    font-size: 10px;
+    font-family: 'Consolas', monospace;
+    display: flex;
+    flex-direction: column;
+    min-width: 120px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+    animation: chipPulse 2s infinite ease-in-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.chip-timer-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: currentColor;
+    width: 100%;
+    opacity: 0.6;
+}
+
+@keyframes chipPulse {
+    0% { transform: scale(1); box-shadow: 0 0 5px currentColor; }
+    50% { transform: scale(1.02); box-shadow: 0 0 15px currentColor; }
+    100% { transform: scale(1); box-shadow: 0 0 5px currentColor; }
+}
+
+/* ARTIFACT DISCOVERY OVERLAY */
+.artifact-discovery-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.discovery-content {
+    background: rgba(10, 15, 25, 0.95);
+    border: 2px solid var(--gold);
+    border-radius: 15px;
+    padding: 40px;
+    text-align: center;
+    position: relative;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 0 50px rgba(241, 196, 15, 0.3);
+    animation: discoveryScale 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes discoveryScale {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.discovery-title {
+    color: var(--gold);
+    font-size: 14px;
+    letter-spacing: 5px;
+    margin-bottom: 30px;
+    font-weight: 900;
+}
+
+.discovery-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 20px var(--gold));
+}
+
+.discovery-name {
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 10px;
+    text-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+.discovery-desc {
+    color: #aaa;
+    font-size: 14px;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+.discovery-close {
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 10px 30px;
+    cursor: pointer;
+    font-family: 'Consolas', monospace;
+    font-weight: bold;
+    transition: 0.3s;
+    border-radius: 4px;
+}
+
+.discovery-close:hover {
+    background: var(--gold);
+    color: #000;
+    box-shadow: 0 0 20px var(--gold);
+}

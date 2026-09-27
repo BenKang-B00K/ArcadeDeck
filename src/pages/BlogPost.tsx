@@ -90,7 +90,7 @@ const BlogPost: React.FC = () => {
 
   useEffect(() => {
     if (!post) return;
-    document.title = `${post.title} | ArcadeDeck Blog`;
+    document.title = post.title; // ponytail: no brand suffix — Bing flags titles >= 70 chars
     markPostRead(post.slug);
   }, [post]);
 
@@ -162,13 +162,13 @@ const BlogPost: React.FC = () => {
       <>
         <meta name="description" content={post.excerpt} />
         <meta property="og:type" content="article" />
-        <meta property="og:title" content={`${post.title} | ArcadeDeck Blog`} />
+        <meta property="og:title" content={post.title} />
         <meta property="og:description" content={post.excerpt} />
         <meta property="og:image" content={ogImage} />
         <meta property="og:image:alt" content={ogImageAlt} />
         <meta property="og:url" content={url} />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${post.title} | ArcadeDeck Blog`} />
+        <meta name="twitter:title" content={post.title} />
         <meta name="twitter:description" content={post.excerpt} />
         <meta name="twitter:image" content={ogImage} />
         <meta name="twitter:image:alt" content={ogImageAlt} />

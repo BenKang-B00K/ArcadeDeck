@@ -115,6 +115,7 @@
 .pb-chip.tier-gold   { color: #ffd166; border-color: rgba(255, 209, 102, 0.5); }
 .pb-chip.tier-silver { color: #d0d6e0; border-color: rgba(208, 214, 224, 0.4); }
 .pb-chip.tier-bronze { color: #cd9b6e; border-color: rgba(205, 155, 110, 0.4); }
+.pb-chip.tier-diamond { color: #9ff1ff; border-color: rgba(159, 241, 255, 0.6); box-shadow: 0 0 14px rgba(159, 241, 255, 0.3); }
 
 .pb-tier {
   text-transform: uppercase;
@@ -747,6 +748,31 @@
 }
 .controls-table tbody tr + tr td { border-top: 1px solid rgba(0, 210, 255, 0.15); }
 .controls-table td.key { white-space: nowrap; }
+
+/* ── Score tier table ── */
+.tiers-caption {
+  margin: 0 0 14px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+.tiers-table-wrap { overflow-x: auto; }
+.tiers-table { min-width: 560px; }
+.tiers-table th, .tiers-table td { text-align: center; padding: 8px 10px; font-size: 0.88rem; }
+.tiers-table th:first-child, .tiers-table td:first-child { text-align: left; }
+.tiers-table tbody th { font-weight: 800; white-space: nowrap; color: var(--tier, var(--text-primary)); }
+.tiers-table tbody td { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.tiers-table td.reached { color: var(--text-primary); }
+.tiers-table td.current {
+  color: #000;
+  font-weight: 800;
+  background: var(--tier, var(--primary-color));
+  border-radius: 6px;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--tier, var(--primary-color)) 50%, transparent);
+}
+.tiers-table tr.tier-bronze  { --tier: #cd9b6e; }
+.tiers-table tr.tier-silver  { --tier: #d0d6e0; }
+.tiers-table tr.tier-gold    { --tier: #ffd166; }
+.tiers-table tr.tier-diamond { --tier: #9ff1ff; }
 
 .faq-wrap { margin-top: 20px; }
 .faq-list {

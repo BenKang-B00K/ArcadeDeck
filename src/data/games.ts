@@ -27,9 +27,12 @@ export interface Game {
   // Auto-enter fullscreen on PLAY click. Defaults to true when omitted; set
   // false for games that misbehave or look worse in fullscreen.
   autoFullscreen?: boolean;
-  // Bronze/silver/gold personal-best thresholds, ascending. Only games whose
-  // build posts a GAME_OVER score have these. Tuning knob — raise or lower
-  // per game as real scores come in; omit to show the best with no tier.
+  // Personal-best anchors, non-decreasing: [Bronze 1, Silver 1, Gold 1,
+  // Gold 10, Diamond]. utils/pb.ts expands them into 31 tiers (10 divisions
+  // per band, linear between anchors, one Diamond on top). Stage-capped games
+  // repeat the cap so a full clear is Diamond. Only games whose build posts a
+  // GAME_OVER score have these. Tuning knob — raise or lower per game as real
+  // scores come in; omit to show the best with no tier.
   // The score's name (e.g. "Depth", "Waves") is `scoreLabel` in en.json.
   scoreTiers?: number[];
 }

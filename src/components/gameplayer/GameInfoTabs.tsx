@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { ReactNode } from 'react';
-import { BookOpen, Check, Joystick, Lightbulb, ScrollText, Sparkles } from 'lucide-react';
+import { BookOpen, Check, Joystick, Lightbulb, ScrollText, Sparkles, Trophy } from 'lucide-react';
 import type { Game } from '../../data/games';
 import type { LocaleOverlay } from '../../i18n';
 import {
@@ -10,6 +10,7 @@ import {
   useUiText,
 } from '../../i18n';
 import HelpfulThumbs from './HelpfulThumbs';
+import { TIERS, tierLabel, tierMeta, tierOf, tierThresholds } from '../../utils/pb';
 
 interface Props {
   game: Game;
@@ -17,6 +18,8 @@ interface Props {
   overlay: LocaleOverlay | null;
   activeTab: string;
   setActiveTab: (id: string) => void;
+  /** Current personal best — highlights the reached tier in the tier table. */
+  pb: number;
 }
 
 type Section = 'overview' | 'controls' | 'tips' | 'lore';
@@ -69,7 +72,7 @@ function loadView(gameId: string): Record<Section, ViewMode> {
   }
 }
 
-const GameInfoTabs: React.FC<Props> = ({ game, lang, overlay, activeTab, setActiveTab }) => {
+const GameInfoTabs: React.FC<Props> = ({ game, lang, overlay, activeTab, setActiveTab, pb }) => {
   const t = useUiText();
   const fullDescription = getLocalizedString(game, 'fullDescription', lang, overlay);
   const controls = getLocalizedString(game, 'controls', lang, overlay);
@@ -81,6 +84,7 @@ const GameInfoTabs: React.FC<Props> = ({ game, lang, overlay, activeTab, setActi
   const faq = getLocalizedObjects(game, 'faq', lang, overlay);
   const characters = getLocalizedObjects(game, 'characters', lang, overlay);
 
+  const tiers = tierThresholds(game.id);
   const hasTips = tips.length > 0;
   const hasLore = lore.length > 0;
   const hasFeatures = features.length > 0;
@@ -159,6 +163,11 @@ const GameInfoTabs: React.FC<Props> = ({ game, lang, overlay, activeTab, setActi
         {hasFeatures && (
           <a href="#section-features" className={`tab-btn ${activeTab === 'features' ? 'active' : ''}`} onClick={() => setActiveTab('features')}>
             <Sparkles size={14} aria-hidden="true" /> {t('tabFeatures', 'Features')}
+          </a>
+        )}
+        {tiers && (
+          <a href="#section-tiers" className={`tab-btn ${activeTab === 'tiers' ? 'active' : ''}`} onClick={() => setActiveTab('tiers')}>
+            <Trophy size={14} aria-hidden="true" /> {t('tabTiers', 'Tiers')}
           </a>
         )}
       </nav>
@@ -281,6 +290,53 @@ const GameInfoTabs: React.FC<Props> = ({ game, lang, overlay, activeTab, setActi
           </ul>
         </section>
       )}
+
+      {tiers && (() => {
+        // 3 bands × 10 divisions, then Diamond alone. Compact numbers keep
+        // 1,000,000,000-scale games readable ("1B", "10億").
+        const bands = [0, 1, 2].map(b => tiers.slice(b * 10, b * 10 + 10));
+        const compact = new Intl.NumberFormat(lang, { notation: 'compact', maximumFractionDigits: 1 });
+        const current = tierOf(game.id, pb);
+        const scoreLabel = getLocalizedString(game, 'scoreLabel', lang, overlay) || t('pbScore', 'Score');
+        const diamond = tierMeta(TIERS)!;
+        const cell = (tier: number, score: number) => (
+          <td key={tier} className={tier === current ? 'current' : tier < current ? 'reached' : ''} aria-current={tier === current ? 'true' : undefined}>
+            {compact.format(score)}
+          </td>
+        );
+        return (
+          <section id="section-tiers" className="info-section detail-card">
+            <h2 className="info-section-title"><Trophy size={18} aria-hidden="true" /> {t('playerTiers', 'Score Tiers')}</h2>
+            <p className="tiers-caption">{t('tiersCaption', '{label} needed to reach each tier. Your current tier is highlighted.').replace('{label}', scoreLabel)}</p>
+            <div className="tiers-table-wrap">
+              <table className="controls-table tiers-table">
+                <thead>
+                  <tr>
+                    <th>{t('tiersColTier', 'Tier')}</th>
+                    {bands[0].map((_, d) => <th key={d}>{d + 1}</th>)}
+                  </tr>
+                </thead>
+                <tbody>
+                  {bands.map((row, b) => {
+                    const meta = tierMeta(b * 10 + 1)!;
+                    return (
+                      <tr key={b} className={meta.cls}>
+                        <th scope="row">{t(meta.key, meta.en)}</th>
+                        {row.map((score, d) => cell(b * 10 + d + 1, score))}
+                      </tr>
+                    );
+                  })}
+                  <tr className={diamond.cls}>
+                    <th scope="row">{tierLabel(diamond, t)}</th>
+                    {cell(TIERS, tiers[TIERS - 1])}
+                    <td colSpan={9} />
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        );
+      })()}
     </div>
   );
 };

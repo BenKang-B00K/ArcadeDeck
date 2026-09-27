@@ -211,7 +211,11 @@ const HeroBackground = () => {
     let dispose = () => {};
     let cancelled = false;
 
-    import('three').then(THREE => {
+    // ponytail: idle-defer the 750 kB chunk — the CSS gradient paints first, the
+    // starfield fades in once the main thread is free (Lighthouse TBT / main-thread work).
+    const idle = (cb: () => void) =>
+      typeof window.requestIdleCallback === 'function' ? window.requestIdleCallback(cb, { timeout: 3000 }) : window.setTimeout(cb, 1500);
+    idle(() => import('three').then(THREE => {
       if (cancelled) return;
 
       let renderer: THREE_NS.WebGLRenderer;
@@ -299,7 +303,7 @@ const HeroBackground = () => {
         }
         renderer.dispose();
       };
-    });
+    }));
 
     return () => {
       cancelled = true;

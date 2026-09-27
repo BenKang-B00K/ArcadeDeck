@@ -43,7 +43,7 @@ const Blog: React.FC = () => {
       <>
         <meta
           name="description"
-          content="The ArcadeDeck devlog: patch notes, game design deep-dives, and strategy guides."
+          content="The ArcadeDeck devlog: patch notes for every release, game design deep-dives on how our browser games are built, strategy guides, and Steam launch news."
         />
         <meta property="og:title" content="Blog | ArcadeDeck Devlog & Game Updates" />
         <meta

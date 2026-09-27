@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GL:Infinite Fleet</title>
+    <link rel="icon" type="image/png" href="public/image/GL%20Favicon.png">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/game_animations.css">
+    <link rel="stylesheet" href="css/ui.css">
+    <link rel="stylesheet" href="css/ui_shop.css">
+    <link rel="stylesheet" href="css/ui_components.css">
+    <link rel="stylesheet" href="css/ui_codex.css">
+    <link rel="stylesheet" href="css/game.css">
+    <link rel="stylesheet" href="css/game_potions.css">
+    <link rel="stylesheet" href="css/game_events.css">
+    <link rel="stylesheet" href="css/game_missions.css">
+    <link rel="stylesheet" href="css/modifiers.css">
+</head>
+<body>
+    <div id="mission-container">
+        <button class="codex-btn-small ufo-codex-btn" onclick="toggleUfoCodex()" title="UFO Archive">🛸</button>
+        <div class="mission-header" onclick="toggleMissionPanel()">
+            <span class="mission-icon">🎯</span>
+            <span class="mission-title">DAILY MISSIONS</span>
+            <span id="mission-count-badge">0</span>
+        </div>
+        <button class="codex-btn-small drone-codex-btn" onclick="toggleDroneCodex()" title="Drone Archive">🤖</button>
+        <div id="mission-list" class="mission-list-hidden"></div>
+    </div>
+
+    <!-- UFO Codex Modal -->
+    <div id="ufo-codex" class="codex-modal" style="display: none;">
+        <div class="codex-overlay" onclick="toggleUfoCodex()"></div>
+        <div class="codex-scanlines"></div>
+        <div class="codex-container" style="max-width: 500px; height: auto; max-height: 80vh;">
+            <div class="codex-header">
+                <span class="codex-title">UFO ARCHIVE</span>
+                <span class="codex-close" onclick="toggleUfoCodex()">[CLOSE]</span>
+            </div>
+            <div class="codex-body" style="flex-direction: column;">
+                <div id="ufo-codex-grid" class="codex-grid-vertical"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Drone Codex Modal -->
+    <div id="drone-codex" class="codex-modal" style="display: none;">
+        <div class="codex-overlay" onclick="toggleDroneCodex()"></div>
+        <div class="codex-scanlines"></div>
+        <div class="codex-container" style="max-width: 500px; height: auto; max-height: 80vh;">
+            <div class="codex-header">
+                <span class="codex-title">DRONE ARCHIVE</span>
+                <span class="codex-close" onclick="toggleDroneCodex()">[CLOSE]</span>
+            </div>
+            <div class="codex-body" style="flex-direction: column;">
+                <div id="drone-codex-grid" class="codex-grid-vertical"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Offline Reward Modal -->
+    <div id="offline-modal" class="codex-modal" style="display: none; z-index: 10001;">
+        <div class="codex-overlay" onclick="closeOfflineModal()" style="cursor: pointer;"></div>
+        <div class="codex-container" style="max-width: 350px;">
+            <div class="codex-header" style="justify-content: center;">
+                <span class="codex-title">COMM-LINK RESTORED</span>
+            </div>
+            <div class="codex-body" style="flex-direction: column; text-align: center; gap: 20px; padding: 20px;">
+                <div id="offline-time-text" style="color: var(--neon); font-size: 14px; letter-spacing: 1px;">YOU WERE AWAY FOR 0m</div>
+                
+                <div id="offline-gains-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%;">
+                    <!-- Gains will be inserted here -->
+                </div>
+
+                <div style="font-size: 10px; color: #666; font-style: italic;">
+                    (Capped at 30 minutes of deep-space extraction)
+                </div>
+
+                <button class="discovery-close" onclick="closeOfflineModal()" style="width: 100%;">[ INITIALIZE RETRIEVAL ]</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="artifact-codex" class="codex-modal" style="display: none;">
+        <div class="codex-overlay" onclick="toggleArtifactCodex()"></div>
+        <div class="codex-scanlines"></div>
+        <div class="codex-container">
+            <div class="codex-header" onclick="toggleArtifactCodex()" style="cursor: pointer;">
+                <span class="codex-title">ARTIFACT ARCHIVE</span>
+                <span class="codex-close">[CLOSE DATABASE]</span>
+            </div>
+            <div class="codex-body">
+                <div id="codex-grid" class="codex-grid"></div>
+                <div id="codex-details" class="codex-details">
+                    <div id="detail-icon" class="detail-icon">?</div>
+                    <div id="detail-name" class="detail-name">SELECT ARTIFACT</div>
+                    <div id="detail-desc" class="detail-desc">Hover over an artifact to view its properties and quantum signature.</div>
+                    
+                    <div id="detail-source" class="source-guide" style="display:none;">
+                        <span class="source-title">[ QUANTUM SOURCE DATA ]</span>
+                        <div id="source-list"></div>
+                    </div>
+
+                    <div id="detail-count" class="detail-count"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading-screen">
+        <div class="bridge-overlay"></div>
+        <div class="loader-content">
+            <div class="loader-logo">🚀</div>
+            <div class="loader-title">GALAXY FLEET<br><span style="font-size: 0.6em; opacity: 0.7; letter-spacing: 8px;">INFINITE MISSION</span></div>
+            
+            <!-- Quick Start Guide -->
+            <div style="background: rgba(0, 242, 254, 0.05); border: 1px solid rgba(0, 242, 254, 0.2); padding: 15px; margin: 20px 0; border-radius: 4px; font-size: 11px; text-align: left; line-height: 1.6; color: #aaa;">
+                <b style="color: var(--neon); display: block; margin-bottom: 5px; border-bottom: 1px solid rgba(0, 242, 254, 0.3);">[ QUICK START PROTOCOL ]</b>
+                • <span style="color: #fff;">CLICK</span> the planet to deploy ships and gather <span style="color: var(--neon);">Stardust (✨)</span>.<br>
+                • <span style="color: #fff;">UPGRADE</span> your fleet in the terminal to increase DPS.<br>
+                • <span style="color: #fff;">COLONIZE</span> planets for passive resource production.<br>
+                • <span style="color: #fff;">CONQUER</span> the universe once you've reached max stability!
+            </div>
+
+            <div class="loader-bar-bg">
+                <div id="loader-bar" class="loader-bar"></div>
+            </div>
+            <div id="loader-status" class="loader-status">INITIALIZING SYSTEMS...</div>
+            <button id="start-btn" style="display: none; margin-top: 20px;">START MISSION</button>
+        </div>
+        <div id="intro-ship-container"></div>
+    </div>
+
+
+    
+
+    <div id="starfield"></div>
+    <div id="supernova-overlay"></div>
+    <div id="boss-vignette"></div>
+    <div id="crt-overlay"></div>
+    <div id="warning-msg">⚠️ WARNING: ENEMY REPAIR DRONE DETECTED! ⚠️</div>
+    
+    <div id="universe-display">
+        <div id="universe-glitch"></div>
+        <div id="universe-name">UNIVERSE-1</div>
+        <div id="universe-bar"></div>
+    </div>
+    
+    <div id="combo-container" style="display: none;">
+        <div id="combo-count">0</div>
+        <div id="combo-label">COMBO</div>
+        <div id="combo-bar-bg"><div id="combo-bar"></div></div>
+    </div>
+    
+    <div class="bottom-right-controls">
+        <button id="mute-btn" class="ctrl-btn" onclick="toggleMute()" title="Toggle Sound">SOUND: ON</button>
+        <button id="help-btn" class="ctrl-btn" onclick="toggleHelp()" title="Commander's Guide">?</button>
+        <div class="author-signature">Created by BenjaminK</div>
+    </div>
+
+    <div id="item-slots">
+        <div id="mini-inventory">
+            <div class="mini-slot" id="mini-slot-neon" onclick="showPotionTooltip('neon')">
+                ⚡<span id="count-neon">0</span>
+                <div class="potion-timer" id="timer-neon" style="display:none;"></div>
+                <div class="mini-tooltip" id="tooltip-neon"><b>NEON OVERDRIVE</b><br>Ships +25% Speed<br>Dur: 25s</div>
+            </div>
+            <div class="mini-slot" id="mini-slot-green" onclick="showPotionTooltip('green')">
+                🍃<span id="count-green">0</span>
+                <div class="potion-timer" id="timer-green" style="display:none;"></div>
+                <div class="mini-tooltip" id="tooltip-green"><b>BIO-RECYCLE</b><br>Pine Drop +50%<br>Dur: 25s</div>
+            </div>
+            <div class="mini-slot" id="mini-slot-gray" onclick="showPotionTooltip('gray')">
+                ⚙️<span id="count-gray">0</span>
+                <div class="potion-timer" id="timer-gray" style="display:none;"></div>
+                <div class="mini-tooltip" id="tooltip-gray"><b>GEAR-SYNC</b><br>Double Gear Drop<br>Dur: 25s</div>
+            </div>
+            <div class="mini-slot" id="mini-slot-dark" onclick="showPotionTooltip('dark')">
+                🔮<span id="count-dark">0</span>
+                <div class="potion-timer" id="timer-dark" style="display:none;"></div>
+                <div class="mini-tooltip" id="tooltip-dark"><b>VOID-X STIM</b><br>Crit Mult x1.5<br>Dur: 15s</div>
+            </div>
+        </div>
+        <div id="full-boost-btn" onclick="useAllPotions()" title="Use 1 of each owned potion">
+            <div class="boost-glow"></div>
+            <span class="boost-text">FULL<br>BOOST</span>
+        </div>
+    </div>
+
+    <div id="game-container">
+        <div id="target-area">
+            <div id="lobby-artifact-display"></div>
+            <div id="target-visual" class="planet-0">
+            </div>
+            <div class="target-bars-wrapper">
+                <div id="boss-timer-container" style="display: none; width: 100%; height: 4px; background: #331111; margin-bottom: 4px; border-radius: 2px; border: 1px solid #ff4757; overflow: hidden;">
+                    <div id="boss-timer-bar" style="width: 100%; height: 100%; background: #ff4757; transition: 0.1s linear;"></div>
+                </div>
+                <div id="hp-bar-container" style="position: relative; width: 100%; height: 12px; background: #222; border-radius: 6px; overflow: hidden; border: 1px solid #444;">
+                    <div id="hp-bar"></div>
+                    <span id="hp-text" style="
+                        position: absolute; 
+                        top: 50%; 
+                        left: 50%; 
+                        transform: translate(-50%, -50%); 
+                        font-size: 10px; 
+                        font-weight: bold; 
+                        color: white; 
+                        text-shadow: 1px 1px 2px black; 
+                        white-space: nowrap;
+                        pointer-events: none;
+                    ">0 / 0</span>
+                </div>
+            </div>
+            <div id="target-name">PROXIMA B</div>
+        </div>
+    </div>
+
+    
+
+
+<div id="help-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 450px; background: rgba(5, 5, 15, 0.98); border: 2px solid var(--neon); padding: 30px; z-index: 5000; border-radius: 4px; box-shadow: 0 0 50px rgba(0, 242, 254, 0.4); backdrop-filter: blur(15px); font-family: 'Consolas', monospace;">
+    <div style="position: absolute; top: 0; left: 0; width: 15px; height: 15px; border-top: 3px solid var(--neon); border-left: 3px solid var(--neon);"></div>
+    <div style="position: absolute; bottom: 0; right: 0; width: 15px; height: 15px; border-bottom: 3px solid var(--neon); border-right: 3px solid var(--neon);"></div>
+    <h2 style="color: var(--neon); margin-top: 0; letter-spacing: 2px; text-shadow: 0 0 10px var(--neon); text-align: center;">🚀 COMMANDER'S MANUAL v2.5</h2>
+    
+    <div style="max-height: 400px; overflow-y: auto; padding-right: 10px; font-size: 11px; line-height: 1.6; color: #ddd; scrollbar-width: thin;">
+        <div style="margin-bottom: 20px;">
+            <b style="color: var(--neon); border-bottom: 1px solid rgba(0, 242, 254, 0.3); display: block; margin-bottom: 8px;">[ CORE MECHANICS ]</b>
+            1. <b>Manual Sortie:</b> Click the planet to launch ships. Damage converted to ✨.<br>
+            2. <b>Auto-Fleet:</b> Hangar upgrades provide passive DPS even without clicking.<br>
+            3. <b>Fever Mode:</b> Click rapidly (25+ combo) to double damage and ✨ output.<br>
+            4. <b>Boss Encounters:</b> Every 10 levels, face a Mothership with unique abilities.
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <b style="color: var(--pine); border-bottom: 1px solid rgba(46, 204, 113, 0.3); display: block; margin-bottom: 8px;">[ RESOURCE LOGISTICS ]</b>
+            • <b>Pines (🌲):</b> Gathered from planets. Used for Efficiency & Mastery upgrades.<br>
+            • <b>Gears (⚙️):</b> Dropped by Machine Worlds & Drones. Used for Utility & Construction.<br>
+            • <b>Dark Matter (🔮):</b> Found in deep space. Powers endgame Void technology.<br>
+            • <b>Artifacts (📂):</b> Rare permanent buffs found by intercepting Relic Hunters.
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <b style="color: var(--colony); border-bottom: 1px solid rgba(230, 126, 34, 0.3); display: block; margin-bottom: 8px;">[ COLONY BASE ]</b>
+            Construct specialized facilities to generate resources passively. 
+            Buildings require time to complete. Use <span style="color: var(--gear);">Rapid Construction</span> ⚙️ to speed up construction protocols.
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <b style="color: var(--unlock); border-bottom: 1px solid rgba(241, 196, 15, 0.3); display: block; margin-bottom: 8px;">[ ADVANCED STRATEGIES ]</b>
+            • 🛸 <b>Mothership Events:</b> Golden UFOs give massive ✨, others give buffs.<br>
+            • 🤖 <b>Repair Drones:</b> Must be destroyed quickly to prevent planet health regeneration.<br>
+            • 🧪 <b>Potions:</b> Powerful temporary stimulants. Save them for tough boss fights!<br>
+            • 🌟 <b>Prestige:</b> Conquer the universe to gain permanent DMG & cost reduction.
+        </div>
+    </div>
+
+    <button onclick="toggleHelp()" style="width: 100%; margin-top: 20px; padding: 12px; background: rgba(0, 242, 254, 0.1); border: 1px solid var(--neon); color: var(--neon); font-weight: bold; cursor: pointer; border-radius: 2px; transition: 0.3s; font-family: 'Consolas', monospace;">[ RESUME MISSION ]</button>
+</div>
+    
+
+    <div class="ui-container left-panels">
+        <div id="unified-commander" class="ui-box" data-icon="📊" onclick="openPanel('unified-commander')">
+            <div class="panel-header" onclick="minimizePanel('unified-commander', event)" style="flex-direction: row; justify-content: space-between; cursor: pointer;">
+                <span class="panel-title" style="color:var(--neon); border:none; margin:0; padding:0; font-size:14px; letter-spacing: 1px;">COMMAND CENTER</span>
+                <span style="font-size: 10px; color: #555;">[MINIMIZE]</span>
+            </div>
+
+            <div id="cmd-tab-stats" class="cmd-tab-content active">
+                <div class="stat-group main-rank">
+                    <div class="stat-row">
+                        <span class="stat-icon">🎖️</span>
+                        <div class="stat-info">
+                            <span class="stat-label">Fleet Rank</span>
+                            <span id="prestige-display" class="stat-val-large">Novice (Lv.0)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-group">
+                    <div class="group-label">PRIMARY ENERGY</div>
+                    <div class="stat-row">
+                        <span class="stat-icon">✨</span>
+                        <div class="stat-info">
+                            <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                                <span class="stat-label">Energy Level</span>
+                                <span class="stat-sub">Rate: <span id="stardust-rate" style="color:var(--neon);">0</span>/s</span>
+                            </div>
+                            <span id="stardust" class="stat-val" style="margin-top:2px;">0</span>
+                        </div>
+                    </div>
+                    <button id="prestige-btn" onclick="doPrestige()" class="prestige-action-btn">
+                        🌟 CONQUER UNIVERSE
+                    </button>
+                </div>
+
+                <div class="stat-group">
+                    <div class="group-label">LOGISTICS & MATERIALS</div>
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">🌲 Pines</span>
+                            <div style="display:flex; flex-direction:column;">
+                                <span id="pines" class="stat-val-mid" style="color:var(--pine);">0</span>
+                                <span id="pines-rate" style="font-size:9px; color:rgba(46, 204, 113, 0.7);">+0/s</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">⚙️ Gears</span>
+                            <div style="display:flex; flex-direction:column;">
+                                <span id="gears-val" class="stat-val-mid" style="color:var(--gear);">0</span>
+                                <span id="gears-rate" style="font-size:9px; color:rgba(149, 165, 166, 0.7);">+0/s</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">🔮 Dark Matter</span>
+                            <div style="display:flex; flex-direction:column;">
+                                <span id="dark-matter" class="stat-val-mid" style="color:var(--dark);">0</span>
+                                <span id="dark-matter-rate" style="font-size:9px; color:rgba(142, 68, 173, 0.7);">+0/s</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">⚔️ Destructions</span>
+                            <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                                <span id="drones-destroyed" class="stat-val-small" title="Robots Destroyed">🤖 0</span>
+                                <span id="ufos-destroyed" class="stat-val-small" title="UFOs Destroyed">🛸 0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-group">
+                    <div class="group-label">COMBAT PERFORMANCE</div>
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">Total Clicks</span>
+                            <span id="total-clicks-display" class="stat-val-small">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Crit Rate</span>
+                            <span id="crit-rate-display" class="stat-val-small" style="color:var(--damage);">10.0%</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Crit Damage</span>
+                            <span id="crit-dmg-display" class="stat-val-small" style="color:var(--damage);">3.0x</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Proj. Speed</span>
+                            <span id="proj-speed-display" class="stat-val-small" style="color:var(--neon);">1.0x</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Click DPS</span>
+                            <span id="click-dps" class="stat-val-small" style="color:var(--neon);">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Auto Rate</span>
+                            <span id="auto-rate" class="stat-val-small" style="color:var(--unlock);">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
+                    <button class="prestige-action-btn" onclick="switchCmdTab('fleet')" style="background: linear-gradient(135deg, #0a2a3a 0%, #051a25 100%); border-color: var(--unlock); color: #fff;">
+                        🚀 MANAGE ACTIVE FLEET
+                    </button>
+                    <button onclick="toggleArtifacts()" class="artifact-toggle-btn">
+                        📂 VIEW DISCOVERED ARTIFACTS (<span id="artifact-count">0</span>)
+                    </button>
+                </div>
+                <div id="artifact-list"></div>
+            </div>
+            
+            <div id="cmd-tab-fleet" class="cmd-tab-content">
+                <div class="panel-title" style="color:var(--unlock); border:none; margin-bottom:15px; font-size: 12px;">[ FLEET CONFIGURATION ]</div>
+                <div id="ships-container"></div>
+                <button class="prestige-action-btn" onclick="switchCmdTab('stats')" style="margin-top: 15px; background: rgba(255,255,255,0.05); border-color: #444;">
+                    [ BACK TO OVERVIEW ]
+                </button>
+            </div>
+        </div>
+    </div>
+
+        <div id="active-effects-ui" style="
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        pointer-events: none;
+        z-index: 2500;
+        align-items: flex-end;
+    "></div>
+
+    <div class="ui-container right-panels">
+        <div id="unified-shop" class="ui-box terminal-theme" data-icon="🏪" onclick="openPanel('unified-shop')">
+            <!-- Terminal CRT Overlay -->
+            <div class="terminal-overlay"></div>
+            <div class="terminal-scanlines"></div>
+            
+            <div class="panel-header terminal-header" onclick="minimizePanel('unified-shop', event)" style="flex-direction: row; justify-content: space-between; cursor: pointer;">
+                <div class="header-left">
+                    <span class="terminal-prefix">></span>
+                    <span class="panel-title" style="color:#fff; border:none; margin:0; padding:0; font-size:14px; letter-spacing: 2px; font-weight: bold;">UPGRADE TERMINAL</span>
+                    <span class="terminal-version">v3.0.4-LOCKED</span>
+                </div>
+                <div class="header-right" style="display: flex; align-items: center; gap: 10px;">
+                    <div id="auto-upg-toggle" onclick="toggleAutoUpgrade(event)" class="auto-toggle-btn" title="Toggle Auto-Upgrade for Active Tab">
+                        AUTO: <span id="auto-upg-status" style="color:#ff4757;">OFF</span>
+                    </div>
+                    <span class="system-status">SYS_OK</span>
+                    <span class="minimize-btn">[ _ ]</span>
+                </div>
+            </div>
+
+            <!-- Terminal System Log Bar -->
+            <div class="terminal-log-bar">
+                <span id="terminal-last-msg">Initializing Core Systems...</span>
+                <span class="terminal-cursor">_</span>
+            </div>
+            
+            <div class="shop-tabs terminal-tabs">
+                <button class="shop-tab-btn active" id="tab-btn-shop" onclick="switchTab('shop')">
+                    <span class="tab-icon">🚀</span>
+                    <span class="tab-text">HANGAR</span>
+                </button>
+                <button class="shop-tab-btn" id="tab-btn-pine-lab" onclick="switchTab('pine-lab')">
+                    <span class="tab-icon">🌲</span>
+                    <span class="tab-text">LAB</span>
+                </button>
+                <button class="shop-tab-btn" id="tab-btn-eng-bay" onclick="switchTab('eng-bay')">
+                    <span class="tab-icon">⚙️</span>
+                    <span class="tab-text">ENG</span>
+                </button>
+                <button class="shop-tab-btn" id="tab-btn-black-market" onclick="switchTab('black-market')">
+                    <span class="tab-icon">🔮</span>
+                    <span class="tab-text">VOID</span>
+                </button>
+            </div>
+
+            <div id="tab-shop" class="shop-tab-content active">
+                <div class="tab-title" style="color:var(--neon);">HANGAR OPERATIONS</div>
+                <button id="upg-click" class="tech-btn hangar-btn" onclick="buyUpgrade('click')">
+                    <div class="tech-icon"><div class="icon-upg icon-click"></div></div>
+                    <div class="tech-info">
+                        <span class="tech-name">Multi-Launch (Lv.<span id="lv-click">1</span><span id="max-click"></span>)</span>
+                        <span class="tech-stat">Ships: <span id="val-click">1</span></span>
+                        <div class="tech-cost">
+                           <div>Cost: <span id="cost-click">50</span> ✨</div>
+                           <span id="prog-click" class="cost-progress"></span>
+                        </div>
+                    </div>
+                </button>
+                <button id="upg-auto" class="tech-btn hangar-btn" onclick="buyUpgrade('auto')">
+                    <div class="tech-icon"><div class="icon-upg icon-auto"></div></div>
+                    <div class="tech-info">
+                        <span class="tech-name">Auto-Hangar (Lv.<span id="lv-auto">0</span><span id="max-auto"></span>)</span>
+                        <span class="tech-stat">Ships: <span id="val-auto">0</span></span>
+                        <div class="tech-cost">
+                           <div>Cost: <span id="cost-auto">10</span> ✨</div>
+                           <span id="prog-auto" class="cost-progress"></span>
+                        </div>
+                    </div>
+                </button>
+                <button id="upg-autoSpeed" class="tech-btn hangar-btn" onclick="buyUpgrade('autoSpeed')">
+                    <div class="tech-icon"><div class="icon-upg icon-speed"></div></div>
+                    <div class="tech-info">
+                        <span class="tech-name">Auto-Speed (Lv.<span id="lv-autoSpeed">0</span><span id="max-autoSpeed"></span>)</span>
+                        <span class="tech-stat">Speed: +<span id="val-autoSpeed">0</span>%</span>
+                        <div class="tech-cost">
+                           <div>Cost: <span id="cost-autoSpeed">150</span> ✨</div>
+                           <span id="prog-autoSpeed" class="cost-progress"></span>
+                        </div>
+                    </div>
+                </button>
+                <button id="upg-autoPower" class="tech-btn hangar-btn" onclick="buyUpgrade('autoPower')">
+                    <div class="tech-icon"><div class="icon-upg icon-overclock"></div></div>
+                    <div class="tech-info">
+                        <span class="tech-name">Hangar Overclock (Lv.<span id="lv-autoPower">0</span><span id="max-autoPower"></span>)</span>
+                        <span class="tech-stat">Auto Dmg: +<span id="val-autoPower">0</span>%</span>
+                        <div class="tech-cost">
+                           <div>Cost: <span id="cost-autoPower">40</span> ✨</div>
+                           <span id="prog-autoPower" class="cost-progress"></span>
+                        </div>
+                    </div>
+                </button>
+                <button id="upg-shipReinforce" class="tech-btn hangar-btn" onclick="buyUpgrade('shipReinforce')">
+                    <div class="tech-icon"><div class="icon-upg icon-reinforced"></div></div>
+                    <div class="tech-info">
+                        <span class="tech-name">Reinforced Weapon (Lv.<span id="lv-shipReinforce">0</span><span id="max-shipReinforce"></span>)</span>
+                        <span class="tech-stat">Dmg: +<span id="val-shipReinforce">0</span>%</span>
+                        <div class="tech-cost">
+                           <div>Cost: <span id="cost-shipReinforce">3</span> ✨</div>
+                           <span id="prog-shipReinforce" class="cost-progress"></span>
+                        </div>
+                    </div>
+                </button>
+            </div>
+
+            <div id="tab-pine-lab" class="shop-tab-content">
+                <div class="tab-title" style="color:var(--pine);">BIO-RESEARCH LAB</div>
+                <button id="upg-clickMastery" class="tech-btn pine-btn" onclick="buyPineUpgrade('clickMastery')">
+                    <div class="tech-icon"><div class="icon-upg icon-tap"></div></div>
+                    <div class="tech-info">
+                        <span class="tech-name">Click Mastery (Lv.<span id="lv-clickMastery">0</span><span id="max-clickMastery"></span>)</span>
+                        <span class="tech-stat">Clicks/Tap: +<span id="val-clickMastery">0</span></span>
+                        <div class="tech-cost">
+                           <div>Cost: <span id="cost-clickMastery">50</span> 🌲</div>
+                           <span id="prog-clickMastery" class="cost-progress"></span>
+                        </div>
+                    </div>
+                </button>
+                <button id="upg-pineChance" class="tech-btn pine-btn" onclick="buyPineUpgrade('pineChance')">
+                    <div class="tech-icon"><div class="icon-upg icon-finder"></div></div>
+                    <div class="tech-info">
+                        <span class="tech-name">Pine Finder (Lv.<span id="lv-pineChance">0</span><span id="max-pineChance"></span>)</span>
+                        <span class="tech-stat">Chance: +<span id="val-pineChance">0</span>%</span>
+                        <div class="tech-cost">
+                           <div>Cost: <span id="cost-pineChance">30</span> 🌲</div>
+                           <span id="prog-pineChance" class="cost-progress"></span>
+                        </div>
+                    </div>
+                </button>
+                <button id="upg-luckyCharm" class="tech-btn pine-btn" onclick="buyPineUpgrade('luckyCharm')">
+                    <div class="tech-icon"><div class="icon-upg icon-lucky"></div></div>
+                    <div class="tech-info">
+                        <span class="tech-name">Lucky Charm (Lv.<span id="lv-luckyCharm">0</span><span id="max-luckyCharm"></span>)</span>
+                        <span class="tech-stat">Lucky Chance: +<span id="val-luckyCharm">0</span>%</span>
+                        <div class="tech-cost">
+                           <div>Cost: <span id="cost-luckyCharm">20</span> 🌲</div>
+                           <span id="prog-luckyCharm" class="cost-progress"></span>
+                        </div>
+                    </div>
+                </button>
+                <button id="upg-pinePower" class="tech-btn pine-btn" onclick="buyPineUpgrade('pinePower')">
+                    <div class="tech-icon"><div class="icon-upg icon-eco"></div></div>
+                    <div class="tech-info">
+                        <span class="tech-name">Eco-Engine (Lv.<span id="lv-pinePower">0</span><span id="max-pinePower"></span>)</span>
+                        <span class="tech-stat">Power: +<span id="val-pinePower">0</span>%</span>
+                        <div class="tech-cost">
+                           <div>Cost: <span id="cost-pinePower">10</span> 🌲</div>
+                           <span id="prog-pinePower" class="cost-progress"></span>
+                        </div>
+                    </div>
+                </button>
+                <button id="upg-market" class="tech-btn pine-btn" onclick="buyPineUpgrade('market')">
+                    <div class="tech-icon"><div class="icon-upg icon-market"></div></div>
+                    <div class="tech-info">
+                        <span class="tech-name">Market Efficiency (Lv.<span id="lv-market">0</span><span id="max-market"></span>)</span>
+                        <span class="tech-stat">Disc: -<span id="val-market">0</span>%</span>
+                        <div class="tech-cost">
+                           <div>Cost: <span id="cost-market">25</span> 🌲</div>
+                           <span id="prog-market" class="cost-progress"></span>
+                        </div>
+                    </div>
+                </button>
+            </div>
+
+            <div id="tab-eng-bay" class="shop-tab-content">
+                <div class="tab-title" style="color:var(--gear);">ENGINEERING BAY</div>
+                <button id="upg-clickSurge" class="tech-btn eng-btn" onclick="buyEngUpgrade('clickSurge')">
+                    <div class="tech-icon"><div class="icon-upg icon-surge"></div></div>
+                    <div class="tech-info">
+                        <span class="tech-name">Click Surge (Lv.<span id="lv-clickSurge">0</span><span id="max-clickSurge"></span>)</span>
+                        <span class="tech-stat">Surge Chance: <span id="val-clickSurge">2.0</span>%</span>
+                        <div class="tech-cost">
+                           <div>Cost: <span id="cost-clickSurge">2</span> ⚙️</div>
+                           <span id="prog-clickSurge" class="cost-progress"></span>
+                        </div>
+                    </div>
+                </button>
+                <button id="upg-rapidCon" class="tech-btn eng-btn" onclick="buyEngUpgrade('rapidCon')">
+                    <div class="tech-icon"><div class="icon-upg icon-rapid"></div></div>
+                    <div class="tech-info">
+                        <span class="tech-name">Rapid Construction (Lv.<span id="lv-rapidCon">0</span><span id="max-rapidCon"></span>)</span>
+                        <span class="tech-stat">Build Speed: +<span id="val-rapidCon">0</span>%</span>
+                        <div class="tech-cost">
+                           <div>Cost: <span id="cost-rapidCon">10</span> ⚙️</div>
+                           <span id="prog-rapidCon" class="cost-progress"></span>
+                        </div>
+                    </div>
+                </button>
+                <button id="upg-planetScan" class="tech-btn eng-btn" onclick="buyEngUpgrade('planetScan')">
+                    <div class="tech-icon"><div class="icon-upg icon-scan"></div></div>
+                    <div class="tech-info">
+                        <span class="tech-name">Planetary Scan (Lv.<span id="lv-planetScan">0</span><span id="max-planetScan"></span>)</span>
+                        <span class="tech-stat">Bonus Chance: +<span id="val-planetScan">0</span>%</span>
+                        <div class="tech-cost">
+                           <div>Cost: <span id="cost-planetScan">2</span> ⚙️</div>
+                           <span id="prog-planetScan" class="cost-progress"></span>
+                        </div>
+                    </div>
+                </button>
+                <button id="upg-droneFreq" class="tech-btn eng-btn" onclick="buyEngUpgrade('droneFreq')">
+                    <div class="tech-icon"><div class="icon-upg icon-beacon"></div></div>
+                    <div class="tech-info">
+                        <span class="tech-name">Drone Beacon (Lv.<span id="lv-droneFreq">0</span><span id="max-droneFreq"></span>)</span>
+                        <span class="tech-stat">Timer: -<span id="val-droneFreq">0</span>s</span>
+                        <div class="tech-cost">
+                           <div>Cost: <span id="cost-droneFreq">4</span> ⚙️</div>
+                           <span id="prog-droneFreq" class="cost-progress"></span>
+                        </div>
+                    </div>
+                </button>
+                <button id="upg-critChance" class="tech-btn eng-btn" onclick="buyEngUpgrade('critChance')">
+                    <div class="tech-icon"><div class="icon-upg icon-precision"></div></div>
+                    <div class="tech-info">
+                        <span class="tech-name">Precision Lens (Lv.<span id="lv-critChance">0</span><span id="max-critChance"></span>)</span>
+                        <span class="tech-stat">Crit: +<span id="val-critChance">0</span>%</span>
+                        <div class="tech-cost">
+                           <div>Cost: <span id="cost-critChance">5</span> ⚙️</div>
+                           <span id="prog-critChance" class="cost-progress"></span>
+                        </div>
+                    </div>
+                </button>
+            </div>
+
+            <div id="tab-black-market" class="shop-tab-content">
+                <div class="tab-title" style="color:var(--dark);">VOID MARKET</div>
+                <button id="upg-darkFlow" class="tech-btn dark-btn" onclick="buyDarkUpgrade('darkFlow')">
+                    <div class="tech-icon"><div class="icon-upg icon-flow"></div></div>
+                    <div class="tech-info">
+                        <span class="tech-name">Dark Flow (Lv.<span id="lv-darkFlow">0</span><span id="max-darkFlow"></span>)</span>
+                        <span class="tech-stat">Speed: +<span id="val-darkFlow">0</span>%</span>
+                        <div class="tech-cost">
+                           <div>Cost: <span id="cost-darkFlow">10</span> 🔮</div>
+                           <span id="prog-darkFlow" class="cost-progress"></span>
+                        </div>
+                    </div>
+                </button>
+                <button id="upg-antimatter" class="tech-btn dark-btn" onclick="buyDarkUpgrade('antimatter')">
+                    <div class="tech-icon"><div class="icon-upg icon-anti"></div></div>
+                    <div class="tech-info">
+                        <span class="tech-name">Antimatter (Lv.<span id="lv-antimatter">0</span><span id="max-antimatter"></span>)</span>
+                        <span class="tech-stat">Crit Mult: +<span id="val-antimatter">0</span>x</span>
+                        <div class="tech-cost">
+                           <div>Cost: <span id="cost-antimatter">25</span> 🔮</div>
+                           <span id="prog-antimatter" class="cost-progress"></span>
+                        </div>
+                    </div>
+                </button>
+                <button id="upg-hyperDrive" class="tech-btn dark-btn" onclick="buyDarkUpgrade('hyperDrive')">
+                    <div class="tech-icon"><div class="icon-upg icon-hyper"></div></div>
+                    <div class="tech-info">
+                        <span class="tech-name">Hyper Drive (Lv.<span id="lv-hyperDrive">0</span><span id="max-hyperDrive"></span>)</span>
+                        <span class="tech-stat">Projectile: +<span id="val-hyperDrive">0</span>%</span>
+                        <div class="tech-cost">
+                           <div>Cost: <span id="cost-hyperDrive">100</span> 🔮</div>
+                           <span id="prog-hyperDrive" class="cost-progress"></span>
+                        </div>
+                    </div>
+                </button>
+                <button id="upg-starForge" class="tech-btn dark-btn" onclick="buyDarkUpgrade('starForge')">
+                    <div class="tech-icon"><div class="icon-upg icon-forge"></div></div>
+                    <div class="tech-info">
+                        <span class="tech-name">Star Forge (Lv.<span id="lv-starForge">0</span><span id="max-starForge"></span>)</span>
+                        <span class="tech-stat">Stardust x<span id="val-starForge">1.0</span></span>
+                        <div class="tech-cost">
+                           <div>Cost: <span id="cost-starForge">250</span> 🔮</div>
+                           <span id="prog-starForge" class="cost-progress"></span>
+                        </div>
+                    </div>
+                </button>
+                <button id="upg-dimRift" class="tech-btn dark-btn" onclick="buyDarkUpgrade('dimRift')">
+                    <div class="tech-icon"><div class="icon-upg icon-rift"></div></div>
+                    <div class="tech-info">
+                        <span class="tech-name">Dimension Rift (Lv.<span id="lv-dimRift">0</span><span id="max-dimRift"></span>)</span>
+                        <span class="tech-stat">Discount: -<span id="val-dimRift">0</span>%</span>
+                        <div class="tech-cost">
+                           <div>Cost: <span id="cost-dimRift">500</span> 🔮</div>
+                           <span id="prog-dimRift" class="cost-progress"></span>
+                        </div>
+                    </div>
+                </button>
+            </div>
+            </div>
+
+            <div id="unified-colony" class="ui-box terminal-theme" data-icon="🏗️" onclick="openPanel('unified-colony')">
+                <div class="terminal-overlay"></div>
+                <div class="panel-header terminal-header" onclick="minimizePanel('unified-colony', event)" style="flex-direction: row; justify-content: space-between; cursor: pointer;">
+                    <div class="header-left">
+                        <span class="terminal-prefix">></span>
+                        <span class="panel-title" style="color:#e67e22; border:none; margin:0; padding:0; font-size:14px; letter-spacing: 2px; font-weight: bold;">COLONY BASE</span>
+                    </div>
+                    <div class="header-right" style="display: flex; align-items: center; gap: 10px;">
+                        <div id="auto-colony-toggle" onclick="toggleAutoColony(event)" class="auto-toggle-btn" title="Toggle Auto-Upgrade for Colony">
+                            AUTO: <span id="auto-colony-status" style="color:#ff4757;">OFF</span>
+                        </div>
+                        <span class="system-status">ACTIVE</span>
+                        <span class="minimize-btn">[ _ ]</span>
+                    </div>
+                </div>
+                
+                <div class="shop-tab-content active" style="display: flex; flex-direction: column; gap: 8px;">
+                    <div class="tab-title" style="color:var(--colony);">INFRASTRUCTURE PROTOCOLS</div>
+                    <div id="colony-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                    <div style="font-size: 10px; color: #777; text-align: center; margin-top: 10px; letter-spacing: 1px;">
+                        [ AUTO-PRODUCTION PROTOCOLS ACTIVE ]
+                    </div>
+                </div>
+            </div>
+    </div>
+
+    <!-- Pixi.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.3.2/pixi.min.js"></script>
+    <script src="js/config.js?v=1.7"></script>
+    <script src="js/artifacts.js?v=1.7"></script>
+    <script src="js/data.js?v=1.7"></script>
+    <script src="js/pixi_app.js?v=1.7"></script>
+    
+    <!-- Gameplay Logic -->
+    <script src="js/gameplay_core.js?v=1.7"></script>
+    <script src="js/gameplay_combat.js?v=1.7"></script>
+    <script src="js/gameplay_progression.js?v=1.7"></script>
+    <script src="js/gameplay_planet_vfx.js?v=1.7"></script>
+    
+    <!-- Visuals -->
+    <script src="js/visuals_ships.js?v=1.7"></script>
+    <script src="js/visuals_projectiles.js?v=1.7"></script>
+    <script src="js/visuals_combat_fx.js?v=1.7"></script>
+    <script src="js/visuals_world_fx.js?v=1.7"></script>
+    <script src="js/visuals_special_fx.js?v=1.7"></script>
+    
+    <!-- Events -->
+    <script src="js/events_ufo.js?v=1.7"></script>
+    <script src="js/events_drones.js?v=1.7"></script>
+    <script src="js/events_core.js?v=1.7"></script>
+    
+    <!-- Utilities & Systems -->
+    <script src="js/core_utils.js?v=1.7"></script>
+    <script src="js/audio.js?v=1.7"></script>
+    <script src="js/prestige.js?v=1.7"></script>
+    <script src="js/items.js?v=1.7"></script>
+    
+    <!-- UI Logic -->
+    <script src="js/ui_upgrades.js?v=1.7"></script>
+    <script src="js/ui_main.js?v=1.7"></script>
+    <script src="js/ui_navigation.js?v=1.7"></script>
+    <script src="js/ui_systems.js?v=1.7"></script>
+    <script src="js/ui_renderers.js?v=1.7"></script>
+    <script src="js/ui_colony.js?v=1.7"></script>
+    <script src="js/ui_codex.js?v=1.7"></script>
+    <script src="js/missions.js?v=1.7"></script>
+    
+    <!-- Save & Boot -->
+    <script src="js/save_init.js?v=1.7"></script>
+    <script src="js/boot.js?v=1.7"></script>
+</body>
+</html>

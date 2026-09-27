@@ -1,0 +1,30 @@
+<svg width="720" height="200" viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d0d1a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a1a2e;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Background Sky -->
+  <rect width="720" height="200" fill="url(#skyGrad)"/>
+  
+  <!-- 3 Mountain Layers -->
+  <path d="M0 140 Q180 60 360 110 T720 80 V200 H0 Z" fill="#16213e"/>
+  <path d="M0 165 Q200 90 400 135 T720 115 V200 H0 Z" fill="#0f3460"/>
+  <path d="M0 155 C180 140 540 140 720 155 V200 H0 Z" fill="#222"/>
+
+  <!-- 3 Hero Placement Slots -->
+  <g opacity="0.6">
+    <!-- Left Slot (240, 100) -->
+    <circle cx="240" cy="100" r="42" fill="none" stroke="#00ffff" stroke-width="1.5" stroke-dasharray="6,4"/>
+    <ellipse cx="240" cy="142" rx="55" ry="12" fill="#00ffff" opacity="0.15"/>
+    
+    <!-- Center Slot (360, 100) -->
+    <circle cx="360" cy="100" r="42" fill="none" stroke="#00ffff" stroke-width="1.5" stroke-dasharray="6,4"/>
+    <ellipse cx="360" cy="142" rx="55" ry="12" fill="#00ffff" opacity="0.15"/>
+    
+    <!-- Right Slot (480, 100) -->
+    <circle cx="480" cy="100" r="42" fill="none" stroke="#00ffff" stroke-width="1.5" stroke-dasharray="6,4"/>
+    <ellipse cx="480" cy="142" rx="55" ry="12" fill="#00ffff" opacity="0.15"/>
+  </g>
+</svg>

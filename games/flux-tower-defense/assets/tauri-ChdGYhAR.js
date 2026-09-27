@@ -1,0 +1,1 @@
+import{t as e}from"./preload-helper-xBbMyY7u.js";function t(){return typeof window<`u`&&`__TAURI_INTERNALS__`in window}async function n(n,r,i){if(!t())return i;try{return await(await e(()=>import(`./core-Bm8t6nHr.js`),[],import.meta.url)).invoke(n,r)}catch(e){return console.warn(`[tauri] ${n} failed`,e),i}}export{t as n,n as t};

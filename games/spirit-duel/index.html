@@ -5,10 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="screen-orientation" content="landscape">
 <meta name="x5-orientation" content="landscape">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1a1525">
 <title>Spirit Duel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Gowun+Dodum&family=VT323&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Gowun+Dodum&family=VT323&family=Zen+Kaku+Gothic+New&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -21,9 +25,17 @@
 </div>
 
 <!-- 토글 버튼들은 .wrap 밖으로 빼서 커튼 위에도 보이게 함 -->
-<button class="sound-toggle" id="soundToggle" data-i18n-title="tip.sound" aria-label="sound toggle">
-  <span id="soundIcon">♪</span>
+<div class="vol-ctrl">
+<input type="range" class="vol-slider" id="volSlider" min="0" max="100" step="5" value="100" data-i18n-title="tip.volume" aria-label="volume level">
+<button class="sound-toggle" id="soundToggle" data-i18n-title="tip.sound" aria-label="mute toggle">
+  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19" fill="currentColor"/>
+    <path class="vol-w1" d="M15.5 8.5a5 5 0 0 1 0 7"/>
+    <path class="vol-w2" d="M19 5a10 10 0 0 1 0 14"/>
+    <path class="vol-x" d="M16 9l6 6M22 9l-6 6"/>
+  </svg>
 </button>
+</div>
 <button class="help-toggle" id="helpToggle" data-i18n-title="tip.help" aria-label="help">?</button>
 <button class="lang-toggle" id="langToggle" data-i18n-title="lang.toggle.title" aria-label="language">
   <span id="langIcon" data-i18n="lang.toggle">한</span>
@@ -113,8 +125,8 @@
       </button>
       <button class="action-btn" data-action="ranged">
         <span class="action-icon">≋</span>
-        <span class="action-name" data-i18n="action.ranged">Ranged</span>
-        <span class="action-hint" data-i18n-html="action.hint.ranged">2-cell range attack</span>
+        <span class="action-name" data-i18n="action.ranged">Wave</span>
+        <span class="action-hint" data-i18n-html="action.hint.ranged">2-cell range</span>
       </button>
       <button class="action-btn action-leap" data-action="leap">
         <span class="action-icon">↷</span>
@@ -138,6 +150,7 @@
   </div>
 
   <div id="curtainSetup" style="display:none; text-align:center;">
+    <h2 class="setup-title">Spirit Duel</h2>
     <p data-i18n="setup.label" style="color:var(--ink-dim); font-size:14px; letter-spacing:0.2em; text-transform:uppercase;">S P I R I T   S E L E C T</p>
     <div class="setup-mode-select" id="setupModeSelect">
       <button class="setup-mode-btn active" id="setupModePVP" data-i18n="setup.mode.pvp">Two Players</button>
@@ -170,24 +183,6 @@
       <div class="draw-rune p2" id="drawP2"></div>
     </div>
     <p id="drawResult" style="min-height:24px; color: var(--gold); font-family:'Cormorant Garamond', serif; font-style: italic; font-size: 20px;"></p>
-  </div>
-
-  <div id="curtainReveal" style="display:none; text-align:center;">
-    <p class="reveal-label" data-i18n="curtain.reveal.label">SIMULTANEOUS INTENT</p>
-    <h2 class="reveal-title" data-i18n="curtain.reveal.title">The Spirits Have Chosen</h2>
-    <div class="reveal-stage">
-      <div class="reveal-side">
-        <div class="reveal-spirit p1"></div>
-        <div class="reveal-name azure" data-i18n="player.1">Azure Spirit</div>
-        <div class="reveal-actions" id="revealP1Actions"></div>
-      </div>
-      <div class="reveal-vs">VS</div>
-      <div class="reveal-side">
-        <div class="reveal-spirit p2"></div>
-        <div class="reveal-name amber" data-i18n="player.2">Amber Spirit</div>
-        <div class="reveal-actions" id="revealP2Actions"></div>
-      </div>
-    </div>
   </div>
 
   <div id="curtainRound" style="display:none; text-align:center;">
@@ -328,6 +323,58 @@
 
       <h3>단축키</h3>
       <p><kbd>1</kbd>~<kbd>8</kbd> 액션 · <kbd>⏎</kbd>/<kbd>Space</kbd> 입력 완료 · <kbd>⌫</kbd>/<kbd>Esc</kbd> 되돌리기 · <kbd>M</kbd> 음소거 · <kbd>?</kbd> 규칙</p>
+    </div>
+
+    <!-- 日本語 -->
+    <div class="help-locale" data-locale="ja">
+      <div class="help-sub">精 霊 決 闘 · ルール</div>
+
+      <h3>試合</h3>
+      <p><strong>2本先取</strong>、最大5ラウンド。HP <strong>4</strong> · <span class="kw-dmg">ダメージ</span> <strong>1</strong>。先攻はランダム抽選、以降ラウンドごとに交代。<span class="gold-c">ラウンド3 = 決戦</span>（1:1時）— 行動が2回ではなく3回/ターン。</p>
+
+      <h3>ターン</h3>
+      <p>先攻入力 → 後攻入力 → 同時解決。<strong>行動2回</strong>を順番に選択。各フェーズ: <span class="hl">移動が先 → 移動後の位置で戦闘判定</span>。</p>
+
+      <h3>行動</h3>
+      <ul>
+        <li><span class="kw-advance">前進</span> / <span class="kw-retreat">後退</span> — 相手側 / 自分側へ1マス</li>
+        <li><span class="kw-attack">攻撃</span> — 隣接、1 <span class="kw-dmg">ダメージ</span></li>
+        <li><span class="kw-block">防御</span> — <span class="kw-attack">攻撃</span>/<span class="kw-wave">霊波</span>を<span class="kw-null">無効化</span>。成功: <span class="kw-star">★ +1</span>。空振り: 相手に<span class="kw-star">★</span></li>
+        <li><span class="kw-counter">カウンター</span> — <span class="kw-attack">攻撃</span>を跳ね返して1 <span class="kw-dmg">ダメージ</span>。<span class="kw-attack">攻撃</span>が来なければ空振り</li>
+        <li><span class="kw-pierce">貫通</span> — <span class="gold-c"><span class="kw-star">★ 2個</span>消費</span>、隣接1 <span class="kw-dmg">ダメージ</span>、<span class="hl">防御不可</span>・<span class="kw-counter">カウンター</span>は可</li>
+        <li><span class="kw-wave">霊波</span> — <span class="hl">ちょうど2マス</span>、1 <span class="kw-dmg">ダメージ</span>。<span class="kw-block">防御</span>/<span class="kw-counter">カウンター</span>可</li>
+        <li><span class="kw-leap">跳躍</span> — <span class="hl">隣接時のみ</span>。相手を飛び越え<strong>2マス先に着地</strong>（端なら1マス）。<span class="gold-c">スロット2個消費</span></li>
+      </ul>
+
+      <h3>戦闘マトリクス</h3>
+      <ul>
+        <li><strong><span class="kw-attack">攻撃</span> vs <span class="kw-attack">攻撃</span></strong> — 両者1 <span class="kw-dmg">ダメージ</span></li>
+        <li><strong><span class="kw-attack">攻撃</span> vs <span class="kw-block">防御</span></strong> — <span class="kw-block">防御</span>勝ち（防御側に<span class="kw-star">★ +1</span>）</li>
+        <li><strong><span class="kw-attack">攻撃</span> vs <span class="kw-counter">カウンター</span></strong> — <span class="kw-counter">カウンター</span>勝ち、攻撃側1 <span class="kw-dmg">ダメージ</span></li>
+        <li><strong><span class="kw-pierce">貫通</span> vs <span class="kw-block">防御</span></strong> — <span class="kw-pierce">貫通</span>勝ち、防御側1 <span class="kw-dmg">ダメージ</span>（<span class="kw-star">★</span>変動なし）</li>
+        <li><strong><span class="kw-pierce">貫通</span> vs <span class="kw-counter">カウンター</span></strong> — <span class="kw-counter">カウンター</span>勝ち（<span class="kw-star">★ 2個</span>は消費）</li>
+        <li><strong><span class="kw-wave">霊波</span> vs <span class="kw-block">防御</span> / <span class="kw-counter">カウンター</span></strong> — <span class="kw-attack">攻撃</span>と同じ</li>
+        <li><strong><span class="kw-block">防御</span> vs <span class="kw-counter">カウンター</span></strong> — <span class="kw-counter">カウンター</span>空振り、次のターン行動 -1</li>
+        <li>射程外 = 外れ（<span class="kw-attack">攻撃</span>/<span class="kw-pierce">貫通</span>=1マス、<span class="kw-wave">霊波</span>=2マス）</li>
+      </ul>
+
+      <h3><span class="kw-star">★ 星</span>（上限2）</h3>
+      <ul>
+        <li><span class="kw-block">防御</span>が<span class="kw-attack">攻撃</span>を止める → 防御側に<span class="kw-star">★ +1</span></li>
+        <li><span class="kw-block">防御</span>空振り（<span class="kw-attack">攻撃</span>なし） → 相手に<span class="kw-star">★ +1</span></li>
+        <li><span class="kw-pierce">貫通</span>された防御 → <span class="kw-star">★</span>変動なし（<span class="kw-dmg">ダメージ</span>のみ）</li>
+        <li><strong>相手の<span class="kw-star">★</span>は?で非表示</strong> — 記憶で推測</li>
+      </ul>
+
+      <h3>移動</h3>
+      <p>移動は戦闘より先に解決。<strong><span class="kw-retreat">後退</span>で回避、<span class="kw-advance">前進</span>で追撃</strong>。同じマス / 入れ替わり = <strong>衝突</strong>、両者動けず。壁の外は<span class="kw-null">無効</span>（行動は消費）。</p>
+
+      <h3><span class="kw-stardust">星屑</span>領域</h3>
+      <p><strong>1・9番</strong>マスは常時<span class="kw-stardust">星屑</span>。3ターン留まると<strong>毎ターンHP -1</strong>（1ターン目 弱警告、2ターン目 強警告、3ターン目以降 <span class="kw-dmg">ダメージ</span>）。離れるとリセット。</p>
+      <p><strong>拡大</strong>: ターン4 → 2・8番、ターン7 → 3・7番。<strong>4・5・6番は常に安全</strong>。新しいマスも同じ警告タイミング。</p>
+
+      <h3>ショートカット</h3>
+      <p><kbd>1</kbd>~<kbd>8</kbd> 行動 · <kbd>⏎</kbd>/<kbd>Space</kbd> 決定 · <kbd>⌫</kbd>/<kbd>Esc</kbd> 戻す · <kbd>M</kbd> ミュート · <kbd>?</kbd> ルール</p>
     </div>
   </div>
 </div>

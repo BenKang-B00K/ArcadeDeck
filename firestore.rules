@@ -21,55 +21,34 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
-    // Forum threads — top-level posts in the player forum.
-    match /forum_threads/{document} {
+    // Forum removed 2026-09-27: forum_threads / forum_posts fall to default deny.
+
+    // Leaderboard — one row per browser (random UUID id), ranked by Deck XP.
+    // No auth, so ownership cannot be enforced; only the shape is validated.
+    match /leaderboard/{playerId} {
       allow read: if true;
 
-      // Create: title <=120, body <=5000, category in allowlist,
-      // nickname <=30, replyCount=0, lastActivity=createdAt.
-      allow create: if request.resource.data.keys().hasAll(['title', 'body', 'category', 'nickname', 'replyCount', 'createdAt', 'lastActivity'])
-        && request.resource.data.title is string
-        && request.resource.data.title.size() > 0
-        && request.resource.data.title.size() <= 120
-        && request.resource.data.body is string
-        && request.resource.data.body.size() > 0
-        && request.resource.data.body.size() <= 5000
-        && request.resource.data.category is string
-        && request.resource.data.category in ['general', 'games', 'suggestions', 'off-topic']
+      allow create, update: if playerId.size() <= 40
+        && request.resource.data.keys().hasOnly(['nickname', 'xp', 'level', 'played', 'mastered', 'updatedAt'])
+        && request.resource.data.keys().hasAll(['nickname', 'xp', 'level', 'played', 'mastered', 'updatedAt'])
         && request.resource.data.nickname is string
         && request.resource.data.nickname.size() > 0
         && request.resource.data.nickname.size() <= 30
-        && request.resource.data.replyCount == 0;
-
-      // Update: only replyCount + lastActivity may change. Original
-      // fields are immutable. replyCount is monotonically non-decreasing
-      // and bumps by 1 at a time.
-      allow update: if resource.data.title == request.resource.data.title
-        && resource.data.body == request.resource.data.body
-        && resource.data.category == request.resource.data.category
-        && resource.data.nickname == request.resource.data.nickname
-        && resource.data.createdAt == request.resource.data.createdAt
-        && request.resource.data.replyCount is int
-        && request.resource.data.replyCount == resource.data.replyCount + 1;
+        && request.resource.data.xp is int
+        && request.resource.data.xp >= 0
+        && request.resource.data.xp <= 1000000
+        && request.resource.data.level is int
+        && request.resource.data.level >= 1
+        && request.resource.data.level <= 10001
+        && request.resource.data.played is int
+        && request.resource.data.played >= 0
+        && request.resource.data.played <= 500
+        && request.resource.data.mastered is int
+        && request.resource.data.mastered >= 0
+        && request.resource.data.mastered <= 500
+        && request.resource.data.updatedAt == request.time;
 
       allow delete: if false;
-    }
-
-    // Forum posts — replies attached to a thread.
-    match /forum_posts/{document} {
-      allow read: if true;
-
-      allow create: if request.resource.data.keys().hasAll(['threadId', 'nickname', 'body', 'createdAt'])
-        && request.resource.data.threadId is string
-        && request.resource.data.threadId.size() > 0
-        && request.resource.data.nickname is string
-        && request.resource.data.nickname.size() > 0
-        && request.resource.data.nickname.size() <= 30
-        && request.resource.data.body is string
-        && request.resource.data.body.size() > 0
-        && request.resource.data.body.size() <= 2000;
-
-      allow update, delete: if false;
     }
 
     // Default deny for everything else

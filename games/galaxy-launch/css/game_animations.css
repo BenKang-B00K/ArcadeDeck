@@ -1,0 +1,24 @@
+/* GLOBAL SHARED ANIMATIONS */
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.05); }
+}
+
+@keyframes supernova-pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+}
+
+@keyframes droneHover {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+@keyframes dronePulse {
+    from { filter: drop-shadow(0 0 10px var(--damage)); }
+    to { filter: drop-shadow(0 0 20px var(--damage)); }
+}
+
+/* Note: hammerSwing and other specific animations are kept in their respective domain files (game.css, ui_shop.css) 
+   to maintain data integrity and localization of style logic. */

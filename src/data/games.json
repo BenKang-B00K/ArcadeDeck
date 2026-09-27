@@ -10,7 +10,7 @@
       "Survival",
       "Strategy"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/gate-of-hell/",
+    "gameUrl": "https://games.arcadedeck.net/gate-of-hell/",
     "aspectRatio": "9/16",
     "status": "PLAYABLE",
     "platform": "BOTH",
@@ -20,7 +20,9 @@
     "scoreTiers": [
       10,
       25,
-      50
+      50,
+      100,
+      150
     ]
   },
   {
@@ -31,23 +33,9 @@
     "genres": [
       "Idle"
     ],
-    "gameUrl": "https://galaxylaunch.onrender.com/",
+    "gameUrl": "https://games.arcadedeck.net/galaxy-launch/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
-    "platform": "BOTH",
-    "isOriginal": true
-  },
-  {
-    "id": "3",
-    "slug": "idle-avatar-rpg",
-    "thumbnail": "images/idle-avatar-rpg.webp",
-    "genres": [
-      "Idle",
-      "RPG"
-    ],
-    "gameUrl": "https://idleavatar.onrender.com/",
-    "aspectRatio": "16/9",
-    "status": "IN PRODUCTION",
     "platform": "BOTH",
     "isOriginal": true
   },
@@ -59,7 +47,7 @@
       "Casual",
       "Strategy"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/gem-merge/",
+    "gameUrl": "https://games.arcadedeck.net/gem-merge/",
     "aspectRatio": "1/1",
     "status": "PLAYABLE",
     "platform": "BOTH",
@@ -68,23 +56,11 @@
     "scoreTiers": [
       5000,
       20000,
-      50000
+      50000,
+      100000,
+      200000
     ],
     "lastUpdated": "2026-09-14"
-  },
-  {
-    "id": "6",
-    "slug": "trade-tycoon",
-    "thumbnail": "images/trade-tycoon.webp",
-    "genres": [
-      "Strategy",
-      "Idle"
-    ],
-    "gameUrl": "https://citytraders.pages.dev",
-    "aspectRatio": "16/9",
-    "status": "IN PRODUCTION",
-    "platform": "BOTH",
-    "isOriginal": true
   },
   {
     "id": "7",
@@ -94,7 +70,7 @@
       "Arcade",
       "Casual"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/15s-click-challenge/",
+    "gameUrl": "https://games.arcadedeck.net/15s-click-challenge/",
     "aspectRatio": "1/1",
     "status": "PLAYABLE",
     "platform": "BOTH",
@@ -104,7 +80,9 @@
     "scoreTiers": [
       5,
       10,
-      15
+      15,
+      20,
+      25
     ]
   },
   {
@@ -115,7 +93,7 @@
       "Strategy",
       "Local Co-op"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/omok/",
+    "gameUrl": "https://games.arcadedeck.net/omok/",
     "aspectRatio": "1/1",
     "status": "PLAYABLE",
     "platform": "BOTH",
@@ -123,7 +101,9 @@
     "scoreTiers": [
       3,
       10,
-      25
+      25,
+      50,
+      100
     ],
     "badge": "UPDATE",
     "lastUpdated": "2026-09-15"
@@ -138,7 +118,7 @@
       "Action",
       "Roguelike"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/40th-century-void-survivor/",
+    "gameUrl": "https://games.arcadedeck.net/40th-century-void-survivor/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
     "platform": "BOTH",
@@ -147,7 +127,9 @@
     "scoreTiers": [
       5,
       15,
-      30
+      30,
+      50,
+      75
     ]
   },
   {
@@ -159,7 +141,7 @@
       "Strategy",
       "Idle"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/kingdom-of-ashes-endless-war/",
+    "gameUrl": "https://games.arcadedeck.net/kingdom-of-ashes-endless-war/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
     "platform": "BOTH",
@@ -169,7 +151,9 @@
     "scoreTiers": [
       10,
       25,
-      50
+      50,
+      100,
+      150
     ]
   },
   {
@@ -181,7 +165,7 @@
       "Roguelike",
       "RPG"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/kingdom-of-ashes-dice-war/",
+    "gameUrl": "https://games.arcadedeck.net/kingdom-of-ashes-dice-war/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
     "platform": "BOTH",
@@ -191,7 +175,9 @@
     "scoreTiers": [
       5,
       10,
-      20
+      20,
+      40,
+      60
     ]
   },
   {
@@ -202,7 +188,7 @@
       "RPG",
       "Strategy"
     ],
-    "gameUrl": "https://heroes-of-the-last-nexus-bk.pages.dev/",
+    "gameUrl": "https://games.arcadedeck.net/heroes-of-the-last-nexus/",
     "aspectRatio": "16/9",
     "status": "IN PRODUCTION",
     "platform": "BOTH",
@@ -217,7 +203,7 @@
       "Arcade",
       "Casual"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/timing-chef/",
+    "gameUrl": "https://games.arcadedeck.net/timing-chef/",
     "aspectRatio": "9/16",
     "status": "PLAYABLE",
     "platform": "BOTH",
@@ -227,7 +213,9 @@
     "scoreTiers": [
       10,
       30,
-      60
+      60,
+      100,
+      150
     ]
   },
   {
@@ -239,7 +227,7 @@
       "Arcade",
       "Action"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/fruit-frenzy/",
+    "gameUrl": "https://games.arcadedeck.net/fruit-frenzy/",
     "aspectRatio": "9/16",
     "status": "PLAYABLE",
     "platform": "BOTH",
@@ -249,7 +237,9 @@
     "scoreTiers": [
       300,
       1000,
-      2000
+      2000,
+      4000,
+      6000
     ]
   },
   {
@@ -261,7 +251,7 @@
       "Strategy",
       "Roguelike"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/kingdom-of-ashes-colosseum/",
+    "gameUrl": "https://games.arcadedeck.net/kingdom-of-ashes-colosseum/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
     "platform": "BOTH",
@@ -270,7 +260,9 @@
     "scoreTiers": [
       600,
       2000,
-      4000
+      4000,
+      8000,
+      12000
     ]
   },
   {
@@ -283,7 +275,7 @@
       "PvP",
       "Local Co-op"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/triangle-battle/",
+    "gameUrl": "https://games.arcadedeck.net/triangle-battle/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
     "platform": "BOTH",
@@ -300,7 +292,7 @@
       "PvP",
       "Local Co-op"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/tank-battle-1v1/",
+    "gameUrl": "https://games.arcadedeck.net/tank-battle-1v1/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
     "platform": "PC",
@@ -310,20 +302,22 @@
     "scoreTiers": [
       3,
       10,
-      25
+      25,
+      50,
+      100
     ]
   },
   {
     "id": "19",
     "slug": "spirit-duel",
-    "language": "KO/EN",
+    "language": "EN/KO/JA",
     "thumbnail": "images/spirit-duel.webp",
     "genres": [
       "Strategy",
       "PvP",
       "Local Co-op"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/spirit-duel/",
+    "gameUrl": "https://games.arcadedeck.net/spirit-duel/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
     "platform": "BOTH",
@@ -331,8 +325,12 @@
     "scoreTiers": [
       3,
       10,
-      25
-    ]
+      25,
+      50,
+      100
+    ],
+    "badge": "UPDATE",
+    "lastUpdated": "2026-09-16"
   },
   {
     "id": "18",
@@ -343,7 +341,7 @@
       "Arcade",
       "Survival"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/skyfall/",
+    "gameUrl": "https://games.arcadedeck.net/skyfall/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
     "platform": "BOTH",
@@ -351,7 +349,9 @@
     "scoreTiers": [
       3000,
       8000,
-      20000
+      20000,
+      40000,
+      60000
     ],
     "badge": "UPDATE",
     "lastUpdated": "2026-09-15"
@@ -365,7 +365,7 @@
       "Tower Defense",
       "Strategy"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/polygon-invasion-td/",
+    "gameUrl": "https://games.arcadedeck.net/polygon-invasion-td/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
     "platform": "BOTH",
@@ -373,28 +373,34 @@
     "scoreTiers": [
       10,
       20,
-      30
+      30,
+      50,
+      75
     ]
   },
   {
     "id": "21",
     "slug": "just-jump",
-    "language": "EN",
+    "language": "EN/KO/JA",
     "thumbnail": "images/just-jump.webp",
     "genres": [
       "Arcade",
       "Casual"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/just-jump/",
+    "gameUrl": "https://games.arcadedeck.net/just-jump/",
     "aspectRatio": "9/16",
     "status": "PLAYABLE",
     "platform": "BOTH",
     "isOriginal": true,
     "scoreTiers": [
-      500,
-      2000,
-      5000
-    ]
+      1000,
+      10000,
+      40000,
+      150000,
+      300000
+    ],
+    "badge": "UPDATE",
+    "lastUpdated": "2026-09-27"
   },
   {
     "id": "22",
@@ -405,16 +411,18 @@
       "Tower Defense",
       "Strategy"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/mythic-defenders-heroes-returns/",
+    "gameUrl": "https://games.arcadedeck.net/mythic-defenders-heroes-returns/",
     "aspectRatio": "1/1",
     "status": "PLAYABLE",
     "platform": "BOTH",
     "isOriginal": true,
     "badge": "UPDATE",
-    "lastUpdated": "2026-05-17",
+    "lastUpdated": "2026-09-16",
     "scoreTiers": [
       1,
       2,
+      3,
+      3,
       3
     ]
   },
@@ -427,7 +435,7 @@
       "Arcade",
       "Casual"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/falling-dodger/",
+    "gameUrl": "https://games.arcadedeck.net/falling-dodger/",
     "aspectRatio": "9/16",
     "status": "PLAYABLE",
     "platform": "BOTH",
@@ -436,7 +444,9 @@
     "scoreTiers": [
       500,
       2000,
-      5000
+      5000,
+      10000,
+      20000
     ],
     "lastUpdated": "2026-09-14"
   },
@@ -450,7 +460,7 @@
       "Simulation",
       "Idle"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/entrepreneur-tycoon/",
+    "gameUrl": "https://games.arcadedeck.net/entrepreneur-tycoon/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
     "platform": "BOTH",
@@ -460,7 +470,9 @@
     "scoreTiers": [
       10000,
       100000,
-      1000000
+      1000000,
+      10000000,
+      100000000
     ]
   },
   {
@@ -473,7 +485,7 @@
       "Auto Battler",
       "Strategy"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/vault-of-ashes-fallen-era/",
+    "gameUrl": "https://games.arcadedeck.net/vault-of-ashes-fallen-era/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
     "platform": "BOTH",
@@ -482,6 +494,8 @@
     "scoreTiers": [
       3,
       6,
+      9,
+      10,
       10
     ]
   },
@@ -494,7 +508,7 @@
       "Arcade",
       "Casual"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/neon-stack/",
+    "gameUrl": "https://games.arcadedeck.net/neon-stack/",
     "aspectRatio": "9/16",
     "status": "PLAYABLE",
     "platform": "BOTH",
@@ -504,7 +518,9 @@
     "scoreTiers": [
       10,
       25,
-      50
+      50,
+      100,
+      150
     ],
     "lastUpdated": "2026-09-15"
   },
@@ -518,7 +534,7 @@
       "Strategy",
       "RPG"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/kingdom-of-ashes-fallen-era/",
+    "gameUrl": "https://games.arcadedeck.net/kingdom-of-ashes-fallen-era/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
     "platform": "BOTH",
@@ -527,8 +543,10 @@
     "featured": true,
     "steamUrl": "https://store.steampowered.com/app/4732700/Kingdom_of_Ashes__Fallen_Era/",
     "scoreTiers": [
-      4,
-      8,
+      3,
+      7,
+      11,
+      13,
       13
     ]
   },
@@ -542,7 +560,7 @@
       "Strategy",
       "Survival"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/barrack-defense/",
+    "gameUrl": "https://games.arcadedeck.net/barrack-defense/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
     "platform": "PC",
@@ -551,7 +569,9 @@
     "scoreTiers": [
       50,
       150,
-      400
+      400,
+      800,
+      1500
     ]
   },
   {
@@ -564,7 +584,7 @@
       "Roguelike",
       "RPG"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/shadow-runner/",
+    "gameUrl": "https://games.arcadedeck.net/shadow-runner/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
     "platform": "PC",
@@ -574,7 +594,9 @@
     "scoreTiers": [
       500,
       2000,
-      5000
+      5000,
+      10000,
+      20000
     ]
   },
   {
@@ -587,15 +609,17 @@
       "Idle",
       "Action"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/ashen-keys/",
+    "gameUrl": "https://games.arcadedeck.net/ashen-keys/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
     "platform": "PC",
     "isOriginal": true,
     "badge": "NEW",
     "scoreTiers": [
-      4,
-      8,
+      3,
+      6,
+      9,
+      11,
       11
     ]
   },
@@ -609,7 +633,7 @@
       "Casual",
       "RPG"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/debt-and-dragons/",
+    "gameUrl": "https://games.arcadedeck.net/debt-and-dragons/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
     "platform": "PC",
@@ -618,7 +642,9 @@
     "scoreTiers": [
       100000,
       1000000,
-      10000000
+      10000000,
+      100000000,
+      1000000000
     ]
   },
   {
@@ -631,7 +657,7 @@
       "Action",
       "Casual"
     ],
-    "gameUrl": "https://arcadedeck-games.pages.dev/endless-runner/",
+    "gameUrl": "https://games.arcadedeck.net/endless-runner/",
     "aspectRatio": "16/9",
     "status": "PLAYABLE",
     "platform": "BOTH",
@@ -640,7 +666,34 @@
     "scoreTiers": [
       500,
       1500,
-      3000
+      3000,
+      6000,
+      10000
+    ]
+  },
+  {
+    "id": "33",
+    "slug": "flux-tower-defense",
+    "language": "EN/KO/JA",
+    "thumbnail": "images/flux-tower-defense.webp",
+    "genres": [
+      "Tower Defense",
+      "Strategy",
+      "Survival"
+    ],
+    "gameUrl": "https://games.arcadedeck.net/flux-tower-defense/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "platform": "PC",
+    "isOriginal": true,
+    "badge": "NEW",
+    "steamUrl": "https://store.steampowered.com/app/4645330/Flux_Tower_Defense/",
+    "scoreTiers": [
+      3,
+      5,
+      8,
+      10,
+      10
     ]
   }
 ]

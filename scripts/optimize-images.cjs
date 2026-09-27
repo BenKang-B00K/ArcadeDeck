@@ -53,7 +53,7 @@ const kb = (bytes) => (bytes / 1024).toFixed(0) + 'K';
 async function encode(src, out, width) {
   const buf = await sharp(src)
     .resize({ width, withoutEnlargement: true })
-    .webp({ quality: QUALITY, ...(BLOG ? { effort: 6 } : {}) })
+    .webp({ quality: QUALITY, alphaQuality: 40, ...(BLOG ? { effort: 6 } : {}) })
     .toBuffer();
   const tmp = out + '.tmp';
   fs.writeFileSync(tmp, buf);

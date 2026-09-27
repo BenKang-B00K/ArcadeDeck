@@ -175,7 +175,7 @@
   padding: 8px 16px;
   border-radius: var(--radius-full);
   background: hsl(var(--h) 80% 60% / 0.14);
-  color: hsl(var(--h) 90% 72%);
+  color: hsl(var(--h) 90% 78%);
   border: 1px solid hsl(var(--h) 80% 60% / 0.35);
   font-size: var(--text-sm);
   font-weight: 600;
@@ -191,9 +191,16 @@
 
 .genre-filters button:hover,
 .genre-filters button.active {
-  background: hsl(var(--h) 85% 62%);
-  border-color: hsl(var(--h) 85% 62%);
+  background: hsl(var(--h) 85% 72%);
+  border-color: hsl(var(--h) 85% 72%);
   color: var(--bg-color);
+}
+
+[data-theme="light"] .genre-filters button:hover,
+[data-theme="light"] .genre-filters button.active {
+  background: hsl(var(--h) 70% 26%);
+  border-color: hsl(var(--h) 70% 26%);
+  color: #fff;
 }
 
 /* ── Sections ── */
@@ -342,4 +349,18 @@
 @media (orientation: landscape) and (max-height: 600px) {
   .home-hero { padding: var(--space-6) 0 var(--space-5); }
   .genre-filters { top: calc(44px + env(safe-area-inset-top)); }
+}
+
+/* Global rank chip beside the nickname; populated from the leaderboard. */
+.home-hero-rank {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  color: var(--bg-color);
+  font-size: var(--text-xs);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  vertical-align: 2px;
 }

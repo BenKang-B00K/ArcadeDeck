@@ -1,0 +1,255 @@
+/* CORE GAME VIEW STYLES */
+
+/* CRT Overlay Effect */
+#crt-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+    background-size: 100% 3px, 3px 100%;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.12;
+}
+
+/* BOSS VFX */
+#boss-vignette {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle, transparent 50%, rgba(255, 0, 0, 0.4) 150%);
+    pointer-events: none;
+    z-index: 9998;
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+#boss-timer-container.overload {
+    animation: timerOverload 0.2s infinite;
+}
+
+@keyframes timerOverload {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    75% { transform: translateX(2px); }
+    100% { transform: translateX(0); }
+}
+
+/* UNIVERSE TITLE (TOP LEFT) */
+#universe-display {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    text-align: left;
+    z-index: 1500;
+    pointer-events: none;
+    font-family: 'Consolas', monospace;
+    padding: 10px;
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(5px);
+    border-left: 2px solid var(--neon);
+    border-radius: 0 10px 10px 0;
+    zoom: var(--ui-scale);
+}
+
+#universe-name {
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 6px;
+    color: #fff;
+    text-shadow: 0 0 10px var(--neon);
+    position: relative;
+    z-index: 2;
+    animation: universePulse 4s infinite ease-in-out;
+}
+
+#universe-bar {
+    width: 40px;
+    height: 2px;
+    background: var(--neon);
+    margin: 4px 0 0;
+    box-shadow: 0 0 10px var(--neon);
+}
+
+#universe-glitch {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 242, 254, 0.1) 3px);
+    pointer-events: none;
+    z-index: 1;
+    animation: glitchLines 5s infinite linear;
+}
+
+@keyframes universePulse {
+    0%, 100% { opacity: 0.8; transform: scale(1); filter: brightness(1); }
+    50% { opacity: 1; transform: scale(1.05); filter: brightness(1.2); }
+}
+
+@keyframes glitchLines {
+    from { background-position: 0 0; }
+    to { background-position: 0 100%; }
+}
+
+/* COMBO & FEVER SYSTEM */
+#combo-container {
+    position: fixed;
+    top: 35%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: none;
+    z-index: 1000;
+    font-family: 'Consolas', monospace;
+    text-shadow: 0 0 15px var(--neon);
+    animation: comboAppear 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    zoom: var(--ui-scale);
+}
+
+#combo-count {
+    font-size: 48px;
+    font-weight: 900;
+    color: #fff;
+    margin: 0;
+    line-height: 1;
+}
+
+#combo-label {
+    font-size: 14px;
+    letter-spacing: 5px;
+    color: var(--neon);
+    font-weight: bold;
+    margin-top: -5px;
+}
+
+#combo-bar-bg {
+    width: 100px;
+    height: 4px;
+    background: rgba(255,255,255,0.1);
+    margin: 10px auto;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+#combo-bar {
+    width: 100%;
+    height: 100%;
+    background: var(--neon);
+    transition: width 0.1s linear;
+}
+
+@keyframes comboAppear {
+    0% { transform: translate(-50%, -40%) scale(0.5); opacity: 0; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+@keyframes comboPulse {
+    0% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.1); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+#combo-container.pulse {
+    animation: comboPulse 0.15s ease-out;
+}
+
+/* TARGET & PLANET HP BARS */
+#target-area { 
+    position: absolute; 
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    text-align: center; 
+    z-index: 2; 
+}
+
+#target-visual {
+    width: 200px; height: 200px; border-radius: 50%; margin: 0 auto 20px; position: relative; transition: 0.3s;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+#lobby-artifact-display {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.lobby-artifact-icon {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    background: rgba(15, 15, 25, 0.8);
+    border: 1px solid rgba(0, 242, 254, 0.4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--neon);
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+    backdrop-filter: blur(4px);
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Circular layout logic */
+    --radius: 140px;
+    --angle: 0deg;
+    left: calc(cos(var(--angle)) * var(--radius));
+    top: calc(sin(var(--angle)) * var(--radius));
+    transform: translate(-50%, -50%);
+}
+
+.lobby-artifact-icon:hover {
+    border-color: var(--neon);
+    box-shadow: 0 0 20px rgba(0, 242, 254, 0.5);
+    scale: 1.2;
+}
+
+.target-bars-wrapper {
+    width: 250px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#hp-bar { 
+    width: 100%; 
+    height: 100%; 
+    background: linear-gradient(90deg, #ff4757, #ff6b81); 
+    transition: 0.1s; 
+}
+
+#target-name { 
+    margin-top: 10px; 
+    font-weight: bold; 
+    letter-spacing: 2px; 
+    font-family: 'Consolas', monospace;
+}
+
+/* Construction Hammer (Colony Base interaction) */
+.colony-btn.constructing .tech-icon::after {
+    content: '🔨';
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    margin-left: -8px;
+    font-size: 16px;
+    animation: hammerSwing 0.5s infinite alternate;
+}
+
+@keyframes hammerSwing {
+    from { transform: rotate(-20deg); }
+    to { transform: rotate(30deg); }
+}
+
+/* UI UTILITIES */
+.ui-box, .bottom-right-controls, #universe-display {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+body.ui-hidden .ui-box { opacity: 0; pointer-events: none; transform: translateY(-20px); }
+body.ui-hidden .bottom-right-controls { opacity: 0; pointer-events: none; transform: translateY(20px); }
+body.ui-hidden #universe-display { opacity: 0; pointer-events: none; transform: translateY(-20px); }

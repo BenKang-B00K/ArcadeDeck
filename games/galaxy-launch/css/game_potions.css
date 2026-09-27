@@ -1,0 +1,145 @@
+/* TACTICAL STIMULANT SYSTEM - MINI INVENTORY REDESIGN */
+
+#item-slots {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    z-index: 1000;
+    padding: 8px 15px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 242, 254, 0.2);
+    box-shadow: 0 0 20px rgba(0,0,0,0.8);
+    zoom: var(--ui-scale);
+}
+
+#mini-inventory {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    max-width: 110px;
+    justify-content: flex-end;
+}
+
+.mini-slot {
+    position: relative;
+    font-size: 11px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 3px 6px;
+    border-radius: 4px;
+    display: none; /* Controlled by JS */
+    align-items: center;
+    gap: 3px;
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(5px);
+    cursor: help;
+}
+
+.mini-slot span {
+    font-family: 'Consolas', monospace;
+    font-weight: 900;
+    color: var(--neon);
+    font-size: 10px;
+}
+
+/* Individual Slot Themes */
+#mini-slot-neon { border-bottom: 1px solid var(--neon); color: var(--neon); }
+#mini-slot-green { border-bottom: 1px solid var(--pine); color: var(--pine); }
+#mini-slot-gray { border-bottom: 1px solid var(--gear); color: var(--gear); }
+#mini-slot-dark { border-bottom: 1px solid var(--dark); color: var(--dark); }
+
+/* Mini Tooltip Styling */
+.mini-tooltip {
+    position: absolute;
+    bottom: 45px;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: rgba(10, 15, 25, 0.95);
+    border: 1px solid rgba(0, 242, 254, 0.4);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 10px;
+    color: #eee;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 2100;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    backdrop-filter: blur(10px);
+}
+
+.mini-tooltip b {
+    color: var(--neon);
+    font-size: 11px;
+    letter-spacing: 0.5px;
+}
+
+.mini-slot:hover .mini-tooltip,
+.mini-slot.show-tooltip .mini-tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* FULL BOOST BUTTON */
+#full-boost-btn {
+    width: 60px;
+    height: 55px;
+    background: rgba(241, 196, 15, 0.1);
+    border: 2px solid var(--gold);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: 0.3s;
+    overflow: hidden;
+    margin-left: 5px;
+}
+
+#full-boost-btn:hover {
+    background: rgba(241, 196, 15, 0.3);
+    transform: scale(1.1);
+    box-shadow: 0 0 20px var(--gold);
+}
+
+#full-boost-btn:active {
+    transform: scale(0.95);
+}
+
+.boost-text {
+    font-size: 10px;
+    font-weight: 900;
+    color: var(--gold);
+    text-align: center;
+    line-height: 1.1;
+    z-index: 2;
+    font-family: 'Consolas', monospace;
+}
+
+.boost-glow {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, var(--gold) 0%, transparent 70%);
+    opacity: 0.2;
+    animation: boostPulse 2s infinite alternate;
+}
+
+@keyframes boostPulse {
+    from { opacity: 0.1; transform: scale(0.8); }
+    to { opacity: 0.4; transform: scale(1.2); }
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(30px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}

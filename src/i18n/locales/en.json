@@ -165,6 +165,10 @@
     "viewToggleAria": "Switch view mode",
     "tabNavAriaLabel": "Jump to game info",
     "tabTips": "Tips",
+    "tabTiers": "Tiers",
+    "playerTiers": "Score Tiers",
+    "tiersColTier": "Tier",
+    "tiersCaption": "{label} needed to reach each tier. Your current tier is highlighted.",
     "tabLore": "Lore",
     "tabFeatures": "Features",
     "playerObjectives": "Objectives",
@@ -194,7 +198,7 @@
     "seoOurGames": "Our Games",
     "seoEnableJs": "Please enable JavaScript to play games on ArcadeDeck.",
     "seoHomeTitle": "ArcadeDeck | The Ultimate Free Browser Games Platform",
-    "seoHomeDescription": "Play the best free online browser games on ArcadeDeck. High-quality Action, RPG, Strategy, and Idle games. No downloads, just pure fun!",
+    "seoHomeDescription": "Play the best free online browser games on ArcadeDeck. High-quality Action, RPG, Strategy, and Idle games with global leaderboards. No downloads, just pure fun!",
     "siteAlternateName": "ArcadeDeck — Free Browser Games",
     "genreNotFoundTitle": "Genre not found",
     "genreBackHome": "← Browse all games",
@@ -202,46 +206,17 @@
     "genrePageSubheading": "{count} games in this genre on ArcadeDeck.",
     "genreGameList": "Games in this genre",
     "seoGenrePageTitle": "{genre} Games | Play Free on ArcadeDeck",
-    "seoGenrePageDescription": "Play {count} {genre} games free on ArcadeDeck. Curated browser titles, straight in your browser. No downloads, no sign-up.",
-    "navForum": "Forum",
-    "forumTitle": "Player Forum",
-    "forumSubtitle": "Talk about games, share tips, and meet other players.",
-    "forumNewThread": "New Thread",
-    "forumCategoryAll": "All",
-    "forumCategoryGeneral": "General",
-    "forumCategoryGames": "Game Talk",
-    "forumCategorySuggestions": "Suggestions",
-    "forumCategoryOffTopic": "Off-Topic",
-    "forumColTitle": "Thread",
-    "forumColCategory": "Category",
-    "forumColAuthor": "Author",
-    "forumColReplies": "Replies",
-    "forumColActivity": "Last Activity",
-    "forumEmpty": "No threads yet. Start the first conversation!",
-    "forumLoadMore": "Load More",
-    "forumLoading": "Loading...",
-    "forumBack": "Back to forum",
-    "forumPostingAs": "Posting as",
-    "forumComposeTitle": "Title",
-    "forumComposeTitlePlaceholder": "Short, descriptive title…",
-    "forumComposeCategory": "Category",
-    "forumComposeBody": "Body",
-    "forumComposeBodyPlaceholder": "Share your thoughts…",
-    "forumComposeSubmit": "Post Thread",
-    "forumComposeSubmitting": "Posting…",
-    "forumComposeCancel": "Cancel",
-    "forumComposeError": "Failed to post. Please try again.",
-    "forumComposeCooldown": "Please wait before posting again.",
-    "forumReplies": "Replies",
-    "forumReplyPlaceholder": "Write a reply…",
-    "forumReplySubmit": "Post Reply",
-    "forumReplySubmitting": "Posting…",
-    "forumReplyEmpty": "No replies yet. Be the first to reply.",
-    "forumThreadNotFound": "Thread not found.",
-    "seoForumTitle": "Player Forum | ArcadeDeck Community",
-    "seoForumDescription": "Discuss games, share strategies, and connect with other ArcadeDeck players in the community forum.",
+    "seoGenrePageDescription": "Play {count} {genre} games free on ArcadeDeck. Curated browser titles with personal bests and global leaderboards. No downloads, no sign-up — just hit play.",
     "deckBestStreak": "best streak",
     "deckLevel": "Deck Level",
+    "homeRankTitle": "Global rank",
+    "homeRankUnranked": "Unranked — finish a run to claim a spot on the leaderboard",
+    "lbTitle": "Global Leaderboard",
+    "lbYourRank": "You: #{n}",
+    "lbLoading": "Loading…",
+    "lbEmpty": "No one ranked yet — finish a run to claim the first spot.",
+    "lbYou": "you",
+    "lbLevel": "Lv {n}",
     "deckMastered": "mastered",
     "deckPlayed": "played",
     "deckShare": "Share my deck",
@@ -254,6 +229,7 @@
     "pbScore": "Score",
     "pbToTier": "{n} to {tier}",
     "tierBronze": "Bronze",
+    "tierDiamond": "Diamond",
     "tierGold": "Gold",
     "tierSilver": "Silver"
   },
@@ -456,107 +432,6 @@
         }
       ]
     },
-    "3": {
-      "title": "Idle Avatar RPG",
-      "description": "Develop your own avatar and explore a mysterious world that grows automatically.",
-      "fullDescription": "\n      The best choice for those who want the fun of growth even in a busy daily life: Idle Avatar RPG. Even while you sleep, your avatar fights monsters, acquires precious items, and grows stronger.\n      Combine various classes and skill trees to create your own unique hero. Hundreds of equipment sets and gem enhancement systems provide endless nurturing fun.\n      Mysterious dungeon exploration, boss raids, and a ranking system to compete with players worldwide! Experience the comfort of an idle game and the depth of an RPG simultaneously.\n      Enter the realm of **Aethelgard**, a world where thought shapes reality. You play as a **Soul-Binder**, a rare individual capable of projecting their consciousness into powerful Avatars.\n      Your physical body remains in the **Temple of Stasis**, but your Avatar roams the **Wildlands**, battling the **Shadow-Blight** that threatens to consume the world's remaining light.\n      Gather \"**Echo Dust**\" from defeated foes to attune your Avatar to the elements—Fire, Ice, and Void. The deeper you venture into the Wildlands, the more complex the loot becomes, requiring you to master the art of **Enchanting**.\n    ",
-      "controls": "Auto-battle supported / Click: Manual skill use and equipment management",
-      "tips": "Keep an eye on the \"**Rebirth**\" mechanic. Resetting your progress at the right time provides massive permanent bonuses. Prioritize the \"**Luck**\" stat early on to increase the drop rate of **Rare-tier** equipment from low-level goblins.",
-      "lore": "\n      **Aethelgard** was once a unified paradise, governed by the \"**Great Weavers**\" who spun the threads of fate. But a catastrophic event known as the \"**Unraveling**\" broke the loom, scattering the threads across the void.\n      Now, the world exists as fragmented islands of reality, held together only by the will of the Soul-Binders. The **Shadow-Blight** is the manifestation of the void's hunger to erase what remains.\n      Every piece of equipment you find is a relic from the old world, a solidified memory of a civilization that was once perfect. By wearing them, you are literally wearing history itself.\n    ",
-      "features": [
-        "True Offline Progress: Gains while App is Closed",
-        "Complex Class Tree with over 20 Specializations",
-        "Rune-based Skill Customization",
-        "Global Raid Bosses with Massive Rewards",
-        "Player-driven Economy and Trading",
-        "Pet System: Tame Monsters to Fight Alongside You"
-      ],
-      "objectives": "Project your Avatar into the **Wildlands** of **Aethelgard**, gather **Echo Dust** from defeated monsters, equip relics of the old world, and grow powerful enough through **Rebirth** cycles to push back the **Shadow-Blight** threatening to erase all remaining light.",
-      "controlsTable": [
-        {
-          "key": "Auto-battle",
-          "action": "Avatar fights continuously without input"
-        },
-        {
-          "key": "Click (Skill)",
-          "action": "Manually activate a skill for instant effect"
-        },
-        {
-          "key": "Click (Equipment)",
-          "action": "Equip, swap, or enhance gear items"
-        },
-        {
-          "key": "Click (Rebirth)",
-          "action": "Reset progress to gain permanent stat bonuses"
-        },
-        {
-          "key": "Click (Pet)",
-          "action": "Tame or assign a monster companion"
-        }
-      ],
-      "faq": [
-        {
-          "q": "Do I need to keep the game open to progress?",
-          "a": "No — the game features true offline progress. Your Avatar continues fighting and collecting while the app is closed, so you can log back in after hours and collect accumulated rewards."
-        },
-        {
-          "q": "When should I use the Rebirth mechanic?",
-          "a": "Rebirth at the point where your Avatar's progress begins to slow significantly. The permanent bonuses from a well-timed Rebirth snowball across all future runs, accelerating your growth far more than grinding the same stage."
-        },
-        {
-          "q": "What stat should I prioritize first?",
-          "a": "Prioritize Luck early on. Higher Luck increases the drop rate of Rare-tier equipment from even low-level enemies, which sets up a much stronger foundation for mid-game class specialization."
-        },
-        {
-          "q": "What is Echo Dust?",
-          "a": "Echo Dust is the primary attunement resource dropped by defeated foes in the Wildlands. It is used to align your Avatar to one of three elements — Fire, Ice, or Void — and unlocks access to elemental skill branches."
-        },
-        {
-          "q": "What are the relics I collect?",
-          "a": "Relics are equipment pieces that are literally solidified memories from Aethelgard's destroyed civilization. Wearing them grants stat bonuses and they can be enhanced with the Enchanting system to scale into the late game."
-        }
-      ],
-      "characters": [
-        {
-          "name": "The Soul-Binder",
-          "role": "Player character",
-          "desc": "A rare individual capable of projecting consciousness into a powerful Avatar. Their physical body rests in the Temple of Stasis while the Avatar roams Aethelgard's Wildlands, gathering relics and battling the Shadow-Blight."
-        },
-        {
-          "name": "The Shadow-Blight",
-          "role": "Primary antagonist force",
-          "desc": "The void's hunger made manifest — a creeping darkness that seeks to erase the fragmented islands of reality left after the Unraveling. It is the central threat the Soul-Binder must push back."
-        },
-        {
-          "name": "The Great Weavers",
-          "role": "Lost civilization (lore)",
-          "desc": "Ancient rulers who once governed Aethelgard by spinning the threads of fate. The Unraveling shattered their loom and scattered reality into fragments; the relics players collect are remnants of their civilization."
-        }
-      ],
-      "featuredComments": [
-        {
-          "name": "EchoDustPriest",
-          "text": "Prioritize Luck early. I know every idle game says something like this, but here it genuinely matters — Rare drops from low-level goblins set up mid-game progression faster than anything else you can do.",
-          "badge": "Strategy"
-        },
-        {
-          "name": "ShadowBlight0",
-          "text": "Wearing relics that are literally solidified memories from a destroyed civilization while your body sits in the Temple of Stasis. The lore framing for gear is genuinely clever."
-        },
-        {
-          "name": "RebornAvatarV",
-          "text": "Do NOT Rebirth at the first sign of slowdown. Wait until progress truly stalls, then reset. The permanent bonus difference between early and well-timed Rebirth is enormous."
-        },
-        {
-          "name": "VoidAttuned",
-          "text": "The offline progress is real. Logged back in after 8 hours and had accumulated enough Echo Dust to unlock the Void attunement I'd been working toward. This is how idle games should work."
-        },
-        {
-          "name": "LunaWeave",
-          "text": "Shadow-Blight as a creeping hunger that erases reality fragments is exactly the kind of ambient villain that works best in idle games — you feel the pressure without it being in your face."
-        }
-      ]
-    },
     "5": {
       "title": "GEM MERGE",
       "description": "Drop gems into a physics vessel, merge matching cuts into rarer jewels, and chain combos to forge the Legendary gem.",
@@ -650,87 +525,6 @@
         }
       ],
       "scoreLabel": "Score"
-    },
-    "6": {
-      "title": "Trade Tycoon - Civilization",
-      "description": "Build your empire, trade resources, and lead your civilization to prosperity.",
-      "fullDescription": "\n      Experience the thrill of building a civilization from the ground up in Trade Tycoon. Manage resources, establish trade routes, and make strategic decisions to expand your influence across the globe.\n      This game is currently in production, bringing deep economic simulation and city-building elements to your browser. Stay tuned for more updates!\n      In the dawn of the **Bronze Age**, you are the leader of a small coastal tribe. Your journey begins with simple barter, but your ambition is to create a **Silk Road** that spans continents.\n      You must manage the \"**Happiness-Tax**\" balance, ensuring your citizens are productive while keeping the treasury full for military expansion.\n      The world is a living marketplace; prices of **gold, spices, and iron** fluctuate based on global supply and demand. Will you be a peaceful merchant prince or a ruthless conqueror who controls the world's resources through force?\n    ",
-      "controls": "Mouse: Navigate menus and manage city structures.",
-      "tips": "Balance your production and consumption. **Over-expansion** can lead to a resource crisis. Always keep a surplus of \"**Grain**\" for the **winter months**, as production drops and prices skyrocket during the off-season.",
-      "lore": "\n      From humble beginnings to a global superpower. Your dynasty will be remembered for centuries to come.\n      The legends tell of the \"**First Merchant**,\" who traded a single pearl for a ship, and that ship for a kingdom. \n      But history is written by the victors. In this world, the gods only smile upon those who can provide the finest offerings of **silk and wine**.\n      Your civilization's rise is written in the ledgers of time, where every coin earned is a brick in your eternal monument.\n    ",
-      "features": [
-        "Deep Economic Market Simulation",
-        "Multiple Tech Eras from Bronze to Space",
-        "Complex Diplomacy and War Mechanics",
-        "Procedural World Maps with Unique Resources",
-        "Customizable City Layouts for Optimized Production",
-        "Leaderboard for the Wealthiest Empires"
-      ],
-      "objectives": "Grow your coastal tribe from **Bronze Age** barter into a globe-spanning empire by establishing profitable trade routes, managing resource surpluses, and out-competing rival civilizations on the **wealth leaderboard**.",
-      "controlsTable": [
-        {
-          "key": "Mouse Click",
-          "action": "Select city structures and open upgrade menus"
-        },
-        {
-          "key": "Mouse Click (Menu)",
-          "action": "Assign resources to production or trade routes"
-        },
-        {
-          "key": "Mouse Click (Diplomacy)",
-          "action": "Initiate trade agreements or military actions"
-        },
-        {
-          "key": "Mouse Click (Tech)",
-          "action": "Advance through technology eras"
-        }
-      ],
-      "faq": [
-        {
-          "q": "What resources matter most early on?",
-          "a": "Grain is the most critical early resource — production drops in winter while prices spike, so always keep a healthy surplus before expanding. Neglecting Grain leads to starvation penalties that cripple your economy."
-        },
-        {
-          "q": "How do I balance expansion without crashing?",
-          "a": "Over-expansion is the most common mistake. Expand only when your current territories are generating stable surplus, and check the Happiness-Tax balance before adding new cities to avoid productivity penalties."
-        },
-        {
-          "q": "How do market prices work?",
-          "a": "Prices for gold, spices, and iron fluctuate based on global supply and demand. Watch the market panel and sell high-demand goods rather than hoarding them, then reinvest in production of currently scarce commodities."
-        },
-        {
-          "q": "What is the difference between peaceful and military play?",
-          "a": "Peaceful merchant strategies compound wealth faster in the mid-game through compounding trade routes. Military conquest gives faster map control but incurs maintenance costs and risks counter-attacks that can destabilize your treasury."
-        },
-        {
-          "q": "What is the end goal?",
-          "a": "The leaderboard ranks the wealthiest empires, so your target is maximum accumulated wealth. Reaching the Space era via the technology tree unlocks the highest-value production buildings in the game."
-        }
-      ],
-      "featuredComments": [
-        {
-          "name": "GrainHoarder",
-          "text": "Always keep a Grain surplus before expanding. Production drops in winter and prices spike — I ignored this exactly once and watched my entire economy implode in a single season.",
-          "badge": "Top Tip"
-        },
-        {
-          "name": "SilkRoadKaiser",
-          "text": "Peaceful merchant compound mid-game wealth so much faster than military conquest. Control the trade routes, not the territory, and the leaderboard takes care of itself."
-        },
-        {
-          "name": "CoastalTribe1",
-          "text": "Watching commodity prices fluctuate based on global supply and demand is genuinely interesting. Selling iron when it's scarce and buying when it's cheap is where the real game is."
-        },
-        {
-          "name": "DynastyLedger",
-          "text": "The Happiness-Tax balance is the thing no one explains well enough. Too much tax and productivity craters, too little and your military expansion stalls. Keep it centered and expand gradually."
-        },
-        {
-          "name": "FirstMerchant",
-          "text": "From a single pearl to a kingdom according to the lore. That's exactly how the early game progression feels — barter, a ship, a province, then suddenly a continent.",
-          "badge": "Lore"
-        }
-      ]
     },
     "7": {
       "title": "15s Click Challenge",
@@ -1837,88 +1631,106 @@
     },
     "19": {
       "title": "Spirit Duel",
-      "description": "A tactical 1v1 card-spirit battle game — challenge a friend locally or test your wits against the AI!",
-      "fullDescription": "\n      Spirit Duel is a deep tactical battle game where players **summon powerful spirits** and outmaneuver their opponent through careful **resource management** and strategic decision-making.\n      Choose from a roster of unique spirits, each with distinct abilities. Build your strategy, read your opponent, and strike at the perfect moment. Every duel is a fresh test of skill and adaptability.\n      Play locally against a friend in intense **1v1** matches, or sharpen your tactics against the **AI**. The spirits await — who will emerge victorious?\n    ",
-      "controls": "Mouse/Touch: Select spirits and actions / UI Buttons: Confirm moves and end turn",
-      "tips": "Learn each spirit's strengths and weaknesses before committing to a strategy. **Resource tempo** is everything — don't overextend early. Watch your opponent's patterns when facing the **AI** to find exploitable openings.",
-      "lore": "\n      Ancient spirits have long walked the boundary between worlds, each one a force of nature given form. In the sacred dueling grounds, two **spirit binders** face off, their wills clashing through the spirits they command.\n      Only through mastery of both spirit and strategy can a true binder claim supremacy. The duel is not just a battle — it is a **conversation between souls**.\n    ",
+      "description": "Simultaneous-action duel on a nine-cell line — queue two moves in secret, resolve them at once, and drain your rival's 4 HP before the stardust drains yours. Hot-seat or vs CPU.",
+      "fullDescription": "\n      Spirit Duel is a simultaneous-action fighting game played on a single line of nine cells. You and your rival — the **Azure Spirit** and the **Amber Spirit** — start on cells 3 and 7 with **4 HP** each, and every hit deals exactly 1. Each turn both players secretly queue **two actions** in order; then the turn resolves at once, slot by slot, with **movement applied before combat**. A match is **best of 2**: if the rounds split 1–1, round 3 becomes the **Decisive Round** with three actions per turn.\n      Eight actions cover the whole game. Advance and Retreat shift one cell; Attack hits an adjacent foe; Block nullifies an incoming Attack or Wave and earns a **★ star** — but a wasted Block hands a star to the opponent. Counter turns an incoming Attack back on its owner, and whiffs into a −1 action penalty if you guess wrong. Two stars buy **Pierce**, an unblockable adjacent strike; Wave hits from exactly two cells away; Leap vaults over an adjacent rival to land behind them, at the cost of both action slots. Your opponent's star count is hidden behind a ?, so you have to remember what they have earned.\n      The board itself fights you. Cells 1 and 9 are **Stardust**: stand there three turns in a row and you lose 1 HP every turn until you move. On turn 4 the stardust swallows cells 2 and 8, on turn 7 cells 3 and 7, leaving only the centre 4·5·6 safe — the duel squeezes toward the middle whether you like it or not.\n      Play hot-seat with a friend, passing the screen between inputs, or face a CPU at Normal, Advanced or Master. Fully playable in English, Korean and Japanese, with keyboard shortcuts on desktop and a landscape touch layout on phones. Your cumulative CPU match wins are the score ArcadeDeck tracks.\n    ",
+      "controls": "Mouse/Touch: Pick actions and confirm / Keyboard: 1–8 queue actions, Enter or Space confirm, Backspace or Esc undo, M mute, ? rules",
+      "tips": "**Movement resolves before combat** — Retreat dodges an adjacent Attack, Advance closes the gap on a Wave. Count your opponent's **★ stars**: two hidden stars means a **Pierce** can come straight through your Block. Never idle on the edge cells — **Stardust** starts draining on your third turn there, and from turn 7 only **4·5·6** are safe.",
+      "lore": "\n      Two spirits, one of **azure** and one of **amber**, share a bridge of nine stones between their worlds. Neither may cross while the other stands, so each dawn they duel — moving, striking and guarding in the same breath, their intentions hidden until the moment the stones light up.\n      The **stardust** that drifts in from both ends is older than either of them. It eats away at whoever lingers at the edges, driving the two spirits ever closer to the centre, where only will and memory decide who holds the bridge.\n    ",
       "features": [
-        "Local 1v1 PvP Mode",
-        "Single Player vs AI",
-        "Unique Spirit Roster with Distinct Abilities",
-        "Deep Tactical Decision-Making",
-        "Fast Rounds & High Replayability",
-        "Web & Mobile Friendly"
+        "Simultaneous two-action turns — movement resolves before combat",
+        "Eight actions: Advance, Retreat, Attack, Block, Counter, Pierce, Wave, Leap",
+        "★ star economy — hidden opponent stars fuel the unblockable Pierce",
+        "Stardust zone that expands on turns 4 and 7",
+        "Best-of-2 matches with a three-action Decisive Round",
+        "Hot-seat 1v1 or CPU at Normal / Advanced / Master",
+        "In-game English, Korean and Japanese; landscape-first mobile layout"
       ],
-      "objectives": "Out-maneuver your opponent through careful **resource management** and strategic spirit summoning across **1v1** duels, depleting their forces before they deplete yours, whether against a friend locally or against the **AI**.",
+      "objectives": "Bring your rival's **4 HP** to zero and be first to **two round wins**. Queue two actions a turn, guess what your opponent queued, and stay out of the spreading **Stardust** — if the match reaches 1–1, the **Decisive Round** gives both spirits three actions per turn.",
       "controlsTable": [
         {
-          "key": "Mouse Click / Touch",
-          "action": "Select a spirit from your roster"
+          "key": "Mouse Click / Tap",
+          "action": "Pick an action from the panel — fills the next slot"
         },
         {
-          "key": "Mouse Click / Touch",
-          "action": "Choose a target or action for your selected spirit"
+          "key": "1 – 8",
+          "action": "Queue Advance / Retreat / Attack / Block / Counter / Pierce / Wave / Leap"
         },
         {
-          "key": "UI Button (Confirm)",
-          "action": "Confirm a move or ability"
+          "key": "Enter / Space",
+          "action": "Confirm your queued actions"
         },
         {
-          "key": "UI Button (End Turn)",
-          "action": "End your turn and pass to opponent"
+          "key": "Backspace / Esc",
+          "action": "Undo the last queued action"
+        },
+        {
+          "key": "M / ?",
+          "action": "Mute · open the rules"
+        },
+        {
+          "key": "Corner buttons",
+          "action": "Language EN → 한 → 日, volume slider, rules"
         }
       ],
       "faq": [
         {
-          "q": "How do I start a duel?",
-          "a": "Select your roster of spirits before the match begins. In local play, both players take turns on the same device. Against the AI, you play first and alternate turns until one spirit binder's forces are exhausted."
+          "q": "How does a turn work?",
+          "a": "The first player queues two actions and confirms; the screen hands off and the second player queues theirs. Both queues then resolve together, slot by slot: any movement in that slot happens first, then combat is judged at the new positions. Going first only decides who inputs first — it gives no combat priority."
         },
         {
-          "q": "What makes resource tempo important?",
-          "a": "Overextending early — summoning too many spirits at once — leaves you resource-starved in later turns. Pacing your summons to match the opponent's pace prevents being caught unable to respond to their key plays."
+          "q": "What beats what?",
+          "a": "Block stops Attack and Wave and earns a star. Counter beats Attack, Wave and even Pierce, dealing 1 damage back. Pierce goes straight through Block. Two Attacks trade damage. Block against Counter is the trap: the Counter whiffs and its user loses an action next turn. Anything out of range simply misses."
         },
         {
-          "q": "How do I beat the AI?",
-          "a": "Watch the AI's summoning patterns across several turns to identify which spirit types it prioritizes. Once you recognize its pattern, you can counter-summon the spirit type that specifically exploits its weakness."
+          "q": "How do stars work?",
+          "a": "Stars cap at two. A successful Block earns one; a Block that meets no attack gives one to your opponent instead. Pierce costs both stars and cannot be blocked — but it can be countered, and the stars are spent either way. Your rival's stars are shown as a ?, so track them yourself."
         },
         {
-          "q": "Do spirit abilities matter more than their stats?",
-          "a": "Distinct abilities are what differentiate spirits — stats alone rarely decide duels. Learn each spirit's ability before committing to your roster, and build a team whose abilities cover each other's weaknesses."
+          "q": "What is the Stardust zone?",
+          "a": "Cells 1 and 9 are always stardust. Standing on stardust for three consecutive turns costs 1 HP per turn until you leave — you get a warning on turns one and two. On turn 4 cells 2 and 8 join, on turn 7 cells 3 and 7; only 4, 5 and 6 are safe forever."
         },
         {
-          "q": "Is the game better with two players or solo?",
-          "a": "Both modes are viable. Local 1v1 adds psychological reads and bluffing, which can't be replicated against the AI. Solo play against the AI is the best way to learn ability interactions before competing against friends."
+          "q": "When is the Decisive Round?",
+          "a": "A match is first to two round wins, up to five rounds. If the first two rounds split 1–1, round 3 is the Decisive Round and both players queue three actions per turn instead of two. The first player alternates every round."
+        },
+        {
+          "q": "What does the score on ArcadeDeck mean?",
+          "a": "Only CPU matches count. Each match you win against the CPU adds one to a running AI Wins total stored in your browser; hot-seat matches send nothing."
         }
       ],
       "characters": [
         {
-          "name": "The Spirit Binders",
-          "role": "Player characters (both sides)",
-          "desc": "Two individuals who have mastered the art of commanding ancient spirits in sacred dueling grounds. Their wills clash through the spirits they summon — the duel is described as a conversation between souls."
+          "name": "Azure Spirit",
+          "role": "Player 1 (cyan)",
+          "desc": "The cool-light spirit that starts on cell 3. Its side of the bridge ends in the permanent stardust at cell 1."
+        },
+        {
+          "name": "Amber Spirit",
+          "role": "Player 2 (amber) — or the CPU",
+          "desc": "The warm-light rival that starts on cell 7. In vs-CPU mode either colour can be the CPU; it picks actions from a weighted table tuned per difficulty and will Leap out of the stardust when cornered."
         }
       ],
       "featuredComments": [
         {
           "name": "SpiritRead",
-          "text": "Watch the AI's summoning pattern for three turns before committing your counter. It repeats a rotation once it hits its preferred composition. Find the rotation and you'll always know what's coming.",
+          "text": "Movement before combat is the whole game. Adjacent and they queue Attack? Retreat in slot one and their swing whiffs, then Wave in slot two hits from exactly two cells. Master CPU reads that pattern after a couple of turns though.",
           "badge": "Strategy"
         },
         {
-          "name": "SoulConversation",
-          "text": "\"A conversation between souls\" is a beautiful framing for what is a back-and-forth tactical resource game. It makes you think about your summons differently — as statements, not just units."
+          "name": "StarCounter",
+          "text": "Keep a running count of the hidden ★. Every time your Attack gets Blocked, they gained one. At two, stop Blocking — Pierce goes right through and you eat the damage for nothing."
         },
         {
-          "name": "TempoMind",
-          "text": "Don't overextend in the first two turns. Summon one spirit, see how they respond, pace from there. The players who flood the field immediately run out of resources exactly when the opponent's counterplay lands."
+          "name": "StardustClock",
+          "text": "Turn 7 is the real timer. Once 3 and 7 go dark there are three safe cells for two spirits, so someone is adjacent whether they like it or not. Bank a star before then."
         },
         {
-          "name": "BinderEdge",
-          "text": "The local 1v1 mode adds a layer the AI mode can't replicate. You can bluff, misrepresent your tempo, make a \"mistake\" to see how they react. The psychological read is an entire second game running underneath the mechanics."
+          "name": "HotSeatNight",
+          "text": "The pass-the-screen curtain makes hot-seat actually work — you never see what they queued. Block-vs-Counter mind games with a friend on the couch are brutal."
         },
         {
-          "name": "AbilityFirst",
-          "text": "Abilities over raw stats. I built a roster of high-stat spirits for my first tournament match and lost to someone with weaker spirits whose abilities countered mine specifically. Learn the interactions before the roster."
+          "name": "LeapLate",
+          "text": "Leap eats both slots, so it is a pure repositioning turn. Best use I found: cornered on cell 1 with the stardust counter at 2, jump over them to cell 4 and reset the drain."
         }
       ],
       "scoreLabel": "AI Wins"
@@ -2022,178 +1834,211 @@
     },
     "21": {
       "title": "Just Jump",
-      "description": "A pure, one-button platformer — time your leaps, stick tricky landings, and push every run further than the last.",
-      "fullDescription": "\n      Just Jump strips the platformer down to its purest form: jump, land, repeat. There is **one input**. There is one goal. There is one score. Time each leap perfectly to clear gaps, stick tricky landings, and ride the rhythm further than the previous attempt.\n      Platforms scroll continuously upward and the gap pattern shifts **every ten platforms** — long stretches reward held inputs, short stretches reward tapping, and mixed stretches punish either rhythm if you commit too early. **Edge landings** count for a small **style bonus** on the score, so the optimal play is always to land as close to the leading edge as you can dare. The further you climb, the faster the world scrolls — eventually **faster than human reaction time**, which is the point.\n      Easy to pick up, brutally hard to master. One mistimed jump and the run ends, but the next attempt is **one tap away**. Chase a personal best, then chase the global top of the leaderboard.\n    ",
-      "controls": "Click, Tap, or Spacebar to jump. Hold for a longer arc; tap for a short hop. There is no second button, no boost, no shield, no second chance — the entire skill ceiling lives inside the length of one press.",
-      "tips": "Read the rhythm before reacting — most deaths come from over-jumping the first platform of a new pattern. **Short hops** cover more horizontal ground than they feel like they should; trust the physics. Keep your eyes **one platform ahead** of your feet, not on the platform you are leaving. **Edge landings** score a **style bonus** and also leave a longer next-jump window — the safest landing is also usually the highest-scoring one. When the world starts scrolling faster than you can think, switch from reacting to **predicting**: commit to the rhythm, not the visuals.",
-      "lore": "\n      **No story**. No cutscenes. No upgrades. Just you, a platform, and the **next jump**.\n      Every leap is a small **bet against gravity**. How long can you keep winning?\n    ",
+      "description": "A one-button night runner — tap to jump, tap again to double-jump, and clear 13 themed stages while buying 40 myth-god skins with the coins you grab.",
+      "fullDescription": "\n      Just Jump is a **one-button side-scrolling runner**. Tap, click or press Space to jump; tap again in the air for a **double jump**. The world scrolls toward you and every obstacle is either jumped cleanly or it ends the run.\n      There are **13 stages** — Twilight, Storm, Inferno, Void, Aurora, Nexus, Abyss, Mirage, Chronos, Grove, Crystal, Cathedral and Genesis — each with its own city skyline, moon or sun, and new obstacle types (**33** in all). Speed climbs from 5 to 10 and obstacles come closer together as your stage score rises, sometimes in pairs. Reach **2,550 (Platinum)** in a run to unlock the next stage; the run keeps going on the same stage, and you pick any unlocked stage from the start screen.\n      Every run earns a **tier** from Rookie to **Diamond (3,650)**, and that tier sets your **coin multiplier for the next run** (×1.0 up to ×3.0). Coins come in six kinds worth 1 to 8. Spend them on **40 skins** themed on gods from Norse, Greek, Egyptian, Japanese, Aztec, Hindu and other myths — every skin has its own helm, weapon and aura effect.\n      Your **previous run replays as a ghost** in the lane below you, so you can see exactly where you went wrong. Game over shows how close you came to your stage best or the next tier and what the next skin costs. Sound effects are synthesised live in D Dorian with a four-step volume button, and the game runs in English, Korean and Japanese.\n    ",
+      "controls": "Tap, click or press Space to jump; tap again in mid-air to double-jump (↑ also jumps during a run). On the start screen, ← / → change skin, ↑ / ↓ change stage, L changes language and M cycles the volume. The game pauses itself if you leave the tab or app mid-run — tap to resume.",
+      "tips": "A single jump is low and short — most tall obstacles need a **double jump**, and the second tap should come near the top of the first jump, not right after it. The glow behind each obstacle marks its real hitbox, and the shadow under a flying one shows how high it is. Push each run into a **higher tier** before you die: the tier you reach multiplies every coin in the next run, so a Diamond run makes the next one earn three times as much. Watch the ghost — if it died at the same spot you did, you are repeating the same timing.",
+      "lore": "\n      Every night the moon rises over a different city, and a small runner sets off beneath it with **one jump and one second chance in the air**.\n      A tiny copy of you stands on the moon cheering you on. Run far enough and the next sky opens up.\n    ",
       "features": [
-        "One-Button, One-Goal Pure Platformer",
-        "Variable-Length Jump Arc Based on Press Duration",
-        "Edge-Landing Style Bonus Adds Skill Ceiling",
-        "Continuous Scroll with Shifting Rhythm Patterns",
-        "Tight, Predictable Physics — No RNG",
-        "Global Score Leaderboard",
-        "Web and Mobile Friendly"
+        "One-Button Runner with Double Jump",
+        "13 Stages, Each with Its Own Skyline, Moon and Obstacles",
+        "33 Obstacle Types with Hitbox Glow for Readability",
+        "10 Run Tiers from Rookie to Diamond That Multiply Next-Run Coins",
+        "40 Myth-God Skins, Each with a Unique Helm, Weapon and Aura",
+        "Ghost Replay of Your Previous Run",
+        "D Dorian Synthesised Sound with Volume Control",
+        "English, Korean and Japanese",
+        "Touch, Mouse and Keyboard; Auto-Pause on Phones"
       ],
-      "objectives": "Time each jump to clear the continuously scrolling platform gaps, stick **edge landings** for **style bonuses**, and climb as high as possible before a **mistimed leap** ends the run and posts your score to the global leaderboard.",
+      "objectives": "Jump and double-jump over every obstacle for as long as you can. Reach **2,550 (Platinum)** in a run to unlock the next of 13 stages, push toward **Diamond (3,650)** for the top coin multiplier, and collect coins to buy all 40 skins. Your ArcadeDeck score is your **total score across all runs**.",
       "controlsTable": [
         {
-          "key": "Mouse Click",
-          "action": "Jump — hold for a longer arc, tap for a short hop"
+          "key": "Tap / Click / Space",
+          "action": "Jump; press again in mid-air to double-jump"
         },
         {
-          "key": "Tap (Mobile)",
-          "action": "Jump — hold for longer arc, tap for short hop"
+          "key": "↑ (during a run)",
+          "action": "Jump"
         },
         {
-          "key": "Spacebar",
-          "action": "Jump — hold for longer arc, tap for short hop"
+          "key": "← / →",
+          "action": "Change skin (start screen)"
+        },
+        {
+          "key": "↑ / ↓",
+          "action": "Change stage (start screen)"
+        },
+        {
+          "key": "L",
+          "action": "Change language (start screen)"
+        },
+        {
+          "key": "M",
+          "action": "Cycle volume: mute / low / mid / high"
         }
       ],
       "faq": [
         {
-          "q": "What is the difference between a hold and a tap?",
-          "a": "Holding the input produces a longer, higher arc that clears wider gaps. Tapping produces a short hop for narrow gaps. The entire skill ceiling of the game lives inside knowing when to hold and when to tap."
+          "q": "How do I unlock more stages?",
+          "a": "Score 2,550 (Platinum) in a single run. A STAGE CLEARED banner unlocks the next stage, and the run carries on in the current one. Choose any unlocked stage on the start screen with ↑ / ↓ or the arrows."
         },
         {
-          "q": "Why do I keep dying at pattern transitions?",
-          "a": "The gap pattern shifts every ten platforms — long stretches reward held inputs, short stretches reward tapping. Deaths most commonly occur on the first platform of a new pattern because players carry the previous rhythm into the wrong gap size. Read the new pattern before reacting."
+          "q": "What does my tier do?",
+          "a": "Each run ends at a tier from Rookie to Diamond. That tier sets the coin multiplier for your next run — ×1.0 at Rookie up to ×3.0 at Diamond — so a strong run pays off in the one after it."
         },
         {
-          "q": "What is an edge landing?",
-          "a": "Landing as close to the leading edge of a platform as possible awards a style bonus on top of your score. Edge landings also leave a longer jump window for the next leap, making them both higher-scoring and tactically safer."
+          "q": "How do I get new skins?",
+          "a": "Collect coins during runs and spend them on the start screen. There are 40 skins; the first is free and the rest cost 80 to 1,600 coins. The game-over screen shows how many coins you still need for the cheapest locked skin."
         },
         {
-          "q": "Where should I look — at my feet or ahead?",
-          "a": "Keep your eyes one platform ahead of where you are standing, not on the platform you are leaving. Looking at your current position causes late jumps; looking ahead lets you commit to the right input before landing."
+          "q": "What is the translucent runner below me?",
+          "a": "That is your previous run, replayed with the same jumps and timing. It fades out where that run ended."
         },
         {
-          "q": "What do I do when the scrolling gets impossibly fast?",
-          "a": "Switch from reacting to predicting. At extreme scroll speeds, the gap pattern is the only usable signal. Commit to the platform rhythm rather than tracking individual visuals — trust the physics and let your muscle memory drive the timing."
+          "q": "What score is shown on ArcadeDeck?",
+          "a": "Your total score added up across every run, not just your best single run. Every run moves it up."
         }
       ],
-      "featuredComments": [
-        {
-          "name": "PlatformEdge",
-          "text": "Edge landings are simultaneously the highest-scoring play and the safest next-jump setup. The game is telling you the optimal strategy is also the risky-looking one. Once that clicks, your scores jump immediately.",
-          "badge": "Strategy"
-        },
-        {
-          "name": "OneButton",
-          "text": "One button. One goal. One score. I played for 40 minutes before I noticed. The simplicity is doing enormous work here."
-        },
-        {
-          "name": "RhythmLeap",
-          "text": "Most deaths happen on the first platform after a pattern shift because you're carrying the previous rhythm. Read the new gap size before you land on the last platform of the old pattern. That's the only reliable fix."
-        },
-        {
-          "name": "NoStory",
-          "text": "No story. No upgrades. Just a platform and the next jump. The self-aware lore is perfect — it's the whole game's design philosophy in two lines."
-        },
-        {
-          "name": "MuscleTrust",
-          "text": "When the scroll gets impossibly fast, stop reacting and start predicting the rhythm. Your eyes can't track at that speed but your muscle memory can follow the pattern. Let go and commit."
-        },
-        {
-          "name": "AheadOfFeet",
-          "text": "Look one platform ahead of where you are standing, not at your current position. I was told this three times before it stuck. Then it immediately improved my average run by 40 platforms."
-        }
-      ],
-      "scoreLabel": "Score"
+      "scoreLabel": "Total Score"
     },
     "22": {
-      "title": "Mythic Defender: Heroes Returns v2.0",
-      "description": "A card-driven tower defense where mythic heroes return to hold the line against endless legions.",
-      "fullDescription": "\n      Mythic Defender: Heroes Returns fuses classic **tower defense with deck-building** strategy. Draw heroes from your **card pool**, place them along the path, and unleash devastating abilities to crush waves of orcs, demons, and worse.\n      Every map is a puzzle of positioning and timing. Some heroes deal heavy **single-target damage**, others rain **area-of-effect lightning**, and a few support the whole line with **auras**. Mix and match to counter what each wave throws at you.\n      Earn **mana** between rounds, upgrade your strongest heroes, and unlock new cards as you progress deeper into the campaign. The legions never stop — how long can your kingdom stand?\n    ",
-      "controls": "Mouse: Drag hero cards onto valid tiles, click heroes to upgrade or activate abilities, click UI buttons to start waves and manage your deck.",
-      "tips": "Front-load tanky melee heroes near **chokepoints** to soak damage while ranged casters work safely from the back. Save **mana** for the wave's **elite enemies** — burning everything early leaves you defenseless when the boss arrives. Upgrades scale better than placing more low-tier units; concentrate your firepower.",
-      "lore": "\n      Once, the **Mythic Heroes** walked among mortals — **Thor of the Storm Hammer**, the rune-bound shieldmaidens of the North, the silent archers of the **Whispering Wood**. When the world found peace, they faded into legend, their cards sealed in the vaults of forgotten kings.\n      Now the **Burning Horde** has torn through the seals, and ancient citadels burn beneath blood-red skies. The cards have begun to glow again. The heroes are returning — but only one defender can summon them.\n      You hold the deck. The legions are at the gate.\n    ",
+      "title": "Mythic Defenders: Heroes Returns",
+      "description": "Deck-building tower defense: recruit 50 mythic heroes, draw them onto a 10×10 grid, merge, evolve and hold three stages against corrupted legends.",
+      "fullDescription": "\n      Mythic Defenders: Heroes Returns is a **tower defense + deck-building roguelike**. Curate a deck of 5–10 heroes from a roster of **50** — Thor, Amaterasu, Hades, Sun Wukong, Odin, Loki, Joan of Arc, Medusa, Kali, Maui, Baba Yaga and more, across Normal, Elite and Legend rarity — draw one of ten maps, then defend a 10×10 grid through **3 stages of 5 waves**. The fifth wave of every stage brings a boss, and you have three lives per stage.\n      Every summon opens **FATE DRAWS**: three cards from your deck are revealed and you keep one, paying essence that climbs with each summon (10, 15, 20…) — your starting essence covers exactly the first three. Drag the hero onto any buildable cell. Drop a hero onto a copy of the same hero at the same tier to **merge** it into tier 2, then tier 3; kills level a hero to 9, where it takes its evolved form with a stronger ability. Regret a placement? Drag it onto the **Portal to Heaven** in the corner for a 70% refund.\n      Heroes carry one of **7 elements** — Fire, Water, Earth, Lightning, Light, Nature, Shadow. Deck breadth and depth both feed a run-long **Pantheon Bond** ATK bonus, and same-element heroes standing on the grid together gain **Field Resonance** ATK and attack speed. Enemies split into ground and air, and some heroes can only hit one, so 20 monster types in normal, elite and boss forms — goblins, gargoyles, hydras, banshees, bombardiers, shamans, summoners, burrowers, plus the new Gilded Rat that bolts for the exit with a fat essence purse, Ironshell Scarab that shrugs off a flat chunk of every hit, Storm Ram that builds speed until something hits it, Hourglass Weaver that rewinds its own HP once and Marsh Lantern that hastens everything around it — keep your board honest.\n      Hit **Esc / P** (or the ⏸ button) for a tactical pause — the world freezes while the bestiary and info panel stay readable — and every skill cast lands with a short freeze-frame. Close the tab mid-run and the title screen offers **Continue**: the run is snapshotted at every wave boundary, so you replay the current wave with your board intact. Merged heroes wear bronze / silver / gold plates with ★ badges so tiers read at a glance.\n      Between runs, wave and stage clears pay out **Mythic Coins**: 60 coins rolls a new hero, and a duplicate plus 40 coins powers up a hero permanently (+3% ATK, +2% speed per level). Clear all three stages and NG+ starts the cycle again, harder. Everything you hear is synthesised at runtime in D Dorian — a soundtrack that follows the mood of the run and per-element attack sounds — with a speaker control on every screen.\n    ",
+      "controls": "Mouse or touch. Tap SUMMON to open FATE DRAWS and pick one of three cards, then drag the hero onto a buildable cell. Drag a hero onto another copy at the same tier to merge; drag it onto the Portal to Heaven to sell. Tap a placed hero to inspect its stats and ability; tap the ⓘ on a card to read its ability text.",
+      "tips": "Use the first three summons before wave 1 — they are free and the timer waits 10 seconds for them. Have at least one **air-capable** hero on the grid by wave 2: gargoyles, wraiths, banshees and carrion crows fly straight past ground-only heroes. **Merging** is cheap for Normal heroes (30 / 80 essence) and steep for Legends (90 / 220) — a tier-3 Archer often outperforms a tier-1 Legend. Stack two or three heroes of one **element** for Field Resonance instead of spreading across all seven. Before a boss wave, sell what is not pulling weight on the **Portal** for 70% back and re-roll into what the Map Bestiary says is coming. Kill a **Gilded Rat** before it reaches the exit — it drops 3–4× the essence of a normal kill but sprints. Hit a **Storm Ram** early and often; any hit resets its charge. **Hourglass Weavers** rewind once at 35% HP, so burst them past the threshold instead of chipping.",
+      "lore": "\n      Once, the mythic heroes walked among mortals — **Thor** with Mjölnir in hand, the **Great Sage** on his cloud, **Loki** laughing behind his own reflection. When the world found peace they faded into story, their names sealed in the vaults of forgotten kings.\n      Now the legends themselves have curdled. Goblins and orcs wear the old sigils, hydras rise out of drowned temples, and **shadow summoners** drag the dead back into the line of march. The seals are cracking and the cards have begun to glow.\n      The heroes are returning — but only the one who holds the deck can call them, and the corruption is already on the path.\n    ",
       "features": [
-        "Card-Based Hero Summoning System",
-        "Strategic Tower Defense Gameplay",
-        "Diverse Hero Roster with Unique Abilities",
-        "Wave-Based Campaign Progression",
-        "Deck-Building & Upgrade Mechanics",
-        "Hand-Painted Mythic Fantasy Art",
-        "Web & Mobile Friendly (Landscape)"
+        "50 Mythic Heroes across Normal, Elite and Legend rarity",
+        "FATE DRAWS: keep one of three cards per summon",
+        "Merge to Tier 3 (bronze / silver / gold plates), level to 9, unlock evolved abilities",
+        "7 elements with Pantheon Bond and Field Resonance synergy",
+        "20 monster types in normal, elite and boss forms, each with a signature trick",
+        "3 stages × 5 waves, boss every fifth wave, 10 random maps",
+        "Tactical pause (Esc / P) and Continue from the last wave boundary",
+        "Persistent Mythic Coins, recruits, power-ups and NG+",
+        "Runtime-synthesised D Dorian soundtrack and SFX",
+        "Mouse and touch, landscape phones and tablets"
       ],
-      "objectives": "Summon mythic heroes from your card deck, place them along the enemy path, and survive every wave of orcs, demons, and worse — earning **mana** to upgrade your strongest heroes before the **Burning Horde** reaches your citadel.",
+      "objectives": "Build a deck of 5–10 heroes, draw a map, and clear all 15 waves across three stages — summoning, merging and evolving heroes on the 10×10 grid — without losing every life in a stage. Stage reached is the score ArcadeDeck tracks.",
       "controlsTable": [
         {
-          "key": "Mouse Drag",
-          "action": "Drag a hero card from hand onto a valid map tile"
+          "key": "Summon",
+          "action": "Opens FATE DRAWS — three cards from your deck, keep one"
         },
         {
-          "key": "Mouse Click (Hero)",
-          "action": "Select a placed hero to upgrade or activate their ability"
+          "key": "Drag card → cell",
+          "action": "Place the chosen hero on a buildable cell"
         },
         {
-          "key": "Mouse Click (UI)",
-          "action": "Start a wave, manage your deck, or spend mana"
+          "key": "Drag hero → same hero",
+          "action": "Merge two same-tier copies into the next tier (costs essence)"
+        },
+        {
+          "key": "Drag hero → Portal",
+          "action": "Sell the hero to the Portal to Heaven for a 70% refund"
+        },
+        {
+          "key": "Tap / click hero",
+          "action": "Inspect stats, level, mana and ability"
+        },
+        {
+          "key": "ⓘ on a card",
+          "action": "Read the hero's ability text (touch-friendly)"
+        },
+        {
+          "key": "Esc / P or ⏸",
+          "action": "Tactical pause — freezes the field, sidebars stay readable"
         }
       ],
       "faq": [
         {
-          "q": "How does the card summoning system work?",
-          "a": "You draw hero cards from your deck at the start of each round. Drag cards onto valid tiles along the enemy path to summon them. Heroes remain on the map until they are defeated or the round ends."
+          "q": "How do FATE DRAWS work?",
+          "a": "Each summon reveals three random cards from your curated deck and you keep one. Essence cost rises by 5 every summon (10, 15, 20…), and your 45 starting essence covers exactly the first three. Later stages give a small chance the card arrives already at tier 2."
         },
         {
-          "q": "Where should I place melee heroes?",
-          "a": "Front-load tanky melee heroes near chokepoints to absorb damage while ranged casters work safely from the back row. A melee hero positioned deep into the map near your core provides no damage reduction for the path before it."
+          "q": "How do I merge and evolve heroes?",
+          "a": "Drag a hero onto another copy of the same hero at the same tier: tier 1 + tier 1 → tier 2, tier 2 + tier 2 → tier 3, paying an essence fee that depends on rarity. Kills level a hero separately — at level 9 it evolves, gaining +30% ATK, +20% attack speed, +10% crit and an upgraded ability."
         },
         {
-          "q": "When should I save mana instead of spending it?",
-          "a": "Save mana for each wave's elite enemies and boss arrivals. Burning all mana on standard enemies leaves you defenseless when the boss appears — bosses require concentrated upgraded firepower, not distributed low-tier units."
+          "q": "What do the elements do?",
+          "a": "Elements do not counter enemies; they buff your own heroes. Pantheon Bond is set when the run starts — more distinct elements in your deck, or several copies of the same one, raise every hero's ATK. Field Resonance is live: each hero gains ATK and attack speed for every same-element hero on the grid, recomputed whenever you place or sell."
         },
         {
-          "q": "Is it better to upgrade one hero or place more?",
-          "a": "Upgrades scale better than placing additional low-tier units. Concentrate your mana on your strongest frontline hero rather than spreading upgrades evenly — a single well-upgraded hero outperforms three under-upgraded ones."
+          "q": "Why is my hero not attacking a flying enemy?",
+          "a": "Heroes have an attack type — ground, air or both — shown by the mound / wing icon on their plate. Ground-only heroes ignore gargoyles, wraiths, banshees, carrion crows, marsh lanterns, hourglass weavers and the flying gargoyle boss. Your first five recruits are guaranteed to include an air-capable hero; keep one on the board."
         },
         {
-          "q": "What is the Burning Horde?",
-          "a": "The Burning Horde is the army that has torn through the ancient seals and set citadels ablaze. It consists of orcs, demons, and worse — each wave is a new portion of the Horde pressing toward your position."
+          "q": "What carries over between runs?",
+          "a": "Mythic Coins, your hero collection, your curated deck, power-up levels and the NG+ counter. In-run essence, placed heroes and stage progress reset when a run ends — but not when you close the tab: the run is saved at every wave boundary and the title screen's Continue replays the current wave with your board, essence and lives intact. Wave clears pay 15 coins, stage clears 60 plus an EXP bonus; a new recruit costs 60 and a power-up costs 40 coins and one duplicate."
+        },
+        {
+          "q": "Can I pause?",
+          "a": "Yes. Esc, P or the ⏸ button in the bottom-right freezes enemies, heroes, timers and projectiles; the sidebars stay readable so you can plan. FATE DRAWS pauses the world on its own while the cards are up."
+        },
+        {
+          "q": "Does it work on phones?",
+          "a": "Yes — landscape only. The grid sizes itself between the two sidebars, cards open their ability text on tap, and the sound control sits in the bottom-left corner of every screen."
         }
       ],
       "characters": [
         {
-          "name": "Thor of the Storm Hammer",
-          "role": "Mythic hero (lore)",
-          "desc": "One of the legendary heroes sealed away when the world found peace. His card has begun to glow again as the Burning Horde tears through the ancient vaults, signaling his return to defend the realm."
+          "name": "Thor",
+          "role": "Legend · Lightning",
+          "desc": "Thunder god of Asgard. Thunder Strike hurls Mjölnir for 250% ATK at the first enemy, then chains lightning to up to five targets and stuns them."
         },
         {
-          "name": "Shieldmaidens of the North",
-          "role": "Mythic hero faction (lore)",
-          "desc": "Rune-bound warriors sealed alongside Thor in the vaults of forgotten kings. They represent the tanky frontline archetype in the game's hero roster."
+          "name": "Sun Wukong",
+          "role": "Legend · Nature",
+          "desc": "The Great Sage on his cloud. Seventy-Two Transformations swings the Ruyi Jingu Bang for 300% ATK area damage to everything in range."
         },
         {
-          "name": "Archers of the Whispering Wood",
-          "role": "Mythic hero faction (lore)",
-          "desc": "Silent ranged heroes awakened by the Burning Horde's breach. They form the backbone of the game's ranged damage-dealer card types."
+          "name": "Loki",
+          "role": "Legend · Shadow",
+          "desc": "Shape-shifter of Jotunheim. Mirror Strike opens three shadow rifts on the most dangerous foes, detonating them in sequence for 220% ATK and a stun each."
+        },
+        {
+          "name": "Kali",
+          "role": "Legend · Shadow",
+          "desc": "Dancer of Endings. Dance of Destruction opens with a 100% ATK slash, then four blades spin around her for 2.6 s, cutting everything they sweep through for 60% ATK; evolved, six blades execute non-boss foes under 15% HP."
+        },
+        {
+          "name": "Shadow Summoner",
+          "role": "Elite enemy",
+          "desc": "Conjures a shadow minion at intervals while it walks the path — kill it first or the wave keeps growing."
+        },
+        {
+          "name": "Gilded Rat",
+          "role": "Normal enemy",
+          "desc": "Frail and fast, carrying a stolen purse — drops 3–4× the essence of a normal kill, but it bolts for the exit. Its elite form is the Rat King."
         }
       ],
       "featuredComments": [
         {
-          "name": "ThorDeck",
-          "text": "Front-load melee at the chokepoint, casters safely behind. A caster placed forward dies to the first elite and you've wasted the mana. The positioning rule is not flexible."
-        },
-        {
-          "name": "BurningVault",
-          "text": "The cards glowing as the Burning Horde tears through the seals is a great image. Mythic heroes waking from legend as a direct response to the threat — the lore earns the card summoning mechanic.",
-          "badge": "Lore"
-        },
-        {
-          "name": "ManaHold",
-          "text": "Save mana for the boss arrival. I burnt everything on the standard wave and had nothing when the boss phase hit. One upgraded hero carrying the line beats four underpowered ones scrambling.",
+          "name": "MjolnirMain",
+          "text": "Tier-3 Archer with two Shadow buddies out-damaged my tier-1 Thor for the whole first stage. Merge the cheap stuff first, save the Legend essence for stage 2.",
           "badge": "Top Tip"
         },
         {
-          "name": "HeroUpgrade",
-          "text": "Upgrades scale better than placement. I tested this extensively. Concentrated mana on your strongest frontline hero consistently outperforms spreading upgrades evenly across the roster."
+          "name": "PortalToHeaven",
+          "text": "Selling on the portal for 70% before the boss wave and re-rolling into air coverage saved my run twice. Placements are not permanent, stop treating them like they are."
         },
         {
-          "name": "WhisperArcher",
-          "text": "The hand-painted art style on the cards is the detail that makes replaying waves feel fresh. Each hero looks distinct enough that you actually care which one you drew."
+          "name": "PantheonSeven",
+          "text": "Seven distinct elements is +35% ATK for everyone. A rainbow deck is not a meme, it is the strongest opener until you can afford to stack one element deep."
+        },
+        {
+          "name": "CurdledMyth",
+          "text": "Framing the enemies as legends gone wrong — Hydra Spawn, Shadow Summoner, The Forgotten as the boss label — makes Thor versus a goblin feel like myth eating itself. The lore earns the roster.",
+          "badge": "Lore"
+        },
+        {
+          "name": "GargoyleAgain",
+          "text": "Lost stage 1 twice to gargoyles because every card I kept was ground-only. Now the first thing I look for in FATE DRAWS is the wing icon."
+        },
+        {
+          "name": "RatCatcher",
+          "text": "Paused on Esc the moment a Gilded Rat spawned, dragged Thor onto its lane, unpaused — 60 essence, a free summon. The pause button is a strategy button."
         }
       ],
       "scoreLabel": "Stage"
@@ -3094,6 +2939,96 @@
         }
       ]
     },
-    "_comment": "Per-game canonical English. Translators mirror this in {lang}.json."
+    "_comment": "Per-game canonical English. Translators mirror this in {lang}.json.",
+    "33": {
+      "title": "Flux Tower Defense",
+      "description": "A grid tower defense where the maze is yours to draw: towers block the path, traps sit on it, and every run hands you a random arsenal to build around. Elemental attributes at Lv 5, Tier 2 abilities at Lv 10, natural disasters you click away, ten elite modifiers on the way. This is the free web edition of the Steam release — waves 1 to 10.",
+      "fullDescription": "\n      Flux Tower Defense is a **grid-based tower defense** on a 19×15 board with no fixed lane. Enemies pour out of a red portal and walk the shortest route to your teal fortress, recomputed the instant anything changes — so **towers are walls** and where you put them is the map. Wall Towers are cheap and only there to bend the path; every other tower shoots. Traps are the opposite: they sit on the route and fire when something walks over them. Sell a tower and the path snaps to the new opening before the next enemy takes a step.\n      You do not pick your build from a menu. Every run **drafts a loadout at random** from 40 towers, auras and specials plus 15 traps, and you plan around what you drew; every five waves you draft one reward on top. Each tower levels from 1 to 15: Lv 4 and 9 are per-tower enhancements, **Lv 5 rolls an attribute** — LAVA, GLACIER, ELECTRIC or STEEL — that changes how the tower behaves and looks, **Lv 10 upgrades it to Tier 2** (burn, freeze, chain, crit), and Lv 15 rolls a second one. Four towers can attempt an **Evolution** at max level: a 60% roll that either transforms them or knocks them back to Lv 4. Towers also earn kills toward veterancy ranks, and Tier 3 unlocks a permanent perk pick.\n      The waves push back. Every wave from the second carries a boss; regular enemies can spawn with one of **ten elite modifiers** — Haste, Shielded, Armored, Juggernaut, Regen, Phasing, EMP, Frenzied, Vampiric, Phoenix; some species carry permanent passives like Fireproof or Burrow. Between waves a **natural disaster** can hit — meteor, blizzard, earthquake, tornado, thunderstorm — and you click its hotspot down before the timer runs out or it takes a tower with it. Tollgates let you mortgage a stretch of the path for gold at the cost of a speed buff to whoever crosses. Three difficulties change enemy HP, gold, starting life and the wall cap; a Daily Challenge hands everyone the same map and loadout for one attempt.\n      This is the **web edition**: waves 1 to 10, saved in your browser, in 11 languages. The run ends with the fortress standing when wave 10 is cleared. The Steam release is the full game — endless waves, a second portal that opens at wave 10 and more after it, the Challenger boss, the **New Discovery** content (VOID and BLIGHT elements, the reroll-only SUPERIOR, Prisma rerolls and five Power-Up star tiers past max level), Steam achievements, leaderboards and cloud saves.\n    ",
+      "controls": "Left Click: Place the selected item, select a placed tower / Double-Click: Upgrade / Right Click: Sell / Left Drag: Lay a line of walls / Q W E: Open the Towers, Auras, Traps panels / ` 1–9 0 -: Pick an item in the open panel / A: Upgrade / S: Sell / Z: Undo the last placement (5 s) / Space: Start the next wave, or smart-upgrade the selected tower / D: Damage meter / B: Codex / Esc: Pause. Mouse and keyboard — PC only.",
+      "scoreLabel": "Waves Cleared",
+      "tips": "**Build the maze first, the damage second** — a long snaking path past a few towers beats a short path past many. **Wall Towers are the cheapest cell on the board**; use them to bend the route, not to fight. Read your **loadout** before placing anything: a run with Frost Plate and Tesla Coil wants a different corridor than one with Blade Launcher and Tar Pit. Push one carry tower to **Lv 5 early** for its attribute roll rather than spreading gold across six Lv 3s. When a **disaster** lands, click its hotspot — the towers under it are the price of ignoring it. **Sell to reroute** when a boss gets past your kill zone; the path updates instantly. A **second portal opens at wave 10** — leave yourself gold for it.",
+      "lore": "\n      The flux is what the old maps called the seam where the portal side and the fortress side meet — a stretch of ground that never stays the same shape twice. Build on it and it holds. Leave it empty and something walks across.\n      Nobody who holds a fortress on the flux draws their own arsenal. It arrives, it is what it is, and the ones who last are the ones who learned to shape the ground to the tools instead of wishing for other tools. Ten waves is the proving run. What comes after is the war.\n    ",
+      "features": [
+        "Free-Form Maze: Towers Block, Traps Sit on the Path",
+        "Random Loadout Draft From 40 Towers and 15 Traps",
+        "Lv 1–15 Upgrades: Attribute at Lv 5, Tier 2 at Lv 10, Evolution at 15",
+        "LAVA, GLACIER, ELECTRIC, STEEL Elemental Attributes",
+        "Ten Elite Modifiers, Per-Wave Bosses, Enemy Passives",
+        "Clickable Natural Disasters and Path Tollgates",
+        "Three Difficulties and a Daily Challenge",
+        "Web Edition: Waves 1–10, No DLC — Full Game on Steam",
+        "PC Only — Mouse and Keyboard",
+        "11 In-Game Languages Including English, Korean and Japanese"
+      ],
+      "objectives": "Shape the path with **towers and walls**, hold the fortress through **ten waves** of bosses, elites and natural disasters, and level a carry tower to its **Lv 5 attribute** and **Lv 10 Tier 2** with whatever loadout the run drafted you. Clearing wave 10 with the fortress standing finishes the web edition.",
+      "controlsTable": [
+        {
+          "key": "Left Click",
+          "action": "Place the selected item, or select a placed tower"
+        },
+        {
+          "key": "Double-Click",
+          "action": "Upgrade the tower under the cursor"
+        },
+        {
+          "key": "Right Click",
+          "action": "Sell a tower — the path recomputes instantly"
+        },
+        {
+          "key": "Left Drag",
+          "action": "Lay a line of Wall Towers"
+        },
+        {
+          "key": "Q  /  W  /  E",
+          "action": "Open the Towers, Auras and Traps panels"
+        },
+        {
+          "key": "`  1–9  0  -",
+          "action": "Pick an item in the open panel"
+        },
+        {
+          "key": "A  /  S  /  Z",
+          "action": "Upgrade, sell, undo the last placement (5 s)"
+        },
+        {
+          "key": "Space",
+          "action": "Start the next wave, or smart-upgrade the selected tower"
+        },
+        {
+          "key": "D  /  B",
+          "action": "Damage meter, codex"
+        },
+        {
+          "key": "Esc",
+          "action": "Pause / menu"
+        }
+      ],
+      "faq": [
+        {
+          "q": "How much of the game is in the web edition?",
+          "a": "Waves 1 to 10 on every difficulty, the full random loadout draft, the Lv 1–15 upgrade path with attributes and Tier 2 abilities, evolutions, veterancy, elite modifiers, natural disasters, tollgates and the Daily Challenge. The run ends with a clear screen once wave 10 is finished. Endless waves, the extra portals, the Challenger boss and the New Discovery content are in the Steam release."
+        },
+        {
+          "q": "What is the New Discovery DLC that the menu mentions?",
+          "a": "Steam-only content layered onto every run: two more elements (VOID and BLIGHT), a reroll-only apex element (SUPERIOR), Prisma currency to reroll a tower's attribute, and five Power-Up star tiers past Lv 15. The web edition shows its locked slots but never generates any of it."
+        },
+        {
+          "q": "Why did my enemies suddenly take a different route?",
+          "a": "Because you changed the board. The path is the shortest walkable route from the portal to the fortress and it is recomputed every time a tower is placed or sold. Towers block; traps and tollgates do not. If a placement would seal the fortress off completely, the game refuses it and warns you."
+        },
+        {
+          "q": "Does my progress save?",
+          "a": "Yes — the run auto-saves at every wave clear and on pause, in your browser's local storage, and the main menu offers Continue. Clearing site data or playing in a private window wipes it, and it does not carry over to the Steam build, which keeps its own save on Steam Cloud."
+        },
+        {
+          "q": "Is there a leaderboard?",
+          "a": "Not on the web. Your best waves-cleared count is stored locally on this site. The Steam release submits to all-time, weekly and daily Steam leaderboards and unlocks 20 achievements."
+        },
+        {
+          "q": "Does it work on a phone?",
+          "a": "No. The board needs right-click to sell, drag to lay walls and a hover-driven detail panel, and the 19×15 grid is laid out for a desktop screen. Play it on a computer."
+        }
+      ]
+    }
   }
 }

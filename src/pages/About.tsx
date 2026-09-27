@@ -30,7 +30,7 @@ const About: React.FC = () => {
 
           <h2 style={{ marginTop: '3rem', color: '#00d2ff' }}>What Makes Us Different</h2>
           <p><strong>Original Games:</strong> Most titles on ArcadeDeck are original creations, developed in-house. We don't just aggregate games from other sources — we build them from scratch with unique mechanics, art, and storylines.</p>
-          <p><strong>No Accounts, No Friction:</strong> No sign-up, no email capture, no paywall. Pick a nickname if you want to comment or post on the forum — everything else stays in your browser.</p>
+          <p><strong>No Accounts, No Friction:</strong> No sign-up, no email capture, no paywall. Pick a nickname if you want to comment — everything else stays in your browser.</p>
           <p><strong>Cross-Platform:</strong> Our games run on desktops, tablets, and phones. We optimize for touch controls and responsive layouts so you get the best experience regardless of device.</p>
           <p><strong>3 Languages:</strong> ArcadeDeck is localized in English, Korean, and Japanese. Game titles, descriptions, controls, tips, and world lore are translated per locale, and every locale has its own URL path for SEO.</p>
 
@@ -42,7 +42,7 @@ const About: React.FC = () => {
           <p>New games ship regularly, and existing games receive balance patches, new content, and quality-of-life improvements based on player feedback.</p>
 
           <h2 style={{ marginTop: '3rem', color: '#00d2ff' }}>Community</h2>
-          <p>We value our players' voices. Every game page has a comment section where you can share strategies, give feedback, or just say hello, and the player forum is open for longer discussions.</p>
+          <p>We value our players' voices. Every game page has a comment section where you can share strategies, give feedback, or just say hello.</p>
 
           <h2 style={{ marginTop: '3rem', color: '#00d2ff' }}>Support ArcadeDeck</h2>
           <p>ArcadeDeck is independently developed and runs without paywalls or required sign-ups. If you enjoy the games and want to help keep the servers running, fund new game development, or just buy the team a coffee, you can support us on Ko-fi.</p>

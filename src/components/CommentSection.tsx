@@ -1,7 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { Star } from 'lucide-react';
 import { useUiText } from '../i18n';
-import type { FeaturedComment } from '../i18n';
 import { db } from '../firebase';
 import {
   collection,
@@ -40,10 +38,9 @@ interface Comment {
 interface CommentSectionProps {
   gameId: string;
   currentNickname: string;
-  featured?: FeaturedComment[];
 }
 
-const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname, featured }) => {
+const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname }) => {
   const t = useUiText();
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
@@ -187,9 +184,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
     setIsLoadingMore(false);
   };
 
-  const featuredCount = featured?.length ?? 0;
-  const countLabel = `${featuredCount + comments.length}${hasMore ? '+' : ''}`;
-  const hasFeatured = featuredCount > 0;
+  const countLabel = `${comments.length}${hasMore ? '+' : ''}`;
 
   return (
     <div className="comment-section">
@@ -218,18 +213,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
       </form>
 
       <div className="comments-list">
-        {hasFeatured && featured!.map((fc, i) => (
-          <div key={`featured-${i}`} className="comment-item featured">
-            <div className="comment-header">
-              <span className="comment-author">{fc.name}</span>
-              <span className="featured-badge">
-                <Star size={12} aria-hidden="true" />
-                {fc.badge || t('commentFeaturedBadge', 'Featured')}
-              </span>
-            </div>
-            <p className="comment-text">{fc.text}</p>
-          </div>
-        ))}
         {comments.length > 0 ? (
           <>
             {comments.map((comment) => (
@@ -254,9 +237,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
             )}
           </>
         ) : (
-          !hasFeatured && (
-            <p className="no-comments">{t('commentEmpty', 'No comments yet. Be the first to share your thoughts!')}</p>
-          )
+          <p className="no-comments">{t('commentEmpty', 'No comments yet. Be the first to share your thoughts!')}</p>
         )}
       </div>
     </div>

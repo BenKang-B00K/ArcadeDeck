@@ -6,34 +6,7 @@
 }
 
 .my-games-header {
-  text-align: center;
-  padding: 110px 24px 70px;
-  position: relative;
-  overflow: hidden;
-  isolation: isolate;
-  margin-bottom: 20px;
-  border-radius: 16px;
-  border: 1px solid var(--border-default);
-}
-
-.my-games-header::after {
-  content: '';
-  position: absolute;
-  inset: -5%;
-  background: url('/images/my-rank-bg.webp') center / cover no-repeat;
-  animation: myGamesZoom 25s ease-in-out infinite alternate;
-  z-index: -2;
-}
-
-.my-games-header::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(180deg, var(--scrim-soft) 0%, var(--scrim-strong) 100%),
-    radial-gradient(ellipse at 50% 120%, var(--glow-subtle) 0%, transparent 60%);
-  pointer-events: none;
-  z-index: -1;
+  padding: 100px 0 28px;
 }
 
 @keyframes myGamesZoom {
@@ -42,11 +15,10 @@
 }
 
 .my-games-header h1 {
-  font-size: 3rem;
-  margin-bottom: 10px;
+  font-size: 2.4rem;
+  margin: 0 0 6px;
   text-transform: uppercase;
   letter-spacing: 2px;
-  position: relative;
 }
 
 .my-games-header h1 span {
@@ -55,21 +27,67 @@
 
 .my-games-header .subtitle {
   color: var(--text-muted);
-  font-size: 1.1rem;
-  margin-bottom: 20px;
-  position: relative;
+  font-size: 1.05rem;
+  margin: 0;
 }
 
-.my-games-header .nickname-badge {
+/* ── Progression wall: full-width banner on top ── */
+.deck-wall {
   position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  text-align: center;
+  padding: 40px 24px 36px;
+  border-radius: 18px;
+  border: 1px solid var(--border-accent);
+  box-shadow: var(--shadow-md), var(--shadow-glow);
+}
+
+.deck-wall-inner {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* ── Best (left) | Recent (right) ── */
+.my-games-cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+  align-items: start;
+}
+
+.my-games-cols .section-title { margin: 36px 0 18px; }
+
+.deck-wall::after {
+  content: '';
+  position: absolute;
+  inset: -5%;
+  background: url('/images/my-rank-bg.webp') center / cover no-repeat;
+  animation: myGamesZoom 25s ease-in-out infinite alternate;
+  z-index: -2;
+}
+
+.deck-wall::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, var(--scrim-soft) 0%, var(--scrim-soft) 45%, var(--scrim-strong) 100%),
+    radial-gradient(ellipse at 50% 30%, var(--glow-subtle) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: -1;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .my-games-header::after { animation: none; }
+  .deck-wall::after { animation: none; }
 }
 
 .nickname-badge {
   display: inline-block;
+  align-self: center;
   background: rgba(0, 210, 255, 0.1);
   border: 1px solid rgba(0, 210, 255, 0.3);
   padding: 8px 20px;
@@ -79,13 +97,11 @@
 }
 
 .ach-row {
-  position: relative;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
-  margin-top: 18px;
-  z-index: 1;
+  margin-top: 14px;
 }
 
 .ach-badge {
@@ -175,6 +191,17 @@
   gap: 15px;
 }
 
+.section-count {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border-default);
+  padding: 2px 10px;
+  border-radius: 999px;
+  line-height: 1.4;
+}
+
 .section-desc {
   color: var(--text-muted);
   margin-bottom: 20px;
@@ -187,35 +214,79 @@
 }
 
 .mini-game-card {
+  --tier: transparent;
+  position: relative;
   display: flex;
   align-items: center;
+  gap: 16px;
   background: var(--card-bg);
-  padding: 12px 20px;
-  border-radius: 10px;
+  padding: 12px 18px 12px 14px;
+  border-radius: 12px;
   text-decoration: none;
   color: inherit;
   border: 1px solid var(--border-default);
-  transition: background 0.2s;
+  border-left: 4px solid var(--tier);
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
 }
 
 .mini-game-card:hover {
   background: var(--bg-elevated);
+  border-color: var(--border-accent);
+  border-left-color: var(--tier);
+  transform: translateX(2px);
 }
 
+.mini-rank {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #000;
+  background: linear-gradient(135deg, #00d2ff, #6e8cff);
+  box-shadow: var(--shadow-sm);
+}
+
+.mini-game-card.tier-gold   { --tier: #ffd166; }
+.mini-game-card.tier-silver { --tier: #d0d6e0; }
+.mini-game-card.tier-bronze { --tier: #cd9b6e; }
+.mini-game-card.tier-diamond { --tier: #9ff1ff; }
+
 .mini-game-card img {
-  width: 50px;
-  height: 50px;
+  flex-shrink: 0;
+  width: 96px;
+  height: 54px;
   border-radius: 8px;
   object-fit: cover;
-  margin-right: 20px;
 }
 
 .mini-info {
   flex: 1;
+  min-width: 0;
 }
 
 .mini-info h4 {
-  margin: 0 0 5px 0;
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+  line-height: 1.25;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mini-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
 }
 
 .genre-tag {
@@ -227,41 +298,34 @@
 }
 
 /* ── Deck Level (localStorage-only progression) ── */
-.deck-panel {
-  position: relative;
-  max-width: 420px;
-  margin: 22px auto 0;
-  padding: 18px 22px;
-  border-radius: 14px;
-  border: 1px solid var(--border-default);
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(6px);
-}
-
 .deck-level {
   display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 10px;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 18px;
 }
 
 .deck-level-num {
-  font-size: 2.4rem;
+  font-size: 6.5rem;
   font-weight: 800;
-  line-height: 1;
+  line-height: 0.95;
   color: #00d2ff;
+  text-shadow: 0 0 28px var(--glow-color);
+  font-variant-numeric: tabular-nums;
 }
 
 .deck-level-word {
   text-transform: uppercase;
   letter-spacing: 1px;
-  font-size: 0.8rem;
-  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
 }
 
 .deck-bar {
-  height: 8px;
-  margin: 14px 0 6px;
+  height: 10px;
+  margin: 18px 0 8px;
   border-radius: 999px;
   background: var(--surface-2);
   overflow: hidden;
@@ -277,29 +341,47 @@
 
 .deck-xp {
   margin: 0;
-  font-size: 0.78rem;
-  color: var(--text-muted);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
 }
 
 .deck-stats {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 8px 18px;
-  margin: 14px 0 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 16px 0 0;
   padding: 0;
   list-style: none;
-  font-size: 0.8rem;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   color: var(--text-muted);
+}
+
+.deck-stats li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 6px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
 }
 
 .deck-stats strong {
   color: var(--text-primary);
-  font-size: 0.95rem;
+  font-size: 1.35rem;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
 }
+
+.deck-stats li:nth-child(2) strong { color: #ffd166; }
+.deck-stats li:nth-child(3) strong { color: #ff7849; }
 
 .deck-share {
   display: inline-flex;
+  align-self: center;
   align-items: center;
   gap: 7px;
   margin-top: 16px;
@@ -319,24 +401,74 @@
 }
 
 .mini-pb {
-  margin-left: 8px;
-  font-size: 0.7rem;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.mini-pb strong {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Progress to the next tier — the "you're close" signal. */
+.mini-next {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.mini-next-bar {
+  flex: 1;
+  max-width: 220px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+
+.mini-next-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--tier, #00d2ff), #00d2ff);
+}
+
+.mini-next-label {
+  font-size: 0.74rem;
   color: var(--text-muted);
+  white-space: nowrap;
 }
 
 .mini-tier {
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
-  margin-right: 12px;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--tier);
+  border: 1px solid color-mix(in srgb, var(--tier) 45%, transparent);
+  background: color-mix(in srgb, var(--tier) 12%, transparent);
 }
 
-.mini-tier.tier-gold   { color: #ffd166; }
-.mini-tier.tier-silver { color: #d0d6e0; }
-.mini-tier.tier-bronze { color: #cd9b6e; }
+.mini-game-card.tier-gold .mini-tier {
+  box-shadow: 0 0 14px rgba(255, 209, 102, 0.25);
+}
+
+.mini-game-card.tier-diamond .mini-tier {
+  box-shadow: 0 0 18px rgba(159, 241, 255, 0.4);
+}
 
 .go-arrow {
+  flex-shrink: 0;
   color: #00d2ff;
   font-weight: bold;
+  font-size: 1.1rem;
 }
 
 .empty-state {
@@ -348,8 +480,126 @@
   border: 1px dashed var(--border-default);
 }
 
+@media (max-width: 900px) {
+  .my-games-cols { grid-template-columns: 1fr; gap: 0; }
+}
+
 @media (max-width: 768px) {
+  .my-games-header {
+    padding-top: 88px;
+    text-align: center;
+  }
   .my-games-header h1 {
     font-size: 2.2rem;
   }
+  .deck-level-num { font-size: 4.5rem; }
+}
+
+@media (max-width: 560px) {
+  .mini-game-card {
+    flex-wrap: wrap;
+    gap: 10px 12px;
+    padding: 12px;
+  }
+
+  .mini-game-card img {
+    width: 80px;
+    height: 45px;
+  }
+
+  .mini-info {
+    flex-basis: calc(100% - 92px);
+  }
+
+  .mini-info h4 { white-space: normal; }
+
+  .mini-next-bar { max-width: none; }
+
+  .mini-tier {
+    margin-left: auto;
+    font-size: 0.74rem;
+    padding: 5px 10px;
+  }
+
+  .go-arrow { display: none; }
+}
+
+/* ── Global leaderboard ── */
+.lb-section .section-title { margin: 36px 0 18px; }
+
+.lb-empty {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  margin: 0;
+}
+
+.lb-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.lb-list li {
+  display: grid;
+  grid-template-columns: 2.4rem 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--bg-elevated);
+  font-size: var(--text-sm);
+}
+
+.lb-list li:nth-child(1) .lb-rank { color: #ffd166; }
+.lb-list li:nth-child(2) .lb-rank { color: #c0c8d4; }
+.lb-list li:nth-child(3) .lb-rank { color: #cd7f32; }
+
+.lb-me {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px var(--glow-subtle);
+}
+
+.lb-list .lb-gap {
+  display: block;
+  padding: 0 0 0 calc(14px + 1.2rem);
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  line-height: 1;
+}
+
+.lb-rank {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+.lb-nick {
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lb-nick small {
+  margin-left: 8px;
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+  background: var(--primary-color);
+  color: var(--bg-color);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.lb-level { color: var(--text-muted); }
+
+.lb-xp {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }

@@ -1,0 +1,368 @@
+/* ARTIFACT CODEX - HOLOGRAPHIC UI */
+
+.codex-modal {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(5, 5, 10, 0.9);
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(10px);
+    animation: codexFadeIn 0.3s ease-out;
+}
+
+.codex-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at center, transparent 0%, rgba(0, 242, 254, 0.05) 100%);
+    pointer-events: none;
+}
+
+.codex-scanlines {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+    background-size: 100% 4px;
+    pointer-events: none;
+    opacity: 0.3;
+}
+
+.codex-container {
+    width: 90%;
+    max-width: 1000px;
+    height: 80%;
+    background: rgba(10, 15, 25, 0.95);
+    border: 1px solid var(--neon);
+    box-shadow: 0 0 30px rgba(0, 242, 254, 0.2), inset 0 0 50px rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.codex-container::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 20px; height: 20px;
+    border-top: 3px solid var(--neon);
+    border-left: 3px solid var(--neon);
+}
+
+.codex-container::after {
+    content: '';
+    position: absolute;
+    bottom: 0; right: 0; width: 20px; height: 20px;
+    border-bottom: 3px solid var(--neon);
+    border-right: 3px solid var(--neon);
+}
+
+.codex-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px 30px;
+    border-bottom: 1px solid rgba(0, 242, 254, 0.3);
+    background: rgba(0, 242, 254, 0.05);
+}
+
+.codex-title {
+    font-family: 'Consolas', monospace;
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--neon);
+    letter-spacing: 4px;
+    text-shadow: 0 0 10px var(--neon);
+}
+
+.codex-close {
+    font-family: 'Consolas', monospace;
+    color: var(--damage);
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.codex-close:hover {
+    text-shadow: 0 0 10px var(--damage);
+}
+
+.codex-body {
+    flex: 1;
+    display: flex;
+    padding: 20px;
+    gap: 20px;
+    overflow: hidden;
+}
+
+.codex-grid {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    overflow-y: auto;
+    padding-right: 15px;
+}
+
+.codex-grid::-webkit-scrollbar { width: 6px; }
+.codex-grid::-webkit-scrollbar-thumb { background: var(--neon); border-radius: 3px; }
+
+/* Rarity Sections */
+.rarity-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Vertical Codex Grid for UFO/Drones */
+.codex-grid-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.codex-grid-vertical::-webkit-scrollbar { width: 4px; }
+.codex-grid-vertical::-webkit-scrollbar-thumb { background: var(--neon); }
+
+.codex-item.compact {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 2px;
+    transition: 0.2s ease-out;
+    justify-content: flex-start;
+    text-align: left;
+}
+
+.codex-item.compact:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateX(4px);
+}
+
+.codex-item-icon-container {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.codex-mini-icon {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));
+}
+
+.codex-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
+}
+
+.codex-item-name {
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.codex-item-desc {
+    font-size: 10px;
+    color: #888;
+    line-height: 1.3;
+    white-space: normal;
+}
+
+/* Buttons next to Mission Header */
+.codex-btn-small {
+    background: rgba(10, 15, 25, 0.9);
+    border: 1px solid var(--neon);
+    color: var(--neon);
+    width: 34px;
+    height: 34px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+}
+
+.codex-btn-small:hover {
+    background: var(--neon);
+    color: #000;
+    box-shadow: 0 0 20px var(--neon);
+    transform: scale(1.1);
+}
+
+.drone-codex-btn {
+    border-color: #95a5a6;
+    color: #95a5a6;
+    box-shadow: 0 0 10px rgba(149, 165, 166, 0.2);
+}
+
+.drone-codex-btn:hover {
+    background: #95a5a6;
+    color: #000;
+    box-shadow: 0 0 20px #95a5a6;
+}
+
+
+.rarity-header {
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    padding: 5px 10px;
+    border-left: 3px solid #fff;
+    background: rgba(255,255,255,0.05);
+    font-family: 'Consolas', monospace;
+}
+
+.rarity-header.Common { border-color: #aaa; color: #aaa; }
+.rarity-header.Rare { border-color: var(--neon); color: var(--neon); box-shadow: inset 50px 0 20px -40px rgba(0, 242, 254, 0.2); }
+.rarity-header.Legendary { border-color: var(--gold); color: var(--gold); box-shadow: inset 50px 0 20px -40px rgba(241, 196, 15, 0.2); }
+
+.artifacts-subgrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    grid-auto-rows: 70px;
+    gap: 15px;
+}
+
+.codex-item {
+    width: 100%; height: 100%;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    cursor: pointer;
+    transition: 0.3s;
+    position: relative;
+    border-radius: 4px;
+}
+
+.codex-item.Rare { border-color: rgba(0, 242, 254, 0.3); }
+.codex-item.Legendary { border-color: rgba(241, 196, 15, 0.3); }
+
+.codex-item:hover {
+    background: rgba(0, 242, 254, 0.1);
+    border-color: var(--neon);
+    transform: scale(1.1);
+    box-shadow: 0 0 15px var(--neon);
+    z-index: 10;
+}
+
+.codex-item:hover.Rare { box-shadow: 0 0 20px var(--neon); border-color: var(--neon); }
+.codex-item:hover.Legendary { box-shadow: 0 0 25px var(--gold); border-color: var(--gold); }
+
+.codex-item.locked {
+    filter: grayscale(1) brightness(0.3);
+    opacity: 0.5;
+    border-color: #333 !important;
+    box-shadow: none !important;
+}
+
+.codex-item-count {
+    position: absolute;
+    bottom: 2px;
+    right: 4px;
+    font-size: 10px;
+    color: #fff;
+    font-weight: bold;
+    font-family: 'Consolas', monospace;
+}
+
+/* Detail View */
+.codex-details {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+}
+
+.detail-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 20px var(--gold));
+    animation: floatIcon 3s infinite ease-in-out;
+}
+
+@keyframes floatIcon {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.detail-name {
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--gold);
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.detail-desc {
+    font-size: 13px;
+    color: #ccc;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.detail-count {
+    margin-top: auto;
+    font-size: 12px;
+    color: var(--neon);
+    font-family: 'Consolas', monospace;
+}
+
+.source-guide {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    width: 100%;
+    text-align: left;
+}
+
+.source-title {
+    font-size: 10px;
+    color: #666;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.source-item {
+    font-size: 11px;
+    color: #999;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.source-item b { color: #ccc; }
+
+@keyframes codexFadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}

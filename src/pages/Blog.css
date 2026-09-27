@@ -515,3 +515,19 @@
     font-size: 1.6rem;
   }
 }
+
+/* Patch Notes (/patchnote) — one card per release, items split on ';'. */
+.patch-items {
+  margin: 0;
+  padding-left: 1.2em;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.patch-items li + li { margin-top: 4px; }
+.patch-items .patch-head { color: var(--text-primary); }
+.patch-items .patch-head > a:first-of-type { font-size: 1.2em; font-weight: 700; }
+.patch-items .patch-head + li { margin-top: 10px; }
+.patch-items ul { margin: 4px 0 8px; padding-left: 1.2em; color: var(--text-muted); }
+.patch-items code { font: 0.9em ui-monospace, monospace; padding: 0 4px; border-radius: 4px; background: var(--surface-3, rgba(255, 255, 255, 0.06)); }
+.patch-items a { color: #00d2ff; text-decoration: none; }
+.patch-items a:hover { text-decoration: underline; }

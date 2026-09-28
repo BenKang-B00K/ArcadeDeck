@@ -62,5 +62,5 @@ export const deviceGames: Game[] = games.filter(g =>
 export const GENRE_HUE: Record<string, number> = {
   'Tower Defense': 25, Survival: 0, Strategy: 210, Idle: 45, RPG: 280, Casual: 330,
   Arcade: 190, 'Local Co-op': 140, Action: 10, Roguelike: 300, PvP: 355, Tycoon: 60,
-  Simulation: 170, 'Auto Battler': 235, 'Loadout Grid-Auto-Battle': 235, 'Travel Planner': 95,
+  Simulation: 170, 'Auto Battler': 235, 'Loadout Grid-Auto-Battle': 235, 'Travel Planner': 95, Educational: 75,
 };

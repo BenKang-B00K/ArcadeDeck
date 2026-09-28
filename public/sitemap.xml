@@ -920,6 +920,33 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/tandem" />
   </url>
   <url>
+    <loc>https://arcadedeck.net/play/only-nand</loc>
+    <lastmod>2026-09-28</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/only-nand" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/only-nand" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/only-nand" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/only-nand" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ja/play/only-nand</loc>
+    <lastmod>2026-09-28</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/only-nand" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/only-nand" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/only-nand" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/only-nand" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ko/play/only-nand</loc>
+    <lastmod>2026-09-28</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/only-nand" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/only-nand" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/only-nand" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/only-nand" />
+  </url>
+  <url>
     <loc>https://arcadedeck.net/genre/action</loc>
     <lastmod>2026-09-27</lastmod>
     <priority>0.7</priority>

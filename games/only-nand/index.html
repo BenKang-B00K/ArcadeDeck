@@ -1,0 +1,2599 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Only NAND: build everything from one gate</title>
+<meta name="description" content="Build every logic gate, and finally an adder, from a single NAND gate.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Only NAND">
+<meta property="og:title" content="Only NAND: build everything from one gate">
+<meta property="og:description" content="Build every logic gate, and finally an adder, from a single NAND gate.">
+<!-- ponytail: relative image path; swap for full https:// URL once hosted (Facebook/X/KakaoTalk need it) -->
+<meta property="og:image" content="icons/og-banner.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="800">
+<meta property="og:image:alt" content="Only NAND: one glowing NAND gate branching into NOT, AND, OR, XOR, an adder and a CPU">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0D3935">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Only NAND">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script>try{const t=JSON.parse(localStorage.getItem('only-nand-settings'))?.theme;if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<style>
+:root{
+  --bg:#E6ECEE; --panel:#FFFFFF; --ink:#17252A; --muted:#56666B; --line:#CBD5D8;
+  --accent:#0C6B5F; --accent-ink:#FFFFFF; --ok:#1F8A5B; --bad:#C23B31; --star:#D99100;
+  --board:#0D3935; --dot:#1E5A53; --chip:#1B2A2E; --nand:#243A3E; --steel:#9DB2B7;
+  --hi:#FFB627; --lo:#58767F; --chip-ink:#E6EEF0;
+  --shadow:0 10px 30px -18px rgba(10,40,36,.55);
+  --cjk:'Apple SD Gothic Neo','Malgun Gothic','Hiragino Sans','Yu Gothic UI','Noto Sans CJK KR';
+  --display:'Chakra Petch',var(--cjk),'Arial Narrow',system-ui,sans-serif;
+  --body:'IBM Plex Sans',var(--cjk),system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+:root:lang(ja){--cjk:'Hiragino Sans','Yu Gothic UI','Meiryo','Noto Sans CJK JP'}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1719; --panel:#172124; --ink:#E2EAEC; --muted:#93A3A8; --line:#2A393D;
+    --accent:#3DBBA6; --accent-ink:#06201C; --ok:#4CC38A; --bad:#F0736A; --star:#FFC247;
+    --shadow:0 12px 32px -16px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1719; --panel:#172124; --ink:#E2EAEC; --muted:#93A3A8; --line:#2A393D;
+  --accent:#3DBBA6; --accent-ink:#06201C; --ok:#4CC38A; --bad:#F0736A; --star:#FFC247;
+  --shadow:0 12px 32px -16px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);background-image:radial-gradient(1200px 500px at 50% -120px,color-mix(in srgb,var(--accent) 14%,transparent),transparent 70%);background-repeat:no-repeat;
+  color:var(--ink);font:400 16px/1.5 var(--body);min-height:100vh;min-height:100dvh;overscroll-behavior-y:none;
+  padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom);
+  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+input,textarea{user-select:text;-webkit-user-select:text}
+img,svg,a{-webkit-user-drag:none}
+:lang(ko) body{word-break:keep-all}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer;touch-action:manipulation;transition:transform .08s,border-color .15s,background-color .15s,box-shadow .15s}
+button:not(:disabled):active{transform:scale(.97)}
+:focus-visible{outline:3px solid var(--hi);outline-offset:2px}
+button:disabled{cursor:not-allowed;opacity:.45}
+
+.top{position:sticky;top:0;z-index:6;display:flex;align-items:center;gap:12px;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));
+  border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--panel) 88%,transparent);-webkit-backdrop-filter:saturate(1.4) blur(10px);backdrop-filter:saturate(1.4) blur(10px)}
+.brand{display:flex;align-items:center;gap:10px;background:none;border:0;padding:4px;font:700 21px/1 var(--display);letter-spacing:.01em;white-space:nowrap}
+.brand svg{width:34px;height:24px;color:var(--accent)}
+#crumb{color:var(--muted);font-size:14px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ctl{display:flex;align-items:center;gap:8px;margin-left:auto}
+.icon-btn{width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:0}
+.icon-btn svg{width:22px;height:22px}
+@media (hover:hover){.icon-btn:hover{border-color:var(--accent)}}
+.icon-btn.accent{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.lang{position:relative;display:flex;align-items:center}
+.lang svg{position:absolute;left:10px;width:18px;height:18px;pointer-events:none;color:var(--muted)}
+.lang select{appearance:none;-webkit-appearance:none;height:40px;padding:0 12px 0 34px;border:1px solid var(--line);border-radius:10px;background:var(--panel);font-size:14px;cursor:pointer}
+.snd{position:relative}
+#tip{position:fixed;left:0;top:0;z-index:50;max-width:240px;padding:6px 9px;border-radius:7px;background:var(--ink);color:var(--bg);font:500 12px/1.35 var(--body);
+  pointer-events:none;box-shadow:var(--shadow);opacity:0;transform:translateY(-2px);transition:opacity .12s,transform .12s}
+#tip.on{opacity:1;transform:none}
+.thm .sun,[data-theme="dark"] .thm .moon{display:none}
+[data-theme="dark"] .thm .sun{display:inline}
+.pop{position:absolute;right:0;top:calc(100% + 8px);width:232px;display:grid;gap:12px;padding:14px;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);z-index:20}
+.pop .row{display:flex;align-items:center;gap:10px}
+.pop .row>svg{width:22px;height:22px;flex:none;color:var(--muted)}
+.pop input[type=range]{flex:1;min-width:0;height:28px;accent-color:var(--accent);cursor:pointer}
+.pop .pct{width:3ch;text-align:right;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.pop .icon-btn{justify-self:end}
+.spk .x{display:none}
+.spk[data-state="mute"] .w1,.spk[data-state="mute"] .w2,.spk[data-state="low"] .w2{display:none}
+.spk[data-state="mute"] .x{display:inline}
+@media (max-width:560px){#crumb{display:none} .brand .bt{display:none}}
+
+/* Level select */
+.levels{max-width:1040px;margin:0 auto;padding:28px 20px 80px}
+/* Hero: dark circuit board with the banner's NAND tree on the right, same in both themes */
+.intro{position:relative;overflow:hidden;isolation:isolate;margin:0 0 36px;padding:clamp(28px,5vw,56px) clamp(22px,4vw,48px) 30px;border-radius:20px;color:#E6EEF0;
+  background:radial-gradient(900px 420px at 0% 0%,rgba(61,187,166,.14),transparent 60%),radial-gradient(#0F3B37 1px,transparent 1.4px) 0 0/22px 22px,#01201F;
+  box-shadow:0 24px 50px -28px rgba(1,32,31,.9),inset 0 0 0 1px rgba(157,178,183,.12)}
+.intro::after{content:'';position:absolute;inset:0 0 0 auto;width:min(52%,540px);z-index:-1;pointer-events:none;
+  background:url(icons/hero.webp) left center/cover no-repeat;-webkit-mask-image:linear-gradient(90deg,transparent,#000 30%);mask-image:linear-gradient(90deg,transparent,#000 30%)}
+@media (max-width:760px){.intro::after{width:100%;opacity:.28}}
+.intro h1{font:700 clamp(40px,6vw,68px)/.95 var(--display);margin:0 0 20px;max-width:12ch;letter-spacing:-.01em;text-shadow:0 2px 24px rgba(0,0,0,.5)}
+.intro p{max-width:46ch;color:#9FBFBA;font-size:18px;margin:0 0 28px}
+.progress{display:flex;align-items:center;gap:12px;margin:0;font-size:14px;color:#9FBFBA}
+.progress .bar{flex:0 1 260px;height:8px;border-radius:99px;background:rgba(157,178,183,.18);overflow:hidden}
+.progress .bar i{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,#3DBBA6,var(--hi));box-shadow:0 0 10px rgba(255,182,39,.5);transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.level-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.level{position:relative;overflow:hidden;width:100%;height:100%;text-align:left;display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:14px;padding:16px;border:1px solid var(--line);background:var(--panel);border-radius:12px;box-shadow:0 1px 0 rgba(0,0,0,.02)}
+@media (hover:hover){.level:hover:not(:disabled){border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--shadow)}}
+.level.done::before{content:'';position:absolute;inset:0 auto 0 0;width:4px;background:var(--accent)}
+.level .num{grid-row:1/3;font:700 34px/1 var(--display);color:var(--accent);min-width:1.2em}
+.level:disabled .num{color:var(--muted)}
+.level .lt{font:600 18px/1.3 var(--display)}
+.level .ls{font-size:14px;color:var(--muted)}
+.level.done .ls{color:var(--ink)}
+.lock{width:14px;height:14px;vertical-align:-2px;margin-right:4px}
+.level .lu{grid-column:2;margin-top:6px;font-size:12px;color:var(--muted)}
+.level .lu::before{content:'\25C7\a0'}
+.level .lu.on{color:var(--accent)}
+.level .lu.on::before{content:'\25C6\a0'}
+.tool:disabled{opacity:.5;cursor:not-allowed;border-style:dashed}
+.stars{color:var(--star);letter-spacing:2px}
+
+/* Play */
+.play{display:grid;grid-template-columns:176px minmax(0,1fr) 320px;gap:16px;padding:16px;align-items:start}
+.palette,.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:0 1px 0 rgba(0,0,0,.02)}
+.palette h2{font:600 13px/1 var(--display);margin:0 0 12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+#tools{display:flex;flex-direction:column;gap:8px}
+.tool{display:flex;flex-direction:column;align-items:flex-start;padding:10px 12px;border-radius:9px;border:1px solid var(--line);background:transparent;text-align:left}
+@media (hover:hover){.tool:hover:not(:disabled){border-color:var(--accent);background:color-mix(in srgb,var(--accent) 6%,transparent)}}
+.tool .tname{font:600 16px/1.2 var(--display)}
+.tool .tdesc{font-size:12px;color:var(--muted)}
+.tool.raw{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 86%,#fff),var(--accent));border-color:var(--accent);color:var(--accent-ink)}
+.tool.raw .tdesc{color:inherit;opacity:.8}
+.tool-actions{display:flex;flex-direction:column;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+.ghost{background:transparent;border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:14px}
+@media (hover:hover){.ghost:hover:not(:disabled){border-color:var(--accent)}}
+
+.board-wrap{background:var(--board);border-radius:12px;overflow:hidden;position:relative;box-shadow:var(--shadow),inset 0 0 0 1px rgba(255,255,255,.04)}
+#inside{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--board);z-index:2}
+.inside-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 14px;background:#0A2E2B;color:#E6EEF0}
+#insideTitle{font:600 19px/1.2 var(--display);display:block}
+#insideSub{font-size:13px;color:#A9C2C0}
+#zoomOut{background:var(--hi);color:#2A1C00;border:0;border-radius:9px;padding:8px 14px;font-weight:600;white-space:nowrap}
+#insideSvg{flex:1;min-height:0;width:100%;display:block;touch-action:none}
+.zoom-btn{cursor:zoom-in}
+.zoom-btn .zbg{fill:var(--hi)}
+.zoom-btn .zhit{fill:transparent}
+.zoom-btn .mag{fill:none;stroke:#2A1C00;stroke-width:2;pointer-events:none}
+@media (prefers-reduced-motion:no-preference){
+  #inside.zoom{animation:zoomIn .38s cubic-bezier(.2,.8,.2,1)}
+  @keyframes zoomIn{from{transform:scale(.06);opacity:0}to{transform:none;opacity:1}}
+}
+#board{display:block;width:100%;height:auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.board-help{margin:0;padding:8px 14px;font-size:13px;color:#A9C2C0;background:#0A2E2B}
+.rotate-tip{display:none;color:var(--hi)}
+@media (orientation:portrait) and (max-width:600px){.rotate-tip{display:block;margin-top:4px}}
+
+.play.learn{grid-template-columns:minmax(0,1fr) 340px}
+@media (max-width:1060px){.play.learn{grid-template-columns:1fr}}
+#lesson p{margin:0 0 10px;font-size:15px;color:var(--ink)}
+#lesson p:last-child{margin:0}
+#lesson{margin:0 0 14px;padding:12px 14px;border-radius:9px;background:color-mix(in srgb,var(--accent) 9%,transparent);border:1px solid color-mix(in srgb,var(--accent) 18%,transparent)}
+#quiz{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+#quiz .q{font:600 18px/1.3 var(--display);margin:0 0 10px}
+.choices{display:flex;flex-direction:column;gap:8px}
+.choice{text-align:left;padding:12px;border-radius:9px;border:1px solid var(--line);background:transparent}
+@media (hover:hover){.choice:hover{border-color:var(--accent)}}
+.choice.wrong{border-color:var(--bad);color:var(--bad)}
+.lvl-num{color:var(--accent)}
+.lvl-num::after{content:': '}
+.panel h1{font:700 26px/1.15 var(--display);margin:0 0 8px}
+/* Goal + hint cards */
+.card-note{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start;margin:0 0 14px;padding:12px 14px;border-radius:10px;
+  background:color-mix(in srgb,var(--accent) 7%,var(--panel));border:1px solid color-mix(in srgb,var(--accent) 22%,transparent)}
+.card-note>svg{width:28px;height:28px;color:var(--accent)}
+.card-note .k{display:block;font:600 12px/1 var(--display);text-transform:uppercase;letter-spacing:.09em;color:var(--accent);margin:2px 0 6px}
+.card-note p{margin:0;font-size:16.5px;line-height:1.6;text-wrap:pretty}
+#lvlGoal .g-head{display:block;font:700 19px/1.3 var(--display);letter-spacing:.01em;text-wrap:balance}
+#lvlGoal .g-desc{display:block;margin-top:6px;font-size:15px;line-height:1.55;font-style:italic;color:var(--muted)}
+:lang(ko) #lvlGoal .g-desc,:lang(ja) #lvlGoal .g-desc{font-style:normal}
+.card-note.hint{margin:14px 0 0;background:color-mix(in srgb,var(--hi) 11%,var(--panel));border-color:color-mix(in srgb,var(--hi) 45%,transparent)}
+.card-note.hint>svg,.card-note.hint .k{color:#B97800}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .card-note.hint>svg,:root:not([data-theme="light"]) .card-note.hint .k{color:var(--hi)}}
+:root[data-theme="dark"] .card-note.hint>svg,:root[data-theme="dark"] .card-note.hint .k{color:var(--hi)}
+@media (prefers-reduced-motion:no-preference){.card-note.hint:not([hidden]){animation:rise .22s ease-out}@keyframes rise{from{transform:translateY(-4px);opacity:0}to{transform:none;opacity:1}}}
+/* Inline tokens in instructions */
+.sig{display:inline-block;font:600 .92em/1.25 var(--display);padding:0 .42em;border-radius:6px;background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent);white-space:nowrap}
+.gt{font:700 .95em var(--display);letter-spacing:.03em}
+.bit{display:inline-grid;place-items:center;min-width:1.4em;height:1.4em;padding:0 .2em;border-radius:6px;font:700 .85em/1 var(--display);background:#1C3337;color:#E6EEF0;vertical-align:.08em}
+.bit.b1{background:var(--hi);color:#2A1C00}
+.meta{font-size:14px;color:var(--muted);margin-bottom:14px}
+.meta .next{display:block;margin-top:4px;color:var(--ink);font-weight:500}
+.tt-cap{caption-side:top;text-align:left;padding:8px 10px 6px;font-size:13px;color:var(--muted)}
+tbody tr.focus td{box-shadow:inset 0 2px 0 var(--bad),inset 0 -2px 0 var(--bad);font-weight:700}
+/* Visual glossary on the intro level */
+.legend{list-style:none;margin:12px 0 0;padding:10px 0 0;border-top:1px dashed color-mix(in srgb,var(--accent) 30%,transparent);display:grid;gap:8px}
+.legend li{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center;font-size:14px}
+.legend svg{width:44px;height:24px}
+/* Rookie coach under the board */
+.coach{margin:0;padding:10px 14px;font-size:14px;line-height:1.5;color:#FFF3D6;background:#123F3A;border-top:1px solid #1E5A53}
+.coach .n{display:inline-block;margin-right:8px;padding:1px 8px;border-radius:99px;background:var(--hi);color:#2A1C00;font:700 12px/1.5 var(--display)}
+.coach .sig{background:rgba(255,182,39,.18);color:var(--hi)}
+.nudge{fill:none;stroke:var(--hi);stroke-width:2.5;pointer-events:none;opacity:.9}
+@media (prefers-reduced-motion:no-preference){.nudge{animation:nudge 1.3s ease-in-out infinite;transform-box:fill-box;transform-origin:center}@keyframes nudge{50%{opacity:.25;transform:scale(1.08)}}}
+/* Sandbox */
+.play:not(.sandbox) .sb-only,.play.sandbox .lv-only{display:none!important}
+.sandbox-card{margin-top:16px;width:100%;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;padding:18px 20px;border-radius:14px;text-align:left;
+  border:1.5px dashed color-mix(in srgb,var(--accent) 55%,transparent);background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,var(--panel)),var(--panel))}
+@media (hover:hover){.sandbox-card:hover{border-style:solid;box-shadow:var(--shadow);transform:translateY(-2px)}}
+.sandbox-card>svg{width:44px;height:44px;color:var(--accent)}
+.sandbox-card .st{display:block;font:700 22px/1.1 var(--display)}
+.sandbox-card .ss{display:block;font-size:14px;color:var(--muted);margin-top:4px}
+.zoom-ctl{position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:6px;z-index:1}
+.zoom-ctl .icon-btn{width:38px;height:38px;box-shadow:0 4px 12px -6px rgba(0,0,0,.6)}
+/* Level chapters */
+.chapter{margin:0 0 34px}
+.ch-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin:0 0 12px}
+.ch-head h2{margin:0;font:700 24px/1.1 var(--display)}
+.ch-head .ch-n{font:600 12px/1 var(--display);padding:4px 9px;border-radius:99px;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent)}
+.ch-head p{flex-basis:100%;margin:0;color:var(--muted);font-size:14px}
+.chapter.rules .ch-head h2{color:var(--bad)}
+.chapter.rules .level .num{color:var(--bad)}
+.wiki{display:inline-flex;align-items:center;gap:6px;min-height:32px;margin-top:8px;font-size:14px;font-weight:600;color:var(--accent);text-decoration:none}
+.wiki:hover span,.wiki:focus-visible span{text-decoration:underline}
+.wiki svg{width:16px;height:16px;flex:none}
+.card-note.rule{background:color-mix(in srgb,var(--bad) 7%,var(--panel));border-color:color-mix(in srgb,var(--bad) 35%,transparent)}
+.card-note.rule>svg,.card-note.rule .k{color:var(--bad)}
+/* Seven-segment digit (seg7 level) */
+.seg-box{fill:#0A2624;stroke:#1E5A53;stroke-width:1.5}
+.seg{fill:#16322F}
+.seg.on{fill:var(--hi)}
+.chapter.memory .ch-head h2{color:#7C5CD6}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .chapter.memory .ch-head h2{color:#A993F0}}
+:root[data-theme="dark"] .chapter.memory .ch-head h2{color:#A993F0}
+td.step{color:var(--muted);font-size:12px}
+/* Sandbox switch / lamp parts */
+.tool.io{border-style:dashed}
+.io-hit{fill:transparent}
+.gate.sel .io-hit{fill:rgba(255,182,39,.07);stroke:var(--hi);stroke-width:1.5;stroke-dasharray:5 4}
+/* "Why it works" note in the win dialog */
+.why{margin-top:14px;padding:12px 14px;border-radius:10px;border-left:3px solid var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--panel))}
+.why .k{display:block;font:600 12px/1 var(--display);text-transform:uppercase;letter-spacing:.09em;color:var(--accent);margin-bottom:6px}
+.why p{margin:0;font-size:15px;line-height:1.6}
+/* Keyboard shortcut badges (hidden on touch-only devices) */
+.tool-actions .ghost{display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left}
+kbd{font:600 11px/1 var(--display);padding:3px 6px;border-radius:5px;border:1px solid var(--line);border-bottom-width:2px;color:var(--muted);background:var(--bg)}
+@media (hover:none) and (pointer:coarse){.tool-actions kbd{display:none}.tool-actions .ghost{justify-content:center}}
+.tt-wrap{overflow:auto;max-height:480px;border:1px solid var(--line);border-radius:9px}
+thead{position:sticky;top:0;z-index:1;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{padding:5px 6px;text-align:center;border-bottom:1px solid var(--line)}
+tbody tr:last-child td{border-bottom:0}
+thead th{font-weight:600;color:var(--muted);font-size:12px;background:color-mix(in srgb,var(--ink) 3%,transparent)}
+th.grp,td.grp{border-left:1px solid var(--line)}
+tbody tr.live td{background:color-mix(in srgb,var(--hi) 22%,transparent)}
+td.miss{color:var(--bad);font-weight:600}
+td.mark-ok{color:var(--ok);font-weight:700} td.mark-bad{color:var(--bad);font-weight:700}
+.panel-actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;justify-content:center}
+.primary{background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 86%,#fff),var(--accent));color:var(--accent-ink);border:0;border-radius:9px;padding:11px 18px;font-weight:600;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 6px 16px -8px var(--accent)}
+.secondary{background:transparent;border:1px solid var(--line);border-radius:9px;padding:10px 14px}
+@media (hover:hover){.secondary:hover{border-color:var(--accent)}}
+#status{margin:12px 0 0;font-size:15px;min-height:1.5em}
+#status:not(:empty){padding:9px 12px;border-radius:9px;background:color-mix(in srgb,var(--ok) 10%,transparent)}
+#status.bad{color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,transparent)}
+
+/* SVG */
+.wire{fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.wire.lo{stroke:var(--lo)} .wire.hi{stroke:#FFC23F}
+.wire.sel{stroke-width:8}
+.wire-glow{fill:none;stroke:var(--hi);stroke-width:14;stroke-linecap:round;stroke-linejoin:round;opacity:.2;pointer-events:none}
+.wire-flow{display:none}
+@media (prefers-reduced-motion:no-preference){
+  .wire-flow{display:inline;fill:none;stroke:#FFF4CC;stroke-width:2;stroke-linecap:round;stroke-dasharray:1.5 16;pointer-events:none;animation:flow .8s linear infinite}
+  @keyframes flow{to{stroke-dashoffset:-17.5}}
+}
+.wire-hit{fill:none;stroke:transparent;stroke-width:var(--wire-hit,18);pointer-events:stroke;cursor:pointer}
+.ghost-wire{fill:none;stroke:var(--hi);stroke-width:3;stroke-dasharray:6 5;pointer-events:none}
+.gate{cursor:grab}
+.shade{fill:rgba(0,0,0,.32);pointer-events:none}
+.body{fill:url(#chipG);stroke:#B4C7CB;stroke-width:2}
+.body.nand{fill:url(#nandG)}
+.gate.sel .body,.gate.sel .bubble{stroke:var(--hi);stroke-width:3}
+.bubble{fill:#1D3033;stroke:#B4C7CB;stroke-width:2}
+.lead{stroke:var(--steel);stroke-width:2}
+.pin{fill:var(--steel);pointer-events:none}
+.pin.hi{fill:var(--hi)}
+.pin-hit{fill:transparent;cursor:crosshair}
+.pending{fill:none;stroke:var(--hi);stroke-width:2.5;pointer-events:none}
+.glabel{fill:var(--chip-ink);font:600 15px var(--display);text-anchor:middle;pointer-events:none}
+.gtitle{fill:#CFE0DD;font:600 13px var(--display);text-anchor:middle;pointer-events:none}
+.plabel{fill:#AFC3C6;font:500 10px var(--body);pointer-events:none}
+.switch{fill:#16292C;stroke:var(--steel);stroke-width:1.5;pointer-events:none}
+.switch.on{fill:url(#amberG);stroke:var(--hi)}
+.switch-hit{fill:transparent;cursor:pointer}
+.knob{fill:#8FA5AA;pointer-events:none}
+.knob.on{fill:#FFF6DC}
+.klabel{font:700 13px var(--display);fill:#16262A;text-anchor:middle;pointer-events:none}
+.klabel.on{fill:#8A5A00}
+.tname{font:600 14px var(--display);fill:#CFE0DD;pointer-events:none}
+.lamp{fill:#16292C;stroke:var(--steel);stroke-width:1.5}
+.lamp.on{fill:url(#lampG);stroke:var(--hi)}
+.lamp.off-none{stroke-dasharray:4 3}
+/* Box select, groups, regions */
+.marquee{fill:rgba(255,182,39,.08);stroke:var(--hi);stroke-width:2;stroke-dasharray:8 6;pointer-events:none}
+.grp-hit{fill:rgba(255,182,39,.05);cursor:move}
+.grp-box{fill:none;stroke:var(--hi);stroke-width:2.5;stroke-dasharray:10 6;pointer-events:none}
+.lasso{fill:rgba(255,182,39,.08);stroke:var(--hi);stroke-width:2.5;stroke-dasharray:4 5;stroke-linejoin:round;pointer-events:none}
+.region{fill:var(--rc);fill-opacity:.1;stroke:var(--rc);stroke-width:2.5;stroke-dasharray:12 7;stroke-linejoin:round;pointer-events:none}
+.region.sel{fill-opacity:.2;stroke-width:4;stroke-dasharray:none}
+.rlabel{cursor:pointer}
+.rlabel rect{fill:var(--rc)}
+.rlabel text{fill:#0A1F1D;font-weight:700;font-family:var(--display)}
+.play.sandbox.mode #board{cursor:crosshair}
+.tool-actions .ghost[aria-pressed="true"]{border-color:var(--hi);background:color-mix(in srgb,var(--hi) 18%,transparent)}
+/* Sandbox panel: title, share, saves, regions */
+.sb-box{display:grid;gap:10px;margin:0 0 14px}
+.sb-box label{font:600 12px/1 var(--display);text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+.sb-box input[type=text]{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg);font:600 17px/1.2 var(--display)}
+.sb-box .row{display:flex;gap:8px;flex-wrap:wrap}
+.sb-box .row>button{flex:1 1 auto;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.sb-box .row svg{width:18px;height:18px}
+.sb-list{list-style:none;margin:0;padding:0;display:grid;gap:6px;max-height:210px;overflow:auto}
+.sb-list li{display:flex;align-items:center;gap:6px}
+.sb-list .ghost{flex:1;min-width:0;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb-list .ghost small{color:var(--muted);margin-left:6px}
+.sb-list .icon-btn{width:34px;height:34px;flex:none}
+.sb-list .icon-btn svg{width:16px;height:16px}
+.sb-list .dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px;vertical-align:0}
+.sb-empty{margin:0;font-size:13px;color:var(--muted)}
+
+/* Win */
+.overlay{position:fixed;inset:0;background:rgba(5,20,18,.55);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);display:grid;place-items:center;padding:20px;z-index:10}
+.win-card{background:var(--panel);border-radius:16px;padding:28px;max-width:420px;width:100%;border:1px solid var(--line);box-shadow:0 30px 60px -20px rgba(0,0,0,.5)}
+.win-card h2{font:700 34px/1.05 var(--display);margin:0 0 10px}
+#winStars{display:flex;gap:6px;font-size:34px;line-height:1;margin-bottom:12px}
+#winStars span{color:var(--line)}
+#winStars span.on{color:var(--star);text-shadow:0 0 18px color-mix(in srgb,var(--star) 60%,transparent)}
+.win-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:22px;flex-wrap:wrap}
+@media (prefers-reduced-motion:no-preference){
+  .win-card{animation:pop .28s cubic-bezier(.2,.9,.3,1.2)}
+  @keyframes pop{from{transform:scale(.92);opacity:0}to{transform:none;opacity:1}}
+  #winStars span.on{animation:star .5s cubic-bezier(.2,.9,.3,1.4) backwards;animation-delay:calc(.15s + var(--d))}
+  @keyframes star{from{transform:scale(0) rotate(-40deg);opacity:0}to{transform:none;opacity:1}}
+}
+
+@media (max-width:1060px){
+  .play{grid-template-columns:1fr;padding:12px;gap:12px}
+  #tools{flex-direction:row;flex-wrap:wrap}
+  .tool{flex:1 1 110px}
+  .tool-actions{flex-direction:row;flex-wrap:wrap}
+  .tool-actions .ghost{flex:1 1 auto;min-height:40px}
+  .palette{order:1} .board-wrap{order:2} .panel{order:3}
+}
+/* Phone held sideways: parts on the left, board fills the height */
+@media (max-width:1060px) and (orientation:landscape) and (max-height:560px){
+  .play{grid-template-columns:150px minmax(0,1fr)}
+  .play.learn{grid-template-columns:minmax(0,1fr) 300px}
+  .play:not(.learn) .panel{grid-column:1/-1}
+  .palette{order:0;padding:10px;max-height:calc(100dvh - 90px);overflow:auto}
+  #tools,.tool-actions{flex-direction:column}
+  .tool{flex:none;padding:8px 10px}
+  .board-wrap{order:0}
+  .top{position:static;padding-top:calc(4px + env(safe-area-inset-top));padding-bottom:4px}
+  #board{max-height:calc(100dvh - 24px)}
+  .board-help{display:none}
+}
+/* Sandbox lists every chip: 3-column parts grid so the list stays short */
+.play.sandbox #tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.play.sandbox .tool{min-width:0;padding:8px;overflow-wrap:anywhere}
+.play.sandbox .tool .tname{font-size:14px}
+.play.sandbox .tool .tdesc{font-size:11px}
+@media (min-width:1061px){.play.sandbox{grid-template-columns:360px minmax(0,1fr) 320px}}
+@media (max-width:1060px) and (orientation:landscape) and (max-height:560px){.play.sandbox{grid-template-columns:280px minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<header class="top">
+  <button id="homeBtn" class="brand" data-i18n-aria="brandAria">
+    <svg viewBox="0 0 34 24" aria-hidden="true"><path d="M4 2h10a10 10 0 0 1 0 20H4z" fill="none" stroke="currentColor" stroke-width="2.5"/><circle cx="28" cy="12" r="3.5" fill="none" stroke="currentColor" stroke-width="2.5"/></svg>
+    <span class="bt">Only NAND</span>
+  </button>
+  <span id="crumb"></span>
+  <div class="ctl">
+    <button id="shareTop" class="icon-btn shareBtn" hidden data-i18n-aria="shareBtn" data-i18n-title="shareBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></button>
+    <button id="installBtn" class="icon-btn accent" hidden data-i18n-aria="install" data-i18n-title="install">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M5 21h14"/></svg>
+    </button>
+    <label class="lang">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.8 2.6 2.8 15.4 0 18M12 3c-2.8 2.6-2.8 15.4 0 18"/></svg>
+      <select id="langSel" data-i18n-aria="lang">
+        <option value="en">English</option><option value="ko">한국어</option><option value="ja">日本語</option>
+      </select>
+    </label>
+    <button id="themeBtn" class="icon-btn thm">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="moon" d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/><g class="sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g></svg>
+    </button>
+    <div class="snd">
+      <button id="sndBtn" class="icon-btn" aria-expanded="false" aria-controls="sndPop" data-i18n-aria="sound" data-i18n-title="sound">
+        <svg class="spk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path class="w1" d="M16.5 9.5a3.5 3.5 0 0 1 0 5"/><path class="w2" d="M19 7a7 7 0 0 1 0 10"/><path class="x" d="M16 9.5l5 5M21 9.5l-5 5"/></svg>
+      </button>
+      <div id="sndPop" class="pop" hidden>
+        <div class="row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>
+          <input type="range" id="musicVol" min="0" max="100" step="1" data-i18n-aria="music" data-i18n-title="music"><span class="pct" id="musicPct"></span>
+        </div>
+        <div class="row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>
+          <input type="range" id="sfxVol" min="0" max="100" step="1" data-i18n-aria="sfx" data-i18n-title="sfx"><span class="pct" id="sfxPct"></span>
+        </div>
+        <button id="muteBtn" class="icon-btn" aria-pressed="false">
+          <svg class="spk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path class="w1" d="M16.5 9.5a3.5 3.5 0 0 1 0 5"/><path class="w2" d="M19 7a7 7 0 0 1 0 10"/><path class="x" d="M16 9.5l5 5M21 9.5l-5 5"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section id="levels" class="levels">
+    <div class="intro">
+      <h1 data-i18n="heroTitle"></h1>
+      <p data-i18n="heroText"></p>
+      <div class="progress"><div class="bar"><i id="progBar"></i></div><span id="progText"></span></div>
+    </div>
+    <div id="levelList"></div>
+    <button id="sandboxBtn" class="sandbox-card">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7 8h3M7 12h2M7 16h3M14 8h3M15 12h2M14 16h3M10 8v8M14 8v8"/></svg>
+      <span><span class="st" data-i18n="sandbox"></span><span class="ss" id="sandboxSub"></span></span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:22px;height:22px;color:var(--muted)"><path d="M9 6l6 6-6 6"/></svg>
+    </button>
+  </section>
+
+  <section id="play" class="play" hidden>
+    <aside class="palette" id="palette">
+      <h2 data-i18n="parts"></h2>
+      <div id="tools"></div>
+      <div class="tool-actions">
+        <button id="insideBtn" class="ghost" aria-keyshortcuts="I" data-kbd="I"><span data-i18n="insideBtn"></span><kbd>I</kbd></button>
+        <button id="delBtn" class="ghost" aria-keyshortcuts="Delete X" data-kbd="Del / X"><span data-i18n="delBtn"></span><kbd>Del</kbd></button>
+        <button id="clearBtn" class="ghost" aria-keyshortcuts="C" data-kbd="C"><span data-i18n="clearBtn"></span><kbd>C</kbd></button>
+        <button id="boxBtn" class="ghost sb-only" aria-pressed="false" aria-keyshortcuts="B" data-kbd="B / Shift+drag"><span data-i18n="boxBtn"></span><kbd>B</kbd></button>
+        <button id="copyBtn" class="ghost sb-only" aria-keyshortcuts="Control+C" data-kbd="Ctrl+C"><span data-i18n="copyBtn"></span><kbd>Ctrl C</kbd></button>
+        <button id="pasteBtn" class="ghost sb-only" aria-keyshortcuts="Control+V" data-kbd="Ctrl+V"><span data-i18n="pasteBtn"></span><kbd>Ctrl V</kbd></button>
+        <button id="regionBtn" class="ghost sb-only" aria-pressed="false" aria-keyshortcuts="R" data-kbd="R"><span data-i18n="regionBtn"></span><kbd>R</kbd></button>
+      </div>
+    </aside>
+
+    <div class="board-wrap">
+      <svg id="board" viewBox="0 0 1000 620" role="img" data-i18n-aria="boardAria">
+        <defs>
+          <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+            <circle cx="10" cy="10" r="1.2" fill="#1E5A53"/>
+          </pattern>
+          <radialGradient id="bloom" cx="30%" cy="35%" r="70%"><stop offset="0" stop-color="#155049"/><stop offset="1" stop-color="#155049" stop-opacity="0"/></radialGradient>
+          <radialGradient id="vign" cx="50%" cy="45%" r="75%">
+            <stop offset="55%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".42"/>
+          </radialGradient>
+          <linearGradient id="chipG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2B4146"/><stop offset="1" stop-color="#15232A"/></linearGradient>
+          <linearGradient id="nandG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#355458"/><stop offset="1" stop-color="#1B2E31"/></linearGradient>
+          <linearGradient id="amberG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFCB5C"/><stop offset="1" stop-color="#F29F0D"/></linearGradient>
+          <radialGradient id="lampG" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#FFF6D6"/><stop offset=".45" stop-color="#FFC23F"/><stop offset="1" stop-color="#E58E00"/></radialGradient>
+          <radialGradient id="glowG"><stop offset="0" stop-color="#FFB627" stop-opacity=".5"/><stop offset="1" stop-color="#FFB627" stop-opacity="0"/></radialGradient>
+        </defs>
+        <rect width="1000" height="620" fill="#0B302D"/>
+        <rect width="1000" height="620" fill="url(#bloom)"/>
+        <rect width="1000" height="620" fill="url(#grid)"/>
+        <rect width="1000" height="620" fill="url(#vign)" pointer-events="none"/>
+        <g id="layer"></g>
+      </svg>
+      <p id="coach" class="coach" role="status" hidden></p>
+      <div class="zoom-ctl sb-only">
+        <button id="zInBtn" class="icon-btn" data-i18n-aria="zoomIn" data-i18n-title="zoomIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+        <button id="zOutBtn" class="icon-btn" data-i18n-aria="zoomOut" data-i18n-title="zoomOut"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+        <button id="zFitBtn" class="icon-btn" data-i18n-aria="zoomFit" data-i18n-title="zoomFit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></svg></button>
+      </div>
+      <p class="board-help"><span class="lv-only" data-i18n="boardHelp"></span><span class="sb-only" data-i18n="sandboxHelp"></span><span class="rotate-tip" data-i18n="rotateTip"></span></p>
+      <div id="inside" hidden>
+        <div class="inside-bar">
+          <div><span id="insideTitle"></span><span id="insideSub"></span></div>
+          <button id="zoomOut" data-i18n="zoomOut"></button>
+        </div>
+        <svg id="insideSvg" role="img" data-i18n-aria="insideAria"></svg>
+      </div>
+    </div>
+
+    <aside class="panel">
+      <h1><span class="lvl-num" id="lvlNum"></span><span id="lvlTitle"></span></h1>
+      <div id="lesson" hidden></div>
+      <div class="sb-box sb-only">
+        <label for="sbTitle" data-i18n="circuitTitle"></label>
+        <input type="text" id="sbTitle" maxlength="60" autocomplete="off" data-i18n-ph="titlePh">
+        <div class="row">
+          <button id="saveBtn" class="primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h11l3 3v15H5z"/><path d="M8 3v5h7V3M8 21v-7h8v7"/></svg><span data-i18n="saveBtn"></span></button>
+        </div>
+        <label data-i18n="savedList"></label>
+        <ul id="slots" class="sb-list"></ul>
+        <label data-i18n="regionsList"></label>
+        <ul id="regionList" class="sb-list"></ul>
+      </div>
+      <div class="card-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg><div><span class="k" data-i18n="goalLabel"></span><p id="lvlGoal"></p><a id="wikiLink" class="wiki" target="_blank" rel="noopener" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5M8 7h7"/></svg><span></span></a></div></div>
+      <div id="ruleCard" class="card-note rule" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z"/><path d="M12 8v5M12 16.5v.5"/></svg><div><span class="k" data-i18n="ruleLabel"></span><p id="ruleText"></p></div></div>
+      <div class="meta" id="meta"></div>
+      <div class="tt-wrap"><table id="tt"></table></div>
+      <div class="panel-actions" id="actions">
+        <button id="testBtn" class="primary" data-i18n="testBtn"></button>
+        <button id="hintBtn" class="secondary"></button>
+      </div>
+      <div id="hint" class="card-note hint" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg><div><span class="k" data-i18n="hintLabel"></span><p id="hintText"></p></div></div>
+      <div id="quiz" hidden><p class="q" id="qText"></p><div class="choices" id="choices"></div></div>
+      <p id="status" role="status"></p>
+    </aside>
+  </section>
+</main>
+
+<div id="win" class="overlay" hidden>
+  <div class="win-card" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+    <div id="winStars" role="img"></div>
+    <h2 id="winTitle"></h2>
+    <p id="winText"></p>
+    <div class="why"><span class="k" data-i18n="whyLabel"></span><p id="whyText"></p></div>
+    <div class="win-actions">
+      <button id="stayBtn" class="secondary" data-i18n="stay"></button>
+      <button id="nextBtn" class="primary"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+let W = 1000, H = 620;            // board size in SVG units (levels 1000x620, sandbox 2400x1500)
+const GW = 96, RATIO = .62;       // gate width; visible area keeps the level aspect so layout never jumps
+const view = {x:0, y:0, w:1000, h:620};
+
+const PARTS = {
+  NAND: {label:'NAND', ins:['A','B'], outs:['Y'], f:(a,b)=>[!(a&&b)]},
+  NOT:  {label:'NOT',  ins:['A'], outs:['Y'], f:(a)=>[!a]},
+  AND:  {label:'AND',  ins:['A','B'], outs:['Y'], f:(a,b)=>[a&&b]},
+  OR:   {label:'OR',   ins:['A','B'], outs:['Y'], f:(a,b)=>[a||b]},
+  XOR:  {label:'XOR',  ins:['A','B'], outs:['Y'], f:(a,b)=>[a!==b]},
+  HALF: {label:'Half adder', short:'HALF ADD', pinLabels:true, ins:['A','B'], outs:['S','C'], f:(a,b)=>[a!==b, a&&b]},
+  FULL: {label:'Full adder', short:'FULL ADD', pinLabels:true, ins:['A','B','Cin'], outs:['S','Cout'], f:(a,b,c)=>{const s=(+a)+(+b)+(+c); return [s%2===1, s>=2];}},
+  MUX:  {label:'MUX', short:'MUX', pinLabels:true, ins:['A','B','S'], outs:['Y'], f:(a,b,s)=>[s?b:a]},
+  NOR:  {label:'NOR',  ins:['A','B'], outs:['Y'], f:(a,b)=>[!(a||b)]},
+  XNOR: {label:'XNOR', ins:['A','B'], outs:['Y'], f:(a,b)=>[a===b]},
+  DEMUX:{label:'DEMUX', short:'DEMUX', pinLabels:true, ins:['D','S'], outs:['Y0','Y1'], f:(d,s)=>[d&&!s, d&&s]},
+  HSUB: {label:'Half subtractor', short:'HALF SUB', pinLabels:true, ins:['A','B'], outs:['D','Bo'], f:(a,b)=>[a!==b, !a&&b]},
+  FSUB: {label:'Full subtractor', short:'FULL SUB', pinLabels:true, ins:['A','B','Bin'], outs:['D','Bout'],
+         f:(a,b,c)=>{const d=(+a)-(+b)-(+c); return [(d&1)===1, d<0];}},
+  ADD4: {label:'4-bit adder', short:'ADD 4', pinLabels:true, ins:['A3','A2','A1','A0','B3','B2','B1','B0','Cin'], outs:['Cout','S3','S2','S1','S0'],
+         f:(...v)=>{const n = b => b.reduce((a,x) => a*2 + (+x), 0), r = n(v.slice(0,4)) + n(v.slice(4,8)) + (+v[8]); return [r>>4&1, r>>3&1, r>>2&1, r>>1&1, r&1];}},
+  // Clocked chips (Clk = last input): master latches follow next(ins, Q) while Clk is 0, Q takes the master value while Clk is 1 (see simulate).
+  DFF:  {label:'D flip-flop', short:'DFF', pinLabels:true, clocked:true, ins:['D','Clk'], outs:['Q'], next:(v)=>v, f:()=>[false]},
+  MUX4: {label:'4-way MUX', short:'MUX 4', pinLabels:true, ins:['A','B','C','D','S1','S0'], outs:['Y'], f:(a,b,c,d,s1,s0)=>[[a,b,c,d][(+s1)*2+(+s0)]]},
+  AND3: {label:'AND3', ins:['A','B','C'], outs:['Y'], f:(a,b,c)=>[a&&b&&c]},
+  OR3:  {label:'OR3',  ins:['A','B','C'], outs:['Y'], f:(a,b,c)=>[a||b||c]},
+  EQ2:  {label:'2-bit comparator', short:'EQ 2', pinLabels:true, ins:['A1','A0','B1','B0'], outs:['EQ'], f:(a1,a0,b1,b0)=>[a1===b1 && a0===b0]},
+  DEC:  {label:'2-to-4 decoder', short:'DEC', pinLabels:true, ins:['A1','A0'], outs:['Y0','Y1','Y2','Y3'], f:(a1,a0)=>[0,1,2,3].map(k => (+a1)*2+(+a0) === k)},
+  // Level-sensitive latch: Q follows D while E is 1, holds while E is 0 (see simulate).
+  DLATCH:{label:'D latch', short:'D LATCH', pinLabels:true, latch:true, ins:['D','E'], outs:['Q'], f:()=>[false]},
+  REG4: {label:'4-bit register', short:'REG 4', pinLabels:true, clocked:true, ins:['D3','D2','D1','D0','Ld','Clk'], outs:['Q3','Q2','Q1','Q0'],
+         next:(v,q)=>v[4] ? v.slice(0,4) : q, f:()=>[false,false,false,false]},
+  // Sandbox-only I/O parts. SW output comes from the gate's own on/off state (see simulate).
+  SW:   {label:'Switch', ins:[], outs:['Y'], f:()=>[false]},
+  LAMP: {label:'Lamp', ins:['A'], outs:[], f:()=>[]},
+};
+const isChip = p => !!PARTS[p] && !['NAND','SW','LAMP'].includes(p);
+
+// Level text lives in I18N.<lang>.levels[id]. ch = chapter on the level screen.
+const demoNand = two => ({gates:[{id:'g1', type:'NAND', x:452, y:270}],
+  wires:[{from:'IN0:o0', to:'g1:i0'}, {from: two ? 'IN1:o0' : 'IN0:o0', to:'g1:i1'}, {from:'g1:o0', to:'OUT0:i0'}]});
+const CHAPTERS = ['basics','gates','advanced','expert','memory','rules'];
+const nib = b => b.reduce((a,x) => a*2 + (+x), 0);                 // bits (MSB first) -> number
+const SEG = [[1,1,1,1,1,1,0],[0,1,1,0,0,0,0],[1,1,0,1,1,0,1],[1,1,1,1,0,0,1]];   // digits 0-3, segments a-g
+const LEVELS = [
+  {id:'intro', ch:'basics', kind:'learn', part:null, ins:['A','B'], outs:['Y'], par:1, answer:2, f:(a,b)=>[!(a&&b)], demo:demoNand(true)},
+  {id:'split', ch:'basics', kind:'learn', part:null, ins:['A'], outs:['Y'], par:1, answer:1, f:(a)=>[!a], demo:demoNand(false)},
+  {id:'not',  ch:'gates', part:'NOT',  ins:['A'], outs:['Y'], par:1},
+  {id:'and',  ch:'gates', part:'AND',  ins:['A','B'], outs:['Y'], par:2},
+  {id:'or',   ch:'gates', part:'OR',   ins:['A','B'], outs:['Y'], par:3},
+  {id:'nor',  ch:'gates', part:'NOR',  ins:['A','B'], outs:['Y'], par:2},
+  {id:'xor',  ch:'gates', part:'XOR',  ins:['A','B'], outs:['Y'], par:3},
+  {id:'xnor', ch:'gates', part:'XNOR', ins:['A','B'], outs:['Y'], par:2},
+  {id:'and3', ch:'gates', part:'AND3', ins:['A','B','C'], outs:['Y'], par:2},
+  {id:'or3',  ch:'gates', part:'OR3',  ins:['A','B','C'], outs:['Y'], par:2},
+  {id:'half', ch:'advanced', part:'HALF', ins:['A','B'], outs:['S','C'], par:2},
+  {id:'full', ch:'advanced', part:'FULL', ins:['A','B','Cin'], outs:['S','Cout'], par:3},
+  {id:'par3', ch:'advanced', part:null, ins:['A','B','C'], outs:['P'], par:2, f:(a,b,c)=>[((+a)+(+b)+(+c)) % 2 === 1]},
+  {id:'hsub', ch:'advanced', part:'HSUB', ins:['A','B'], outs:['D','Bo'], par:3},
+  {id:'fsub', ch:'advanced', part:'FSUB', ins:['A','B','Bin'], outs:['D','Bout'], par:3},
+  {id:'mux',  ch:'advanced', part:'MUX',  ins:['A','B','S'], outs:['Y'], par:4},
+  {id:'mux4', ch:'advanced', part:'MUX4', ins:['A','B','C','D','S1','S0'], outs:['Y'], par:3},
+  {id:'demux',ch:'advanced', part:'DEMUX',ins:['D','S'], outs:['Y0','Y1'], par:3},
+  {id:'add4', ch:'advanced', part:'ADD4', ins:['A3','A2','A1','A0','B3','B2','B1','B0','Cin'], outs:['Cout','S3','S2','S1','S0'], par:4},
+  {id:'add2', ch:'advanced', part:null, ins:['A1','A0','B1','B0'], outs:['S2','S1','S0'], par:2,
+   f:(a1,a0,b1,b0)=>{const v=((+a1)*2+(+a0))+((+b1)*2+(+b0)); return [(v>>2)&1,(v>>1)&1,v&1];}},
+  {id:'eq',   ch:'expert', part:'EQ2', ins:['A1','A0','B1','B0'], outs:['EQ'], par:3, f:(a1,a0,b1,b0)=>[a1===b1 && a0===b0]},
+  {id:'dec',  ch:'expert', part:'DEC', ins:['A1','A0'], outs:['Y0','Y1','Y2','Y3'], par:6, f:(a1,a0)=>[0,1,2,3].map(k => (+a1)*2+(+a0) === k)},
+  {id:'maj',  ch:'expert', part:null, ins:['A','B','C'], outs:['Y'], par:1, f:(a,b,c)=>[(+a)+(+b)+(+c) >= 2]},
+  {id:'gt',   ch:'expert', part:null, ins:['A1','A0','B1','B0'], outs:['GT'], par:2, f:(a1,a0,b1,b0)=>[(+a1)*2+(+a0) > (+b1)*2+(+b0)]},
+  {id:'penc', ch:'expert', part:null, ins:['I3','I2','I1','I0'], outs:['Y1','Y0','V'], par:6,
+   f:(i3,i2,i1,i0)=>{const v = i3 ? 3 : i2 ? 2 : i1 ? 1 : 0; return [v >= 2, v === 3 || v === 1, i3||i2||i1||i0];}},
+  {id:'mul2', ch:'expert', part:null, ins:['A1','A0','B1','B0'], outs:['P3','P2','P1','P0'], par:6,
+   f:(a1,a0,b1,b0)=>{const m = ((+a1)*2+(+a0)) * ((+b1)*2+(+b0)); return [m>>3&1, m>>2&1, m>>1&1, m&1];}},
+  {id:'alu',  ch:'expert', part:null, ins:['Op','A1','A0','B1','B0'], outs:['Y1','Y0'], par:5,
+   f:(op,a1,a0,b1,b0)=>{const a = (+a1)*2+(+a0), b = (+b1)*2+(+b0), r = op ? a & b : (a + b) & 3; return [r>>1&1, r&1];}},
+  {id:'sub4', ch:'expert', part:null, ins:['A3','A2','A1','A0','B3','B2','B1','B0'], outs:['D3','D2','D1','D0'], par:6,
+   f:(...v)=>{const r = (nib(v.slice(0,4)) - nib(v.slice(4,8))) & 15; return [r>>3&1, r>>2&1, r>>1&1, r&1];}},
+  {id:'seg7', ch:'expert', part:null, ins:['B1','B0'], outs:['a','b','c','d','e','f','g'], par:5, display:'seg7', f:(b1,b0)=>SEG[(+b1)*2+(+b0)]},
+  // Memory: seq = ordered test steps 'inputs>outputs' ('x' = don't care); state carries over between steps.
+  {id:'srl',    ch:'memory', part:null, ins:['S','R'], outs:['Q'], par:2, seq:['10>1','00>1','01>0','00>0','10>1','00>1']},
+  {id:'dlatch', ch:'memory', part:'DLATCH', ins:['D','E'], outs:['Q'], par:4, seq:['11>1','01>0','10>0','11>1','00>1','01>0','10>0']},
+  {id:'dff',    ch:'memory', part:'DFF', ins:['D','Clk'], outs:['Q'], par:9, seq:['10>x','11>1','01>1','00>1','01>0','11>0','10>0','11>1','01>1']},
+  {id:'tff',    ch:'memory', part:null, ins:['T','Rst','Clk'], outs:['Q'], par:3,
+   seq:['010>x','011>0','100>0','101>1','100>1','101>0','000>0','001>0','100>0','101>1','000>1','001>1','110>1','111>0']},
+  {id:'jk',     ch:'memory', part:null, ins:['J','K','Clk'], outs:['Q'], par:3,
+   seq:['100>x','101>1','000>1','001>1','010>1','011>0','110>0','111>1','110>1','111>0','100>0','101>1','100>1','101>1','000>1','001>1']},
+  {id:'cnt2',   ch:'memory', part:null, ins:['Rst','Clk'], outs:['Q1','Q0'], par:5,
+   seq:['10>xx','11>00','00>00','01>01','00>01','01>10','00>10','01>11','00>11','01>00','00>00','01>01','10>01','11>00','00>00']},
+  {id:'shift4', ch:'memory', part:null, ins:['Din','Clk'], outs:['Q3','Q2','Q1','Q0'], par:4,
+   seq:['10>xxxx','11>1xxx','00>1xxx','01>01xx','10>01xx','11>101x','10>101x','11>1101','00>1101','01>0110','00>0110','01>0011','10>0011','11>1001']},
+  {id:'reg4',   ch:'memory', part:'REG4', ins:['D3','D2','D1','D0','Ld','Clk'], outs:['Q3','Q2','Q1','Q0'], par:8,
+   seq:['101010>xxxx','101011>1010','010111>1010','010110>1010','010100>1010','010101>1010','010110>1010','010111>0101','111100>0101','111110>0101','111111>1111']},
+  {id:'cnt4',   ch:'memory', part:null, ins:['Rst','En','Clk'], outs:['Q3','Q2','Q1','Q0'], par:7,
+   seq:['100>xxxx','101>0000','010>0000','011>0001','010>0001','011>0010','000>0010','001>0010','010>0010','011>0011','010>0011','011>0100','010>0100','011>0101','110>0101','111>0000']},
+  {id:'acc',    ch:'memory', part:null, ins:['X3','X2','X1','X0','Op','En','Clk'], outs:['Q3','Q2','Q1','Q0'], par:6,
+   seq:['0011010>xxxx','0011011>0011','0101110>0011','0101111>1000','1111100>1000','1111101>1000','1001110>1000','1001111>0001','0110010>0001','0110011>0110','0110110>0110','0110111>1100']},
+  // Special rules: nand = only NAND in the parts list, max = hard part limit checked by Test.
+  {id:'r_xor', ch:'rules', part:null, ins:['A','B'], outs:['Y'], par:4, rule:{nand:true, max:4}, f:(a,b)=>[a!==b]},
+  {id:'r_half',ch:'rules', part:null, ins:['A','B'], outs:['S','C'], par:5, rule:{nand:true, max:5}, f:(a,b)=>[a!==b, a&&b]},
+  {id:'r_mux', ch:'rules', part:null, ins:['A','B','S'], outs:['Y'], par:4, rule:{nand:true, max:4}, f:(a,b,s)=>[s?b:a]},
+  {id:'r_ram', ch:'rules', part:null, ins:['D','Sel','WE'], outs:['Q'], par:8, rule:{nand:true, max:8},
+   seq:['111>1','010>1','000>0','001>0','010>1','011>0','110>0','101>0','010>0','111>1','100>0','010>1']},
+];
+LEVELS.forEach(l=>{ if(!l.f && l.part) l.f = PARTS[l.part].f; });
+
+/* ---------- localization ---------- */
+// Wikipedia "learn more" per level: [en title(#anchor), ko title, ja title]. ko/ja go through
+// Special:Search so a renamed article still lands on results. ponytail: missing ko/ja = English article.
+const FF = 'Flip-flop (electronics)', ADD = 'Adder (electronics)';
+const WIKI = {
+  intro:['NAND gate','NAND 게이트','NANDゲート'], split:['Fan-out'],
+  not:['Inverter (logic gate)','NOT 게이트','NOTゲート'], and:['AND gate','AND 게이트','ANDゲート'],
+  or:['OR gate','OR 게이트','ORゲート'], nor:['NOR gate','NOR 게이트','NORゲート'],
+  xor:['XOR gate','XOR 게이트','XORゲート'], xnor:['XNOR gate','XNOR 게이트','XNORゲート'],
+  and3:['AND gate','AND 게이트','ANDゲート'], or3:['OR gate','OR 게이트','ORゲート'],
+  half:[ADD+'#Half adder','가산기','加算器'], full:[ADD+'#Full adder','가산기','加算器'],
+  add2:[ADD+'#Ripple-carry adder','가산기','加算器'], add4:[ADD+'#Ripple-carry adder','가산기','加算器'],
+  par3:['Parity function','패리티 비트','パリティビット'],
+  hsub:['Subtractor','감산기','減算器'], fsub:['Subtractor','감산기','減算器'],
+  mux:['Multiplexer','멀티플렉서','マルチプレクサ'], mux4:['Multiplexer','멀티플렉서','マルチプレクサ'],
+  demux:['Multiplexer#Digital demultiplexers','멀티플렉서','マルチプレクサ'],
+  eq:['Digital comparator'], gt:['Digital comparator'], dec:['Binary decoder'],
+  maj:['Majority function'], penc:['Priority encoder'], mul2:['Binary multiplier'],
+  alu:['Arithmetic logic unit','산술 논리 장치','算術論理演算装置'],
+  sub4:["Two's complement",'2의 보수','2の補数'], seg7:['Seven-segment display'],
+  srl:[FF+'#SR NAND latch','플립플롭','フリップフロップ'], dlatch:[FF+'#Gated D latch','플립플롭','フリップフロップ'],
+  dff:[FF+'#D flip-flop','플립플롭','フリップフロップ'], tff:[FF+'#T flip-flop','플립플롭','フリップフロップ'],
+  jk:[FF+'#JK flip-flop','플립플롭','フリップフロップ'],
+  cnt2:['Counter (digital)'], cnt4:['Counter (digital)'],
+  reg4:['Processor register','프로세서 레지스터'], shift4:['Shift register','시프트 레지스터','シフトレジスタ'],
+  acc:['Accumulator (computing)','누산기'], r_ram:['Static random-access memory'],
+  r_xor:['XOR gate','XOR 게이트','XORゲート'], r_half:[ADD+'#Half adder','가산기','加算器'],
+  r_mux:['Multiplexer','멀티플렉서','マルチプレクサ'],
+};
+function wikiRef(id, lang){
+  const w = WIKI[id]; if (!w) return null;
+  const loc = {ko:w[1], ja:w[2]}[lang];
+  if (loc) return {name:loc, href:`https://${lang}.wikipedia.org/wiki/Special:Search/${encodeURIComponent(loc)}`};
+  const [title, anchor] = w[0].split('#');
+  return {name:title.replace(/ \(.*\)$/, ''), href:'https://en.wikipedia.org/wiki/' + encodeURIComponent(title.replace(/ /g,'_')) + (anchor ? '#' + anchor.replace(/ /g,'_') : '')};
+}
+const I18N = {
+  en: {
+    title:'Only NAND: build everything from one gate', brandAria:'Only NAND, back to levels',
+    heroTitle:'One gate. Build the rest.',
+    heroText:'You start with a single part, the NAND gate. Every circuit you solve becomes a chip you can use in the next one, until you’ve built a working adder.',
+    progress:(a,b)=>`${a} of ${b} levels solved`,
+    parts:'Parts', insideBtn:'Look inside chip', delBtn:'Delete selected', clearBtn:'Clear board',
+    boardAria:'Circuit board', insideAria:'Chip internals made of NAND gates',
+    boardHelp:'Tap a switch to flip an input. Drag from one pin to another to connect them. Tap the magnifier on a chip to see its NAND gates.',
+    rotateTip:'Turn your phone sideways for a bigger board.',
+    zoomOut:'Zoom out', testBtn:'Test circuit', showHint:'Show hint', hideHint:'Hide hint',
+    winTitle:'Circuit works', winLast:'You finished every level', stay:'Keep tinkering', next:'Next level', backLevels:'Back to levels',
+    levelN:n=>`Level ${n}`, levelOf:(a,b)=>`Level ${a} of ${b}`,
+    locked:'Locked', notSolved:'Not solved yet', best:n=>`Best: ${n} parts`, starsAria:n=>`${n} of 3 stars`,
+    tried:(a,b)=>`Combinations tried: ${a} of ${b}.`,
+    partsUsed:(n,p,b)=>`Parts used: ${n}. Par: ${p}.` + (b!=null ? ` Your best: ${b}.` : ''),
+    thInputs:'Inputs', thTarget:'Target', thYours:'Yours', thMatch:'Match',
+    startGate:'Starting gate', builtChip:'Chip you built',
+    insideTitle:(name,n)=>`Inside ${name}: ${n} NAND gate${n===1?'':'s'}`,
+    insideOwn:'Built from your own design. ', insideStd:'Showing a standard design. ', insideFlip:'Flip the switches here to experiment.',
+    clearConfirm:'Remove every part and wire from this board?',
+    msgUnstable:'The circuit never settles on an answer. Look for a loop that feeds an output back into itself.',
+    msgUnwired:l=>`${l.join(', ')} ${l.length>1?'aren’t':'isn’t'} connected yet.`,
+    msgRows:(a,b)=>`${a} of ${b} rows match the target. Check the rows marked ✗.`,
+    quizWrong:'Not quite. Check which row turned the lamp off.',
+    winBuilt:(n,p)=>`Built with ${n} part${n===1?'':'s'}. Par is ${p}.`,
+    winFewer:' Try it again with fewer parts for three stars.',
+    winLearn:'Right: NAND outputs 0 only when both inputs are 1. Next, you’ll use NAND gates to build your first new gate.',
+    winChip:name=>` ${name} is now a chip in your parts list.`,
+    winFinal:' Every chip inside it comes down to NAND gates.',
+    sandbox:'Sandbox', sbTag:'Free build', sandboxSub:(n,m)=>`Free build on a huge board · ${n} / ${m} chips unlocked`, unlocks:p=>`Unlocks ${p} in Sandbox`,
+    sbGoal:'Build anything. Place switches, lamps and any gate or chip, drag them anywhere and wire them up. Tap a switch to flip it.',
+    sandboxHelp:'Drag empty space to pan. Scroll, pinch or use + / \u2212 to zoom. Tap a switch to flip it, drag any part to move it.',
+    sbMeta:(s,l,p)=>`Switches: ${s} \u00b7 Lamps: ${l} \u00b7 Parts: ${p}.`, sbTableCap:'Live truth table of your design.',
+    sbTooBig:'The truth table shows up to 5 inputs. Flip the switches to explore.',
+    zoomIn:'Zoom in', zoomFit:'Show whole board', whyLabel:'Why it works',
+    why:{
+      intro:'Real chips lean on NAND because it takes just four transistors, and every other gate can be made from it. Engineers call this functional completeness.',
+      not:'Tie both inputs together and NAND sees A AND A, which is just A, so it outputs NOT A. Inverters sit on almost every path inside a processor.',
+      and:'NOT of NAND is AND: flipping a flipped answer gives the original back. This double-negation trick shows up all over logic design.',
+      or:'This is De Morgan\u2019s law: A OR B = NOT(NOT A AND NOT B). Flipping the inputs and output turns AND into OR.',
+      xor:'XOR spots differences. Computers use it to add bits, compare values and catch errors in data sent over networks.',
+      half:'Binary adds column by column, just like decimal: the sum digit stays and the carry moves one column left.',
+      full:'A full adder handles one column of a bigger sum, including the carry coming in from the right. Chain 64 of them for a 64-bit adder.',
+      mux:'A multiplexer is a switch steered by a signal. CPUs use them to decide which data goes where, such as which register to read.',
+      add2:'You built a ripple-carry adder: each carry ripples into the next column. Real CPUs use faster carry tricks, but the idea is the same.',
+    },
+    chapters:{basics:['Basics','What signals, wires and gates are.'], gates:['New Gates','Build every classic gate out of NAND.'],
+      advanced:['Advanced','Arithmetic and routing data.'], expert:['Expert','Bigger circuits made from your own chips.'],
+      memory:['Memory','Circuits that remember: feedback loops, latches and flip-flops. Tested step by step.'],
+      rules:['Special Rules','Classic puzzles with strict limits: NAND only, and a hard part budget.']},
+    seqCap:'Test sequence: steps run top to bottom, and your circuit keeps its state between steps. \u00b7 = any value.',
+    bigTable:n=>`${n} rows: showing the current row and any mismatches.`,
+    ruleLabel:'Special rule', ruleNand:'NAND gates only', ruleMax:n=>`At most ${n} parts`,
+    msgTooMany:n=>`The truth table matches, but this rule allows at most ${n} parts.`,
+    swName:'Switch', swDesc:'Input you can flip', lampName:'Lamp', lampDesc:'Shows an output', lockedChip:n=>`Solve level ${n}`,
+    goalLabel:'Goal', wiki:s=>`Wikipedia: ${s} ↗`, hintLabel:'Hint', shortcut:k=>`Shortcut: ${k}`,
+    ttExplain:'This is a truth table: one row for every combination of inputs.',
+    nextTry:p=>`Next, try ${p}.`, allTried:'You tried every combination! Now answer the question below.',
+    legSwitch:'Switch: an input. Tap it to flip between 0 and 1.', legLamp:'Lamp: the output. Lit means 1, dark means 0.',
+    legWire:'Wire: glows amber while it carries 1, stays grey for 0.',
+    coachStep:n=>`Step ${n}`,
+    coachAdd:'Tap NAND in the parts list to put a gate on the board.',
+    coachWire:'Drag from the dot beside a switch to a dot on the left edge of a gate. Wires carry the signal.',
+    coachOut:l=>`Drag from a gate\u2019s right-hand dot to the lamp ${l.join(', ')}.`,
+    coachTest:'Flip the switches to watch each row, then press Test circuit.',
+    coachFix:'Rows marked \u2717 don\u2019t match yet. Set the switches to that row and follow the wires.',
+    sound:'Sound', music:'Music volume', sfx:'Effects volume', mute:'Mute', unmute:'Unmute', lang:'Language', toDark:'Dark mode', toLight:'Light mode', install:'Install app',
+    boxBtn:'Box select', copyBtn:'Copy', pasteBtn:'Paste', regionBtn:'Draw region',
+    boxHint:'Drag a box around the parts you want. Then copy and paste them, or drag any of them to move the whole group.',
+    regionHint:'Draw a free-form outline around part of your circuit, then give the region a name.',
+    regionName:'Name this region:', regionDefault:n=>`Region ${n}`, regionsList:'Regions', noRegions:'No regions yet. Use Draw region to outline and name part of your circuit.',
+    circuitTitle:'Circuit title', titlePh:'Name your circuit', untitled:'Untitled circuit',
+    shareBtn:'Share', shareSaved:'Screenshot saved to your downloads.',
+    saveBtn:'Save', savedList:'Saved circuits', noSaves:'Nothing saved yet. Save keeps a copy of this board on this device.',
+    savedMsg:n=>`Saved “${n}”.`, loadConfirm:n=>`Replace the current board with “${n}”?`, delSave:n=>`Delete “${n}”`,
+    delConfirm:n=>`Delete the saved circuit “${n}”?`, renameRegion:'Tap the label again to rename it.',
+    partNames:{},
+    levels:{
+      intro:{title:'What is a NAND gate?', goal:'Flip A and B to try all four combinations. Watch the lamp on the right.',
+        lesson:['A computer only understands two signals: 1 (on) and 0 (off). A logic gate takes signals in and gives one signal out.',
+          'NAND means "not AND". Its output is 0 only when both inputs are 1. Every other time, the output is 1.',
+          'That one simple rule is enough to build every other gate, and eventually a whole computer. That is what this game is about.'],
+        question:'When does a NAND gate output 0?',
+        choices:['When both inputs are 0','When at least one input is 1','Only when both inputs are 1'],
+        hint:'Look at the table you filled in. Find the row where the lamp was off.'},
+      not:{title:'Invert', goal:'Make a NOT gate. Y should always be the opposite of A.', hint:'Wire A into both inputs of a single NAND.'},
+      and:{title:'Both', goal:'Make an AND gate. Y is 1 only when A and B are both 1.', hint:'AND is a NAND with its answer flipped. You just built the flipper.'},
+      or:{title:'Either', goal:'Make an OR gate. Y is 1 when A, B, or both are 1.', hint:'Flip A, flip B, then NAND the two flipped signals.'},
+      xor:{title:'Different', goal:'Make an XOR gate. Y is 1 only when A and B are different.', hint:'Y is 1 when (A OR B) is 1 and (A NAND B) is also 1.'},
+      half:{title:'Add two bits', goal:'Build a half adder. S is the sum bit and C is the carry.', hint:'In binary, 1 + 1 = 10. The sum bit behaves like XOR, and the carry behaves like AND.'},
+      full:{title:'Add with carry', goal:'Build a full adder that adds A, B and a carry-in, Cin.', hint:'Chain two half adders, then OR their two carries together.'},
+      mux:{title:'Choose', goal:'Build a multiplexer. When S is 0, Y copies A. When S is 1, Y copies B.', hint:'AND A with NOT S, AND B with S, then OR the two results.'},
+      split:{title:'One wire, two places', goal:'Flip A and watch the lamp. The wire from A splits to feed both inputs of the NAND.',
+        lesson:['A wire can branch. Every branch carries the same signal, so one switch can feed many inputs at once.',
+          'Here the signal splits to feed both inputs of a single NAND. Try both positions of the switch and fill in the table.'],
+        question:'What does this circuit do to the input?', choices:['Copies it','Flips it','Always outputs 1'],
+        hint:'Compare Y with A in each row of the table.',
+        win:'Right: feeding one signal into both inputs of a NAND flips it. You just discovered the NOT gate, and you will build it next.',
+        why:'Splitting a signal is called fan-out. A real gate can only drive so many inputs before its signal gets weak, so chip designers budget fan-out carefully.'},
+      par3:{title:'Odd one out', goal:'Build a parity checker. P is 1 when an odd number of A, B and C are 1.', hint:'XOR is already a 2-input parity checker. Chain two of them.',
+        why:'Parity bits are the simplest error detection: send one extra bit so every message has an even count of 1s. A single flipped bit breaks the pattern.'},
+      hsub:{title:'Take away', goal:'Build a half subtractor for A \u2212 B. D is the difference bit and Bo is the borrow.', hint:'The difference behaves like XOR. You only need to borrow when A is 0 and B is 1.',
+        why:'Subtraction borrows from the next column, the mirror image of carrying. Early calculators had dedicated subtract circuits like this one.'},
+      fsub:{title:'Borrow chain', goal:'Build a full subtractor for A \u2212 B \u2212 Bin. Output the difference D and the borrow-out Bout.', hint:'Chain two half subtractors, then OR their two borrows, just like the full adder.',
+        why:'Most CPUs never build a subtractor: they add the two\u2019s complement instead (flip B and add 1). The borrow chain you built is the classic textbook version.'},
+      mux4:{title:'Four-way switch', goal:'Build a 4-to-1 multiplexer. S1 S0 picks which of A, B, C, D reaches Y (00 = A, 11 = D).', hint:'Use two MUX chips with S0 to choose inside each pair, then let a third MUX pick a pair with S1.',
+        why:'Big multiplexers are trees of small ones. A CPU\u2019s register file uses the same tree to pick one of dozens of registers.'},
+      gt:{title:'Greater than', goal:'Output GT = 1 when the 2-bit number A1 A0 is greater than B1 B0.', hint:'Subtract A from B with your subtractor chips. If B \u2212 A needs a borrow, B is smaller than A.',
+        why:'CPUs compare numbers by subtracting them and checking the borrow (carry) flag. That is exactly the trick you just used.'},
+      penc:{title:'Who goes first', goal:'Build a priority encoder. Y1 Y0 is the number of the highest input that is 1. V is 1 when any input is 1.', hint:'Y1 is I3 OR I2. Y0 is I3, or I1 while I2 is off. V is the OR of all four inputs.',
+        why:'Priority encoders decide which interrupt a CPU serves first when several devices ask at once, such as the keyboard, the disk and the network.'},
+      mul2:{title:'Times two bits', goal:'Multiply the 2-bit numbers A1 A0 and B1 B0. Output the 4-bit product P3 P2 P1 P0.', hint:'Multiplying bits is AND: A0 AND B0 is P0. Add the middle pair A1\u00b7B0 and A0\u00b7B1 with a half adder, then add A1\u00b7B1 to that carry with another.',
+        why:'Binary long multiplication is ANDs plus additions. Hardware multipliers lay out thousands of these in a grid so a CPU can multiply in a single clock cycle.'},
+      alu:{title:'Mini ALU', goal:'Build a tiny ALU. When Op is 0, Y1 Y0 = A + B (drop the final carry). When Op is 1, Y1 Y0 = A AND B, bit by bit.', hint:'Compute both answers, then let two MUX chips choose with Op. The half adder\u2019s carry already equals A0 AND B0, so reuse it.',
+        why:'The arithmetic logic unit is the heart of a CPU: it computes several results and an operation code picks one. You just built a tiny one from NAND.'},
+      add4:{title:'Four-bit adder', goal:'Add the 4-bit numbers A3\u2013A0 and B3\u2013B0 plus the carry-in Cin. Output Cout and S3\u2013S0.', hint:'Chain four full adders. Each carry-out feeds the next column\u2019s carry-in, and Cin goes into the A0 + B0 column.',
+        why:'Four bits count to 15. Real CPUs chain the same stage 64 times and use carry-lookahead tricks so they never wait for a carry to ripple through every column.'},
+      sub4:{title:'Subtract by adding', goal:'Output D3\u2013D0 = A \u2212 B for the 4-bit numbers A3\u2013A0 and B3\u2013B0, wrapping around below 0 (so 2 \u2212 3 = 15).', hint:'A \u2212 B = A + NOT B + 1. Flip every B bit, feed your 4-bit adder and set Cin to 1. A gate with nothing wired in sees 0s, so a lone NAND always outputs 1.',
+        why:'This is two\u2019s complement. One adder does both addition and subtraction, which is why nearly every CPU stores negative numbers this way. Read D3 as a sign bit and 15 means \u22121.'},
+      seg7:{title:'Digit display', goal:'Show the number B1 B0 (0 to 3) on the seven-segment display by lighting segments a to g.', hint:'Check which digits use each segment. Segment b is lit for every digit, so it only needs constant 1 from an unwired NAND. Segment g is simply B1.',
+        why:'Seven-segment decoders drive calculator, clock and microwave displays. The decoder turns a binary number into the pattern our eyes read as a digit.'},
+      srl:{title:'Remember one bit', goal:'Build an SR latch. S = 1 sets Q to 1, R = 1 resets Q to 0, and while both are 0, Q keeps its last value.',
+        lesson:['Every circuit so far forgets instantly: change the inputs and the output follows. Memory needs feedback, where a gate\u2019s output loops back into another gate\u2019s input.',
+          'Two NOR gates wired in a loop can hold one bit. S (set) stores 1, R (reset) stores 0, and when both are 0 the loop keeps whatever it had.',
+          'Memory levels are tested with a sequence: the steps run in order, and your circuit keeps its state between them.'],
+        hint:'Cross-couple two NOR gates so each output feeds one input of the other. S and R go into the free inputs, and Q comes from the NOR that R drives.',
+        why:'Feedback is how circuits remember. Latches like this one are the ancestors of the static RAM cells inside every CPU cache.'},
+      dlatch:{title:'Data latch', goal:'Build a D latch. While E is 1, Q follows D. When E is 0, Q holds its value.', hint:'Drive an SR latch with S = D AND E and R = NOT D AND E, so S and R can never both be 1. Four NANDs are enough for three stars.',
+        why:'A D latch removes the forbidden S = R = 1 case. Registers are rows of latches that grab data when their enable line fires.'},
+      cnt2:{title:'Count to three', goal:'Build a 2-bit counter. Each time Clk rises, Q1 Q0 counts up: 00, 01, 10, 11, then back to 00. While Rst is 1, a rising Clk resets it to 00.',
+        hint:'Use two DFF chips with Clk wired to both. Q0 flips on every tick, so feed its D with NOR(Q0, Rst). Q1 flips when Q0 is 1, so feed it NOR(Q1 XNOR Q0, Rst).',
+        why:'Counters are everywhere: the program counter that steps through instructions, timers, and the dividers that turn a fast quartz crystal into a 1 Hz clock tick.'},
+      reg4:{title:'Four-bit register', goal:'Build a 4-bit register. When Clk rises and Ld is 1, Q3\u2013Q0 load D3\u2013D0. Otherwise Q keeps its value.',
+        hint:'One DFF chip per bit. Put a MUX in front of each: when Ld is 0 it feeds the flip-flop its own Q, when Ld is 1 it feeds the new D.',
+        why:'Registers are the CPU\u2019s fastest storage. Every instruction reads its inputs from registers and writes its result back into one, all in step with the clock.'},
+      dff:{title:'Edge trigger', goal:'Build a D flip-flop. Q copies D only at the moment Clk rises from 0 to 1, and holds at every other time.', hint:'Chain two D latches. The first (master) is enabled while Clk is 0; the second (slave) is enabled while Clk is 1 and takes the master\u2019s Q as its D.',
+        why:'Flip-flops make a whole CPU move in lockstep: on every clock edge, billions of them capture their new value at the same instant. A 4 GHz CPU does this 4 billion times per second.'},
+      nor:{title:'Neither', goal:'Make a NOR gate. Y is 1 only when A and B are both 0.', hint:'NOR means "not OR". Put an OR and a NOT in a row.',
+        why:'NOR is functionally complete too, just like NAND. The Apollo Guidance Computer that flew to the Moon was built entirely from NOR gates.'},
+      xnor:{title:'Same', goal:'Make an XNOR gate. Y is 1 only when A and B are equal.', hint:'XNOR is XOR with its answer flipped.',
+        why:'XNOR is a one-bit equality check. Put several side by side and AND their outputs to test whether two whole numbers match.'},
+      demux:{title:'Route', goal:'Build a demultiplexer. D goes to Y0 when S is 0 and to Y1 when S is 1. The other output stays 0.', hint:'Y0 is D AND NOT S. Y1 is D AND S.',
+        why:'A demultiplexer mirrors a multiplexer: one input, many destinations. Memory chips use the same idea to deliver data to exactly one storage cell.'},
+      eq:{title:'Equal?', goal:'Output EQ = 1 when the 2-bit numbers A1 A0 and B1 B0 are equal.', hint:'Check each bit pair with XNOR, then AND the two results.',
+        why:'Comparators like this decide every "if (a == b)" in a program. CPUs compare 64-bit numbers with the same pattern, just wider.'},
+      dec:{title:'Decode', goal:'Build a 2-to-4 decoder. Exactly one of Y0 to Y3 is 1: the one whose number is A1 A0.', hint:'Make NOT A1 and NOT A0 first. Each output is an AND of one version of A1 and one version of A0.',
+        why:'Decoders pick one line out of many. Memory uses them to turn an address into the single row it should read.'},
+      maj:{title:'Majority vote', goal:'Y is 1 when at least two of A, B and C are 1.', hint:'You already built a chip that computes this. Look closely at the outputs of the full adder.',
+        why:'The carry of a full adder is a majority vote. Spacecraft run three computers and a majority voter so one faulty machine cannot win the vote.'},
+      r_xor:{title:'Pure XOR', goal:'Build XOR from NAND gates only, using at most 4.', hint:'NAND A and B first. NAND that result with A, and separately with B. Then NAND those two together.',
+        why:'Four NANDs is the smallest XOR you can make from NAND alone. Cutting gate count like this saves chip area and power.'},
+      r_half:{title:'Tight adder', goal:'Build a half adder from NAND gates only, using at most 5.', hint:'Build the 4-NAND XOR for S. Its first NAND already computes A NAND B, so one more NAND wired as NOT gives C.',
+        why:'Sharing one signal between two outputs is a key optimization. Here the carry reuses a gate the sum already needed.'},
+      r_mux:{title:'Tight choice', goal:'Build a multiplexer from NAND gates only, using at most 4.', hint:'One NAND makes NOT S. NAND A with NOT S, NAND B with S, then NAND the two results.',
+        why:'NAND-NAND logic equals AND-OR logic. Thanks to De Morgan\u2019s law, any AND-OR circuit can be built from a single gate type.'},
+      and3:{title:'All three', goal:'Make a 3-input AND gate. Y is 1 only when A, B and C are all 1.', hint:'AND A with B, then AND that result with C.',
+        why:'Wide gates are built by chaining narrow ones. Checking whether every bit of a number is 1 works the same way, just with more inputs.'},
+      or3:{title:'Any of three', goal:'Make a 3-input OR gate. Y is 1 when at least one of A, B and C is 1.', hint:'OR A with B, then OR that result with C.',
+        why:'A wide OR answers "is anything on?". CPUs NOR every bit of a result to raise the zero flag, which tells the program the answer was 0.'},
+      tff:{title:'Toggle', goal:'Build a T flip-flop. When Clk rises and T is 1, Q flips. When T is 0, Q holds. While Rst is 1, a rising Clk resets Q to 0.',
+        hint:'Use a DFF chip. The next Q is T XOR Q, so feed its D with NOR(T XNOR Q, Rst).',
+        why:'With T held at 1, Q changes at half the clock\u2019s speed. Chain a few and you divide a fast quartz crystal down to the slow tick a watch needs.'},
+      jk:{title:'Set, reset, flip', goal:'Build a JK flip-flop. On each rising Clk: J = 1 sets Q to 1, K = 1 resets it to 0, both 1 flips Q, and both 0 keeps it.',
+        hint:'Use a DFF chip. When Q is 0 the next value is J; when Q is 1 it is NOT K. A MUX with Q on its S input picks between them.',
+        why:'The JK flip-flop gives the SR latch\u2019s forbidden input a meaning: J = K = 1 toggles. It was the workhorse of 1970s logic chips.'},
+      shift4:{title:'Bit conveyor', goal:'Build a 4-bit shift register. On each rising Clk, Din moves into Q3, Q3 into Q2, Q2 into Q1 and Q1 into Q0.',
+        hint:'Chain four DFF chips with Clk wired to all of them. Each flip-flop\u2019s D takes the Q of the one before it.',
+        why:'Shift registers turn one wire into many bits. USB, SPI and serial ports send data one bit at a time, and a shift register gathers the bits back into bytes.'},
+      cnt4:{title:'Count to fifteen', goal:'Build a 4-bit counter. On each rising Clk: Rst = 1 resets Q3\u2013Q0 to 0000; otherwise En = 1 adds 1 and En = 0 holds.',
+        hint:'Feed your REG4\u2019s Q into the ADD4\u2019s A inputs, leave B at 0 and set Cin to En. Four MUX chips with S = Rst swap the sum for 0 (a MUX with nothing wired into B outputs 0 when S is 1). Load when Rst OR En is 1.',
+        why:'This is how a CPU\u2019s program counter works: a register plus an adder that adds 1 every clock tick, so instructions run in order.'},
+      acc:{title:'Accumulator', goal:'Build an accumulator. When Clk rises with En = 1: Op = 0 loads X3\u2013X0 into Q3\u2013Q0, and Op = 1 adds X to Q (wrapping past 15). With En = 0, Q holds.',
+        hint:'Wire REG4\u2019s Q into ADD4\u2019s A inputs and X into B. Four MUX chips with S = Op choose between X and the sum and feed the register\u2019s D. Ld is En.',
+        why:'Early computers such as EDSAC and the 6502 were built around an accumulator: one register that every calculation passes through. You just built the core of one.'},
+      r_ram:{title:'Memory cell', goal:'Build one RAM cell from NAND gates only, using at most 8. While Sel and WE are both 1, the cell stores D. Q shows the stored bit while Sel is 1, and is 0 otherwise.',
+        hint:'Two NANDs make E = Sel AND WE. Four NANDs make a D latch enabled by E. Two more NANDs AND the latch\u2019s output with Sel.',
+        why:'Real memory is a grid of cells like this. A decoder raises one Sel line, and only that cell takes the write or drives the output. The static RAM in CPU caches uses six transistors per cell.'},
+      add2:{title:'Two-bit adder', goal:'Add the 2-bit numbers A1 A0 and B1 B0. Output the 3-bit sum S2 S1 S0.', hint:'A half adder handles A0 + B0. A full adder handles A1 + B1 plus that carry.'},
+    },
+  },
+  ko: {
+    title:'Only NAND: 게이트 하나로 모든 것을 만들기', brandAria:'Only NAND, 레벨 목록으로',
+    heroTitle:'게이트 하나. 나머지는 직접.',
+    heroText:'처음 가진 부품은 NAND 게이트 하나뿐입니다. 회로를 하나 풀 때마다 다음 레벨에서 쓸 수 있는 칩이 되고, 마지막에는 작동하는 덧셈기를 완성하게 됩니다.',
+    progress:(a,b)=>`${b}개 레벨 중 ${a}개 완료`,
+    parts:'부품', insideBtn:'칩 내부 보기', delBtn:'선택 항목 삭제', clearBtn:'보드 비우기',
+    boardAria:'회로 보드', insideAria:'NAND 게이트로 이루어진 칩 내부',
+    boardHelp:'스위치를 탭해 입력을 바꾸세요. 핀에서 다른 핀으로 드래그하면 연결됩니다. 칩의 돋보기를 탭하면 안의 NAND 게이트를 볼 수 있습니다.',
+    rotateTip:'휴대폰을 가로로 돌리면 보드가 커집니다.',
+    zoomOut:'축소', testBtn:'회로 테스트', showHint:'힌트 보기', hideHint:'힌트 숨기기',
+    winTitle:'회로 작동!', winLast:'모든 레벨을 완료했습니다', stay:'계속 만지기', next:'다음 레벨', backLevels:'레벨 목록으로',
+    levelN:n=>`레벨 ${n}`, levelOf:(a,b)=>`레벨 ${a} / ${b}`,
+    locked:'잠김', notSolved:'아직 풀지 않음', best:n=>`최고: 부품 ${n}개`, starsAria:n=>`별 3개 중 ${n}개`,
+    tried:(a,b)=>`시도한 조합: ${b}개 중 ${a}개.`,
+    partsUsed:(n,p,b)=>`사용한 부품: ${n}개. 기준: ${p}개.` + (b!=null ? ` 내 최고: ${b}개.` : ''),
+    thInputs:'입력', thTarget:'목표', thYours:'내 회로', thMatch:'일치',
+    startGate:'기본 게이트', builtChip:'직접 만든 칩',
+    insideTitle:(name,n)=>`${name} 내부: NAND 게이트 ${n}개`,
+    insideOwn:'직접 만든 설계입니다. ', insideStd:'표준 설계를 보여줍니다. ', insideFlip:'여기서 스위치를 바꿔 실험해 보세요.',
+    clearConfirm:'이 보드의 모든 부품과 전선을 지울까요?',
+    msgUnstable:'회로가 답을 정하지 못하고 있습니다. 출력이 자기 자신에게 다시 들어가는 고리가 있는지 확인하세요.',
+    msgUnwired:l=>`${l.join(', ')} 출력이 아직 연결되지 않았습니다.`,
+    msgRows:(a,b)=>`${b}개 행 중 ${a}개가 목표와 일치합니다. ✗ 표시된 행을 확인하세요.`,
+    quizWrong:'아쉽네요. 어느 행에서 램프가 꺼졌는지 확인하세요.',
+    winBuilt:(n,p)=>`부품 ${n}개로 완성. 기준은 ${p}개입니다.`,
+    winFewer:' 더 적은 부품으로 다시 도전하면 별 3개를 받을 수 있습니다.',
+    winLearn:'정답: NAND는 두 입력이 모두 1일 때만 0을 출력합니다. 다음에는 NAND 게이트로 첫 번째 새 게이트를 만듭니다.',
+    winChip:name=>` ${name} 칩이 부품 목록에 추가되었습니다.`,
+    winFinal:' 안에 있는 모든 칩은 결국 NAND 게이트로 이루어져 있습니다.',
+    sandbox:'샌드박스', sbTag:'자유 제작', sandboxSub:(n,m)=>`거대한 보드에서 자유 제작 · 칩 ${n} / ${m}개 해금`, unlocks:p=>`샌드박스에서 ${p} 해금`,
+    sbGoal:'무엇이든 만들어 보세요. 스위치, 램프, 모든 게이트와 칩을 놓고, 원하는 곳으로 옮기고, 연결하세요. 스위치를 탭하면 바뀝니다.',
+    sandboxHelp:'빈 곳을 드래그해 이동하세요. 스크롤, 두 손가락 또는 + / \u2212로 확대·축소합니다. 스위치는 탭하면 바뀌고, 모든 부품은 드래그로 옮길 수 있습니다.',
+    sbMeta:(s,l,p)=>`스위치 ${s}개 \u00b7 램프 ${l}개 \u00b7 부품 ${p}개.`, sbTableCap:'내 설계의 실시간 진리표입니다.',
+    sbTooBig:'진리표는 입력 5개까지 표시됩니다. 스위치를 바꿔 가며 살펴보세요.',
+    zoomIn:'확대', zoomFit:'보드 전체 보기', whyLabel:'원리',
+    why:{
+      intro:'실제 칩이 NAND를 많이 쓰는 이유는 트랜지스터 4개로 만들 수 있고, 다른 모든 게이트를 NAND로 만들 수 있기 때문입니다. 이를 기능적 완전성이라고 합니다.',
+      not:'두 입력을 묶으면 NAND는 A AND A, 즉 A를 보게 되므로 NOT A를 출력합니다. 인버터는 프로세서 안의 거의 모든 경로에 있습니다.',
+      and:'NAND를 NOT 하면 AND입니다. 뒤집은 답을 다시 뒤집으면 원래대로 돌아오죠. 이 이중 부정 기법은 논리 설계 곳곳에 쓰입니다.',
+      or:'드모르간의 법칙입니다: A OR B = NOT(NOT A AND NOT B). 입력과 출력을 뒤집으면 AND가 OR로 바뀝니다.',
+      xor:'XOR는 차이를 찾아냅니다. 컴퓨터는 XOR로 비트를 더하고, 값을 비교하고, 네트워크로 보낸 데이터의 오류를 잡아냅니다.',
+      half:'2진수 덧셈도 10진수처럼 자리마다 계산합니다. 합 자리는 그대로 남고, 캐리는 한 자리 왼쪽으로 넘어갑니다.',
+      full:'전가산기는 큰 덧셈의 한 자리를 맡고, 오른쪽에서 넘어온 캐리까지 처리합니다. 64개를 이으면 64비트 덧셈기가 됩니다.',
+      mux:'멀티플렉서는 신호로 조종하는 스위치입니다. CPU는 어떤 데이터를 어디로 보낼지, 예를 들어 어느 레지스터를 읽을지 고를 때 씁니다.',
+      add2:'방금 만든 것은 리플 캐리 덧셈기입니다. 캐리가 다음 자리로 물결처럼 전달되죠. 실제 CPU는 더 빠른 캐리 기법을 쓰지만 원리는 같습니다.',
+    },
+    chapters:{basics:['기초','신호, 전선, 게이트가 무엇인지 알아봅니다.'], gates:['새 게이트','NAND로 모든 기본 게이트를 만듭니다.'],
+      advanced:['고급','덧셈과 데이터 경로.'], expert:['전문가','직접 만든 칩으로 더 큰 회로를 만듭니다.'],
+      memory:['메모리','기억하는 회로: 피드백 고리, 래치, 플립플롭. 단계별로 테스트합니다.'],
+      rules:['특수 규칙','엄격한 제한이 있는 고전 퍼즐: NAND만 사용, 부품 수 제한.']},
+    seqCap:'테스트 순서: 위에서 아래로 차례로 실행되며, 회로는 단계 사이에 상태를 유지합니다. \u00b7 = 아무 값.',
+    bigTable:n=>`${n}개 행: 현재 행과 틀린 행만 표시합니다.`,
+    ruleLabel:'특수 규칙', ruleNand:'NAND 게이트만 사용', ruleMax:n=>`부품 최대 ${n}개`,
+    msgTooMany:n=>`진리표는 맞지만, 이 규칙에서는 부품을 최대 ${n}개까지만 쓸 수 있습니다.`,
+    swName:'스위치', swDesc:'바꿀 수 있는 입력', lampName:'램프', lampDesc:'출력을 표시', lockedChip:n=>`레벨 ${n} 클리어 시 해금`,
+    goalLabel:'목표', wiki:s=>`위키백과: ${s} ↗`, hintLabel:'힌트', shortcut:k=>`단축키: ${k}`,
+    ttExplain:'이것은 진리표입니다. 입력 조합마다 한 행씩 있습니다.',
+    nextTry:p=>`다음은 ${p} 조합을 시험해 보세요.`, allTried:'모든 조합을 시도했습니다! 이제 아래 질문에 답해 보세요.',
+    legSwitch:'스위치: 입력입니다. 탭하면 0과 1이 바뀝니다.', legLamp:'램프: 출력입니다. 켜지면 1, 꺼지면 0입니다.',
+    legWire:'전선: 1을 전달하면 주황색으로 빛나고, 0이면 회색입니다.',
+    coachStep:n=>`${n}단계`,
+    coachAdd:'부품 목록에서 NAND를 탭해 보드에 게이트를 놓으세요.',
+    coachWire:'스위치 옆의 점에서 게이트 왼쪽 가장자리의 점으로 드래그하세요. 전선이 신호를 전달합니다.',
+    coachOut:l=>`게이트 오른쪽 점에서 램프 ${l.join(', ')}(으)로 드래그하세요.`,
+    coachTest:'스위치를 바꿔 각 행을 확인한 다음 회로 테스트를 누르세요.',
+    coachFix:'\u2717 표시된 행은 아직 맞지 않습니다. 스위치를 그 행에 맞추고 전선을 따라가 보세요.',
+    sound:'사운드', music:'음악 볼륨', sfx:'효과음 볼륨', mute:'음소거', unmute:'음소거 해제', lang:'언어', toDark:'다크 모드', toLight:'라이트 모드', install:'앱 설치',
+    boxBtn:'박스 선택', copyBtn:'복사', pasteBtn:'붙여넣기', regionBtn:'영역 그리기',
+    boxHint:'원하는 부품을 박스로 감싸세요. 그다음 복사해서 붙여넣거나, 아무 부품이나 끌어 그룹 전체를 옮길 수 있어요.',
+    regionHint:'회로의 일부를 자유롭게 둘러 그린 뒤 영역 이름을 붙이세요.',
+    regionName:'영역 이름:', regionDefault:n=>`영역 ${n}`, regionsList:'영역', noRegions:'아직 영역이 없어요. 영역 그리기로 회로 일부를 둘러싸고 이름을 붙여 보세요.',
+    circuitTitle:'회로 제목', titlePh:'회로 이름을 입력하세요', untitled:'제목 없는 회로',
+    shareBtn:'공유', shareSaved:'스크린샷을 다운로드 폴더에 저장했어요.',
+    saveBtn:'저장', savedList:'저장된 회로', noSaves:'저장된 회로가 없어요. 저장하면 이 기기에 보드 사본이 남아요.',
+    savedMsg:n=>`“${n}” 저장 완료.`, loadConfirm:n=>`현재 보드를 “${n}”(으)로 바꿀까요?`, delSave:n=>`“${n}” 삭제`,
+    delConfirm:n=>`저장된 회로 “${n}”을(를) 삭제할까요?`, renameRegion:'라벨을 한 번 더 누르면 이름을 바꿀 수 있어요.',
+    partNames:{HALF:'반가산기', FULL:'전가산기', MUX:'멀티플렉서', DEMUX:'디멀티플렉서', HSUB:'반감산기', FSUB:'전감산기', ADD4:'4비트 덧셈기', DFF:'D 플립플롭', MUX4:'4입력 MUX', EQ2:'2비트 비교기', DEC:'2-4 디코더', DLATCH:'D 래치', REG4:'4비트 레지스터'},
+    levels:{
+      intro:{title:'NAND 게이트란?', goal:'A와 B를 바꿔 네 가지 조합을 모두 시험해 보세요. 오른쪽 램프를 지켜보세요.',
+        lesson:['컴퓨터는 두 가지 신호만 이해합니다: 1(켜짐)과 0(꺼짐). 논리 게이트는 신호를 받아 하나의 신호를 내보냅니다.',
+          'NAND는 "NOT AND"라는 뜻입니다. 두 입력이 모두 1일 때만 출력이 0이고, 나머지 경우에는 모두 1입니다.',
+          '이 단순한 규칙 하나로 다른 모든 게이트를, 나아가 컴퓨터 전체를 만들 수 있습니다. 이 게임이 바로 그 이야기입니다.'],
+        question:'NAND 게이트는 언제 0을 출력할까요?',
+        choices:['두 입력이 모두 0일 때','입력 중 하나 이상이 1일 때','두 입력이 모두 1일 때만'],
+        hint:'방금 채운 표를 보세요. 램프가 꺼졌던 행을 찾아보세요.'},
+      not:{title:'반전', goal:'NOT 게이트를 만드세요. Y는 항상 A의 반대여야 합니다.', hint:'NAND 하나의 두 입력에 모두 A를 연결하세요.'},
+      and:{title:'둘 다', goal:'AND 게이트를 만드세요. A와 B가 모두 1일 때만 Y가 1입니다.', hint:'AND는 결과를 뒤집은 NAND입니다. 뒤집는 부품은 방금 만들었죠.'},
+      or:{title:'둘 중 하나', goal:'OR 게이트를 만드세요. A나 B, 또는 둘 다 1이면 Y가 1입니다.', hint:'A를 뒤집고, B를 뒤집은 다음, 뒤집은 두 신호를 NAND 하세요.'},
+      xor:{title:'서로 다름', goal:'XOR 게이트를 만드세요. A와 B가 다를 때만 Y가 1입니다.', hint:'(A OR B)가 1이고 (A NAND B)도 1일 때 Y가 1입니다.'},
+      half:{title:'두 비트 더하기', goal:'반가산기를 만드세요. S는 합 비트, C는 올림(캐리)입니다.', hint:'2진수에서 1 + 1 = 10입니다. 합 비트는 XOR처럼, 캐리는 AND처럼 동작합니다.'},
+      full:{title:'캐리를 포함한 덧셈', goal:'A, B와 올림 입력 Cin을 더하는 전가산기를 만드세요.', hint:'반가산기 두 개를 이어 붙인 다음, 두 캐리를 OR로 합치세요.'},
+      mux:{title:'선택', goal:'멀티플렉서를 만드세요. S가 0이면 Y는 A를, S가 1이면 Y는 B를 따라갑니다.', hint:'A를 NOT S와 AND, B를 S와 AND 한 다음, 두 결과를 OR 하세요.'},
+      split:{title:'한 전선, 두 곳', goal:'A를 바꾸며 램프를 지켜보세요. A에서 나온 전선이 갈라져 NAND의 두 입력에 모두 들어갑니다.',
+        lesson:['전선은 갈라질 수 있습니다. 갈라진 가지는 모두 같은 신호를 전달하므로, 스위치 하나로 여러 입력을 동시에 채울 수 있습니다.',
+          '여기서는 신호가 갈라져 NAND 하나의 두 입력에 모두 들어갑니다. 스위치를 두 가지로 바꿔 보며 표를 채우세요.'],
+        question:'이 회로는 입력을 어떻게 바꿀까요?', choices:['그대로 복사한다','뒤집는다','항상 1을 출력한다'],
+        hint:'표의 각 행에서 Y와 A를 비교해 보세요.',
+        win:'정답: 신호 하나를 NAND의 두 입력에 넣으면 뒤집힙니다. 방금 NOT 게이트를 발견했고, 다음 레벨에서 직접 만듭니다.',
+        why:'신호를 여러 곳으로 나누는 것을 팬아웃이라고 합니다. 실제 게이트는 너무 많은 입력을 구동하면 신호가 약해지므로, 칩 설계자는 팬아웃을 신중하게 관리합니다.'},
+      par3:{title:'홀수 찾기', goal:'패리티 검사기를 만드세요. A, B, C 중 1의 개수가 홀수이면 P가 1입니다.', hint:'XOR는 이미 입력 2개짜리 패리티 검사기입니다. 두 개를 이어 보세요.',
+        why:'패리티 비트는 가장 단순한 오류 검출입니다. 비트 하나를 더 보내 모든 메시지의 1 개수를 짝수로 맞추면, 한 비트만 뒤집혀도 규칙이 깨집니다.'},
+      hsub:{title:'빼기', goal:'A \u2212 B를 계산하는 반감산기를 만드세요. D는 차 비트, Bo는 빌림(borrow)입니다.', hint:'차는 XOR처럼 동작합니다. 빌림은 A가 0이고 B가 1일 때만 필요합니다.',
+        why:'뺄셈은 다음 자리에서 빌려 옵니다. 올림의 거울상이죠. 초기 계산기에는 이런 뺄셈 회로가 따로 있었습니다.'},
+      fsub:{title:'빌림의 사슬', goal:'A \u2212 B \u2212 Bin을 계산하는 전감산기를 만드세요. 차 D와 빌림 출력 Bout을 내보냅니다.', hint:'전가산기처럼 반감산기 두 개를 잇고, 두 빌림을 OR로 합치세요.',
+        why:'대부분의 CPU는 감산기를 따로 만들지 않고 2의 보수를 더합니다(B를 뒤집고 1을 더함). 방금 만든 빌림 사슬은 교과서의 고전적인 방식입니다.'},
+      mux4:{title:'4방향 스위치', goal:'4-1 멀티플렉서를 만드세요. S1 S0이 A, B, C, D 중 무엇을 Y로 보낼지 고릅니다(00 = A, 11 = D).', hint:'MUX 칩 두 개에 S0을 연결해 각 쌍 안에서 고르고, 세 번째 MUX가 S1로 쌍을 고르게 하세요.',
+        why:'큰 멀티플렉서는 작은 것들을 나무처럼 쌓아 만듭니다. CPU의 레지스터 파일도 같은 구조로 수십 개 레지스터 중 하나를 고릅니다.'},
+      gt:{title:'더 큰가?', goal:'2비트 수 A1 A0이 B1 B0보다 크면 GT = 1을 출력하세요.', hint:'감산기 칩으로 B에서 A를 빼 보세요. B \u2212 A에 빌림이 필요하면 B가 A보다 작습니다.',
+        why:'CPU는 두 수를 빼고 빌림(캐리) 플래그를 확인해 크기를 비교합니다. 방금 쓴 바로 그 기법입니다.'},
+      penc:{title:'누가 먼저?', goal:'우선순위 인코더를 만드세요. Y1 Y0은 1인 입력 중 가장 높은 번호입니다. 입력이 하나라도 1이면 V가 1입니다.', hint:'Y1은 I3 OR I2입니다. Y0은 I3이거나, I2가 꺼져 있을 때의 I1입니다. V는 네 입력을 모두 OR 한 것입니다.',
+        why:'우선순위 인코더는 키보드, 디스크, 네트워크처럼 여러 장치가 동시에 요청할 때 CPU가 어떤 인터럽트를 먼저 처리할지 정합니다.'},
+      mul2:{title:'2비트 곱셈', goal:'2비트 수 A1 A0과 B1 B0을 곱하세요. 4비트 곱 P3 P2 P1 P0을 출력합니다.', hint:'비트 곱은 AND입니다: A0 AND B0이 P0입니다. 가운데 쌍 A1\u00b7B0과 A0\u00b7B1을 반가산기로 더하고, A1\u00b7B1과 그 캐리를 또 다른 반가산기로 더하세요.',
+        why:'2진수 곱셈은 AND와 덧셈의 조합입니다. 하드웨어 곱셈기는 이런 회로 수천 개를 격자로 배치해 한 클럭 만에 곱셈을 끝냅니다.'},
+      alu:{title:'미니 ALU', goal:'작은 ALU를 만드세요. Op가 0이면 Y1 Y0 = A + B(마지막 캐리는 버림), Op가 1이면 Y1 Y0 = 비트별 A AND B입니다.', hint:'두 답을 모두 계산한 뒤 MUX 칩 두 개가 Op로 고르게 하세요. 반가산기의 캐리가 이미 A0 AND B0이니 재활용하세요.',
+        why:'산술 논리 장치(ALU)는 CPU의 심장입니다. 여러 결과를 계산하고 연산 코드가 그중 하나를 고르죠. 방금 NAND로 작은 ALU를 만들었습니다.'},
+      add4:{title:'4비트 덧셈기', goal:'4비트 수 A3\u2013A0과 B3\u2013B0, 올림 입력 Cin을 더하세요. Cout과 S3\u2013S0을 출력합니다.', hint:'전가산기 네 개를 이으세요. 각 캐리 출력이 다음 자리의 캐리 입력으로 들어가고, A0 + B0 자리에는 Cin이 들어갑니다.',
+        why:'4비트로는 15까지 셀 수 있습니다. 실제 CPU는 같은 단을 64개 이어 붙이고, 캐리가 모든 자리를 물결처럼 지나가길 기다리지 않도록 캐리 예측 기법을 씁니다.'},
+      sub4:{title:'더해서 빼기', goal:'4비트 수 A3\u2013A0과 B3\u2013B0에 대해 D3\u2013D0 = A \u2212 B를 출력하세요. 0 아래로 내려가면 한 바퀴 돕니다(2 \u2212 3 = 15).', hint:'A \u2212 B = A + NOT B + 1입니다. B의 모든 비트를 뒤집어 4비트 덧셈기에 넣고 Cin을 1로 만드세요. 아무것도 연결되지 않은 게이트는 0을 보므로, 혼자 놓인 NAND는 항상 1을 출력합니다.',
+        why:'이것이 2의 보수입니다. 덧셈기 하나로 덧셈과 뺄셈을 모두 할 수 있어서 거의 모든 CPU가 음수를 이렇게 저장합니다. D3을 부호 비트로 읽으면 15는 \u22121을 뜻합니다.'},
+      seg7:{title:'숫자 표시', goal:'7세그먼트 표시기에 숫자 B1 B0(0~3)을 나타내세요. 세그먼트 a~g를 켜서 표시합니다.', hint:'각 세그먼트가 어떤 숫자에서 켜지는지 보세요. 세그먼트 b는 모든 숫자에서 켜지므로 상수 1, 즉 연결하지 않은 NAND 하나면 됩니다. 세그먼트 g는 그냥 B1입니다.',
+        why:'7세그먼트 디코더는 계산기, 시계, 전자레인지의 표시창을 구동합니다. 2진수를 우리 눈이 숫자로 읽는 모양으로 바꿔 주죠.'},
+      srl:{title:'1비트 기억하기', goal:'SR 래치를 만드세요. S = 1이면 Q가 1로, R = 1이면 Q가 0으로 바뀌고, 둘 다 0인 동안 Q는 마지막 값을 유지합니다.',
+        lesson:['지금까지의 회로는 모두 즉시 잊어버립니다. 입력이 바뀌면 출력도 바로 따라가죠. 기억하려면 게이트의 출력이 다른 게이트의 입력으로 되돌아가는 피드백이 필요합니다.',
+          'NOR 게이트 두 개를 고리로 연결하면 1비트를 기억할 수 있습니다. S(set)는 1을, R(reset)은 0을 저장하고, 둘 다 0이면 고리는 가지고 있던 값을 유지합니다.',
+          '메모리 레벨은 순서대로 테스트합니다. 단계가 차례로 실행되며, 회로는 단계 사이에 상태를 유지합니다.'],
+        hint:'NOR 게이트 두 개를 교차 연결해 각 출력이 다른 쪽의 입력 하나로 들어가게 하세요. 남은 입력에 S와 R을 넣고, Q는 R이 들어가는 NOR에서 나옵니다.',
+        why:'피드백은 회로가 기억하는 방법입니다. 이런 래치는 모든 CPU 캐시에 들어 있는 SRAM 셀의 조상입니다.'},
+      dlatch:{title:'데이터 래치', goal:'D 래치를 만드세요. E가 1인 동안 Q는 D를 따라가고, E가 0이면 Q는 값을 유지합니다.', hint:'S = D AND E, R = NOT D AND E로 SR 래치를 구동하면 S와 R이 동시에 1이 될 수 없습니다. 별 3개는 NAND 4개로 충분합니다.',
+        why:'D 래치는 S = R = 1이라는 금지된 경우를 없앱니다. 레지스터는 활성 신호가 들어올 때 데이터를 붙잡는 래치들의 줄입니다.'},
+      cnt2:{title:'셋까지 세기', goal:'2비트 카운터를 만드세요. Clk가 올라갈 때마다 Q1 Q0이 00, 01, 10, 11 순서로 늘어나고 다시 00으로 돌아갑니다. Rst가 1인 동안 Clk가 올라가면 00으로 초기화됩니다.',
+        hint:'DFF 칩 두 개를 쓰고 Clk를 둘 다에 연결하세요. Q0은 매 박자마다 뒤집히므로 D에 NOR(Q0, Rst)를 넣으세요. Q1은 Q0이 1일 때 뒤집히므로 NOR(Q1 XNOR Q0, Rst)를 넣으세요.',
+        why:'카운터는 어디에나 있습니다. 명령어를 차례로 짚어 가는 프로그램 카운터, 타이머, 빠른 수정 진동을 1Hz 시계 박자로 바꾸는 분주기가 모두 카운터입니다.'},
+      reg4:{title:'4비트 레지스터', goal:'4비트 레지스터를 만드세요. Clk가 올라갈 때 Ld가 1이면 Q3\u2013Q0에 D3\u2013D0을 저장하고, 그렇지 않으면 Q는 값을 유지합니다.',
+        hint:'비트마다 DFF 칩을 하나씩 쓰세요. 각 앞에 MUX를 두어 Ld가 0이면 자기 Q를, Ld가 1이면 새 D를 플립플롭에 넣으세요.',
+        why:'레지스터는 CPU에서 가장 빠른 저장소입니다. 모든 명령어는 레지스터에서 입력을 읽고 결과를 레지스터에 다시 쓰며, 이 모든 것이 클럭에 맞춰 움직입니다.'},
+      dff:{title:'에지 트리거', goal:'D 플립플롭을 만드세요. Q는 Clk가 0에서 1로 올라가는 순간에만 D를 복사하고, 나머지 시간에는 유지합니다.', hint:'D 래치 두 개를 이으세요. 첫 번째(마스터)는 Clk가 0인 동안, 두 번째(슬레이브)는 Clk가 1인 동안 활성화되고 마스터의 Q를 D로 받습니다.',
+        why:'플립플롭은 CPU 전체를 한 박자로 움직이게 합니다. 클럭 에지마다 수십억 개가 같은 순간에 새 값을 붙잡죠. 4GHz CPU는 이를 1초에 40억 번 합니다.'},
+      nor:{title:'둘 다 아님', goal:'NOR 게이트를 만드세요. A와 B가 모두 0일 때만 Y가 1입니다.', hint:'NOR는 "NOT OR"라는 뜻입니다. OR와 NOT을 차례로 연결하세요.',
+        why:'NOR도 NAND처럼 기능적으로 완전합니다. 달에 간 아폴로 유도 컴퓨터는 NOR 게이트만으로 만들어졌습니다.'},
+      xnor:{title:'같음', goal:'XNOR 게이트를 만드세요. A와 B가 같을 때만 Y가 1입니다.', hint:'XNOR는 결과를 뒤집은 XOR입니다.',
+        why:'XNOR는 1비트 일치 검사기입니다. 여러 개를 나란히 놓고 출력을 AND 하면 두 수 전체가 같은지 확인할 수 있습니다.'},
+      demux:{title:'경로 배정', goal:'디멀티플렉서를 만드세요. S가 0이면 D가 Y0으로, S가 1이면 Y1로 갑니다. 다른 출력은 0을 유지합니다.', hint:'Y0은 D AND NOT S, Y1은 D AND S입니다.',
+        why:'디멀티플렉서는 멀티플렉서의 거울입니다: 입력 하나, 목적지 여러 개. 메모리 칩도 같은 원리로 데이터를 정확히 한 저장 칸에 보냅니다.'},
+      eq:{title:'같을까?', goal:'2비트 수 A1 A0과 B1 B0이 같으면 EQ = 1을 출력하세요.', hint:'각 비트 쌍을 XNOR로 비교한 다음 두 결과를 AND 하세요.',
+        why:'이런 비교기가 프로그램의 모든 "if (a == b)"를 판단합니다. CPU는 같은 방식을 더 넓게 써서 64비트 수를 비교합니다.'},
+      dec:{title:'디코드', goal:'2-4 디코더를 만드세요. Y0~Y3 중 정확히 하나만 1이 됩니다: 번호가 A1 A0인 출력입니다.', hint:'먼저 NOT A1과 NOT A0을 만드세요. 각 출력은 A1의 한 형태와 A0의 한 형태를 AND 한 것입니다.',
+        why:'디코더는 여러 선 중 하나를 고릅니다. 메모리는 디코더로 주소를 읽어야 할 단 하나의 행으로 바꿉니다.'},
+      maj:{title:'다수결', goal:'A, B, C 중 두 개 이상이 1이면 Y가 1입니다.', hint:'이 값을 계산하는 칩을 이미 만들었습니다. 전가산기의 출력을 잘 살펴보세요.',
+        why:'전가산기의 캐리는 다수결입니다. 우주선은 컴퓨터 세 대와 다수결 회로를 써서 고장 난 한 대가 결정을 좌우하지 못하게 합니다.'},
+      r_xor:{title:'순수 XOR', goal:'NAND 게이트만으로, 최대 4개를 써서 XOR를 만드세요.', hint:'먼저 A와 B를 NAND 하세요. 그 결과를 A와 한 번, B와 한 번 따로 NAND 한 다음, 두 결과를 NAND 하세요.',
+        why:'NAND 4개는 NAND만으로 만들 수 있는 가장 작은 XOR입니다. 이렇게 게이트 수를 줄이면 칩 면적과 전력이 절약됩니다.'},
+      r_half:{title:'빠듯한 덧셈기', goal:'NAND 게이트만으로, 최대 5개를 써서 반가산기를 만드세요.', hint:'S는 NAND 4개짜리 XOR로 만드세요. 첫 NAND가 이미 A NAND B를 계산하므로, NOT으로 쓰는 NAND 하나만 더하면 C가 됩니다.',
+        why:'두 출력이 신호를 공유하는 것은 핵심 최적화 기법입니다. 여기서 캐리는 합이 이미 쓰던 게이트를 재활용합니다.'},
+      r_mux:{title:'빠듯한 선택', goal:'NAND 게이트만으로, 최대 4개를 써서 멀티플렉서를 만드세요.', hint:'NAND 하나로 NOT S를 만드세요. A를 NOT S와, B를 S와 NAND 한 다음 두 결과를 NAND 하세요.',
+        why:'NAND-NAND 논리는 AND-OR 논리와 같습니다. 드모르간의 법칙 덕분에 어떤 AND-OR 회로도 한 종류의 게이트로 만들 수 있습니다.'},
+      and3:{title:'셋 다', goal:'3입력 AND 게이트를 만드세요. A, B, C가 모두 1일 때만 Y가 1입니다.', hint:'A와 B를 AND 한 다음, 그 결과를 C와 AND 하세요.',
+        why:'넓은 게이트는 좁은 게이트를 이어서 만듭니다. 수의 모든 비트가 1인지 확인하는 것도 입력만 많을 뿐 같은 방식입니다.'},
+      or3:{title:'셋 중 하나', goal:'3입력 OR 게이트를 만드세요. A, B, C 중 하나라도 1이면 Y가 1입니다.', hint:'A와 B를 OR 한 다음, 그 결과를 C와 OR 하세요.',
+        why:'넓은 OR는 "켜진 게 하나라도 있나?"에 답합니다. CPU는 결과의 모든 비트를 NOR 해서, 답이 0인지 알려 주는 제로 플래그를 만듭니다.'},
+      tff:{title:'토글', goal:'T 플립플롭을 만드세요. Clk가 올라갈 때 T가 1이면 Q가 뒤집히고, T가 0이면 유지됩니다. Rst가 1인 동안 Clk가 올라가면 Q는 0으로 초기화됩니다.',
+        hint:'DFF 칩을 쓰세요. 다음 Q는 T XOR Q이므로 D에 NOR(T XNOR Q, Rst)를 넣으세요.',
+        why:'T를 1로 두면 Q는 클록의 절반 속도로 바뀝니다. 몇 개를 이으면 빠른 수정 발진기를 시계에 필요한 느린 박자로 나눌 수 있습니다.'},
+      jk:{title:'설정, 초기화, 뒤집기', goal:'JK 플립플롭을 만드세요. Clk가 올라갈 때마다 J = 1이면 Q를 1로, K = 1이면 0으로 만들고, 둘 다 1이면 뒤집고, 둘 다 0이면 유지합니다.',
+        hint:'DFF 칩을 쓰세요. Q가 0이면 다음 값은 J, Q가 1이면 NOT K입니다. S 입력에 Q를 넣은 MUX로 둘 중 하나를 고르세요.',
+        why:'JK 플립플롭은 SR 래치의 금지 입력에 의미를 줍니다. J = K = 1이면 뒤집기죠. 1970년대 논리 칩의 일꾼이었습니다.'},
+      shift4:{title:'비트 컨베이어', goal:'4비트 시프트 레지스터를 만드세요. Clk가 올라갈 때마다 Din은 Q3으로, Q3은 Q2로, Q2는 Q1로, Q1은 Q0으로 이동합니다.',
+        hint:'DFF 칩 네 개를 잇고 Clk를 모두에 연결하세요. 각 플립플롭의 D는 바로 앞 플립플롭의 Q를 받습니다.',
+        why:'시프트 레지스터는 전선 하나를 여러 비트로 바꿉니다. USB, SPI, 시리얼 포트는 데이터를 한 비트씩 보내고, 시프트 레지스터가 이를 다시 바이트로 모읍니다.'},
+      cnt4:{title:'열다섯까지 세기', goal:'4비트 카운터를 만드세요. Clk가 올라갈 때마다 Rst = 1이면 Q3\u2013Q0을 0000으로 초기화하고, 아니면 En = 1일 때 1을 더하고 En = 0이면 유지합니다.',
+        hint:'REG4의 Q를 ADD4의 A 입력에 넣고, B는 0으로 두고 Cin에 En을 연결하세요. S = Rst인 MUX 칩 네 개가 합을 0으로 바꿉니다(B에 아무것도 연결하지 않은 MUX는 S가 1일 때 0을 냅니다). Rst OR En이 1일 때 저장하세요.',
+        why:'CPU의 프로그램 카운터가 이렇게 작동합니다. 레지스터와 덧셈기가 클록마다 1을 더해 명령어를 순서대로 실행합니다.'},
+      acc:{title:'누산기', goal:'누산기를 만드세요. En = 1인 채로 Clk가 올라갈 때 Op = 0이면 X3\u2013X0을 Q3\u2013Q0에 저장하고, Op = 1이면 Q에 X를 더합니다(15를 넘으면 0부터 다시). En = 0이면 Q는 유지됩니다.',
+        hint:'REG4의 Q를 ADD4의 A 입력에, X를 B에 연결하세요. S = Op인 MUX 칩 네 개가 X와 합 중 하나를 골라 레지스터의 D에 넣습니다. Ld는 En입니다.',
+        why:'EDSAC이나 6502 같은 초기 컴퓨터는 누산기를 중심으로 만들어졌습니다. 모든 계산이 거쳐 가는 레지스터 하나죠. 방금 그 핵심을 만들었습니다.'},
+      r_ram:{title:'메모리 셀', goal:'NAND 게이트만으로, 최대 8개를 써서 RAM 셀 하나를 만드세요. Sel과 WE가 모두 1인 동안 셀은 D를 저장합니다. Q는 Sel이 1일 때 저장된 비트를 보여 주고, 아니면 0입니다.',
+        hint:'NAND 두 개로 E = Sel AND WE를 만드세요. NAND 네 개로 E가 켜는 D 래치를 만들고, NAND 두 개로 래치 출력과 Sel을 AND 하세요.',
+        why:'실제 메모리는 이런 셀을 격자로 늘어놓은 것입니다. 디코더가 Sel 선 하나를 올리면 그 셀만 쓰기를 받거나 출력을 냅니다. CPU 캐시의 SRAM은 셀 하나에 트랜지스터 6개를 씁니다.'},
+      add2:{title:'2비트 덧셈기', goal:'2비트 수 A1 A0과 B1 B0을 더하세요. 3비트 합 S2 S1 S0을 출력합니다.', hint:'반가산기로 A0 + B0을, 전가산기로 A1 + B1과 그 캐리를 처리하세요.'},
+    },
+  },
+  ja: {
+    title:'Only NAND：ひとつのゲートからすべてを作る', brandAria:'Only NAND、レベル一覧へ',
+    heroTitle:'ゲートはひとつ。あとは自分で。',
+    heroText:'最初に使える部品は NAND ゲートひとつだけ。回路を解くたびにそれが次のレベルで使えるチップになり、最後には動く加算器が完成します。',
+    progress:(a,b)=>`${b} レベル中 ${a} クリア`,
+    parts:'部品', insideBtn:'チップの中を見る', delBtn:'選択を削除', clearBtn:'ボードを消去',
+    boardAria:'回路ボード', insideAria:'NAND ゲートでできたチップの内部',
+    boardHelp:'スイッチをタップして入力を切り替えます。ピンから別のピンへドラッグして接続します。チップの虫めがねをタップすると中の NAND ゲートが見られます。',
+    rotateTip:'スマホを横向きにするとボードが大きくなります。',
+    zoomOut:'ズームアウト', testBtn:'回路をテスト', showHint:'ヒントを表示', hideHint:'ヒントを隠す',
+    winTitle:'回路が動いた！', winLast:'すべてのレベルをクリアしました', stay:'もう少しいじる', next:'次のレベル', backLevels:'レベル一覧へ',
+    levelN:n=>`レベル ${n}`, levelOf:(a,b)=>`レベル ${a} / ${b}`,
+    locked:'ロック中', notSolved:'未クリア', best:n=>`ベスト：部品 ${n} 個`, starsAria:n=>`星 3 つ中 ${n} つ`,
+    tried:(a,b)=>`試した組み合わせ：${b} 通り中 ${a} 通り。`,
+    partsUsed:(n,p,b)=>`使用部品：${n} 個。基準：${p} 個。` + (b!=null ? `自己ベスト：${b} 個。` : ''),
+    thInputs:'入力', thTarget:'目標', thYours:'あなた', thMatch:'一致',
+    startGate:'初期ゲート', builtChip:'自作チップ',
+    insideTitle:(name,n)=>`${name} の内部：NAND ゲート ${n} 個`,
+    insideOwn:'あなたの設計です。', insideStd:'標準的な設計を表示しています。', insideFlip:'ここでスイッチを切り替えて試せます。',
+    clearConfirm:'このボードの部品と配線をすべて消去しますか？',
+    msgUnstable:'回路の答えが定まりません。出力が自分自身に戻るループがないか確認してください。',
+    msgUnwired:l=>`${l.join('、')} がまだ接続されていません。`,
+    msgRows:(a,b)=>`${b} 行中 ${a} 行が目標と一致。✗ の行を確認してください。`,
+    quizWrong:'惜しい！ランプが消えた行を確認してください。',
+    winBuilt:(n,p)=>`部品 ${n} 個で完成。基準は ${p} 個です。`,
+    winFewer:'もっと少ない部品で再挑戦すると星 3 つになります。',
+    winLearn:'正解：NAND は両方の入力が 1 のときだけ 0 を出力します。次は NAND ゲートで最初の新しいゲートを作ります。',
+    winChip:name=>`${name} が部品リストのチップになりました。`,
+    winFinal:'中のチップはすべて NAND ゲートでできています。',
+    sandbox:'サンドボックス', sbTag:'自由制作', sandboxSub:(n,m)=>`巨大なボードで自由制作 · チップ ${n} / ${m} 個解放`, unlocks:p=>`サンドボックスで ${p} を解放`,
+    sbGoal:'何でも作れます。スイッチ、ランプ、あらゆるゲートやチップを置き、好きな場所へ動かして配線しましょう。スイッチはタップで切り替わります。',
+    sandboxHelp:'何もない所をドラッグで移動。スクロール、ピンチ、または + / \u2212 で拡大縮小。スイッチはタップで切り替え、どの部品もドラッグで移動できます。',
+    sbMeta:(s,l,p)=>`スイッチ ${s} 個・ランプ ${l} 個・部品 ${p} 個。`, sbTableCap:'あなたの設計のリアルタイム真理値表です。',
+    sbTooBig:'真理値表は入力 5 つまで表示されます。スイッチを切り替えて確かめましょう。',
+    zoomIn:'拡大', zoomFit:'ボード全体を表示', whyLabel:'しくみ',
+    why:{
+      intro:'実際のチップで NAND がよく使われるのは、トランジスタ 4 個で作れて、ほかのすべてのゲートを NAND から作れるからです。これを機能的完全性と呼びます。',
+      not:'2 つの入力をまとめると NAND は A AND A、つまり A を見ることになり、NOT A を出力します。インバータはプロセッサ内のほぼすべての経路にあります。',
+      and:'NAND を NOT すると AND になります。反転した答えをもう一度反転すると元に戻ります。この二重否定は論理設計のあちこちで使われます。',
+      or:'これはド・モルガンの法則です：A OR B = NOT(NOT A AND NOT B)。入力と出力を反転すると AND が OR に変わります。',
+      xor:'XOR は「違い」を見つけます。コンピュータは XOR でビットを足し、値を比べ、ネットワークで送ったデータの誤りを見つけます。',
+      half:'2 進数の足し算も 10 進数と同じく桁ごとに行います。和の桁はその場に残り、桁上がりは 1 つ左の桁へ移ります。',
+      full:'全加算器は大きな足し算の 1 桁を担当し、右の桁からの桁上がりも処理します。64 個つなげば 64 ビット加算器になります。',
+      mux:'マルチプレクサは信号で操作するスイッチです。CPU はどのデータをどこへ流すか、たとえばどのレジスタを読むかを選ぶのに使います。',
+      add2:'いま作ったのはリップルキャリー加算器です。桁上がりが次の桁へ波のように伝わります。実際の CPU はより速い方式を使いますが、考え方は同じです。',
+    },
+    chapters:{basics:['基礎','信号、配線、ゲートの基本。'], gates:['新しいゲート','NAND から定番ゲートをすべて作ろう。'],
+      advanced:['上級','足し算とデータの経路。'], expert:['エキスパート','自作チップで大きな回路を作ろう。'],
+      memory:['メモリ','記憶する回路：フィードバック、ラッチ、フリップフロップ。ステップごとにテストします。'],
+      rules:['特別ルール','厳しい制限つきの定番パズル：NAND のみ、部品数の上限あり。']},
+    seqCap:'テスト手順：上から順に実行され、回路はステップ間で状態を保ちます。\u00b7 = どの値でも可。',
+    bigTable:n=>`${n} 行：現在の行と不一致の行だけを表示します。`,
+    ruleLabel:'特別ルール', ruleNand:'NAND ゲートのみ', ruleMax:n=>`部品は最大 ${n} 個`,
+    msgTooMany:n=>`真理値表は一致していますが、このルールでは部品は最大 ${n} 個までです。`,
+    swName:'スイッチ', swDesc:'切り替えられる入力', lampName:'ランプ', lampDesc:'出力を表示', lockedChip:n=>`レベル ${n} クリアで解放`,
+    goalLabel:'目標', wiki:s=>`ウィキペディア：${s} ↗`, hintLabel:'ヒント', shortcut:k=>`ショートカット：${k}`,
+    ttExplain:'これは真理値表です。入力の組み合わせごとに 1 行あります。',
+    nextTry:p=>`次は ${p} を試してみましょう。`, allTried:'すべての組み合わせを試しました！下の質問に答えましょう。',
+    legSwitch:'スイッチ：入力です。タップすると 0 と 1 が切り替わります。', legLamp:'ランプ：出力です。点灯は 1、消灯は 0。',
+    legWire:'配線：1 を運んでいるとオレンジに光り、0 ならグレーです。',
+    coachStep:n=>`ステップ ${n}`,
+    coachAdd:'部品リストの NAND をタップして、ボードにゲートを置きましょう。',
+    coachWire:'スイッチの横の点から、ゲートの左端の点へドラッグしましょう。配線が信号を運びます。',
+    coachOut:l=>`ゲートの右側の点からランプ ${l.join('、')} へドラッグしましょう。`,
+    coachTest:'スイッチを切り替えて各行を確かめたら、「回路をテスト」を押しましょう。',
+    coachFix:'\u2717 の行はまだ一致していません。スイッチをその行に合わせて、配線をたどってみましょう。',
+    sound:'サウンド', music:'音楽の音量', sfx:'効果音の音量', mute:'ミュート', unmute:'ミュート解除', lang:'言語', toDark:'ダークモード', toLight:'ライトモード', install:'アプリをインストール',
+    boxBtn:'範囲選択', copyBtn:'コピー', pasteBtn:'貼り付け', regionBtn:'エリアを描く',
+    boxHint:'欲しいパーツをボックスで囲みましょう。コピーして貼り付けたり、どれかをドラッグしてグループごと動かせます。',
+    regionHint:'回路の一部を自由な線で囲んで、エリアに名前を付けましょう。',
+    regionName:'エリアの名前：', regionDefault:n=>`エリア ${n}`, regionsList:'エリア', noRegions:'エリアはまだありません。「エリアを描く」で回路の一部を囲んで名前を付けましょう。',
+    circuitTitle:'回路のタイトル', titlePh:'回路に名前を付けよう', untitled:'無題の回路',
+    shareBtn:'シェア', shareSaved:'スクリーンショットをダウンロードに保存しました。',
+    saveBtn:'保存', savedList:'保存した回路', noSaves:'保存した回路はまだありません。保存するとこの端末にボードのコピーが残ります。',
+    savedMsg:n=>`「${n}」を保存しました。`, loadConfirm:n=>`今のボードを「${n}」に置き換えますか？`, delSave:n=>`「${n}」を削除`,
+    delConfirm:n=>`保存した回路「${n}」を削除しますか？`, renameRegion:'ラベルをもう一度タップすると名前を変更できます。',
+    partNames:{HALF:'半加算器', FULL:'全加算器', MUX:'マルチプレクサ', DEMUX:'デマルチプレクサ', HSUB:'半減算器', FSUB:'全減算器', ADD4:'4 ビット加算器', DFF:'D フリップフロップ', MUX4:'4 入力 MUX', EQ2:'2 ビット比較器', DEC:'2-4 デコーダ', DLATCH:'D ラッチ', REG4:'4 ビットレジスタ'},
+    levels:{
+      intro:{title:'NAND ゲートとは？', goal:'A と B を切り替えて 4 つの組み合わせをすべて試しましょう。右のランプに注目。',
+        lesson:['コンピュータが理解できる信号は 1（オン）と 0（オフ）の 2 つだけ。論理ゲートは信号を受け取り、ひとつの信号を出力します。',
+          'NAND は「NOT AND」の意味です。両方の入力が 1 のときだけ出力が 0 になり、それ以外はすべて 1 です。',
+          'このシンプルなルールひとつで、ほかのすべてのゲート、さらにはコンピュータ全体が作れます。それがこのゲームのテーマです。'],
+        question:'NAND ゲートが 0 を出力するのはいつ？',
+        choices:['両方の入力が 0 のとき','少なくとも一方の入力が 1 のとき','両方の入力が 1 のときだけ'],
+        hint:'埋めた表を見てください。ランプが消えた行を探しましょう。'},
+      not:{title:'反転', goal:'NOT ゲートを作ろう。Y は常に A の逆になります。', hint:'A を 1 つの NAND の両方の入力につなぎましょう。'},
+      and:{title:'両方', goal:'AND ゲートを作ろう。A と B が両方 1 のときだけ Y が 1 になります。', hint:'AND は答えを反転した NAND です。反転器はさっき作りましたね。'},
+      or:{title:'どちらか', goal:'OR ゲートを作ろう。A か B、または両方が 1 なら Y が 1 になります。', hint:'A を反転、B を反転して、反転した 2 つの信号を NAND しましょう。'},
+      xor:{title:'違い', goal:'XOR ゲートを作ろう。A と B が異なるときだけ Y が 1 になります。', hint:'(A OR B) が 1 で、(A NAND B) も 1 のとき Y は 1 です。'},
+      half:{title:'2 ビットの足し算', goal:'半加算器を作ろう。S は和のビット、C は桁上がりです。', hint:'2 進数では 1 + 1 = 10。和のビットは XOR、桁上がりは AND と同じ動きです。'},
+      full:{title:'桁上がり付きの足し算', goal:'A、B と桁上がり入力 Cin を足す全加算器を作ろう。', hint:'半加算器を 2 つつなぎ、2 つの桁上がりを OR でまとめましょう。'},
+      mux:{title:'選択', goal:'マルチプレクサを作ろう。S が 0 なら Y は A を、S が 1 なら Y は B をそのまま出力します。', hint:'A と NOT S を AND、B と S を AND して、2 つの結果を OR しましょう。'},
+      split:{title:'1 本の線、2 か所へ', goal:'A を切り替えてランプを見ましょう。A からの配線は分かれて NAND の両方の入力に届きます。',
+        lesson:['配線は枝分かれできます。どの枝も同じ信号を運ぶので、1 つのスイッチで複数の入力を同時に動かせます。',
+          'ここでは信号が分かれて 1 つの NAND の両方の入力に入ります。スイッチを両方の状態にして表を埋めましょう。'],
+        question:'この回路は入力をどう変える？', choices:['そのままコピーする','反転する','常に 1 を出力する'],
+        hint:'表の各行で Y と A を比べてみましょう。',
+        win:'正解：1 つの信号を NAND の両方の入力に入れると反転します。いま NOT ゲートを発見しました。次のレベルで作ります。',
+        why:'信号を複数に分けることをファンアウトと呼びます。実際のゲートは多くの入力を駆動しすぎると信号が弱まるため、設計者はファンアウトを慎重に管理します。'},
+      par3:{title:'奇数を探せ', goal:'パリティ検査器を作ろう。A、B、C のうち 1 の個数が奇数なら P が 1 になります。', hint:'XOR はすでに 2 入力のパリティ検査器です。2 つつなげてみましょう。',
+        why:'パリティビットは最も単純な誤り検出です。1 ビット追加して 1 の個数を常に偶数にしておけば、1 ビットでも反転すると規則が崩れます。'},
+      hsub:{title:'引き算', goal:'A \u2212 B を計算する半減算器を作ろう。D は差のビット、Bo は借り（ボロー）です。', hint:'差は XOR と同じ動きです。借りが必要なのは A が 0 で B が 1 のときだけです。',
+        why:'引き算は次の桁から借りてきます。桁上がりの鏡像です。初期の電卓にはこのような減算回路が別にありました。'},
+      fsub:{title:'借りの連鎖', goal:'A \u2212 B \u2212 Bin を計算する全減算器を作ろう。差 D と借り出力 Bout を出します。', hint:'全加算器と同じく、半減算器を 2 つつなぎ、2 つの借りを OR でまとめましょう。',
+        why:'多くの CPU は減算器を作らず、2 の補数を足します（B を反転して 1 を足す）。いま作った借りの連鎖は教科書どおりの古典的な方式です。'},
+      mux4:{title:'4 方向スイッチ', goal:'4-1 マルチプレクサを作ろう。S1 S0 が A、B、C、D のどれを Y に送るか選びます（00 = A、11 = D）。', hint:'MUX チップ 2 つに S0 をつないで各ペアの中から選び、3 つ目の MUX で S1 を使ってペアを選びましょう。',
+        why:'大きなマルチプレクサは小さなものを木のように組んで作ります。CPU のレジスタファイルも同じ構造で数十個のレジスタから 1 つを選びます。'},
+      gt:{title:'どっちが大きい？', goal:'2 ビットの数 A1 A0 が B1 B0 より大きければ GT = 1 を出力しよう。', hint:'減算器チップで B から A を引いてみましょう。B \u2212 A で借りが出れば、B は A より小さいということです。',
+        why:'CPU は 2 つの数を引き算し、借り（キャリー）フラグを見て大小を比べます。いま使ったのとまさに同じ技です。'},
+      penc:{title:'だれが先？', goal:'プライオリティエンコーダを作ろう。Y1 Y0 は 1 になっている入力のうち最も大きい番号です。どれか 1 つでも 1 なら V が 1 になります。', hint:'Y1 は I3 OR I2。Y0 は I3、または I2 がオフのときの I1。V は 4 つの入力すべての OR です。',
+        why:'プライオリティエンコーダは、キーボード・ディスク・ネットワークなど複数の装置が同時に要求したとき、CPU がどの割り込みを先に処理するかを決めます。'},
+      mul2:{title:'2 ビットのかけ算', goal:'2 ビットの数 A1 A0 と B1 B0 をかけ算しよう。4 ビットの積 P3 P2 P1 P0 を出力します。', hint:'ビットのかけ算は AND です：A0 AND B0 が P0。中央の組 A1\u00b7B0 と A0\u00b7B1 を半加算器で足し、A1\u00b7B1 とその桁上がりをもう 1 つの半加算器で足しましょう。',
+        why:'2 進数のかけ算は AND と足し算の組み合わせです。ハードウェア乗算器はこれを何千個も格子状に並べ、1 クロックでかけ算を終えます。'},
+      alu:{title:'ミニ ALU', goal:'小さな ALU を作ろう。Op が 0 なら Y1 Y0 = A + B（最後の桁上がりは捨てる）、Op が 1 なら Y1 Y0 = ビットごとの A AND B です。', hint:'両方の答えを計算してから、MUX チップ 2 つで Op に応じて選びましょう。半加算器の桁上がりはすでに A0 AND B0 なので再利用できます。',
+        why:'算術論理演算装置（ALU）は CPU の心臓部です。いくつもの結果を計算し、命令コードがその 1 つを選びます。いま NAND から小さな ALU を作りました。'},
+      add4:{title:'4 ビット加算器', goal:'4 ビットの数 A3\u2013A0 と B3\u2013B0、桁上がり入力 Cin を足そう。Cout と S3\u2013S0 を出力します。', hint:'全加算器を 4 つつなぎます。各桁の桁上がり出力が次の桁の桁上がり入力になり、A0 + B0 の桁には Cin が入ります。',
+        why:'4 ビットなら 15 まで数えられます。実際の CPU は同じ段を 64 個つなげ、桁上がりがすべての桁を伝わるのを待たないよう桁上げ先見の工夫をしています。'},
+      sub4:{title:'足して引く', goal:'4 ビットの数 A3\u2013A0 と B3\u2013B0 について D3\u2013D0 = A \u2212 B を出力しよう。0 を下回ると一周します（2 \u2212 3 = 15）。', hint:'A \u2212 B = A + NOT B + 1 です。B のすべてのビットを反転して 4 ビット加算器に入れ、Cin を 1 にします。何もつながっていないゲートは 0 を見るので、単独の NAND は常に 1 を出力します。',
+        why:'これが 2 の補数です。1 つの加算器で足し算も引き算もできるため、ほぼすべての CPU が負の数をこの形で保存します。D3 を符号ビットと読むと 15 は \u22121 を表します。'},
+      seg7:{title:'数字表示', goal:'7 セグメント表示器に数 B1 B0（0〜3）を表示しよう。セグメント a〜g を点灯させます。', hint:'各セグメントがどの数字で点灯するか見てみましょう。セグメント b はすべての数字で点灯するので定数 1、つまり何もつないでいない NAND で十分です。セグメント g は B1 そのものです。',
+        why:'7 セグメントデコーダは電卓、時計、電子レンジの表示を動かしています。2 進数を、私たちの目が数字として読む形に変えるのです。'},
+      srl:{title:'1 ビットを覚える', goal:'SR ラッチを作ろう。S = 1 で Q が 1 に、R = 1 で Q が 0 になり、両方 0 の間 Q は最後の値を保ちます。',
+        lesson:['これまでの回路はすぐに忘れます。入力を変えると出力もすぐ追従します。記憶するには、ゲートの出力が別のゲートの入力へ戻るフィードバックが必要です。',
+          'NOR ゲート 2 つをループにつなぐと 1 ビットを保持できます。S（セット）は 1 を、R（リセット）は 0 を記憶し、両方 0 のときループは持っていた値を保ちます。',
+          'メモリのレベルは手順どおりにテストされます。ステップは順番に実行され、回路はステップ間で状態を保ちます。'],
+        hint:'NOR ゲート 2 つをたすき掛けにつなぎ、それぞれの出力をもう一方の入力の 1 つに入れます。空いた入力に S と R を入れ、Q は R が入る NOR から取り出します。',
+        why:'フィードバックこそ回路が記憶するしくみです。このようなラッチは、あらゆる CPU キャッシュにある SRAM セルの祖先です。'},
+      dlatch:{title:'データラッチ', goal:'D ラッチを作ろう。E が 1 の間 Q は D に追従し、E が 0 のとき Q は値を保ちます。', hint:'S = D AND E、R = NOT D AND E で SR ラッチを動かせば、S と R が同時に 1 になることはありません。星 3 つなら NAND 4 個で足ります。',
+        why:'D ラッチは S = R = 1 という禁止状態をなくします。レジスタは、イネーブル信号が来たときにデータをつかむラッチの列です。'},
+      cnt2:{title:'3 まで数える', goal:'2 ビットカウンタを作ろう。Clk が上がるたびに Q1 Q0 が 00、01、10、11 と増え、また 00 に戻ります。Rst が 1 の間に Clk が上がると 00 にリセットされます。',
+        hint:'DFF チップを 2 つ使い、Clk を両方につなぎます。Q0 は毎回反転するので D に NOR(Q0, Rst) を入れます。Q1 は Q0 が 1 のとき反転するので NOR(Q1 XNOR Q0, Rst) を入れます。',
+        why:'カウンタはあらゆる所にあります。命令を順にたどるプログラムカウンタ、タイマー、速い水晶振動を 1 Hz の時計の刻みに変える分周器もカウンタです。'},
+      reg4:{title:'4 ビットレジスタ', goal:'4 ビットレジスタを作ろう。Clk が上がるときに Ld が 1 なら Q3\u2013Q0 に D3\u2013D0 を読み込み、そうでなければ Q は値を保ちます。',
+        hint:'1 ビットにつき DFF チップを 1 つ。それぞれの前に MUX を置き、Ld が 0 なら自分の Q を、Ld が 1 なら新しい D をフリップフロップに入れます。',
+        why:'レジスタは CPU で最も速い記憶場所です。すべての命令はレジスタから入力を読み、結果をレジスタに書き戻します。すべてクロックに合わせて動きます。'},
+      dff:{title:'エッジトリガ', goal:'D フリップフロップを作ろう。Q は Clk が 0 から 1 に上がる瞬間だけ D をコピーし、それ以外は値を保ちます。', hint:'D ラッチを 2 つつなぎます。1 つ目（マスタ）は Clk が 0 の間、2 つ目（スレーブ）は Clk が 1 の間有効になり、マスタの Q を D として受け取ります。',
+        why:'フリップフロップは CPU 全体を同じ拍子で動かします。クロックのエッジごとに何十億個もが同じ瞬間に新しい値をつかみます。4 GHz の CPU はこれを 1 秒に 40 億回行います。'},
+      nor:{title:'どちらでもない', goal:'NOR ゲートを作ろう。A と B が両方 0 のときだけ Y が 1 になります。', hint:'NOR は「NOT OR」の意味。OR と NOT を順につなぎましょう。',
+        why:'NOR も NAND と同じく機能的に完全です。月へ行ったアポロ誘導コンピュータは NOR ゲートだけで作られていました。'},
+      xnor:{title:'同じ', goal:'XNOR ゲートを作ろう。A と B が等しいときだけ Y が 1 になります。', hint:'XNOR は答えを反転した XOR です。',
+        why:'XNOR は 1 ビットの一致検出器です。いくつも並べて出力を AND すれば、2 つの数全体が一致するか確かめられます。'},
+      demux:{title:'振り分け', goal:'デマルチプレクサを作ろう。S が 0 なら D は Y0 へ、S が 1 なら Y1 へ。もう一方の出力は 0 のままです。', hint:'Y0 は D AND NOT S、Y1 は D AND S です。',
+        why:'デマルチプレクサはマルチプレクサの鏡です：入力 1 つ、行き先はたくさん。メモリチップも同じ考え方で、データをちょうど 1 つの記憶セルに届けます。'},
+      eq:{title:'等しい？', goal:'2 ビットの数 A1 A0 と B1 B0 が等しければ EQ = 1 を出力しよう。', hint:'各ビットの組を XNOR で比べて、2 つの結果を AND しましょう。',
+        why:'こうした比較器がプログラムの「if (a == b)」をすべて判定しています。CPU は同じ仕組みを広げて 64 ビットの数を比べます。'},
+      dec:{title:'デコード', goal:'2-4 デコーダを作ろう。Y0〜Y3 のうちちょうど 1 つだけが 1 になります：番号が A1 A0 の出力です。', hint:'まず NOT A1 と NOT A0 を作りましょう。各出力は A1 のどちらかと A0 のどちらかの AND です。',
+        why:'デコーダは多くの線から 1 本を選びます。メモリはデコーダでアドレスを読むべき 1 行に変換します。'},
+      maj:{title:'多数決', goal:'A、B、C のうち 2 つ以上が 1 なら Y が 1 になります。', hint:'これを計算するチップはもう作っています。全加算器の出力をよく見てみましょう。',
+        why:'全加算器の桁上がりは多数決です。宇宙船は 3 台のコンピュータと多数決回路を使い、1 台が故障しても結果が狂わないようにしています。'},
+      r_xor:{title:'純粋な XOR', goal:'NAND ゲートだけで、4 個以内で XOR を作ろう。', hint:'まず A と B を NAND。その結果を A と、別に B と NAND し、その 2 つを NAND します。',
+        why:'NAND 4 個は NAND だけで作れる最小の XOR です。ゲート数を減らすとチップの面積と電力を節約できます。'},
+      r_half:{title:'ぎりぎり加算器', goal:'NAND ゲートだけで、5 個以内で半加算器を作ろう。', hint:'S は NAND 4 個の XOR で。最初の NAND がすでに A NAND B を計算しているので、NOT として使う NAND をもう 1 つ足せば C になります。',
+        why:'2 つの出力で信号を共有するのは重要な最適化テクニックです。ここでは桁上がりが、和ですでに使っているゲートを再利用しています。'},
+      r_mux:{title:'ぎりぎり選択', goal:'NAND ゲートだけで、4 個以内でマルチプレクサを作ろう。', hint:'NAND 1 つで NOT S を作ります。A と NOT S、B と S をそれぞれ NAND して、2 つの結果を NAND しましょう。',
+        why:'NAND-NAND 論理は AND-OR 論理と同じです。ド・モルガンの法則のおかげで、どんな AND-OR 回路も 1 種類のゲートで作れます。'},
+      and3:{title:'3 つとも', goal:'3 入力 AND ゲートを作ろう。A、B、C がすべて 1 のときだけ Y が 1 になります。', hint:'A と B を AND して、その結果を C と AND しましょう。',
+        why:'幅の広いゲートは狭いゲートをつないで作ります。数のすべてのビットが 1 か調べるのも、入力が多いだけで同じ仕組みです。'},
+      or3:{title:'3 つのどれか', goal:'3 入力 OR ゲートを作ろう。A、B、C のどれか 1 つでも 1 なら Y が 1 になります。', hint:'A と B を OR して、その結果を C と OR しましょう。',
+        why:'幅の広い OR は「どれか点いている？」に答えます。CPU は結果の全ビットを NOR して、答えが 0 かどうかを示すゼロフラグを立てます。'},
+      tff:{title:'トグル', goal:'T フリップフロップを作ろう。Clk が上がるとき T が 1 なら Q が反転し、T が 0 なら保ちます。Rst が 1 の間に Clk が上がると Q は 0 にリセットされます。',
+        hint:'DFF チップを使います。次の Q は T XOR Q なので、D に NOR(T XNOR Q, Rst) を入れましょう。',
+        why:'T を 1 にしておくと、Q はクロックの半分の速さで変わります。いくつかつなげば、速い水晶発振を時計に必要なゆっくりした刻みまで分周できます。'},
+      jk:{title:'セット・リセット・反転', goal:'JK フリップフロップを作ろう。Clk が上がるたびに、J = 1 なら Q を 1 に、K = 1 なら 0 にし、両方 1 なら反転、両方 0 なら保ちます。',
+        hint:'DFF チップを使います。Q が 0 なら次の値は J、Q が 1 なら NOT K です。S 入力に Q をつないだ MUX でどちらかを選びましょう。',
+        why:'JK フリップフロップは SR ラッチの禁止入力に意味を与えます。J = K = 1 は反転です。1970 年代の論理 IC の主力でした。'},
+      shift4:{title:'ビットコンベア', goal:'4 ビットシフトレジスタを作ろう。Clk が上がるたびに Din は Q3 へ、Q3 は Q2 へ、Q2 は Q1 へ、Q1 は Q0 へ移ります。',
+        hint:'DFF チップを 4 つつなぎ、Clk を全部に接続します。各フリップフロップの D には 1 つ前の Q を入れましょう。',
+        why:'シフトレジスタは 1 本の線を多くのビットに変えます。USB、SPI、シリアルポートはデータを 1 ビットずつ送り、シフトレジスタがそれをバイトにまとめ直します。'},
+      cnt4:{title:'15 まで数える', goal:'4 ビットカウンタを作ろう。Clk が上がるたびに、Rst = 1 なら Q3\u2013Q0 を 0000 にリセット、そうでなければ En = 1 で 1 を足し、En = 0 なら保ちます。',
+        hint:'REG4 の Q を ADD4 の A 入力へつなぎ、B は 0 のまま、Cin に En を入れます。S = Rst の MUX チップ 4 つで和を 0 に置き換えます（B に何もつながない MUX は S が 1 のとき 0 を出します）。Rst OR En が 1 のとき読み込みましょう。',
+        why:'CPU のプログラムカウンタはこう動きます。レジスタと加算器がクロックごとに 1 を足し、命令を順番に実行させるのです。'},
+      acc:{title:'アキュムレータ', goal:'アキュムレータを作ろう。En = 1 で Clk が上がるとき、Op = 0 なら X3\u2013X0 を Q3\u2013Q0 に読み込み、Op = 1 なら Q に X を足します（15 を超えると 0 に戻ります）。En = 0 なら Q は保ちます。',
+        hint:'REG4 の Q を ADD4 の A 入力へ、X を B へつなぎます。S = Op の MUX チップ 4 つで X と和のどちらかを選び、レジスタの D に入れましょう。Ld は En です。',
+        why:'EDSAC や 6502 のような初期のコンピュータは、アキュムレータを中心に作られていました。すべての計算が通るたった 1 つのレジスタです。その心臓部をいま作りました。'},
+      r_ram:{title:'メモリセル', goal:'NAND ゲートだけで、8 個以内で RAM セルを 1 つ作ろう。Sel と WE が両方 1 の間、セルは D を記憶します。Q は Sel が 1 のとき記憶したビットを示し、それ以外は 0 です。',
+        hint:'NAND 2 つで E = Sel AND WE を作ります。NAND 4 つで E で有効になる D ラッチを作り、さらに NAND 2 つでラッチの出力と Sel を AND しましょう。',
+        why:'本物のメモリはこのようなセルが格子状に並んだものです。デコーダが Sel 線を 1 本だけ上げ、そのセルだけが書き込みを受けたり出力したりします。CPU キャッシュの SRAM は 1 セルにトランジスタ 6 個を使います。'},
+      add2:{title:'2 ビット加算器', goal:'2 ビットの数 A1 A0 と B1 B0 を足そう。3 ビットの和 S2 S1 S0 を出力します。', hint:'半加算器で A0 + B0 を、全加算器で A1 + B1 とその桁上がりを処理します。'},
+    },
+  },
+};
+
+/* ---------- storage ---------- */
+const KEY = 'only-nand-v1', SKEY = 'only-nand-settings';
+let prog = {best:{}, circuits:{}, solutions:{}};
+try { const s = localStorage.getItem(KEY); if (s) { const p = JSON.parse(s); prog.best = p.best||{}; prog.circuits = p.circuits||{}; prog.solutions = p.solutions||{}; } } catch(e){}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(prog)); } catch(e){} }
+const nav = (navigator.language || 'en').slice(0,2);
+let settings = {lang: I18N[nav] ? nav : 'en', music:40, sfx:70, muted:false};
+try { Object.assign(settings, JSON.parse(localStorage.getItem(SKEY)) || {}); } catch(e){}
+if (!I18N[settings.lang]) settings.lang = 'en';
+function saveSettings(){ try { localStorage.setItem(SKEY, JSON.stringify(settings)); } catch(e){} }
+
+const t = (k, ...a) => { const v = I18N[settings.lang][k] ?? I18N.en[k]; return typeof v === 'function' ? v(...a) : v; };
+function lt(L, k){
+  if (L.kind === 'sandbox') return ({title:t('sandbox'), goal:t('sbGoal')})[k] ?? null;
+  const pick = lang => k === 'why' ? (I18N[lang].why?.[L.id] ?? I18N[lang].levels[L.id]?.why) : I18N[lang].levels[L.id]?.[k];
+  return pick(settings.lang) ?? pick('en');
+}
+const partName = p => p === 'SW' ? t('swName') : p === 'LAMP' ? t('lampName') : I18N[settings.lang].partNames[p] || PARTS[p].label;
+
+// Highlight gate names, signal names and (optionally) standalone 0/1 bits in instruction text.
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function rich(text, L, bits){
+  // L = null: gate names only (prose where "A" may be an English article)
+  const sig = L ? [...new Set([...L.ins, ...L.outs])].sort((a,b) => b.length - a.length).join('|') : '(?!)';
+  const re = new RegExp(`\\b(NAND|NOT|AND|OR|XOR|NOR|XNOR)\\b|\\b(${sig})\\b` + (bits ? '|(?<![\\w-])([01])(?![\\w-])' : ''), 'g');
+  return esc(text).replace(re, (m, g, sg, b) => g ? `<span class="gt">${g}</span>` : sg ? `<span class="sig">${sg}</span>` : `<span class="bit b${b}">${b}</span>`);
+}
+
+/* ---------- audio: D Dorian synth, SFX + ambient music ---------- */
+const Snd = (() => {
+  const DOR = [0,2,3,5,7,9,10];                       // Dorian intervals
+  const deg = (d, o = 0) => 62 + 12*(o + Math.floor(d/7)) + DOR[((d%7)+7)%7];   // degree -> MIDI, root D4
+  const mtof = m => 440 * Math.pow(2, (m-69)/12);
+  const BPM = 66, BEAT = 60/BPM;
+  // Chords: i (Dm7), IV (G6, the Dorian colour), i, bVII (Cadd9). 8 beats each.
+  const CH = [{b:38, p:[50,53,57,60]}, {b:43, p:[55,59,62,64]}, {b:38, p:[50,57,60,65]}, {b:36, p:[52,55,60,62]}];
+  // Two 32-beat phrases of long melody notes [midi, beats]
+  const MEL = [[69,3],[72,1],[74,4], [71,4],[74,2],[67,2], [65,3],[64,1],[62,4], [64,2],[67,2],[72,4],
+               [74,2],[77,2],[76,4], [74,3],[71,1],[67,4], [69,4],[65,4],       [67,4],[64,4]];
+  const LOOP = 64, AT = {};
+  let beat = 0; MEL.forEach(([m,len]) => { (AT[beat] ??= []).push([m,len]); beat += len; });
+
+  let ctx, master, sfxBus, musBus, verb, timer = 0, nextT = 0, step = 0;
+  const vol = v => (v/100) ** 2;
+
+  function impulse(sec, decay){
+    const n = ctx.sampleRate*sec | 0, b = ctx.createBuffer(2, n, ctx.sampleRate);
+    for (let c = 0; c < 2; c++){ const d = b.getChannelData(c); for (let i = 0; i < n; i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/n, decay); }
+    return b;
+  }
+  function init(){
+    if (ctx){ if (ctx.state === 'suspended' && !document.hidden) ctx.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    ctx = new AC({latencyHint:'interactive'});
+    const comp = ctx.createDynamicsCompressor();
+    comp.threshold.value = -20; comp.knee.value = 12; comp.ratio.value = 3; comp.attack.value = .005; comp.release.value = .25;
+    master = ctx.createGain(); master.connect(comp); comp.connect(ctx.destination);
+    sfxBus = ctx.createGain(); musBus = ctx.createGain(); sfxBus.connect(master); musBus.connect(master);
+    verb = ctx.createConvolver(); verb.buffer = impulse(2.6, 2.4);
+    const wet = ctx.createGain(); wet.gain.value = .8; verb.connect(wet); wet.connect(master);
+    apply();
+  }
+  // One voice: 2 detuned oscillators -> lowpass (closing) -> ADSR -> pan -> bus (+ reverb send)
+  function voice({m, t, dur = .15, bus = sfxBus, type = 'triangle', vol = .15, a = .004, sus = .5, r = .3, cut = 5000,
+                  send = .2, pan = 0, vib = 0, det = 5, bell = 0}){
+    const hz = mtof(m), end = t + a + dur + r;
+    const mix = ctx.createGain(), f = ctx.createBiquadFilter(), env = ctx.createGain();
+    mix.gain.value = .5; f.type = 'lowpass'; f.Q.value = .6;
+    f.frequency.setValueAtTime(cut, t); f.frequency.exponentialRampToValueAtTime(Math.max(220, cut*.45), t + a + dur);
+    env.gain.setValueAtTime(0, t);
+    env.gain.linearRampToValueAtTime(vol, t + a);
+    env.gain.exponentialRampToValueAtTime(Math.max(vol*sus, 1e-4), t + a + dur);
+    env.gain.exponentialRampToValueAtTime(1e-4, end);
+    let lfo;
+    if (vib){
+      lfo = ctx.createOscillator(); const lg = ctx.createGain();
+      lfo.frequency.value = 4.8; lg.gain.setValueAtTime(0, t); lg.gain.linearRampToValueAtTime(hz*.005*vib, t + .6);
+      lfo.connect(lg); lfo.start(t); lfo.stop(end); lfo = lg;
+    }
+    for (const d of [-det, det]){
+      const o = ctx.createOscillator(); o.type = type; o.frequency.value = hz; o.detune.value = d;
+      if (lfo) lfo.connect(o.frequency);
+      o.connect(mix); o.start(t); o.stop(end + .05);
+    }
+    if (bell){                                         // bright octave partial that fades faster
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = hz*2;
+      g.gain.setValueAtTime(bell, t); g.gain.exponentialRampToValueAtTime(1e-3, t + a + Math.max(.08, dur*.7));
+      o.connect(g); g.connect(mix); o.start(t); o.stop(end);
+    }
+    mix.connect(f); f.connect(env);
+    let out = env;
+    if (ctx.createStereoPanner && pan){ const p = ctx.createStereoPanner(); p.pan.value = pan; env.connect(p); out = p; }
+    out.connect(bus);
+    if (send){ const s = ctx.createGain(); s.gain.value = send; out.connect(s); s.connect(verb); }
+  }
+  function schedule(i, t){
+    if (i % 8 === 0){
+      const c = CH[(i/8) % 4], len = 8*BEAT;
+      c.p.forEach((m,k) => voice({m, t, bus:musBus, type:'sawtooth', dur:len-1.6, a:1.6, sus:.85, r:2.4, cut:1100, vol:.028, send:.6, det:9, pan:(k-1.5)*.3}));
+      voice({m:c.b, t, bus:musBus, type:'sine', dur:len-.5, a:.5, sus:.8, r:1.2, cut:500, vol:.13, send:.08, det:0});
+    }
+    (AT[i] || []).forEach(([m,len]) => voice({m, t, bus:musBus, type:'triangle', dur:len*BEAT*.92, a:.09, sus:.55, r:1.5,
+      cut:3000, vol:.085, send:.5, vib:1, bell:.12, pan:.1}));
+  }
+  function tick(){
+    while (nextT < ctx.currentTime + .5){ schedule(step, nextT); nextT += BEAT; step = (step + 1) % LOOP; }
+  }
+  function music(){
+    const on = ctx && !settings.muted && settings.music > 0 && !document.hidden;
+    if (on && !timer){ nextT = ctx.currentTime + .15; step = 0; timer = setInterval(tick, 120); tick(); }
+    if (!on && timer){ clearInterval(timer); timer = 0; }
+  }
+  function apply(){
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    master.gain.setTargetAtTime(settings.muted ? 0 : 1, now, .05);
+    sfxBus.gain.setTargetAtTime(vol(settings.sfx), now, .03);
+    musBus.gain.setTargetAtTime(vol(settings.music) * .9, now, .08);
+    music();
+  }
+  const buzz = p => { if (!settings.muted && navigator.vibrate) navigator.vibrate(p); };
+  function play(name, arg){
+    if (!ctx || settings.muted || ctx.state !== 'running') return;
+    if (settings.sfx === 0) return;
+    const t0 = ctx.currentTime + .005, P = (m, dt, o = {}) => voice({m, t:t0 + dt, ...o});
+    switch (name){
+      case 'on':     P(deg(4,1), 0, {dur:.08, vol:.15, bell:.35, pan:-.25}); buzz(6); break;
+      case 'off':    P(deg(0,1), 0, {dur:.08, vol:.13, cut:2400, pan:-.25}); buzz(6); break;
+      case 'tap':    P(deg(0,2), 0, {type:'sine', dur:.03, vol:.045, r:.12, send:.1}); break;
+      case 'select': P(deg(4,2), 0, {type:'sine', dur:.035, vol:.05, r:.14, send:.12}); break;
+      case 'place':  P(deg(0,0), 0, {dur:.1, vol:.15, bell:.25}); P(deg(4,0), .07, {dur:.16, vol:.13, bell:.25}); buzz(8); break;
+      case 'connect':P(deg(3,1), 0, {dur:.07, vol:.12, bell:.45, pan:.15}); P(deg(5,1), .06, {dur:.2, vol:.12, bell:.45, pan:.15, send:.35}); buzz(10); break;
+      case 'cut':    P(deg(2,0), 0, {dur:.07, vol:.12, cut:1800}); P(deg(0,0), .07, {dur:.14, vol:.11, cut:1300}); buzz(8); break;
+      case 'clear':  [4,2,0,-3].forEach((d,i) => P(deg(d,0), i*.06, {dur:.09, vol:.1, cut:1500})); buzz(14); break;
+      case 'error':  P(deg(2,-1), 0, {type:'square', dur:.15, vol:.06, cut:1000, sus:.6});
+                     P(deg(1,-1), .14, {type:'square', dur:.32, vol:.06, cut:800, sus:.6}); buzz([30,40,30]); break;
+      case 'hint':   P(deg(4,1), 0, {type:'sine', dur:.25, vol:.07, bell:.5, send:.5}); P(deg(6,1), .12, {type:'sine', dur:.45, vol:.06, bell:.5, send:.5}); break;
+      case 'zoomIn': [0,2,4,6].forEach((d,i) => P(deg(d,1), i*.045, {type:'sine', dur:.06, vol:.07, send:.35})); break;
+      case 'zoomOut':[6,4,2,0].forEach((d,i) => P(deg(d,1), i*.045, {type:'sine', dur:.06, vol:.07, send:.35})); break;
+      case 'win': {
+        [0,2,4,6,8,12].forEach((d,i) => P(deg(d,0), i*.12, {dur:.9, vol:.1, bell:.35, sus:.35, r:1.6, send:.55, pan:(i-2.5)*.12}));
+        [0,4,9].forEach(d => P(deg(d,-1), .7, {type:'sawtooth', a:.3, dur:1.6, vol:.03, cut:1400, sus:.7, r:2.2, send:.6, det:9}));
+        if ((arg ?? 3) === 3) [9,11,14].forEach((d,i) => P(deg(d,1), .95 + i*.09, {type:'sine', dur:.25, vol:.045, bell:.6, send:.7}));
+        buzz([20,60,20]); break;
+      }
+    }
+  }
+  const visible = () => { if (!ctx) return; if (document.hidden) ctx.suspend(); else ctx.resume(); music(); };
+  return {init, play, apply, visible};
+})();
+
+/* ---------- state ---------- */
+const state = {screen:'levels', li:0, inputs:[], sel:null, pending:null, ghost:null, drag:null, wireDrag:false, tested:false, msg:'', msgBad:false, seen:new Set(), sim:null};
+const isLearn = () => cur().kind === 'learn';
+const rowIndex = bits => bits.reduce((a,b)=>a*2+(+b),0);
+
+const $ = id => document.getElementById(id);
+const svg = $('board'), layer = $('layer');
+
+/* ---------- model helpers ---------- */
+// Sandbox: switches and lamps are ordinary movable parts (SW / LAMP) in circuits.sandbox.
+const ioName = k => k < 26 ? String.fromCharCode(65 + k) : 'S' + (k+1);
+function sbx(){
+  let c = prog.circuits.sandbox;
+  if (!c) c = prog.circuits.sandbox = {gates:[{id:'g1', type:'SW', x:80, y:780}, {id:'g2', type:'SW', x:80, y:1000}, {id:'g3', type:'LAMP', x:1150, y:890}], wires:[]};
+  if (c.nIn != null){                     // v2.2 layout: fixed side terminals -> movable parts
+    const map = {};
+    for (let k = 0; k < c.nIn; k++){ c.gates.push({id:'s'+k, type:'SW', x:30, y:Math.round(1500*(k+1)/(c.nIn+1)) - 25}); map[`IN${k}:o0`] = `s${k}:o0`; }
+    for (let k = 0; k < c.nOut; k++){ c.gates.push({id:'l'+k, type:'LAMP', x:2270, y:Math.round(1500*(k+1)/(c.nOut+1)) - 25}); map[`OUT${k}:i0`] = `l${k}:i0`; }
+    c.wires = c.wires.map(w => ({from: map[w.from] || w.from, to: map[w.to] || w.to}));
+    delete c.nIn; delete c.nOut;
+  }
+  return c;
+}
+const sbOf = type => sbx().gates.filter(g => g.type === type);
+const SANDBOX = {id:'sandbox', kind:'sandbox', par:0,
+  get ins(){ return sbOf('SW').map((_,k) => ioName(k)); },
+  get outs(){ return sbOf('LAMP').map((_,k) => 'Y' + (k+1)); }};
+const isSandbox = () => !!state.sandbox;
+const cur = () => state.sandbox ? SANDBOX : LEVELS[state.li];
+function circ(){ const id = cur().id; if(!prog.circuits[id]) prog.circuits[id] = {gates:[], wires:[]}; return prog.circuits[id]; }
+const gh = P => Math.max(P.ins.length, P.outs.length)*30 + 20;
+const termY = (i,n) => H*(i+1)/(n+1);
+const isSrc = pin => pin.split(':')[1][0] === 'o';
+const unlocked = i => i === 0 || prog.best[LEVELS[i].id] != null || prog.best[LEVELS[i-1].id] != null;
+const stars = (n,par) => n <= par ? 3 : (n <= par+2 ? 2 : 1);
+const starText = s => '★'.repeat(s) + '☆'.repeat(3-s);
+const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+const bbox = pts => [Math.min(...pts.map(p => p[0])), Math.min(...pts.map(p => p[1])), Math.max(...pts.map(p => p[0])), Math.max(...pts.map(p => p[1]))];
+// Outline around parts, with room for the label above each part.
+const gatesBox = gs => { const b = bbox(gs.flatMap(g => [[g.x, g.y], [g.x + GW, g.y + gh(PARTS[g.type])]])); return [b[0]-14, b[1]-38, b[2]+14, b[3]+16]; };
+const RC = ['#7FD6C8', '#F2A65A', '#B69CF2', '#F28CA6', '#9CD66B', '#6BB8F2'];   // region colours
+
+// Touch targets scale with how small the board is drawn (phones render it at ~0.35x).
+let boardScale = 1;
+const pinR = () => clamp(22/boardScale, 15, 30);
+function measure(){
+  boardScale = svg.getBoundingClientRect().width / view.w || 1;
+  svg.style.setProperty('--wire-hit', clamp(30/boardScale, 18, 44));
+}
+new ResizeObserver(measure).observe(svg);
+function applyView(){
+  view.x = clamp(view.x, 0, Math.max(0, W - view.w)); view.y = clamp(view.y, 0, Math.max(0, H - view.h));
+  svg.setAttribute('viewBox', `${view.x} ${view.y} ${view.w} ${view.h}`);
+  measure();
+}
+function setBoard(w, h, v = {x:0, y:0, w}){
+  W = w; H = h;
+  svg.querySelectorAll(':scope > rect').forEach(r => { r.setAttribute('width', W); r.setAttribute('height', H); });
+  Object.assign(view, v, {h: v.w*RATIO});
+  applyView();
+}
+// Zoom so the board point under (cx, cy) stays put. Sandbox only.
+function zoomTo(w, cx, cy){
+  const r = svg.getBoundingClientRect(), fx = (cx - r.left)/r.width, fy = (cy - r.top)/r.height;
+  const px = view.x + fx*view.w, py = view.y + fy*view.h;
+  view.w = clamp(w, 400, W); view.h = view.w*RATIO;
+  view.x = px - fx*view.w; view.y = py - fy*view.h;
+  applyView();
+}
+const zoomBy = f => { const r = svg.getBoundingClientRect(); zoomTo(view.w*f, r.left + r.width/2, r.top + r.height/2); };
+const zoomFit = () => { Object.assign(view, {x:0, y:0, w:W, h:W*RATIO}); applyView(); };
+
+function pinPos(pin){
+  const [nid, pk] = pin.split(':');
+  const kind = pk[0], k = +pk.slice(1), L = cur();
+  if (nid.startsWith('IN'))  return {x:86,  y:termY(+nid.slice(2), L.ins.length)};
+  if (nid.startsWith('OUT')) return {x:W-86, y:termY(+nid.slice(3), L.outs.length)};
+  const g = circ().gates.find(q => q.id === nid); if (!g) return null;
+  const P = PARTS[g.type], h = gh(P), n = kind === 'i' ? P.ins.length : P.outs.length;
+  return {x: g.x + (kind === 'i' ? 0 : GW), y: g.y + h*(k+1)/(n+1)};
+}
+
+// Nearest pin within radius R (board units). Geometry, not DOM, so overlapping hit areas pick the closest.
+function nearestPin(p, R, skip){
+  const L = cur(), ids = isSandbox() ? [] : [...L.ins.map((_,k) => `IN${k}:o0`), ...L.outs.map((_,k) => `OUT${k}:i0`)];
+  circ().gates.forEach(g => { const P = PARTS[g.type]; P.ins.forEach((_,k) => ids.push(`${g.id}:i${k}`)); P.outs.forEach((_,j) => ids.push(`${g.id}:o${j}`)); });
+  let best = null, bd = R*R;
+  for (const id of ids){
+    if (id === skip) continue;
+    const q = pinPos(id); if (!q) continue;
+    const d = (q.x-p.x)**2 + (q.y-p.y)**2;
+    if (d < bd){ bd = d; best = id; }
+  }
+  return best;
+}
+
+// prev = gate outputs from the previous step, so feedback loops (latches) keep their state.
+function simulate(bits, prev){
+  const c = circ(), val = {}, src = {}, sb = isSandbox();
+  let si = 0;
+  if (!sb) bits.forEach((b,k) => val[`IN${k}:o0`] = !!b);
+  c.wires.forEach(w => src[w.to] = w.from);
+  c.gates.forEach(g => g.type === 'SW' ? val[`${g.id}:o0`] = !!bits[si++] : PARTS[g.type].outs.forEach((_,j) => { const p = `${g.id}:o${j}`; val[p] = !!(prev && prev[p]); }));
+  c.gates.forEach(g => { if (PARTS[g.type].clocked) PARTS[g.type].outs.forEach((_,j) => val[`${g.id}:m${j}`] = !!(prev && prev[`${g.id}:m${j}`])); });
+  let stable = false;
+  for (let it = 0; it < 80; it++){
+    let changed = false;
+    for (const g of c.gates){
+      if (g.type === 'SW' || g.type === 'LAMP') continue;
+      const P = PARTS[g.type];
+      const args = P.ins.map((_,k) => !!val[src[`${g.id}:i${k}`]]);
+      if (P.clocked){
+        const clk = args[args.length-1], q = P.outs.map((_,j) => val[`${g.id}:o${j}`]), nx = clk ? null : P.next(args.slice(0,-1), q);
+        P.outs.forEach((_,j) => {
+          const mk = `${g.id}:m${j}`, qk = `${g.id}:o${j}`;
+          if (!clk && val[mk] !== !!nx[j]){ val[mk] = !!nx[j]; changed = true; }
+          if (clk && val[qk] !== val[mk]){ val[qk] = val[mk]; changed = true; }
+        });
+        continue;
+      }
+      if (P.latch){
+        const [d, e] = args, qk = `${g.id}:o0`;
+        if (e && val[qk] !== d){ val[qk] = d; changed = true; }
+        continue;
+      }
+      P.f(...args).forEach((r,j) => { const p = `${g.id}:o${j}`; if (val[p] !== !!r){ val[p] = !!r; changed = true; } });
+    }
+    if (!changed){ stable = true; break; }
+  }
+  const lampIn = sb ? c.gates.filter(g => g.type === 'LAMP').map(g => `${g.id}:i0`) : cur().outs.map((_,k) => `OUT${k}:i0`);
+  const outs = lampIn.map(p => src[p] ? !!val[src[p]] : null);
+  return {val, src, outs, stable};
+}
+
+function rows(){
+  const L = cur(), n = L.ins.length, list = [];
+  if (L.seq){                                       // memory levels: run the steps in order, carrying state
+    let val = null;
+    return L.seq.map(step => {
+      const [i, o] = step.split('>'), bits = [...i].map(ch => ch === '1');
+      const sim = simulate(bits, val), exp = [...o].map(ch => ch === 'x' ? null : ch === '1');
+      val = sim.val;
+      return {bits, exp, got:sim.outs, stable:sim.stable, ok: sim.stable && exp.every((e,j) => e === null || sim.outs[j] === e)};
+    });
+  }
+  for (let r = 0; r < (1<<n); r++){
+    const bits = L.ins.map((_,k) => !!((r >> (n-1-k)) & 1));
+    const exp = L.f(...bits).map(Boolean);
+    const sim = simulate(bits);
+    const ok = sim.stable && sim.outs.every((o,j) => o === exp[j]);
+    list.push({bits, exp, got:sim.outs, stable:sim.stable, ok});
+  }
+  return list;
+}
+
+/* ---------- rendering ---------- */
+// PCB-style trace: horizontal / vertical runs with rounded corners. Backward wires detour around via a side lane.
+function curve(a,b){
+  const dx = b.x - a.x, pts = dx >= 24 ? [a, {x:a.x+dx/2, y:a.y}, {x:a.x+dx/2, y:b.y}, b]
+    : (my => [a, {x:a.x+16, y:a.y}, {x:a.x+16, y:my}, {x:b.x-16, y:my}, {x:b.x-16, y:b.y}, b])
+      (Math.abs(b.y-a.y) < 40 ? Math.max(a.y, b.y) + 36 : (a.y+b.y)/2);
+  let d = `M${a.x} ${a.y}`;
+  for (let i = 1; i < pts.length-1; i++){
+    const p = pts[i], q = pts[i-1], n = pts[i+1];
+    const k = Math.min(12, Math.hypot(p.x-q.x, p.y-q.y)/2, Math.hypot(n.x-p.x, n.y-p.y)/2);
+    const t = (u, v) => { const l = Math.hypot(v.x-u.x, v.y-u.y) || 1; return `${u.x+(v.x-u.x)*k/l} ${u.y+(v.y-u.y)*k/l}`; };
+    d += ` L${t(p,q)} Q${p.x} ${p.y} ${t(p,n)}`;
+  }
+  return d + ` L${b.x} ${b.y}`;
+}
+const wirePath = (d, on, extra = '') =>
+  (on ? `<path d="${d}" class="wire-glow"/>` : '') + `<path d="${d}" class="wire ${on?'hi':'lo'} ${extra}" pointer-events="none"/>` + (on ? `<path d="${d}" class="wire-flow"/>` : '');
+
+function switchSvg(attr, k, y, name, on, hitH = 34, nudge = false){
+  const kx = on ? 53 : 31;
+  return (nudge ? `<rect class="nudge" x="7" y="${y-24}" width="70" height="48" rx="24"/>` : '') + `<text class="tname" x="42" y="${y-26}" text-anchor="middle">${name}</text>` +
+    `<rect class="switch ${on?'on':''}" x="14" y="${y-17}" width="56" height="34" rx="17"/>` +
+    `<circle class="knob ${on?'on':''}" cx="${kx}" cy="${y}" r="13"/>` +
+    `<text class="klabel ${on?'on':''}" x="${kx}" y="${y+4.5}">${on?1:0}</text>` +
+    `<line class="lead" x1="70" y1="${y}" x2="86" y2="${y}"/>` +
+    `<rect class="switch-hit" ${attr}="${k}" x="2" y="${y-hitH}" width="74" height="${hitH*2}"/>`;
+}
+function lampSvg(cx, y, name, on, none){
+  return (on ? `<circle cx="${cx}" cy="${y}" r="38" fill="url(#glowG)" pointer-events="none"/>` : '') +
+    `<circle class="lamp ${on?'on':''} ${none?'off-none':''}" cx="${cx}" cy="${y}" r="17"/>` +
+    `<text class="tname" x="${cx}" y="${y-26}" text-anchor="middle">${name}</text>`;
+}
+
+function renderBoard(){
+  const L = cur(), c = circ();
+  if (isSandbox()) state.inputs = c.gates.filter(g => g.type === 'SW').map(g => !!g.on);
+  // Dragging only moves parts, so the logic result from the last render is still valid.
+  const keep = L.seq || isSandbox();
+  const sim = (state.drag && state.sim) || (state.sim = simulate(state.inputs, keep && state.sim ? state.sim.val : null));
+  let s = '';
+  if (L.display === 'seg7'){
+    const ox = 770, oy = 245, w = 72, h = 130, k = 12, half = h/2 - 12;
+    const R_ = [[ox+8, oy, w-16, k], [ox+w-k, oy+8, k, half], [ox+w-k, oy+h/2+4, k, half], [ox+8, oy+h-k, w-16, k], [ox, oy+h/2+4, k, half], [ox, oy+8, k, half], [ox+8, oy+h/2-k/2, w-16, k]];
+    s += `<rect class="seg-box" x="${ox-16}" y="${oy-16}" width="${w+32}" height="${h+32}" rx="12"/>` +
+      R_.map(([x,y,ww,hh], j) => `<rect class="seg ${sim.outs[j] ? 'on' : ''}" x="${x}" y="${y}" width="${ww}" height="${hh}" rx="${k/2}"/>`).join('');
+  }
+
+  // Named free-form regions sit under everything; only their label takes taps.
+  const fs = clamp(15/boardScale, 15, 42);
+  (c.regions || []).forEach((r, i) => {
+    const sel = state.sel?.kind === 'region' && state.sel.id === r.id, rc = RC[i % RC.length];
+    const [x0, y0] = bbox(r.pts), w = [...r.name].reduce((a, ch) => a + (ch.charCodeAt(0) > 255 ? 1 : .58), 0)*fs + fs;
+    s += `<path class="region ${sel?'sel':''}" style="--rc:${rc}" d="M${r.pts.map(p => p.join(' ')).join('L')}Z"/>` +
+      `<g class="rlabel" style="--rc:${rc}" data-region="${r.id}"><title>${esc(t('renameRegion'))}</title><rect x="${x0}" y="${y0 - fs*1.7}" width="${w}" height="${fs*1.6}" rx="${fs*.4}"/>` +
+      `<text x="${x0 + fs/2}" y="${y0 - fs*.55}" style="font-size:${fs}px">${esc(r.name)}</text></g>`;
+  });
+
+  // Empty space inside a box-selected group is a drag handle for the whole group (wires and parts on top still win).
+  if (state.sel?.kind === 'group'){
+    const [x0, y0, x1, y1] = gatesBox(c.gates.filter(g => state.sel.ids.includes(g.id)));
+    s += `<rect class="grp-hit" data-grp="1" x="${x0}" y="${y0}" width="${x1-x0}" height="${y1-y0}" rx="14"/>`;
+  }
+
+  c.wires.forEach((w,i) => {
+    const a = pinPos(w.from), b = pinPos(w.to); if (!a || !b) return;
+    const sel = state.sel && state.sel.kind === 'wire' && state.sel.idx === i;
+    const d = curve(a,b);
+    s += wirePath(d, sim.val[w.from], sel ? 'sel' : '');
+    s += `<path d="${d}" class="wire-hit" data-wire="${i}"/>`;
+  });
+
+  if (!isSandbox()){
+  const hitH = Math.min(34, H/(L.ins.length+1)/2 - 2), nx = isLearn() ? learnNext() : -1;
+  L.ins.forEach((name,k) => {
+    const y = termY(k, L.ins.length), on = state.inputs[k];
+    const nudge = nx >= 0 && !!((nx >> (L.ins.length-1-k)) & 1) !== on;
+    s += switchSvg('data-toggle', k, y, name, on, hitH, nudge);
+    s += pinSvg(`IN${k}:o0`, 86, y, on);
+  });
+
+  L.outs.forEach((name,k) => {
+    const y = termY(k, L.outs.length), v = sim.outs[k];
+    s += `<line class="lead" x1="${W-86}" y1="${y}" x2="${W-68}" y2="${y}"/>`;
+    s += lampSvg(W-50, y, name, v, v === null);
+    s += pinSvg(`OUT${k}:i0`, W-86, y, !!v);
+  });
+  }
+  const sws = c.gates.filter(g => g.type === 'SW'), lamps = c.gates.filter(g => g.type === 'LAMP');
+
+  c.gates.forEach(g => {
+    const P = PARTS[g.type], h = gh(P);
+    const sel = state.sel && (state.sel.kind === 'gate' ? state.sel.id === g.id : state.sel.kind === 'group' && state.sel.ids.includes(g.id));
+    s += `<g class="gate ${sel?'sel':''}" data-gate="${g.id}" transform="translate(${g.x} ${g.y})">`;
+    if (g.type === 'SW'){
+      const on = !!g.on, kx = on ? 53 : 31;
+      s += `<rect class="io-hit" x="4" y="-20" width="78" height="${h+24}" rx="10"/>` +
+        `<text class="tname" x="42" y="-4" text-anchor="middle">${ioName(sws.indexOf(g))}</text>` +
+        `<rect class="switch ${on?'on':''}" x="14" y="8" width="56" height="34" rx="17"/>` +
+        `<circle class="knob ${on?'on':''}" cx="${kx}" cy="25" r="13"/><text class="klabel ${on?'on':''}" x="${kx}" y="29.5">${on?1:0}</text>` +
+        `<line class="lead" x1="70" y1="25" x2="${GW}" y2="25"/>` + pinSvg(`${g.id}:o0`, GW, 25, on) + '</g>';
+      return;
+    }
+    if (g.type === 'LAMP'){
+      const k = lamps.indexOf(g), v = sim.outs[k];
+      s += `<rect class="io-hit" x="14" y="-20" width="74" height="${h+24}" rx="10"/>` +
+        `<line class="lead" x1="0" y1="25" x2="33" y2="25"/>` + lampSvg(50, 25, 'Y' + (k+1), v, v === null) + pinSvg(`${g.id}:i0`, 0, 25, !!v) + '</g>';
+      return;
+    }
+    P.ins.forEach((_,k) => { const y = h*(k+1)/(P.ins.length+1); s += `<line class="lead" x1="0" y1="${y}" x2="14" y2="${y}"/>`; });
+    P.outs.forEach((_,j) => { const y = h*(j+1)/(P.outs.length+1); s += `<line class="lead" x1="${g.type==='NAND'?86:82}" y1="${y}" x2="${GW}" y2="${y}"/>`; });
+    if (g.type === 'NAND'){
+      const r = h/2, d = `M14 0 H${74-r} A${r} ${r} 0 0 1 ${74-r} ${h} H14 Z`;
+      s += `<path class="shade" d="${d}" transform="translate(3 5)"/>`;
+      s += `<path class="body nand" d="${d}"/>`;
+      s += `<circle class="bubble" cx="80" cy="${h/2}" r="6"/>`;
+      s += `<text class="glabel" x="40" y="${h/2+5}" style="font-size:12px">NAND</text>`;
+    } else {
+      s += `<rect class="shade" x="17" y="5" width="68" height="${h}" rx="6"/>`;
+      s += `<rect class="body" x="14" y="0" width="68" height="${h}" rx="6"/>`;
+      if (P.pinLabels){
+        s += `<text class="gtitle" x="48" y="-8">${P.short}</text>`;
+        P.ins.forEach((n,k) => s += `<text class="plabel" x="19" y="${h*(k+1)/(P.ins.length+1)+3.5}">${n}</text>`);
+        P.outs.forEach((n,j) => s += `<text class="plabel" x="77" y="${h*(j+1)/(P.outs.length+1)+3.5}" text-anchor="end">${n}</text>`);
+      } else {
+        s += `<text class="glabel" x="48" y="${h/2+5}">${P.label}</text>`;
+      }
+    }
+    P.ins.forEach((_,k) => { const p = `${g.id}:i${k}`; s += pinSvg(p, 0, h*(k+1)/(P.ins.length+1), !!sim.val[sim.src[p]]); });
+    P.outs.forEach((_,j) => { const p = `${g.id}:o${j}`; s += pinSvg(p, GW, h*(j+1)/(P.outs.length+1), !!sim.val[p]); });
+    if (isChip(g.type)){
+      s += `<g class="zoom-btn" data-zoom="${g.id}"><circle class="zhit" cx="82" cy="${h}" r="20"/><circle class="zbg" cx="82" cy="${h}" r="12"/><circle class="mag" cx="80" cy="${h-2}" r="4.5"/><line class="mag" x1="83.5" y1="${h+1.5}" x2="88" y2="${h+6}"/></g>`;
+    }
+    s += `</g>`;
+  });
+
+  if (state.sel?.kind === 'group'){
+    const [x0, y0, x1, y1] = gatesBox(c.gates.filter(g => state.sel.ids.includes(g.id)));
+    s += `<rect class="grp-box" x="${x0}" y="${y0}" width="${x1-x0}" height="${y1-y0}" rx="14"/>`;
+  }
+  const dr = state.draw;
+  if (dr?.kind === 'box' && dr.pts[1]){
+    const [x0, y0, x1, y1] = bbox(dr.pts);
+    s += `<rect class="marquee" x="${x0}" y="${y0}" width="${x1-x0}" height="${y1-y0}"/>`;
+  } else if (dr?.kind === 'region') s += `<path class="lasso" d="M${dr.pts.map(p => p.join(' ')).join('L')}"/>`;
+
+  if (state.pending){
+    const pp = pinPos(state.pending);
+    if (pp){
+      s += `<circle class="pending" cx="${pp.x}" cy="${pp.y}" r="11"/>`;
+      if (state.ghost && state.wireDrag){
+        s += `<path class="ghost-wire" d="${isSrc(state.pending) ? curve(pp, state.ghost) : curve(state.ghost, pp)}"/>`;
+      }
+    }
+  }
+  layer.innerHTML = s;
+}
+
+// Pin hit circles are only for the hover cursor; hit-testing uses nearestPin().
+function pinSvg(id, x, y, on){
+  return `<circle class="pin ${on?'hi':''}" cx="${x}" cy="${y}" r="5"/><circle class="pin-hit" cx="${x}" cy="${y}" r="15"/>`;
+}
+
+// Coalesce high-rate pointermove renders to one per frame.
+let raf = 0;
+const boardSoon = () => { if (!raf) raf = requestAnimationFrame(() => { raf = 0; renderBoard(); }); };
+
+function renderPanel(){
+  const L = cur(), c = circ(), list = isSandbox() ? null : rows();
+  $('lvlNum').textContent = isSandbox() ? t('sbTag') : t('levelN', state.li+1);
+  $('lvlTitle').textContent = lt(L, 'title');
+  // First sentence = headline, rest = description (works for en/ko ". " and ja "。")
+  const [, gHead, gDesc] = lt(L, 'goal').match(/^(.*?(?:[.!?](?=\s|$)|[。！？]))\s*([\s\S]*)$/) || [, lt(L, 'goal'), ''];
+  $('lvlGoal').innerHTML = `<span class="g-head">${rich(gHead, L, true)}</span>` + (gDesc ? `<span class="g-desc">${rich(gDesc, L, true)}</span>` : '');
+  const wr = isSandbox() ? null : wikiRef(L.id, settings.lang);
+  $('wikiLink').hidden = !wr;
+  if (wr){ $('wikiLink').href = wr.href; $('wikiLink').lastChild.textContent = t('wiki', wr.name); }
+  const lesson = lt(L, 'lesson');
+  $('lesson').hidden = !lesson;
+  if (lesson) $('lesson').innerHTML = lesson.map(p => `<p>${rich(p, null)}</p>`).join('') + (L.id !== 'intro' ? '' : `<ul class="legend"><li><svg viewBox="0 0 44 24" aria-hidden="true"><rect x="2" y="3" width="40" height="18" rx="9" fill="#FFB627"/><circle cx="32" cy="12" r="7" fill="#FFF6DC"/></svg><span>${esc(t('legSwitch'))}</span></li><li><svg viewBox="0 0 44 24" aria-hidden="true"><circle cx="22" cy="12" r="11" fill="#FFB627" opacity=".3"/><circle cx="22" cy="12" r="7" fill="#FFC23F" stroke="#FFB627"/></svg><span>${esc(t('legLamp'))}</span></li><li><svg viewBox="0 0 44 24" aria-hidden="true"><path d="M2 7h40" stroke="#FFB627" stroke-width="4" stroke-linecap="round"/><path d="M2 17h40" stroke="#58767F" stroke-width="4" stroke-linecap="round"/></svg><span>${esc(t('legWire'))}</span></li></ul>`);
+  $('hintText').innerHTML = rich(lt(L, 'hint') || '', L);
+  renderCoach();
+  $('delBtn').disabled = !state.sel;
+  $('insideBtn').disabled = !(state.sel && state.sel.kind === 'gate' && isChip((c.gates.find(g => g.id === state.sel.id)||{}).type));
+  $('ruleCard').hidden = !L.rule;
+  if (L.rule) $('ruleText').innerHTML = rich([L.rule.nand && t('ruleNand'), L.rule.max && t('ruleMax', L.rule.max)].filter(Boolean).join(' \u00b7 '), null);
+  if (isSandbox()){
+    const n = L.ins.length;
+    $('meta').textContent = t('sbMeta', n, L.outs.length, c.gates.filter(g => isChip(g.type) || g.type === 'NAND').length);
+    let tb = `<caption class="tt-cap">${esc(t(n > 5 ? 'sbTooBig' : 'sbTableCap'))}</caption>`;
+    if (n <= 5){
+      tb += '<thead><tr>' + L.ins.map(x => `<th>${x}</th>`).join('') + L.outs.map((x,j) => `<th${j?'':' class="grp"'}>${x}</th>`).join('') + '</tr></thead><tbody>';
+      for (let r = 0; r < 1 << n; r++){
+        const bits = L.ins.map((_,k) => !!((r >> (n-1-k)) & 1)), sim = simulate(bits);
+        const live = bits.every((b,k) => b === !!state.inputs[k]);
+        tb += `<tr class="${live?'live':''}">` + bits.map(b => `<td>${+b}</td>`).join('') +
+          sim.outs.map((o,j) => `<td${j?'':' class="grp"'}>${!sim.stable ? '?' : o === null ? '–' : +o}</td>`).join('') + '</tr>';
+      }
+      tb += '</tbody>';
+    }
+    $('tt').innerHTML = tb;
+    $('status').textContent = ''; $('status').className = '';
+    if (document.activeElement !== $('sbTitle')) $('sbTitle').value = c.title || '';
+    $('copyBtn').disabled = !selIds().length;
+    $('pasteBtn').disabled = !state.clip;
+    const X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+    const sl = slots();
+    $('slots').innerHTML = sl.length ? sl.map((s, i) => `<li><button class="ghost" data-load="${i}">${esc(s.name)}<small>${new Date(s.at).toLocaleDateString(settings.lang)}</small></button>` +
+      `<button class="icon-btn" data-del="${i}" aria-label="${esc(t('delSave', s.name))}" data-tip="${esc(t('delSave', s.name))}">${X}</button></li>`).join('') : `<li><p class="sb-empty">${esc(t('noSaves'))}</p></li>`;
+    const rg = c.regions || [];
+    $('regionList').innerHTML = rg.length ? rg.map((r, i) => `<li><button class="ghost" data-goto="${r.id}"><span class="dot" style="background:${RC[i % RC.length]}"></span>${esc(r.name)}</button></li>`).join('')
+      : `<li><p class="sb-empty">${esc(t('noRegions'))}</p></li>`;
+    return;
+  }
+  if (isLearn()){
+    const nx = learnNext();
+    $('meta').innerHTML = esc(t('tried', state.seen.size, list.length)) + '<span class="next">' +
+      (nx < 0 ? esc(t('allTried')) : rich(t('nextTry', L.ins.map((n,k) => `${n} = ${(nx >> (L.ins.length-1-k)) & 1}`).join(', ')), L, true)) + '</span>';
+    let tb = `<caption class="tt-cap">${esc(t('ttExplain'))}</caption><thead><tr>` + L.ins.map(n=>`<th>${n}</th>`).join('') + '<th class="grp">Y</th></tr></thead><tbody>';
+    list.forEach((r,i) => {
+      const live = r.bits.every((b,k) => b === state.inputs[k]);
+      tb += `<tr class="${live?'live':''} ${state.focusRow===i?'focus':''}">` + r.bits.map(b=>`<td>${+b}</td>`).join('') +
+           `<td class="grp">${state.seen.has(i) ? +r.exp[0] : '?'}</td></tr>`;
+    });
+    $('tt').innerHTML = tb + '</tbody>';
+    $('status').textContent = state.msg;
+    $('status').className = state.msgBad ? 'bad' : '';
+    return;
+  }
+  $('meta').textContent = t('partsUsed', c.gates.length, L.par, prog.best[L.id]);
+
+  const nI = L.ins.length, nO = L.outs.length, seq = !!L.seq;
+  const isLive = r => !seq && r.bits.every((b,k) => b === state.inputs[k]);
+  // Huge tables (4-bit levels): show only the live row plus mismatches after a test.
+  const shown = list.length <= 64 ? list : list.filter(r => isLive(r) || (state.tested && !r.ok)).slice(0, 17);
+  const cap = seq ? t('seqCap') : list.length > 64 ? t('bigTable', list.length) : '';
+  let tb = (cap ? `<caption class="tt-cap">${esc(cap)}</caption>` : '') + `<thead><tr>${seq ? '<th></th>' : ''}<th colspan="${nI}">${t('thInputs')}</th><th class="grp" colspan="${nO}">${t('thTarget')}</th><th class="grp" colspan="${nO}">${t('thYours')}</th>${state.tested?'<th></th>':''}</tr><tr>`;
+  if (seq) tb += `<th>#</th>`;
+  L.ins.forEach(n => tb += `<th>${n}</th>`);
+  L.outs.forEach((n,j) => tb += `<th${j===0?' class="grp"':''}>${n}</th>`);
+  L.outs.forEach((n,j) => tb += `<th${j===0?' class="grp"':''}>${n}</th>`);
+  if (state.tested) tb += `<th aria-label="${t('thMatch')}"></th>`;
+  tb += '</tr></thead><tbody>';
+  shown.forEach(r => {
+    tb += `<tr class="${isLive(r)?'live':''}">` + (seq ? `<td class="step">${list.indexOf(r)+1}</td>` : '');
+    r.bits.forEach(b => tb += `<td>${+b}</td>`);
+    r.exp.forEach((e,j) => tb += `<td${j===0?' class="grp"':''}>${e === null ? '·' : +e}</td>`);
+    r.got.forEach((g,j) => {
+      const txt = !r.stable ? '?' : (g === null ? '–' : +g);
+      const miss = state.tested && ((r.exp[j] !== null && g !== r.exp[j]) || !r.stable);
+      tb += `<td class="${j===0?'grp':''} ${miss?'miss':''}">${txt}</td>`;
+    });
+    if (state.tested) tb += `<td class="${r.ok?'mark-ok':'mark-bad'}">${r.ok?'✓':'✗'}</td>`;
+    tb += '</tr>';
+  });
+  $('tt').innerHTML = tb + '</tbody>';
+
+  $('status').textContent = state.msg;
+  $('status').className = state.msgBad ? 'bad' : '';
+}
+
+// First unseen truth-table row on the intro level, or -1 when all were tried.
+function learnNext(){ for (let r = 0; r < (1 << cur().ins.length); r++) if (!state.seen.has(r)) return r; return -1; }
+
+// Step-by-step guidance for newcomers on the first build levels, until that level is solved once.
+function renderCoach(){
+  const L = cur(), c = circ(), el = $('coach');
+  let step = null;
+  if (isSandbox()){
+    el.hidden = !state.mode;
+    if (state.mode) el.textContent = t(state.mode + 'Hint');
+    return;
+  }
+  if (['not','and','or'].includes(L.id) && !isSandbox() && prog.best[L.id] == null){
+    const unwired = L.outs.filter((_,k) => (state.sim || simulate(state.inputs)).outs[k] === null);
+    if (!c.gates.length) step = [1, t('coachAdd')];
+    else if (!c.wires.length) step = [2, t('coachWire')];
+    else if (unwired.length) step = [3, t('coachOut', unwired)];
+    else step = [4, t(state.tested ? 'coachFix' : 'coachTest')];
+  }
+  el.hidden = !step;
+  if (step) el.innerHTML = `<span class="n">${esc(t('coachStep', step[0]))}</span>${rich(step[1], L)}`;
+}
+
+function renderTools(){
+  const chips = LEVELS.filter(l => l.part).map(l => l.part);
+  const tools = isSandbox() ? ['SW', 'LAMP', 'NAND', ...chips]
+    : cur().rule?.nand ? ['NAND'] : ['NAND', ...LEVELS.slice(0, state.li).filter(l => l.part && prog.best[l.id] != null).map(l => l.part)];
+  // Sandbox lists every chip; a chip stays locked until its level is solved.
+  const locked = p => partLevel(p) && prog.best[partLevel(p).id] == null;
+  const desc = p => p === 'NAND' ? t('startGate') : p === 'SW' ? t('swDesc') : p === 'LAMP' ? t('lampDesc')
+    : locked(p) ? LOCK + t('lockedChip', LEVELS.indexOf(partLevel(p)) + 1) : t('builtChip');
+  $('tools').innerHTML = tools.map(p =>
+    `<button class="tool ${p==='NAND'?'raw':''} ${PARTS[p].ins.length && PARTS[p].outs.length ? '' : 'io'}" data-tool="${p}" ${locked(p)?'disabled':''}><span class="tname">${partName(p)}</span><span class="tdesc">${desc(p)}</span></button>`
+  ).join('');
+}
+
+const LOCK = '<svg class="lock" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/><path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+function renderLevels(){
+  const chips = LEVELS.filter(l => l.part);
+  $('sandboxSub').textContent = t('sandboxSub', chips.filter(l => prog.best[l.id] != null).length, chips.length);
+  const solved = LEVELS.filter(l => prog.best[l.id] != null).length;
+  $('progBar').style.width = `${solved/LEVELS.length*100}%`;
+  $('progText').textContent = t('progress', solved, LEVELS.length);
+  const card = (l, i) => {
+    const open = unlocked(i), best = prog.best[l.id];
+    let sub = LOCK + t('locked');
+    if (open){
+      const st = best != null ? stars(best,l.par) : 0;
+      sub = best != null ? `<span class="stars" role="img" aria-label="${t('starsAria', st)}">${starText(st)}</span> ${t('best', best)}` : t('notSolved');
+    }
+    return `<li><button class="level ${best!=null?'done':''}" data-li="${i}" ${open?'':'disabled'}><span class="num">${i+1}</span><span class="lt">${lt(l,'title')}</span><span class="ls">${sub}</span>${l.part ? `<span class="lu ${best!=null?'on':''}">${t('unlocks', partName(l.part))}</span>` : ''}</button></li>`;
+  };
+  $('levelList').innerHTML = CHAPTERS.map(ch => {
+    const items = LEVELS.map((l,i) => [l,i]).filter(([l]) => l.ch === ch), [name, desc] = t('chapters')[ch];
+    const done = items.filter(([l]) => prog.best[l.id] != null).length;
+    return `<section class="chapter ${ch}"><header class="ch-head"><h2>${name}</h2><span class="ch-n">${done} / ${items.length}</span><p>${desc}</p></header>` +
+      `<ol class="level-list">${items.map(([l,i]) => card(l,i)).join('')}</ol></section>`;
+  }).join('');
+}
+
+function render(){
+  const onLevels = state.screen === 'levels';
+  $('levels').hidden = !onLevels;
+  $('play').hidden = onLevels;
+  $('play').classList.toggle('sandbox', isSandbox());
+  $('shareTop').hidden = onLevels;
+  $('crumb').textContent = onLevels ? '' : isSandbox() ? t('sandbox') : t('levelOf', state.li+1, LEVELS.length);
+  if (onLevels) renderLevels(); else { renderBoard(); renderPanel(); }
+}
+
+function commit(){ save(); state.tested = false; state.msg = ''; render(); }
+
+/* ---------- actions ---------- */
+function openLevel(i){
+  $('inside').hidden = true; state.inside = null;
+  state.li = i; state.screen = 'play'; state.sandbox = false; state.sim = null;
+  setBoard(1000, 620);
+  state.inputs = cur().ins.map(() => false);
+  Object.assign(state, {sel:null, pending:null, ghost:null, tested:false, msg:''});
+  $('hint').hidden = true; $('hintBtn').textContent = t('showHint');
+  state.seen = new Set([0]); state.focusRow = -1;
+  const learn = isLearn();
+  $('play').classList.toggle('learn', learn);
+  $('palette').hidden = learn;
+  $('actions').hidden = learn;
+  if (learn){
+    prog.circuits[cur().id] = JSON.parse(JSON.stringify(cur().demo));
+    renderQuiz();
+  } else $('quiz').hidden = true;
+  renderTools(); render(); window.scrollTo(0,0);
+}
+
+function openSandbox(){
+  $('inside').hidden = true; state.inside = null;
+  state.sandbox = true; state.screen = 'play';
+  Object.assign(state, {sel:null, pending:null, ghost:null, tested:false, msg:''});
+  state.inputs = cur().ins.map(() => false);
+  $('hint').hidden = true; $('quiz').hidden = true;
+  $('play').classList.remove('learn');
+  $('palette').hidden = false; $('actions').hidden = true;
+  sbx();
+  setBoard(3000, 1860, {x:0, y:496, w:1400});
+  renderTools(); render(); measure(); window.scrollTo(0,0);
+}
+$('sandboxBtn').addEventListener('click', () => { Snd.play('tap'); openSandbox(); });
+
+function connect(a, b){
+  if (isSrc(a) === isSrc(b)) return false;
+  const from = isSrc(a) ? a : b, to = isSrc(a) ? b : a;
+  const c = circ();
+  c.wires = c.wires.filter(w => w.to !== to);
+  c.wires.push({from, to});
+  Snd.play('connect');
+  return true;
+}
+
+function deleteSelected(){
+  const c = circ(), s = state.sel; if (!s) return;
+  if (s.kind === 'gate' || s.kind === 'group'){
+    const ids = new Set(s.ids || [s.id]), gone = pin => ids.has(pin.split(':')[0]);
+    c.gates = c.gates.filter(g => !ids.has(g.id));
+    c.wires = c.wires.filter(w => !gone(w.from) && !gone(w.to));
+  } else if (s.kind === 'region'){
+    c.regions = c.regions.filter(r => r.id !== s.id);
+  } else {
+    c.wires.splice(s.idx, 1);
+  }
+  Snd.play('cut');
+  state.sel = null; commit();
+}
+
+function toSvg(e){
+  const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+  return pt.matrixTransform(svg.getScreenCTM().inverse());
+}
+
+function toggleInput(k){
+  state.inputs[k] = !state.inputs[k];
+  Snd.play(state.inputs[k] ? 'on' : 'off');
+  if (isLearn()){ state.seen.add(rowIndex(state.inputs)); renderQuiz(); }
+  render();
+}
+
+// Active pointers, for two-finger pinch zoom in the sandbox.
+const ptrs = new Map();
+const capture = id => { try { svg.setPointerCapture(id); } catch (err) {} };  // throws if the pointer is already gone
+['pointerup','pointercancel'].forEach(ev => addEventListener(ev, e => ptrs.delete(e.pointerId), {capture:true}));
+
+svg.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  if (e.button) return;  // left / touch / pen only; right & middle don't start wires or drags
+  ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY});
+  if (isSandbox() && ptrs.size === 2){
+    const [a,b] = [...ptrs.values()];
+    Object.assign(state, {drag:null, wireDrag:false, pending:null, pan:null, draw:null, pinch:{d:Math.hypot(a.x-b.x, a.y-b.y) || 1, w:view.w}});
+    capture(e.pointerId); renderBoard(); return;
+  }
+  const p = toSvg(e);
+  // Box select (button, B, or Shift+drag) and region drawing take over the whole board.
+  if (isSandbox() && (state.mode || e.shiftKey)){
+    Object.assign(state, {draw:{kind: state.mode || 'box', pts:[[Math.round(p.x), Math.round(p.y)]]}, pending:null});
+    capture(e.pointerId); renderBoard(); return;
+  }
+  const direct = e.target.closest('[data-zoom],[data-toggle]');
+  if (direct && direct.dataset.toggle){ toggleInput(+direct.dataset.toggle); return; }
+  if (isLearn()) return;
+  if (direct && direct.dataset.zoom){ openInside(direct.dataset.zoom); return; }
+
+  const pin = nearestPin(p, pinR());
+  if (pin){
+    if (state.pending && state.pending !== pin && connect(state.pending, pin)){
+      state.pending = null; commit(); return;
+    }
+    state.pending = pin; state.wireDrag = true; state.ghost = {x:p.x, y:p.y};
+    capture(e.pointerId);
+    Snd.play('select');
+    renderBoard(); return;
+  }
+  const tg = e.target.closest('[data-gate],[data-wire],[data-region],[data-grp]');
+  if (tg?.dataset.grp){
+    const g = circ().gates.find(q => q.id === state.sel.ids[0]);
+    state.pending = null;
+    state.drag = {id:g.id, dx:p.x-g.x, dy:p.y-g.y, moved:false, cx:e.clientX, cy:e.clientY, grp:true};
+    capture(e.pointerId); renderBoard(); return;
+  }
+  if (!tg){
+    state.pending = null; state.sel = null;
+    if (isSandbox()){ state.pan = {x:e.clientX, y:e.clientY, vx:view.x, vy:view.y}; capture(e.pointerId); }
+    render(); return;
+  }
+  if (tg.dataset.region){
+    const id = tg.dataset.region, r = circ().regions.find(q => q.id === id);
+    state.pending = null;
+    if (state.sel?.kind === 'region' && state.sel.id === id){
+      const name = prompt(t('regionName'), r.name)?.trim();
+      if (name){ r.name = name.slice(0, 40); save(); }
+    } else { state.sel = {kind:'region', id}; Snd.play('select'); }
+    render(); return;
+  }
+  if (tg.dataset.gate){
+    const g = circ().gates.find(q => q.id === tg.dataset.gate);
+    if (!(state.sel?.kind === 'group' && state.sel.ids.includes(g.id))) state.sel = {kind:'gate', id:g.id};  // dragging a group member moves the group
+    state.pending = null;
+    state.drag = {id:g.id, dx:p.x-g.x, dy:p.y-g.y, moved:false, cx:e.clientX, cy:e.clientY};
+    capture(e.pointerId);
+    Snd.play('select');
+    render(); return;
+  }
+  state.sel = {kind:'wire', idx:+tg.dataset.wire}; state.pending = null;
+  Snd.play('select');
+  render();
+});
+
+svg.addEventListener('pointermove', e => {
+  if (ptrs.has(e.pointerId)) ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY});
+  if (state.pinch){
+    if (ptrs.size >= 2){ const [a,b] = [...ptrs.values()]; zoomTo(state.pinch.w * state.pinch.d / (Math.hypot(a.x-b.x, a.y-b.y) || 1), (a.x+b.x)/2, (a.y+b.y)/2); }
+    return;
+  }
+  if (state.draw){
+    const p = toSvg(e), q = [Math.round(p.x), Math.round(p.y)], pts = state.draw.pts;
+    if (state.draw.kind === 'box') pts[1] = q;
+    else if (Math.hypot(q[0] - pts.at(-1)[0], q[1] - pts.at(-1)[1]) > 8/boardScale) pts.push(q);
+    boardSoon(); return;
+  }
+  if (state.pan){
+    const r = svg.getBoundingClientRect();
+    view.x = state.pan.vx - (e.clientX - state.pan.x) * view.w / r.width;
+    view.y = state.pan.vy - (e.clientY - state.pan.y) * view.h / r.height;
+    applyView(); return;
+  }
+  if (state.drag){
+    // 6px dead zone so a tap (e.g. flipping a sandbox switch) is not read as a drag
+    if (!state.drag.moved && Math.hypot(e.clientX - state.drag.cx, e.clientY - state.drag.cy) < 6) return;
+    const p = toSvg(e), g = circ().gates.find(q => q.id === state.drag.id); if (!g) return;
+    const m = isSandbox() ? 4 : 110;
+    const gs = state.sel?.kind === 'group' && state.sel.ids.includes(g.id) ? circ().gates.filter(q => state.sel.ids.includes(q.id)) : [g];
+    // one shared delta, clamped so every part in the group stays on the board
+    let dx = Math.round(p.x - state.drag.dx) - g.x, dy = Math.round(p.y - state.drag.dy) - g.y;
+    dx = clamp(dx, Math.max(...gs.map(q => m - q.x)), Math.min(...gs.map(q => W-m-GW - q.x)));
+    dy = clamp(dy, Math.max(...gs.map(q => 24 - q.y)), Math.min(...gs.map(q => H-gh(PARTS[q.type])-10 - q.y)));
+    gs.forEach(q => { q.x += dx; q.y += dy; });
+    state.drag.moved = true;
+    boardSoon();
+  } else if (state.wireDrag){
+    const p = toSvg(e); state.ghost = {x:p.x, y:p.y};
+    boardSoon();
+  }
+});
+
+function endPointer(e){
+  if (state.pinch){ if (ptrs.size < 2) state.pinch = null; return; }
+  if (state.draw){ finishDraw(); return; }
+  if (state.pan){ state.pan = null; return; }
+  if (state.drag){
+    const {moved, id, grp} = state.drag; state.drag = null;
+    if (moved){ save(); return; }
+    if (grp) return;                              // tap inside the outline: keep the group selected
+    const g = circ().gates.find(q => q.id === id);
+    if (g && g.type === 'SW'){ g.on = !g.on; Snd.play(g.on ? 'on' : 'off'); save(); render(); }
+    return;
+  }
+  if (state.wireDrag){
+    state.wireDrag = false;
+    const p = toSvg(e), R = pinR();
+    const hit = nearestPin(p, R*1.5, state.pending);
+    if (hit && connect(state.pending, hit)){ state.pending = null; commit(); return; }
+    const own = pinPos(state.pending);
+    if (!own || (own.x-p.x)**2 + (own.y-p.y)**2 > R*R) state.pending = null; // tap on same pin keeps it armed
+    renderBoard();
+  }
+}
+svg.addEventListener('pointerup', endPointer);
+svg.addEventListener('pointercancel', () => { Object.assign(state, {drag:null, wireDrag:false, pending:null, pan:null, pinch:null, draw:null}); renderBoard(); });
+svg.addEventListener('wheel', e => { if (!isSandbox()) return; e.preventDefault(); zoomTo(view.w * Math.exp(e.deltaY * .0015), e.clientX, e.clientY); }, {passive:false});
+$('zInBtn').addEventListener('click', () => zoomBy(1/1.25));
+$('zOutBtn').addEventListener('click', () => zoomBy(1.25));
+$('zFitBtn').addEventListener('click', zoomFit);
+
+// Where a new part appears: switches in a column at the left of the view, lamps at the right,
+// everything else spiralling out from the middle, always on a spot that overlaps no existing part.
+function freeSpot(type){
+  const sb = isSandbox(), h = gh(PARTS[type]), pad = 16, m = sb ? 4 : 110;
+  const box = (x, y, hh) => [x - pad, y - 28 - pad, x + GW + pad, y + hh + 10 + pad];   // 28 = label above the part
+  const taken = circ().gates.map(g => box(g.x, g.y, gh(PARTS[g.type])));
+  const free = (x, y) => { const [a0, b0, a1, b1] = box(x, y, h); return !taken.some(([c0, d0, c1, d1]) => a0 < c1 && c0 < a1 && b0 < d1 && d0 < b1); };
+  const v = sb ? view : {x:0, y:0, w:W, h:H};
+  const cands = [];
+  if (type === 'SW' || type === 'LAMP'){
+    // lamps keep ~70 screen px clear of the right edge so the zoom buttons never cover them
+    const dir = type === 'SW' ? 1 : -1, x0 = type === 'SW' ? v.x + 40 : v.x + v.w - GW - Math.max(40, 70 / boardScale);
+    for (let col = 0; col < 6; col++) for (let y = v.y + 50; y <= v.y + v.h - h - 20; y += 20) cands.push([x0 + dir*col*130, y]);
+  } else {
+    const cx = v.x + v.w/2 - GW/2, cy = v.y + v.h/2 - h/2;
+    cands.push([cx, cy]);
+    for (let r = 1; r <= 30; r++) for (let dx = -r; dx <= r; dx++) for (let dy = -r; dy <= r; dy++)
+      if (Math.max(Math.abs(dx), Math.abs(dy)) === r) cands.push([cx + dx*40, cy + dy*40]);
+  }
+  const fit = ([x, y]) => ({x: Math.round(clamp(x, m, W - m - GW)), y: Math.round(clamp(y, 30, H - h - 10))});
+  for (const c of cands){ const p = fit(c); if (free(p.x, p.y)) return p; }
+  return fit(cands[0]);   // ponytail: board full, overlap accepted; player can drag
+}
+
+$('tools').addEventListener('click', e => {
+  const b = e.target.closest('[data-tool]'); if (!b) return;
+  const c = circ(), type = b.dataset.tool, id = nextId(c.gates);
+  c.gates.push({id, type, ...freeSpot(type)});
+  state.sel = {kind:'gate', id};
+  Snd.play('place');
+  commit();
+});
+function nextId(list, pre = 'g'){ return pre + (list.reduce((m,q) => Math.max(m, +q.id.slice(1) || 0), 0) + 1); }
+
+/* ---------- sandbox: box select, copy/paste, regions ---------- */
+function setMode(m){
+  state.mode = state.mode === m ? null : m; state.draw = null;
+  $('boxBtn').setAttribute('aria-pressed', state.mode === 'box');
+  $('regionBtn').setAttribute('aria-pressed', state.mode === 'region');
+  $('play').classList.toggle('mode', !!state.mode);
+  Snd.play('tap'); render();
+}
+$('boxBtn').addEventListener('click', () => setMode('box'));
+$('regionBtn').addEventListener('click', () => setMode('region'));
+
+function finishDraw(){
+  const {kind, pts} = state.draw, c = circ();
+  state.draw = null;
+  if (state.mode) setMode(state.mode);          // one shot: the mode ends after each outline
+  if (kind === 'box'){
+    const [x0, y0, x1, y1] = bbox(pts);
+    // a part is inside when its centre is inside the box
+    const ids = c.gates.filter(g => { const cx = g.x + GW/2, cy = g.y + gh(PARTS[g.type])/2; return cx > x0 && cx < x1 && cy > y0 && cy < y1; }).map(g => g.id);
+    state.sel = ids.length > 1 ? {kind:'group', ids} : ids.length ? {kind:'gate', id:ids[0]} : null;
+    if (ids.length) Snd.play('select');
+    render(); return;
+  }
+  const [x0, y0, x1, y1] = bbox(pts);
+  if (pts.length < 3 || Math.max(x1-x0, y1-y0) < 40){ render(); return; }
+  c.regions ||= [];
+  const name = prompt(t('regionName'), t('regionDefault', c.regions.length + 1))?.trim();
+  if (!name){ render(); return; }
+  const id = nextId(c.regions, 'r');
+  c.regions.push({id, name: name.slice(0, 40), pts});
+  state.sel = {kind:'region', id};
+  Snd.play('place'); commit();
+}
+
+const selIds = () => state.sel?.kind === 'group' ? state.sel.ids : state.sel?.kind === 'gate' ? [state.sel.id] : [];
+function copySel(){
+  const c = circ(), ids = new Set(selIds()); if (!ids.size) return;
+  const inside = pin => ids.has(pin.split(':')[0]);
+  state.clip = JSON.parse(JSON.stringify({gates: c.gates.filter(g => ids.has(g.id)), wires: c.wires.filter(w => inside(w.from) && inside(w.to))}));
+  Snd.play('select'); renderPanel();
+}
+function paste(){
+  const c = circ(), clip = state.clip; if (!clip) return;
+  // Each paste lands one group-width further right of the original, on fresh ids; wires inside the copy come along.
+  const [x0, y0, x1] = gatesBox(clip.gates), map = {}, n = clip.n = (clip.n || 0) + 1;
+  let dx = (x1 - x0 + 20) * n, dy = 0;
+  if (x1 + dx > W){ dx = Math.round(view.x + view.w/2 - (x0+x1)/2); dy = Math.round(view.y + view.h/2 - y0); }   // off the board: drop it in view instead
+  clip.gates.forEach(g => {
+    const id = map[g.id] = nextId(c.gates), h = gh(PARTS[g.type]);
+    c.gates.push({...g, id, x: clamp(g.x + dx, 4, W-4-GW), y: clamp(g.y + dy, 24, H-h-10)});
+  });
+  const re = pin => { const [g, p] = pin.split(':'); return map[g] + ':' + p; };
+  clip.wires.forEach(w => c.wires.push({from: re(w.from), to: re(w.to)}));
+  state.sel = {kind:'group', ids:Object.values(map)};
+  Snd.play('place'); commit();
+}
+$('copyBtn').addEventListener('click', copySel);
+$('pasteBtn').addEventListener('click', paste);
+
+function showRegion(r){
+  const [x0, y0, x1, y1] = bbox(r.pts), cx = (x0+x1)/2, cy = (y0+y1)/2;
+  view.w = clamp(Math.max((x1-x0)*1.3, (y1-y0)*1.3/RATIO), 400, W); view.h = view.w*RATIO;
+  view.x = cx - view.w/2; view.y = cy - view.h/2;
+  applyView();
+  state.sel = {kind:'region', id:r.id}; Snd.play('zoomIn'); render();
+}
+$('regionList').addEventListener('click', e => {
+  const b = e.target.closest('[data-goto]'); if (b) showRegion(circ().regions.find(r => r.id === b.dataset.goto));
+});
+
+/* ---------- sandbox: title, share screenshot, saved circuits ---------- */
+$('sbTitle').addEventListener('input', e => { circ().title = e.target.value; save(); });
+
+// Screenshot: clone the board, inline computed styles (the stylesheet doesn't travel with an <img>), crop to the circuit.
+async function shareShot(){
+  Object.assign(state, {sel:null, pending:null}); renderBoard();
+  const bb = layer.getBBox(), pad = 40;
+  const x = Math.max(0, bb.x - pad), y = Math.max(0, bb.y - pad), w = Math.min(W - x, bb.width + pad*2) || W, h = Math.min(H - y, bb.height + pad*2) || H;
+  const cl = svg.cloneNode(true), src = svg.querySelectorAll('*'), dst = cl.querySelectorAll('*');
+  const props = ['fill','fill-opacity','stroke','stroke-width','stroke-dasharray','stroke-linecap','stroke-linejoin','opacity','font-family','font-size','font-weight','text-anchor','display'];
+  src.forEach((el, i) => { const cs = getComputedStyle(el); dst[i].setAttribute('style', props.map(p => `${p}:${cs.getPropertyValue(p)}`).join(';')); });
+  cl.querySelectorAll('.pin-hit,.wire-hit,.zhit,title').forEach(el => el.remove());
+  const k = Math.min(2, 4000 / Math.max(w, h)), top = Math.round(Math.max(64, w*k*.05)), fz = top*.44;
+  cl.setAttribute('viewBox', `${x} ${y} ${w} ${h}`); cl.setAttribute('width', w*k); cl.setAttribute('height', h*k);
+  const img = new Image(), url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(cl)], {type:'image/svg+xml'}));
+  img.src = url; await img.decode(); URL.revokeObjectURL(url);
+  const cv = document.createElement('canvas'), g = cv.getContext('2d');
+  cv.width = w*k; cv.height = h*k + top;
+  g.fillStyle = '#0A2E2B'; g.fillRect(0, 0, cv.width, top);
+  g.drawImage(img, 0, top);
+  const title = isSandbox() ? (circ().title || '').trim() || t('untitled') : lt(cur(), 'title');
+  g.textBaseline = 'middle';
+  const font = getComputedStyle(document.body).getPropertyValue('--display');
+  g.fillStyle = '#E6EEF0'; g.font = `700 ${fz}px ${font}`; g.fillText(title, fz, top/2, cv.width - fz*9);
+  g.fillStyle = '#FFB627'; g.font = `600 ${fz*.6}px ${font}`; g.textAlign = 'right'; g.fillText('Only NAND', cv.width - fz, top/2);
+  const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+  const file = new File([blob], (title.replace(/[\\/:*?"<>|]+/g, '').trim() || 'circuit') + '.png', {type:'image/png'});
+  render();
+  if (navigator.canShare?.({files:[file]})){
+    try { await navigator.share({files:[file], title}); } catch (err) {}   // AbortError = user closed the sheet
+    return;
+  }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = file.name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  $('status').textContent = t('shareSaved');
+}
+document.querySelectorAll('.shareBtn').forEach(b => b.addEventListener('click', () => { Snd.play('tap'); shareShot(); }));
+
+// Saved sandbox circuits live under their own key so the progress save stays small.
+const SLOTS = 'only-nand-sandboxes';
+const slots = () => { try { return JSON.parse(localStorage.getItem(SLOTS)) || []; } catch (e) { return []; } };
+const setSlots = s => { try { localStorage.setItem(SLOTS, JSON.stringify(s)); return true; } catch (e) { return false; } };
+$('saveBtn').addEventListener('click', () => {
+  const c = circ(), name = (c.title || '').trim() || t('untitled');
+  const list = slots().filter(s => s.name !== name);      // same title overwrites
+  list.unshift({name, at: Date.now(), c: JSON.parse(JSON.stringify(c))});
+  if (!setSlots(list)) return;
+  Snd.play('place'); renderPanel();
+  $('status').textContent = t('savedMsg', name);
+});
+$('slots').addEventListener('click', e => {
+  const b = e.target.closest('[data-load],[data-del]'); if (!b) return;
+  const list = slots(), i = +(b.dataset.load ?? b.dataset.del), s = list[i]; if (!s) return;
+  if (b.dataset.del != null){
+    if (confirm(t('delConfirm', s.name))){ list.splice(i, 1); setSlots(list); Snd.play('cut'); renderPanel(); }
+    return;
+  }
+  if (circ().gates.length && !confirm(t('loadConfirm', s.name))) return;
+  prog.circuits.sandbox = JSON.parse(JSON.stringify(s.c));
+  Object.assign(state, {sel:null, pending:null, sim:null});
+  Snd.play('place'); commit();
+});
+
+$('levelList').addEventListener('click', e => {
+  const b = e.target.closest('[data-li]'); if (b && !b.disabled){ Snd.play('tap'); openLevel(+b.dataset.li); }
+});
+
+$('delBtn').addEventListener('click', deleteSelected);
+
+/* ---------- look inside a chip ---------- */
+const w_ = (from,to) => ({from,to});
+const CANON = {
+  NOT:  {gates:[{id:'g1',type:'NAND'}], wires:[w_('IN0:o0','g1:i0'), w_('IN0:o0','g1:i1'), w_('g1:o0','OUT0:i0')]},
+  AND:  {gates:[{id:'g1',type:'NAND'},{id:'g2',type:'NOT'}], wires:[w_('IN0:o0','g1:i0'), w_('IN1:o0','g1:i1'), w_('g1:o0','g2:i0'), w_('g2:o0','OUT0:i0')]},
+  OR:   {gates:[{id:'g1',type:'NOT'},{id:'g2',type:'NOT'},{id:'g3',type:'NAND'}], wires:[w_('IN0:o0','g1:i0'), w_('IN1:o0','g2:i0'), w_('g1:o0','g3:i0'), w_('g2:o0','g3:i1'), w_('g3:o0','OUT0:i0')]},
+  XOR:  {gates:[{id:'g1',type:'NAND'},{id:'g2',type:'NAND'},{id:'g3',type:'NAND'},{id:'g4',type:'NAND'}], wires:[w_('IN0:o0','g1:i0'), w_('IN1:o0','g1:i1'), w_('IN0:o0','g2:i0'), w_('g1:o0','g2:i1'), w_('IN1:o0','g3:i0'), w_('g1:o0','g3:i1'), w_('g2:o0','g4:i0'), w_('g3:o0','g4:i1'), w_('g4:o0','OUT0:i0')]},
+  HALF: {gates:[{id:'g1',type:'XOR'},{id:'g2',type:'AND'}], wires:[w_('IN0:o0','g1:i0'), w_('IN1:o0','g1:i1'), w_('IN0:o0','g2:i0'), w_('IN1:o0','g2:i1'), w_('g1:o0','OUT0:i0'), w_('g2:o0','OUT1:i0')]},
+  FULL: {gates:[{id:'g1',type:'HALF'},{id:'g2',type:'HALF'},{id:'g3',type:'OR'}], wires:[w_('IN0:o0','g1:i0'), w_('IN1:o0','g1:i1'), w_('g1:o0','g2:i0'), w_('IN2:o0','g2:i1'), w_('g1:o1','g3:i0'), w_('g2:o1','g3:i1'), w_('g2:o0','OUT0:i0'), w_('g3:o0','OUT1:i0')]},
+  NOR:  {gates:[{id:'g1',type:'OR'},{id:'g2',type:'NOT'}], wires:[w_('IN0:o0','g1:i0'), w_('IN1:o0','g1:i1'), w_('g1:o0','g2:i0'), w_('g2:o0','OUT0:i0')]},
+  XNOR: {gates:[{id:'g1',type:'XOR'},{id:'g2',type:'NOT'}], wires:[w_('IN0:o0','g1:i0'), w_('IN1:o0','g1:i1'), w_('g1:o0','g2:i0'), w_('g2:o0','OUT0:i0')]},
+  DEMUX:{gates:[{id:'g1',type:'NOT'},{id:'g2',type:'AND'},{id:'g3',type:'AND'}], wires:[w_('IN1:o0','g1:i0'), w_('IN0:o0','g2:i0'), w_('g1:o0','g2:i1'), w_('IN0:o0','g3:i0'), w_('IN1:o0','g3:i1'), w_('g2:o0','OUT0:i0'), w_('g3:o0','OUT1:i0')]},
+  HSUB: {gates:[{id:'g1',type:'XOR'},{id:'g2',type:'NOT'},{id:'g3',type:'AND'}], wires:[w_('IN0:o0','g1:i0'), w_('IN1:o0','g1:i1'), w_('IN0:o0','g2:i0'), w_('g2:o0','g3:i0'), w_('IN1:o0','g3:i1'), w_('g1:o0','OUT0:i0'), w_('g3:o0','OUT1:i0')]},
+  FSUB: {gates:[{id:'g1',type:'HSUB'},{id:'g2',type:'HSUB'},{id:'g3',type:'OR'}], wires:[w_('IN0:o0','g1:i0'), w_('IN1:o0','g1:i1'), w_('g1:o0','g2:i0'), w_('IN2:o0','g2:i1'), w_('g1:o1','g3:i0'), w_('g2:o1','g3:i1'), w_('g2:o0','OUT0:i0'), w_('g3:o0','OUT1:i0')]},
+  DFF:  {gates:['n','m1','m2','m3','m4','s1','s2','s3','s4'].map(id => ({id, type:'NAND'})), wires:[w_('IN1:o0','n:i0'), w_('IN1:o0','n:i1'),
+    w_('IN0:o0','m1:i0'), w_('n:o0','m1:i1'), w_('m1:o0','m2:i0'), w_('n:o0','m2:i1'), w_('m1:o0','m3:i0'), w_('m4:o0','m3:i1'), w_('m2:o0','m4:i0'), w_('m3:o0','m4:i1'),
+    w_('m3:o0','s1:i0'), w_('IN1:o0','s1:i1'), w_('s1:o0','s2:i0'), w_('IN1:o0','s2:i1'), w_('s1:o0','s3:i0'), w_('s4:o0','s3:i1'), w_('s2:o0','s4:i0'), w_('s3:o0','s4:i1'), w_('s3:o0','OUT0:i0')]},
+  ADD4: {gates:[{id:'g1',type:'FULL'},{id:'g2',type:'FULL'},{id:'g3',type:'FULL'},{id:'g4',type:'FULL'}], wires:[w_('IN3:o0','g1:i0'), w_('IN7:o0','g1:i1'), w_('IN8:o0','g1:i2'), w_('g1:o0','OUT4:i0'),
+    w_('IN2:o0','g2:i0'), w_('IN6:o0','g2:i1'), w_('g1:o1','g2:i2'), w_('g2:o0','OUT3:i0'), w_('IN1:o0','g3:i0'), w_('IN5:o0','g3:i1'), w_('g2:o1','g3:i2'), w_('g3:o0','OUT2:i0'),
+    w_('IN0:o0','g4:i0'), w_('IN4:o0','g4:i1'), w_('g3:o1','g4:i2'), w_('g4:o0','OUT1:i0'), w_('g4:o1','OUT0:i0')]},
+  MUX4: {gates:[{id:'g1',type:'MUX'},{id:'g2',type:'MUX'},{id:'g3',type:'MUX'}], wires:[w_('IN0:o0','g1:i0'), w_('IN1:o0','g1:i1'), w_('IN5:o0','g1:i2'), w_('IN2:o0','g2:i0'), w_('IN3:o0','g2:i1'), w_('IN5:o0','g2:i2'), w_('g1:o0','g3:i0'), w_('g2:o0','g3:i1'), w_('IN4:o0','g3:i2'), w_('g3:o0','OUT0:i0')]},
+  MUX:  {gates:[{id:'g1',type:'NOT'},{id:'g2',type:'NAND'},{id:'g3',type:'NAND'},{id:'g4',type:'NAND'}], wires:[w_('IN2:o0','g1:i0'), w_('IN0:o0','g2:i0'), w_('g1:o0','g2:i1'), w_('IN1:o0','g3:i0'), w_('IN2:o0','g3:i1'), w_('g2:o0','g4:i0'), w_('g3:o0','g4:i1'), w_('g4:o0','OUT0:i0')]},
+  AND3: {gates:[{id:'g1',type:'AND'},{id:'g2',type:'AND'}], wires:[w_('IN0:o0','g1:i0'), w_('IN1:o0','g1:i1'), w_('g1:o0','g2:i0'), w_('IN2:o0','g2:i1'), w_('g2:o0','OUT0:i0')]},
+  OR3:  {gates:[{id:'g1',type:'OR'},{id:'g2',type:'OR'}], wires:[w_('IN0:o0','g1:i0'), w_('IN1:o0','g1:i1'), w_('g1:o0','g2:i0'), w_('IN2:o0','g2:i1'), w_('g2:o0','OUT0:i0')]},
+  EQ2:  {gates:[{id:'g1',type:'XNOR'},{id:'g2',type:'XNOR'},{id:'g3',type:'AND'}], wires:[w_('IN0:o0','g1:i0'), w_('IN2:o0','g1:i1'), w_('IN1:o0','g2:i0'), w_('IN3:o0','g2:i1'),
+    w_('g1:o0','g3:i0'), w_('g2:o0','g3:i1'), w_('g3:o0','OUT0:i0')]},
+  DEC:  {gates:[{id:'n1',type:'NOT'},{id:'n0',type:'NOT'},{id:'y0',type:'AND'},{id:'y1',type:'AND'},{id:'y2',type:'AND'},{id:'y3',type:'AND'}], wires:[w_('IN0:o0','n1:i0'), w_('IN1:o0','n0:i0'),
+    w_('n1:o0','y0:i0'), w_('n0:o0','y0:i1'), w_('n1:o0','y1:i0'), w_('IN1:o0','y1:i1'), w_('IN0:o0','y2:i0'), w_('n0:o0','y2:i1'), w_('IN0:o0','y3:i0'), w_('IN1:o0','y3:i1'),
+    w_('y0:o0','OUT0:i0'), w_('y1:o0','OUT1:i0'), w_('y2:o0','OUT2:i0'), w_('y3:o0','OUT3:i0')]},
+  DLATCH:{gates:['m1','m2','m3','m4'].map(id => ({id, type:'NAND'})), wires:[w_('IN0:o0','m1:i0'), w_('IN1:o0','m1:i1'), w_('m1:o0','m2:i0'), w_('IN1:o0','m2:i1'),
+    w_('m1:o0','m3:i0'), w_('m4:o0','m3:i1'), w_('m2:o0','m4:i0'), w_('m3:o0','m4:i1'), w_('m3:o0','OUT0:i0')]},
+  REG4: {gates:[0,1,2,3].flatMap(i => [{id:'x'+i, type:'MUX'}, {id:'f'+i, type:'DFF'}]),
+    wires:[0,1,2,3].flatMap(i => [w_(`f${i}:o0`,`x${i}:i0`), w_(`IN${i}:o0`,`x${i}:i1`), w_('IN4:o0',`x${i}:i2`), w_(`x${i}:o0`,`f${i}:i0`), w_('IN5:o0',`f${i}:i1`), w_(`f${i}:o0`,`OUT${i}:i0`)])},
+};
+const partLevel = p => LEVELS.find(l => l.part === p);
+function chipDef(p){ const sol = prog.solutions[partLevel(p).id]; return sol || CANON[p]; }
+
+// Expand a part into NAND gates. Refs: 'I<k>' = chip input, 'n<i>' = NAND output, null = unconnected (0).
+function flatten(type, inRefs, nands, stack){
+  if (type === 'NAND'){ nands.push({a:inRefs[0], b:inRefs[1]}); return ['n'+(nands.length-1)]; }
+  const P = PARTS[type];
+  if (stack.includes(type)) return P.outs.map(() => null);
+  const def = chipDef(type), src = {}, memo = {}, busy = new Set();
+  def.wires.forEach(w => src[w.to] = w.from);
+  const gates = Object.fromEntries(def.gates.map(g => [g.id, g]));
+  const ref = pin => {
+    if (!pin) return null;
+    const [nid, pk] = pin.split(':');
+    if (nid.startsWith('IN')) return inRefs[+nid.slice(2)] ?? null;
+    return outsOf(nid)[+pk.slice(1)] ?? null;
+  };
+  function outsOf(id){
+    if (memo[id]) return memo[id];
+    const g = gates[id]; if (!g || !PARTS[g.type]) return [];
+    if (busy.has(id)) return PARTS[g.type].outs.map((_,j) => () => memo[id] ? memo[id][j] : null);   // loop: resolve later
+    busy.add(id);
+    const ins = PARTS[g.type].ins.map((_,k) => ref(src[`${id}:i${k}`]));
+    memo[id] = flatten(g.type, ins, nands, [...stack, type]);
+    busy.delete(id);
+    return memo[id];
+  }
+  return P.outs.map((_,k) => ref(src[`OUT${k}:i0`]));
+}
+
+function openInside(gateId){
+  const g = circ().gates.find(q => q.id === gateId); if (!g || !isChip(g.type)) return;
+  const P = PARTS[g.type], sim = state.sim || simulate(state.inputs), nands = [];
+  const res = r => { while (typeof r === 'function') r = r(); return r ?? null; };
+  const outRefs = flatten(g.type, P.ins.map((_,k) => 'I'+k), nands, []).map(res);
+  nands.forEach(n => { n.a = res(n.a); n.b = res(n.b); });
+  state.inside = {type:g.type, vals:P.ins.map((_,k) => !!sim.val[sim.src[`${g.id}:i${k}`]]), nands, outRefs,
+                  own: !!prog.solutions[partLevel(g.type).id]};
+  state.pending = null; state.drag = null; state.wireDrag = false;
+  const el = $('inside');
+  el.style.transformOrigin = `${(g.x+48-view.x)/view.w*100}% ${(g.y+gh(P)/2-view.y)/view.h*100}%`;
+  el.hidden = false; el.classList.remove('zoom'); void el.offsetWidth; el.classList.add('zoom');
+  Snd.play('zoomIn');
+  renderInside();
+  $('zoomOut').focus();
+}
+function closeInside(){ $('inside').hidden = true; state.inside = null; Snd.play('zoomOut'); renderBoard(); }
+
+function renderInside(){
+  const S = state.inside, P = PARTS[S.type], N = S.nands;
+  const v = new Array(N.length).fill(false);
+  const sv = r => r == null ? false : (r[0] === 'I' ? !!S.vals[+r.slice(1)] : v[+r.slice(1)]);
+  for (let it = 0; it < 100; it++){ let ch = false; N.forEach((n,i) => { const o = !(sv(n.a) && sv(n.b)); if (o !== v[i]){ v[i] = o; ch = true; } }); if (!ch) break; }
+
+  // Column = depth over strongly connected components, so cross-coupled latch pairs stack in one column.
+  const nIn = i => [N[i].a, N[i].b].filter(r => r && r[0] === 'n').map(r => +r.slice(1));
+  const comp = [], low = [], idx = [], stk = [], onStk = [];
+  let cnt = 0, nc = 0;
+  const scc = v => {
+    idx[v] = low[v] = cnt++; stk.push(v); onStk[v] = true;
+    for (const w of nIn(v)){
+      if (idx[w] === undefined){ scc(w); low[v] = Math.min(low[v], low[w]); }
+      else if (onStk[w]) low[v] = Math.min(low[v], idx[w]);
+    }
+    if (low[v] === idx[v]){ let w; do { w = stk.pop(); onStk[w] = false; comp[w] = nc; } while (w !== v); nc++; }
+  };
+  N.forEach((_,i) => idx[i] === undefined && scc(i));
+  const cd = [];   // Tarjan numbers components inputs-first, so one forward pass is enough
+  for (let c = 0; c < nc; c++){
+    let d = 1;
+    N.forEach((_,i) => { if (comp[i] === c) nIn(i).forEach(j => { if (comp[j] !== c) d = Math.max(d, cd[comp[j]] + 1); }); });
+    cd[c] = d;
+  }
+  const depth = N.map((_,i) => cd[comp[i]]);
+  const maxD = Math.max(1, ...depth), cols = {};
+  N.forEach((_,i) => (cols[depth[i]] ??= []).push(i));
+  const maxCnt = Math.max(1, ...Object.values(cols).map(c => c.length));
+  const HH = Math.max(maxCnt*100, Math.max(P.ins.length, P.outs.length)*90) + 60;
+  const WW = 190 + maxD*160 + 110;
+  const pos = {};
+  P.ins.forEach((_,k) => pos['I'+k] = {x:86, y:HH*(k+1)/(P.ins.length+1)});
+  const outPt = r => r == null || !pos[r] ? null : (r[0] === 'I' ? pos[r] : {x:pos[r].x+96, y:pos[r].y+40});   // null until placed (feedback)
+  for (let d = 1; d <= maxD; d++){
+    const c = cols[d] || [];
+    const key = i => { const ys = [N[i].a, N[i].b].map(outPt).filter(Boolean).map(p => p.y); return ys.length ? ys.reduce((a,b) => a+b, 0)/ys.length : HH/2; };
+    c.sort((a,b) => key(a) - key(b));
+    c.forEach((i,j) => pos['n'+i] = {x:190 + (d-1)*160, y:HH*(j+1)/(c.length+1) - 40});
+  }
+
+  let s = `<defs><pattern id="grid2" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1.2" fill="#1E5A53"/></pattern></defs><rect width="${WW}" height="${HH}" fill="url(#grid2)"/><rect width="${WW}" height="${HH}" fill="url(#vign)"/>`;
+  const wire = (a, b, on) => a && b ? wirePath(curve(a,b), on) : '';
+  N.forEach((n,i) => {
+    const p = pos['n'+i];
+    s += wire(outPt(n.a), {x:p.x, y:p.y+80/3}, sv(n.a));
+    s += wire(outPt(n.b), {x:p.x, y:p.y+160/3}, sv(n.b));
+  });
+  S.outRefs.forEach((r,k) => { const y = HH*(k+1)/(P.outs.length+1); s += wire(outPt(r), {x:WW-86, y}, sv(r)); });
+
+  const body = 'M14 0 H34 A40 40 0 0 1 34 80 H14 Z';
+  N.forEach((n,i) => {
+    const {x,y} = pos['n'+i];
+    s += `<g transform="translate(${x} ${y})">`;
+    s += `<line class="lead" x1="0" y1="${80/3}" x2="14" y2="${80/3}"/><line class="lead" x1="0" y1="${160/3}" x2="14" y2="${160/3}"/><line class="lead" x1="86" y1="40" x2="96" y2="40"/>`;
+    s += `<path class="shade" d="${body}" transform="translate(3 5)"/><path class="body nand" d="${body}"/><circle class="bubble" cx="80" cy="40" r="6"/>`;
+    s += `<text class="glabel" x="40" y="45" style="font-size:12px">NAND</text>`;
+    s += `<circle class="pin ${sv(n.a)?'hi':''}" cx="0" cy="${80/3}" r="5"/><circle class="pin ${sv(n.b)?'hi':''}" cx="0" cy="${160/3}" r="5"/><circle class="pin ${v[i]?'hi':''}" cx="96" cy="40" r="5"/></g>`;
+  });
+  P.ins.forEach((name,k) => {
+    const y = pos['I'+k].y, on = S.vals[k];
+    s += switchSvg('data-itoggle', k, y, name, on);
+    s += `<circle class="pin ${on?'hi':''}" cx="86" cy="${y}" r="5"/>`;
+  });
+  P.outs.forEach((name,k) => {
+    const y = HH*(k+1)/(P.outs.length+1), r = S.outRefs[k], on = sv(r);
+    s += `<line class="lead" x1="${WW-86}" y1="${y}" x2="${WW-68}" y2="${y}"/>`;
+    s += lampSvg(WW-50, y, name, on, r == null);
+    s += `<circle class="pin ${on?'hi':''}" cx="${WW-86}" cy="${y}" r="5"/>`;
+  });
+
+  const svgI = $('insideSvg');
+  svgI.setAttribute('viewBox', `0 0 ${WW} ${HH}`);
+  svgI.innerHTML = s;
+  $('insideTitle').textContent = t('insideTitle', partName(S.type), N.length);
+  $('insideSub').textContent = t(S.own ? 'insideOwn' : 'insideStd') + t('insideFlip');
+}
+
+$('insideSvg').addEventListener('pointerdown', e => {
+  if (e.button) return;
+  const el = e.target.closest('[data-itoggle]'); if (!el || !state.inside) return;
+  e.preventDefault();
+  const k = +el.dataset.itoggle; state.inside.vals[k] = !state.inside.vals[k];
+  Snd.play(state.inside.vals[k] ? 'on' : 'off');
+  renderInside();
+});
+$('zoomOut').addEventListener('click', closeInside);
+$('insideBtn').addEventListener('click', () => { if (state.sel && state.sel.kind === 'gate') openInside(state.sel.id); });
+$('clearBtn').addEventListener('click', () => {
+  if (!circ().gates.length) return;
+  if (confirm(t('clearConfirm'))){
+    Object.assign(circ(), {gates:[], wires:[], regions:[]}); state.sel = null; Snd.play('clear'); commit();
+  }
+});
+$('hintBtn').addEventListener('click', () => {
+  const h = $('hint'); h.hidden = !h.hidden;
+  $('hintBtn').textContent = t(h.hidden ? 'showHint' : 'hideHint');
+  if (!h.hidden) Snd.play('hint');
+});
+$('homeBtn').addEventListener('click', () => { $('inside').hidden = true; state.inside = null; state.screen = 'levels'; Snd.play('tap'); render(); });
+
+$('testBtn').addEventListener('click', () => {
+  const L = cur(), list = rows();
+  state.tested = true; state.msgBad = true;
+  const unwired = L.outs.filter((_,j) => list[0].got[j] === null);
+  const over = L.rule?.max && circ().gates.length > L.rule.max;
+  if (list.every(r => r.ok) && !over){ state.msg = ''; state.msgBad = false; render(); solved(); return; }
+  if (over && list.every(r => r.ok)) state.msg = t('msgTooMany', L.rule.max);
+  else if (list.some(r => !r.stable)) state.msg = t('msgUnstable');
+  else if (unwired.length) state.msg = t('msgUnwired', unwired);
+  else state.msg = t('msgRows', list.filter(r => r.ok).length, list.length);
+  Snd.play('error');
+  render();
+});
+
+function renderQuiz(){
+  const L = cur(), q = $('quiz');
+  q.hidden = state.seen.size < (1 << L.ins.length);
+  if (q.hidden || $('choices').childElementCount) return;
+  $('qText').textContent = lt(L, 'question');
+  $('choices').innerHTML = lt(L, 'choices').map((c,i)=>`<button class="choice" data-choice="${i}">${c}</button>`).join('');
+}
+$('choices').addEventListener('click', e => {
+  const b = e.target.closest('[data-choice]'); if (!b) return;
+  if (+b.dataset.choice === cur().answer){ state.msg = ''; state.msgBad = false; render(); solved(); }
+  else { b.classList.add('wrong'); state.focusRow = rows().findIndex(r => !r.exp[0]); state.msg = t('quizWrong'); state.msgBad = true; Snd.play('error'); render(); }
+});
+
+function solved(){
+  const L = cur(), n = circ().gates.length, prev = prog.best[L.id];
+  if (prev == null || n < prev) prog.best[L.id] = n;
+  if (L.part) prog.solutions[L.id] = JSON.parse(JSON.stringify(circ()));
+  save();
+  // ArcadeDeck personal best: total stars (best per level), max 3 per level.
+  if (parent !== window) parent.postMessage({type:'GAME_OVER', score: LEVELS.reduce((t, l) => t + (prog.best[l.id] != null ? stars(prog.best[l.id], l.par) : 0), 0)}, '*');
+  const last = state.li === LEVELS.length - 1, st = stars(n, L.par);
+  $('winStars').innerHTML = [0,1,2].map(i => `<span class="${i<st?'on':''}" style="--d:${i*140}ms">★</span>`).join('');
+  $('winStars').setAttribute('aria-label', t('starsAria', st));
+  $('winTitle').textContent = t(last ? 'winLast' : 'winTitle');
+  $('choices').innerHTML = '';
+  let txt = t('winBuilt', n, L.par);
+  if (n > L.par) txt += t('winFewer');
+  if (isLearn()) txt = lt(L, 'win') ?? t('winLearn');
+  else txt += L.part ? t('winChip', partName(L.part)) : t('winFinal');
+  $('winText').textContent = txt;
+  $('whyText').innerHTML = rich(lt(L, 'why'), null);
+  $('nextBtn').textContent = t(last ? 'backLevels' : 'next');
+  $('win').hidden = false;
+  Snd.play('win', st);
+  $('nextBtn').focus();
+}
+$('stayBtn').addEventListener('click', () => { $('win').hidden = true; if (isLearn()) renderQuiz(); });
+$('nextBtn').addEventListener('click', () => {
+  $('win').hidden = true;
+  $('choices').innerHTML = '';
+  Snd.play('tap');
+  if (state.li === LEVELS.length - 1){ state.screen = 'levels'; render(); }
+  else openLevel(state.li + 1);
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !$('sndPop').hidden){ toggleSndPop(false); $('sndBtn').focus(); return; }
+  if (state.screen !== 'play') return;
+  if (e.key === 'Escape' && !$('inside').hidden){ closeInside(); return; }
+  if (!$('inside').hidden) return;
+  if (e.key === 'Escape'){ if (!$('win').hidden) $('win').hidden = true; if (state.mode) setMode(state.mode); Object.assign(state, {pending:null, sel:null, draw:null}); render(); }
+  const k = e.key.toLowerCase();
+  if (isSandbox() && (e.ctrlKey || e.metaKey) && !e.altKey && (k === 'c' || k === 'v') && !e.target.closest?.('input,select,textarea')){
+    e.preventDefault(); k === 'c' ? copySel() : paste(); return;
+  }
+  // Tool-action hotkeys: ignore while typing in a control, with modifiers, or when the win dialog is up.
+  if (!$('win').hidden || isLearn() || e.ctrlKey || e.metaKey || e.altKey || e.target.closest?.('input,select,textarea')) return;
+  if (isSandbox() && (k === 'b' || k === 'r')){ e.preventDefault(); setMode(k === 'b' ? 'box' : 'region'); return; }
+  if (isSandbox() && ['+','=','-','0'].includes(k)){ e.preventDefault(); k === '0' ? zoomFit() : zoomBy(k === '-' ? 1.25 : 1/1.25); return; }
+  const btn = (k === 'delete' || k === 'backspace' || k === 'x') ? $('delBtn') : k === 'i' ? $('insideBtn') : k === 'c' ? $('clearBtn') : null;
+  if (btn){ e.preventDefault(); if (!btn.disabled) btn.click(); }
+});
+
+/* ---------- language, sound controls, install ---------- */
+function applyLang(){
+  document.documentElement.lang = settings.lang;
+  document.title = t('title');
+  document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = t(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => el.setAttribute('aria-label', t(el.dataset.i18nAria)));
+  document.querySelectorAll('[data-i18n-title]').forEach(el => el.dataset.tip = t(el.dataset.i18nTitle));
+  document.querySelectorAll('[data-kbd]').forEach(el => el.dataset.tip = t('shortcut', el.dataset.kbd));
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => el.placeholder = t(el.dataset.i18nPh));
+  $('langSel').value = settings.lang;
+  $('hintBtn').textContent = t($('hint').hidden ? 'showHint' : 'hideHint');
+  syncSound(); syncTheme();
+  if (state.screen === 'play'){
+    renderTools();
+    if (isLearn() && $('choices').childElementCount){ $('choices').innerHTML = ''; renderQuiz(); }
+    if (state.inside) renderInside();
+  }
+  render();
+}
+$('langSel').addEventListener('change', e => { settings.lang = e.target.value; saveSettings(); applyLang(); });
+
+// Styled hover tooltip for anything with data-tip (mouse hover + keyboard focus; touch skips it).
+const tip = document.body.appendChild(Object.assign(document.createElement('div'), {id:'tip', role:'tooltip'}));
+let tipFor = null, tipTimer;
+function showTip(el){
+  if (!el.isConnected || !el.dataset.tip) return;
+  tip.textContent = el.dataset.tip;
+  const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+  let y = r.bottom + 8; if (y + h > innerHeight - 4) y = r.top - h - 8;
+  tip.style.left = Math.max(4, Math.min(innerWidth - w - 4, r.left + r.width/2 - w/2)) + 'px';
+  tip.style.top = y + 'px';
+  tip.classList.add('on');
+}
+function hideTip(){ clearTimeout(tipTimer); tipFor = null; tip.classList.remove('on'); }
+document.addEventListener('pointerover', e => {
+  if (e.pointerType !== 'mouse') return;
+  const el = e.target.closest('[data-tip]');
+  if (el === tipFor) return;
+  hideTip(); tipFor = el;
+  if (el) tipTimer = setTimeout(() => showTip(el), 350);
+});
+document.documentElement.addEventListener('pointerleave', hideTip);
+document.addEventListener('pointerdown', hideTip, {capture:true});
+addEventListener('scroll', hideTip, {capture:true, passive:true});
+document.addEventListener('focusin', e => { const el = e.target.closest?.('[data-tip]'); if (el?.matches(':focus-visible')) { tipFor = el; showTip(el); } });
+document.addEventListener('focusout', hideTip);
+
+function isDark(){ return (settings.theme ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark'; }
+function syncTheme(){
+  const dark = isDark(), label = t(dark ? 'toLight' : 'toDark');
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  $('themeBtn').setAttribute('aria-label', label); $('themeBtn').dataset.tip = label;
+}
+$('themeBtn').addEventListener('click', () => { settings.theme = isDark() ? 'light' : 'dark'; saveSettings(); syncTheme(); Snd.play('tap'); });
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncTheme);
+
+function syncSound(){
+  const level = settings.muted || (settings.music === 0 && settings.sfx === 0) ? 'mute' : (Math.max(settings.music, settings.sfx) < 50 ? 'low' : 'high');
+  document.querySelectorAll('.spk').forEach(s => s.dataset.state = level);
+  $('musicVol').value = settings.music; $('sfxVol').value = settings.sfx;
+  $('musicPct').textContent = settings.music; $('sfxPct').textContent = settings.sfx;
+  $('muteBtn').setAttribute('aria-pressed', settings.muted);
+  $('muteBtn').setAttribute('aria-label', t(settings.muted ? 'unmute' : 'mute'));
+  $('muteBtn').dataset.tip = t(settings.muted ? 'unmute' : 'mute');
+}
+function setSound(patch){ Object.assign(settings, patch); saveSettings(); syncSound(); Snd.apply(); }
+function toggleSndPop(open){ $('sndPop').hidden = !open; $('sndBtn').setAttribute('aria-expanded', open); }
+$('sndBtn').addEventListener('click', () => toggleSndPop($('sndPop').hidden));
+$('musicVol').addEventListener('input', e => setSound({music:+e.target.value, muted:false}));
+$('sfxVol').addEventListener('input', e => setSound({sfx:+e.target.value, muted:false}));
+$('sfxVol').addEventListener('change', () => Snd.play('on'));
+$('muteBtn').addEventListener('click', () => setSound({muted:!settings.muted}));
+document.addEventListener('pointerdown', e => { if (!$('sndPop').hidden && !e.target.closest('.snd')) toggleSndPop(false); });
+
+// Game-feel hygiene: no browser context menu / long-press menu, no ghost-dragging text or icons (text fields keep theirs).
+const editable = el => el.closest?.('input,textarea,[contenteditable]');
+document.addEventListener('contextmenu', e => { if (!editable(e.target)) e.preventDefault(); });
+document.addEventListener('dragstart', e => { if (!editable(e.target)) e.preventDefault(); });
+document.addEventListener('mousedown', e => { if (e.button === 1) e.preventDefault(); });  // middle-click autoscroll
+
+// Audio can only start from a user gesture (iOS/Android autoplay rules).
+document.addEventListener('pointerdown', Snd.init, {capture:true});
+document.addEventListener('keydown', Snd.init, {capture:true});
+document.addEventListener('visibilitychange', Snd.visible);
+
+let installEvt = null;
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; $('installBtn').hidden = false; });
+addEventListener('appinstalled', () => { installEvt = null; $('installBtn').hidden = true; });
+$('installBtn').addEventListener('click', async () => {
+  if (!installEvt) return;
+  installEvt.prompt(); await installEvt.userChoice; installEvt = null; $('installBtn').hidden = true;
+});
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+
+applyLang();
+</script>
+</body>
+</html>

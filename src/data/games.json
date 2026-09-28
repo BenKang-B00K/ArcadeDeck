@@ -785,5 +785,28 @@
       18,
       21
     ]
+  },
+  {
+    "id": "38",
+    "slug": "only-nand",
+    "language": "EN/KO/JA",
+    "thumbnail": "images/only-nand.webp",
+    "genres": [
+      "Puzzle",
+      "Educational"
+    ],
+    "gameUrl": "https://games.arcadedeck.net/only-nand/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "platform": "BOTH",
+    "isOriginal": true,
+    "badge": "NEW",
+    "scoreTiers": [
+      3,
+      30,
+      70,
+      110,
+      129
+    ]
   }
 ]

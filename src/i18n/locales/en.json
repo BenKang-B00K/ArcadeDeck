@@ -3305,6 +3305,88 @@
         }
       ]
     },
+    "38": {
+      "title": "Only NAND",
+      "description": "A logic-circuit puzzle game where you start with a single part, the NAND gate, and build everything else from it. Wire NOT, AND, OR and XOR, then adders, multiplexers, latches, counters and a tiny ALU. Every circuit you solve becomes a chip for the next one, across 43 levels and a free-build sandbox.",
+      "fullDescription": "\n      Only NAND is a **logic-circuit puzzle game** built on one real idea from computer engineering: every digital circuit can be made from **NAND gates alone**. You start with one part and two switches. Drag wires from pin to pin, flip the inputs, and press Test circuit — the game checks your design against every row of the truth table and marks the ones that don't match.\n      Each solved level **becomes a chip** in your parts list. Build NOT out of NAND, then AND out of NOT and NAND, then OR, XOR, a half adder, a full adder and a **4-bit adder** — each one standing on the last. Tap the magnifier on any chip to **look inside** and see the NAND gates it comes down to, using your own design.\n      **43 levels in six chapters**: Basics, New Gates, Advanced (adders, subtractors, multiplexers), Expert (decoder, comparator, multiplier, a 2-bit ALU, a 7-segment display), **Memory** — feedback loops, latches, flip-flops, counters and a shift register, tested step by step over time — and **Special Rules**, classic puzzles with NAND only and a hard part budget. Finish under **par** for three stars. Every level has a hint, a short \"why it works\" note and a Wikipedia link.\n      The **Sandbox** is a huge free-build board with every part unlocked: place switches and lamps, box-select and move groups, draw named regions, watch a live truth table, save circuits and share a PNG of your design. Circuit-board look with light and dark mode, D Dorian ambient music and effects with volume sliders. Plays in English, Korean and Japanese, installs as an app and works offline.\n    ",
+      "controls": "Parts List: Tap a part to add it to the board / Drag Pin to Pin: Connect a wire / Tap a Switch: Flip an input / Magnifier: Look inside a chip / Test Circuit: Check your design / Del, Backspace or X: Delete selected / C: Clear board / I: Look inside / Esc: Cancel / Sandbox: drag empty space to pan, scroll or pinch to zoom, B box select, R region, Ctrl+C / Ctrl+V copy and paste",
+      "scoreLabel": "Stars",
+      "tips": "Every gate starts from **NOT**: tie both NAND inputs together and it inverts. **AND is NOT of NAND**, and **OR is NAND of two NOTs** (De Morgan). Use the chips you already built — an adder is much easier from HALF and FULL than from bare NANDs. Stuck? Read the rows marked **✗** in the truth table: they tell you exactly which input combination is wrong. For **three stars**, rebuild a solved level with fewer parts. In **Memory** levels a wire that loops back is the point, not a mistake.",
+      "lore": "\n      Every processor ever made, from a pocket calculator to the chip in your phone, comes down to billions of tiny switches. Wire four transistors the right way and you get a NAND gate — and with enough NAND gates, you can build anything.\n      You get one. Build the rest.\n    ",
+      "features": [
+        "Build Every Logic Gate From a Single NAND Gate",
+        "43 Levels in Six Chapters, From NOT to a 2-Bit ALU",
+        "Every Solved Circuit Becomes a Reusable Chip",
+        "Look Inside Any Chip to See Its NAND Gates",
+        "Memory Chapter: Latches, Flip-Flops, Counters, Shift Registers",
+        "Special Rules: NAND Only With a Hard Part Budget",
+        "Three Stars for Beating Par, With Hints and Why-It-Works Notes",
+        "Free-Build Sandbox With Live Truth Table, Saves and PNG Share",
+        "Light and Dark Mode, D Dorian Music With Volume Sliders",
+        "Phone, Tablet and Desktop — Installable, Plays Offline, EN/KO/JA"
+      ],
+      "objectives": "Solve all **43 levels** by wiring circuits whose outputs match the target on **every row of the truth table** — or, in Memory levels, on every step of the test sequence. Turn each solution into a **chip**, climb from NOT to adders, memory and an ALU, and finish every level at or under **par** for **three stars**.",
+      "controlsTable": [
+        {
+          "key": "Tap a part",
+          "action": "Add it from the Parts list to the board"
+        },
+        {
+          "key": "Drag pin → pin",
+          "action": "Connect a wire"
+        },
+        {
+          "key": "Tap a switch",
+          "action": "Flip an input between 0 and 1"
+        },
+        {
+          "key": "Magnifier  /  I",
+          "action": "Look inside a chip"
+        },
+        {
+          "key": "Test circuit",
+          "action": "Check your design against the truth table"
+        },
+        {
+          "key": "Del  /  Backspace  /  X",
+          "action": "Delete the selected part or wire"
+        },
+        {
+          "key": "C",
+          "action": "Clear the board"
+        },
+        {
+          "key": "Esc",
+          "action": "Cancel the current action"
+        },
+        {
+          "key": "B  ·  R  ·  + / − / 0",
+          "action": "Sandbox: box select, draw region, zoom"
+        },
+        {
+          "key": "Ctrl+C  /  Ctrl+V",
+          "action": "Sandbox: copy and paste a selection"
+        }
+      ],
+      "faq": [
+        {
+          "q": "Do I need to know electronics?",
+          "a": "No. The first levels explain what signals, wires and gates are, and each level has a hint and a short note on why the solution works. Everything else is trial and error against the truth table."
+        },
+        {
+          "q": "What is a NAND gate?",
+          "a": "A gate with two inputs that outputs 0 only when both inputs are 1, and 1 otherwise. It is \"functionally complete\": every other logic gate, and so every digital circuit, can be built from NAND gates alone."
+        },
+        {
+          "q": "What counts toward my personal best?",
+          "a": "Your total stars: the best star rating on each level added up, 3 per level, 129 in all. You get three stars by solving a level at or under its par part count."
+        },
+        {
+          "q": "Is my progress saved?",
+          "a": "Yes, in this browser. Solved levels, best part counts, your chip designs and sandbox saves stay on this device; clearing site data or a private window removes them."
+        }
+      ]
+    },
     "_comment": "Per-game canonical English. Translators mirror this in {lang}.json."
   }
 }

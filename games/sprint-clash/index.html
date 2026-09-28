@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#070b1c">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="Local co-op sports duel: split-screen on one tablet or online peer-to-peer.">
+<title>Sprint Clash</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/" } }</script>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js" crossorigin>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="gY" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff6b8"/><stop offset=".45" stop-color="#ffd23f"/><stop offset="1" stop-color="#d68400"/></linearGradient><linearGradient id="gC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c4f8ff"/><stop offset=".45" stop-color="#35e0ff"/><stop offset="1" stop-color="#0a78b0"/></linearGradient><linearGradient id="gP" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc9dc"/><stop offset=".45" stop-color="#ff4f8b"/><stop offset="1" stop-color="#a8134f"/></linearGradient><linearGradient id="gG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfffe4"/><stop offset=".45" stop-color="#3dff9a"/><stop offset="1" stop-color="#0c8f4d"/></linearGradient><linearGradient id="gR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffbdb3"/><stop offset=".45" stop-color="#ff4d3d"/><stop offset="1" stop-color="#9c140a"/></linearGradient><linearGradient id="gB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d2ccff"/><stop offset=".45" stop-color="#7a6dff"/><stop offset="1" stop-color="#3424a8"/></linearGradient><linearGradient id="gW" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6cf9c"/><stop offset=".45" stop-color="#c47d3e"/><stop offset="1" stop-color="#6f3c14"/></linearGradient><linearGradient id="gS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".45" stop-color="#cfd8f2"/><stop offset="1" stop-color="#7481a8"/></linearGradient><linearGradient id="gK" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a86ab"/><stop offset=".45" stop-color="#3a4569"/><stop offset="1" stop-color="#151b36"/></linearGradient><linearGradient id="gA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a6ecff"/><stop offset=".45" stop-color="#2f9fe0"/><stop offset="1" stop-color="#0f4d85"/></linearGradient></defs></svg>
+<canvas id="c"></canvas>
+<div id="hud"></div>
+
+<div id="topbar">
+  <button id="btnExit" class="icon game-only" data-i18n-aria="exit">
+    <svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+  <select id="lang" class="menu-only" data-i18n-aria="language">
+    <option value="en">English</option><option value="ko">한국어</option><option value="ja">日本語</option>
+  </select>
+  <div class="vol">
+    <button id="btnSnd" class="icon" data-i18n-aria="sound" data-level="2">
+      <svg class="i" viewBox="0 0 24 24"><path class="spk" d="M3 9.5h4l5-4v13l-5-4H3z"/><path class="w1" d="M15.5 9a4 4 0 0 1 0 6"/><path class="w2" d="M18.5 6a8.5 8.5 0 0 1 0 12"/><path class="x" d="M16 9.5l5 5M21 9.5l-5 5"/></svg>
+    </button>
+    <input id="vol" class="menu-only" type="range" min="0" max="100" step="1" data-i18n-aria="volume">
+  </div>
+  <button id="btnMus" class="icon" data-i18n-aria="music">
+    <svg class="i" viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/><path class="slash" d="M3 3l18 18"/></svg>
+  </button>
+  <button id="btnFs" class="icon menu-only" data-i18n-aria="fullscreen">
+    <svg class="i" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+  </button>
+</div>
+
+<div id="menu" class="screen on">
+  <div class="card">
+    <h1 class="logo"><span class="a">SPRINT</span><span class="b">CLASH</span></h1>
+    <p class="tagline" data-i18n="tagline"></p>
+    <p class="lineup" data-i18n="lineup"></p>
+    <div class="games" role="group" aria-label="Games">
+      <button class="game" data-game="dash" aria-pressed="false">
+        <svg class="i3" viewBox="0 0 48 48" aria-hidden="true"><path fill="url(#gY)" d="M26 3L8 28h14l-2 17 20-26H26z"/><path class="hl" d="M24 9L13.5 24.5"/></svg>
+        <b data-i18n="gameDash"></b><small data-i18n="gameDashDesc"></small>
+      </button>
+      <button class="game" data-game="timing" aria-pressed="false">
+        <svg class="i3" viewBox="0 0 48 48" aria-hidden="true"><circle cx="22" cy="26" r="18" fill="url(#gR)"/><circle cx="22" cy="26" r="12" fill="url(#gS)"/><circle cx="22" cy="26" r="6" fill="url(#gR)"/><path class="hl" d="M9 21a14 14 0 0 1 8-8"/><path class="o" d="M23 25L40 8" stroke-width="5.5"/><path class="ln" d="M23 25L40 8" stroke="#e8ecff" stroke-width="2.5"/><path fill="url(#gC)" d="M37 6l7-3-2 6-4 2z"/></svg>
+        <b data-i18n="gameTiming"></b><small data-i18n="gameTimingDesc"></small>
+      </button>
+      <button class="game" data-game="draw" aria-pressed="false">
+        <svg class="i3" viewBox="0 0 48 48" aria-hidden="true"><rect x="20" y="3" width="8" height="6" rx="1.5" fill="url(#gY)"/><path fill="url(#gS)" d="M35.5 10.5l3-3 3 3-3 3z"/><circle cx="24" cy="27" r="17" fill="url(#gS)"/><circle cx="24" cy="27" r="12.5" fill="#f5f8ff"/><path class="ln" d="M24 27v-8M24 27l6 4" stroke-width="2.6"/><circle cx="24" cy="27" r="2" fill="url(#gR)"/><path class="hl" d="M10 22a15 15 0 0 1 9-9"/></svg>
+        <b data-i18n="gameDraw"></b><small data-i18n="gameDrawDesc"></small>
+      </button>
+      <button class="game" data-game="stack" aria-pressed="false">
+        <svg class="i3" viewBox="0 0 48 48" aria-hidden="true"><path fill="#0a6a9c" d="M35 36l5-5v8l-5 5z"/><path fill="#bff6ff" d="M5 36l5-5h30l-5 5z"/><rect x="5" y="36" width="30" height="8" fill="url(#gC)"/><path fill="#8f1043" d="M33 25l5-5v8l-5 5z"/><path fill="#ffc9dc" d="M9 25l5-5h24l-5 5z"/><rect x="9" y="25" width="24" height="8" fill="url(#gP)"/><path fill="#b06c00" d="M32 14l5-5v8l-5 5z"/><path fill="#fff3b0" d="M14 14l5-5h18l-5 5z"/><rect x="14" y="14" width="18" height="8" fill="url(#gY)"/><path class="hl" d="M16 16h13"/></svg>
+        <b data-i18n="gameStack"></b><small data-i18n="gameStackDesc"></small>
+      </button>
+      <button class="game" data-game="sprint" aria-pressed="false">
+        <svg class="i3" viewBox="0 0 48 48" aria-hidden="true"><path class="ln" d="M3 18h8M1 26h8M5 34h6" stroke="#98a3c7" stroke-width="2.5"/><path class="o" d="M16 43l6-12 7 4v9" stroke-width="7"/><path class="ln" d="M16 43l6-12 7 4v9" stroke="#35e0ff" stroke-width="4"/><path class="o" d="M23 31l2-11 8 6 7-2" stroke-width="7"/><path class="ln" d="M23 31l2-11 8 6 7-2" stroke="#35e0ff" stroke-width="4"/><path class="o" d="M25 20l-8 2-4 6" stroke-width="7"/><path class="ln" d="M25 20l-8 2-4 6" stroke="#35e0ff" stroke-width="4"/><circle cx="30" cy="9.5" r="5" fill="url(#gC)"/><circle class="gl" cx="28.5" cy="8" r="1.6"/></svg>
+        <b data-i18n="gameSprint"></b><small data-i18n="gameSprintDesc"></small>
+      </button>
+      <button class="game" data-game="rope" aria-pressed="false">
+        <svg class="i3" viewBox="0 0 48 48" aria-hidden="true"><rect x="2" y="26" width="4" height="20" rx="1" fill="url(#gW)"/><rect x="42" y="26" width="4" height="20" rx="1" fill="url(#gW)"/><path class="o" d="M4 29Q24 35 44 29" stroke-width="5.5"/><path class="ln" d="M4 29Q24 35 44 29" stroke="#d9a066" stroke-width="2.5"/><path class="o" d="M24 14v15M24 29l-4 4M24 29l4 4" stroke-width="6.5"/><path class="ln" d="M24 14v15M24 29l-4 4M24 29l4 4" stroke="#ff4f8b" stroke-width="3.5"/><path class="o" d="M5 21Q24 15 43 21" stroke-width="5.5"/><path class="ln" d="M5 21Q24 15 43 21" stroke="#ffd23f" stroke-width="2.5"/><circle cx="24" cy="9" r="4.5" fill="url(#gP)"/><circle class="gl" cx="22.5" cy="7.5" r="1.4"/></svg>
+        <b data-i18n="gameRope"></b><small data-i18n="gameRopeDesc"></small>
+      </button>
+      <button class="game" data-game="echo" aria-pressed="false">
+        <svg class="i3" viewBox="0 0 48 48" aria-hidden="true"><path class="ln" d="M5 12a8 8 0 0 1 7-7M5 19a15 15 0 0 1 14-14" stroke="#35e0ff" stroke-width="2.5"/><path fill="url(#gB)" d="M18 12l21-5v6l-21 5z"/><rect x="16.5" y="13" width="3.5" height="23" fill="url(#gB)"/><rect x="35.5" y="9" width="3.5" height="23" fill="url(#gB)"/><ellipse cx="13" cy="37" rx="6.5" ry="5" transform="rotate(-20 13 37)" fill="url(#gB)"/><ellipse cx="32" cy="33" rx="6.5" ry="5" transform="rotate(-20 32 33)" fill="url(#gB)"/><circle class="gl" cx="11" cy="35" r="1.8"/><circle class="gl" cx="30" cy="31" r="1.8"/></svg>
+        <b data-i18n="gameEcho"></b><small data-i18n="gameEchoDesc"></small>
+      </button>
+      <button class="game" data-game="lanes" aria-pressed="false">
+        <svg class="i3" viewBox="0 0 48 48" aria-hidden="true"><path fill="url(#gK)" d="M17 3h14l14 42H3z"/><path class="ln" d="M21.7 3L17 45M26.3 3L31 45" stroke="#7481a8" stroke-width="1.2"/><path class="ln" d="M5 38h38" stroke="#ffd23f" stroke-width="2.5"/><ellipse cx="13" cy="38" rx="5.5" ry="3" fill="url(#gC)"/><ellipse cx="24" cy="24" rx="4.5" ry="2.5" fill="url(#gP)"/><ellipse cx="30.5" cy="12" rx="3.2" ry="1.8" fill="url(#gG)"/></svg>
+        <b data-i18n="gameLanes"></b><small data-i18n="gameLanesDesc"></small>
+      </button>
+      <button class="game" data-game="tug" aria-pressed="false">
+        <svg class="i3" viewBox="0 0 48 48" aria-hidden="true"><path class="o" d="M4 28h40" stroke-width="7"/><path class="ln" d="M4 28h40" stroke="#d9a066" stroke-width="4"/><path class="ln" d="M11 26l2 4M17 26l2 4M29 26l2 4M35 26l2 4" stroke-width="1.2"/><path class="o" d="M24 28V8" stroke-width="5"/><path class="ln" d="M24 28V8" stroke="#e8ecff" stroke-width="2"/><path fill="url(#gR)" d="M24 8l12 5-12 5z"/><circle cx="6" cy="28" r="5.5" fill="url(#gC)"/><circle cx="42" cy="28" r="5.5" fill="url(#gP)"/><circle class="gl" cx="4.5" cy="26.5" r="1.6"/><circle class="gl" cx="40.5" cy="26.5" r="1.6"/></svg>
+        <b data-i18n="gameTug"></b><small data-i18n="gameTugDesc"></small>
+      </button>
+      <button class="game" data-game="fuse" aria-pressed="false">
+        <svg class="i3" viewBox="0 0 48 48" aria-hidden="true"><path class="o" d="M34 12c2-4 5-6 8-6" stroke-width="5.5"/><path class="ln" d="M34 12c2-4 5-6 8-6" stroke="#d9a066" stroke-width="2.5"/><path fill="url(#gS)" d="M27 15l6-6 6 6-6 6z"/><circle cx="20" cy="29" r="15" fill="url(#gK)"/><ellipse class="gl" cx="14" cy="22" rx="5" ry="3.2" transform="rotate(-35 14 22)"/><path fill="url(#gY)" d="M43 1l1.5 3.5L48 5l-3 2.2L46 11l-3-2-3 2 1-3.8L38 5l3.5-.5z"/></svg>
+        <b data-i18n="gameFuse"></b><small data-i18n="gameFuseDesc"></small>
+      </button>
+      <button class="game" data-game="sumo" aria-pressed="false">
+        <svg class="i3" viewBox="0 0 48 48" aria-hidden="true"><path fill="url(#gW)" d="M3 32v5a21 9 0 0 0 42 0v-5z"/><ellipse cx="24" cy="32" rx="21" ry="9" fill="#e9b77e"/><ellipse cx="24" cy="32" rx="15" ry="6" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="1.5"/><circle cx="17" cy="26" r="7" fill="url(#gC)"/><circle cx="31" cy="27" r="7" fill="url(#gP)"/><circle class="gl" cx="15" cy="23.5" r="2"/><circle class="gl" cx="29" cy="24.5" r="2"/><path class="ln" d="M24 5v6M18 7l2.5 4.5M30 7l-2.5 4.5" stroke="#ffd23f" stroke-width="2.5"/></svg>
+        <b data-i18n="gameSumo"></b><small data-i18n="gameSumoDesc"></small>
+      </button>
+      <button class="game" data-game="grid" aria-pressed="false">
+        <svg class="i3" viewBox="0 0 48 48" aria-hidden="true"><path fill="#7481a8" d="M4 20l20 12v6L4 26z"/><path fill="#4b5780" d="M44 20L24 32v6l20-12z"/><path fill="url(#gS)" d="M24 8l20 12-20 12L4 20z"/><path fill="#35e0ff" stroke="none" d="M24 8l6.67 4L24 16l-6.67-4zM30.67 12l6.67 4-6.67 4L24 16zM17.33 12L24 16l-6.67 4-6.67-4z"/><path fill="#ff4f8b" stroke="none" d="M24 24l6.67 4L24 32l-6.67-4zM30.67 20l6.67 4-6.67 4L24 24z"/><path class="ln" d="M30.67 12l-20 12M37.33 16l-20 12M17.33 12l20 12M10.67 16l20 12" stroke-width="1"/><path class="ln" d="M24 8l20 12-20 12L4 20z"/><circle cx="24" cy="18" r="3.5" fill="url(#gY)"/></svg>
+        <b data-i18n="gameGrid"></b><small data-i18n="gameGridDesc"></small>
+      </button>
+      <button class="game" data-game="vault" aria-pressed="false">
+        <svg class="i3" viewBox="0 0 48 48" aria-hidden="true"><path fill="url(#gK)" d="M7 45V22a17 17 0 0 1 34 0v23z"/><path fill="#0c1233" d="M13 45V23a11 11 0 0 1 22 0v22z"/><path fill="url(#gC)" d="M24 19l8 8-8 13-8-13z"/><path class="ln" d="M16 27h16M20 23l4 4 4-4M24 27v13" stroke-width="1" stroke="#0a78b0"/><path class="hl" d="M10 18a15 15 0 0 1 7-7"/><path fill="url(#gY)" stroke="none" d="M38 3l1 3 3 1-3 1-1 3-1-3-3-1 3-1zM9 30l.8 2.2 2.2.8-2.2.8L9 36l-.8-2.2L6 33l2.2-.8z"/></svg>
+        <b data-i18n="gameVault"></b><small data-i18n="gameVaultDesc"></small>
+      </button>
+      <button class="game" data-game="chicken" aria-pressed="false">
+        <svg class="i3" viewBox="0 0 48 48" aria-hidden="true"><path fill="url(#gW)" d="M1 31h29v16H1z"/><path fill="#6bdc6b" d="M1 31l3-3h29l-3 3z"/><path fill="#3f9e45" d="M30 31l3-3v18l-3 1z"/><rect x="5" y="15" width="20" height="10" rx="2" fill="url(#gR)"/><path class="hl" d="M8 18h14"/><circle cx="10" cy="26" r="3.5" fill="url(#gK)"/><circle cx="21" cy="26" r="3.5" fill="url(#gK)"/><path class="o" d="M31 28V12" stroke-width="4.8"/><path class="ln" d="M31 28V12" stroke="#e8ecff" stroke-width="1.8"/><path fill="url(#gY)" d="M31 12l9 3.5-9 3.5z"/></svg>
+        <b data-i18n="gameChicken"></b><small data-i18n="gameChickenDesc"></small>
+      </button>
+      <button class="game" data-game="boat" aria-pressed="false">
+        <svg class="i3" viewBox="0 0 48 48" aria-hidden="true"><path class="ln" d="M1 42q4-3 8 0t8 0 8 0 8 0 8 0 8 0" stroke="#2f9fe0" stroke-width="2.5"/><path class="o" d="M14 25l-4 12M22 25l-4 12M30 25l-4 12" stroke-width="5"/><path class="ln" d="M14 25l-4 12M22 25l-4 12M30 25l-4 12" stroke="#d9a066" stroke-width="2"/><path fill="url(#gR)" d="M3 27h40l-5 9H9z"/><path class="hl" d="M7 29.5h30"/><path class="o" d="M40 27c4-5 3-11-2-13" stroke-width="6.5"/><path class="ln" d="M40 27c4-5 3-11-2-13" stroke="#ffd23f" stroke-width="3.5"/><ellipse cx="38" cy="12" rx="5" ry="3.5" fill="url(#gY)"/><circle cx="39" cy="11" r="1" fill="#0c1233" stroke="none"/><circle cx="14" cy="22" r="3" fill="url(#gC)"/><circle cx="22" cy="22" r="3" fill="url(#gC)"/><circle cx="30" cy="22" r="3" fill="url(#gC)"/></svg>
+        <b data-i18n="gameBoat"></b><small data-i18n="gameBoatDesc"></small>
+      </button>
+      <button class="game" data-game="hex" aria-pressed="false">
+        <svg class="i3" viewBox="0 0 48 48" aria-hidden="true"><path fill="#a86600" d="M8 36L16 43H32L40 36v4L32 47H16L8 40z"/><path fill="url(#gY)" d="M8 36L16 29H32L40 36L32 43H16z"/><path fill="#8f1043" d="M8 24L16 31H32L40 24v4L32 35H16L8 28z"/><path fill="url(#gP)" d="M8 24L16 17H32L40 24L32 31H16z"/><path fill="#0a6a9c" d="M8 12L16 19H32L40 12v4L32 23H16L8 16z"/><path fill="url(#gC)" d="M8 12L16 5H32L40 12L32 19H16z"/><path fill="#0c1233" d="M24 12l3-2.5h6L36 12l-3 2.5h-6z"/><path fill="url(#gC)" d="M36 20l2-1.6h4L44 20l-2 1.6h-4z"/><path class="hl" d="M12 12l5-4h12"/></svg>
+        <b data-i18n="gameHex"></b><small data-i18n="gameHexDesc"></small>
+      </button>
+      <button class="game" data-game="curl" aria-pressed="false">
+        <svg class="i3" viewBox="0 0 48 48" aria-hidden="true"><ellipse cx="24" cy="35" rx="22" ry="10" fill="url(#gA)"/><ellipse cx="24" cy="35" rx="14" ry="6.5" fill="#f5f8ff"/><ellipse cx="24" cy="35" rx="6.5" ry="3" fill="url(#gR)"/><path fill="url(#gS)" d="M13 22v6a11 4.5 0 0 0 22 0v-6z"/><ellipse cx="24" cy="22" rx="11" ry="4.5" fill="#eef2ff"/><path class="o" d="M19 21v-6h10" stroke-width="6.5"/><path class="ln" d="M19 21v-6h10" stroke="#ff4d3d" stroke-width="3.5"/></svg>
+        <b data-i18n="gameCurl"></b><small data-i18n="gameCurlDesc"></small>
+      </button>
+      <button class="game" data-game="puck" aria-pressed="false">
+        <svg class="i3" viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="12" width="40" height="32" rx="6" fill="#2a1d85"/><rect x="4" y="7" width="40" height="32" rx="6" fill="url(#gB)"/><path class="ln" d="M8 23h32" stroke="#fff" stroke-opacity=".6" stroke-width="1.2"/><circle cx="24" cy="23" r="5" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="1.2"/><circle cx="24" cy="33" r="5" fill="url(#gP)"/><circle cx="24" cy="32" r="2.2" fill="#ffc9dc"/><circle cx="24" cy="13" r="5" fill="url(#gC)"/><circle cx="24" cy="12" r="2.2" fill="#c4f8ff"/><ellipse cx="31" cy="21" rx="3.8" ry="3" fill="url(#gK)"/></svg>
+        <b data-i18n="gamePuck"></b><small data-i18n="gamePuckDesc"></small>
+      </button>
+      <button class="game" data-game="chairs" aria-pressed="false">
+        <svg class="i3" viewBox="0 0 48 48" aria-hidden="true"><rect x="11" y="26" width="2.5" height="14" fill="url(#gK)"/><rect x="11" y="5" width="16" height="20" rx="3" fill="url(#gR)"/><path class="hl" d="M14 9v12"/><path fill="#f6cf9c" d="M9 25h21l5 4H14z"/><path fill="url(#gW)" d="M14 29h21v4H14z"/><rect x="15" y="33" width="3" height="12" fill="url(#gK)"/><rect x="31" y="33" width="3" height="12" fill="url(#gK)"/><rect x="39" y="3" width="2.5" height="14" fill="url(#gY)"/><ellipse cx="37" cy="17.5" rx="4.2" ry="3.2" transform="rotate(-20 37 17.5)" fill="url(#gY)"/><path class="o" d="M41.5 4q5 2 4 7" stroke-width="5"/><path class="ln" d="M41.5 4q5 2 4 7" stroke="#ffd23f" stroke-width="2"/></svg>
+        <b data-i18n="gameChairs"></b><small data-i18n="gameChairsDesc"></small>
+      </button>
+      <button class="game" data-game="fish" aria-pressed="false">
+        <svg class="i3" viewBox="0 0 48 48" aria-hidden="true"><path class="ln" d="M1 28q5-3 10 0t10 0 10 0 10 0 10 0" stroke="#2f9fe0" stroke-width="2.5"/><path class="ln" d="M30 13Q41 20 40 35" stroke="#e8ecff" stroke-width="1"/><path class="o" d="M3 3l27 10" stroke-width="6"/><path class="ln" d="M3 3l27 10" stroke="#c47d3e" stroke-width="3"/><path fill="url(#gG)" d="M17 37l-9-7v14z"/><path fill="url(#gG)" d="M16 37c6-9 19-9 26 0-7 9-20 9-26 0z"/><path class="hl" d="M22 33.5c4-3 10-3 14 0"/><circle cx="35.5" cy="36" r="1.6" fill="#0c1233" stroke="none"/></svg>
+        <b data-i18n="gameFish"></b><small data-i18n="gameFishDesc"></small>
+      </button>
+      <button class="game" data-game="kite" aria-pressed="false">
+        <svg class="i3" viewBox="0 0 48 48" aria-hidden="true"><path class="ln" d="M26 17L4 46" stroke="#e8ecff" stroke-width="1"/><path class="o" d="M26 33q-6 5-2 9t-5 5" stroke-width="4.2"/><path class="ln" d="M26 33q-6 5-2 9t-5 5" stroke="#e8ecff" stroke-width="1.2"/><path fill="url(#gP)" d="M26 3l14 14H26z"/><path fill="url(#gY)" d="M40 17L26 33V17z"/><path fill="url(#gP)" d="M26 33L12 17h14z"/><path fill="url(#gY)" d="M12 17L26 3v14z"/><path class="ln" d="M26 3v30M12 17h28" stroke-width="1.2"/><path class="ln" d="M26 3L40 17 26 33 12 17z"/><path fill="url(#gC)" d="M20 38l4 1.5-1 3.5zM22 44l4-.5-1.5 3.5z"/><path class="hl" d="M16 16l9-9"/></svg>
+        <b data-i18n="gameKite"></b><small data-i18n="gameKiteDesc"></small>
+      </button>
+      <button class="game" data-game="crowd" data-online aria-pressed="false">
+        <svg class="i3" viewBox="0 0 48 48" aria-hidden="true"><path fill="url(#gS)" d="M2 40v-4a8 8 0 0 1 16 0v4z"/><circle cx="10" cy="17" r="5" fill="url(#gS)"/><path fill="url(#gS)" d="M30 40v-4a8 8 0 0 1 16 0v4z"/><circle cx="38" cy="17" r="5" fill="url(#gS)"/><path fill="url(#gY)" d="M13 46v-6a11 11 0 0 1 22 0v6z"/><circle cx="24" cy="20" r="6.5" fill="url(#gY)"/><circle class="gl" cx="22" cy="18" r="2"/><path class="hl" d="M17 38a7 7 0 0 1 5-5"/></svg>
+        <b data-i18n="gameCrowd"></b><small data-i18n="gameCrowdDesc"></small>
+      </button>
+      <button class="game sel" data-game="random" aria-pressed="true">
+        <svg class="i3" viewBox="0 0 48 48" aria-hidden="true"><path fill="url(#gS)" d="M6 14l18 10v20L6 34z"/><path fill="#8b97c0" d="M42 14v20L24 44V24z"/><path fill="#fff" d="M24 4l18 10-18 10L6 14z"/><ellipse cx="24" cy="14" rx="3.4" ry="1.9" fill="url(#gR)" stroke="none"/><g fill="#0c1233" stroke="none"><ellipse cx="11.4" cy="23" rx="1.8" ry="2.4"/><ellipse cx="18.6" cy="35" rx="1.8" ry="2.4"/><ellipse cx="28.5" cy="26.5" rx="1.8" ry="2.4"/><ellipse cx="33" cy="29" rx="1.8" ry="2.4"/><ellipse cx="37.5" cy="31.5" rx="1.8" ry="2.4"/></g></svg>
+        <b data-i18n="gameRandom"></b><small data-i18n="gameRandomDesc"></small>
+      </button>
+    </div>
+    <p id="gameInfo" class="ginfo" aria-live="polite"><b data-i18n="gameRandom"></b><span data-i18n="gameRandomDesc"></span></p>
+    <div class="playbar">
+      <div class="count" role="radiogroup" data-i18n-aria="players">
+        <span class="count-l">
+          <svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14a6.5 6.5 0 0 1 3.5 6"/></svg>
+          <span data-i18n="players"></span>
+        </span>
+        <button data-n="1" role="radio" aria-checked="false" data-i18n-label="solo">1</button>
+        <button class="sel" data-n="2" role="radio" aria-checked="true">2</button>
+        <button data-n="3" role="radio" aria-checked="false">3</button>
+        <button data-n="4" role="radio" aria-checked="false">4</button>
+      </div>
+      <div class="modes">
+        <button id="btnLocal" class="mode-ic primary" data-i18n-label="modeLocal">
+          <svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M12 5v14"/></svg>
+          <span class="tip" aria-hidden="true"><span data-i18n="modeLocal"></span><small data-i18n="modeLocalDesc"></small></span>
+        </button>
+        <button id="btnHost" class="mode-ic" data-i18n-label="modeHost">
+          <svg class="i" viewBox="0 0 24 24"><path d="M5 12.5a10 10 0 0 1 14 0M8 15.5a5.5 5.5 0 0 1 8 0"/><circle cx="12" cy="19" r="1.2" fill="currentColor"/></svg>
+          <span class="tip" aria-hidden="true"><span data-i18n="modeHost"></span><small data-i18n="modeHostDesc"></small></span>
+        </button>
+        <button id="btnJoin" class="mode-ic" data-i18n-label="modeJoin">
+          <svg class="i" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>
+          <span class="tip" aria-hidden="true"><span data-i18n="modeJoin"></span><small data-i18n="modeJoinDesc"></small></span>
+        </button>
+        <button id="btnCodex" class="mode-ic" data-i18n-label="codex">
+          <svg class="i" viewBox="0 0 24 24"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H20v15H5.5A1.5 1.5 0 0 0 4 19.5z"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H20v-3"/><path d="M12 6.5l1.2 2.4 2.6.4-1.9 1.8.5 2.6-2.4-1.3-2.4 1.3.5-2.6-1.9-1.8 2.6-.4z"/></svg>
+          <span class="tip" aria-hidden="true"><span data-i18n="codex"></span><small data-i18n="codexDesc"></small></span>
+        </button>
+      </div>
+    </div>
+    <p class="keys" data-i18n="keysHint"></p>
+  </div>
+</div>
+
+<div id="lobby" class="screen">
+  <div class="card">
+    <h2 data-i18n="roomCode"></h2>
+    <div id="code" class="code">····</div>
+    <p class="msg" data-i18n="shareCode"></p>
+    <p id="lobbyMsg" class="msg"></p>
+    <div class="row">
+      <button id="btnStart" class="btn primary center" data-i18n="start" disabled></button>
+      <button class="btn center" data-back data-i18n="cancel"></button>
+    </div>
+  </div>
+</div>
+
+<div id="join" class="screen">
+  <div class="card">
+    <h2 data-i18n="modeJoin"></h2>
+    <input id="codeIn" maxlength="4" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" enterkeyhint="go" data-i18n-ph="codePlaceholder">
+    <p id="joinMsg" class="msg"></p>
+    <div class="row">
+      <button id="joinGo" class="btn primary center" data-i18n="join"></button>
+      <button class="btn center" data-back data-i18n="cancel"></button>
+    </div>
+  </div>
+</div>
+
+<div id="guide" class="screen">
+  <div class="card guide">
+    <p class="eyebrow" data-i18n="howTo"></p>
+    <h2 id="gTitle"></h2>
+    <p id="gRec" class="grec"></p>
+    <ul id="gRules"></ul>
+    <div id="gCtrl" class="gctrl"></div>
+    <p id="gKeys" class="msg"></p>
+    <div class="gbar"><i id="gBar"></i></div>
+    <div class="row">
+      <button id="gGo" class="btn primary center"></button>
+      <button class="btn center" data-back data-i18n="menu"></button>
+    </div>
+  </div>
+</div>
+
+<div id="results" class="screen">
+  <div class="card">
+    <h2 id="resTitle"></h2>
+    <div id="resLines"></div>
+    <div id="resRecord" hidden>
+      <div class="rec-top"><span id="recHead"></span><span id="recLead"></span></div>
+      <div id="recRows"></div>
+    </div>
+    <p id="resWait" class="msg"></p>
+    <div class="row">
+      <button id="btnRematch" class="btn primary center" data-i18n="rematch"></button>
+      <button id="btnMenu" class="btn center" data-i18n="menu"></button>
+    </div>
+  </div>
+</div>
+
+<div id="codex" class="screen">
+  <div class="card">
+    <h2 data-i18n="codex"></h2>
+    <p id="cxSum" class="msg"></p>
+    <div id="cxList"></div>
+    <div class="row">
+      <button class="btn center" data-back data-i18n="menu"></button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" role="status"></div>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

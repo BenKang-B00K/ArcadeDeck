@@ -3387,6 +3387,72 @@
         }
       ]
     },
+    "39": {
+      "title": "Sprint Clash",
+      "description": "A 1–4 player party sports battle with 22 mini-games: sprints, tug of war, curling, air hockey, fishing, kite fights and more. Play split-screen on one device or peer-to-peer online with a room code, or go solo and chase your best.",
+      "fullDescription": "\n      Sprint Clash is a **party sports battle for 1 to 4 players** packed with **22 mini-games**. Every game uses the same three buttons — **left, action, right** — so anyone can pick it up in seconds, and a quick how-to card explains each one before it starts.\n      Play on **one device** with a split screen (a tablet, a phone or a shared keyboard), or **host an online room** and have friends join with a code, peer-to-peer. If someone drops out online, an AI takes their seat so the match carries on. Pick **1 player** for **solo mode**: 14 of the games have a score that means something alone, and the results screen tells you when you set a new best.\n      The lineup covers races, reflexes and rhythm: Dash Run, Power Sprint (100 m, hurdles, long jump), Tightrope, Quick Draw, Timing Strike, Stack Tower, Echo Chain, Dorian Lanes and Dragon Boat; head-to-head brawls like Tug of War, Hot Fuse, Sumo Bump, Hex Drop, Puck Panic, Kite Fight and Musical Chairs; and strategy rounds like Grid Claim, Stone Slide curling with wind, Cliff Chicken, Vault Run and Deep Cast fishing. Crowd Cover is an online-only hidden-identity game where every player hides among 35 identical people.\n      The menu shows 8 games around **Random** and reshuffles after every match; Random can draw any game. The **Codex** records every game you have finished and your best winning score for each player count. Rendered in 3D with four cartoon athletes, D Dorian music and effects, and a volume slider. Plays in English, Korean and Japanese, installs as an app and works offline.\n    ",
+      "controls": "P1: A / W / D (left / action / right) · P2: ← / ↑ / → · P3: J / I / L · P4: Numpad 4 / 8 / 6 · Timing Strike: Space · Touch: tap the left / middle / right of your own part of the screen · Double-click a game card to start it straight away",
+      "scoreLabel": "Games finished",
+      "tips": "**Read the how-to card** — every game uses the same three buttons, but what they do changes. In **alternate-press** games (Power Sprint, Tug of War) pressing the **same side twice** makes you stumble, so keep a steady left–right rhythm. Many games punish **early presses**: in Quick Draw, Musical Chairs and Hot Fuse, waiting a beat beats guessing. Try **solo mode** to learn a game before a party night, and open the **Codex** to see which games you have not finished yet — Random can pick any of them.",
+      "lore": "\n      Four kids, one stadium, and a scoreboard that never switches off. Every night the floodlights come up and the announcer draws a new lineup: a sprint, a rope, a frozen lake, a rooftop full of kites.\n      Nobody knows what comes next, only that someone will be standing on the podium when the confetti falls — and that everyone will want a rematch.\n    ",
+      "features": [
+        "22 Mini-Games: Races, Reflex Duels, Rhythm, Brawls and Strategy",
+        "1–4 Players on One Device With a Split Screen",
+        "Online Rooms With a Code — Peer-to-Peer, AI Fills Dropped Seats",
+        "Solo Mode With Personal Bests in 14 Games",
+        "Same Three Buttons in Every Game: Left, Action, Right",
+        "Codex of Every Game Finished and Best Score per Player Count",
+        "New 3×3 Lineup After Every Match, Random Can Pick Any Game",
+        "3D Stadium, Cartoon Athletes and D Dorian Music",
+        "Phone, Tablet and Desktop — Installable, Plays Offline",
+        "English, Korean and Japanese"
+      ],
+      "objectives": "Win the **match**: each mini-game ranks every player, and the **room record** keeps the running wins and points across the session. In **solo mode**, beat your **personal best**. Your ArcadeDeck score is the number of the **22 games** you have finished — fill the **Codex** to reach the top tier.",
+      "controlsTable": [
+        {
+          "key": "A  ·  W  ·  D",
+          "action": "Player 1: left, action, right"
+        },
+        {
+          "key": "←  ·  ↑  ·  →",
+          "action": "Player 2: left, action, right"
+        },
+        {
+          "key": "J  ·  I  ·  L",
+          "action": "Player 3: left, action, right"
+        },
+        {
+          "key": "Numpad 4  ·  8  ·  6",
+          "action": "Player 4: left, action, right"
+        },
+        {
+          "key": "Space / Enter",
+          "action": "Timing Strike: press on your turn; also starts a game from the how-to card"
+        },
+        {
+          "key": "Touch",
+          "action": "Tap the left, middle or right of your own part of the screen"
+        }
+      ],
+      "faq": [
+        {
+          "q": "How many people can play?",
+          "a": "One to four. With 2–4 players the screen splits so everyone has their own view; with 1 player you play solo and chase your best score in the 14 games that work alone."
+        },
+        {
+          "q": "How does online play work?",
+          "a": "One player picks Host Online and gets a room code; the others pick Join Online and enter it. Devices connect peer-to-peer. If a player leaves mid-match, an AI takes over their seat. Crowd Cover can only be played online, because on a shared screen everyone would see who is who."
+        },
+        {
+          "q": "What counts toward my personal best?",
+          "a": "The number of different games you have finished, out of 22. The Codex in the game menu shows which ones you have played and your best winning score for 1, 2, 3 and 4 players."
+        },
+        {
+          "q": "Can I play on a phone or tablet?",
+          "a": "Yes. Each player taps the left, middle or right of their own part of the screen, so a tablet works well for two to four people. It can be installed as an app and plays offline after the first visit (online rooms still need a connection)."
+        }
+      ]
+    },
     "_comment": "Per-game canonical English. Translators mirror this in {lang}.json."
   }
 }

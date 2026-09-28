@@ -808,5 +808,33 @@
       110,
       129
     ]
+  },
+  {
+    "id": "39",
+    "slug": "sprint-clash",
+    "language": "EN/KO/JA",
+    "thumbnail": "images/sprint-clash.webp",
+    "genres": [
+      "Arcade",
+      "PvP",
+      "Local Co-op"
+    ],
+    "players": [
+      1,
+      4
+    ],
+    "gameUrl": "https://games.arcadedeck.net/sprint-clash/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "platform": "BOTH",
+    "isOriginal": true,
+    "badge": "NEW",
+    "scoreTiers": [
+      1,
+      5,
+      10,
+      16,
+      22
+    ]
   }
 ]

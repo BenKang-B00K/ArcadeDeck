@@ -17,10 +17,18 @@ const GameHeadMeta: React.FC<Props> = ({ game, lang, overlay }) => {
   const title = getLocalizedString(game, 'title', lang, overlay);
   const desc = getLocalizedString(game, 'description', lang, overlay);
   const imageUrl = `https://arcadedeck.net/${encodeURI(game.thumbnail)}`;
-  const pageUrl = `https://arcadedeck.net/play/${game.slug}`;
+  // Mirrors prerender-pages.js: self URL per locale; an untranslated locale
+  // canonicalizes to the English page.
+  const enUrl = `https://arcadedeck.net/play/${game.slug}`;
+  const pageUrl = lang === 'en' ? enUrl : `https://arcadedeck.net/${lang}/play/${game.slug}`;
+  const canonical = lang === 'en' || overlay?.games?.[game.id] ? pageUrl : enUrl;
   const isApp = game.kind === 'app';
   const uiT = useUiText();
   const playFreeOn = isApp ? uiT('seoFreeOnApp', 'Free on ArcadeDeck') : uiT('seoPlayFreeOn', 'Play Free on ArcadeDeck');
+  const playPrefix = isApp ? '' : uiT('seoPlayPrefix', 'Play') + ' ';
+  const freeOnline = isApp
+    ? uiT('seoFreeOnlineApp', 'Free browser app on ArcadeDeck. No download, no sign-up.')
+    : uiT('seoFreeOnlineGame', 'Free online browser game on ArcadeDeck.');
 
   useEffect(() => {
     document.title = `${title} - ${playFreeOn}`;
@@ -51,9 +59,9 @@ const GameHeadMeta: React.FC<Props> = ({ game, lang, overlay }) => {
   return (
     <>
       <html lang={lang} />
-      <meta name="description" content={`Play ${title}: ${desc} Free online browser game on ArcadeDeck.`} />
-      <meta name="keywords" content={`${titleEn}, ${game.genres.join(', ')}, free online game, browser game, arcadedeck`} />
-      <link rel="canonical" href={pageUrl} />
+      <meta name="description" content={`${playPrefix}${title}: ${desc} ${freeOnline}`} />
+      <meta name="keywords" content={`${title}, ${game.genres.join(', ')}, free online game, browser game, arcadedeck`} />
+      <link rel="canonical" href={canonical} />
 
       <meta property="og:type" content="website" />
       <meta property="og:site_name" content="ArcadeDeck" />

@@ -645,7 +645,7 @@ const homeJsonLd = (lang) => [
     inLanguage: lang,
     mainEntity: {
       '@type': 'ItemList',
-      itemListElement: playableGames.slice(0, 20).map((g, i) => ({
+      itemListElement: playableGames.map((g, i) => ({
         '@type': 'ListItem',
         position: i + 1,
         url: fullUrl(lang, `/play/${g.slug}`),
@@ -711,9 +711,9 @@ ${noscriptItems}
   // Drop existing og:locale:alternate(s) and inject the full set.
   shell = shell.replace(/\s*<meta property="og:locale:alternate" content="[^"]*" \/>/g, '');
   shell = shell.replace(/(<meta property="og:locale" content="[^"]*" \/>)/, `$1\n    ${ogLocaleAlts(lang)}`);
-  shell = shell.replace(/(<meta property="twitter:url" content=")[^"]*(")/, `$1${homeUrl}$2`);
-  shell = shell.replace(/(<meta property="twitter:title" content=")[^"]*(")/, `$1${escAttr(homeTitle)}$2`);
-  shell = shell.replace(/(<meta property="twitter:description" content=")[^"]*(")/, `$1${escAttr(homeDesc)}$2`);
+  shell = shell.replace(/(<meta name="twitter:url" content=")[^"]*(")/, `$1${homeUrl}$2`);
+  shell = shell.replace(/(<meta name="twitter:title" content=")[^"]*(")/, `$1${escAttr(homeTitle)}$2`);
+  shell = shell.replace(/(<meta name="twitter:description" content=")[^"]*(")/, `$1${escAttr(homeDesc)}$2`);
 
   // Replace LCP shell hero text with translated version. Mirrors the <header>
   // Home.tsx renders so the static shell and the React tree share dimensions.

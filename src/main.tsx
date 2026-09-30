@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { matchLocaleSlug, localeToUrlPrefix } from './i18n/registry'
+import { installHeadDedupe } from './utils/headDedupe'
 
 // Detect locale from the URL prefix (e.g. /ja, /ko). React Router runs
 // with the prefix as basename so child routes match the canonical English
@@ -10,6 +11,8 @@ import { matchLocaleSlug, localeToUrlPrefix } from './i18n/registry'
 const firstSeg = window.location.pathname.split('/')[1] ?? '';
 const matched = matchLocaleSlug(firstSeg);
 const basename = matched && matched !== 'en' ? localeToUrlPrefix(matched) : '/';
+
+installHeadDedupe()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

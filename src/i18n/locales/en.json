@@ -3453,6 +3453,72 @@
         }
       ]
     },
+    "40": {
+      "title": "Trade Tycoon",
+      "description": "Grow a floating island of 12 cities from tribal camps to industrial powers. Build, research and link cities with caravan trade routes, then follow a branching objective tree to one of many victories.",
+      "fullDescription": "\n      Trade Tycoon is a **city-building and trade strategy game** on a floating island at night. You run **8 of its 12 cities**; the other 4 are rival **NPC cities**, picked at random each game. Every city starts as a tribal camp of 100 people and can rise through **five eras** — Tribal, Ancient, Medieval, Renaissance and Industrial — once it reaches both the population and the total knowledge each era asks for.\n      Each city has its own terrain and a **random specialty** (3 possible per city), so no two games play the same. Queue up **22 kinds of buildings** — farms, sawmills, mines, schoolhouses, libraries, markets, ports, guilds, warehouses and more — and watch for **synergies**: dozens of building and neighbour combinations boost or drain each other, and the manual reveals each one only once you have discovered it.\n      Cities with a Market, Bazaar or Merchant Guild can open **trade routes**. Caravans follow roads and rivers across the map; **auto trade** moves surpluses between your own cities to where they are short, and barter with NPC cities through each town's Looking for / Selling board. Distance, guilds, ports and terrain decide how much a route earns.\n      The **objective tree** is your guide to victory: finish an objective, confirm it and the next ones open. At a ◆ choice node you pick one path and the others close for good, and every path ends in a 🏆 winning objective. A first-time tutorial, a full in-game manual, city hotkeys, 1× / 2× speed, pan and zoom, D Dorian music and effects with a volume control, and English, Korean and Japanese text round it out. Installs as an app and plays offline.\n    ",
+      "controls": "Click / tap a city to open it · Drag to pan, wheel / pinch to zoom · 1–8: jump to your cities (rebindable) · M: mute · Esc: close a panel · Long-press on touch for tooltips",
+      "scoreLabel": "Score",
+      "tips": "**Food first**: build **Farms** early so every city's food stays positive and the population keeps growing. Knowledge drives the eras, so add **Schoolhouses and Libraries** steadily, and **Warehouses** so you can afford the bigger buildings. Put a **Market** in each city and let **auto trade** cover shortages; a **Merchant Guild** earns 1.5× on every route, so make that city your hub. River cities 🌊 get extra food and gold and are the only ones that can build a **Port**. Before you confirm a ◆ choice in the objective tree, read which paths it closes.",
+      "lore": "\n      High above a sea of clouds, an island drifts through the night, its waterfalls spilling into the dark. Twelve settlements cling to its hills, forests and deserts, each with a campfire and a story of its own.\n      Roads will glow between them, caravans will cross the rivers, and the campfires will become cities of stone and steam — if someone can make them trade.\n    ",
+      "features": [
+        "12 Cities on a Floating Night Island — 8 Yours, 4 Rival NPCs",
+        "Five Eras From Tribal Camp to Industrial Power",
+        "22 Buildings and Dozens of Synergies to Discover",
+        "Random City Specialties Every Game",
+        "Caravan Trade Routes, Auto Trade and NPC Barter",
+        "Branching Objective Tree With Many Ways to Win",
+        "Tutorial, Full In-Game Manual and City Hotkeys",
+        "D Dorian Music and Effects With a Volume Control",
+        "Phone, Tablet and Desktop — Installable, Plays Offline",
+        "English, Korean and Japanese"
+      ],
+      "objectives": "Reach a **🏆 winning objective** at the end of any path in the objective tree. Your **score** is the sum of every city's population × its era multiplier (Tribal 1×, Ancient 2×, Medieval 5×, Renaissance 10×, Industrial 20×); NPC cities don't count. Your ArcadeDeck personal best is the highest score you reach.",
+      "controlsTable": [
+        {
+          "key": "Click / Tap",
+          "action": "Select a city, a building card or a map button"
+        },
+        {
+          "key": "Drag · Wheel / Pinch",
+          "action": "Pan and zoom the map"
+        },
+        {
+          "key": "1 – 8",
+          "action": "Jump to your own cities (rebind in the hotkey settings)"
+        },
+        {
+          "key": "M",
+          "action": "Mute or unmute"
+        },
+        {
+          "key": "Esc",
+          "action": "Close the open panel or popover"
+        },
+        {
+          "key": "Long-press",
+          "action": "Show a tooltip on touch screens"
+        }
+      ],
+      "faq": [
+        {
+          "q": "How do I win?",
+          "a": "Open Objectives and follow the tree. Each objective opens the next ones when you confirm it, and the 🏆 objective at the end of any path wins the game. At a ◆ choice node you can take only one path."
+        },
+        {
+          "q": "How is the score calculated?",
+          "a": "Score = the sum of each of your cities' population × its era multiplier: 1× Tribal, 2× Ancient, 5× Medieval, 10× Renaissance, 20× Industrial. Gold does not affect score, and NPC cities are not counted."
+        },
+        {
+          "q": "How does a city advance to the next era?",
+          "a": "Each city advances on its own once it meets both the era's population goal and its total knowledge goal — for example 200 people and 50 knowledge for the Ancient Era. Schoolhouses, libraries and academies produce knowledge."
+        },
+        {
+          "q": "Can I play on a phone or tablet?",
+          "a": "Yes. The interface switches to a compact layout on small screens, touch targets are finger-sized and long-press shows tooltips. It can be installed as an app and plays offline."
+        }
+      ]
+    },
     "_comment": "Per-game canonical English. Translators mirror this in {lang}.json."
   }
 }

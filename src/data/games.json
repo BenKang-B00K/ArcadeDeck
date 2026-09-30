@@ -836,5 +836,29 @@
       16,
       22
     ]
+  },
+  {
+    "id": "40",
+    "slug": "trade-tycoon",
+    "language": "EN/KO/JA",
+    "thumbnail": "images/trade-tycoon.webp",
+    "genres": [
+      "Strategy",
+      "Tycoon",
+      "Simulation"
+    ],
+    "gameUrl": "https://games.arcadedeck.net/trade-tycoon/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "platform": "BOTH",
+    "isOriginal": true,
+    "badge": "NEW",
+    "scoreTiers": [
+      5000,
+      50000,
+      500000,
+      2000000,
+      5000000
+    ]
   }
 ]

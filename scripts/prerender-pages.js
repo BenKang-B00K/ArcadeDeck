@@ -718,7 +718,7 @@ ${noscriptItems}
   // Replace LCP shell hero text with translated version. Mirrors the <header>
   // Home.tsx renders so the static shell and the React tree share dimensions.
   const surprise = ui('homeRandomGame', lang, 'Surprise me');
-  const heroHtml = `<header class="home-hero"><div class="container home-hero-content"><h1>${heroTitle} <span>ArcadeDeck</span></h1><div class="home-hero-actions"><button type="button" class="home-hero-random" disabled>${surprise}</button></div><div class="home-hero-nick"></div></div></header>`;
+  const heroHtml = `<header class="home-hero"><div class="container home-hero-content"><h1>${heroTitle} <span>ArcadeDeck</span></h1><div class="home-hero-nick"></div><div class="home-hero-actions"><button type="button" class="home-hero-random" disabled>${surprise}</button></div></div></header>`;
 
   // Visible catalogue below the hero. Without it #root carried ~115 characters
   // of text and the whole catalogue existed only in <noscript> + JSON-LD.

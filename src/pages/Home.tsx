@@ -142,13 +142,6 @@ const Home: React.FC = () => {
           <div className="container home-hero-content">
             <h1>{t('homeHeroTitle', 'Welcome to')} <span>ArcadeDeck</span></h1>
 
-            <div className="home-hero-actions">
-              <button type="button" className="home-hero-random" onClick={surprise}>
-                <Shuffle size={16} aria-hidden="true" />
-                {t('homeRandomGame', 'Surprise me')}
-              </button>
-            </div>
-
             <div className="home-hero-nick">
               {editing ? (
                 <form className="home-hero-nick-card" onSubmit={saveNick}>
@@ -170,6 +163,13 @@ const Home: React.FC = () => {
                   <Edit3 size={14} aria-hidden="true" />
                 </button>
               )}
+            </div>
+
+            <div className="home-hero-actions">
+              <button type="button" className="home-hero-random" onClick={surprise}>
+                <Shuffle size={16} aria-hidden="true" />
+                {t('homeRandomGame', 'Surprise me')}
+              </button>
             </div>
           </div>
         </header>

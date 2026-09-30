@@ -20,6 +20,20 @@ const FEATURED = deviceGames.filter(g => g.featured);
 const COOP_GENRE = 'Local Co-op';
 const COOP = deviceGames.filter(g => g.genres.includes(COOP_GENRE)).sort((a, b) => parseInt(b.id) - parseInt(a.id));
 
+// Hero banner rotates one step per page load (public/images/banner/banner-01..16).
+// Module scope so in-app navigation back to Home keeps the same art.
+const BANNER_COUNT = 16;
+const BANNER = (() => {
+  let n = Math.floor(Math.random() * BANNER_COUNT);
+  try {
+    const prev = Number(localStorage.getItem('heroBanner'));
+    if (Number.isInteger(prev) && prev >= 0) n = (prev + 1) % BANNER_COUNT;
+    localStorage.setItem('heroBanner', String(n));
+  } catch { /* storage blocked: random pick */ }
+  const base = `${import.meta.env.BASE_URL}images/banner/banner-${String(n + 1).padStart(2, '0')}`;
+  return { '--hero-banner': `url(${base}.webp)`, '--hero-banner-sm': `url(${base}-768.webp)` } as React.CSSProperties;
+})();
+
 // Full-width spotlight for the Featured Game section. Thumbnail is 640w, so the
 // image column caps at ~half the container; description fills the rest.
 const FeaturedCard: React.FC<{ game: Game }> = ({ game }) => {
@@ -124,7 +138,7 @@ const Home: React.FC = () => {
       <Navbar />
 
       <main>
-        <header className="home-hero">
+        <header className="home-hero" style={BANNER}>
           <div className="container home-hero-content">
             <h1>{t('homeHeroTitle', 'Welcome to')} <span>ArcadeDeck</span></h1>
 

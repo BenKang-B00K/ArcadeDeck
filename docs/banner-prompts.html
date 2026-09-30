@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Banner Art Prompts</title>
+<style>
+  :root {
+    --bg: #171424; --surface: #221d36; --border: rgba(255,255,255,.1);
+    --text: #eaeaf0; --muted: #9c98b8; --cyan: #00e5ff; --magenta: #e040fb; --gold: #f5c542;
+    --code-bg: #120f1d;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 960px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { margin: 0 0 4px; font-size: 28px; background: linear-gradient(90deg, var(--cyan), var(--magenta)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  h2 { font-size: 18px; margin: 40px 0 12px; color: var(--cyan); }
+  p.lead { color: var(--muted); margin: 0 0 24px; }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: 13px; color: var(--gold); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+  .card h3 { margin: 0 0 10px; font-size: 16px; display: flex; align-items: center; gap: 10px; }
+  .num { font: 700 12px ui-monospace, monospace; color: var(--bg); background: var(--cyan); border-radius: 6px; padding: 2px 7px; }
+  .prompt { position: relative; }
+  .prompt pre { margin: 0; background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 84px 12px 12px; white-space: pre-wrap; word-break: break-word; font: 13px/1.55 ui-monospace, Consolas, monospace; color: var(--text); }
+  .copy { position: absolute; top: 8px; right: 8px; background: transparent; color: var(--cyan); border: 1px solid rgba(0,229,255,.35); border-radius: 6px; padding: 4px 10px; font: 12px system-ui, sans-serif; cursor: pointer; }
+  .copy:hover { background: rgba(0,229,255,.1); }
+  .copy.done { color: var(--gold); border-color: var(--gold); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+  .grid .card { margin: 0; }
+  .swatches { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .sw { display: flex; align-items: center; gap: 6px; font: 12px ui-monospace, monospace; color: var(--muted); }
+  .sw i { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--border); }
+  ul { padding-left: 20px; color: var(--muted); }
+  li { margin-bottom: 6px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Site Banner Art Prompts</h1>
+  <p class="lead">16 rotating styles. Target <code>public/images/banner/banner-{01..16}.webp</code>, 2752×1536, WebP q72. Hero text and search sit in the <strong>center</strong>, so every prompt keeps a calm, darker central band with detail at the edges.</p>
+
+  <h2>Shared suffix — append to every prompt</h2>
+  <div class="prompt"><pre>wide cinematic banner, 16:9, calm darker negative space in the center third for overlaid title text, rich detail toward left and right edges, brand palette deep indigo #171424 base with cyan #00e5ff and magenta #e040fb accents plus a touch of gold #f5c542, no text, no letters, no logos, no watermark, no UI, no real game characters or trademarked IP, high detail, crisp, professional key art</pre><button class="copy">Copy</button></div>
+  <div class="swatches">
+    <span class="sw"><i style="background:#171424"></i>#171424</span>
+    <span class="sw"><i style="background:#00e5ff"></i>#00e5ff</span>
+    <span class="sw"><i style="background:#e040fb"></i>#e040fb</span>
+    <span class="sw"><i style="background:#f5c542"></i>#f5c542</span>
+  </div>
+
+  <h2>Shared negative prompt</h2>
+  <div class="prompt"><pre>text, lettering, words, logo, watermark, signature, UI, HUD, frame, border, blurry, low-res, jpeg artifacts, deformed hands, extra fingers, trademarked characters, Nintendo, Sony, Pac-Man, Mario, busy center, bright white center</pre><button class="copy">Copy</button></div>
+
+  <h2>Styles</h2>
+  <div class="grid">
+    <div class="card"><h3><span class="num">01</span>Synthwave Grid Horizon</h3>
+      <div class="prompt"><pre>retro synthwave landscape, glowing cyan perspective grid floor receding to a huge striped magenta sunset sun, low-poly wireframe mountains on both sides, floating arcade cabinets and game cartridges drifting in the sky like planets, scanline haze, chromatic aberration glow</pre><button class="copy">Copy</button></div></div>
+    <div class="card"><h3><span class="num">02</span>Isometric Pixel Arcade Hall</h3>
+      <div class="prompt"><pre>detailed 32-bit isometric pixel art of a neon arcade hall at night, rows of arcade cabinets along left and right walls, glowing screens, claw machine, prize counter, checkerboard carpet, tiny pixel players, dithered lighting, clean pixel grid, limited palette</pre><button class="copy">Copy</button></div></div>
+    <div class="card"><h3><span class="num">03</span>Card Deck Cosmos</h3>
+      <div class="prompt"><pre>giant ornate playing cards fanned out and floating in deep space like a galaxy spiral, each card face shows a different miniature game world (dungeon, racetrack, space battle, puzzle blocks, castle), gold foil edges catching cyan starlight, nebula clouds in indigo and magenta, cosmic dust</pre><button class="copy">Copy</button></div></div>
+    <div class="card"><h3><span class="num">04</span>Papercraft Diorama</h3>
+      <div class="prompt"><pre>layered cut-paper diorama, handmade papercraft game worlds stacked in depth layers, paper castle, paper rocket, paper dragon, paper race car, soft rim lighting between layers, visible paper texture and fibers, tilt-shift depth of field, cozy handcrafted feel</pre><button class="copy">Copy</button></div></div>
+    <div class="card"><h3><span class="num">05</span>Cyberpunk Rain Street</h3>
+      <div class="prompt"><pre>rain-soaked cyberpunk alley at night, neon holographic game icons (joystick, controller, sword, heart, star) projected onto wet walls, puddle reflections in cyan and magenta, steam from vents, cables overhead, cinematic volumetric light, moody atmosphere, blade-runner mood without text signs</pre><button class="copy">Copy</button></div></div>
+    <div class="card"><h3><span class="num">06</span>Vaporwave Marble Dream</h3>
+      <div class="prompt"><pre>vaporwave surreal scene, classical marble bust wearing a VR visor, floating checkerboard platforms, pastel magenta and cyan gradient sky, low-poly palm trees, a retro CRT monitor showing a starfield, dolphins made of wireframe, glossy chrome spheres, dreamy haze</pre><button class="copy">Copy</button></div></div>
+    <div class="card"><h3><span class="num">07</span>Ink &amp; Watercolor Adventure Map</h3>
+      <div class="prompt"><pre>fantasy adventure map painted in ink and watercolor, each region is a different game genre: dungeon mountains, racing canyon, puzzle city, space harbor, pirate sea, tiny illustrated landmarks, compass rose and dotted travel paths, aged parchment edges tinted indigo, gold leaf accents, hand-painted texture</pre><button class="copy">Copy</button></div></div>
+    <div class="card"><h3><span class="num">08</span>Claymation Toy Box</h3>
+      <div class="prompt"><pre>claymation style miniature world spilling out of an open wooden toy box, plasticine tanks, rockets, dice, knights and slime monsters, fingerprint texture on clay, soft studio lighting, shallow depth of field, playful stop-motion look, saturated but soft colors</pre><button class="copy">Copy</button></div></div>
+    <div class="card"><h3><span class="num">09</span>Low-Poly Floating Islands</h3>
+      <div class="prompt"><pre>low-poly 3D floating sky islands at dusk, each island a tiny game level (maze, racetrack loop, castle, block tower, lava pit), waterfalls pouring off edges into clouds, faceted flat-shaded geometry, soft ambient occlusion, gradient sky from indigo to magenta, glowing cyan crystals</pre><button class="copy">Copy</button></div></div>
+    <div class="card"><h3><span class="num">10</span>Ukiyo-e Arcade Wave</h3>
+      <div class="prompt"><pre>ukiyo-e woodblock print style, a great curling wave made of pixel blocks and game controllers crashing across the scene, tiny boats carrying arcade cabinets, stylized clouds, Mount Fuji silhouette replaced by a giant d-pad shape, woodgrain texture, flat inks in indigo, cyan, magenta and gold</pre><button class="copy">Copy</button></div></div>
+    <div class="card"><h3><span class="num">11</span>Stained Glass Cathedral</h3>
+      <div class="prompt"><pre>gothic cathedral interior with towering stained glass windows on both sides, each window depicts a game scene in leaded glass (knight and dragon, rocket launch, racing cars, falling puzzle blocks), jewel-toned light beams in cyan, magenta and gold spilling across a dark stone floor, dust motes, dim nave in the center</pre><button class="copy">Copy</button></div></div>
+    <div class="card"><h3><span class="num">12</span>Blueprint Schematic</h3>
+      <div class="prompt"><pre>technical blueprint drawing of a disassembled arcade cabinet and game controller in exploded view, glowing cyan line art on deep indigo drafting paper, gears, circuit boards, joystick springs, dimension lines and measurement arrows without numbers, faint grid, magenta highlight accents, precise engineering illustration</pre><button class="copy">Copy</button></div></div>
+    <div class="card"><h3><span class="num">13</span>Art Deco Casino Lounge</h3>
+      <div class="prompt"><pre>1920s art deco game lounge, symmetrical gilded arches and sunburst motifs framing both sides, lacquered black and gold geometric patterns, velvet booths with glowing tabletop games, brass slot-style cabinets, soft cyan and magenta neon tubes tracing the architecture, dark polished floor fading into a quiet center</pre><button class="copy">Copy</button></div></div>
+    <div class="card"><h3><span class="num">14</span>Underwater Bioluminescent Reef</h3>
+      <div class="prompt"><pre>deep ocean reef at night, bioluminescent coral shaped like joysticks, buttons and d-pads, glowing jellyfish with pixel-block tentacles, sunken arcade cabinet overgrown with anemones on one side, sea turtle carrying a treasure chest of dice on the other, cyan and magenta light, drifting particles, dark calm water in the center</pre><button class="copy">Copy</button></div></div>
+    <div class="card"><h3><span class="num">15</span>Comic Book Panel Burst</h3>
+      <div class="prompt"><pre>dynamic American comic book art, halftone dot shading, bold ink outlines, action burst panels on left and right showing a racing car drifting, a mech punching, a wizard casting, speed lines radiating outward, empty speech bubbles, dark indigo gutter space in the center, cyan and magenta spot colors with gold highlights</pre><button class="copy">Copy</button></div></div>
+    <div class="card"><h3><span class="num">16</span>Cozy Lo-Fi Gamer Room</h3>
+      <div class="prompt"><pre>lo-fi anime style cozy bedroom at night, rain on the window, glowing CRT TV and handheld consoles on a desk to one side, shelves of game cartridges and plush toys on the other, sleeping cat on a beanie bag, string lights, warm lamp mixed with cyan and magenta screen glow, soft painterly shading, quiet dim wall in the center</pre><button class="copy">Copy</button></div></div>
+  </div>
+
+  <h2>Notes</h2>
+  <ul>
+    <li>Generate at 16:9 or larger, then crop/resize to 2752×1536 and encode WebP. <code>scripts/optimize-images.cjs</code> doesn't cover <code>images/banner/</code> — run a manual <code>cwebp -q 72</code> pass.</li>
+    <li>Check each render at 360px width: central band must stay dark enough for white hero text (contrast ≥ 4.5:1).</li>
+    <li><code>og:image</code> stays <code>arcadedeck-banner.webp</code> — social cards want one stable image; rotation is on-site only.</li>
+  </ul>
+</main>
+<script>
+  // Copy button copies prompt + shared suffix for style cards, raw text for shared blocks.
+  const suffix = document.querySelector('.prompt pre').textContent;
+  document.querySelectorAll('.copy').forEach(btn => btn.addEventListener('click', async () => {
+    const pre = btn.previousElementSibling;
+    const text = btn.closest('.card') ? `${pre.textContent}, ${suffix}` : pre.textContent;
+    try { await navigator.clipboard.writeText(text); btn.textContent = 'Copied'; btn.classList.add('done'); }
+    catch { btn.textContent = 'Failed'; }
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('done'); }, 1500);
+  }));
+</script>
+</body>
+</html>

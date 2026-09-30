@@ -4,8 +4,28 @@
 
 /* ── Hero ── */
 .home-hero {
+  --hero-banner-img: var(--hero-banner-sm);
+  position: relative;
+  isolation: isolate;
   padding: var(--space-10) 0 var(--space-8);
   text-align: center;
+}
+
+/* Rotating banner art (set inline from Home.tsx). Scrim keeps the centered
+   title legible and fades the bottom edge into the page background. */
+.home-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(to bottom, rgba(23, 20, 36, 0.35), var(--scrim-soft) 60%, var(--bg-color)),
+    radial-gradient(50% 60% at 50% 45%, rgba(23, 20, 36, 0.55), transparent 80%),
+    var(--hero-banner-img) center / cover no-repeat;
+}
+
+@media (min-width: 769px) {
+  .home-hero { --hero-banner-img: var(--hero-banner); }
 }
 
 .home-hero-content {

@@ -3597,6 +3597,77 @@
         }
       ]
     },
+    "42": {
+      "title": "One Minute: Auto-Battle",
+      "description": "Survive the swarm as a tiny slime that shoots on its own. Pick one of three tiered upgrade cards every 10 seconds, then at each minute decide: keep fighting for more PARTS or bank what you have.",
+      "fullDescription": "\n      One Minute: Auto-Battle is a **top-down auto-shooter survival roguelite**. You are a tiny glowing slime in an endless dark arena, and you only steer: the slime fires at the nearest monster in range on its own. Eye-orb drones pour in from every side, elite and boss mechs hover in on cyan jets, and every 20 seconds the waves grow bigger and nastier.\n      Power comes from the clock, not from grinding. **Every 10 seconds** the game pauses and offers **three upgrade cards** from a pool of 33 in four categories — attack, defense, utility and special. Each card rolls a **tier from 1 to 10**; tiers 5 and 10 add milestone effects, and Luck (+2 on every level-up) pushes the odds toward the rare high tiers. Explosive Rounds, Chain Lightning, Vampirism, Barrier, Orbiting Blades, Phoenix Feather — one strong pick can turn a run.\n      Every minute is a checkpoint. Keep going for another 60 seconds, or **take what you have earned** and bank your **PARTS**: monsters drop them now and then and bosses always do, but die before you cash out and they are gone. PARTS buy nodes in the **GAME UPGRADE** tree — 46 nodes in six branches (Hunt, Forge, Arsenal, Vault, Clock and Pact). Unlock special cards, rerolls, banish and lock, insurance and interest, **Overtime** to stretch a run to five minutes and finally Endless; switch on **Pacts** such as Glass Slime or Rush Hour to make runs harder for a bigger payout.\n      The arena fights back too. **Elemental pillars** project Ice, Fire, Electric and Mud fields that slow, burn, power up or trip both you and the monsters, and overlapping fields of the same type multiply. Hand-shaded pixel art, D Dorian music and effects with a volume control, pause with live tier odds, a mid-run save that resumes with a 3-2-1 countdown, and English, Korean and Japanese text round it out. Plays on phone, tablet and desktop, installs as an app and works offline.\n    ",
+      "controls": "WASD / Arrow keys or drag anywhere (floating joystick) to move · Shooting is automatic · 1 / 2 / 3: pick a card · R: reroll · B: banish · L: lock · Esc: pause",
+      "scoreLabel": "Seconds survived",
+      "tips": "**Keep moving in wide circles** — standing still lets the swarm close the ring around you. Early on, take **attack speed and damage** so you can clear the waves; once Luck climbs, high-tier cards are worth more than a new card at tier 1. Pull monsters into **Ice and Electric fields**, and stay out of **Fire** yourself unless you have HP to spare. Bank your PARTS at the checkpoint whenever a run feels shaky — dying throws them all away. Spend your first PARTS on **Overtime I** in the Clock branch: longer runs pay more.",
+      "lore": "\n      Down in the dark under the old arena, a drop of glowing slime woke up with one minute to live. Then the drones opened their eyes.\n      It cannot run forever and it cannot hide. All it can do is shoot, grow stronger every ten seconds, and carry what it salvages out before the clock — and the mechs — catch up.\n    ",
+      "features": [
+        "Auto-Shooting Slime: You Steer, It Fires",
+        "Pick 1 of 3 Upgrade Cards Every 10 Seconds",
+        "33 Cards With Tiers 1–10 and Milestone Effects",
+        "Minute Checkpoints: Push On or Bank Your PARTS",
+        "46-Node GAME UPGRADE Tree in Six Branches",
+        "Overtime, Endless Mode and Risk-for-Reward Pacts",
+        "Ice, Fire, Electric and Mud Pillar Fields That Stack",
+        "Elite and Boss Mechs, Waves That Grow Every 20 Seconds",
+        "Mid-Run Save, D Dorian Music and a Volume Control",
+        "Phone, Tablet and Desktop — Installable, Plays Offline",
+        "English, Korean and Japanese"
+      ],
+      "objectives": "Survive as long as you can. A run lasts one minute at first; **Overtime** nodes in the GAME UPGRADE tree raise the cap to five minutes and **Endless** removes it. At each minute checkpoint, either keep fighting or end the run and bank your PARTS. Your ArcadeDeck personal best is the **longest survival time in seconds** — Bronze at 30 s, Silver at a full minute, Gold at 3:00, Diamond at 10:00.",
+      "controlsTable": [
+        {
+          "key": "WASD / Arrow keys",
+          "action": "Move the slime"
+        },
+        {
+          "key": "Drag (touch or mouse)",
+          "action": "Floating joystick — move in any direction"
+        },
+        {
+          "key": "1 / 2 / 3",
+          "action": "Pick an upgrade card, or a checkpoint choice"
+        },
+        {
+          "key": "R · B · L",
+          "action": "Reroll the cards · Banish a card · Lock a card (once unlocked)"
+        },
+        {
+          "key": "Esc",
+          "action": "Pause and see the current card tier odds"
+        },
+        {
+          "key": "Enter / Space",
+          "action": "Start a run or play again"
+        }
+      ],
+      "faq": [
+        {
+          "q": "Do I have to aim or shoot?",
+          "a": "No. The slime fires at the nearest monster in range by itself. You only move — dodging the swarm and steering monsters into the right pillar fields is the whole skill."
+        },
+        {
+          "q": "What are PARTS and how do I keep them?",
+          "a": "PARTS are the upgrade currency. Normal monsters drop one rarely, elites more often, and every boss drops one. They are only safe once you choose Take What's Earned at a minute checkpoint; if you die first you lose them, unless you have bought Salvage or Checkpoint Insurance in the Vault branch."
+        },
+        {
+          "q": "Why does my run end at one minute?",
+          "a": "The first run cap is one minute. Buy Overtime I–IV in the Clock branch to extend it to five minutes (each tier needs a run that reached the current cap), then Endless removes the limit."
+        },
+        {
+          "q": "What counts as my personal best on ArcadeDeck?",
+          "a": "Your longest survival time in seconds. A run that ends at a checkpoint counts the same as one that ends in death."
+        },
+        {
+          "q": "Can I play on a phone?",
+          "a": "Yes. Drag anywhere to use the floating joystick and tap cards to pick them. It installs as an app and plays offline, and a run in progress is saved if you close the page."
+        }
+      ]
+    },
     "_comment": "Per-game canonical English. Translators mirror this in {lang}.json."
   }
 }

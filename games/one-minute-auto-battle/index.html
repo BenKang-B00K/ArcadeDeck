@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>One Minute: Auto-Battle</title>
+    <meta name="description" content="Survive the swarm as a tiny slime. Pick an upgrade every 10 seconds." />
+    <meta name="theme-color" content="#0b0e17" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="One Minute" />
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #0b0e17;
+        overscroll-behavior: none;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      /* Canvas stays inside the notch / home-indicator safe area */
+      #game-container {
+        position: fixed;
+        top: env(safe-area-inset-top, 0);
+        right: env(safe-area-inset-right, 0);
+        bottom: env(safe-area-inset-bottom, 0);
+        left: env(safe-area-inset-left, 0);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        touch-action: none;
+      }
+      /* Boot splash: banner art from first paint (JS download) through Boot's art load + texture baking; Boot fades it out */
+      #splash {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        overflow: hidden;
+        background: #0b0e17 center / cover;
+        transition: opacity 0.45s;
+      }
+      /* Blurred, dimmed copy of the same banner fills the letterbox (portrait phones) */
+      #splash::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: inherit;
+        filter: blur(24px) brightness(0.35);
+        transform: scale(1.15);
+      }
+      #splash.done { opacity: 0; pointer-events: none; }
+      #splash img { position: relative; width: 100%; height: 100%; object-fit: contain; }
+      #splash-bar {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: env(safe-area-inset-bottom, 0);
+        height: 4px;
+        background: linear-gradient(90deg, #3fa7ff, #facc15);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.2s;
+      }
+      canvas {
+        display: block;
+        image-rendering: pixelated;
+        touch-action: none;
+      }
+      #toolbar {
+        position: fixed;
+        top: calc(env(safe-area-inset-top, 0px) + 10px);
+        right: calc(env(safe-area-inset-right, 0px) + 10px);
+        display: flex;
+        gap: 8px;
+        z-index: 10;
+        font-family: "Segoe UI", system-ui, sans-serif;
+      }
+      #toolbar button {
+        min-width: 44px;
+        height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 0 10px;
+        border: 1.5px solid #2b3a5c;
+        border-radius: 12px;
+        background: rgba(20, 26, 43, 0.78);
+        color: #eef2ff;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        transition: background 0.15s, border-color 0.15s, transform 0.1s;
+      }
+      #toolbar button:hover { background: rgba(35, 45, 75, 0.9); border-color: #3fa7ff; }
+      #toolbar button:active { transform: scale(0.94); }
+      #toolbar button:focus-visible { outline: 2px solid #facc15; outline-offset: 2px; }
+      #toolbar button[hidden] { display: none; }
+      #toolbar img { width: 24px; height: 24px; pointer-events: none; }
+      #vol { position: relative; }
+      #vol-pop {
+        position: absolute;
+        top: 52px;
+        right: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 14px 8px 8px;
+        border: 1.5px solid #2b3a5c;
+        border-radius: 14px;
+        background: rgba(20, 26, 43, 0.94);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      }
+      #vol-pop[hidden] { display: none; }
+      #vol-range {
+        width: 140px;
+        accent-color: #3fa7ff;
+        height: 32px;
+        cursor: pointer;
+      }
+    </style>
+    <script type="module" crossorigin src="./assets/index-BiYpY3sU.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/phaser-0RJB29YE.js">
+  </head>
+  <body>
+    <div id="game-container"></div>
+    <div id="splash"><img id="splash-img" alt="" fetchpriority="high"><div id="splash-bar"></div></div>
+    <script>
+      var banner = 'art/banner/' + ['main', 'boss', 'pillars', 'clock'][Math.floor(Math.random() * 4)] + '.webp';
+      document.getElementById('splash-img').src = banner;
+      document.getElementById('splash').style.backgroundImage = 'url(' + banner + ')';
+    </script>
+    <div id="toolbar">
+      <button id="pause-btn" type="button" aria-label="Pause" hidden></button>
+      <button id="lang-btn" type="button" aria-label="Language" hidden>
+        <img src="art/generated/128/toolbar/lang.png" alt="">
+        <span>EN</span>
+      </button>
+      <div id="vol" hidden>
+        <button id="vol-btn" type="button" aria-label="Volume" aria-expanded="false" aria-controls="vol-pop"></button>
+        <div id="vol-pop" hidden>
+          <button id="mute-btn" type="button" aria-label="Mute"></button>
+          <input id="vol-range" type="range" min="0" max="100" step="1" aria-label="Volume" />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

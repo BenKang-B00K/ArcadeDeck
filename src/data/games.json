@@ -876,5 +876,29 @@
     "platform": "BOTH",
     "isOriginal": true,
     "badge": "NEW"
+  },
+  {
+    "id": "42",
+    "slug": "one-minute-auto-battle",
+    "language": "EN/KO/JA",
+    "thumbnail": "images/one-minute-auto-battle.webp",
+    "genres": [
+      "Action",
+      "Survival",
+      "Roguelike"
+    ],
+    "gameUrl": "https://games.arcadedeck.net/one-minute-auto-battle/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "platform": "BOTH",
+    "isOriginal": true,
+    "badge": "NEW",
+    "scoreTiers": [
+      30,
+      60,
+      180,
+      300,
+      600
+    ]
   }
 ]

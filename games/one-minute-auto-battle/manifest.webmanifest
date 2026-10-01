@@ -1,0 +1,28 @@
+{
+  "name": "One Minute: Auto-Battle",
+  "short_name": "One Minute",
+  "description": "Survive the swarm as a tiny slime. Pick an upgrade every 10 seconds.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "any",
+  "background_color": "#0b0e17",
+  "theme_color": "#0b0e17",
+  "categories": ["games"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    { "src": "art/banner/main.webp", "sizes": "1536x1024", "type": "image/webp", "form_factor": "wide", "label": "A tiny slime holds off the swarm" },
+    { "src": "art/banner/boss.webp", "sizes": "1536x1024", "type": "image/webp", "form_factor": "wide", "label": "Boss mech showdown" },
+    { "src": "art/banner/pillars.webp", "sizes": "1536x1024", "type": "image/webp", "form_factor": "wide", "label": "Ice, fire, shock and mud pillars" },
+    { "src": "art/banner/clock.webp", "sizes": "1536x1024", "type": "image/webp", "form_factor": "wide", "label": "Survive the minute" },
+    { "src": "art/banner/main.webp", "sizes": "1536x1024", "type": "image/webp", "label": "A tiny slime holds off the swarm" },
+    { "src": "art/banner/boss.webp", "sizes": "1536x1024", "type": "image/webp", "label": "Boss mech showdown" },
+    { "src": "art/banner/pillars.webp", "sizes": "1536x1024", "type": "image/webp", "label": "Ice, fire, shock and mud pillars" },
+    { "src": "art/banner/clock.webp", "sizes": "1536x1024", "type": "image/webp", "label": "Survive the minute" }
+  ]
+}

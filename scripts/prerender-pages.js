@@ -24,6 +24,13 @@ const BCP47 = {
   en: 'en_US', ja: 'ja_JP', ko: 'ko_KR',
 };
 const SITE = 'https://arcadedeck.net';
+// Spellings people search the brand by (KO/JA transliterations, spaced and domain forms).
+// Fed to WebSite/Organization alternateName so Google can map these queries to the site name.
+const BRAND_ALIASES = [
+  'Arcade Deck', 'ArcadeDeckNet', 'arcadedeck.net',
+  '아케이드덱', '아케이드 덱', '아케이드덱닷넷', '아케이드덱넷',
+  'アーケードデッキ', 'アーケードデック', 'アーケードデッキドットネット', 'アーケードデッキネット',
+];
 const prefix = (lang) => (lang === 'en' ? '' : '/' + lang.toLowerCase());
 // Locale home is /ja, not /ja/ — firebase.json has trailingSlash:false, so the
 // slashed form 301s and Search Console files it under "page with redirect".
@@ -67,6 +74,9 @@ function txt(id, lang) {
 function ui(key, lang, fallback = '') {
   return overlays[lang]?.ui?.[key] || en.ui?.[key] || fallback;
 }
+
+// Localized genre label (`genre_{slug}` UI key), English name as fallback. Mirrors genreName in src/utils/genres.ts.
+const genreName = (gn, lang) => ui('genre_' + genreSlug(gn), lang, gn);
 
 function escAttr(s) {
   return String(s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
@@ -186,7 +196,8 @@ for (const lang of SUPPORTED_LOCALES) {
     // kind 'app' = a tool, not a game: no Play wording, WebApplication JSON-LD.
     const isApp = game.kind === 'app';
     const playFreeOn = isApp ? ui('seoFreeOnApp', lang, 'Free on ArcadeDeck') : ui('seoPlayFreeOn', lang, 'Play Free on ArcadeDeck');
-    const playPrefix = isApp ? '' : ui('seoPlayPrefix', lang, 'Play') + ' ';
+    // Template, not prefix: ko/ja put the verb after the title ("X 플레이", "Xをプレイ").
+    const playTitle = isApp ? t.title : ui('seoPlayTitle', lang, 'Play {title}').replace('{title}', t.title);
     const aboutH2 = ui('seoAboutThisGame', lang, 'About This Game');
     const howToH2 = isApp ? ui('seoHowToUse', lang, 'How to Use') : ui('seoHowToPlay', lang, 'How to Play');
     const tipsH2 = ui('seoProTips', lang, 'Pro Tips');
@@ -197,7 +208,7 @@ for (const lang of SUPPORTED_LOCALES) {
     const genresLabel = ui('seoGenres', lang, 'Genres');
 
     const title = `${t.title} - ${playFreeOn}`;
-    const desc = `${playPrefix}${t.title}: ${t.description} ${isApp ? ui('seoFreeOnlineApp', lang, 'Free browser app on ArcadeDeck. No download, no sign-up.') : ui('seoFreeOnlineGame', lang, 'Free online browser game on ArcadeDeck.')}`;
+    const desc = `${playTitle}: ${t.description} ${isApp ? ui('seoFreeOnlineApp', lang, 'Free browser app on ArcadeDeck. No download, no sign-up.') : ui('seoFreeOnlineGame', lang, 'Free online browser game on ArcadeDeck.')}`;
     const thumbUrl = `${SITE}/${encodeURI(game.thumbnail)}`;
     const pageUrl = fullUrl(lang, routePath);
     // Hero banner is the LCP element on the click-to-start page. Preload it
@@ -247,7 +258,7 @@ for (const lang of SUPPORTED_LOCALES) {
       '@type': isApp ? 'WebApplication' : 'VideoGame',
       name: t.title,
       description: t.description,
-      genre: game.genres,
+      genre: game.genres.map(gn => genreName(gn, lang)),
       applicationCategory: isApp ? 'TravelApplication' : 'GameApplication',
       operatingSystem: 'Web Browser',
       image: thumbUrl,
@@ -269,7 +280,7 @@ for (const lang of SUPPORTED_LOCALES) {
       '@type': 'BreadcrumbList',
       itemListElement: [
         { '@type': 'ListItem', position: 1, name: ui('breadcrumbHome', lang, 'Home'), item: fullUrl(lang, '/') },
-        { '@type': 'ListItem', position: 2, name: game.genres[0] || 'Games', item: fullUrl(lang, '/') },
+        { '@type': 'ListItem', position: 2, name: game.genres[0] ? genreName(game.genres[0], lang) : 'Games', item: fullUrl(lang, '/') },
         { '@type': 'ListItem', position: 3, name: t.title, item: pageUrl },
       ],
     });
@@ -364,7 +375,7 @@ for (const lang of SUPPORTED_LOCALES) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>${escAttr(title)}</title>
     <meta name="description" content="${escAttr(desc)}" />
-    <meta name="keywords" content="${escAttr(t.title)}, ${escAttr(game.genres.join(', '))}, free online game, browser game, arcadedeck" />
+    <meta name="keywords" content="${escAttr(t.title)}, ${escAttr(game.genres.map(gn => genreName(gn, lang)).join(', '))}, free online game, browser game, arcadedeck" />
     <meta name="robots" content="${robotsValue}" />
     <meta name="theme-color" content="#050507" />
     ${adsenseMeta}
@@ -438,7 +449,7 @@ for (const lang of SUPPORTED_LOCALES) {
 
         ${game.steamUrl ? `<p style="margin-top:32px;"><a href="${game.steamUrl}" rel="noopener noreferrer" style="color:#00d2ff;">${ui('playerSteam', lang, 'Full version on Steam')}</a></p>` : ''}
 
-        <p style="margin-top:32px;color:#9aa;">${genresLabel}: ${game.genres.join(', ')}</p>
+        <p style="margin-top:32px;color:#9aa;">${genresLabel}: ${game.genres.map(gn => genreName(gn, lang)).join(', ')}</p>
         <p style="color:#9aa;">${ui('seoLoadingGame', lang, 'Loading interactive game…')} <a href="${pageUrl}" style="color:#00d2ff;">${pageUrl}</a></p>
       </main>
     </div>
@@ -484,9 +495,10 @@ for (const genre of allGenres) {
     const pageUrl = fullUrl(lang, routePath);
     const titleTemplate = ui('seoGenrePageTitle', lang, '{genre} Games | Play Free on ArcadeDeck');
     const descTemplate = ui('seoGenrePageDescription', lang, 'Play {count} {genre} games free on ArcadeDeck. Curated browser titles, straight in your browser. No downloads, no sign-up.');
-    const title = titleTemplate.replace('{genre}', genre).replace('{count}', String(inGenre.length));
-    const desc = descTemplate.replace('{genre}', genre).replace('{count}', String(inGenre.length));
-    const heading = ui('genrePageHeading', lang, '{genre} Games').replace('{genre}', genre);
+    const label = genreName(genre, lang);
+    const title = titleTemplate.replace('{genre}', label).replace('{count}', String(inGenre.length));
+    const desc = descTemplate.replace('{genre}', label).replace('{count}', String(inGenre.length));
+    const heading = ui('genrePageHeading', lang, '{genre} Games').replace('{genre}', label);
     const subheading = ui('genrePageSubheading', lang, '{count} games in this genre on ArcadeDeck.').replace('{count}', String(inGenre.length));
     const listLabel = ui('genreGameList', lang, 'Games in this genre');
 
@@ -613,7 +625,7 @@ const homeJsonLd = (lang) => [
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'ArcadeDeck',
-    alternateName: ui('siteAlternateName', lang, 'ArcadeDeck — Free Browser Games'),
+    alternateName: BRAND_ALIASES,
     url: `${SITE}/`,
     inLanguage: SUPPORTED_LOCALES,
   }),
@@ -621,7 +633,7 @@ const homeJsonLd = (lang) => [
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'ArcadeDeck',
-    alternateName: '아케이드덱',
+    alternateName: BRAND_ALIASES,
     url: `${SITE}/`,
     logo: `${SITE}/images/icon-512x512.webp`,
     identifier: { '@type': 'PropertyValue', propertyID: 'wikidata', value: 'Q141473972' },
@@ -735,7 +747,7 @@ ${noscriptItems}
   // one- and two-game genre pages from home would surface pages we chose not
   // to submit.
   const genreLinks = indexableGenres
-    .map(gn => `<a href="${fullUrl(lang, '/genre/' + genreSlug(gn))}" style="color:#00d2ff;text-decoration:none;margin-right:12px;">${gn}</a>`)
+    .map(gn => `<a href="${fullUrl(lang, '/genre/' + genreSlug(gn))}" style="color:#00d2ff;text-decoration:none;margin-right:12px;">${genreName(gn, lang)}</a>`)
     .join('');
   const catalogueHtml = `<div id="games"><div class="container" style="padding:24px 20px;font-family:system-ui,sans-serif;">
       <nav aria-label="${escAttr(ui('homeGenresAria', lang, 'Game genres'))}" style="margin-bottom:20px;font-size:0.9rem;">${genreLinks}</nav>

@@ -868,7 +868,12 @@
     "thumbnail": "images/ladder-game.webp",
     "genres": [
       "Party",
-      "Casual"
+      "Casual",
+      "Local Co-op"
+    ],
+    "players": [
+      1,
+      10
     ],
     "gameUrl": "https://games.arcadedeck.net/ladder-game/",
     "aspectRatio": "16/9",

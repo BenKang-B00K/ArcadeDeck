@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import type * as THREE_NS from 'three';
+import type * as THREE_NS from './heroThree';
 import './HeroBackground.css';
 
 // Soft round sprite so points render as glows, not squares.
@@ -215,7 +215,7 @@ const HeroBackground = () => {
     // starfield fades in once the main thread is free (Lighthouse TBT / main-thread work).
     const idle = (cb: () => void) =>
       typeof window.requestIdleCallback === 'function' ? window.requestIdleCallback(cb, { timeout: 3000 }) : window.setTimeout(cb, 1500);
-    idle(() => import('three').then(THREE => {
+    idle(() => import('./heroThree').then(THREE => {
       if (cancelled) return;
 
       let renderer: THREE_NS.WebGLRenderer;

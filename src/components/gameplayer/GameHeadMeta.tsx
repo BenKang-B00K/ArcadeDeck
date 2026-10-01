@@ -25,7 +25,7 @@ const GameHeadMeta: React.FC<Props> = ({ game, lang, overlay }) => {
   const isApp = game.kind === 'app';
   const uiT = useUiText();
   const playFreeOn = isApp ? uiT('seoFreeOnApp', 'Free on ArcadeDeck') : uiT('seoPlayFreeOn', 'Play Free on ArcadeDeck');
-  const playPrefix = isApp ? '' : uiT('seoPlayPrefix', 'Play') + ' ';
+  const playTitle = isApp ? title : uiT('seoPlayTitle', 'Play {title}').replace('{title}', title);
   const freeOnline = isApp
     ? uiT('seoFreeOnlineApp', 'Free browser app on ArcadeDeck. No download, no sign-up.')
     : uiT('seoFreeOnlineGame', 'Free online browser game on ArcadeDeck.');
@@ -59,7 +59,7 @@ const GameHeadMeta: React.FC<Props> = ({ game, lang, overlay }) => {
   return (
     <>
       <html lang={lang} />
-      <meta name="description" content={`${playPrefix}${title}: ${desc} ${freeOnline}`} />
+      <meta name="description" content={`${playTitle}: ${desc} ${freeOnline}`} />
       <meta name="keywords" content={`${title}, ${game.genres.join(', ')}, free online game, browser game, arcadedeck`} />
       <link rel="canonical" href={canonical} />
 

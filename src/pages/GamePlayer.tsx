@@ -17,7 +17,7 @@ import { useNickname } from '../hooks/useNickname';
 import { AD_SLOTS } from '../constants/gameConstants';
 import { MAX_SCORE, formatScore, nextTierAt, readPB, recordPlayed, savePB, tierLabel, tierMeta, tierOf } from '../utils/pb';
 import { useUiText, useLocale, getLocalizedString } from '../i18n';
-import { genreSlug } from '../utils/genres';
+import { genreSlug, genreName } from '../utils/genres';
 import '../components/GameCard.css';
 import './GamePlayer.css';
 
@@ -273,7 +273,7 @@ const GamePlayer: React.FC = () => {
           <span aria-hidden="true">›</span>
           {game.genres[0] && (
             <>
-              <Link to={`/genre/${genreSlug(game.genres[0])}`}>{game.genres[0]}</Link>
+              <Link to={`/genre/${genreSlug(game.genres[0])}`}>{genreName(uiT, game.genres[0])}</Link>
               <span aria-hidden="true">›</span>
             </>
           )}
@@ -291,7 +291,7 @@ const GamePlayer: React.FC = () => {
                   to={`/genre/${genreSlug(g)}`}
                   className={`genre-tag ${i === 0 ? 'main' : 'sub'} clickable-genre`}
                   style={{ '--h': GENRE_HUE[g] ?? 260 } as React.CSSProperties}
-                >{g}</Link>
+                >{genreName(uiT, g)}</Link>
               ))}
             </div>
           </div>

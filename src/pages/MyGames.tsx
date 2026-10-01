@@ -12,6 +12,7 @@ import { XP_PER_LEVEL, deckStats, formatScore, nextTierAt, readCachedRank, readP
 import { fetchMyRank, fetchTop, playerId, syncLeaderboard } from '../utils/leaderboard';
 import type { LbRow } from '../utils/leaderboard';
 import { useUiText, useLocale, getLocalizedString } from '../i18n';
+import { genreName } from '../utils/genres';
 import './MyGames.css';
 
 // ponytail: everything here is localStorage-only — no network, no loading state.
@@ -113,7 +114,7 @@ const MyGames = () => {
         <div className="mini-info">
           <h4>{title}</h4>
           <div className="mini-meta">
-            <span className="genre-tag">{game.genres[0]}</span>
+            <span className="genre-tag">{genreName(t, game.genres[0])}</span>
             {pb > 0 && (
               <span className="mini-pb">
                 {getLocalizedString(game, 'scoreLabel', lang, overlay) || t('pbScore', 'Score')} <strong>{formatScore(pb)}</strong>

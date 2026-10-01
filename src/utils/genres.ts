@@ -10,6 +10,11 @@ export function genreSlug(name: string): string {
     .replace(/[^a-z0-9-]/g, '');
 }
 
+// Display name for a genre in the active locale (`genre_{slug}` UI key), English name as fallback.
+export function genreName(t: (key: string, fallback: string) => string, genre: string): string {
+  return t(`genre_${genreSlug(genre)}`, genre);
+}
+
 // Every distinct genre that appears on at least one playable game, alpha-sorted.
 export function listGenres(): string[] {
   const set = new Set<string>();

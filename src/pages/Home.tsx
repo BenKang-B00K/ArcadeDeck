@@ -10,6 +10,7 @@ import { games, deviceGames, GENRE_HUE, type Game } from '../data/games';
 import { useToast } from '../contexts/useToast';
 import { BANNED_WORDS, AD_SLOTS } from '../constants/gameConstants';
 import { useUiText, useLocale, getLocalizedString } from '../i18n';
+import { genreName } from '../utils/genres';
 import { readNickname, saveNickname } from '../hooks/useNickname';
 import { deckStats, readCachedRank } from '../utils/pb';
 import './Home.css';
@@ -49,7 +50,7 @@ const FeaturedCard: React.FC<{ game: Game }> = ({ game }) => {
       <div className="featured-card-body">
         <div className="card-tags-row">
           {game.genres.map((genre, i) => (
-            <span key={genre} className={`genre-tag ${i === 0 ? 'main' : 'sub'}`} style={{ '--h': GENRE_HUE[genre] ?? 260 } as React.CSSProperties}>{genre}</span>
+            <span key={genre} className={`genre-tag ${i === 0 ? 'main' : 'sub'}`} style={{ '--h': GENRE_HUE[genre] ?? 260 } as React.CSSProperties}>{genreName(t, genre)}</span>
           ))}
         </div>
         <h3>{title}</h3>
@@ -93,7 +94,9 @@ const Home: React.FC = () => {
     [],
   );
 
-  useEffect(() => { document.title = 'ArcadeDeck | Play the Best Online Browser Games'; }, []);
+  // Same key the prerendered shell uses, so /ja and /ko keep their localized title after hydration.
+  const homeTitle = t('seoHomeTitle', 'ArcadeDeck | The Ultimate Free Browser Games Platform');
+  useEffect(() => { document.title = homeTitle; }, [homeTitle]);
 
   const comingSoon = () => showToast(t('homeComingSoonNotification', 'This game is coming soon!'), 'info', 3000);
 
@@ -179,7 +182,7 @@ const Home: React.FC = () => {
             <nav className="genre-filters" aria-label={t('homeGenresAria', 'Game genres')}>
               {ALL_GENRES.map(g => (
                 <button key={g} type="button" className={g === genre ? 'active' : ''} aria-pressed={g === genre} style={{ '--h': GENRE_HUE[g] ?? 260 } as React.CSSProperties} onClick={() => setGenre(g)}>
-                  {g}
+                  {genreName(t, g)}
                 </button>
               ))}
             </nav>

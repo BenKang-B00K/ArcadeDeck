@@ -89,7 +89,7 @@ Adding a new game: edit `games.json` (structural) + `en.json` `games` block (tex
 
 ## SEO / verification artifacts
 
-- `index.html` head: `msvalidate.01` (Bing) and `google-adsense-account` meta tags.
+- `index.html` head: `msvalidate.01` (Bing), `naver-site-verification` (Naver Search Advisor) and `google-adsense-account` meta tags.
 - `public/BingSiteAuth.xml` — Bing Webmaster verification file.
 - Domain DNS verification for Bing requires a DNS-only (un-proxied) CNAME on Cloudflare.
 - Wikidata entity for the site is **Q141473972** — referenced as `sameAs` / `identifier` in the WebSite + Organization JSON-LD (`prerender-pages.js`, `GameHeadMeta.tsx`, `BlogPost.tsx`) and linked from `/about`. Change it in all four places or nowhere.

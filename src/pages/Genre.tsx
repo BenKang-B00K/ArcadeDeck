@@ -2,7 +2,7 @@ import React, { lazy, Suspense } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { deviceGames as games } from '../data/games';
-import { genreFromSlug } from '../utils/genres';
+import { genreFromSlug, genreName } from '../utils/genres';
 import { useUiText, useLocale, getLocalizedString } from '../i18n';
 
 const GameGrid = lazy(() => import('../components/GameGrid'));
@@ -28,7 +28,7 @@ const Genre: React.FC = () => {
   }
 
   const gamesInGenre = games.filter(g => g.genres.includes(genre));
-  const heading = t('genrePageHeading', '{genre} Games').replace('{genre}', genre);
+  const heading = t('genrePageHeading', '{genre} Games').replace('{genre}', genreName(t, genre));
   const subheading = t('genrePageSubheading', '{count} games in this genre on ArcadeDeck.')
     .replace('{count}', String(gamesInGenre.length));
 
@@ -37,7 +37,7 @@ const Genre: React.FC = () => {
       <Navbar />
       <main className="container" style={{ padding: '24px 20px 0' }}>
         <nav aria-label="Breadcrumb" style={{ fontSize: '0.85rem', opacity: 0.7, marginBottom: 8 }}>
-          <Link to="/">{t('breadcrumbHome', 'Home')}</Link> &rsaquo; <span>{genre}</span>
+          <Link to="/">{t('breadcrumbHome', 'Home')}</Link> &rsaquo; <span>{genreName(t, genre)}</span>
         </nav>
         <h1 style={{ marginBottom: 4 }}>{heading}</h1>
         <p style={{ opacity: 0.75, marginBottom: 16 }}>{subheading}</p>

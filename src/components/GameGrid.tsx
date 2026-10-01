@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { deviceGames as games } from '../data/games';
 import GameCard from './GameCard';
 import { useUiText, useLocale, getLocalizedString } from '../i18n';
+import { genreName } from '../utils/genres';
 import './GameGrid.css';
 
 interface GameGridProps {
@@ -42,7 +43,7 @@ const GameGrid: React.FC<GameGridProps> = ({ selectedGenre = 'All', searchQuery 
   }, [selectedGenre, searchQuery, lang, overlay, excludeGenre]);
 
   const title = selectedGenre !== 'All'
-    ? `${selectedGenre} ${t('gameGridGames', 'Games')}`
+    ? `${genreName(t, selectedGenre)} ${t('gameGridGames', 'Games')}`
     : `${t('gameGridAll', 'All')} ${t('gameGridGames', 'Games')}`;
 
   return (
@@ -65,7 +66,7 @@ const GameGrid: React.FC<GameGridProps> = ({ selectedGenre = 'All', searchQuery 
               {onGenreClick && (
                 <div className="empty-state-chips">
                   {TOP_GENRES.map(g => (
-                    <button key={g} type="button" className="empty-state-chip" onClick={() => onGenreClick(g)}>{g}</button>
+                    <button key={g} type="button" className="empty-state-chip" onClick={() => onGenreClick(g)}>{genreName(t, g)}</button>
                   ))}
                 </div>
               )}

@@ -36,10 +36,10 @@ export default defineConfig({
       // precache stays lean (single index.html shell + hashed assets). If the
       // build order ever changes, add `workbox.globIgnores` to skip
       // `**/{ja,ko}/**/*` and `**/blog/tag/**/*`.
-      // The three.js chunk is ~750 kB and only Home's background needs it —
+      // The three.js chunk (heroThree) is ~520 kB and only Home's background needs it —
       // keep it out of the precache and let the HTTP cache handle it.
       workbox: {
-        globIgnores: ['**/three.module-*.js'],
+        globIgnores: ['**/heroThree-*.js'],
       },
       manifest: {
         id: '/',
@@ -91,10 +91,14 @@ export default defineConfig({
     target: 'es2015', // Increase compatibility for older browsers like Firefox
     cssTarget: 'chrome61', // Better CSS compatibility
     minify: 'esbuild',
+    // ponytail: only heroThree (~520 kB) trips the default 500 — it's tree-shaken
+    // to the floor (WebGLRenderer pulls all of ShaderLib), idle-loaded after
+    // FCP and kept out of the precache. Swap three for a 2D canvas to go lower.
+    chunkSizeWarningLimit: 550,
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
+          vendor: ['react', 'react-dom', 'react-dom/client', 'react-router-dom'],
           firebase: ['firebase/app', 'firebase/firestore/lite'],
           icons: ['lucide-react'],
         },

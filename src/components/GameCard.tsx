@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Monitor, Smartphone, Gamepad2 } from 'lucide-react';
 import { GENRE_HUE, type Game } from '../data/games';
 import { useLocale, getLocalizedString, useUiText } from '../i18n';
+import { genreName } from '../utils/genres';
 import { thumb360, SRCSET_SIZES } from '../utils/thumb';
 import './GameCard.css';
 
@@ -117,7 +118,7 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, onGenreCli
             className={`genre-tag ${i === 0 ? 'main' : 'sub'}${onGenreClick ? ' clickable-genre' : ''}`}
             style={{ '--h': GENRE_HUE[genre] ?? 260 } as React.CSSProperties}
             onClick={onGenreClick ? (e) => { e.preventDefault(); e.stopPropagation(); onGenreClick(genre); } : undefined}
-          >{genre}</span>
+          >{genreName(t, genre)}</span>
         ))}
       </div>
     </Link>

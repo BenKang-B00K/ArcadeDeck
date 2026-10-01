@@ -3519,6 +3519,84 @@
         }
       ]
     },
+    "41": {
+      "title": "Ladder Game",
+      "description": "The classic Ghost Leg lottery (사다리 타기 / あみだくじ) for 2–10 players. Pick a spot, watch your animal run down the hidden ladder and let it decide winners, ranks, teams, penalties or who pays the bill.",
+      "fullDescription": "\n      Ladder Game is the **Ghost Leg** lottery — 사다리 타기 in Korea, あみだくじ in Japan — for **2 to 10 players**. Every player is a cute animal at the top of the ladder and the results wait at the bottom. Each rung an animal meets sends it across to the next rail, so nobody can tell where a spot leads, and every path ends on a different result.\n      Type your own results or use **Quick fill**: Winner (one or several), Rank (with ties for 1st if you like), Ratio (random percentage shares), Teams (sizes even to within one), Penalty, or Bill — a random split of a total in dollars, won or yen that always adds up exactly, with as many people paying nothing as you choose.\n      Press Start and you get **3 seconds to peek** at the middle of the ladder before the mist rolls in, then each player picks a spot in turn, or Random seats everyone. Tap a player to send their animal down alone with the camera following, tap a result to climb back up to whoever landed there, or press Result to run everyone at once. Animals that meet on the ladder bump into each other and get stunned.\n      Height decides how wild the ladder gets: Short keeps straight rungs, Medium adds **diagonal rungs** plus a **wormhole** or the **carousel**, and Long has the most rungs with all of them. Short and Long ladders can also hide the **Joker** — whoever lands on the joker card trades results with another player at the very end. A results summary, four splash artworks, D Dorian music and effects with a volume control, and English, Korean and Japanese round it out. Plays on phones, tablets and desktop; installs as an app and works offline.\n    ",
+      "controls": "Click / Tap a top spot: Pick it · Tap a player: Run them alone · Tap a result: Climb back up to who got it · Result: Run everyone · New: Fresh ladder · Reset: Back to setup · Enter: Next result field · Esc: Close the volume panel",
+      "tips": "**Use the peek**: for 3 seconds the middle of the ladder shows and slowly widens, so follow one rail through it before the mist hides everything. **Short** ladders are the easiest to read; **Long** ladders hide wormholes, the carousel and sometimes a **Joker** that can still swap results at the end. Hover or focus a height button to see which specials it brings. Splitting a meal? Pick **Bill**, enter the total and how many pay nothing, and the shares always add up exactly.",
+      "lore": "\n      Ghost Leg has settled who-gets-what for generations: a few lines drawn on paper, a name at the top of each, and a fold to hide the rungs until everyone has chosen.\n      Here twenty animals take turns at the top of a glowing ladder under a night sky. Somewhere beneath the mist a wormhole is turning, the carousel is waiting, and one card might be the Joker.\n    ",
+      "features": [
+        "Ghost Leg / 사다리 타기 / あみだくじ for 2–10 Players",
+        "20 Cute Animals, Each With Its Own Colour",
+        "Six Quick Fills: Winner, Rank, Ratio, Teams, Penalty, Bill",
+        "Bill Splits in Dollars, Won or Yen That Always Add Up",
+        "3-Second Peek, Then the Mist Rolls In",
+        "Three Heights With Diagonal Rungs, Wormholes, a Carousel and the Joker",
+        "Solo Runs With a Following Camera, or Everyone at Once",
+        "Animals Bump and Get Stunned When Their Paths Meet",
+        "D Dorian Music and Effects With a Volume Control",
+        "Phone, Tablet and Desktop — Installable, Plays Offline",
+        "English, Korean and Japanese"
+      ],
+      "objectives": "There is no score — the ladder decides. Set the players and results, peek at the ladder, pick a spot and see where your animal lands. Every path ends on a different result, so no two players ever share one, and the Joker swap picks its partner fairly from everyone else.",
+      "controlsTable": [
+        {
+          "key": "Click / Tap a top spot",
+          "action": "Claim it for the next player while spots are being picked"
+        },
+        {
+          "key": "Click / Tap a player",
+          "action": "Send that animal down on its own; the camera follows"
+        },
+        {
+          "key": "Click / Tap a result",
+          "action": "Climb back up to see who landed there"
+        },
+        {
+          "key": "Random",
+          "action": "Seat every remaining player on a random spot"
+        },
+        {
+          "key": "Result",
+          "action": "Lift the mist and run every remaining player at once"
+        },
+        {
+          "key": "New · Reset",
+          "action": "Draw a fresh ladder · go back to setup"
+        },
+        {
+          "key": "Enter",
+          "action": "Move to the next result field in setup"
+        },
+        {
+          "key": "Esc",
+          "action": "Close the volume panel"
+        }
+      ],
+      "faq": [
+        {
+          "q": "What is a ladder game?",
+          "a": "It is Ghost Leg, known as 사다리 타기 in Korea and あみだくじ in Japan: vertical rails with rungs between them. Each player starts at the top and follows the rail down, crossing over at every rung, until they reach a result at the bottom. Every path ends on a different result."
+        },
+        {
+          "q": "How many players can play?",
+          "a": "From 2 to 10. Use + and − in setup. Each player is an animal; tap Pick Order to shuffle which animals play."
+        },
+        {
+          "q": "What do wormholes, the carousel and the Joker do?",
+          "a": "A wormhole drops an animal into one mouth and out of the other. The carousel carries it one seat round its ring before it goes on down. The Joker is a result card: whoever lands on it trades results with another player at the end. Hover or focus a Height button to see which ones that height uses."
+        },
+        {
+          "q": "Can I split a bill with it?",
+          "a": "Yes. Choose Bill, enter the total, pick dollars, won or yen and how many people pay nothing. The ladder hands out random shares in whole steps ($5, ₩1,000 or ¥100) that add up to the total exactly."
+        },
+        {
+          "q": "Does it work on phones?",
+          "a": "Yes. It is built for touch, works in portrait and landscape, installs as an app and plays offline."
+        }
+      ]
+    },
     "_comment": "Per-game canonical English. Translators mirror this in {lang}.json."
   }
 }

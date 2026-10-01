@@ -860,5 +860,21 @@
       2000000,
       5000000
     ]
+  },
+  {
+    "id": "41",
+    "slug": "ladder-game",
+    "language": "EN/KO/JA",
+    "thumbnail": "images/ladder-game.webp",
+    "genres": [
+      "Party",
+      "Casual"
+    ],
+    "gameUrl": "https://games.arcadedeck.net/ladder-game/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "platform": "BOTH",
+    "isOriginal": true,
+    "badge": "NEW"
   }
 ]

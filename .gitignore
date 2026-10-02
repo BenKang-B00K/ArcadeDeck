@@ -35,3 +35,7 @@ games/kingdom-of-ashes-fallen-era/
 
 # Ids of the fake leaderboard rows (scripts/seed-leaderboard.mjs) — table is public, this list is not
 scripts/.leaderboard-bots.json
+
+# Local scratch — screenshots and SEO notes, not versioned
+screenshots/
+docs/SEO-FIXES.md

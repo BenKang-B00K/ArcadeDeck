@@ -2,6 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Shorthand commands
+
+When the user's whole message is one of these phrases, run the mapped action right away. Don't ask for confirmation. Report results briefly when it's done. Add new phrases to this table as the user defines them.
+
+| Phrase | Action | Report |
+|---|---|---|
+| "update leaderboard" | `timeout 90 node scripts/seed-leaderboard.mjs update`: advances the fake Global Leaderboard players (doc ids in gitignored `scripts/.leaderboard-bots.json`; if that file is missing, stop and tell the user; no CHANGELOG entry, data only) | rows changed, top 5, user's own rank (row "Ben") |
+
 ## Stack
 
 React 19 + TypeScript + Vite 7. Firebase Firestore for comments/leaderboard. Site deployed via Firebase Hosting (`firebase deploy --only hosting`, custom domain `arcadedeck.net`); hosted game builds deployed separately to Cloudflare Pages (see **Hosted games**). PWA via `vite-plugin-pwa`. Security headers (CSP, HSTS, COOP, XFO) in `firebase.json`.
@@ -30,7 +38,7 @@ firebase deploy --only firestore:rules --project ultragames-website
 
 There are no tests in this repo.
 
-One-off helpers (run manually, not part of build): `python scripts/sync_i18n.py` reports ja/ko keys missing vs `en.json`; `node scripts/seed-leaderboard.mjs [n]` seeds fake leaderboard rows through the client SDK; `scripts/sky-puff-textures.cjs` keys black-background cloud art to alpha WebP.
+One-off helpers (run manually, not part of build): `python scripts/sync_i18n.py` reports ja/ko keys missing vs `en.json`; `node scripts/seed-leaderboard.mjs [n]` seeds fake leaderboard rows through the client SDK, `… update` advances the existing fakes (ids in gitignored `scripts/.leaderboard-bots.json` — lose it and they can't be told apart from real rows); `scripts/sky-puff-textures.cjs` keys black-background cloud art to alpha WebP.
 
 ## CHANGELOG (mandatory)
 
@@ -43,6 +51,22 @@ Every user-visible change updates `CHANGELOG.md` in the same commit — do not w
 Bump rule (counters never reset, each bumps independently — see the Versioning block in `CHANGELOG.md`): new game → MAJOR; feature / UI change / existing game update → MINOR; tuning or bug fix → PATCH. Same-day changes of the same tier fold into the existing top line instead of adding a new one. Docs-only, tooling, and refactors with no visible effect skip the changelog.
 
 The format is load-bearing: `src/pages/PatchNote.tsx` imports `CHANGELOG.md?raw` and renders `/patchnote` from the regex `^- \*\*v(\d+)\.(\d+)\.(\d+)\*\* \((\d{4}-\d{2}-\d{2})\) — (.+)$` — bold version, ISO date in parens, an em dash (`—`, not `-`), one line per release. Items split on `; ` outside parentheses/brackets (so `(a; b)` stays one item); an item that opens with a catalogue game title and a `:` (`Skyfall v1.4: …`, `New game: X …: …`) heads a group and the items after it nest under it until the next such head — keep a game's sub-items contiguous and put site-wide items before the first game head. Backtick spans render as `<code>`. Tier colour is derived from which counter moved vs. the previous line. English game titles in the text auto-link to `/play/{slug}` (matched against `en.json` titles), so write titles as they appear in the catalogue. Keep line endings LF.
+
+## Game reviews (mandatory)
+
+Run these on the game source (outside this repo) before copying the build into `games/{slug}/`; fix findings in the same job and list them in the report. Don't wait to be asked.
+
+**Every new game → mobile touch hygiene review (iOS Safari + Android Chrome).** Check and fix:
+- Viewport meta `width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no`; layout respects `env(safe-area-inset-*)` (notch, home bar); `100dvh` not `100vh`.
+- Play surface: `touch-action: none`, `user-select: none`, `-webkit-user-select: none`, `-webkit-touch-callout: none`, `-webkit-tap-highlight-color: transparent`; page `overscroll-behavior: none` (no pull-to-refresh / rubber-band mid-game); menus/buttons at least `touch-action: manipulation` (no double-tap zoom, no 300 ms delay).
+- Pointer Events, not mouse-only; track by `pointerId` for multi-touch (stick + fire at once); handle `pointercancel` and `lostpointercapture` so a stick never sticks; block `contextmenu` (long-press menu); `preventDefault` only in listeners registered `{ passive: false }`.
+- No hover-only affordances; tap targets ≥ 44 px; controls stay reachable in portrait and landscape, and on a resize/rotation mid-game.
+- Audio unlocks on the first `pointerdown`/`touchend` (iOS keeps `AudioContext` suspended until a gesture) and resumes after `visibilitychange`; the game pauses when hidden.
+- Test with Chrome DevTools device emulation (touch on) at a phone width before shipping.
+
+**Adding a HOST-JOIN (phone link) system → QoL + performance review.** Tank Battle: 1v1 is the reference (see the co-op phone link memory). Check and fix:
+- QoL: room code input `inputmode="email" autocapitalize="characters" autocomplete="off"` (email mode opens a Latin keyboard on most KO/JA phones), letters only, auto-uppercase, submit on the last char without double-submitting with Enter; ambiguous letters (`0/O`, `1/I/L`) dropped from the code alphabet; clear states for waiting / connecting / connected / failed with a cancel or back button on each; plain error text (room server unreachable vs. peers can't connect → try a hotspot); disconnect mid-match pauses with a "partner left" message and a way back to the menu, never a frozen screen; host can start again without reloading.
+- Performance: high-rate state on an unordered, unreliable channel (`{ ordered: false, maxRetransmits: 0 }`) and one-off events (start, score, game over) on a reliable one; cap snapshot rate (~20–30 Hz), send deltas or quantized numbers, not full JSON object trees every frame; guest interpolates between snapshots instead of snapping; guest input sent on change plus a low-rate keepalive, not every frame; `bufferedAmount` check so a slow link drops frames instead of queueing; no Firestore polling once the DataChannel is open; close the `RTCPeerConnection` and listeners on leave / `pagehide`.
 
 ## Architecture — Big Picture
 

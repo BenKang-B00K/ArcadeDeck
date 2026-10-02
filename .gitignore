@@ -32,3 +32,6 @@ _archive/
 # Deployed straight off disk by `npm run deploy:games`. NOT versioned - so that command must only
 # be run from a machine that has this folder populated, or the deploy drops the game from live.
 games/kingdom-of-ashes-fallen-era/
+
+# Ids of the fake leaderboard rows (scripts/seed-leaderboard.mjs) — table is public, this list is not
+scripts/.leaderboard-bots.json

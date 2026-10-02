@@ -395,6 +395,39 @@ body {
   text-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 
+/* --- Phone link (coop.js modal picks up the --coop-* colors) --- */
+:root { --coop-accent: #e94560; --coop-bg: rgba(22, 33, 62, 0.96); }
+.start-row {
+  display: flex;
+  gap: clamp(8px, 1.5vmin, 14px);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+#link-btn, #leave-btn {
+  margin-top: 1.2em;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  padding: 0 1.4em;
+  font-size: clamp(0.8rem, 2.2vmin, 1.4rem);
+  font-weight: 700;
+  color: #00d2ff;
+  background: rgba(22, 33, 62, 0.6);
+  border: 1px solid rgba(0, 210, 255, 0.4);
+  border-radius: clamp(8px, 1.5vmin, 14px);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+#link-btn:hover, #leave-btn:hover { background: rgba(0, 210, 255, 0.12); border-color: rgba(0, 210, 255, 0.7); }
+#link-btn svg { width: 1.3em; height: 1.3em; flex-shrink: 0; }
+#result-box #restart-btn, #result-box #leave-btn { margin: 0.4em; }
+#start-btn { min-height: 44px; }
+/* Online: one player per phone — the 180° table mirror is noise */
+body.online #hud-bottom, body.online #minimap-mirror, body.online #timer-bar-wrap-mirror { display: none; }
+.player-badge.me { text-decoration: underline; text-underline-offset: 0.25em; text-decoration-thickness: 2px; }
+
 /* --- Top bar: guide + language --- */
 #setup-screen .top-bar { /* id prefix beats the #setup-screen > * position rule */
   position: absolute;
@@ -459,7 +492,7 @@ body {
   .name-input-row input {
     padding: 0.2em 0.5em;
   }
-  #start-btn {
+  #start-btn, #link-btn {
     margin-top: 0.4em;
     padding: 0.4em 2em;
   }

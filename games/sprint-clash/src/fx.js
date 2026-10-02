@@ -30,7 +30,25 @@ export function disposeScene(scene) {
   });
 }
 
-export const buzz = ms => { if (navigator.userActivation?.hasBeenActive ?? true) navigator.vibrate?.(ms); };
+// haptics: Android vibrates; iOS (18+) has no vibrate API, but toggling a native switch plays the system tick.
+// ponytail: iOS has one fixed tick, so a long buzz (≥ 60 ms) becomes two ticks; no strength control there
+let hapOn = (() => { try { return localStorage.getItem('haptics') !== '0'; } catch { return true; } })(), sw = null;
+const tick = () => {
+  if (!sw) { sw = document.createElement('label'); sw.ariaHidden = 'true'; sw.style.display = 'none'; sw.innerHTML = '<input type="checkbox" switch>'; document.head.append(sw); }
+  sw.click();
+};
+export const canBuzz = matchMedia('(pointer: coarse)').matches && (!!navigator.vibrate || 'switch' in HTMLInputElement.prototype);
+export const isHaptics = () => hapOn;
+export const buzz = ms => {
+  if (!hapOn || !canBuzz || !(navigator.userActivation?.hasBeenActive ?? true)) return;
+  if (navigator.vibrate) navigator.vibrate(ms);
+  else { tick(); if (ms >= 60) setTimeout(tick, 100); }
+};
+export function toggleHaptics() {
+  hapOn = !hapOn;
+  try { localStorage.setItem('haptics', hapOn ? 1 : 0); } catch {}
+  buzz(30); // a taste of it when switched on
+}
 
 export function flash(el, text, cls = '') {
   el.textContent = text;

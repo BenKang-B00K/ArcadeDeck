@@ -117,6 +117,7 @@ export function createFuse({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
   const chips = () => panes.forEach(v => v.chips(players.map(p => (p.alive ? `★${p.pips}` : '✕'))));
 
   // fl: { f, to, own (passer: still owns it in the air), u (0→1 flight), w (s since landing), fumble, plan }
+  let qP = null; // a pass pressed just before it's allowed
   let roundTxt = '', ph = 'count', r = 0, h = -1, fl = null, fuse = 0, hk = 0, holdT = 0, boomT = 0, time = 0, netT = 0, tickT = 0, sparkT = 0, shake = 0;
   const elim = [], ctrl = new Set(online ? [me] : IDX), ai = new Set();
   const step = countdown(panes);
@@ -175,7 +176,8 @@ export function createFuse({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
   function input(i, a) {
     if (ph !== 'play' || !players[i]?.alive) return;
     if (a !== 'A') {
-      if (h !== i || holdT < COOL || players[i].daze > 0) return;
+      if (h !== i) return;
+      if (holdT < COOL || players[i].daze > 0) { if (players[i].daze < .3) qP = { i, a, t: .3 }; return; } // too soon: pass the moment you can
       const to = neighbour(i, a);
       if (to < 0) return;
       fl = { f: i, to, own: i, u: 0, w: 0, fumble: false, plan: null };
@@ -239,6 +241,8 @@ export function createFuse({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
         if (online) send({ t: 'fd', from: me, i: h });
       }
     } else holdT += dt;
+    if (qP && (qP.t -= dt) <= 0) qP = null;
+    else if (qP && h === qP.i && holdT >= COOL && players[h].daze <= 0) { const { i, a } = qP; qP = null; input(i, a); }
     fuse -= dt;
     hk = fuse < HOT ? Math.min(1, 1 - fuse / HOT) : 0; // heat only shows in the last 3 s
     if (fuse <= 0) bang(h >= 0 ? h : fl.own);

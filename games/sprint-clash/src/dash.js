@@ -314,8 +314,8 @@ export function createDash({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
       }
     }
     p.x += (laneX(p.lane) - p.x) * Math.min(1, dt * 14);
-    p.vy -= GRAV * dt; p.y += p.vy * dt;
-    if (p.y <= 0) { p.y = 0; p.vy = 0; }
+    p.vy -= GRAV * dt; p.y += p.vy * dt; p.jb = Math.max(0, (p.jb || 0) - dt);
+    if (p.y <= 0) { p.y = 0; p.vy = 0; if (p.jb > 0) { p.jb = 0; p.vy = JUMP; if (heard(p)) sfx.jump(); } } // buffered jump fires on touchdown
     pose(p, dt, sp, laneX(p.lane));
   }
 
@@ -395,7 +395,7 @@ export function createDash({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
     const s = heard(p);
     if (a === 'L' && p.lane > 0) { p.lane--; if (s) sfx.lane(); }
     else if (a === 'R' && p.lane < 2) { p.lane++; if (s) sfx.lane(); }
-    else if (a === 'J' && p.y <= 0) { p.vy = JUMP; if (s) sfx.jump(); }
+    else if (a === 'J') { if (p.y <= 0) { p.vy = JUMP; if (s) sfx.jump(); } else p.jb = .15; } // pressed just before landing: jump again on touchdown
   };
   const KEYS = {
     KeyA: [0, 'L'], KeyD: [0, 'R'], KeyW: [0, 'J'], ArrowLeft: [1, 'L'], ArrowRight: [1, 'R'], ArrowUp: [1, 'J'],
@@ -409,7 +409,7 @@ export function createDash({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
   };
   const touches = new Map();
   const paneAt = (x, y) => panes.find(v => x >= v.x && x < v.x + v.w && y >= v.y && y < v.y + v.h) || panes[0];
-  const onDown = e => touches.set(e.pointerId, { x: e.clientX, y: e.clientY, v: paneAt(e.clientX, e.clientY), used: false });
+  const onDown = e => touches.set(e.pointerId, { x: e.clientX, y: e.clientY, v: paneAt(e.clientX, e.clientY), used: false, t: performance.now() });
   const onMove = e => {
     const s = touches.get(e.pointerId);
     if (!s || s.used) return;
@@ -423,7 +423,7 @@ export function createDash({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
   const onUp = e => {
     const s = touches.get(e.pointerId);
     touches.delete(e.pointerId);
-    if (!s || s.used || e.type === 'pointercancel') return;
+    if (!s || s.used || e.type === 'pointercancel' || performance.now() - s.t > 350) return; // a resting thumb lifted later isn't a tap
     let rx = (s.x - s.v.x) / s.v.w;
     if (s.v.flip) rx = 1 - rx;
     act(s.v.pi, rx < .33 ? 'L' : rx > .67 ? 'R' : 'J');

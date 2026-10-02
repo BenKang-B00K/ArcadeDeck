@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { t, getLang, setLang, applyI18n } from './i18n.js';
 import { sfx, unlock, getVolume, setVolume, isMuted, toggleMute, isMusicOn, toggleMusic } from './audio.js';
 import * as net from './net.js';
-import { mulberry32, hex, initEnv, Bloom } from './fx.js';
+import { mulberry32, hex, initEnv, Bloom, buzz, canBuzz, isHaptics, toggleHaptics } from './fx.js';
 // game modules load on demand (the how-to card covers the fetch); the service worker keeps them all for offline play.
 // key → display key (also the module's createX name and its i18n keys)
 const GKEY = { dash: 'Dash', timing: 'Timing', draw: 'Draw', stack: 'Stack', sprint: 'Sprint', rope: 'Rope', echo: 'Echo', lanes: 'Lanes', tug: 'Tug', fuse: 'Fuse', sumo: 'Sumo', grid: 'Grid', curl: 'Curl', hex: 'Hex', boat: 'Boat', chicken: 'Chicken', vault: 'Vault', puck: 'Puck', chairs: 'Chairs', fish: 'Fish', kite: 'Kite', crowd: 'Crowd' };
@@ -76,14 +76,19 @@ const label = i => {
   return opts?.bots?.includes(i) ? t('bot', { p: s }) : s;
 };
 
+// off the menu, one history entry of ours sits on top, so the system back (Android gesture / button, iOS edge swipe)
+// pops it instead of leaving the site; back on the menu by any other route, it's popped quietly
+let hist = false;
 function show(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id));
+  if (id !== 'menu' && !hist) { hist = true; history.pushState(null, ''); }
+  else if (id === 'menu' && hist) { hist = false; history.back(); }
 }
 
-// how-to card before every match. Local: waits for Start. Online: fixed delay so every device starts together;
-// messages that arrive meanwhile are queued for the game.
-const GUIDE_ONLINE = 6000, KEYSETS = ['A W D', '← ↑ →', 'J I L', 'Num 4 8 6'];
-let guideT = null, inbox = null;
+// how-to card before every match. Local: waits for Start. Online: everyone taps Ready, then the host says go
+// (AI seats count as ready); messages that arrive meanwhile are queued for the game.
+const KEYSETS = ['A W D', '← ↑ →', 'J I L', 'Num 4 8 6'];
+let inbox = null;
 
 function renderGuide(o) {
   const k = GKEY[o.game];
@@ -112,10 +117,42 @@ function renderGuide(o) {
   $('#gKeys').textContent = coarse ? t(o.game === 'dash' ? 'gTouchDash' : o.game === 'timing' ? 'gTouchTiming' : 'gTouch')
     : o.game === 'timing' ? t('gKeysTiming')
     : `${t('keys')}: ` + (o.mode === 'online' || o.n === 1 ? 'A W D / ← ↑ →' : KEYSETS.slice(0, o.n).map((s, i) => `P${i + 1} ${s}`).join(' · '));
-  const online = o.mode === 'online', go = $('#gGo');
-  go.disabled = online;
-  go.textContent = online ? t('getReady') : t('start');
-  $('#gBar').parentElement.hidden = !online;
+  const go = $('#gGo');
+  go.disabled = false;
+  go.textContent = t('start');
+  renderReady(o);
+}
+
+// online how-to card: one chip per seat, and the Ready button turns into "waiting" once pressed
+function renderReady(o) {
+  const box = $('#gReady'), go = $('#gGo');
+  box.hidden = !o.ready;
+  if (!o.ready) return;
+  box.replaceChildren(...[...Array(o.n).keys()].map(i => {
+    const s = document.createElement('span'), ok = o.ready[i] || o.bots.includes(i);
+    s.className = ok ? 'ok' : '';
+    s.style.setProperty('--c', hex(i));
+    s.textContent = `${label(i)} ${ok ? '✓' : '…'}`;
+    return s;
+  }));
+  go.disabled = !!o.ready[o.me];
+  go.textContent = t(o.ready[o.me] ? 'waitRival' : 'ready');
+}
+
+function markReady(i) {
+  const o = opts;
+  if (!o?.ready || o.starting || !Number.isInteger(i) || i < 0 || i >= o.n) return;
+  o.ready[i] = true;
+  if ($('#guide').classList.contains('on')) renderReady(o);
+  hostGo();
+}
+
+// host: every human seat ready → go. Guests start on the 'go' message.
+function hostGo() {
+  const o = opts;
+  if (role !== 'host' || !o?.ready || o.starting || ![...Array(o.n).keys()].every(i => o.ready[i] || o.bots.includes(i))) return;
+  net.send({ t: 'go' });
+  startGame(o);
 }
 
 function begin(o) {
@@ -123,20 +160,17 @@ function begin(o) {
   opts = o;
   document.activeElement?.blur();
   inbox = [];
-  renderGuide(o);
-  const bar = $('#gBar');
-  bar.style.animation = 'none'; void bar.offsetWidth; bar.style.animation = '';
-  show('guide');
   o.starting = false; // a rematch spreads the last opts
+  o.ready = o.mode === 'online' ? [] : null; // per seat
+  renderGuide(o);
+  show('guide');
   o.load = GAMES[o.game](); // fetch while the card is read
   o.load.catch(() => {}); // failure is handled when starting
-  if (o.mode === 'online') guideT = setTimeout(() => startGame(o), GUIDE_ONLINE);
 }
 
 async function startGame(o) {
   if (opts !== o || game || o.starting) return;
   o.starting = true;
-  clearTimeout(guideT); guideT = null;
   let create;
   try { create = await o.load; } catch { toast(t('gameLoadFail')); return toMenu(); }
   if (opts !== o) return; // left the card while loading
@@ -151,7 +185,7 @@ async function startGame(o) {
 }
 
 function clearGame() {
-  clearTimeout(guideT); guideT = null; inbox = null;
+  inbox = null;
   game?.dispose();
   game = null;
   document.body.classList.remove('playing');
@@ -283,6 +317,7 @@ function results({ order, draw, scores, places, title }) {
   }
   $('#resWait').textContent = '';
   $('#btnRematch').hidden = !!opts.orphan; // host gone: no one left to rematch with
+  $('#btnPick').hidden = role !== 'host';
   !solo && online && winner !== opts.me && winner >= 0 ? sfx.lose() : sfx.win();
   show('results');
 }
@@ -322,10 +357,14 @@ net.on('msg', m => {
     if (Object.hasOwn(GAMES, m.game) && n >= 2 && n <= 4 && me >= 1 && me < n) begin({ mode: 'online', n, me, bots, game: m.game, random: !!m.random, seed: m.seed >>> 0 });
   }
   else if (m.t === 'rec' && role === 'guest' && m.from == null) takeRecord(m); // host-only: relayed guest messages carry `from`
-  else if (m.t === 'rematch' && role === 'host' && opts) hostStart(opts.random ? 'random' : opts.game, opts.n, opts.bots);
+  else if (m.t === 'ready') markReady(m.from ?? 0); // no `from` = the host
+  else if (m.t === 'go' && role === 'guest' && m.from == null && opts?.ready) startGame(opts);
+  else if (m.t === 'pick' && role === 'guest' && m.from == null) $('#resWait').textContent = t('hostPicking');
+  else if (m.t === 'rematch' && role === 'host' && opts && $('#results').classList.contains('on')) hostStart(opts.random ? 'random' : opts.game, opts.n, opts.bots);
   else if (m.t === 'bot' && role === 'guest' && opts) { // host reports a dropped player; host drives them now
     const i = m.i | 0;
     if (i > 0 && i < opts.n && i !== opts.me && !opts.bots.includes(i)) { opts.bots.push(i); game?.botify(i, false); toast(t('aiJoined', { p: t('pn', { n: i + 1 }) })); }
+    if ($('#guide').classList.contains('on')) renderReady(opts);
   }
   else if (game) game.onNet(m);
   else inbox?.push(m);
@@ -337,6 +376,9 @@ net.on('drop', i => {
   game?.botify(i, true);
   net.send({ t: 'bot', from: 0, i });
   toast(t('aiJoined', { p: t('pn', { n: i + 1 }) }));
+  if ($('#guide').classList.contains('on')) renderReady(opts);
+  if ($('#lobby').classList.contains('on')) lobbyCount();
+  hostGo(); // the one we were waiting on may have left
 });
 // guest side: lost the host. Mid-game, AI takes every other seat and the match finishes offline.
 net.on('close', () => {
@@ -370,7 +412,7 @@ document.querySelectorAll('.mode-ic').forEach(b => {
   b.addEventListener('pointerdown', e => {
     if (e.pointerType === 'mouse') return;
     held = false;
-    timer = setTimeout(() => { held = true; b.classList.add('tip-on'); navigator.vibrate?.(15); }, 420);
+    timer = setTimeout(() => { held = true; b.classList.add('tip-on'); buzz(15); }, 420);
   });
   const end = () => { clearTimeout(timer); if (held) setTimeout(() => b.classList.remove('tip-on'), 1400); };
   ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => b.addEventListener(ev, end));
@@ -385,29 +427,53 @@ document.querySelectorAll('[data-n]').forEach(b => b.addEventListener('click', (
   if (was !== (nSel === 1)) shuffleLineup(sel); // solo lineup holds solo games only
 }));
 $('#btnLocal').onclick = () => { sfx.click(); if (ONLINE_ONLY.has(sel)) return toast(t('onlineOnly')); begin({ mode: 'local', n: nSel, bots: [], game: sel === 'random' ? pickGame(null, nSel) : sel, random: sel === 'random', seed: newSeed() }); };
+// ---- host lobby: room code, head count, and a picker with every game (the menu lineup shows only 8).
+// Reopened from the results screen ("Change game") with the room kept: the code is hidden (room locked) and seats carry over.
+let roomMax = 0;
+const lobbyCount = () => { const c = net.guestCount(); $('#lobbyMsg').textContent = t('joined', { n: c + 1, max: roomMax }); $('#btnStart').disabled = c < 1; };
+function renderPick() {
+  const card = k => $(`.game[data-game="${k}"]`), name = k => card(k).querySelector('b').textContent;
+  $('#pick').replaceChildren(...['random', ...Object.keys(GAMES).sort((a, b) => name(a).localeCompare(name(b)))].map(k => {
+    const b = document.createElement('button');
+    b.className = 'pk'; b.dataset.k = k;
+    b.append(card(k).querySelector('svg').cloneNode(true), name(k));
+    b.onclick = () => { card(k).click(); syncPick(); }; // the menu card's handler sets `sel`, so the menu stays in step
+    return b;
+  }));
+  syncPick();
+  const pick = $('#pick'), s = pick.querySelector('.sel'); // scroll the list only: scrollIntoView would also scroll the screen on landscape phones
+  if (s) pick.scrollTop = s.offsetTop - pick.offsetTop - (pick.clientHeight - s.offsetHeight) / 2;
+}
+function syncPick() {
+  $('#pick').querySelectorAll('.pk').forEach(b => { b.classList.toggle('sel', b.dataset.k === sel); b.setAttribute('aria-pressed', String(b.dataset.k === sel)); });
+  const [name, desc] = $('#pickInfo').children, card = $(`.game[data-game="${sel}"]`);
+  name.textContent = card.querySelector('b').textContent; desc.textContent = card.querySelector('small').textContent;
+}
+function openLobby(max) {
+  roomMax = max;
+  $('#code').hidden = $('#share').hidden = !!record; // record = this room already played a match
+  show('lobby');
+  renderPick();
+  lobbyCount();
+}
 $('#btnHost').onclick = () => {
   sfx.click();
   role = 'host';
   $('#code').textContent = '····';
+  openLobby(nSel);
   $('#lobbyMsg').textContent = t('connecting');
-  $('#btnStart').disabled = true;
-  show('lobby');
-  const max = nSel;
-  net.host(code => { $('#code').textContent = code; $('#lobbyMsg').textContent = t('joined', { n: 1, max }); }, count => {
-    $('#lobbyMsg').textContent = t('joined', { n: count + 1, max });
-    $('#btnStart').disabled = count < 1;
-    if (count + 1 >= max) hostStart(sel); // room full: go
-    else sfx.turn();
-  }, netFail);
+  net.host(code => { $('#code').textContent = code; lobbyCount(); }, () => { lobbyCount(); sfx.turn(); }, netFail, nSel - 1);
 };
-$('#btnStart').onclick = () => { sfx.click(); hostStart(sel); };
+$('#btnStart').onclick = () => { sfx.click(); record ? hostStart(sel, opts.n, opts.bots) : hostStart(sel); };
+$('#btnPick').onclick = () => { sfx.click(); clearGame(); net.send({ t: 'pick' }); openLobby(opts.n); };
 $('#btnJoin').onclick = () => { sfx.click(); $('#joinMsg').textContent = ''; show('join'); if (!coarse) $('#codeIn').focus(); };
 $('#btnCodex').onclick = () => { sfx.click(); renderCodex(); show('codex'); };
-$('#codeIn').oninput = e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); };
+// inputmode="email" opens a Latin keyboard on most KO / JA phones; the 4th character joins straight away
+$('#codeIn').oninput = e => { e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''); if (e.target.value.length === 4) $('#joinGo').click(); };
 $('#codeIn').onkeydown = e => { if (e.key === 'Enter') $('#joinGo').click(); };
 $('#joinGo').onclick = () => {
   const code = $('#codeIn').value;
-  if (code.length !== 4) return;
+  if (code.length !== 4 || role === 'guest') return; // already joining (auto-join + Enter): one attempt at a time; a failure clears role
   sfx.click();
   role = 'guest';
   $('#joinMsg').textContent = t('connecting');
@@ -421,15 +487,38 @@ $('#btnRematch').onclick = () => {
   else if (role === 'host') hostStart(opts.random ? 'random' : opts.game, opts.n, opts.bots);
   else { net.send({ t: 'rematch' }); $('#resWait').textContent = t('waitHost'); }
 };
-$('#btnExit').onclick = () => { sfx.click(); toMenu(); };
+// leaving a live match takes a 2nd press within 2.5 s (back always, ✕ on touch), so a stray edge swipe or corner tap can't end it
+let exitArm = -1e4;
+function leave(confirm) {
+  const live = game && !$('#results').classList.contains('on');
+  if (confirm && live && performance.now() - exitArm > 2500) { exitArm = performance.now(); toast(t('exitAgain')); return false; }
+  toMenu();
+  return true;
+}
+$('#btnExit').onclick = () => { sfx.click(); leave(coarse); };
+addEventListener('popstate', () => {
+  if (!hist) return; // our own quiet pop from show('menu')
+  hist = false;
+  if (!leave(true)) { hist = true; history.pushState(null, ''); }
+});
 
 // ---- top bar
-const langSel = $('#lang'), volEl = $('#vol'), sndBtn = $('#btnSnd'), musBtn = $('#btnMus');
+const langSel = $('#lang'), volEl = $('#vol'), sndBtn = $('#btnSnd'), musBtn = $('#btnMus'), vibBtn = $('#btnVib');
 langSel.value = getLang();
-langSel.onchange = () => { setLang(langSel.value); sfx.click(); if ($('#guide').classList.contains('on')) renderGuide(opts); if ($('#codex').classList.contains('on')) renderCodex(); };
-$('#gGo').onclick = () => { sfx.click(); startGame(opts); };
+langSel.onchange = () => {
+  setLang(langSel.value); sfx.click();
+  if ($('#guide').classList.contains('on')) renderGuide(opts);
+  if ($('#codex').classList.contains('on')) renderCodex();
+  if ($('#lobby').classList.contains('on')) { renderPick(); if ($('#code').textContent !== '····') lobbyCount(); }
+};
+$('#gGo').onclick = () => {
+  sfx.click();
+  if (!opts.ready) return startGame(opts);
+  net.send({ t: 'ready' });
+  markReady(opts.me);
+};
 addEventListener('keydown', e => {
-  if ((e.code === 'Enter' || e.code === 'Space') && !e.repeat && $('#guide').classList.contains('on') && opts?.mode !== 'online') { e.preventDefault(); $('#gGo').click(); }
+  if ((e.code === 'Enter' || e.code === 'Space') && !e.repeat && $('#guide').classList.contains('on') && !$('#gGo').disabled) { e.preventDefault(); $('#gGo').click(); }
 });
 function syncAudioUI() {
   const v = getVolume();
@@ -439,11 +528,15 @@ function syncAudioUI() {
   sndBtn.setAttribute('aria-pressed', String(!isMuted()));
   musBtn.classList.toggle('off', !isMusicOn());
   musBtn.setAttribute('aria-pressed', String(isMusicOn()));
+  vibBtn.classList.toggle('off', !isHaptics());
+  vibBtn.setAttribute('aria-pressed', String(isHaptics()));
 }
 volEl.oninput = () => { unlock(); setVolume(volEl.value / 100); syncAudioUI(); };
 volEl.onchange = () => sfx.click();
 sndBtn.onclick = () => { unlock(); toggleMute(); syncAudioUI(); sfx.click(); };
 musBtn.onclick = () => { unlock(); toggleMusic(); syncAudioUI(); sfx.click(); };
+vibBtn.hidden = !canBuzz; // touch devices that can buzz only
+vibBtn.onclick = () => { toggleHaptics(); syncAudioUI(); sfx.click(); };
 const fs = $('#btnFs');
 // embedded: the host page owns fullscreen (a nested request hangs in Chrome)
 if (!document.documentElement.requestFullscreen || matchMedia('(display-mode: standalone)').matches || parent !== window) fs.hidden = true;
@@ -451,10 +544,14 @@ fs.onclick = () => (document.fullscreenElement ? document.exitFullscreen() : doc
 
 // ---- mobile hygiene
 addEventListener('pointerdown', unlock, { passive: true });
+addEventListener('pointerup', unlock, { passive: true }); // a touch only counts as a user gesture on release, so the 1st tap's pointerdown can't start audio
 addEventListener('keydown', unlock);
 document.addEventListener('gesturestart', e => e.preventDefault());
 document.addEventListener('dblclick', e => e.preventDefault());
 $('#c').addEventListener('contextmenu', e => e.preventDefault());
+// held taps on the play area (Deep Cast, Kite Fight, Stone Slide, long notes…): iOS would raise the magnifier loupe,
+// text selection + haptic, or the callout. Cancelling touchstart stops those; pointer events (all game input) still fire.
+$('#c').addEventListener('touchstart', e => e.preventDefault(), { passive: false });
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden && game && !wakeLock) navigator.wakeLock?.request('screen').then(l => { wakeLock = l; }, () => {});
   else if (document.hidden) wakeLock = null; // browser releases it on hide

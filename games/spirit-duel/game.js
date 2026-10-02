@@ -461,6 +461,8 @@ function renderStars(justGainedPid) {
   let activePid = null;
   if (state.vsAI) {
     activePid = state.humanPid;
+  } else if (net) {
+    activePid = net.me;
   } else if (state.phase === 'first_input') {
     activePid = state.firstPlayer;
   } else if (state.phase === 'second_input') {
@@ -554,6 +556,14 @@ function renderTurnInfo() {
   } else {
     inputPanel.style.visibility = 'hidden'; // 레이아웃 유지 — display:none 이면 보드가 점프
   }
+
+  // 폰 연결: 상대 차례면 내 폰은 입력 대신 "고르는 중" 표시만
+  const waiting = !!net && state.phase.endsWith('_input') && state.currentPlayer !== net.me;
+  inputPanel.classList.toggle('waiting', waiting);
+  if (waiting) document.getElementById('netWait').textContent = t('net.deciding', { name: t(`player.${state.currentPlayer}`) });
+  [p1Card, p2Card].forEach((card, i) => {
+    if (net && net.me === i + 1) card.dataset.you = t('net.you'); else delete card.dataset.you;
+  });
 
   // 화살표 방향 - 상대 위치 기준 동적 결정
   const iconAdvance = document.getElementById('iconAdvance');
@@ -1130,7 +1140,7 @@ function showPreview(action) {
 }
 
 actionBtns.forEach(btn => {
-  const canPreview = () => !btn.disabled && !state.inputLocked;
+  const canPreview = () => !btn.disabled && !state.inputLocked && myTurn();
   // 마우스: hover 즉시
   btn.addEventListener('pointerenter', e => {
     if (e.pointerType === 'mouse' && canPreview()) showPreview(btn.dataset.action);
@@ -1152,7 +1162,7 @@ actionBtns.forEach(btn => {
 actionBtns.forEach(btn => {
   btn.addEventListener('click', () => {
     if (previewConsumedClick) { previewConsumedClick = false; return; }
-    if (state.inputLocked) return;
+    if (state.inputLocked || !myTurn()) return;
     const action = btn.dataset.action;
     const p = state.players[state.currentPlayer];
     const maxActions = getMaxActions(state.round) - p.penalty;
@@ -1173,7 +1183,7 @@ actionBtns.forEach(btn => {
 });
 
 undoBtn.addEventListener('click', () => {
-  if (state.inputLocked) return;
+  if (state.inputLocked || !myTurn()) return;
   const p = state.players[state.currentPlayer];
   if (p.actions.length > 0) {
     if (p.actions[p.actions.length - 1] === 'leap_hold') {
@@ -1247,8 +1257,14 @@ document.addEventListener('keydown', (e) => {
 });
 
 confirmBtn.addEventListener('click', () => {
-  if (state.inputLocked) return;
+  if (state.inputLocked || !myTurn()) return;
   clearPreview();
+  if (net && state.phase.endsWith('_input')) {
+    Coop.send({ t: 'acts', r: state.round, n: state.turn, a: state.players[net.me].actions });
+    SFX.uiConfirm();
+    netAdvance();
+    return;
+  }
   if (state.phase === 'first_input') {
     SFX.uiConfirm();
     if (state.vsAI && state.firstPlayer === state.humanPid) {
@@ -1346,7 +1362,9 @@ function triggerAIIfNeeded() {
 }
 
 // ==================== 동시 처리 로직 ====================
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+// gen 이 바뀌면(온라인 매치 재시작/이탈) 진행 중이던 연출 체인은 그 자리에서 멈춤 — 새 화면을 건드리지 않음
+let gen = 0;
+function sleep(ms) { const g = gen; return new Promise(r => setTimeout(() => g === gen && r(), ms)); }
 
 function gainStar(pid) {
   const p = state.players[pid];
@@ -1509,7 +1527,6 @@ async function resolveActions() {
   state.turn++;
   p1.actions = [];
   p2.actions = [];
-  state.phase = 'first_input';
 
   const newExpansion = STARDUST_EXPANSION.find(p => p.turn === state.turn);
   if (newExpansion) {
@@ -1520,7 +1537,9 @@ async function resolveActions() {
     renderCornerStates();
     await sleep(1200);
   }
+  state.phase = 'first_input'; // 확장 연출이 끝난 뒤에 입력 단계 — 그 사이 키 입력이 지난 턴 플레이어에게 들어가지 않게
 
+  if (net) return netTurnStart();
   const firstName = t('curtain.turnName', { name: t(`player.${state.firstPlayer}`) });
   showCurtain({ mode: 'handoff', title: firstName, sub: t('curtain.handoff.sub.nextTurn'), themePid: state.firstPlayer }, () => {
     triggerAIIfNeeded();
@@ -1774,6 +1793,7 @@ function startNextRound() {
   state.players[2] = { hp: MAX_HP, pos: START_POS_P2, actions: [], penalty: 0, cornerTurns: 0, stars: 0 };
 
   renderAll();
+  if (net) return netTurnStart();
 
   const firstName = t('curtain.turnName', { name: t(`player.${state.firstPlayer}`) });
   const subText = state.round === DECISIVE_ROUND
@@ -1816,7 +1836,9 @@ function endMatch() {
     }
     try { window.parent.postMessage({ type: 'GAME_OVER', score: aiWins, subScore: state.matchScore[human] }, '*'); } catch (e) {}
   }
+  const g = gen;
   setTimeout(() => {
+    if (g !== gen) return;
     hideCurtain();
     endmodal.classList.add('show');
   }, 800);
@@ -2078,7 +2100,7 @@ function runSetupScreen() {
 }
 
 // ==================== 선공 추첨 연출 ====================
-async function runFirstPlayerDraw() {
+async function runFirstPlayerDraw(forced) {
   drawResult.textContent = '';
   drawP1.classList.remove('chosen', 'blinking');
   drawP2.classList.remove('chosen', 'blinking');
@@ -2106,14 +2128,14 @@ async function runFirstPlayerDraw() {
   drawP1.classList.remove('blinking');
   drawP2.classList.remove('blinking');
 
-  const chosen = Math.random() < 0.5 ? 1 : 2;
+  const chosen = forced || (Math.random() < 0.5 ? 1 : 2);
   state.firstPlayer = chosen;
 
   const chosenName = t(`player.${chosen}`);
   if (chosen === 1) drawP1.classList.add('chosen');
   else drawP2.classList.add('chosen');
   curtain.setAttribute('data-theme', `p${chosen}`);
-  drawResult.textContent = '';
+  drawResult.innerHTML = net ? t('setup.chosen', { mine: pname(net.me), other: pname(3 - net.me) }) : '';
   drawTitle.textContent = t('curtain.draw.result', { name: chosenName });
   SFX.sfxDrawComplete(chosen === 1);
 
@@ -2123,6 +2145,7 @@ async function runFirstPlayerDraw() {
   curtainBtn.textContent = t('btn.beginDuel');
   curtainBtn.onclick = () => {
     hideCurtain();
+    if (net) return netTurnStart();
     const firstName = t('curtain.turnName', { name: t(`player.${state.firstPlayer}`) });
     showCurtain({ mode: 'handoff', title: firstName, sub: t('curtain.draw.handoffSub'), themePid: state.firstPlayer }, () => {
       triggerAIIfNeeded();
@@ -2132,7 +2155,7 @@ async function runFirstPlayerDraw() {
 }
 
 // ==================== 재시작 ====================
-restartBtn.addEventListener('click', () => {
+function resetMatch() {
   state.round = 1;
   state.matchScore = { 1: 0, 2: 0 };
   state.turn = 1;
@@ -2141,9 +2164,101 @@ restartBtn.addEventListener('click', () => {
   state.players[1] = { hp: MAX_HP, pos: START_POS_P1, actions: [], penalty: 0, cornerTurns: 0, stars: 0 };
   state.players[2] = { hp: MAX_HP, pos: START_POS_P2, actions: [], penalty: 0, cornerTurns: 0, stars: 0 };
   endmodal.classList.remove('show');
+  restartBtn.disabled = false;
+  restartBtn.textContent = t('btn.newMatch');
   renderAll();
+}
+restartBtn.addEventListener('click', () => {
+  if (net) {
+    // 온라인 재대결: 호스트가 바로 시작, 게스트는 요청만 보내고 호스트를 기다림
+    if (Coop.role === 'host') netNewMatch();
+    else { Coop.send({ t: 'again' }); restartBtn.disabled = true; restartBtn.textContent = t('net.waitHost'); }
+    return;
+  }
+  resetMatch();
   runSetupScreen();
 });
+
+// ==================== 폰 연결 (Host / Join, coop.js) ====================
+// 액션 릴레이: 양쪽 폰이 같은 결정적 판정 로직을 돌리고, 오가는 건 각자 확정한 행동 목록뿐.
+// 호스트 = 푸른 정령(1), 게스트 = 호박 정령(2). 선공 추첨은 호스트가 굴려 'go' 로 보냄.
+// 상대가 먼저 확정한 행동은 pending 에 (라운드:턴) 키로 쌓였다가 내 폰이 그 입력 단계에 오면 적용 —
+// 라운드 사이 버튼을 서로 다른 때 눌러도 어긋나지 않음.
+// ponytail: 상대 행동도 폰 메모리엔 있음(화면엔 안 보임). 치팅 방지가 필요하면 호스트 판정 + 결과만 전송으로.
+let net = null;      // null | { me: 1|2 }
+let pending = {};
+// 입력 단계에서 실제로 둘 차례인 쪽 (currentPlayer 는 renderTurnInfo 전까지 지난 값일 수 있음)
+const inputPid = () => state.phase === 'first_input' ? state.firstPlayer : 3 - state.firstPlayer;
+const myTurn = () => !net || (state.phase.endsWith('_input') && inputPid() === net.me);
+
+function netMatch(first) {
+  gen++;
+  pending = {};
+  state.vsAI = false;
+  hideCurtain();
+  resetMatch();
+  runFirstPlayerDraw(first);
+}
+function netNewMatch() {
+  const first = Math.random() < 0.5 ? 1 : 2;
+  Coop.send({ t: 'go', first });
+  netMatch(first);
+}
+function netTurnStart() {
+  renderTurnInfo();
+  SFX.sfxTurnStart();
+  netPull();
+}
+function netAdvance() {
+  if (state.phase === 'first_input') {
+    state.phase = 'second_input';
+    netTurnStart();
+  } else {
+    state.phase = 'resolve';
+    renderTurnInfo();
+    resolveActions();
+  }
+}
+// 지금 입력할 차례가 상대이고 그 행동이 이미 도착했으면 적용
+function netPull() {
+  if (!net || !state.phase.endsWith('_input')) return;
+  const cur = inputPid();
+  const key = state.round + ':' + state.turn;
+  if (cur === net.me || !pending[key]) return;
+  state.players[cur].actions = pending[key];
+  delete pending[key];
+  netAdvance();
+}
+function netExit() {
+  gen++;
+  net = null;
+  document.body.classList.remove('online');
+  hideCurtain();
+  resetMatch();
+  runSetupScreen();
+}
+
+const coopOpts = {
+  game: 'spiritduel', max: 1, lang: getLocale,
+  name: i => t(`player.${i + 1}`),
+  onStart(n, me) {
+    net = { me: me + 1 };
+    document.body.classList.add('online');
+    if (me === 0) netNewMatch(); // 게스트는 호스트의 'go' 를 기다림
+  },
+  onMsg(m) {
+    if (m.t === 'go' && Coop.role === 'guest') netMatch(m.first === 2 ? 2 : 1);
+    else if (m.t === 'acts' && Array.isArray(m.a)) {
+      pending[m.r + ':' + m.n] = m.a.filter(a => a in ACTIONS);
+      netPull();
+    } else if (m.t === 'again' && Coop.role === 'host' && endmodal.classList.contains('show')) netNewMatch();
+  },
+  onLeave() { gen++; }, // 상대가 나감: 연출 멈춤 — coop.js 가 안내 + 메뉴로 버튼을 띄움
+  onMenu: netExit,
+};
+const openLink = () => { SFX.uiClick(); Coop.open(coopOpts); };
+document.getElementById('setupModeLink').addEventListener('click', openLink);
+document.getElementById('linkToggle').addEventListener('click', openLink);
 
 // ==================== 초기화 ====================
 function renderAll() {

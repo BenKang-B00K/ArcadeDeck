@@ -1,6 +1,6 @@
 // Offline shell: serve from cache, refresh cache in the background (stale-while-revalidate).
-const CACHE = 'ladder-v1.127.1';
-const SHELL = ['./', 'index.html', 'style.css', 'game.js', 'ladder.js', 'audio.js', 'manifest.webmanifest',
+const CACHE = 'ladder-v1.129.0';
+const SHELL = ['./', 'index.html', 'style.css', 'game.js', 'ladder.js', 'audio.js', 'coop.js', 'manifest.webmanifest',
   'icons/icon.svg', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', e => {

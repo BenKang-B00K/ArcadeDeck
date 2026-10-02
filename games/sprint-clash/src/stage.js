@@ -83,18 +83,23 @@ export function renderPanes(renderer, scene, panes, camFor) {
 export function bindInput({ cv, panes, n, online, me, act, release, down }) {
   if (n === 1) online = true; // solo: every key set drives the one player (me defaults to 0)
   const held = new Map(); // pointerId -> [pi, action] so the release goes to the zone that was pressed
+  const keys = new Map(); // code -> [pi, action] while down, so losing focus can let go of them
   const key = e => KEYS[e.code] ?? (down && KEYS_D[e.code] != null ? [KEYS_D[e.code], 'D'] : null);
   const onKey = e => {
     const k = key(e);
     if (!k || e.repeat || (!online && k[0] >= n)) return;
     e.preventDefault();
+    keys.set(e.code, [online ? me : k[0], k[1]]);
     act(online ? me : k[0], k[1]);
   };
   const onUp = e => {
     const k = key(e);
     if (!k || (!online && k[0] >= n)) return;
+    keys.delete(e.code);
     release(online ? me : k[0], k[1]);
   };
+  // alt-tab / notification while holding: the keyup never arrives, so release everything still held
+  const onBlur = () => { for (const h of [...keys.values(), ...held.values()]) release(...h); keys.clear(); held.clear(); };
   const onDown = e => {
     if (e.button > 0) return;
     const v = panes.find(p => e.clientX >= p.x && e.clientX < p.x + p.w && e.clientY >= p.y && e.clientY < p.y + p.h) || panes[0];
@@ -107,10 +112,10 @@ export function bindInput({ cv, panes, n, online, me, act, release, down }) {
   const onPUp = e => { const h = held.get(e.pointerId); if (h) { held.delete(e.pointerId); release(...h); } };
   cv.addEventListener('pointerdown', onDown);
   addEventListener('keydown', onKey);
-  if (release) { addEventListener('keyup', onUp); addEventListener('pointerup', onPUp); addEventListener('pointercancel', onPUp); }
+  if (release) { addEventListener('keyup', onUp); addEventListener('pointerup', onPUp); addEventListener('pointercancel', onPUp); addEventListener('blur', onBlur); }
   return () => {
     cv.removeEventListener('pointerdown', onDown); removeEventListener('keydown', onKey);
-    removeEventListener('keyup', onUp); removeEventListener('pointerup', onPUp); removeEventListener('pointercancel', onPUp);
+    removeEventListener('keyup', onUp); removeEventListener('pointerup', onPUp); removeEventListener('pointercancel', onPUp); removeEventListener('blur', onBlur);
   };
 }
 

@@ -2,15 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
     <meta name="description" content="Play Omok (Gomoku / Five-in-a-row) against AI or a friend">
     <meta name="theme-color" content="#2a2521">
     <link rel="manifest" href="./manifest.json">
     <link rel="icon" href="./icon-192.png" type="image/png">
     <link rel="apple-touch-icon" href="./icon-192.png">
     <title>Omok</title>
-  <script type="module" crossorigin src="./assets/index-DAO0DMHm.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-DWLQlSlB.css">
+  <script type="module" crossorigin src="./assets/index-DCupDiYL.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-B_z06JKR.css">
 </head>
 <body>
     <a href="#board" class="skip-link" aria-label="Skip to game board">Skip to Board</a>
@@ -35,6 +35,7 @@
                 <div class="mode-buttons">
                     <button class="mode-btn active" data-mode="AI" data-i18n="vsAI" aria-pressed="true">Vs AI</button>
                     <button class="mode-btn" data-mode="LOCAL" data-i18n="twoPlayer" aria-pressed="false">2 Player</button>
+                    <button class="mode-btn" data-mode="ONLINE" data-i18n="phoneLink" aria-pressed="false">Phone link</button>
                 </div>
             </div>
 
@@ -110,11 +111,14 @@
             <div id="result-screen" style="display: none;" role="dialog" aria-modal="true" aria-label="Game result">
                 <div class="result-box">
                     <h2 id="result-message" aria-live="assertive"></h2>
+                    <p id="rematch-wait" data-i18n="waitHost" hidden>Waiting for the host to start the next game…</p>
+                    <button id="rematch-btn" data-i18n="rematch" hidden>Rematch</button>
                     <button id="back-to-lobby-btn" data-i18n="backToLobby">Back to Lobby</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="./coop.js"></script>
 </body>
 </html>

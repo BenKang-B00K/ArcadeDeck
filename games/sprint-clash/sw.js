@@ -1,5 +1,5 @@
 // Offline app shell. Bump CACHE on every release so old files are dropped.
-const CACHE = 'sprintclash-v3.4.1';
+const CACHE = 'sprintclash-v3.4.2';
 const SHELL = [
   './', 'index.html', 'style.css', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png',
   'src/main.js', 'src/i18n.js', 'src/audio.js', 'src/net.js', 'src/fx.js', 'src/dash.js', 'src/timing.js',

@@ -219,6 +219,11 @@
   position: relative;
 }
 
+.blog-post h3 {
+  margin-top: 24px;
+  font-size: 1.05rem;
+}
+
 .blog-post h2 .heading-anchor {
   color: var(--text-muted);
   text-decoration: none;

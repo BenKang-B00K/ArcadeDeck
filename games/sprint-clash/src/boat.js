@@ -197,7 +197,7 @@ export function createBoat({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
   let beatPtr = 0, kickCur = 0, hatCur = 0, chordBar = 0, drumPulse = 0;
   const step = countdown(panes);
   const q2 = v => Math.round(v * 100) / 100;
-  const lastSync = boats.map(() => 0), lastHits = boats.map(() => 0);
+  const lastSync = boats.map(() => 0), lastHits = boats.map(() => 0), lastFin = boats.map(() => false);
   const syncPtr = () => { while (beatPtr + 1 < NBEATS && beatT[beatPtr + 1] <= RT) beatPtr++; };
 
   // authority only: apply one judged stroke to its boat's physics + steer/sync bookkeeping. k = -1: stray stroke.
@@ -233,7 +233,9 @@ export function createBoat({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
     if (k >= 0) p.done[k] = 1;
     p.combo = q ? p.combo + 1 : 0; p.best = Math.max(p.best, p.combo);
     p.lastSide = sideChar; p.strokeSide = s2; p.strokeFX = 1;
-    judge(p, q, dt);
+    let jd = dt; // a stray just ahead of this side's next note still says EARLY
+    if (k < 0) for (let j = p.next; j < NOTES.length && NOTES[j].t - RT < .6; j++) if (!p.done[j] && NOTES[j].s === s2) { jd = RT - NOTES[j].t; break; }
+    judge(p, q, jd);
     if (q) {
       const nt = NOTES[k];
       if (paneOf(p.i)) { sfx.pull(); sfx.pitch(nt.deg, .28, q === 2 ? .13 : .09); if (nt.steer != null && !boats[p.s].dodge[nt.steer]) say(p.i, t('boatDodge'), 'boost'); }
@@ -302,6 +304,15 @@ export function createBoat({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
   // updates and for a guest reading them off the broadcast — same code path either way)
   function boatFX() {
     boats.forEach((boat, s) => {
+      if (boat.fin != null && !lastFin[s]) { // crossed the line: say so, then wait for the rest (notes stop judging)
+        lastFin[s] = true;
+        members[s].forEach(i => {
+          const v = paneOf(i);
+          if (!v) return;
+          say(i, t('finish'), 'go'); sfx.finish();
+          if (online && boats.some(bt => bt.fin == null)) { v.hint.textContent = t('waitRival'); v.hint.classList.remove('hide'); }
+        });
+      }
       if (boat.syncN > lastSync[s]) {
         lastSync[s] = boat.syncN;
         burst.emit(TX[s] + boat.x, .6, -boat.d, 0xffd23f, 30, 6);
@@ -475,8 +486,8 @@ export function createBoat({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
       }
     } else if (auth) simulate(dt);
     else if (st === 'play') RT += dt;
-    if (st === 'play' && RT > 2.5) panes.forEach(v => v.hint.classList.add('hide'));
-    if (st === 'play') for (const p of players) if (p.local) sweep(p);
+    if (st === 'play' && RT > 2.5) panes.forEach(v => { if (boats[players[v.pi].s].fin == null) v.hint.classList.add('hide'); }); // a finished boat's pane keeps its wait hint
+    if (st === 'play') for (const p of players) if (p.local && boats[p.s].fin == null) sweep(p);
 
     // backing track: kick every beat, a bar chord every 4 beats, hats on the offbeat — same local clock for all
     if (st === 'play') {

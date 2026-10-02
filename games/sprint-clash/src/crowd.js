@@ -15,7 +15,8 @@ import { coarse, keyHint, zones, makePane, rankChips, layout, fitFov, renderPane
 // Last one standing or first to 4 statues takes the round; first to 2 rounds wins.
 // Host-authoritative: guests send held inputs + punches; the host streams the crowd at 12 Hz. On one shared screen
 // everyone would see whose figure moves with which keys, so main.js only offers it online.
-const PX = 16, PZ = 10, RCAP = 90, SPD = 1.8, TURN = 2, TOUCH = 1.2, REACH = 1.35, PIP_DELAY = 3, EXPOSE = 3, WINS = 2, MAX_ROUNDS = 3, STEP = 1 / 60;
+const PX = 16, PZ = 10, RCAP = 90, SPD = 1.8, SLOW = .92, TURN = 2, TOUCH = 1.2, REACH = 1.35, PIP_DELAY = 3, EXPOSE = 3, WINS = 2, MAX_ROUNDS = 3, STEP = 1 / 60;
+// SLOW: each statue touched this round multiplies that player's walk speed (3 touches = x0.78), a tell rivals can read
 const STAT = [[-11, -6.2], [11, -6.2], [-11, 6.2], [11, 6.2]], FR = [2.9, 2.2]; // fountain ellipse radii (x, z)
 const ST = ['count', 'play', 'end', 'done'];
 const inF = w => (w.x / FR[0]) ** 2 + (w.z / FR[1]) ** 2 < 1;
@@ -292,7 +293,8 @@ export function createCrowd({ renderer, mode, n = 2, me = 0, bots = [], send, la
         const d = Math.atan2(Math.sin(w.want - w.a), Math.cos(w.want - w.a)); w.a += Math.max(-TURN * dt, Math.min(TURN * dt, d));
         if (w.stop > 0) { w.stop -= dt; moving = false; }
       }
-      if (moving) { w.x += Math.cos(w.a) * SPD * dt; w.z += Math.sin(w.a) * SPD * dt; w.ph += dt * 9; }
+      const sp = i >= 0 ? SPD * SLOW ** S.p[i].vis : SPD;
+      if (moving) { w.x += Math.cos(w.a) * sp * dt; w.z += Math.sin(w.a) * sp * dt; w.ph += dt * 9; }
       w.mv = moving ? 1 : 0;
       w.x = Math.max(-PX, Math.min(PX, w.x)); w.z = Math.max(-PZ, Math.min(PZ, w.z));
       for (const [sx, sz] of STAT) { const dx = w.x - sx, dz = w.z - sz, d = Math.hypot(dx, dz); if (d < .75) { w.x = sx + dx / (d || 1) * .75; w.z = sz + dz / (d || 1) * .75; } } // plinths are solid

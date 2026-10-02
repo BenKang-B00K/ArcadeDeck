@@ -89,7 +89,7 @@ export function createStack({ renderer, mode, n = 2, me = 0, bots = [], rand, se
 
   function spawn(p) {
     const f = p.floors.length, top = p.floors[f - 1];
-    p.axis = f % 2; p.u = side[f % MAXF] * AMP; p.dir = -side[f % MAXF]; p.prevU = p.u; p.plan = null; p.think = .75 + Math.random() * .6;
+    p.axis = f % 2; p.u = side[f % MAXF] * AMP; p.dir = -side[f % MAXF]; p.prevU = p.u; p.plan = null; p.think = .75 + Math.random() * .6; p.age = 0;
     p.cur.scale.set(top.w, FH, top.d);
     p.cur.material.color.copy(colorAt(p.i, f));
     p.cur.material.emissive.copy(C);
@@ -147,7 +147,7 @@ export function createStack({ renderer, mode, n = 2, me = 0, bots = [], rand, se
       for (const p of players) {
         if (!p.local || p.fin != null) continue;
         if (p.stun > 0) { if ((p.stun -= dt) <= 0) spawn(p); continue; }
-        p.prevU = p.u;
+        p.prevU = p.u; p.age += dt;
         p.u += p.dir * speedAt(p.floors.length) * dt;
         if (Math.abs(p.u) > AMP) { p.u = Math.sign(p.u) * AMP; p.dir = -p.dir; }
         if (p.bot) botStep(p, dt);
@@ -206,7 +206,7 @@ export function createStack({ renderer, mode, n = 2, me = 0, bots = [], rand, se
 
   const act = pi => {
     const p = players[pi];
-    if (!p?.local || p.bot || state !== 'play' || p.stun > 0 || p.fin != null) return;
+    if (!p?.local || p.bot || state !== 'play' || p.stun > 0 || p.fin != null || p.age < .15) return; // a double tap can't drop the fresh block at the edge
     place(p);
   };
   const unbind = bindInput({ cv: renderer.domElement, panes, n, online, me, act });

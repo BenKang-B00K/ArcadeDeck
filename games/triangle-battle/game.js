@@ -66,6 +66,11 @@
       win: '승리!',
       statLines: (e, t) => `총 <strong>${e}</strong>개의 선 · <strong>${t}</strong>개의 삼각형`,
       rotateLandscape: '화면을 가로로 돌려주세요',
+      link: '폰 연결',
+      linkTitle: '각자 휴대폰으로 플레이 (같은 Wi-Fi)',
+      yourTurn: '내 차례!',
+      deciding: (name) => `${name}님이 수를 고민하는 중…`,
+      leave: '나가기',
     },
     en: {
       title: 'Triangle Battle!',
@@ -96,6 +101,11 @@
       win: 'Wins!',
       statLines: (e, t) => `<strong>${e}</strong> lines · <strong>${t}</strong> triangles`,
       rotateLandscape: 'Please rotate to landscape mode',
+      link: 'Phone link',
+      linkTitle: 'Play on separate phones (same Wi-Fi)',
+      yourTurn: 'Your turn!',
+      deciding: (name) => `${name} is deciding their move…`,
+      leave: 'Leave',
     }
   };
 
@@ -212,6 +222,8 @@
     currentLang = currentLang === 'ko' ? 'en' : 'ko';
     applyI18n();
     buildNameInputs();
+    document.getElementById('link-btn').title = t('linkTitle');
+    if (!gameScreen.classList.contains('hidden')) updateTurnInfo();
   });
   applyI18n(); // initial
 
@@ -262,13 +274,16 @@
 
   // --- Init ---
   startBtn.addEventListener('click', startGame);
-  restartBtn.addEventListener('click', () => {
+  restartBtn.addEventListener('click', () => Coop.live ? hostMatch() : toSetup());
+  function toSetup() {
     resultOverlay.classList.add('hidden');
     setupScreen.classList.remove('hidden');
     gameScreen.classList.add('hidden');
+    document.body.classList.remove('online');
     stopAnimLoop();
     clearInterval(timerInterval);
-  });
+    clearTimeout(resultTimer);
+  }
   window.addEventListener('resize', () => {
     if (!gameScreen.classList.contains('hidden')) setupBoard();
   });
@@ -283,6 +298,14 @@
 
   function startGame() {
     if (!validateAndSetNames()) return;
+    playerCount = parseInt(playerCountSel.value);
+    pegCount = parseInt(pegCountSel.value);
+    timeLimit = parseInt(timeLimitSel.value);
+    beginMatch();
+  }
+
+  // Local, host and guest all start here. pegList = [[nx, ny], ...] from the host (guest only).
+  function beginMatch(pegList) {
     audio.playStart();
     // Mobile hardening (all no-ops where unsupported): keep screen on, trap back gesture,
     // fullscreen + landscape lock (Android; iPhone has no element fullscreen)
@@ -290,22 +313,26 @@
     if (history.state !== 'game') history.pushState('game', '');
     document.documentElement.requestFullscreen?.({ navigationUI: 'hide' })
       .then(() => screen.orientation.lock('landscape')).catch(() => {});
-    playerCount = parseInt(playerCountSel.value);
-    pegCount = parseInt(pegCountSel.value);
-    timeLimit = parseInt(timeLimitSel.value);
     currentPlayer = 0;
     scores = Array(playerCount).fill(0);
     edges = []; triangles = [];
     selectedPeg = null; hoveredPeg = null;
     gameOver = false; xMark = null;
     particles = []; screenFlash = 0; gameEndAnim = null;
+    netWait = false;
+    clearTimeout(resultTimer);
 
+    resultOverlay.classList.add('hidden');
     setupScreen.classList.add('hidden');
     gameScreen.classList.remove('hidden');
+    document.body.classList.toggle('online', Coop.live); // one player per phone: drop the mirrored table HUD
+    restartBtn.classList.toggle('hidden', Coop.role === 'guest'); // the host restarts online matches
+    leaveBtn.classList.toggle('hidden', !Coop.live);
 
     buildHUD(); // before setupBoard: HUD height decides the container size we measure
     setupBoard();
-    generatePegs();
+    if (pegList) pegs = pegList.map(([nx, ny], id) => ({ nx, ny, x: nx * boardSize, y: ny * boardSize, id }));
+    else generatePegs();
     initBgEffects();
     startTimer();
     startAnimLoop();
@@ -379,31 +406,33 @@
     if (gameOver) { clearInterval(timerInterval); return; }
     const now = Date.now();
     // Pause while hidden/rotated; a gap > 500ms means the tab was throttled or JS suspended (iOS)
-    if (document.hidden || portraitQuery.matches || now - lastTick > 500) turnStartTime += now - lastTick;
+    if (!Coop.live && (document.hidden || portraitQuery.matches || now - lastTick > 500)) turnStartTime += now - lastTick;
     lastTick = now;
     const elapsed = (now - turnStartTime) / 1000;
     updateTimerBar();
 
     // Tick-tock when < 4s remaining
-    if (timeLimit > 0 && timeLimit - elapsed <= 4 && timeLimit - elapsed > 0) {
+    if (timeLimit > 0 && timeLimit - elapsed <= 4 && timeLimit - elapsed > 0 && (!Coop.live || currentPlayer === Coop.me)) {
       if (Math.floor(elapsed * 10) % 10 === 0) { // Approx once per second
         audio.playTick();
       }
     }
 
-    if (elapsed >= timeLimit) {
+    if (elapsed >= timeLimit && Coop.role !== 'guest') { // online, only the host calls time
       // Time's up — opponent (next player) gets a random line, then it's their turn
       selectedPeg = null;
       showMessage(t('timeUp'));
       const opp = (currentPlayer + 1) % playerCount;
       const moves = validMoves();
-      if (moves.length) placeEdge(...moves[Math.floor(Math.random() * moves.length)], opp);
+      const mv = moves.length ? moves[Math.floor(Math.random() * moves.length)] : [null, null];
+      if (moves.length) placeEdge(...mv, opp);
       currentPlayer = opp;
       audio.playTurn();
       turnStartTime = Date.now();
       updateHUD();
       wakeAnimLoop();
       if (!validMoves().length) endGame();
+      push(mv[0], mv[1], opp, true);
     }
   }
 
@@ -414,7 +443,7 @@
     screenFlash = 0.6;
     screenFlashColor = '255,255,255';
     gameEndAnim = { birth: performance.now(), player: currentPlayer };
-    setTimeout(showResults, 1200);
+    resultTimer = setTimeout(showResults, 1200);
   }
 
   function updateTimerBar() {
@@ -488,6 +517,7 @@
 
   function handleTap(cx, cy) {
     if (gameOver) return;
+    if (Coop.live && (currentPlayer !== Coop.me || netWait)) return; // not my turn: panning only
     const idx = getPegAt(cx, cy);
     if (idx === null) { selectedPeg = null; return; }
     if (selectedPeg === null) { selectedPeg = idx; }
@@ -560,7 +590,7 @@
       infoDiv.innerHTML = '';
       for (let i = 0; i < playerCount; i++) {
         const badge = document.createElement('div');
-        badge.className = 'player-badge' + (i === currentPlayer ? ' active' : '');
+        badge.className = 'player-badge' + (i === currentPlayer ? ' active' : '') + (Coop.live && i === Coop.me ? ' me' : '');
         badge.dataset.player = i;
         badge.style.setProperty('--player-glow', `rgba(${PLAYER_RGB[i]},0.5)`);
         badge.innerHTML = `<span class="dot" style="background:${PLAYER_COLORS[i]}"></span>${PLAYER_NAMES[i]}<span class="score">0</span>`;
@@ -583,7 +613,9 @@
   }
 
   function updateTurnInfo() {
-    const text = gameOver ? t('gameEnded') : t('turnOf', PLAYER_NAMES[currentPlayer]);
+    const text = gameOver ? t('gameEnded')
+      : !Coop.live ? t('turnOf', PLAYER_NAMES[currentPlayer])
+      : currentPlayer === Coop.me ? t('yourTurn') : t('deciding', PLAYER_NAMES[currentPlayer]);
     const color = PLAYER_COLORS[currentPlayer];
     for (const pos of ['top', 'bottom']) {
       hudEls[pos].turn.textContent = text;
@@ -691,14 +723,21 @@
   function tryConnect(a, b) {
     const why = invalidReason(a, b);
     if (why) { showInvalidX(a, b); showMessage(t(why)); return; }
+    if (Coop.role === 'guest') { netWait = true; Coop.send({ t: 'move', a, b }); return; } // host applies it and echoes 'mv'
+    connect(a, b);
+  }
 
-    if (placeEdge(a, b, currentPlayer) === 0) { // no triangle → turn passes
+  // Local / host: commit the current player's edge a-b and hand the turn on.
+  function connect(a, b) {
+    const p = currentPlayer;
+    if (placeEdge(a, b, p) === 0) { // no triangle → turn passes
       currentPlayer = (currentPlayer + 1) % playerCount;
       audio.playTurn();
     }
     turnStartTime = Date.now();
     updateHUD();
     if (!validMoves().length) endGame();
+    push(a, b, p, false);
   }
 
   // Commit edge a-b for `player` and score any triangles it closes. Returns the triangle count.
@@ -782,6 +821,61 @@
     messageText = text;
     clearTimeout(messageTimer);
     messageTimer = setTimeout(() => { messageText = ''; }, 1200);
+  }
+
+  // --- Phone link (coop.js: host-authoritative, reliable channel only — turn-based, a few messages a turn) ---
+  // host → guests  init {names, pegs, time}           new match (also Play Again)
+  //                mv   {a, b, p, cur, sc, to, end}    edge a-b for player p (a = null: timeout with no line left),
+  //                                                    then cur's turn; sc = scores; to = timeout; end = game over
+  //                nope                                the guest's move was refused (stale board): tap again
+  // guest → host   move {a, b}                         only accepted from the player whose turn it is
+  // Guests replay the same placeEdge on the same pegs, so boards stay identical; scores ride along anyway.
+  let netWait = false, netGuests = 0, resultTimer = null;
+  const leaveBtn = document.getElementById('leave-btn');
+  const linkBtn = document.getElementById('link-btn');
+  linkBtn.title = t('linkTitle');
+  linkBtn.addEventListener('click', () => Coop.open({
+    game: 'trianglebattle', max: 5, min: 1,
+    lang: () => currentLang,
+    name: i => PLAYER_NAMES[i] || DEFAULT_NAMES[i],
+    onStart(n, me) { netGuests = n; if (me === 0) hostMatch(); }, // guests wait for 'init'
+    onMsg,
+    onLeave() { gameOver = true; clearInterval(timerInterval); }, // coop.js shows the notice + Back to menu
+    onMenu: toSetup,
+  }));
+  leaveBtn.addEventListener('click', () => { Coop.close(); toSetup(); });
+
+  function hostMatch() {
+    playerCount = netGuests + 1;
+    pegCount = parseInt(pegCountSel.value);
+    timeLimit = parseInt(timeLimitSel.value);
+    PLAYER_NAMES = DEFAULT_NAMES.slice(0, playerCount).map((d, i) => document.getElementById(`name-input-${i}`)?.value.trim() || d);
+    if (new Set(PLAYER_NAMES.map(n => n.toLowerCase())).size < playerCount) PLAYER_NAMES = DEFAULT_NAMES.slice(0, playerCount);
+    beginMatch();
+    Coop.send({ t: 'init', names: PLAYER_NAMES, pegs: pegs.map(p => [p.nx, p.ny]), time: timeLimit });
+  }
+  function push(a, b, p, to) {
+    if (Coop.role === 'host') Coop.send({ t: 'mv', a, b, p, cur: currentPlayer, sc: scores, to, end: gameOver });
+  }
+  function onMsg(m, from) {
+    if (Coop.role === 'host') {
+      if (m.t !== 'move') return;
+      if (from === currentPlayer && !gameOver && !invalidReason(m.a, m.b)) connect(m.a, m.b);
+      else Coop.sendTo(from, { t: 'nope' });
+    } else if (m.t === 'init') {
+      PLAYER_NAMES = m.names; playerCount = m.names.length; pegCount = m.pegs.length; timeLimit = m.time;
+      beginMatch(m.pegs);
+    } else if (m.t === 'nope') netWait = false;
+    else if (m.t === 'mv') {
+      netWait = false; selectedPeg = null;
+      if (m.a !== null) placeEdge(m.a, m.b, m.p);
+      if (m.cur !== currentPlayer) audio.playTurn();
+      currentPlayer = m.cur; scores = m.sc;
+      turnStartTime = Date.now();
+      if (m.to) showMessage(t('timeUp'));
+      updateHUD(); wakeAnimLoop();
+      if (m.end) endGame();
+    }
   }
 
   // --- Results ---
@@ -1276,7 +1370,8 @@
 
   function drawGameEndAnim(time) {
     if (!gameEndAnim) return;
-    const age = (time - gameEndAnim.birth) / 1000;
+    // birth is performance.now(), the rAF stamp can be a few ms older: a negative age threw in arc() and killed the loop
+    const age = Math.max(0, (time - gameEndAnim.birth) / 1000);
     if (age > 2.5) { gameEndAnim = null; return; }
     const B = boardSize;
     const cx = B * 0.5, cy = B * 0.5;

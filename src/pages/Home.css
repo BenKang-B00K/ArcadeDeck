@@ -243,6 +243,48 @@
   margin-bottom: var(--space-8);
 }
 
+.coop-tip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: help;
+  outline-offset: 4px;
+}
+
+.coop-tip > svg { color: var(--text-muted); }
+
+.coop-tip-box {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 20;
+  display: grid;
+  gap: 4px;
+  width: max-content;
+  max-width: min(320px, calc(100vw - 32px));
+  padding: 10px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-md);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.4;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s, visibility 0.15s;
+}
+
+.coop-tip-box > span::before { content: '• '; color: var(--text-muted); }
+
+.coop-tip:hover .coop-tip-box,
+.coop-tip:focus .coop-tip-box {
+  opacity: 1;
+  visibility: visible;
+}
+
 /* ── Featured Game spotlight ── */
 .featured-card {
   display: grid;

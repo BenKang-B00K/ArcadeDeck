@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { X, Shuffle, Edit3, Check } from 'lucide-react';
+import { X, Shuffle, Edit3, Check, Info } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import GameCard from '../components/GameCard';
 import GameGrid from '../components/GameGrid';
@@ -206,7 +206,15 @@ const Home: React.FC = () => {
             {showCoop && (
               <section className="recent-section">
                 <h2 className="section-title">
-                  {t('homeCoopTitle', 'Local Co-op')} {t('gameGridGames', 'Games')}
+                  {/* ponytail: CSS tooltip on hover/focus; tabIndex lets a tap open it on touch */}
+                  <span className="coop-tip" tabIndex={0} aria-describedby="coop-tip">
+                    {t('homeCoopTitle', 'Local Co-op')} {t('gameGridGames', 'Games')}
+                    <Info size={16} aria-hidden="true" />
+                    <span id="coop-tip" role="tooltip" className="coop-tip-box">
+                      <span>{t('homeCoopTipPhone', 'Play on your phones, linked by Host / Join')}</span>
+                      <span>{t('homeCoopTipScreen', 'Or play together on the same screen')}</span>
+                    </span>
+                  </span>
                   <span className="section-count">{COOP.length}</span>
                 </h2>
                 <div className="game-grid">

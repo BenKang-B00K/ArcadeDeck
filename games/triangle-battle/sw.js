@@ -1,9 +1,10 @@
-const CACHE_NAME = 'triangle-battle-v4';
+const CACHE_NAME = 'triangle-battle-v6';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
   './game.js',
+  './coop.js',
   './image/main_bg.webp',
   './image/icon-512.png',
   './image/game_bg.webp'

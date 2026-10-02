@@ -139,7 +139,8 @@ export function createPuck({ renderer, mode, n = 2, me = 0, bots = [], send, lab
     st: 'count', stT: 0, round: 1, T: 0, wins: Array(n).fill(0), goals: Array(n).fill(0),
     pl: SIDES.map(() => ({ p: 0, lives: 0, alive: 0, lunge: 0, cd: 0, sm: SMASHES, hits: 0, sc: 0, v: 0 })), pk: [], q: [],
   };
-  const inp = IDX.map(() => ({ l: 0, r: 0, s: 0 })); // held left / right, smash requested
+  const inp = IDX.map(() => ({ l: 0, r: 0, k: 0, s: 0 })); // held left / right, last one pressed, smash requested
+  const dirOf = io => io.l && io.r ? io.k : io.r - io.l; // both held: the newer press wins, so a quick reverse doesn't stop the paddle
   const ctrl = new Set(online ? [me] : IDX), ai = new Set(), brain = IDX.map(() => ({ off: 0, t: 0 }));
 
   const panes = (online ? [me] : IDX).map(pi => {
@@ -209,7 +210,7 @@ export function createPuck({ renderer, mode, n = 2, me = 0, bots = [], send, lab
       if (!P.alive) continue;
       let mv = null;
       if (ai.has(k) && ctrl.has(k)) mv = think(k, dt);
-      else if (ctrl.has(k)) mv = inp[k].r - inp[k].l;
+      else if (ctrl.has(k)) mv = dirOf(inp[k]);
       if (inp[k].s) { inp[k].s = 0; smash(k); }
       if (mv != null) { P.p = THREE.MathUtils.clamp(P.p + mv * PADV * dt, -LIM, LIM); P.v = mv; } // remote guests set p themselves
     }
@@ -297,8 +298,8 @@ export function createPuck({ renderer, mode, n = 2, me = 0, bots = [], send, lab
   // ---- input
   const act = (pi, a) => {
     if (!ctrl.has(pi) || ai.has(pi)) return;
-    if (a === 'L') inp[pi].l = 1;
-    else if (a === 'R') inp[pi].r = 1;
+    if (a === 'L') { inp[pi].l = 1; inp[pi].k = -1; }
+    else if (a === 'R') { inp[pi].r = 1; inp[pi].k = 1; }
     else if (S.st === 'play' && S.pl[pi].alive) {
       const P = S.pl[pi];
       if (P.sm <= 0) { if (shown(pi)) { flash(paneOf(pi).msg, t('puckNoSmash'), 'miss'); sfx.miss(); } return; }
@@ -369,7 +370,7 @@ export function createPuck({ renderer, mode, n = 2, me = 0, bots = [], send, lab
       gT += dt;
       const P = S.pl[me], io = inp[me];
       P.lunge = Math.max(0, P.lunge - dt); P.cd = Math.max(0, P.cd - dt);
-      if (S.st === 'play' && P.alive) { P.v = io.r - io.l; P.p = THREE.MathUtils.clamp(P.p + P.v * PADV * dt, -LIM, LIM); }
+      if (S.st === 'play' && P.alive) { P.v = dirOf(io); P.p = THREE.MathUtils.clamp(P.p + P.v * PADV * dt, -LIM, LIM); }
       if ((pmAcc += dt) >= .05 && P.p !== sentP) { pmAcc = 0; sentP = P.p; send({ t: 'pm', from: me, p: q2(P.p) }); }
       if (S.st === 'done') finish();
     }

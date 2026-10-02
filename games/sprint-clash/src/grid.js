@@ -215,7 +215,11 @@ export function createGrid({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
       p.px = p.x; p.py = p.y;
       if (p.bot && p.local && !p.stun) think(p);
       if (p.stun > 0) {
-        if (--p.stun === 0) { const d = [p.d, (p.d + 1) % 4, (p.d + 3) % 4, (p.d + 2) % 4].find(d => free(p, d)); if (d == null) p.stun = 1; else p.d = d; }
+        if (--p.stun === 0) { // a turn pressed while stunned picks the way out
+          const turn = p.q.length ? (p.d + (p.q[0] === 'L' ? 3 : 1)) % 4 : p.d;
+          const d = [turn, p.d, (p.d + 1) % 4, (p.d + 3) % 4, (p.d + 2) % 4].find(d => free(p, d));
+          if (d == null) p.stun = 1; else { p.d = d; p.q = []; }
+        }
         p.boostReq = false;
         continue;
       }

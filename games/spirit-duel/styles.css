@@ -2236,3 +2236,45 @@ h1 {
   .controls { grid-area: controls; margin-top: 0; }
   .action-btn { padding: 8px 4px; gap: 3px; }
 }
+
+/* ==================== 폰 연결 (Host / Join — coop.js) ==================== */
+:root { --coop-bg: var(--bg-mid); --coop-accent: #4f7fa8; }
+.link-toggle { display: none; }
+body.online .link-toggle { display: flex; }
+/* 상대 차례: 입력 UI 는 자리만 지키고 "고르는 중" 문구만 */
+.net-wait { display: none; }
+.input-panel.waiting > :not(.net-wait) { visibility: hidden; }
+.input-panel.waiting .net-wait {
+  display: flex;
+  position: absolute;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 22px;
+  animation: glowBreath 2.4s ease-in-out infinite;
+}
+.input-panel.p1-turn .net-wait { color: var(--p1-glow); }
+.input-panel.p2-turn .net-wait { color: var(--p2-glow); }
+/* 내 정령 표시 */
+.player-card[data-you]::before {
+  content: attr(data-you);
+  position: absolute;
+  top: -9px;
+  padding: 1px 7px;
+  border-radius: 3px;
+  background: var(--gold);
+  color: var(--bg-deep);
+  font-family: 'VT323', monospace;
+  font-size: 13px;
+  letter-spacing: 0.15em;
+  line-height: 1.2;
+}
+.p1-card[data-you]::before { left: 10px; }
+.p2-card[data-you]::before { right: 10px; }
+@media (prefers-reduced-motion: reduce) {
+  .input-panel.waiting .net-wait { animation: none; }
+}

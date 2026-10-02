@@ -392,7 +392,9 @@ export function createChicken({ renderer, mode, n = 2, me = 0, bots = [], rand, 
 
   const act = (pi, a) => {
     const p = players[pi];
-    if (!p?.local || p.bot || ph !== 'roll' || tb[pi] != null) return;
+    if (!p?.local || p.bot) return;
+    if (ph === 'count') { if (shown(pi)) flash(paneOf(pi).msg, t('waitGo'), 'miss'); return; } // the brake isn't spent: say so
+    if (ph !== 'roll' || tb[pi] != null) return;
     setTb(pi, clock);
   };
   const unbind = bindInput({ cv: renderer.domElement, panes, n, online, me, act });

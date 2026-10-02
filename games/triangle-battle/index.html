@@ -68,7 +68,10 @@
         </label>
       </div>
       <div id="name-error" class="name-error hidden"></div>
-      <button id="start-btn"><span data-i18n="startGame"></span></button>
+      <div class="start-row">
+        <button id="start-btn"><span data-i18n="startGame"></span></button>
+        <button id="link-btn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="8" height="14" rx="2"/><rect x="14" y="5" width="8" height="14" rx="2"/><path d="M10 12h4"/></svg><span data-i18n="link"></span></button>
+      </div>
     </div>
   </div>
 
@@ -99,6 +102,7 @@
       <h2 data-i18n="gameOver"></h2>
       <div id="result-list"></div>
       <button id="restart-btn"><span data-i18n="playAgain"></span></button>
+      <button id="leave-btn" class="hidden"><span data-i18n="leave"></span></button>
     </div>
   </div>
 </div>
@@ -134,6 +138,7 @@
   <p data-i18n="rotateLandscape"></p>
 </div>
 
+<script src="coop.js"></script>
 <script src="game.js"></script>
 </body>
 </html>

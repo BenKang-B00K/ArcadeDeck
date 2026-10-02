@@ -314,7 +314,7 @@ export class View {
     const skinMat = new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.3, roughness: 0.3 });
     skinMat.onBeforeCompile = sh => {
       sh.fragmentShader = sh.fragmentShader.replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
-        float rim = pow(1.0 - abs(dot(normal, normalize(vViewPosition))), 2.5);
+        float rim = pow(max(1.0 - abs(dot(normal, normalize(vViewPosition))), 0.0), 2.5); // |dot| can round past 1: pow of a negative is NaN (a black speck)
         totalEmissiveRadiance += mix(diffuseColor.rgb, vec3(1.0), 0.35) * rim * 1.4;`);
     };
     const skin = new THREE.Mesh(new THREE.CapsuleGeometry(PW / 2 - 0.01, PH - PW, 6, 16), skinMat);

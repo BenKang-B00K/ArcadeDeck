@@ -218,9 +218,9 @@ export function createFish({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
       const counter = p.dir < 0 ? p.r : p.l, wrong = p.dir < 0 ? p.l : p.r;
       p.T = Math.max(0, p.T + (counter ? -.22 : wrong ? .36 : .16) * dt * (.6 + p.fish.w / 16));
       if (!counter) p.line = Math.min(1, p.line + .03 * dt);
-      if (p.T > 1) land(p, 'snap');
+      if (p.line <= 0) land(p, 'catch'); // the winding tap that lands it can't also snap it
+      else if (p.T > 1) land(p, 'snap');
       else if (p.T < .1 ? (p.slack += dt) > SLACK : (p.slack = 0, false)) land(p, 'slack');
-      else if (p.line <= 0) land(p, 'catch');
     } else if (p.ph === 'rest' && p.t > REST) { p.ph = 'aim'; p.m = 0; p.mt = 0; p.hold = false; }
   }
 
@@ -304,7 +304,7 @@ export function createFish({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
         if (p.fin) continue;
         stepAngler(p, dt);
         if (online && (p.sendT += dt) >= .125) { p.sendT = 0; status(p); }
-        if (clock >= DUR) finishLocal(p);
+        if (clock >= DUR && (p.ph !== 'reel' && p.ph !== 'bite' || clock >= DUR + 10)) finishLocal(p); // a fish on the line at the buzzer gets fought out
       }
       if (P.every(p => p.fin)) { ph = 'done'; finish(); }
     }
@@ -393,7 +393,7 @@ export function createFish({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
         v.ten.classList.toggle('hot', p.T > .85); v.ten.classList.toggle('slack', p.T < .12);
         v.reelI.style.transform = `scaleX(${(1 - p.line).toFixed(3)})`;
         // row 1 = situation (where the fish pulls, or where it's about to switch), row 2 = what to hold (always the opposite side)
-        const warn = p.dirT < WARN, d = warn ? p.nd : p.dir, key = d + '' + warn;
+        const warn = p.dirT < WARN && p.nd !== p.dir, d = warn ? p.nd : p.dir, key = d + '' + warn;
         if (s.pull !== key) {
           s.pull = key; v.pull.classList.toggle('warn', warn);
           v.sit.textContent = t(warn ? 'fishSitSwap' : 'fishSitPull'); v.dir.textContent = t(d < 0 ? 'fishDirL' : 'fishDirR'); v.todo.textContent = t(d < 0 ? 'fishDoR' : 'fishDoL');

@@ -207,7 +207,7 @@ export function createHex({ renderer, mode, n = 2, me = 0, bots = [], rand, send
     for (const i of IDX) {
       const p = S.p[i], a = i / n * Math.PI * 2 + Math.PI / 4, R = 5.2, c = cellAt(Math.cos(a) * R, Math.sin(a) * R);
       Object.assign(p, { x: wx(c), z: wz(c), y: LY[0], vy: 0, h: Math.atan2(Math.sin(a), -Math.cos(a)), layer: 0, grounded: true, alive: 1, hopCd: 0 });
-      inp[i].l = 0; inp[i].r = 0;
+      if (ai.has(i)) { inp[i].l = 0; inp[i].r = 0; } // a human still holding a turn keeps turning at GO
     }
     S.T = 0;
   }
@@ -312,7 +312,7 @@ export function createHex({ renderer, mode, n = 2, me = 0, bots = [], rand, send
       }
       if (!p.grounded && p.y < LY[LR - 1] - OUT_MARGIN) outs.push(i); // y alone: p.layer only tracks the last stood tile, not the current fall depth
     }
-    stepTiles(dt);
+    if (play) stepTiles(dt); // tiles freeze once the round is decided, so the winner doesn't drop through afterwards
     // light bump: push overlapping grounded players on the same floor apart (no momentum model to knock them with)
     for (let a = 0; a < n; a++) for (let b = a + 1; b < n; b++) {
       const p = S.p[a], q = S.p[b];
@@ -439,7 +439,7 @@ export function createHex({ renderer, mode, n = 2, me = 0, bots = [], rand, send
         lastAlive[i] = p.alive; lastLayer[i] = p.layer;
       });
       if (S.st === 'done') { if (online) snapshot(); finish(); }
-    } else if (!auth) { gT += dt; stepTiles(dt); }
+    } else if (!auth) { gT += dt; if (S.st === 'play') stepTiles(dt); }
 
     // rivals interpolated ~100 ms back; a guest's own player is extrapolated from the last snapshot — copy sumo.js
     const newest = snaps.at(-1);

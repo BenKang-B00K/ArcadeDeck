@@ -15,8 +15,14 @@ save = { unlocked: 1, gems: {}, best: {}, last: 0, volume: 0.7, music: 0.6, mute
 for (const i in save.gems) save.unlocked = Math.max(save.unlocked, Math.min(+i + 2, LEVELS.length));
 const persist = () => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch { /* private mode */ } };
 
+// phone link state (see "phone link" below): role null = one device, 'host' runs the sim, 'guest' mirrors it
+let role = null, epoch = 0;
+const out = [];  // host: events of this frame, encoded for the guest
 const events = [];
-const game = new Game((type, data) => events.push([type, data]));
+const game = new Game((type, data) => {
+  events.push([type, data]);
+  if (role === 'host') { if (type === 'restart') epoch++; out.push([type, enc(type, data)]); }
+});
 const view = new View($('#c'));
 game.load(Math.min(save.last, LEVELS.length - 1));
 view.build(game);
@@ -24,6 +30,8 @@ view.build(game);
 // ---------- screens ----------
 let screen = 'menu', stagesFrom = 'menu';
 function show(name) {
+  if (name === 'menu' && role) { Coop.close(); unlink(); } // back to the menu ends the link; the partner gets a notice
+  else if (role === 'host') Coop.send({ scr: name });
   screen = name;
   for (const s of $$('.screen')) s.hidden = s.id !== `scr-${name}`;
   const playing = name === 'game';
@@ -42,6 +50,7 @@ function startLevel(i) {
   save.last = i;
   persist();
   hud();
+  if (role === 'host') sendGo(true);
   show('game');
   toast(t(LEVELS[i].hint), 5000);
 }
@@ -101,9 +110,21 @@ function stageGrid() {
 }
 
 // no pausing in the clear window: onClear's timer would bail and the clear screen never appears
-const pause = () => { if (screen === 'game' && game.state !== 'clear') show('pause'); };
-const resume = () => { if (screen === 'pause') show('game'); };
-const restart = () => { game.load(game.index); view.build(game); hud(); show('game'); };
+// linked guest asks the host, whose screen change comes back to both phones
+const pause = () => {
+  if (role === 'guest') { if (screen === 'game') Coop.send({ pz: 1 }); }
+  else if (screen === 'game' && game.state !== 'clear') show('pause');
+};
+const resume = () => {
+  if (role === 'guest') { if (screen === 'pause') Coop.send({ pz: 0 }); }
+  else if (screen === 'pause') show('game');
+};
+const restart = () => {
+  if (role === 'guest') return; // the host picks restarts and stages
+  game.load(game.index); view.build(game); hud();
+  if (role === 'host') sendGo(false);
+  show('game');
+};
 
 function onClear() {
   const i = game.index;
@@ -138,6 +159,7 @@ function handleEvents() {
     else if (type === 'clear') onClear();
   }
   events.length = 0;
+  if (out.length) Coop.send({ e: out.splice(0), k: epoch });
 }
 
 // ---------- settings: language, volume, fullscreen ----------
@@ -261,6 +283,171 @@ const standalone = matchMedia('(display-mode: standalone), (display-mode: fullsc
 $('#ios-install').hidden = !(ios && !standalone);
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js');
 
+// ---------- phone link ----------
+// Host-authoritative over coop.js (WebRTC, one guest). The host runs the 120 Hz sim with the guest's input;
+// the guest runs no sim, it mirrors the host:
+//   guest → host  reliable  { i: [x, jump] } on change only · { pz: 1 | 0 } pause / resume request
+//                 ponytail: input rides the reliable, ordered channel, so no keepalive (coop.js heartbeats the link)
+//   host → guest  reliable  { go: stage, k, h } stage (re)loaded · { e: [[type, data]], k } sim events (sfx / fx / hud)
+//                           { scr } screen change
+//                 fast      30 Hz snapshot, positions ×1000 as ints: { k, ts, t, st, p, d, b, f }
+// k = load epoch, so snapshots or events from before a (re)load never land on the new stage.
+// Clears are saved on both phones: the pair earned them together.
+const remote = { x: 0, jump: false, jumpPressed: false }; // host: the guest's jelly
+const snaps = [];                                          // guest: recent snapshots, oldest first
+const INTERP = 100;                                        // guest renders this many ms behind the host
+let clock = null, lastIn = '', lastSnap = 0;
+
+const sendGo = hint => { epoch++; Coop.send({ go: game.index, k: epoch, h: hint ? 1 : 0 }); };
+
+// event data → wire (players / cannons by index, so the guest resolves its own objects) and back
+function enc(type, d) {
+  if (type === 'jump' || type === 'die') return d.id;
+  if (type === 'land') return [d.p.id, Math.round(d.v)];
+  if (type === 'shoot') return game.cannons.indexOf(d);
+  if (type === 'gem') return [d.x, d.y];
+  if (type === 'plate') return [d.x, d.y, d.ch, d.on];
+  if (type === 'clear') return Math.round(game.time * 1000);
+  return 0;
+}
+function dec(type, d) {
+  const P = game.players;
+  if (type === 'jump') return P[d];
+  if (type === 'die') { if (P[d]) { P[d].dead = true; game.state = 'dead'; } return P[d]; }
+  if (type === 'land') return P[d[0]] && { p: P[d[0]], v: d[1] };
+  if (type === 'shoot') return game.cannons[d];
+  if (type === 'gem') {
+    const g = game.gems.find(g => g.x === d[0] && g.y === d[1]);
+    if (g && !g.taken) { g.taken = true; game.gemsTaken++; }
+    return g;
+  }
+  if (type === 'plate') return { x: d[0], y: d[1], ch: d[2], on: d[3] };
+  if (type === 'clear') { game.state = 'clear'; game.time = d / 1000; }
+  if (type === 'restart') game.load(game.index);
+  return {};
+}
+
+const q = v => Math.round(v * 1000);
+const bits = (list, k) => list.map(o => (o[k] ? 1 : 0)).join('');
+function snapshot(now) {
+  if (now - lastSnap < 33) return;
+  lastSnap = now;
+  Coop.fast({
+    k: epoch, ts: Math.round(now), t: q(game.time), st: game.state,
+    p: game.players.flatMap(p => [q(p.x), q(p.y), q(p.vx), p.facing, (p.grounded ? 1 : 0) | (p.dead ? 2 : 0) | (p.inExit ? 4 : 0)]),
+    d: game.drones.flatMap(d => [q(d.x), q(d.y), Math.sign(d.vx || d.vy)]),
+    b: game.bolts.flatMap(b => [q(b.x), q(b.y)]),
+    f: bits(game.dyn, 'solid') + bits(game.plates, 'on') + bits(game.gems, 'taken'),
+  });
+}
+
+// guest: discrete state from the newest snapshot; positions are interpolated per frame in interp()
+function onSnap(m) {
+  if (m.k !== epoch || m.ts <= (snaps.at(-1)?.ts ?? -1)) return; // unordered channel: drop stale or out-of-order
+  snaps.push(m);
+  if (snaps.length > 8) snaps.shift();
+  game.state = m.st;
+  game.time = m.t / 1000;
+  let j = 0;
+  for (const d of game.dyn) d.solid = m.f[j++] === '1';
+  for (const pl of game.plates) pl.on = m.f[j++] === '1';
+  for (const g of game.gems) g.taken = m.f[j++] === '1';
+  game.gemsTaken = game.gems.filter(g => g.taken).length;
+  for (const ch in game.active) game.active[ch] = game.plates.some(pl => pl.ch === ch && pl.on);
+  game.players.forEach((p, i) => {
+    const fl = m.p[i * 5 + 4];
+    p.facing = m.p[i * 5 + 3]; p.grounded = !!(fl & 1); p.dead = !!(fl & 2); p.inExit = !!(fl & 4);
+  });
+}
+function interp(dtMs) {
+  if (!snaps.length) return;
+  const target = snaps.at(-1).ts - INTERP;
+  // render clock follows the host's, INTERP behind: nudged toward it, jumps only after a long gap
+  clock = clock == null || Math.abs(target - clock) > 300 ? target : clock + dtMs + (target - clock) * 0.05;
+  let a = snaps[0], b = a;
+  for (const s of snaps) { if (s.ts <= clock) a = b = s; else { b = s; break; } }
+  const k = b.ts > a.ts ? Math.min(1, Math.max(0, (clock - a.ts) / (b.ts - a.ts))) : 0;
+  const L = (u, v) => (u + (v - u) * k) / 1000;
+  game.players.forEach((p, i) => {
+    const o = i * 5;
+    p.x = L(a.p[o], b.p[o]); p.y = L(a.p[o + 1], b.p[o + 1]); p.vx = L(a.p[o + 2], b.p[o + 2]);
+  });
+  game.drones.forEach((d, i) => {
+    const o = i * 3;
+    d.x = L(a.d[o], b.d[o]); d.y = L(a.d[o + 1], b.d[o + 1]); d.vx = a.d[o + 2]; d.vy = 0;
+  });
+  const same = a.b.length === b.b.length; // a bolt spawned or hit a wall in between: show the older set as is
+  game.bolts = [];
+  for (let i = 0; i < a.b.length; i += 2) {
+    game.bolts.push(same ? { x: L(a.b[i], b.b[i]), y: L(a.b[i + 1], b.b[i + 1]) } : { x: a.b[i] / 1000, y: a.b[i + 1] / 1000 });
+  }
+}
+
+function onNet(m) {
+  if (role === 'host') {
+    if (Array.isArray(m.i)) {
+      const j = !!m.i[1];
+      if (j && !remote.jump) remote.jumpPressed = true;
+      remote.x = Math.sign(+m.i[0]) || 0;
+      remote.jump = j;
+    } else if (m.pz === 1) pause();
+    else if (m.pz === 0) resume();
+    return;
+  }
+  if (m.p) return onSnap(m);
+  if (m.e) {
+    for (const [type, d] of m.e) {
+      const data = dec(type, d);
+      if (type === 'restart') { epoch = m.k; snaps.length = 0; clock = null; }
+      if (data) events.push([type, data]);
+    }
+    handleEvents();
+  } else if (m.go != null && LEVELS[m.go]) {
+    game.load(m.go);
+    view.build(game);
+    epoch = m.k; snaps.length = 0; clock = null;
+    hud();
+    show('game');
+    if (m.h) toast(t(LEVELS[m.go].hint), 5000);
+  } else if (m.scr && m.scr !== 'clear') show(m.scr === 'stages' ? 'pause' : m.scr); // clear: the guest's own onClear shows it
+}
+
+// guest: send only when the input changes
+function sendInput(p) {
+  const s = `${p.x},${p.jump ? 1 : 0}`;
+  if (s === lastIn) return;
+  lastIn = s;
+  Coop.send({ i: [p.x, p.jump ? 1 : 0] });
+}
+
+// the single on-screen pad drives "my" jelly: label it for screen readers too
+function padLabels() {
+  for (const b of $$('.pad.p1 button')) b.dataset.i18nPrefix = role === 'guest' ? 'P2 ' : 'P1 ';
+  setLang(save.lang);
+}
+function unlink() {
+  role = null;
+  out.length = 0; snaps.length = 0;
+  Object.assign(remote, { x: 0, jump: false, jumpPressed: false });
+  document.body.classList.remove('linked', 'net-host', 'net-guest');
+  padLabels();
+}
+
+$('#btn-link').onclick = () => Coop.open({
+  game: 'tandem', max: 1, lang: getLang,
+  onStart(n, me) {
+    role = me ? 'guest' : 'host';
+    epoch = 0; lastIn = ''; clock = null;
+    document.body.classList.add('linked', `net-${role}`);
+    padLabels();
+    if (role === 'host') startLevel(Math.min(save.last, save.unlocked - 1));
+    else show('pause'); // "waiting for the host" until the first stage arrives
+  },
+  onMsg: onNet,
+  onLeave() { unlink(); pause(); }, // coop.js shows "… disconnected" with Back to menu
+  onMenu: () => show('menu'),
+});
+
 // ---------- main loop ----------
 applyLang(save.lang);
 syncVolume();
@@ -274,10 +461,20 @@ function frame(now) {
   time += dt;
   const inp = readInput();
   if (inp.start) screen === 'game' ? pause() : resume();
-  if (screen === 'game') {
+  if (role) { // phone link: every key, button and pad on this phone drives my own jelly; the other one is remote
+    const [a, b] = inp;
+    inp[0] = { x: a.x || b.x, jump: a.jump || b.jump, jumpPressed: a.jumpPressed || b.jumpPressed };
+    inp[1] = remote;
+  }
+  if (screen === 'game' && role === 'guest') {
+    sendInput(inp[0]);
+    interp(dt * 1000);
+  } else if (screen === 'game') {
     inp.forEach((p, i) => p.jumpPressed && game.jump(i));
+    remote.jumpPressed = false;
     for (acc += dt; acc >= STEP; acc -= STEP) game.step(STEP, inp);
     handleEvents();
+    if (role === 'host') snapshot(now);
   } else acc = 0;
   if (screen === 'game') {
     const s = fmtTime(game.time);

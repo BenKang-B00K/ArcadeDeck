@@ -147,7 +147,8 @@ export function createChairs({ renderer, mode, n = 2, me = 0, bots = [], rand, s
     if (S.st !== 'stop') return;
     const [x, z] = pos(P.th);
     let best = -1, bd = 1e9;
-    S.chairs.forEach((o, c) => { if (o >= 0) return; const [cx, cz] = cpos(c), d = Math.hypot(cx - x, cz - z); if (d < bd) { bd = d; best = c; } });
+    const aimed = c => S.p.some(q => q.mode === 'dive' && q.c === c); // a chair someone is already diving for is a last resort
+    S.chairs.forEach((o, c) => { if (o >= 0) return; const [cx, cz] = cpos(c), d = Math.hypot(cx - x, cz - z) + (aimed(c) ? 1e3 : 0); if (d < bd) { bd = d; best = c; } });
     if (best < 0) return;
     P.mode = 'dive'; P.c = best; P.dt = 0;
   }
@@ -324,7 +325,7 @@ export function createChairs({ renderer, mode, n = 2, me = 0, bots = [], rand, s
   let time = 0, lastSt = null;
   function update(dt) {
     time += dt;
-    if (S.st === 'count' && !step(dt) && auth) { S.st = 'music'; S.stT = 0; }
+    if (S.st === 'count' && !step(dt) && auth) { S.st = 'music'; S.stT = 0; IDX.forEach(i => { inp[i].d = 0; }); } // a dive pressed during 3-2-1 isn't a false start
     if (S.st === 'music' || S.st === 'ready') panes.forEach(v => v.hint.classList.add('hide'));
     if (auth && S.st !== 'done') {
       acc = Math.min(acc + dt, .25);

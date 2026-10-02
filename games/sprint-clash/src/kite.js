@@ -106,7 +106,7 @@ export function createKite({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
     st: n >= 3 ? 'rps' : 'count', stT: 0, round: 1, T: 0, wind: 0, wins: Array(n).fill(0), cuts: Array(n).fill(0), surv: Array(n).fill(0),
     seat: IDX.slice(), // seat[i] = seat index of player i (0 = leftmost)
     k: IDX.map(() => ({ x: 0, y: 10, a: 0, m: 1, pull: 0, alive: 1, vx: 0, vy: 0, spin: 0, cutN: 0, crashN: 0, st: 0, cd: 0, blk: 0 })),
-    R: { ph: 'pick', t: 0, groups: [IDX.slice()], picks: {}, shown: IDX.map(() => -1), msg: '', bot: IDX.map(() => .4 + Math.random() * 1.4) },
+    R: { ph: 'pick', t: -2, groups: [IDX.slice()], picks: {}, shown: IDX.map(() => -1), msg: '', bot: IDX.map(() => .4 + Math.random() * 1.4) }, // t starts at -2: the first throw gets 2 s extra to find the keys
     pairs: {},
   };
   const inp = IDX.map(() => ({ l: 0, r: 0, p: 0, s: 0 }));
@@ -130,7 +130,7 @@ export function createKite({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
     IDX.forEach(i => {
       const side = Math.sign(ax(i)) || (i ? 1 : -1);
       Object.assign(S.k[i], { x: ax(i) + side * 4, y: 12, a: side * .45, m: 1, pull: 0, alive: 1, vx: 0, vy: 0, spin: 0, st: 0, cd: 0 });
-      inp[i].p = inp[i].s = 0;
+      if (ai.has(i)) inp[i].p = inp[i].s = 0; // a human still holding Pull keeps pulling at GO
     });
     Object.assign(S, { T: 0, pairs: {} });
   }
@@ -149,7 +149,12 @@ export function createKite({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
     if (R.ph === 'pick') {
       active.forEach(i => { if (ai.has(i) && ctrl.has(i) && R.picks[i] == null && R.t > R.bot[i]) R.picks[i] = Math.random() * 3 | 0; });
       if (R.t < PICK_T && !active.every(i => R.picks[i] != null)) return;
-      active.forEach(i => { if (R.picks[i] == null) R.picks[i] = Math.random() * 3 | 0; }); // no throw in time: random
+      active.forEach(i => { // no throw in time: random, and the slowpoke is told
+        if (R.picks[i] != null) return;
+        R.picks[i] = Math.random() * 3 | 0;
+        const v = panes.find(v => v.pi === i);
+        if (v && !ai.has(i)) flash(v.msg, t('kiteRandom'), 'miss');
+      });
       const out = [], msgs = [];
       for (const g of R.groups) {
         if (g.length === 1) { out.push(g); continue; }
@@ -272,6 +277,7 @@ export function createKite({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
       if (!k.alive) { k.vx = m.wd; k.vy = -2; }
     });
     const R = S.R, ph = ['pick', 'reveal', 'seats'][m.rp[0]] ?? 'pick';
+    if (ph === 'reveal' && R.ph === 'pick' && myPick < 0 && R.groups.some(g => g.length > 1 && g.includes(me))) panes.forEach(v => { if (v.pi === me) flash(v.msg, t('kiteRandom'), 'miss'); });
     if (ph === 'pick' && R.ph !== 'pick') myPick = -1;
     Object.assign(R, { ph, t: m.rp[1], groups: m.rg, shown: m.rs, msg: m.rm });
     rk = m.rk;
@@ -295,6 +301,7 @@ export function createKite({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
   const act = (pi, a) => {
     if (!ctrl.has(pi) || ai.has(pi)) return;
     if (S.st === 'rps') { // throw: Left rock, Action paper, Right scissors
+      inp[pi][KEY[a]] = 1; sync(pi); // still held when the draw ends: it steers / pulls straight away
       if (a === 'D') return;
       const R = S.R, v = a === 'L' ? 0 : a === 'A' ? 1 : 2;
       if (R.ph !== 'pick' || !R.groups.some(g => g.length > 1 && g.includes(pi))) return;

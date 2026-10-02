@@ -1,5 +1,5 @@
 // Offline cache for Tank Battle. Bump CACHE on every release so clients refresh.
-const CACHE = 'tank-battle-v3.1.0';
+const CACHE = 'tank-battle-v3.3.0';
 const ASSETS = [
   './',
   './index.html',

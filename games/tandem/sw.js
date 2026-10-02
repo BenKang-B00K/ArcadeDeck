@@ -1,7 +1,7 @@
 // Bump VERSION with each release so old caches are dropped.
-const VERSION = 'tandem-v3.9.0';
+const VERSION = 'tandem-v3.11.2';
 const FILES = [
-  './', 'index.html', 'manifest.webmanifest',
+  './', 'index.html', 'manifest.webmanifest', 'coop.js',
   'src/main.js', 'src/game.js', 'src/view.js', 'src/levels.js', 'src/input.js', 'src/audio.js', 'src/i18n.js',
   'vendor/three.module.min.js', 'vendor/three.core.js',
   'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/splash.webp',

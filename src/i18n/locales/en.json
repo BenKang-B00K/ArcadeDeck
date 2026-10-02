@@ -62,6 +62,8 @@
     "homeRandomGame": "Surprise me",
     "homeGenresAria": "Game genres",
     "homeCoopTitle": "Local Co-op",
+    "homeCoopTipPhone": "Play on your phones, linked by Host / Join",
+    "homeCoopTipScreen": "Or play together on the same screen",
     "homeFeaturedTitle": "Featured",
     "homeFeaturedSpan": "Game",
     "homeRecentTitle": "Jump",
@@ -648,6 +650,7 @@
       "lore": "\n      A game of **kings and scholars**. The black and white stones represent the harmony and conflict of the universe.\n      The origin of Omok is lost to time, but some say it was played by the gods to decide the boundaries of the stars. \n      The board itself is a **map of the soul**, where every stone represents a decision, and the lines represent the paths we choose to follow.\n      To win is not just to align **five stones**, but to demonstrate a superior understanding of the balance between creation and destruction.\n    ",
       "features": [
         "Advanced AI with Multiple Difficulty Levels",
+        "Phone Link: Two Phones, Each Places Its Own Stones",
         "Sleek and Responsive User Interface",
         "Replay System to Analyze your Previous Games",
         "Customizable Board Skins and Stone Styles",
@@ -1388,6 +1391,7 @@
       "lore": "\n      In the neon-lit arenas of the **Grid**, geometric warriors compete for supremacy. The ancient **Triangle Protocol** demands that only those who can form the perfect shape will ascend.\n      Each match is a test of speed, strategy, and spatial mastery. The Grid remembers every triangle ever formed, and the greatest players are immortalized in its luminous halls.\n    ",
       "features": [
         "Hot-Seat 2-6 Players, One Device",
+        "Phone Link: 2-6 Players, One Phone Each",
         "+1 Per Triangle, +2 for All-Own-Color, Extra Turn on Close",
         "10s / 20s Turn Timer — Timeout Gives Opponent a Free Line",
         "10-25 Pegs, Random Board Every Match",
@@ -1663,6 +1667,7 @@
       "lore": "\n      Two spirits, one of **azure** and one of **amber**, share a bridge of nine stones between their worlds. Neither may cross while the other stands, so each dawn they duel — moving, striking and guarding in the same breath, their intentions hidden until the moment the stones light up.\n      The **stardust** that drifts in from both ends is older than either of them. It eats away at whoever lingers at the edges, driving the two spirits ever closer to the centre, where only will and memory decide who holds the bridge.\n    ",
       "features": [
         "Simultaneous two-action turns — movement resolves before combat",
+        "Phone link — duel on two phones, each player picking moves privately on their own screen",
         "Eight actions: Advance, Retreat, Attack, Block, Counter, Pierce, Wave, Leap",
         "★ star economy — hidden opponent stars fuel the unblockable Pierce",
         "Stardust zone that expands on turns 4 and 7",
@@ -3268,6 +3273,7 @@
       "lore": "\n      High above the clouds, the old ruins still remember two of everything: two doors, two plates, two colors of light. They were built for a pair.\n      Red and Blue woke up on the same ledge at dusk. Neither can reach the exit alone, and the ruins will not open for one. So they climb together — one holding the door, one running through, and then the other way round.\n    ",
       "features": [
         "Two-Player Local Co-op: One Keyboard, Two Gamepads or One Touch Screen",
+        "Phone Link: Two Phones, Each Player Controls Their Own Jelly",
         "21 Stages in Basics, Advanced and Expert Tiers",
         "Boost Off Your Partner's Head to Reach High Ledges",
         "Pressure Plates That Open Doors, Raise Bridges and Build Steps",
@@ -3460,7 +3466,7 @@
         },
         {
           "q": "How does online play work?",
-          "a": "One player picks Host Online and gets a room code; the others pick Join Online and enter it. Devices connect peer-to-peer. If a player leaves mid-match, an AI takes over their seat. Crowd Cover can only be played online, because on a shared screen everyone would see who is who."
+          "a": "One player picks Host Online and gets a room code; the others pick Join Online and enter it. Devices connect peer-to-peer. The host picks any of the 22 games in the room and presses Start, and the match begins once everyone taps Ready; after it, the host can rematch or change the game without anyone rejoining. If a player leaves mid-match, an AI takes over their seat. Crowd Cover can only be played online, because on a shared screen everyone would see who is who."
         },
         {
           "q": "What counts toward my personal best?",
@@ -3547,6 +3553,7 @@
       "lore": "\n      Ghost Leg has settled who-gets-what for generations: a few lines drawn on paper, a name at the top of each, and a fold to hide the rungs until everyone has chosen.\n      Here twenty animals take turns at the top of a glowing ladder under a night sky. Somewhere beneath the mist a wormhole is turning, the carousel is waiting, and one card might be the Joker.\n    ",
       "features": [
         "Ghost Leg / 사다리 타기 / あみだくじ for 2–10 Players",
+        "Phone Link: Host on One Phone, Everyone Else Watches Live on Their Own",
         "20 Cute Animals, Each With Its Own Colour",
         "Six Quick Fills: Winner, Rank, Ratio, Teams, Penalty, Bill",
         "Bill Splits in Dollars, Won or Yen That Always Add Up",
@@ -3684,6 +3691,94 @@
         {
           "q": "Can I play on a phone?",
           "a": "Yes. Drag anywhere to use the floating joystick and tap cards to pick them. It installs as an app and plays offline, and a run in progress is saved if you close the page."
+        }
+      ]
+    },
+    "43": {
+      "title": "Marble Racing",
+      "description": "A 3D party decision-maker for 2–20 players. Each animal rides a glass marble down a glowing toy marble run, and the finishing order decides winners, ranks, teams, penalties or who pays the bill.",
+      "fullDescription": "\n      Marble Racing is the 3D sequel to Ladder Game: a **party decision-maker** for **2 to 20 players**. Every player is a cute animal riding inside a clear glass marble, and the results wait at the finish, one for each place. Send everyone down a glowing toy marble run and the finishing order decides who gets what.\n      Type your own result for each place or use **Quick fill**: Winner (the first places), Penalty (the last places), Rank, Teams (sizes even to within one), Ratio (random percentage shares) or Bill — a random split of a total in dollars, won or yen that always adds up exactly, with as many people paying nothing as you choose.\n      Press Start and a fresh course is built from a new seed. A **3-second flyover** shows it off, everyone is seated at a random start gate, and Race! counts down 3-2-1-GO. The camera follows the action, the standings update live, and you can tap any animal to follow its marble or press **×3** to fast-forward. A close finish on a place that decides something gets a **photo finish** in slow motion.\n      Pick **Short, Medium or Long** (about 25, 30 or 50 seconds) and fill its 3, 5 or 7 slots with **mods**: carousels, wormholes, trap routes, a mist tube that hides who is ahead, boomerang half-pipes, waterslide bowls, ramps, jumps with boost hoops, boost pads, narrow tubes and mud — or let Random mods pick new ones every race. Peg boards scatter the pack on every course, and a hard knock from behind stuns the marble in front.\n      Most races hide a **Joker** on one place: whoever finishes there trades results with a fairly drawn player at the very end. A summary with places, finish times and split checkpoints, a record of your last 30 races, the code of every course, D Dorian music and effects with a volume control, and English, Korean and Japanese round it out. With **Phone link** one phone hosts and up to 15 others watch the same race live on their own screens. Plays on phones, tablets and desktop; installs as an app and works offline.\n    ",
+      "controls": "Start: Build a course · Race!: 3-2-1-GO · Tap an animal in the standings: Follow its marble · Tap the course: Back to the auto camera · ×3: Fast forward · New: Fresh course · Reset: Back to setup · Results: Open the summary · Enter: Next result field · Esc: Close the volume panel",
+      "tips": "**Short** races are over in about 25 seconds; **Long** courses fit up to 7 mods. Tap a mod again to add another, up to its max, or turn on **Random** to roll new mods every race. Splitting a meal? Pick **Bill**, enter the total and how many pay nothing, and the shares always add up exactly. Playing round a big table? Use **Phone link** so everyone can follow the race on their own phone.",
+      "lore": "\n      A marble run on the kitchen table has always been the fairest referee: nobody can push a marble, and nobody can argue with gravity.\n      Here twenty animals squeeze into glass marbles at the top of a neon toy track under the night sky. Somewhere below, a wormhole is humming, the carousel is turning, and one finishing cup might hide the Joker.\n    ",
+      "features": [
+        "3D Party Decision-Maker for 2–20 Players",
+        "Phone Link: Host on One Phone, Up to 15 Others Watch Live",
+        "20 Cute Animals Riding Glass Marbles",
+        "Six Quick Fills: Winner, Penalty, Rank, Teams, Ratio, Bill",
+        "Bill Splits in Dollars, Won or Yen That Always Add Up",
+        "A Fresh Course Every Race, With a 3-Second Flyover",
+        "Short, Medium and Long Tracks With 11 Kinds of Mods",
+        "Follow Any Marble, ×3 Fast Forward and Photo Finishes",
+        "The Joker Swap at the Finish",
+        "Summary With Places, Times and Split Checkpoints, Plus a Race Record",
+        "D Dorian Music and Effects With a Volume Control",
+        "Phone, Tablet and Desktop — Installable, Plays Offline",
+        "English, Korean and Japanese"
+      ],
+      "objectives": "There is no score — the race decides. Set the players and results, watch the flyover, press Race! and see where each marble finishes. The result for each place goes to whoever finishes there, and the Joker trade draws its partner fairly from every place.",
+      "controlsTable": [
+        {
+          "key": "Start",
+          "action": "Build a fresh course from your setup and fly over it"
+        },
+        {
+          "key": "Race!",
+          "action": "Count down 3-2-1 and open the gates"
+        },
+        {
+          "key": "Tap an animal in the standings",
+          "action": "Follow its marble; tap it again or tap the course to go back to the auto camera"
+        },
+        {
+          "key": "Tap a face at the screen edge",
+          "action": "Follow that marble while it is off screen"
+        },
+        {
+          "key": "×3",
+          "action": "Fast-forward the race"
+        },
+        {
+          "key": "New · Reset",
+          "action": "Build a new course with the same setup · go back to setup"
+        },
+        {
+          "key": "Results",
+          "action": "Open the summary with places, times and splits"
+        },
+        {
+          "key": "Enter",
+          "action": "Move to the next result field in setup"
+        },
+        {
+          "key": "Esc",
+          "action": "Close the volume panel"
+        }
+      ],
+      "faq": [
+        {
+          "q": "What is Marble Racing?",
+          "a": "A party decision-maker: each player's animal rides a glass marble down a 3D toy marble run, and the finishing order hands out the results you set, from a single winner to a full bill split. It is the sequel to Ladder Game, with the same animals, quick fills and Joker."
+        },
+        {
+          "q": "How many players can race?",
+          "a": "From 2 to 20. Use + and − in setup; every player gets one of the 20 animals."
+        },
+        {
+          "q": "Is it fair?",
+          "a": "Yes. Every race runs on a fresh course from a new seed, gates are dealt at random and the start wheel spins before GO, so nobody starts ahead. The code under the summary (Track #…) names the course that was raced. The Joker draws its trade partner from every place, its own included."
+        },
+        {
+          "q": "What do the mods do?",
+          "a": "Each length has slots for mods: 3 on Short, 5 on Medium and 7 on Long. Carousels, wormholes, trap routes, the mist tube, boomerangs, bowls, ramps, jumps, boost pads, narrow tubes and mud each change how the pack spreads out. Tap a mod to add it, tap it again for another, or turn on Random mods."
+        },
+        {
+          "q": "Can several phones watch the same race?",
+          "a": "Yes. Tap the phone button: one phone hosts and shows a 4-letter code, and up to 15 others join with it to watch the host's setup, races and results live. Same Wi-Fi or one phone's hotspot works best."
+        },
+        {
+          "q": "Does it work on phones?",
+          "a": "Yes. It is built for touch, works in portrait and landscape, installs as an app and plays offline."
         }
       ]
     },

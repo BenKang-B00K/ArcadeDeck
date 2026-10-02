@@ -3,7 +3,7 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://arcadedeck.net/</loc>
-    <lastmod>2026-09-30</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja" />
@@ -12,7 +12,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ja</loc>
-    <lastmod>2026-09-30</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja" />
@@ -21,7 +21,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ko</loc>
-    <lastmod>2026-09-30</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja" />
@@ -1055,6 +1055,33 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/one-minute-auto-battle" />
   </url>
   <url>
+    <loc>https://arcadedeck.net/play/marble-racing</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/marble-racing" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/marble-racing" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/marble-racing" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/marble-racing" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ja/play/marble-racing</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/marble-racing" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/marble-racing" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/marble-racing" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/marble-racing" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ko/play/marble-racing</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/marble-racing" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/marble-racing" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/marble-racing" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/marble-racing" />
+  </url>
+  <url>
     <loc>https://arcadedeck.net/genre/action</loc>
     <lastmod>2026-09-27</lastmod>
     <priority>0.7</priority>
@@ -1353,12 +1380,12 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/blog</loc>
-    <lastmod>2026-09-30</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://arcadedeck.net/patchnote</loc>
-    <lastmod>2026-10-01</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1492,6 +1519,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://arcadedeck.net/blog/phone-link-couch-games-on-your-own-phones</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://arcadedeck.net/blog/tag/arcade</loc>
     <lastmod>2026-09-15</lastmod>
     <priority>0.5</priority>
@@ -1517,13 +1549,18 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://arcadedeck.net/blog/tag/multiplayer</loc>
+    <lastmod>2026-10-02</lastmod>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://arcadedeck.net/blog/tag/mythic-defenders-heroes-returns</loc>
     <lastmod>2026-09-27</lastmod>
     <priority>0.5</priority>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/tag/news</loc>
-    <lastmod>2026-09-30</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.5</priority>
   </url>
   <url>
@@ -1533,7 +1570,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/tag/platform</loc>
-    <lastmod>2026-09-15</lastmod>
+    <lastmod>2026-10-02</lastmod>
     <priority>0.5</priority>
   </url>
   <url>

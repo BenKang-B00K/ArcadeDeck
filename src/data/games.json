@@ -905,5 +905,26 @@
       300,
       600
     ]
+  },
+  {
+    "id": "43",
+    "slug": "marble-racing",
+    "language": "EN/KO/JA",
+    "thumbnail": "images/marble-racing.webp",
+    "genres": [
+      "Party",
+      "Casual",
+      "Local Co-op"
+    ],
+    "players": [
+      1,
+      20
+    ],
+    "gameUrl": "https://games.arcadedeck.net/marble-racing/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "platform": "BOTH",
+    "isOriginal": true,
+    "badge": "NEW"
   }
 ]

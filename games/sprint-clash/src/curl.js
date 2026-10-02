@@ -366,7 +366,8 @@ export function createCurl({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
       Object.assign(s, { x: m.st[o], z: m.st[o + 1], vx: m.st[o + 2], vz: m.st[o + 3], owner: m.st[o + 4], alive: m.st[o + 5], bumps: m.st[o + 6] });
       if (was && !s.alive && panes.length) { burst.emit(s.x, .2, s.z, COL[s.owner], 18, 5); sfx.fall(); }
     }
-    Object.assign(S, { phase: ph, end: m.e, turn: m.tn, thrower: m.th, aimA: m.a, meter: m.m, score: m.sc.slice(), best: m.bd.slice(), wa: m.wa, ws: clamp(m.ws, 0, 1) });
+    const mine = ph === 'aim' && S.phase === 'aim' && m.th === S.thrower && ctrl.has(m.th) && !ai.has(m.th); // this device steers that throw: keep its own aim
+    Object.assign(S, { phase: ph, end: m.e, turn: m.tn, thrower: m.th, aimA: mine ? S.aimA : m.a, meter: mine ? S.meter : m.m, score: m.sc.slice(), best: m.bd.slice(), wa: m.wa, ws: clamp(m.ws, 0, 1) });
     windVec();
     chips();
     if (ph === 'done') finish();
@@ -414,6 +415,7 @@ export function createCurl({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
     else if (a === 'R') io.r = 0;
     else if (io.c) {
       io.c = 0;
+      if (S.chargeT < .15) { S.charging = 0; S.meter = 0; return; } // a quick tap on the middle cancels instead of a min-power throw
       const p = S.charging ? S.meter : 0;
       if (auth) doThrow(pi, S.aimA, p);
       else { S.charging = 0; send({ t: 'ct', from: pi, a: q2(S.aimA), p: q2(p) }); }
@@ -422,11 +424,18 @@ export function createCurl({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
   const unbind = bindInput({ cv: renderer.domElement, panes, n, online, me, act, release });
 
   // --- frame
-  let time = 0;
+  let time = 0, aimKey = '', aimClk = 0;
   const camPos = new THREE.Vector3(0, 2.1, SHEET_FRONT - 2), camLook = new THREE.Vector3(0, .3, 10), tgt = new THREE.Vector3(), lookTgt = new THREE.Vector3();
 
   function update(dt) {
     time += dt;
+    // 2 s before the aim timeout throws for you, warn the thrower (a local clock, so guests get it too)
+    const key = S.phase === 'aim' ? `${S.end}:${S.turn}:${S.thrower}` : '';
+    if (key !== aimKey) { aimKey = key; aimClk = 0; }
+    else if (key && aimClk < AIM_TIMEOUT - 2 && (aimClk += dt) >= AIM_TIMEOUT - 2 && ctrl.has(S.thrower) && !ai.has(S.thrower)) {
+      const v = panes.find(v => v.pi === S.thrower);
+      if (v) { flash(v.msg, t('curlHurry'), 'miss'); sfx.tick(); }
+    }
     if (S.phase === 'count') { if (!step(dt) && auth) newEnd(); }
     if (auth && S.phase !== 'count' && S.phase !== 'done') {
       acc = Math.min(acc + dt, .25);

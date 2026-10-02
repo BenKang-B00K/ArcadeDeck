@@ -139,6 +139,7 @@ export function createTiming({ renderer, mode, n = 2, me = 0, bots = [], rand, s
   }
 
   function tap(auto, a = auto ? null : angleAt(performance.now())) {
+    if (st === 'intro' && !auto && mine()) { flash(msg, t('waitGo'), 'miss'); return; } // early: the turn isn't spent, say so
     if (st !== 'spin' || !mine()) return;
     if (online) send({ t: 'tap', from: who(), k, a });
     resolve(a);

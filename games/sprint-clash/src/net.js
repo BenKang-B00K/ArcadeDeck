@@ -2,7 +2,7 @@
 // and relays game messages between guests. The public PeerJS broker is only used for the handshake.
 // Loaded lazily so local play never touches the network.
 const SRC = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';
-const PREFIX = 'sprintclash-v4-'; // bump when the wire protocol changes so old clients can't join
+const PREFIX = 'sprintclash-v5-'; // bump when the wire protocol changes so old clients can't join
 const ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 export const MAX_GUESTS = 3;
 
@@ -20,14 +20,14 @@ const load = () => loading ??= new Promise((res, rej) => {
 
 const valid = m => m && typeof m === 'object';
 
-export async function host(onCode, onPeers, onErr) {
+export async function host(onCode, onPeers, onErr, cap = MAX_GUESTS) { // cap: room size minus the host
   try { await load(); } catch { return onErr('load'); }
   close();
   const code = Array.from({ length: 4 }, () => ABC[Math.random() * ABC.length | 0]).join('');
   const p = peer = new window.Peer(PREFIX + code);
   p.on('open', () => onCode(code));
   p.on('connection', c => {
-    if (locked || guests.length >= MAX_GUESTS) { c.on('open', () => c.close()); return; }
+    if (locked || guests.length >= cap) { c.on('open', () => c.close()); return; }
     c.on('open', () => { if (peer !== p) return c.close(); guests.push(c); onPeers(guests.length); });
     c.on('data', m => {
       const i = guests.indexOf(c);
@@ -47,7 +47,7 @@ export async function host(onCode, onPeers, onErr) {
   });
   p.on('error', e => {
     if (peer !== p) return;
-    if (e.type === 'unavailable-id') host(onCode, onPeers, onErr);
+    if (e.type === 'unavailable-id') host(onCode, onPeers, onErr, cap);
     else if (!guestCount()) onErr(e.type);
   });
 }

@@ -273,7 +273,9 @@ export function createVault({ renderer, mode, n = 2, me = 0, bots = [], rand, se
 
   function act(pi, a) {
     const p = players[pi];
-    if (!p?.local || p.bot || ph !== 'decide' || !p.inside || waiting) return;
+    if (!p?.local || p.bot || !p.inside || waiting) return;
+    if (ph === 'reveal') { if (!busted) { p.early = a === 'A' ? 0 : 1; sfx.click(); } return; } // read the card fast: the pick waits for the timer
+    if (ph !== 'decide') return;
     p.pending = a === 'A' ? 0 : 1;
     sfx.click();
     const v = paneOf(pi); // lock-in pop, replays on every change of mind
@@ -297,7 +299,7 @@ export function createVault({ renderer, mode, n = 2, me = 0, bots = [], rand, se
     else if (ph === 'reveal') {
       if ((revealT -= dt) <= 0) {
         if (busted) { ph = 'bust'; phaseT = BUST_SHOW; }
-        else { ph = 'decide'; winT = WINDOW; waiting = false; tickT = .25; players.forEach(p => { p.pending = null; }); prepBots(); }
+        else { ph = 'decide'; winT = WINDOW; waiting = false; tickT = .25; players.forEach(p => { p.pending = p.early ?? null; p.early = null; }); prepBots(); }
       }
     } else if (ph === 'decide') {
       winT -= dt;

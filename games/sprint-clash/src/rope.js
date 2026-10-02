@@ -87,14 +87,14 @@ export function createRope({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
     if (online) send({ t: 'fin', from: p.i, ...final[p.i] });
   }
 
-  function fall(p) {
+  function fall(p, msg = 'fall') {
     p.fall = FALL; p.falls++; p.stepT = 0;
-    if (paneOf(p.i)) { say(p, t('fall'), 'hit'); sfx.fall(); buzz(80); }
+    if (paneOf(p.i)) { say(p, t(msg), 'hit'); sfx.fall(); buzz(80); }
   }
 
   function tryStep(p) {
     if (p.stepT > 0) return;
-    if (Math.abs(p.th) > OVER) return fall(p);
+    if (Math.abs(p.th) > OVER) return fall(p, 'ropeTilt');
     p.stepT = STEP; p.from = p.d;
     p.om += (Math.round(p.d) % 2 ? .25 : -.25); // each foot sways you its way
     if (paneOf(p.i)) sfx.step();
@@ -132,7 +132,7 @@ export function createRope({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
         for (let k = 0; k < 3; k++) burst.emit(TX[p.i], HY + 2, -LEN - 2, [0xffd23f, COL[p.i], 0xffffff][k], 20, 6);
       }
     }
-    if (Math.abs(p.th) > TIP) fall(p);
+    if (p.fin == null && Math.abs(p.th) > TIP) fall(p);
   }
 
   function stepRemote(p, dt) {
@@ -150,7 +150,7 @@ export function createRope({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
         state = 'wait';
         sfx.finish();
         panes.forEach(v => flash(v.msg, t('timeUp'), 'go'));
-        for (const p of players) if (p.local && !final[p.i]) report(p, null);
+        for (const p of players) if (p.local && !final[p.i]) { if (p.fall > 0) p.d = Math.floor(p.d / POST) * POST; report(p, null); } // mid-fall counts from the post you drop back to
         if (online && final.some(f => !f)) panes.forEach(v => { v.hint.textContent = t('waitRival'); v.hint.classList.remove('hide'); });
       }
     }

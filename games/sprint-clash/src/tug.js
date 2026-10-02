@@ -134,7 +134,7 @@ export function createTug({ renderer, mode, n = 2, me = 0, bots = [], rand, send
   function press(p, a) {
     const heard = !!paneOf(p.i);
     if (p.tangT > 0) { if (a !== 'A') chord(p, a, heard); return; }
-    if (p.slipT > 0) return;
+    if (p.slipT > 0 && a !== 'A') return; // a slip locks your pulls, not your brace
     if (a === 'A') {
       const b = braceAt(RT);
       if (b != null && p.bw !== b) { p.bw = b; p.boostT = BOOST; say(p.i, t('tugBraced'), 'perfect'); if (heard) sfx.perfect(); }

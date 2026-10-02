@@ -21,6 +21,7 @@ const I18N = {
     tipShort: 'Short: fewest rungs [m:0.8×]\n[s:Straight] + [j:Joker]', tipMedium: 'Medium: standard rungs [m:1.2×]\n[s:Straight] + [d:Diagonal] + [w:Wormhole] / [c:Carousel]',
     tipHelp: 'What do the specials do?', tipFeat: '[w:Wormhole] Falls in one mouth, comes out the other [o:M 50% · L 100%]\n[c:Carousel] Rides one seat round the ring, then goes on down [o:M 50% · L 50%]\n[j:Joker] At the end, its player trades results with another [o:S 40% · L 40%]',
     tipLong: 'Long: most rungs [m:1.5×]\n[d:Diagonal] + [w:Wormhole] + [c:Carousel] + [j:Joker]', joker: 'Joker swap!', stay: 'STAYING!', lucky: 'LUCKY SWAP!', unlucky: 'UNLUCKY SWAP!', wormhole: 'Wormhole!', carousel: 'Carousel!', out: 'OUT!', stun: 'STUN!', climb: 'CLIMB!', slide: 'SLIDE!',
+    link: 'Phone link', watching: 'Watching',
   },
   ko: {
     title: '사다리 타기',
@@ -34,6 +35,7 @@ const I18N = {
     tipShort: '짧게: 가로줄 적음 [m:0.8×]\n[s:직선] + [j:조커]', tipMedium: '보통: 가로줄 보통 [m:1.2×]\n[s:직선] + [d:대각선] + [w:웜홀] / [c:회전목마]',
     tipHelp: '특수 장치 설명', tipFeat: '[w:웜홀] 한쪽 입구로 들어가 다른 입구로 나옴 [o:M 50% · L 100%]\n[c:회전목마] 고리를 따라 한 칸 옆으로 옮겨 내려감 [o:M 50% · L 50%]\n[j:조커] 마지막에 조커 카드 주인이 다른 사람과 결과를 바꿈 [o:S 40% · L 40%]',
     tipLong: '길게: 가로줄 많음 [m:1.5×]\n[d:대각선] + [w:웜홀] + [c:회전목마] + [j:조커]', joker: '조커 교환!', stay: '그대로!', lucky: 'Lucky!', unlucky: 'Unlucky!', wormhole: '웜홀!', carousel: '회전목마!', out: '탈출!', stun: '기절!', climb: '영차!', slide: '미끄럼!',
+    link: '폰 연결', watching: '관전 중',
   },
   ja: {
     title: 'あみだくじ',
@@ -47,6 +49,7 @@ const I18N = {
     tipShort: '短い: 横線少なめ [m:0.8×]\n[s:直線]＋[j:ジョーカー]', tipMedium: '普通: 横線ふつう [m:1.2×]\n[s:直線]＋[d:斜め]＋[w:ワームホール]／[c:回転木馬]',
     tipHelp: '特殊ギミックの説明', tipFeat: '[w:ワームホール] 片方の口に入り、もう片方から出る [o:M 50% · L 100%]\n[c:回転木馬] 輪に乗って一つ隣へ移り、下へ進む [o:M 50% · L 50%]\n[j:ジョーカー] 最後にジョーカー札の人が他の人と結果を交換 [o:S 40% · L 40%]',
     tipLong: '長い: 横線多め [m:1.5×]\n[d:斜め]＋[w:ワームホール]＋[c:回転木馬]＋[j:ジョーカー]', joker: 'ジョーカー交換！', stay: 'そのまま！', lucky: 'Lucky!', unlucky: 'Unlucky!', wormhole: 'ワームホール！', carousel: '回転木馬！', out: 'アウト！', stun: 'ピヨピヨ！', climb: 'よいしょ！', slide: 'すべり！',
+    link: 'スマホ接続', watching: '観戦中',
   },
 };
 
@@ -84,7 +87,13 @@ const S = {
 const CUR = { USD: ['$', 5, 100], KRW: ['₩', 1000, 50000], JPY: ['¥', 100, 5000] };
 if (!CUR[S.cur]) S.cur = { ko: 'KRW', ja: 'JPY' }[S.lang] || 'USD';
 if (S.total <= 0) S.total = CUR[S.cur][2];
-const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch { /* sandboxed iframe */ } };
+// phone link (bottom of file). mine: this phone's own setup, parked while it watches another phone's game
+const NET = { mine: null };
+const save = () => {
+  // watching: S holds the host's setup, so disk keeps this phone's own (language and volume stay its own)
+  try { localStorage.setItem(KEY, JSON.stringify(NET.mine ? { ...NET.mine, lang: S.lang, music: S.music, sfx: S.sfx } : S)); } catch { /* sandboxed iframe */ }
+  NET.sync?.();
+};
 
 const t = (k, n) => {
   const v = I18N[S.lang][k] ?? I18N.en[k];
@@ -289,7 +298,7 @@ const setCount = d => {
   reroll();
   sfx.ui(); save(); renderEntries();
 };
-$('#orderBtn').onclick = () => { shuffle(ZOO); sfx.ui(); renderEntries(); };
+$('#orderBtn').onclick = () => { shuffle(ZOO); sfx.ui(); renderEntries(); NET.sync?.(); };
 $('#minus').onclick = () => setCount(-1);
 $('#plus').onclick = () => setCount(1);
 document.querySelectorAll('[data-height]').forEach(b => b.onclick = () => { S.height = b.dataset.height; sfx.ui(); save(); renderEntries(); });
@@ -309,18 +318,8 @@ document.querySelectorAll('[data-preset]').forEach(b => b.onclick = () => {
   sfx.ui(); save(); renderEntries();
 });
 
-$('#startBtn').onclick = () => {
-  sfx.go(0, 0);
-  setup.hidden = true;
-  play.hidden = false;
-  newGame();
-};
-$('#editBtn').onclick = () => {
-  sfx.ui();
-  stop();
-  play.hidden = true;
-  setup.hidden = false;
-};
+$('#startBtn').onclick = () => act({ t: 'start' });
+$('#editBtn').onclick = () => act({ t: 'edit' });
 
 // ---------- ladder board ----------
 const cv = $('#cv'), cx = cv.getContext('2d');
@@ -1142,10 +1141,9 @@ const finish = () => { $('#jkToast').hidden = true; sfx.fanfare(); openSummary()
 
 // Joker: whoever landed on the joker card trades results with one other player. A spotlight runs round the
 // other cards, slowing down, and stops on the one picked. The drawn paths stay; only the results change hands.
-// The pick is uniform over every other card, same result or not, so the joker stays fair (each player keeps 1/n).
-// ponytail: picking only cards with a different result made the holder of a "Pass" joker always take the lone "WIN!"
+// The pick (G.jkE) is rolled with the board, see roll().
 function joker() {
-  const j = G.joker, ring = range(G.n).filter(x => x !== j), e = ring[Math.floor(Math.random() * ring.length)];
+  const j = G.joker, ring = range(G.n).filter(x => x !== j), e = G.jkE;
   // the spotlight laps every other card, at least ~16 steps, then on to the pick
   const steps = Math.ceil(16 / ring.length) * ring.length + ring.indexOf(e) + 1;
   cards.children[j].classList.add('armed');
@@ -1281,7 +1279,7 @@ function renderLanes() {
     const b = el('button', 'chip');
     b.type = 'button';
     b.style.setProperty('--i', i);
-    b.onclick = () => G.pick < G.n ? pick(i) : go(i, false, true);
+    b.onclick = () => act({ t: 'chip', i });
     return b;
   }));
   paintChips();
@@ -1289,7 +1287,7 @@ function renderLanes() {
     const d = el('button', 'res'), b = el('b'), s = el('small');
     d.type = 'button';
     d.style.setProperty('--i', e); // idle hop stagger
-    d.onclick = () => G.traces.forEach((tr, i) => tr.end === e && go(i, true, true));
+    d.onclick = () => act({ t: 'card', e });
     if (S.preset) { b.className = 'gl'; b.innerHTML = glyph(e); } else b.textContent = resultOf(e);
     // ratio: the card itself is the gauge, filled from the bottom to the share
     if (S.preset === 'ratio') { d.classList.add('gauge'); d.style.setProperty('--r', S.ratio[e]); }
@@ -1345,13 +1343,23 @@ function update() {
   if (!picking) delete turn.dataset.p;
 }
 
-function newGame() {
+// everything random about a new board, rolled once on the host so watching phones replay the same one
+function roll() {
+  const [scale, tilt, holes, ring, jokerChance, either] = HEIGHTS[S.height];
+  // result card that swaps its player at the end; none when every result reads the same (the swap would change nothing)
+  const joker = Math.random() < jokerChance && new Set(range(S.n).map(resultOf)).size > 1 ? Math.floor(Math.random() * S.n) : -1;
+  // the card it trades with: uniform over every other card, same result or not, so the joker stays fair (each player keeps 1/n).
+  // ponytail: picking only cards with a different result made the holder of a "Pass" joker always take the lone "WIN!"
+  const others = range(S.n).filter(x => x !== joker);
+  return { ladder: makeLadder(S.n, Math.random, holes, scale, tilt, ring, either), joker, jkE: others[Math.floor(Math.random() * others.length)] };
+}
+
+function newGame({ ladder, joker, jkE }) {
   stop();
   G.n = S.n;
-  const [scale, tilt, holes, ring, jokerChance, either] = HEIGHTS[S.height];
-  G.ladder = makeLadder(G.n, Math.random, holes, scale, tilt, ring, either);
-  // result card that swaps its player at the end; none when every result reads the same (the swap would change nothing)
-  G.joker = Math.random() < jokerChance && new Set(range(G.n).map(resultOf)).size > 1 ? Math.floor(Math.random() * G.n) : -1;
+  G.ladder = ladder;
+  G.joker = joker;
+  G.jkE = jkE;
   G.swapped = null;
   G.traces = range(G.n).map(i => trace(G.ladder, i));
   G.done = new Set();
@@ -1386,20 +1394,21 @@ function pick(i) {
   update();
 }
 
-function newLadder() {
+function newLadder(m) {
+  if (summary.open) summary.close();
   sfx.shuffle();
   wrap.classList.remove('shake');
   void wrap.offsetWidth; // restart the CSS animation
   wrap.classList.add('shake');
-  newGame();
+  newGame(m);
 }
 
-$('#newBtn').onclick = newLadder;
+$('#newBtn').onclick = () => act({ t: 'new' });
 // each tick seats the next player on a random free spot -> a uniformly random placement
 $('#randBtn').onclick = () => {
   for (let k = 0; k < G.n; k++) G.timers.push(setTimeout(() => {
     const open = range(G.n).filter(c => G.order[c] < 0);
-    if (open.length) pick(open[Math.floor(Math.random() * open.length)]);
+    if (open.length) act({ t: 'chip', i: open[Math.floor(Math.random() * open.length)] });
   }, k * 160));
 };
 function reveal() {
@@ -1408,13 +1417,7 @@ function reveal() {
   if (!G.raf) paint();
   update();
 }
-$('#allBtn').onclick = () => {
-  G.follow = null; // everyone runs: back to the whole board
-  reveal();
-  // everyone leaves at once; one launch chord, not n arpeggios piled into a cluster
-  let first = true;
-  for (let i = 0; i < G.n; i++) if (!G.done.has(i) && !G.active.some(a => a.i === i)) { go(i, false, false, !first); first = false; }
-};
+$('#allBtn').onclick = () => act({ t: 'all' });
 
 // ---------- summary ----------
 function openSummary() {
@@ -1446,7 +1449,7 @@ function showSummary(rows) {
 }
 $('#sumBtn').onclick = () => { sfx.ui(); openSummary(); };
 $('#closeBtn').onclick = () => { sfx.ui(); summary.close(); };
-$('#replayBtn').onclick = () => { summary.close(); newLadder(); };
+$('#replayBtn').onclick = () => act({ t: 'new' });
 summary.addEventListener('click', e => {
   const r = summary.getBoundingClientRect();
   if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) summary.close();
@@ -1496,6 +1499,7 @@ function applyI18n() {
     n.setAttribute('aria-description', raw.replace(/\[\w:([^\]]*)\]/g, '$1'));
     n.querySelector('.tip').innerHTML = raw.replace(/\[(\w):([^\]]*)\]/g, '<b class="k-$1">$2</b>');
   });
+  $('#startBtn').dataset.watch = t('watching');
   renderEntries();
   if (G.n) { renderLanes(); update(); }
   if (summary.open) openSummary();
@@ -1506,6 +1510,104 @@ $('#lang').onclick = () => {
   S.lang = L[(L.indexOf(S.lang) + 1) % L.length];
   save(); applyI18n();
 };
+
+// ---------- phone link ----------
+// Host + watchers: the host plays as usual; other phones join to watch its game live and can't change anything.
+// Every host action is a small message that watching phones replay through the same code (ACT): the randomness
+// (board, joker trade, random picks) is rolled on the host and travels in the message; the animation runs locally.
+// Setup edits stream as the shared part of S. A phone joining mid-game gets a snapshot.
+// ponytail: a late joiner restarts paths still running on the host from their start, and misses the joker badge on
+// the card that was already traded; everything that decides a result is exact
+const ACT = {
+  start: m => { sfx.go(0, 0); setup.hidden = true; play.hidden = false; newGame(m); },
+  edit: () => { sfx.ui(); stop(); play.hidden = true; setup.hidden = false; },
+  new: newLadder,
+  chip: ({ i }) => G.pick < G.n ? pick(i) : go(i, false, true),
+  card: ({ e }) => G.traces.forEach((tr, i) => tr.end === e && go(i, true, true)),
+  all: () => {
+    G.follow = null; // everyone runs: back to the whole board
+    reveal();
+    // everyone leaves at once; one launch chord, not n arpeggios piled into a cluster
+    let first = true;
+    for (let i = 0; i < G.n; i++) if (!G.done.has(i) && !G.active.some(a => a.i === i)) { go(i, false, false, !first); first = false; }
+  },
+};
+const hosting = () => Coop.role === 'host' && Coop.live;
+function act(m) {
+  if (NET.mine) return; // watching: only the host drives (the controls are inert as well)
+  if (m.t === 'start' || m.t === 'new') Object.assign(m, roll(), shared());
+  ACT[m.t](m);
+  if (hosting()) Coop.send(m);
+}
+// setup that travels: everything in S but this phone's own language and volume
+const shared = () => {
+  const { lang, music, musicV2, sfx: fx, ...s } = S;
+  return { s, zoo: [...ZOO] };
+};
+// several saves in one tick (a preset tap re-rolls and saves) go out as one message
+NET.sync = () => {
+  if (!hosting() || NET.queued) return;
+  NET.queued = true;
+  queueMicrotask(() => { NET.queued = false; Coop.send({ t: 'S', ...shared() }); });
+};
+const snapshot = () => ({ t: 'sync', ...shared(), on: !play.hidden, g: play.hidden || !G.ladder ? null : {
+  ladder: G.ladder, joker: G.joker, jkE: G.jkE, order: G.order, pick: G.pick, left: G.left, at: G.at, shown: G.shown,
+  swapped: G.swapped, done: [...G.done], lit: [...G.lit], holeLit: [...G.holeLit], ringLit: [...G.ringLit],
+  ends: G.traces.map(tr => tr.end), active: G.active.map(a => [a.i, a.up]),
+} });
+function syncTo({ on, g }) {
+  stop();
+  if (summary.open) summary.close();
+  setup.hidden = on; play.hidden = !on;
+  if (!g) return;
+  newGame(g);
+  if (!g.left) { // peek already over on the host
+    G.timers.forEach(clearTimeout); G.timers = [];
+    cancelAnimationFrame(G.grow);
+    G.left = 0; G.ext = EXT;
+  }
+  Object.assign(G, { order: g.order, pick: g.pick, at: g.at, shown: g.shown, swapped: g.swapped,
+    done: new Set(g.done), lit: new Set(g.lit), holeLit: new Set(g.holeLit), ringLit: new Set(g.ringLit) });
+  g.ends.forEach((e, i) => G.traces[i].end = e);
+  renderLanes(); drawStatic(); drawTrail();
+  if (!G.raf) paint();
+  update();
+  g.active.forEach(([i, up]) => go(i, up, false, true));
+  if (G.done.size === G.n && G.joker >= 0 && !G.swapped) joker(); // joker beat still to come
+}
+// watching: this phone's own setup parked, the host's controls inert, Replay gone
+function watch(on) {
+  if (!!NET.mine === on) return;
+  if (on) NET.mine = JSON.parse(JSON.stringify(S));
+  else {
+    Object.assign(S, NET.mine, { lang: S.lang, music: S.music, sfx: S.sfx });
+    NET.mine = null;
+    stop();
+    if (summary.open) summary.close();
+    play.hidden = true; setup.hidden = false;
+    renderEntries();
+  }
+  document.body.classList.toggle('watching', on);
+  document.querySelectorAll('#setup .panel, #startBtn, #chips, #cards, #randBtn, #editBtn, #newBtn, #allBtn, #replayBtn').forEach(e => e.inert = on);
+}
+const linkOpts = {
+  game: 'ladder', watch: true, max: 15, lang: () => S.lang,
+  onStart(n, me) {
+    document.body.classList.add('linked');
+    if (me) watch(true);
+    else Coop.send(snapshot()); // phones that joined before Continue
+  },
+  onJoin(i) { if (Coop.live) Coop.sendTo(i, snapshot()); }, // joined mid-game
+  onMsg(m) {
+    if (!NET.mine) return; // not started yet: the host sends a snapshot on Continue
+    if (m.s) { Object.assign(S, m.s); ZOO.splice(0, ZOO.length, ...m.zoo); renderEntries(); }
+    if (m.t === 'sync') syncTo(m);
+    else ACT[m.t]?.(m);
+  },
+  onLeave() { if (summary.open) summary.close(); }, // the "host left" notice must not sit under the modal dialog
+  onMenu() { document.body.classList.remove('linked'); watch(false); },
+};
+document.querySelectorAll('.link-btn').forEach(b => b.onclick = () => { sfx.ui(); Coop.open(linkOpts); });
 
 // ---------- boot ----------
 // audio may only start from a user gesture (autoplay policy); init() is idempotent and resumes iOS-interrupted contexts

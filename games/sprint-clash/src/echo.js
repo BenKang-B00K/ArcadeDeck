@@ -142,12 +142,14 @@ export function createEcho({ renderer, mode, n = 2, me = 0, bots = [], label, se
     input(val);
   }
 
+  function startPlay() {
+    st = 'play'; winT = winMax = chain.length ? windowFor(chain.length) + .5 : FIRST;
+    flash(v.msg, t('echoStart'), 'go'); sfx.go(); // the window timer runs from here
+  }
+
   function update(dt) {
     time += dt; timer -= dt;
-    if (st === 'intro' && timer <= 0) {
-      st = 'play'; winT = winMax = chain.length ? windowFor(chain.length) + .5 : FIRST;
-      flash(v.msg, t('echoStart'), 'go'); sfx.go(); // the window timer runs from here
-    }
+    if (st === 'intro' && timer <= 0) startPlay();
     else if (st === 'play') {
       winT -= dt;
       while (queue.length && queue[0].k < k) queue.shift();
@@ -201,7 +203,8 @@ export function createEcho({ renderer, mode, n = 2, me = 0, bots = [], label, se
 
   const act = (pi, a) => {
     if (pi < 0) pi = online ? me : cur;
-    if (pi !== cur || st !== 'play' || !human()) return;
+    if (pi !== cur || (st !== 'play' && st !== 'intro') || !human()) return;
+    if (st === 'intro') startPlay(); // pressed before your cue: the turn starts now, so that note still counts
     press(SYM.indexOf(a));
   };
   const unbind = bindInput({ cv: renderer.domElement, panes, n, online, me, act });

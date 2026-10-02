@@ -26,6 +26,11 @@
 
 <!-- 토글 버튼들은 .wrap 밖으로 빼서 커튼 위에도 보이게 함 -->
 <div class="vol-ctrl">
+<button class="sound-toggle link-toggle" id="linkToggle" data-i18n-title="tip.link" aria-label="phone link">
+  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <rect x="5" y="2" width="14" height="20" rx="2.5"/><path d="M12 18h.01"/>
+  </svg>
+</button>
 <input type="range" class="vol-slider" id="volSlider" min="0" max="100" step="5" value="100" data-i18n-title="tip.volume" aria-label="volume level">
 <button class="sound-toggle" id="soundToggle" data-i18n-title="tip.sound" aria-label="mute toggle">
   <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none">
@@ -138,6 +143,7 @@
       <button class="ctrl-btn" id="undoBtn"><span data-i18n="btn.undo">Undo</span> <kbd>⌫</kbd></button>
       <button class="ctrl-btn primary" id="confirmBtn" disabled><span data-i18n="btn.confirm">Confirm</span> <kbd>⏎</kbd></button>
     </div>
+    <div class="net-wait" id="netWait" aria-live="polite"></div>
   </div>
 </div>
 
@@ -155,6 +161,7 @@
     <div class="setup-mode-select" id="setupModeSelect">
       <button class="setup-mode-btn active" id="setupModePVP" data-i18n="setup.mode.pvp">Two Players</button>
       <button class="setup-mode-btn" id="setupModeCPU" data-i18n="setup.mode.cpu">vs CPU</button>
+      <button class="setup-mode-btn" id="setupModeLink" data-i18n="setup.mode.link">Phone Link</button>
     </div>
     <div class="setup-diff-select" id="setupDiffSelect" style="display:none;">
       <button class="setup-diff-btn active" id="setupDiffNormal" data-i18n="setup.diff.normal">Normal</button>
@@ -379,6 +386,7 @@
   </div>
 </div>
 
+<script src="coop.js"></script>
 <script src="i18n.js"></script>
 <script src="game.js"></script>
 </body>

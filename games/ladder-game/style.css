@@ -709,3 +709,19 @@ dialog h2 { margin: 0 0 14px; text-align: center; font-size: 22px; font-weight: 
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .peek.run i { animation-duration: var(--t, 3s) !important; } /* countdown is information, keep it */
 }
+
+/* ---------- phone link (coop.js) ---------- */
+/* link state lives on the game's own button, so coop.js's floating chip (it would sit on the Reset button) stays off */
+.coop-chip { display: none !important; }
+body .coop { --coop-bg: #1d1556; --coop-accent: var(--violet); }
+body .coop button.pri { background: linear-gradient(135deg, var(--pink) 0%, var(--violet) 100%); }
+.link-btn { position: relative; }
+.actions .link-btn { flex: none; }
+.linked .link-btn::after { content: ''; position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: #ff4d5e; box-shadow: 0 0 8px #ff4d5e; animation: live 1.6s ease-in-out infinite; }
+@keyframes live { 50% { opacity: .35; } }
+/* watching another phone's game: the host's setup shows but is inert (game.js), Start reads "Watching",
+   the host-only board buttons are gone */
+.watching #startBtn { filter: saturate(.35) brightness(.85); font-size: 15px; }
+.watching #startBtn > * { display: none; }
+.watching #startBtn::after { content: attr(data-watch); }
+.watching :is(#editBtn, #newBtn, #allBtn, #randBtn, #replayBtn) { display: none !important; }

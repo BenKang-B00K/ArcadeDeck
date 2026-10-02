@@ -7,7 +7,7 @@ import { coarse, keyHint, zones, makePane, rankChips, layout, fitFov, renderPane
 // Sumo Bump: pucks on an icy ring, bump rivals off the edge. The ring shrinks every 15 s. First to 2 round wins.
 // Online is host-authoritative: guests send input changes, the host simulates and broadcasts snapshots at 20 Hz.
 // Guests draw rivals ~100 ms behind (interpolated) and their own puck from the newest snapshot, extrapolated.
-const R0 = 9, PR = .75, STEP = 1 / 60, ROT = 2.8, ACC = 2.6, DAMP = .9, CHARGE = .8, COOL = .6, E = .9;
+const R0 = 9, PR = .75, STEP = 1 / 60, ROT = 2.8, ACC = 2.6, DAMP = .9, CHARGE = .8, COOL = .6, BUF = .3, E = .9;
 const SHRINK_EVERY = 15, SHRINK = 1.8, RMIN = 2.2, CAP = 45, CAP_END = 62, WINS = 2, MAX_ROUNDS = 5;
 const ST = ['count', 'play', 'end', 'done'], F = 10; // snapshot floats per puck: x z vx vz h alive charge bumps dashes y
 
@@ -100,7 +100,7 @@ export function createSumo({ renderer, mode, n = 2, me = 0, bots = [], send, lab
   function place() {
     S.p.forEach((p, i) => {
       const a = i / n * Math.PI * 2 + Math.PI / 4;
-      Object.assign(p, { x: Math.sin(a) * 5.5, z: Math.cos(a) * 5.5, vx: 0, vz: 0, h: a, alive: 1, y: 0, vy: 0, cool: 0, dashT: 0, last: -1, lastT: 0 }); // h = a faces the centre
+      Object.assign(p, { x: Math.sin(a) * 5.5, z: Math.cos(a) * 5.5, vx: 0, vz: 0, h: a, alive: 1, y: 0, vy: 0, cool: 0, qd: null, dashT: 0, last: -1, lastT: 0 }); // h = a faces the centre
       inp[i].c = 0; inp[i].ct = 0;
     });
     Object.assign(S, { R: R0, Rt: R0, T: 0 });
@@ -118,7 +118,8 @@ export function createSumo({ renderer, mode, n = 2, me = 0, bots = [], send, lab
   const fwd = h => [-Math.sin(h), -Math.cos(h)];
   function dash(i, pw) {
     const p = S.p[i];
-    if (S.st !== 'play' || !p.alive || p.cool > 0) return;
+    if (S.st !== 'play' || !p.alive) return;
+    if (p.cool > 0) { if (p.cool < BUF) p.qd = pw; return; } // released just before the cooldown ends: dash the moment it does
     const [fx, fz] = fwd(p.h), k = 3.5 + 7 * Math.min(1, Math.max(0, pw));
     p.vx += fx * k; p.vz += fz * k; p.dashT = .35; p.cool = COOL; p.d++;
   }
@@ -152,7 +153,7 @@ export function createSumo({ renderer, mode, n = 2, me = 0, bots = [], send, lab
       S.Rt = S.T > CAP ? Math.max(0, R0 - SHRINK * 3 - (S.T - CAP) * .45) : Math.max(RMIN, R0 - k * SHRINK);
       if (S.T >= CAP_END) S.Rt = 0;
     }
-    S.R += Math.sign(S.Rt - S.R) * Math.min(Math.abs(S.Rt - S.R), 1.2 * dt);
+    if (play) S.R += Math.sign(S.Rt - S.R) * Math.min(Math.abs(S.Rt - S.R), 1.2 * dt); // the ring stops shrinking once the round is decided
     for (const i of IDX) {
       const p = S.p[i], io = inp[i];
       if (play && ai.has(i) && ctrl.has(i)) think(i, dt);
@@ -164,10 +165,11 @@ export function createSumo({ renderer, mode, n = 2, me = 0, bots = [], send, lab
         p.vx += fx * a * dt; p.vz += fz * a * dt;
         S.surv[i] += dt;
       }
-      const damp = Math.exp(-DAMP * dt);
+      const damp = Math.exp(-(play ? DAMP : 6) * dt); // round over: everyone skids to a stop instead of sliding out
       p.vx *= damp; p.vz *= damp;
       p.x += p.vx * dt; p.z += p.vz * dt;
       p.cool -= dt; p.dashT -= dt;
+      if (p.qd != null && p.cool <= 0) { const pw = p.qd; p.qd = null; dash(i, pw); }
     }
     // collisions: equal masses, restitution E; a dashing puck hits harder
     for (let a = 0; a < n; a++) for (let b = a + 1; b < n; b++) {
@@ -185,7 +187,7 @@ export function createSumo({ renderer, mode, n = 2, me = 0, bots = [], send, lab
       if (-vn > 1.5) { p.b++; q.b++; }
     }
     // ring-outs; if everyone left would fall in the same step, the one nearest the middle holds on
-    const alive = IDX.filter(i => S.p[i].alive), outs = alive.filter(i => Math.hypot(S.p[i].x, S.p[i].z) > S.R + .05);
+    const alive = IDX.filter(i => S.p[i].alive), outs = play ? alive.filter(i => Math.hypot(S.p[i].x, S.p[i].z) > S.R + .05) : [];
     if (outs.length && outs.length === alive.length) outs.splice(outs.indexOf(outs.reduce((m, i) => (Math.hypot(S.p[i].x, S.p[i].z) < Math.hypot(S.p[m].x, S.p[m].z) ? i : m))), 1);
     for (const i of outs) {
       const p = S.p[i];
@@ -267,7 +269,9 @@ export function createSumo({ renderer, mode, n = 2, me = 0, bots = [], send, lab
       const pw = io.ct / CHARGE;
       io.c = 0; io.ct = 0;
       if (auth) dash(pi, pw); else { sentC = 0; send({ t: 'sd', from: pi, p: q2(pw) }); }
-      if (shown(pi)) sfx.boost();
+      const ready = time - lastDash[pi] >= COOL - BUF; // too soon after the last dash: no whoosh for a dash that won't happen
+      if (ready) lastDash[pi] = time;
+      if (shown(pi)) ready ? sfx.boost() : sfx.miss();
     }
     syncInput(pi);
   };
@@ -290,7 +294,7 @@ export function createSumo({ renderer, mode, n = 2, me = 0, bots = [], send, lab
   }
 
   // --- frame
-  let time = 0, lastOut = IDX.map(() => 1), lastB = IDX.map(() => 0), shrinkK = 0;
+  let time = 0, lastDash = IDX.map(() => -9), lastOut = IDX.map(() => 1), lastB = IDX.map(() => 0), shrinkK = 0;
   const shrinkStage = T => (T > CAP ? 9 : Math.floor(T / SHRINK_EVERY));
   function update(dt) {
     time += dt;

@@ -169,6 +169,7 @@
 
 .game-controls {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
 }
@@ -209,6 +210,25 @@
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(0, 210, 255, 0.4);
 }
+
+/* Cast-to-TV how-to: native popover (light dismiss + Esc for free) */
+.cast-help {
+  width: min(380px, calc(100vw - 32px));
+  padding: 16px 18px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  box-shadow: var(--shadow-lg);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  text-align: left;
+}
+.cast-help::backdrop { background: rgba(0, 0, 0, 0.45); }
+.cast-help p { margin: 0; }
+.cast-help-title { color: var(--text-primary); font-weight: 700; }
+.cast-help ul { margin: 10px 0; padding-left: 18px; }
+.cast-help li + li { margin-top: 6px; }
 
 /* Iframe Section */
 .game-screen-wrapper {

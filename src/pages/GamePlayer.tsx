@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
-import { Maximize, Minimize, Heart, Link as LinkIcon, Home, X, Trophy } from 'lucide-react';
+import { Maximize, Minimize, Heart, Link as LinkIcon, Home, X, Trophy, Cast } from 'lucide-react';
 import { games, GENRE_HUE } from '../data/games';
 import type { Game } from '../data/games';
 import Navbar from '../components/Navbar';
@@ -20,6 +20,18 @@ import { useUiText, useLocale, getLocalizedString } from '../i18n';
 import { genreSlug, genreName } from '../utils/genres';
 import '../components/GameCard.css';
 import './GamePlayer.css';
+
+// ponytail: a page can't push a cross-origin game iframe to a TV itself (Presentation
+// API would start a second, input-less copy), so Cast just points at the OS/browser
+// mirroring for this device. Linux desktop gets the Chrome line only.
+const castSteps = (): string[] => {
+  const ua = navigator.userAgent;
+  if (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) return ['playerCastIos'];
+  if (/Android/.test(ua)) return ['playerCastAndroid'];
+  if (/Macintosh/.test(ua)) return ['playerCastChrome', 'playerCastMac'];
+  if (/Windows/.test(ua)) return ['playerCastChrome', 'playerCastWindows'];
+  return ['playerCastChrome'];
+};
 
 const GamePlayer: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -330,6 +342,16 @@ const GamePlayer: React.FC = () => {
             <button className="control-btn share-btn" onClick={() => handleShare()}>
               <LinkIcon size={16} aria-hidden="true" /> {uiT('shareTitle', 'Share')}
             </button>
+            <button className="control-btn cast-btn" popoverTarget="cast-help">
+              <Cast size={16} aria-hidden="true" /> {uiT('playerCast', 'Cast to TV')}
+            </button>
+          </div>
+          <div id="cast-help" popover="auto" className="cast-help">
+            <p className="cast-help-title">{uiT('playerCastHint', 'Mirror this screen to a TV:')}</p>
+            <ul>
+              {castSteps().map(k => <li key={k}>{uiT(k, '')}</li>)}
+            </ul>
+            <p>{uiT('playerCastTip', '')}</p>
           </div>
         </div>
 
@@ -360,7 +382,7 @@ const GamePlayer: React.FC = () => {
                 title={getLocalizedString(game, 'title', 'en', null)}
                 frameBorder="0"
                 allowFullScreen
-                allow="fullscreen; autoplay; gamepad; clipboard-write; web-share"
+                allow="fullscreen; autoplay; gamepad; clipboard-write; web-share; screen-wake-lock"
                 className="game-iframe"
                 onLoad={() => {
                   setIframeLoading(false);

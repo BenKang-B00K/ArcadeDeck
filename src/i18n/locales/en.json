@@ -149,6 +149,14 @@
     "playerEdit": "Edit",
     "playerFullscreen": "Fullscreen",
     "playerExitFullscreen": "Exit",
+    "playerCast": "Cast to TV",
+    "playerCastHint": "Mirror this screen to a TV:",
+    "playerCastIos": "iPhone / iPad: open Control Center → Screen Mirroring → pick your Apple TV or AirPlay TV.",
+    "playerCastAndroid": "Android: swipe down Quick Settings → Cast, Screen Cast or Smart View → pick your TV.",
+    "playerCastChrome": "Chrome: ⋮ menu → Cast, save and share → Cast… → pick your TV. Edge: ⋯ menu → More tools → Cast media to device.",
+    "playerCastMac": "Mac: Control Center → Screen Mirroring → pick your Apple TV or AirPlay TV.",
+    "playerCastWindows": "Windows: press Win + K → pick your TV or wireless display.",
+    "playerCastTip": "Then press Fullscreen so the TV shows only the game. You keep playing on this device.",
     "playerLoad": "Load",
     "playerOverview": "Overview",
     "playerControls": "Controls",
@@ -2162,7 +2170,7 @@
     "24": {
       "title": "Entrepreneur Tycoon",
       "description": "Turn one lemonade stand into a 30-industry empire on a living street market — hire managers, court whale customers, and guard your reputation as the buildings pile up.",
-      "fullDescription": "\n      Entrepreneur Tycoon puts you in charge of a street of businesses. Start with a **$4 lemonade stand**, click **Produce** to run your first cycle, and reinvest every dollar into more units, more shops, and staff who keep the cycle turning while you plan the next purchase.\n      **Thirty industries across ten categories** — Food, Lifestyle, Agriculture, Health, Finance, Entertainment, Travel, Tech, Real Estate, and Energy — climb from a shoeshine stand and a pizza delivery to a hedge fund, a cruise line, a chip fab, and finally a **fusion reactor**. Every industry gets its own hand-drawn building on the street, and the street grows floors as your empire does.\n      Customers walk the sidewalk for real. Broke shoppers, regulars, the wealthy, and top-hatted whales pick a shop, buy, and tip — minus delivery, transaction, and platform fees. Turn a customer away with empty shelves and your reputation drops, which cuts revenue and foot traffic. **Reputation runs from 1 to 1000** and swings your income between **half and 1.5×**, so the shady upgrades that triple revenue while leaking rep every second are a real trade, not a free lunch.\n      **Unit milestones** double each shop's output, sales milestones stack on top as a shop becomes a local favorite and then a global brand, and every other industry you unlock feeds a **synergy bonus** back into the rest. Come back after a break and the game settles up to **eight hours of offline earnings**.\n    ",
+      "fullDescription": "\n      Entrepreneur Tycoon puts you in charge of a street of businesses. Start with a **$4 lemonade stand**, click **Produce** to run your first cycle, and reinvest every dollar into more units, more shops, and staff who keep the cycle turning while you plan the next purchase.\n      **Thirty industries across ten categories** — Food, Lifestyle, Agriculture, Health, Finance, Entertainment, Travel, Tech, Real Estate, and Energy — climb from a shoeshine stand and a pizza delivery to a hedge fund, a cruise line, a chip fab, and finally a **fusion reactor**. Every industry gets its own hand-drawn building on the street, and the street grows floors as your empire does.\n      Customers walk the sidewalk for real. Broke shoppers, regulars, the wealthy, and top-hatted whales pick a shop, buy, and tip — minus delivery, transaction, and platform fees. Turn a customer away with empty shelves and your reputation drops, which cuts revenue and foot traffic. **Reputation runs from 1 to 10,000** and swings your income between **half and 1.5×**, so the shady upgrades that triple revenue while leaking rep every second are a real trade, not a free lunch.\n      **Unit milestones** double each shop's output, sales milestones stack on top as a shop becomes a local favorite and then a global brand, and every other industry you unlock feeds a **synergy bonus** back into the rest. Come back after a break and the game settles up to **eight hours of offline earnings**.\n    ",
       "controls": "Mouse: click ▶ Produce on a card to run a cycle, Buy to add units, Hire to recruit a manager or employees, and the pause toggle to stop a shop. Scroll over the street to zoom in on your buildings. Touch: tap the same buttons; buildings on the street open their card.",
       "tips": "Hire a manager on your first two shops as early as you can — until then every cycle needs a click. Buy toward **unit milestones (25, 50, 100…)**: each one doubles that shop's revenue. Keep stock up: every customer turned away costs reputation and money. Unlock cheap industries even when they earn little — each one adds a **synergy bonus** to all the others. Treat **Shady upgrades** as a sprint: their reputation drain never stops, so buy the regen and forgiveness upgrades first.",
       "lore": "\n      They said the block was dead. Shuttered storefronts, a bus stop nobody used, and a kid selling lemonade for **four dollars a cup** because that was all the ingredients cost.\n      The kid kept the change. Then hired a manager. Then bought the shoeshine stand next door, then the allotment behind it, and one morning the street woke up to scaffolding where the empty lots used to be.\n      Now the whales arrive in top hats, the tabloids sniff around for a story, and the skyline at the end of the road hums with a reactor you built. It is still your street. Keep it that way.\n    ",
@@ -2214,7 +2222,7 @@
         },
         {
           "q": "What does reputation do?",
-          "a": "Reputation runs from 1 to 1000 and starts at 500. It multiplies all revenue between 0.5× and 1.5×, scales how many customers walk the street, and shrinks penalties when it is high. Sold-out shops that turn customers away lose reputation; customer upgrades add regen and forgiveness."
+          "a": "Reputation runs from 1 to 10,000 and starts at 1,000, the neutral point (×1.0 revenue). Below it your revenue slides toward 0.5×, above it climbs toward 1.5×, and the climb slows near the top. It also scales how many customers walk the street and shrinks penalties when it is high. Sold-out shops that turn customers away, firing staff, shady upgrades and unpaid payroll all cost reputation; customer upgrades add regen and forgiveness."
         },
         {
           "q": "Are Shady upgrades worth it?",
@@ -2226,7 +2234,7 @@
         },
         {
           "q": "What are unit and sales milestones?",
-          "a": "Owning 25, 50, 100, 200… units of an industry doubles its revenue at each step. Separately, selling 50, 250, 1,000… units to street customers raises that shop through Regulars, Local favorite, City landmark, and up to Global empire at ×25. Both stack with your upgrades and synergy."
+          "a": "Owning 25, 50, 100, 150, 200, 250 and 300 units of an industry doubles its revenue at each step. Separately, selling 50, 250, 1,000… units to street customers raises that shop through Regulars, Local favorite, City landmark, and up to Global empire at ×25. Both stack with your upgrades and synergy."
         },
         {
           "q": "Does the game progress while I'm away?",
@@ -3697,7 +3705,7 @@
     "43": {
       "title": "Marble Racing",
       "description": "A 3D party decision-maker for 2–20 players. Each animal rides a glass marble down a glowing toy marble run, and the finishing order decides winners, ranks, teams, penalties or who pays the bill.",
-      "fullDescription": "\n      Marble Racing is the 3D sequel to Ladder Game: a **party decision-maker** for **2 to 20 players**. Every player is a cute animal riding inside a clear glass marble, and the results wait at the finish, one for each place. Send everyone down a glowing toy marble run and the finishing order decides who gets what.\n      Type your own result for each place or use **Quick fill**: Winner (the first places), Penalty (the last places), Rank, Teams (sizes even to within one), Ratio (random percentage shares) or Bill — a random split of a total in dollars, won or yen that always adds up exactly, with as many people paying nothing as you choose.\n      Press Start and a fresh course is built from a new seed. A **3-second flyover** shows it off, everyone is seated at a random start gate, and Race! counts down 3-2-1-GO. The camera follows the action, the standings update live, and you can tap any animal to follow its marble or press **×3** to fast-forward. A close finish on a place that decides something gets a **photo finish** in slow motion.\n      Pick **Short, Medium or Long** (about 25, 30 or 50 seconds) and fill its 3, 5 or 7 slots with **mods**: carousels, wormholes, trap routes, a mist tube that hides who is ahead, boomerang half-pipes, waterslide bowls, ramps, jumps with boost hoops, boost pads, narrow tubes and mud — or let Random mods pick new ones every race. Peg boards scatter the pack on every course, and a hard knock from behind stuns the marble in front.\n      Most races hide a **Joker** on one place: whoever finishes there trades results with a fairly drawn player at the very end. A summary with places, finish times and split checkpoints, a record of your last 30 races, the code of every course, D Dorian music and effects with a volume control, and English, Korean and Japanese round it out. With **Phone link** one phone hosts and up to 15 others watch the same race live on their own screens. Plays on phones, tablets and desktop; installs as an app and works offline.\n    ",
+      "fullDescription": "\n      Marble Racing is the 3D sequel to Ladder Game: a **party decision-maker** for **2 to 20 players**. Every player is a cute animal riding inside a clear glass marble, and the results wait at the finish, one for each place. Send everyone down a glowing toy marble run and the finishing order decides who gets what.\n      Type your own result for each place or use **Quick fill**: Winner (the first places), Penalty (the last places), Rank, Teams (sizes even to within one), Ratio (random percentage shares) or Bill — a random split of a total in dollars, won or yen that always adds up exactly, with as many people paying nothing as you choose.\n      Press Start and a fresh course is built from a new seed. A **flyover** shows it off, pausing on each mod's neon sign, everyone is seated at a random start gate, and Race! counts down 3-2-1-GO. The camera follows the action, the standings update live, and you can tap any animal to follow its marble or press **×3** to fast-forward. A close finish on a place that decides something gets a **photo finish** in slow motion.\n      Pick **Short, Medium or Long** (about 25, 30 or 50 seconds) and fill its 3, 5 or 7 slots with **mods**: carousels, wormholes, trap routes, a mist tube that hides who is ahead, boomerang half-pipes, waterslide bowls, ramps, jumps with boost hoops, boost pads, a narrow helix of glass coils, mud, a whirlpool, the Wormhole Roulette, a fork switch and trapdoors — or let Random mods pick new ones every race. Peg boards scatter the pack on every course, and a hard knock from behind stuns the marble in front.\n      Most races hide a **Joker** on one place: whoever finishes there trades results with a fairly drawn player at the very end. A summary with places, finish times and split checkpoints, a record of your last 30 races, the code of every course, D Dorian music and effects with a volume control, and English, Korean and Japanese round it out. With **Phone link** one phone hosts and up to 15 others watch the same race live on their own screens. Plays on phones, tablets and desktop; installs as an app and works offline.\n    ",
       "controls": "Start: Build a course · Race!: 3-2-1-GO · Tap an animal in the standings: Follow its marble · Tap the course: Back to the auto camera · ×3: Fast forward · New: Fresh course · Reset: Back to setup · Results: Open the summary · Enter: Next result field · Esc: Close the volume panel",
       "tips": "**Short** races are over in about 25 seconds; **Long** courses fit up to 7 mods. Tap a mod again to add another, up to its max, or turn on **Random** to roll new mods every race. Splitting a meal? Pick **Bill**, enter the total and how many pay nothing, and the shares always add up exactly. Playing round a big table? Use **Phone link** so everyone can follow the race on their own phone.",
       "lore": "\n      A marble run on the kitchen table has always been the fairest referee: nobody can push a marble, and nobody can argue with gravity.\n      Here twenty animals squeeze into glass marbles at the top of a neon toy track under the night sky. Somewhere below, a wormhole is humming, the carousel is turning, and one finishing cup might hide the Joker.\n    ",
@@ -3707,8 +3715,8 @@
         "20 Cute Animals Riding Glass Marbles",
         "Six Quick Fills: Winner, Penalty, Rank, Teams, Ratio, Bill",
         "Bill Splits in Dollars, Won or Yen That Always Add Up",
-        "A Fresh Course Every Race, With a 3-Second Flyover",
-        "Short, Medium and Long Tracks With 11 Kinds of Mods",
+        "A Fresh Course Every Race, With a Flyover of Every Mod",
+        "Short, Medium and Long Tracks With 15 Kinds of Mods",
         "Follow Any Marble, ×3 Fast Forward and Photo Finishes",
         "The Joker Swap at the Finish",
         "Summary With Places, Times and Split Checkpoints, Plus a Race Record",
@@ -3770,7 +3778,7 @@
         },
         {
           "q": "What do the mods do?",
-          "a": "Each length has slots for mods: 3 on Short, 5 on Medium and 7 on Long. Carousels, wormholes, trap routes, the mist tube, boomerangs, bowls, ramps, jumps, boost pads, narrow tubes and mud each change how the pack spreads out. Tap a mod to add it, tap it again for another, or turn on Random mods."
+          "a": "Each length has slots for mods: 3 on Short, 5 on Medium and 7 on Long. Carousels, wormholes, trap routes, the mist tube, boomerangs, bowls, ramps, jumps, boost pads, the narrow helix, mud, the whirlpool, the Wormhole Roulette, the fork switch and trapdoors each change how the pack spreads out. Tap a mod to add it, tap it again for another, or turn on Random mods."
         },
         {
           "q": "Can several phones watch the same race?",
@@ -3779,6 +3787,180 @@
         {
           "q": "Does it work on phones?",
           "a": "Yes. It is built for touch, works in portrait and landscape, installs as an app and plays offline."
+        }
+      ]
+    },
+    "44": {
+      "title": "Emotion Act",
+      "description": "A party acting card game for 2–27 players on one phone. Say an everyday line with a secret emotion and see who can tell Wronged from Betrayed.",
+      "fullDescription": "\n      Emotion Act is a **party acting card game** for **2 to 27 players** that needs nothing but one phone. Three piles sit on the table: a Number card from 1 to 6, an Emotion card listing six numbered feelings, and a Line card with an everyday sentence like \"This is really good.\"\n      Each round a reel picks the actor. Everyone else looks away while the actor sees the secret number and the emotion card, then the line appears: **5 seconds to think**, then **15 seconds to act** it out loud with that feeling while the others watch the screen. Everyone guesses the number from 1 to 6, and once per round the group can ask for **+10 sec more acting**.\n      The emotion cards are the trick: each one hides two or three near-twins (Wronged · Betrayed · Hurt, Nervous · Anxious · Urgent), so a good guess reads nuance, not just the mood. **Scoring** pushes the actor to be clear but not obvious: if nobody gets it the actor loses 2, if everyone gets it the actor loses 1 and everyone gains 1, and if only some get it the right guessers gain 2 while the wrong ones lose 1.\n      Everybody acts once in shuffled order, then **3 bonus rounds** with random actors and no penalties shake up the standings before the **curtain call**, with a spotlight, confetti and the Star of the night. Two players get their own rule (right +1, wrong −1), and one player gets endless acting practice.\n      With **Phone link** one phone hosts and the others join with a 4-letter code: each phone picks its player, the actor reads the secret cards on their own phone and everyone enters their own guess. 10 emotion cards with 48 emotions, 30 line cards in each language, a colour for every player, D Dorian sound effects with a volume control and English, Korean and Japanese round it out. Plays on phones, tablets and desktop, installs as an app, works offline and saves after every step.\n    ",
+      "controls": "Start: Open the lobby · Add: Add a player · Actor ready: Show the secret cards / move on · Ready: Start the line · 1–6: Guess the number · +10 sec more acting: Once per round · Reveal answer: Score the round · Phone button: Phone link · Globe: Language · Speaker: Volume",
+      "tips": "Pick a number whose emotion has a twin on the same card? Lean into what makes it different. Acting too obviously costs you a point when everyone gets it, and nobody getting it costs two. Not sure? Ask for **+10 sec more acting** before anyone picks. Playing in a big group? Use **Phone link** so the actor can peek at their own phone and nobody has to look away.",
+      "lore": "\n      Every drama club warms up the same way: one plain sentence, said ten different ways, until the room can hear the difference between sad and heartbroken.\n      Here the curtain is a phone screen, the script is three cards, and the audience gets to judge. Somewhere between Wronged and Betrayed is the Star of the night.\n    ",
+      "features": [
+        "Party Acting Card Game for 2–27 Players on One Phone",
+        "Number, Emotion and Line Card Piles",
+        "10 Emotion Cards With 48 Emotions in Near-Twin Clusters",
+        "30 Everyday Lines in Each Language",
+        "5-Second Think, 15-Second Act and +10 Sec More Acting",
+        "Scoring That Rewards Clear but Not Obvious Acting",
+        "3 Bonus Rounds With No Penalties",
+        "Curtain Call With Spotlight, Confetti and the Star of the Night",
+        "Phone Link: Secret Cards and Guesses on Each Player's Own Phone",
+        "Two-Player Rule and Solo Acting Practice",
+        "D Dorian Sound Effects With a Volume Control",
+        "Saves After Every Step; Installable, Plays Offline",
+        "English, Korean and Japanese"
+      ],
+      "objectives": "There is no high score to chase — the group's standings decide the night. Act the secret emotion so that some players read it but not everyone, guess the others' numbers right, and finish the bonus rounds on top to become the Star of the night.",
+      "controlsTable": [
+        {
+          "key": "Start · Continue",
+          "action": "Open the lobby · resume the saved game"
+        },
+        {
+          "key": "Add",
+          "action": "Add a player in the lobby (Enter works too); tap × to remove one"
+        },
+        {
+          "key": "Actor ready",
+          "action": "Only the actor looks: show the secret number and emotion card, then move on"
+        },
+        {
+          "key": "Ready",
+          "action": "Everyone is looking: show the line and start the 5-second think"
+        },
+        {
+          "key": "1–6",
+          "action": "Pick each guesser's number"
+        },
+        {
+          "key": "+10 sec more acting",
+          "action": "Act again for 10 seconds, once per round"
+        },
+        {
+          "key": "Reveal answer",
+          "action": "Show the answer and the score changes"
+        },
+        {
+          "key": "Phone button",
+          "action": "Phone link: host a room or join one with its code"
+        },
+        {
+          "key": "Globe · Speaker",
+          "action": "Switch language · set the volume or mute"
+        },
+        {
+          "key": "× · Back",
+          "action": "Leave the game (progress is saved)"
+        }
+      ],
+      "faq": [
+        {
+          "q": "What is Emotion Act?",
+          "a": "A party acting card game for one phone: the actor secretly gets a number and an emotion card, says an everyday line with that feeling, and everyone else guesses which of the six emotions it was."
+        },
+        {
+          "q": "How many players can play?",
+          "a": "From 2 to 27. Everyone acts once, then 3 bonus rounds follow. Two players use a simple rule (right +1, wrong −1), and one player gets acting practice with no score."
+        },
+        {
+          "q": "How does scoring work?",
+          "a": "If nobody guesses right the actor loses 2. If everyone does, the actor loses 1 and each guesser gains 1. If only some do, right guessers gain 2 and wrong ones lose 1. Bonus rounds have no penalties."
+        },
+        {
+          "q": "Can everyone use their own phone?",
+          "a": "Yes. Tap the phone button: one phone hosts and shows a 4-letter code, the others join with it and pick their player. The actor sees the secret cards on their own phone and each player enters their own guess. Same Wi-Fi or one phone's hotspot works best."
+        },
+        {
+          "q": "Does it work offline?",
+          "a": "Yes. It installs as an app, plays offline and saves after every step, so you can continue a game from Home."
+        }
+      ]
+    },
+    "45": {
+      "title": "Animal Racing",
+      "description": "A couch kart racer for 1–4 players in split screen or on linked phones. Twenty chibi animals in wind-up toy karts drift, boost and throw bombs across four neon tracks, and the finishing order can settle a prize, a penalty or the bill.",
+      "fullDescription": "\n      Animal Racing is a **couch kart racer** for **1 to 4 players** and the racing sister of Ladder Game. Everyone picks one of **20 chibi animals**, each in its own glossy wind-up toy kart — Rabbit's Carrot Rocket, Penguin's Ice Sled, Panda's Bamboo Buggy, Hamster's Wheel Runner — and CPUs fill the rest of the field (4, 6 or 8 racers). Two to four players **split the screen**, joining with any mix of keyboard, gamepads and touch. Or use **Phone link**: one phone hosts with a four-letter code, up to three others join, and every phone races its own kart on its own full screen.\n      Driving is arcade, not sim. Hold Drift through a corner to charge cyan, amber and pink sparks into a **mini-turbo**, hit the gas right before GO for a **rocket start**, run over glowing rung strips for a boost and collect star coins for extra top speed. Glass \"?\" cards roll one of four items: a Bomb to throw ahead or drop behind, a Bubble shield, a Lucky Dash and the Joker, which swaps places with the racer just ahead. Wormholes fling you forward — or back — and spinning turntables push the pack sideways.\n      Four tracks: the Toy Diorama Speedway in a child's room at night, the watercolour Storybook Meadow with its plank bridge over the river, the Neon Arcade Circuit floating in space and Festival Night under Korean lotus lanterns and fireworks. Race one in Quick Race or all four in a **Grand Prix** for points, in Chill, Normal or Turbo. Turn on **Party Stakes** and the finishing order decides a Winner, a Penalty, a Rank, two Teams or who pays the most of the Bill.\n    ",
+      "controls": "P1 keyboard: W/S gas and brake · A/D steer · Left Shift drift · E or Space item · Q look back · P2 keyboard: arrow keys · Right Shift or / drift · Enter or . item · , look back · Gamepad: stick steer · A or RT gas · B or LT brake · L1/R1 drift · X item · Y look back · Start pause · Touch: auto-gas, stick under the left thumb, Drift / Item / Brake buttons · Esc: pause",
+      "scoreLabel": "Race Wins",
+      "tips": "Drift through every long corner: the sparks go cyan, then amber, then pink, and each colour fires a longer mini-turbo when you let go. Holding the gas from \"3\" spins you out — press it just before GO for a **rocket start** (on touch, hold **Drift** just before GO). Hold **look back** while using a Bomb to drop it behind you. A **Bubble** soaks up one bomb, bump or even a Joker swap. Racing round a table with phones? Use **Phone link** so everyone gets a full screen.",
+      "lore": "\n      Every night, when the lights go out, the toy box opens. Twenty animals wind up their karts, the night-light becomes a stadium lamp and the blanket turns into a mountain pass.\n      Nobody remembers who started the first race. Everyone remembers who had to pay for the snacks after it.\n    ",
+      "features": [
+        "Couch Kart Racer for 1–4 Players in Split Screen",
+        "Phone Link: Up to 4 Phones, Each Racing on Its Own Full Screen",
+        "20 Chibi Animals, Each With Its Own Wind-Up Toy Kart",
+        "4 Tracks: Toy Diorama, Storybook Meadow, Neon Arcade and Festival Night",
+        "Quick Race and a 4-Track Grand Prix With Points",
+        "Drift Mini-Turbos, Rocket Starts, Rung Boosts and Coins",
+        "Items: Bomb, Bubble, Lucky Dash and the Joker Swap",
+        "Wormholes, Turntables, Ramps and Moving Walls",
+        "Party Stakes: Winner, Penalty, Rank, Teams or Bill",
+        "Chill, Normal and Turbo Speed Classes With 4, 6 or 8 Racers",
+        "Keyboard, Gamepads and Touch, With Optional Tilt Steering",
+        "D Dorian Music for Every Track With a Volume Control",
+        "Phone, Tablet and Desktop — Installable, Plays Offline",
+        "English, Korean and Japanese"
+      ],
+      "objectives": "Finish first. Race three laps (or two, or five) with drifts, items and wormholes; in a **Grand Prix** the points from all four tracks crown the champion. Your ArcadeDeck score is the number of races you have **won against the CPUs** on this device — phone-link races don't count.",
+      "controlsTable": [
+        {
+          "key": "W / A / S / D",
+          "action": "P1: gas, steer, brake (one player alone can also use the arrow keys)"
+        },
+        {
+          "key": "Left Shift · E or Space · Q",
+          "action": "P1: drift · use item · look back"
+        },
+        {
+          "key": "Arrow keys · Right Shift or / · Enter or . · ,",
+          "action": "P2: drive · drift · use item · look back"
+        },
+        {
+          "key": "Gamepad",
+          "action": "Stick or D-pad steer, A or RT gas, B or LT brake, L1/R1 drift, X item, Y look back, Start pause (up to 4 pads)"
+        },
+        {
+          "key": "Touch",
+          "action": "The kart accelerates by itself; a stick appears under your left thumb, with Drift, Item and Brake on the right"
+        },
+        {
+          "key": "Look back + item",
+          "action": "Drop a Bomb behind you instead of throwing it"
+        },
+        {
+          "key": "Esc · ⏸",
+          "action": "Pause"
+        }
+      ],
+      "faq": [
+        {
+          "q": "What is Animal Racing?",
+          "a": "A kart racer for 1–4 players: chibi animals in toy karts, drifting, boosts and items on four themed tracks. It is the racing sister of Ladder Game, with the same animals, look and quick-fill stakes."
+        },
+        {
+          "q": "How many people can play, and how?",
+          "a": "Up to four. On one screen, 2–4 players split it (halves for 2, a 2×2 grid for 3–4) with any mix of keyboard (two players), gamepads and touch (two players on a tablet). With Phone link, one phone hosts and up to three others join with a four-letter code, and each phone shows its own kart full screen. CPUs fill the rest of the field."
+        },
+        {
+          "q": "How does Phone link work?",
+          "a": "Tap Phone link on the title screen, then Host on one phone and Join with the code on the others; the same Wi-Fi or one phone's hotspot works best. The host picks the mode, track and settings, and every phone picks its own racer and drives its own kart. If a phone drops out, everyone gets a notice and goes back to the menu."
+        },
+        {
+          "q": "How do I get a mini-turbo?",
+          "a": "Hold Drift while turning. The sparks under the kart change colour the longer you hold — cyan, amber, pink — and letting go gives a short, medium or long boost."
+        },
+        {
+          "q": "What do the items do?",
+          "a": "Bomb: throw it ahead, or hold look back to drop it behind; it rolls, explodes and stuns anyone close. Bubble: a shield that blocks one hit. Lucky Dash: an instant boost. Joker: a spotlight on the racer ahead, then you swap places; in 1st it turns into a Dash."
+        },
+        {
+          "q": "What is Party Stakes?",
+          "a": "An optional toggle. Before the race, pick Winner, Penalty, Rank, Teams or Bill, and the finishing order of the human players settles it: who wins the prize, who takes the penalty or how a total is split in dollars, won or yen, with last place paying the most."
+        },
+        {
+          "q": "Can I play on a phone?",
+          "a": "Yes. Turn the phone sideways: the kart accelerates by itself, a stick appears under your left thumb and Drift, Item and Brake sit on the right. Tilt steering is in Settings. You can install it from the browser and play offline."
         }
       ]
     },

@@ -102,6 +102,16 @@ const About: React.FC = () => {
                 Ko-fi: developer_benjamink
               </a>
             </li>
+            <li>
+              <a
+                href="https://www.moddb.com/company/arcadedeck"
+                target="_blank"
+                rel="me noopener noreferrer"
+                style={{ color: '#00d2ff' }}
+              >
+                ModDB: ArcadeDeck
+              </a>
+            </li>
           </ul>
         </div>
       </main>

@@ -641,6 +641,7 @@ const homeJsonLd = (lang) => [
       'https://www.wikidata.org/wiki/Q141473972',
       'https://arcadedeck.itch.io',
       'https://ko-fi.com/developer_benjamink',
+      'https://www.moddb.com/company/arcadedeck',
     ],
     contactPoint: {
       '@type': 'ContactPoint',
@@ -892,6 +893,7 @@ const routeShells = {
           <li><a href="https://www.wikidata.org/wiki/Q141473972" rel="me noopener" target="_blank">Wikidata: Q141473972</a></li>
           <li><a href="https://arcadedeck.itch.io" rel="me noopener" target="_blank">itch.io: arcadedeck.itch.io</a></li>
           <li><a href="https://ko-fi.com/developer_benjamink" rel="me noopener" target="_blank">Ko-fi: developer_benjamink</a></li>
+          <li><a href="https://www.moddb.com/company/arcadedeck" rel="me noopener" target="_blank">ModDB: ArcadeDeck</a></li>
         </ul>
         <p><a href="/">Browse all games</a> · <a href="/privacy">Privacy Policy</a></p>
       </div>`,

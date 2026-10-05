@@ -1,6 +1,6 @@
-// Offline cache. Install: the page + every asset it links. Then stale-while-revalidate for all GETs.
+// Offline cache. Install: the page + every asset it links. Then stale-while-revalidate for GETs (cache only for immutable files).
 // ponytail: hand-written instead of vite-plugin-pwa; bump CACHE when this file needs to evict old entries.
-const CACHE = 'emotion-v1.14.2';
+const CACHE = 'emotion-v2.14.5';
 
 self.addEventListener('install', e => e.waitUntil((async () => {
   const c = await caches.open(CACHE);
@@ -20,6 +20,8 @@ self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET' || !e.request.url.startsWith('http')) return;
   e.respondWith(caches.open(CACHE).then(async c => {
     const hit = await c.match(e.request, { ignoreSearch: e.request.mode === 'navigate' });
+    // hashed build files and font files never change: no background refetch on every launch
+    if (hit && /\/assets\/|\/\/fonts\.gstatic\.com\//.test(e.request.url)) return hit;
     const net = fetch(e.request).then(r => {
       if (r.ok || r.type === 'opaque') c.put(e.request, r.clone());
       return r;

@@ -26,8 +26,10 @@ svg.i { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-widt
 @media (min-width: 1900px) and (min-height: 1040px) { #menu > .card { zoom: 1.4; } }
 @media (min-width: 2500px) and (min-height: 1380px) { #menu > .card { zoom: 1.8; } }
 #results { background: rgba(5, 8, 22, .55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
-/* device already struggling (bloom off): a full-screen blur over the live 3D view every frame is the next thing to cost frames */
+/* device already struggling (bloom off), or a phone / tablet: a full-screen blur at native resolution over the live 3D view,
+   redrawn every frame, is the next thing to cost frames and heat */
 .lofx #results { background: rgba(5, 8, 22, .8); backdrop-filter: none; -webkit-backdrop-filter: none; }
+@media (pointer: coarse) { #results { background: rgba(5, 8, 22, .8); backdrop-filter: none; -webkit-backdrop-filter: none; } }
 .card { width: min(640px, 100%); background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: clamp(18px, 4vw, 28px); box-shadow: 0 20px 60px rgba(0, 0, 0, .5); text-align: center; }
 /* banner wordmark: glossy gold letters, thick ink outline, extruded base, speed streaks on the left */
 .logo { position: relative; width: fit-content; margin: 0 auto; padding: 0 .1em; font-size: clamp(38px, 9vw, 60px); font-weight: 900; font-style: italic; letter-spacing: -.01em; line-height: 1.1;

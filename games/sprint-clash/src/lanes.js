@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { sfx, holdMusic } from './audio.js';
 import { t } from './i18n.js';
 import { COL, canvasTex, disposeScene, flash, Burst } from './fx.js';
-import { coarse, keyHint, zones, makePane, rankChips, layout, fitFov, renderPanes, bindInput, countdown, addSky, addCity, lights, symTex } from './stage.js';
+import { setText, coarse, keyHint, zones, makePane, rankChips, layout, fitFov, renderPanes, bindInput, countdown, addSky, addCity, lights, symTex } from './stage.js';
 
 // Three-lane rhythm game. Everyone plays the same seeded chart on their own highway; hitting a note plays its
 // D Dorian pitch, so the chart turns into a melody. Judged on the game clock (accumulated dt), never wall time.
@@ -291,7 +291,7 @@ export function createLanes({ renderer, mode, n = 2, me = 0, bots = [], rand, se
         pd.pad.position.y = .02 - pd.glow * .05;
       });
       const v = paneOf(p.i);
-      if (v) v.val.textContent = p.score;
+      if (v) setText(v.val, p.score);
     }
     chips();
     burst.update(dt);

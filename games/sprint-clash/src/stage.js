@@ -29,6 +29,9 @@ export function makePane(pi, label, extra = '') {
   return { pi, el, q, val: q('.ptime'), msg: q('.pmsg'), hint: q('.phint'), x: 0, y: 0, w: 1, h: 1, flip: false };
 }
 
+// HUD text that's refreshed every frame: writing the same string still makes the browser re-lay-out and repaint it
+export const setText = (el, s) => { s = String(s); if (el.textContent !== s) el.textContent = s; };
+
 // score chips for every player, shown in each pane
 export function rankChips(pane, n, label) {
   const box = document.createElement('div');
@@ -41,7 +44,7 @@ export function rankChips(pane, n, label) {
     return s;
   });
   pane.el.appendChild(box);
-  return vals => chips.forEach((s, i) => { s.textContent = `${label(i)} ${vals[i]}`; });
+  return vals => chips.forEach((s, i) => setText(s, `${label(i)} ${vals[i]}`));
 }
 
 // 1 pane: full screen. 2: side by side (landscape) or stacked (portrait). 3–4: top row of 2, bottom row of the rest.

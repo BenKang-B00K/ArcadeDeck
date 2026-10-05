@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { sfx } from './audio.js';
 import { t } from './i18n.js';
 import { COL, hex, disposeScene, flash, buzz, Burst } from './fx.js';
-import { coarse, keyHint, zones, makePane, rankChips, layout, fitFov, renderPanes, bindInput, countdown, makeShowcase, addSky, addCity, lights, makeRunner, animRunner, placeRunner, nameTag } from './stage.js';
+import { setText, coarse, keyHint, zones, makePane, rankChips, layout, fitFov, renderPanes, bindInput, countdown, makeShowcase, addSky, addCity, lights, makeRunner, animRunner, placeRunner, nameTag } from './stage.js';
 
 // Balance walk over a high wire. Left/Right push your lean, Action takes a 1 m step.
 // Lean past TIP and you fall; step while leaning past OVER and you fall. Gusts come from the seed, so all wires get the same wind.
@@ -196,10 +196,10 @@ export function createRope({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
       const w = state === 'play' && warnAt(T);
       for (const v of panes) {
         const p = players[v.pi];
-        v.val.textContent = Math.max(0, Math.ceil(CLOCK - T));
+        setText(v.val, Math.max(0, Math.ceil(CLOCK - T)));
         v.dots.forEach((d, j) => { d.style.transform = `translateX(${Math.min(100, players[j].d / LEN * 100)}cqw)`; });
         v.mark.style.transform = `translateX(${50 + THREE.MathUtils.clamp(p.th / TIP, -1, 1) * 50}cqw)`;
-        v.wind.textContent = w ? (w.f > 0 ? t('wind') + ' ≫' : '≪ ' + t('wind')) : '';
+        setText(v.wind, w ? (w.f > 0 ? t('wind') + ' ≫' : '≪ ' + t('wind')) : '');
         v.wind.classList.toggle('on', !!w);
       }
       chips();

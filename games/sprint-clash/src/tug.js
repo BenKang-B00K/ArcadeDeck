@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { sfx } from './audio.js';
 import { t } from './i18n.js';
 import { COL, canvasTex, disposeScene, flash, buzz, Burst } from './fx.js';
-import { coarse, keyHint, zones, makePane, rankChips, layout, fitFov, renderPanes, bindInput, countdown, makeShowcase, addSky, addCity, lights, makeRunner, placeRunner, nameTag } from './stage.js';
+import { setText, coarse, keyHint, zones, makePane, rankChips, layout, fitFov, renderPanes, bindInput, countdown, makeShowcase, addSky, addCity, lights, makeRunner, placeRunner, nameTag } from './stage.js';
 
 // Tug of War. Alternate Left/Right to pull; Action inside a gold brace window doubles your pull for 1 s.
 // Tangles: the rope snags everyone's hands at once; pulls do nothing until you hit Left+Right together 3× in a row.
@@ -329,7 +329,7 @@ export function createTug({ renderer, mode, n = 2, me = 0, bots = [], rand, send
     burst.update(dt);
     sc.update(dt);
     for (const v of panes) {
-      v.val.textContent = st === 'pull' ? Math.max(0, Math.ceil(CAP - RT)) : '';
+      setText(v.val, st === 'pull' ? Math.max(0, Math.ceil(CAP - RT)) : '');
       const p = players[v.pi], tang = st === 'pull' && p.tangT > 0, boosted = st === 'pull' && p.boostT > 0, open = !tang && braceOn >= 0 && p.bw !== braceOn;
       v.tangle.classList.toggle('on', tang);
       v.pips.forEach((e, j) => e.classList.toggle('on', j < p.tn));

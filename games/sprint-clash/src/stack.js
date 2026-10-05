@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { sfx } from './audio.js';
 import { t } from './i18n.js';
 import { COL, disposeScene, flash, buzz, Burst } from './fx.js';
-import { coarse, keyHint, zones, makePane, rankChips, layout, renderPanes, bindInput, countdown, makeShowcase, addSky, addCity, lights } from './stage.js';
+import { setText, coarse, keyHint, zones, makePane, rankChips, layout, renderPanes, bindInput, countdown, makeShowcase, addSky, addCity, lights } from './stage.js';
 
 // Stacker: a block slides over your tower, drop it and the overhang is cut off. Tallest tower after 60 s wins.
 // Slide speed depends only on the floor number and start sides come from the seed, so every tower faces the same run.
@@ -183,7 +183,7 @@ export function createStack({ renderer, mode, n = 2, me = 0, bots = [], rand, se
     }
     burst.update(dt);
     sc.update(dt);
-    if ((hudT -= dt) <= 0) { hudT = .1; panes.forEach(v => { v.val.textContent = Math.max(0, Math.ceil(CLOCK - T)); }); }
+    if ((hudT -= dt) <= 0) { hudT = .1; panes.forEach(v => setText(v.val, Math.max(0, Math.ceil(CLOCK - T)))); }
   }
 
   function resize() {

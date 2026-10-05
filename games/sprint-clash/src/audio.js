@@ -20,11 +20,17 @@ export function unlock() {
     const d = noiseBuf.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
   }
-  if (ctx.state !== 'running' && !document.hidden) ctx.resume();
+  if (ctx.state !== 'running' || !level()) wake(); // resume, or put a context created while muted to sleep
   startMusic();
 }
 
-const apply = () => out && out.gain.setTargetAtTime(level(), ctx.currentTime, .02);
+// muted or in the background: suspend the context, so the audio thread stops mixing silence (CPU + battery)
+function wake() {
+  if (!ctx) return;
+  if (level() && !document.hidden) ctx.resume();
+  else setTimeout(() => { if (!level() || document.hidden) ctx.suspend(); }, 100); // after the fade-out
+}
+const apply = () => { if (out) { out.gain.setTargetAtTime(level(), ctx.currentTime, .02); wake(); } };
 export const getVolume = () => vol;
 export const isMuted = () => muted;
 export function setVolume(v) { vol = v; if (v > 0) muted = false; put('vol', v); put('muted', muted ? 1 : 0); apply(); }
@@ -92,7 +98,12 @@ export function startMusic() {
 
 export function stopMusic() {
   clearInterval(timer); timer = null;
-  if (mus) { mus.gain.setTargetAtTime(0, ctx.currentTime, .25); mus = null; } // scheduled notes fade on the old bus
+  if (mus) { // scheduled notes fade on the old bus, then it's unplugged: its echo loop would otherwise run forever
+    const m = mus;
+    m.gain.setTargetAtTime(0, ctx.currentTime, .25);
+    setTimeout(() => m.disconnect(), 2000);
+    mus = null;
+  }
 }
 
 export const isMusicOn = () => musicOn;
@@ -103,11 +114,7 @@ export function toggleMusic() {
 }
 
 // pause everything while the tab/app is in the background (battery + no throttled-timer gaps)
-document.addEventListener('visibilitychange', () => {
-  if (!ctx) return;
-  if (document.hidden) ctx.suspend();
-  else ctx.resume();
-});
+document.addEventListener('visibilitychange', wake);
 
 function noise({ dur = .2, gain = .3, f = 1000, q = .8, at = 0 } = {}) {
   const t0 = ctx.currentTime + at, s = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain();

@@ -21,17 +21,18 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 initEnv(renderer);
 const bloom = new Bloom(renderer);
 
-// adaptive resolution: each second, an average under 40 fps drops the pixel ratio a step (never raised mid-game).
+// adaptive resolution: each second, an average under 40 fps (50 on touch) drops the pixel ratio a step (never raised mid-game).
 // A drop that didn't speed frames up is undone and adapting stops for this game: the device is refresh-capped
 // (iOS Low Power Mode runs at 30 fps) or CPU-bound, and a blurry bloomless picture wouldn't buy anything.
-// Every game starts back at full res, so one heavy game doesn't leave the next one blurry and bloomless.
-const PR = Math.min(devicePixelRatio, coarse ? 1.5 : 2);
+// The next game starts one step above where the last one ended: a phone that had to step down is still hot.
+// Touch: 1.25× (not 1.5×) — about 30% fewer pixels shaded every frame, the biggest single cut in phone heat.
+const PR = Math.min(devicePixelRatio, coarse ? 1.25 : 2);
 // pixel budget: a 4K monitor or a 13" tablet would otherwise shade 3–8 M px a frame (plus bloom) on integrated / tablet GPUs
 const BUDGET = coarse ? 2.2e6 : 5e6;
 const prMax = () => Math.max(.75, Math.min(PR, Math.sqrt(BUDGET / (innerWidth * innerHeight))));
 // phones: at most ~60 fps. 90/120 Hz screens would double GPU work, heat and battery drain for nothing.
-const FRAME = coarse ? 1000 / 60 : 0;
-let pr = prMax(), win = 0, frames = 0, prevAvg = 0, locked = false;
+const FRAME = coarse ? 1000 / 60 : 0, SLOW = coarse ? 20 : 25; // avg ms per frame that counts as slow
+let pr = prMax(), win = 0, frames = 0, prevAvg = 0, locked = false, calm = false;
 let game = null, opts = null, role = null, sel = 'random', nSel = 2, wakeLock = null;
 
 function resize() {
@@ -51,24 +52,26 @@ function setPr(p) {
 }
 
 function adapt(avg) {
-  if (avg < 25) prevAvg = 0; // ≥ 40 fps: keep what we have
+  if (avg < SLOW) prevAvg = 0; // fast enough: keep what we have
   else if (prevAvg && avg > prevAvg * .9) { locked = true; setPr(pr + .25); } // last drop didn't help: undo it, stop
   else if (pr > .75) { prevAvg = avg; setPr(Math.max(.75, pr - .25)); }
 }
 
-let last = performance.now(), due = 0;
-renderer.setAnimationLoop(now => {
+// runs only while a game is live (startGame / clearGame): menus and the how-to card wake nothing per frame.
+// Behind the results card the camera only drifts, so 30 fps is plenty there.
+let last = 0, due = 0;
+function loop(now) {
   if (now < due - 3) return; // 3 ms slack so a 60 Hz frame arriving a hair early isn't skipped
-  due = Math.max(due, now - FRAME) + FRAME;
-  const ms = now - last, dt = Math.min(.05, ms / 1000);
+  const step = calm ? 1000 / 30 : FRAME;
+  due = Math.max(due, now - step) + step;
+  const ms = Math.max(0, now - last), dt = Math.min(.05, ms / 1000); // max: the first frame stamp can predate startGame's now()
   last = now;
-  if (!game) return; // menus: no GPU work
   // clamped per frame: one shader-compile hitch at game start mustn't read as a slow second
-  if (!locked) { win += Math.min(ms, 50); if (++frames >= 30 && win > 1000) { adapt(win / frames); win = frames = 0; } }
+  if (!locked && !calm) { win += Math.min(ms, 50); if (++frames >= 30 && win > 1000) { adapt(win / frames); win = frames = 0; } }
   game.update(dt);
   game.render();
   bloom.render();
-});
+}
 
 const newSeed = () => Math.random() * 2 ** 32 >>> 0;
 const label = i => {
@@ -179,13 +182,16 @@ async function startGame(o) {
   inbox = null;
   document.body.classList.add('playing');
   show(null);
-  win = frames = prevAvg = 0; locked = false;
-  pr = PR; setPr(prMax());
+  win = frames = prevAvg = 0; locked = calm = false;
+  setPr(Math.min(prMax(), pr + .25));
+  last = performance.now(); due = 0;
+  renderer.setAnimationLoop(loop);
   navigator.wakeLock?.request('screen').then(l => { wakeLock = l; }, () => {});
 }
 
 function clearGame() {
   inbox = null;
+  renderer.setAnimationLoop(null);
   game?.dispose();
   game = null;
   document.body.classList.remove('playing');
@@ -319,6 +325,7 @@ function results({ order, draw, scores, places, title }) {
   $('#btnRematch').hidden = !!opts.orphan; // host gone: no one left to rematch with
   $('#btnPick').hidden = role !== 'host';
   !solo && online && winner !== opts.me && winner >= 0 ? sfx.lose() : sfx.win();
+  calm = true;
   show('results');
 }
 

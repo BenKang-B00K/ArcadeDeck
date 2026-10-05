@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { sfx } from './audio.js';
 import { t } from './i18n.js';
 import { COL, canvasTex, disposeScene, flash, buzz, Burst } from './fx.js';
-import { coarse, keyHint, zones, makePane, rankChips, layout, fitFov, renderPanes, bindInput, countdown, makeShowcase, addSky, lights, makeRunner, animRunner, placeRunner, nameTag } from './stage.js';
+import { setText, coarse, keyHint, zones, makePane, rankChips, layout, fitFov, renderPanes, bindInput, countdown, makeShowcase, addSky, lights, makeRunner, animRunner, placeRunner, nameTag } from './stage.js';
 
 // Vault Run: push-your-luck (Incan Gold style), 5 vaults. Every device builds the same 5 seeded 30-card
 // decks from `rand` up front, then reveals cards on its own clock — no host authority. Only the hidden
@@ -268,7 +268,7 @@ export function createVault({ renderer, mode, n = 2, me = 0, bots = [], rand, se
     v.brace.classList.add('on', 'vault');
     v.brace.classList.toggle('locked', locked);
     bar.style.transform = `scaleX(${waiting ? 0 : Math.max(0, winT / WINDOW)})`;
-    lab.textContent = locked ? '✓' : waiting ? '' : Math.ceil(winT);
+    setText(lab, locked ? '✓' : waiting ? '' : Math.ceil(winT));
   }
 
   function act(pi, a) {

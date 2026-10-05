@@ -3,7 +3,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { sfx } from './audio.js';
 import { t } from './i18n.js';
 import { COL, hex, canvasTex, disposeScene, flash, buzz, Burst } from './fx.js';
-import { coarse, keyHint, zones, makePane, rankChips, layout, fitFov, renderPanes, bindInput, countdown, makeShowcase, addSky, addCity, lights, nameTag } from './stage.js';
+import { setText, coarse, keyHint, zones, makePane, rankChips, layout, fitFov, renderPanes, bindInput, countdown, makeShowcase, addSky, addCity, lights, nameTag } from './stage.js';
 
 // Grid Claim: light cycles paint every cell they enter. Recent cells (2.5 s) stand as light walls; hitting one
 // stuns you for 1.5 s, nobody is knocked out. Closing a loop of your own cells claims everything inside it.
@@ -176,10 +176,10 @@ export function createGrid({ renderer, mode, n = 2, me = 0, bots = [], rand, sen
     if (sec !== lastSec && sec <= 5 && sec > 0 && ph === 'play') sfx.count();
     lastSec = sec;
     for (const v of panes) {
-      v.val.textContent = sec;
+      setText(v.val, sec);
       v.chips(cnt.map(c => `${Math.round(c / 16)}%`));
       v.segs.forEach((s, i) => { s.style.width = `${cnt[i] / 16}%`; });
-      v.pips.textContent = '⚡'.repeat(players[v.pi].charges);
+      setText(v.pips, '⚡'.repeat(players[v.pi].charges));
     }
   }
 

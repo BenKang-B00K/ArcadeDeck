@@ -1,12 +1,13 @@
 <!doctype html>
 <html lang="en">
-<head>
+<head><script src="/perf.js"></script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>15s Click Challenge</title>
   <link rel="stylesheet" href="style.css">
   <link rel="preload" as="image" href="body_bg.webp" media="(min-width: 901px)">
   <link rel="preload" as="image" href="body_bg-1280.webp" media="(max-width: 900px)">
+<script>/* offline play: games.arcadedeck.net/sw.js (shared, one cache per game) */if('serviceWorker'in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js',{scope:'./'}).then(()=>navigator.serviceWorker.ready).then(r=>r.active&&r.active.postMessage([location.origin+location.pathname,...performance.getEntriesByType('resource').map(e=>e.name)])).catch(()=>{})})</script>
 </head>
 <body>
   <div class="container">

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head><script src="/perf.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <meta name="theme-color" content="#1a1a2e">
@@ -6426,11 +6426,15 @@ function haptic(ms) { if (isTouchDevice && !document.body.classList.contains('sp
 // The guest eases tanks/bullets/stars between snapshots (netLerpStep).
 // Signaling (offer/answer swap) goes through a Firestore `coop/{code}` doc via
 // REST, once; after that no server is involved.
-// ponytail: STUN only, no TURN — same Wi-Fi / hotspot works, strict-NAT cellular
-// pairs fail. Add a TURN server to NET_ICE if cross-network play matters.
+// ICE: STUN plus Cloudflare TURN credentials from the games site's /turn Pages
+// Function (functions/turn.js in the ArcadeDeck repo), so phones with no direct
+// path (cellular, client-isolated Wi-Fi) relay instead of failing. No /turn → STUN only.
 const NET_FS = 'https://firestore.googleapis.com/v1/projects/ultragames-website/databases/(default)/documents/coop';
 const NET_KEY = 'AIzaSyDFwB-Yt7ARcMZoPD6-1vI892PXyLEvdcU';   // public web key (same as arcadedeck.net)
-const NET_ICE = [{ urls: 'stun:stun.l.google.com:19302' }];
+const NET_ICE = [{ urls: ['stun:stun.cloudflare.com:3478', 'stun:stun.l.google.com:19302'] }];
+// POST, not GET: the service worker caches GETs and would replay expired credentials
+const netIce = () => fetch('/turn', { method: 'POST', signal: AbortSignal.timeout?.(4000) }).then(r => (r.ok ? r.json() : [])).catch(() => [])
+  .then(t => NET_ICE.concat(Array.isArray(t) ? t : []));
 const NET_CODE_CHARS = 'ACDEFHJKMNPRTWXY';   // no look-alikes (0/O, 1/I, B/8…)
 const NET_SEND_MS = 30;      // host tick: every 2nd frame at 60 Hz, every 4th at 120 Hz
 const NET_EVENT_DELAY = 34;  // guest replays effects one tick late so they line up with the eased positions
@@ -6645,9 +6649,9 @@ function netGathered(pc) {
 }
 const netSleep = (ms) => new Promise(r => setTimeout(r, ms));
 
-function netNewPc() {
+function netNewPc(iceServers) {
   netClose();
-  const pc = netPc = new RTCPeerConnection({ iceServers: NET_ICE });
+  const pc = netPc = new RTCPeerConnection({ iceServers });
   netSeq = 0; netRecvSeq = 0;
   pc.addEventListener('connectionstatechange', () => {
     if (pc !== netPc) return;
@@ -6671,10 +6675,13 @@ function netWire(dc, role) {
 
 async function netHost() {
   if (netJoinBusy || netPc) return;
-  const pc = netNewPc();
+  netJoinBusy = true;   // a second tap while the TURN credentials load must not open two rooms
+  setLinkStatus('linkMaking');
+  const ice = await netIce();
+  netJoinBusy = false;
+  const pc = netNewPc(ice);
   netWire(pc.createDataChannel('ev'), 'host');
   netWire(pc.createDataChannel('st', { ordered: false, maxRetransmits: 0 }), 'host');
-  setLinkStatus('linkMaking');
   try {
     await pc.setLocalDescription(await pc.createOffer());
     await netGathered(pc);
@@ -6705,10 +6712,10 @@ async function netJoin(code) {
   if (code.length !== 4) return setLinkStatus('linkBadCode');
   netJoinBusy = true;
   setLinkStatus('linkJoining');
-  let f;
-  try { f = await netFsGet(code); } catch (e) { return setLinkStatus('linkServer'); } finally { netJoinBusy = false; }
+  let f, ice;
+  try { [f, ice] = await Promise.all([netFsGet(code), netIce()]); } catch (e) { return setLinkStatus('linkServer'); } finally { netJoinBusy = false; }
   if (!f || !f.offer || f.answer) return setLinkStatus('linkBadCode');
-  const pc = netNewPc();
+  const pc = netNewPc(ice);
   pc.ondatachannel = (e) => netWire(e.channel, 'guest');
   try {
     await pc.setRemoteDescription(JSON.parse(f.offer.stringValue));

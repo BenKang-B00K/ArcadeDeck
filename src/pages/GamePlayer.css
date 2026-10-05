@@ -396,6 +396,9 @@
   pointer-events: none;
 }
 
+/* Game running: no site animation ticking the compositor next to it (phone heat). */
+body:has(.game-iframe) .logo span::before { animation: none; }
+
 .game-iframe {
   width: 100%;
   height: 100%;

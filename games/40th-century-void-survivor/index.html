@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+  <head><script src="/perf.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -52,6 +52,7 @@
     <link rel="modulepreload" crossorigin href="./assets/js/vendor-CeFe20HN.js">
     <link rel="modulepreload" crossorigin href="./assets/js/vendor-pixi-giY9gfwS.js">
     <link rel="modulepreload" crossorigin href="./assets/js/vendor-matter-v3VZ5dfQ.js">
+    <script>/* offline play: games.arcadedeck.net/sw.js (shared, one cache per game) */if('serviceWorker'in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js',{scope:'./'}).then(()=>navigator.serviceWorker.ready).then(r=>r.active&&r.active.postMessage([location.origin+location.pathname,...performance.getEntriesByType('resource').map(e=>e.name)])).catch(()=>{})})</script>
   </head>
   <body>
     <div id="rotate-notice">

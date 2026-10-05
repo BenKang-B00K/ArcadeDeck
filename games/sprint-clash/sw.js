@@ -1,5 +1,5 @@
 // Offline app shell. Bump CACHE on every release so old files are dropped.
-const CACHE = 'sprintclash-v3.4.2';
+const CACHE = 'sprintclash-v3.4.3';
 const SHELL = [
   './', 'index.html', 'style.css', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png',
   'src/main.js', 'src/i18n.js', 'src/audio.js', 'src/net.js', 'src/fx.js', 'src/dash.js', 'src/timing.js',
@@ -14,8 +14,9 @@ self.addEventListener('install', e => {
   self.skipWaiting();
 });
 
+// Every game shares this origin's Cache Storage: purge only our own old caches, never another game's.
 self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))));
+  e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE && k.startsWith('sprintclash-')).map(k => caches.delete(k)))));
   self.clients.claim();
 });
 

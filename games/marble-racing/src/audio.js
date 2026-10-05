@@ -459,10 +459,15 @@ export function shuffle() {
   }
 }
 
-// wormhole: filtered-noise swoosh + shimmering Dorian run, rising when lifted, falling when dropped
+// wormhole: filtered-noise swoosh + shimmering Dorian run, rising when lifted, falling when dropped; at most 6 a second
+// (a whole field drops into a roulette, a crowd drains out of a bowl)
+let warpT = [];
 export function warp(up, pan) {
   if (!live()) return;
   const t = ctx.currentTime, dur = 0.7;
+  warpT = warpT.filter(x => t - x < 1);
+  if (warpT.length >= 6) return;
+  warpT.push(t);
   const src = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain();
   src.buffer = noise;
   bp.type = 'bandpass'; bp.Q.value = 6;
@@ -580,6 +585,7 @@ export function roll(on) {
     setTimeout(() => s.stop(), 900);
     rollSrc = null;
   }
+  if (!on && waterSrc) { const s = waterSrc; waterG.gain.setTargetAtTime(0, t, 0.2); setTimeout(() => s.stop(), 1200); waterSrc = null; }
 }
 export function rollLevel(level, speed, muffled) {
   if (!rollSrc || !live()) return;
@@ -703,4 +709,126 @@ export function photo() {
   musicLp.frequency.setValueAtTime(musicLp.frequency.value, t);
   musicLp.frequency.exponentialRampToValueAtTime(500, t + 0.25);
   musicLp.frequency.exponentialRampToValueAtTime(20000, t + 1.6);
+}
+
+// ---------- the late shufflers ----------
+// a whirlpool's water: a looped low-passed noise, louder and brighter the more marbles its current holds (0..1); 20
+// updates a second at most, like the rolling bed, and it fades with it
+let waterSrc = null, waterLp = null, waterG = null, waterAt = 0;
+export function water(level) {
+  if (!live() || !level && !waterSrc) return;
+  const t = ctx.currentTime;
+  if (t - waterAt < 0.05) return;
+  waterAt = t;
+  if (!waterSrc) {
+    waterSrc = ctx.createBufferSource(); waterSrc.buffer = noise; waterSrc.loop = true;
+    waterLp = ctx.createBiquadFilter(); waterLp.type = 'lowpass'; waterLp.Q.value = 2.5; waterLp.frequency.value = 300;
+    waterG = ctx.createGain(); waterG.gain.value = 0;
+    waterSrc.connect(waterLp).connect(waterG).connect(out('sfx', 0, 0.4));
+    waterSrc.start();
+  }
+  waterG.gain.setTargetAtTime(0.09 * level, t, 0.25);
+  waterLp.frequency.setTargetAtTime(280 + 1500 * level, t, 0.3);
+}
+
+// a whirlpool lets a marble go: one bell, each release a Dorian step higher, so the last one out sounds highest
+export function letGo(k, pan) {
+  if (!live()) return;
+  strike('sfx', mtof(deg(k % 12, 62)), ctx.currentTime, { partials: BELL, decay: 1.6, peak: 0.08, pan, send: 0.55 });
+}
+
+// a roulette's JACKPOT: a rising bell run (degrees 0 2 4 7) over a low bell; LOST: a slow falling run with a long tail
+export function jackpot(pan) {
+  if (!live()) return;
+  const t = ctx.currentTime;
+  [0, 2, 4, 7].forEach((d, k) => strike('sfx', mtof(deg(d, 74)), t + k * 0.06, { partials: BELL, decay: 1.4, peak: 0.1, pan, send: 0.5 }));
+  strike('sfx', mtof(deg(0, 50)), t, { partials: BELL, decay: 1.8, peak: 0.1, pan, send: 0.4 });
+}
+export function lost(pan) {
+  if (!live()) return;
+  const t = ctx.currentTime;
+  [7, 4, 2, 0].forEach((d, k) => strike('sfx', mtof(deg(d, 62)), t + k * 0.16, { partials: BELL, decay: k === 3 ? 2.8 : 1.2, peak: 0.07, pan, send: 0.7 }));
+}
+
+// a roulette sector passing its pointer: a soft click
+export function wheel(pan) {
+  if (!live()) return;
+  const t = ctx.currentTime, src = ctx.createBufferSource(), hp = ctx.createBiquadFilter(), g = ctx.createGain();
+  src.buffer = noise; hp.type = 'highpass'; hp.frequency.value = 4200;
+  g.gain.setValueAtTime(0.07, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.025);
+  src.connect(hp).connect(g).connect(out('sfx', pan, 0.1));
+  src.start(t, Math.random() * 0.5); src.stop(t + 0.03);
+}
+
+// the flyover stopping on a mod's neon sign: a short bright bell, a Dorian step higher for each sign along the course
+// (the preview plays a rising line, from the octave back down once it runs past it), its fifth a beat later, softer
+export function sign(k, pan) {
+  if (!live()) return;
+  const t = ctx.currentTime, d = k % 8;
+  strike('sfx', mtof(deg(d, 74)), t, { partials: BELL, decay: 0.7, peak: 0.07, pan, send: 0.45 });
+  strike('sfx', mtof(deg(d + 4, 74)), t + 0.07, { partials: BELL, decay: 0.45, peak: 0.03, pan, send: 0.5 });
+}
+
+// a fork's signal changing: a very quiet marimba blip, degree 0 / 2 / 4 for EXPRESS / MAIN / LONG
+export function signal(way, pan) {
+  if (!live()) return;
+  strike('sfx', mtof(deg([0, 2, 4][way] ?? 2, 74)), ctx.currentTime, { partials: MARIMBA, decay: 0.2, peak: 0.04, pan, send: 0.15 });
+}
+
+// up a fork's EXPRESS tube: a glassy whoosh (a narrow band sweeping high) and a high bell
+export function express(pan) {
+  if (!live()) return;
+  const t = ctx.currentTime;
+  whoosh(t, 1400, 6500, 0.45, 0.1, pan, 5, 0.5);
+  strike('sfx', mtof(deg(7, 86)), t + 0.12, { partials: BELL, decay: 1, peak: 0.05, pan, send: 0.6 });
+}
+
+// into a narrow helix's coil: the air takes it, a breathy whoosh rising (at most one every 0.25 s, a crowd pours in);
+// for the marble the camera cares about, also a slow Dorian climb, one long soft bell per half-turn of its ride
+let coilAt = -9;
+export function spiral(pan, big) {
+  if (!live()) return;
+  const t = ctx.currentTime;
+  if (!big && t - coilAt < 0.25) return;
+  coilAt = t;
+  whoosh(t, 500, 3200, 0.5, big ? 0.1 : 0.06, pan, 2, 0.4);
+  if (big) [0, 2, 4].forEach((d, k) => strike('sfx', mtof(deg(d, 62)), t + 0.2 + k * 0.85, { partials: BELL, decay: 1.8, peak: 0.06, pan, send: 0.6 }));
+}
+// down a narrow helix's middle tube: one bright marimba note over a quiet octave
+export function shortcut(pan) {
+  if (!live()) return;
+  const t = ctx.currentTime;
+  strike('sfx', mtof(deg(4, 74)), t, { partials: MARIMBA, decay: 0.5, peak: 0.12, pan, send: 0.3 });
+  strike('sfx', mtof(deg(4, 62)), t, { partials: MARIMBA, decay: 0.4, peak: 0.05, pan, send: 0.2 });
+}
+
+// down a trapdoor: a low gulp (a bass D bent down), then a falling whistle echoing in the cave (a short feedback delay)
+export function gulp(pan) {
+  if (!live()) return;
+  const t = ctx.currentTime, o = out('sfx', pan, 0.2), g = ctx.createGain(), osc = ctx.createOscillator();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(mtof(deg(0, 50)), t); osc.frequency.exponentialRampToValueAtTime(mtof(deg(0, 50)) * 0.6, t + 0.2);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.18, t + 0.015); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.24);
+  osc.connect(g).connect(o); osc.start(t); osc.stop(t + 0.26);
+  const cave = ctx.createDelay(0.5), fb = ctx.createGain(), w = ctx.createGain(), ws = ctx.createOscillator(), wg = ctx.createGain(), s = t + 0.12;
+  cave.delayTime.value = 0.11; fb.gain.value = 0.42; w.gain.value = 0.6;
+  cave.connect(fb).connect(cave); cave.connect(w).connect(out('sfx', pan, 0.5));
+  ws.type = 'sine';
+  ws.frequency.setValueAtTime(mtof(deg(11, 74)), s); ws.frequency.exponentialRampToValueAtTime(mtof(deg(4, 62)), s + 0.5);
+  wg.gain.setValueAtTime(0, s); wg.gain.linearRampToValueAtTime(0.06, s + 0.03); wg.gain.exponentialRampToValueAtTime(0.0001, s + 0.55);
+  ws.connect(wg); wg.connect(o); wg.connect(cave);
+  ws.start(s); ws.stop(s + 0.6);
+  setTimeout(() => { cave.disconnect(); fb.disconnect(); w.disconnect(); }, 2500);
+}
+
+// a trapdoor lid lifting: a short creak (a band of noise rising) and a wooden clack; at most 6 a second
+let lidT = [];
+export function lid(pan) {
+  if (!live()) return;
+  const t = ctx.currentTime;
+  lidT = lidT.filter(x => t - x < 1);
+  if (lidT.length >= 6) return;
+  lidT.push(t);
+  whoosh(t, 380, 950, 0.13, 0.05, pan, 9, 0.15);
+  strike('sfx', mtof(deg(2, 62)), t + 0.12, { partials: MARIMBA, decay: 0.14, peak: 0.09, pan, send: 0.2 });
 }

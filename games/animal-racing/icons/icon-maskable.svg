@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff5d8f"/><stop offset="1" stop-color="#6a3dff"/></linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".36" r=".62"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffa3c2"/><stop offset=".5" stop-color="#ff5d8f"/><stop offset="1" stop-color="#c92e68"/></linearGradient>
+    <linearGradient id="chrome" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset=".6" stop-color="#cfd3ea"/><stop offset="1" stop-color="#8a8fb0"/></linearGradient>
+    <linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff6c4"/><stop offset=".35" stop-color="#ffd54a"/><stop offset=".8" stop-color="#e09a12"/><stop offset="1" stop-color="#a8650a"/></linearGradient>
+    <filter id="ol" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB"><feMorphology in="SourceAlpha" operator="dilate" radius=".7" result="d"/><feGaussianBlur in="SourceAlpha" stdDeviation="1.1" result="b"/><feOffset in="b" dx=".9" dy="1.2" result="bl"/><feComposite in="SourceAlpha" in2="bl" operator="out" result="tl"/><feOffset in="b" dx="-.9" dy="-1.2" result="bd"/><feComposite in="SourceAlpha" in2="bd" operator="out" result="br"/><feFlood flood-color="#000"/><feComposite in2="d" operator="in" result="o"/><feFlood flood-color="#fff" flood-opacity=".5"/><feComposite in2="tl" operator="in" result="hi"/><feFlood flood-color="#1a0f3a" flood-opacity=".32"/><feComposite in2="br" operator="in" result="sh"/><feMerge><feMergeNode in="o"/><feMergeNode in="SourceGraphic"/><feMergeNode in="sh"/><feMergeNode in="hi"/></feMerge></filter>
+  </defs>
+  <rect width="512" height="512" rx="0" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="0" fill="url(#glow)"/>
+  <g transform="translate(51.2 51.2) scale(.8)">
+    <!-- ladder road: neon rails + rungs running to the horizon -->
+    <g stroke-linecap="round" fill="none">
+      <path d="M58 512 216 300M454 512 296 300" stroke="#fff" stroke-opacity=".22" stroke-width="22"/>
+      <path d="M58 512 216 300M454 512 296 300" stroke="#fff" stroke-width="7"/>
+      <path d="M104 450h304M148 392h216M184 343h144" stroke="#fff" stroke-opacity=".45" stroke-width="8"/>
+    </g>
+    <ellipse cx="256" cy="448" rx="168" ry="24" fill="#1a0f3a" opacity=".45"/>
+    <!-- wind-up key peeking out behind -->
+    <g stroke="#1a0f3a" stroke-width="10" stroke-linejoin="round"><path d="M356 300 398 238" fill="none" stroke="#a8650a" stroke-width="16"/><path d="M398 238c-30-16-38-48-16-58s40 18 16 58zm0 0c34-6 60 14 50 36s-46 8-50-36z" fill="url(#gg)"/></g>
+    <!-- rabbit (#a0) sitting in the kart -->
+    <g transform="translate(112 44) scale(9)"><g filter="url(#ol)"><path fill="#f6f2fc" d="M10 3.5c-2.4 0-3.2 3.4-2.7 8 .2 2 .9 3.7 1.7 4.7L13.2 15c0-4.3-.7-11.5-3.2-11.5zM22 3.5c2.4 0 3.2 3.4 2.7 8-.2 2-.9 3.7-1.7 4.7L18.8 15c0-4.3.7-11.5 3.2-11.5z"/><path fill="#ffb3c8" d="M10 6.3c-1 0-1.4 2.2-1 5.3l1.3 2.9 1.3-.4c0-3.7-.6-7.8-1.6-7.8zM22 6.3c1 0 1.4 2.2 1 5.3l-1.3 2.9-1.3-.4c0-3.7.6-7.8 1.6-7.8z"/><ellipse cx="16" cy="20.5" rx="10.5" ry="8.8" fill="#f6f2fc"/><g class="e"><g fill="#2b2140"><circle cx="12.2" cy="19.6" r="2.1"/><circle cx="19.8" cy="19.6" r="2.1"/></g><g fill="#fff"><circle cx="12.85" cy="18.95" r="0.85"/><circle cx="11.48" cy="20.35" r="0.4"/><circle cx="20.45" cy="18.95" r="0.85"/><circle cx="19.09" cy="20.35" r="0.4"/></g></g><path fill="#ff7aa0" d="M14.7 22.4h2.6L16 23.9z"/><path d="M16 23.9v1M14.3 25.4q1.7 1 1.7-.5q0 1.5 1.7.5" fill="none" stroke="#2b2140" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/><g fill="#ff9db4" opacity=".9"><ellipse cx="9.6" cy="23" rx="2.2" ry="1.35"/><ellipse cx="22.4" cy="23" rx="2.2" ry="1.35"/></g></g></g>
+    <!-- toy kart, front view -->
+    <g stroke="#1a0f3a" stroke-width="11" stroke-linejoin="round">
+      <rect x="78" y="368" width="70" height="92" rx="24" fill="#2b2140"/>
+      <rect x="364" y="368" width="70" height="92" rx="24" fill="#2b2140"/>
+      <path d="M116 330q4-36 48-38h184q44 2 48 38l10 68q2 34-34 36H140q-36-2-34-36z" fill="url(#body)"/>
+      <path d="M232 293h48v140h-48z" fill="#fff" stroke="none" opacity=".92"/>
+      <rect x="150" y="402" width="212" height="36" rx="18" fill="url(#chrome)"/>
+    </g>
+    <path d="M134 318q10-16 40-18" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" opacity=".7"/>
+    <g fill="#ff5d8f"><rect x="96" y="388" width="14" height="52" rx="7"/><rect x="402" y="388" width="14" height="52" rx="7"/></g>
+  </g>
+</svg>

@@ -26,12 +26,15 @@ const I18N = {
       trap: ['Trap Route', 'Roll over the orange pad before a turn and get flicked onto a lane that goes the long way round'], mist: ['Mist Tube', 'Frosted glass hides who is ahead, and inside every marble meets its own gust: a tailwind pushes it on, a headwind holds it back. The order can change before they come out'],
       boomerang: ['Boomerang', 'A boost pad, a steep drop and a giant half-pipe: marbles swing up and down its walls, once or many times, then roll out past a few pegs'],
       basin: ['Bowl', 'Every course has one free; this adds another. A booster flings marbles into a waterslide bowl: they swirl round under its curled rim and drop down the drain in the middle'],
+      whirlpool: ['Whirlpool', 'A giant bowl: the current spins every marble round the wall'], roulette: ['Wormhole Roulette', 'A funnel nobody can miss. The spinning wheel picks the exit'],
+      fork: ['Fork Switch', 'A signal before a turn flips between Express, Main and Long'],
       ramp: ['Ramp', 'A steep drop on a straight: marbles pick up speed'],
       jump: ['Jump', 'A kicker throws marbles over a gap onto a wide landing. Fly through the glowing hoop for a boost'], boost: ['Boost', 'Arrow pads fling marbles forward'],
-      narrow: ['Narrow Tube', 'A glass tube only 1.5 marbles wide: the crowd squeezes in and goes through single file. No overtaking inside'],
+      narrow: ['Narrow Helix', 'Three glass tubes: the middle one runs straight, the two side ones coil round it the long way'], trapdoor: ['Trapdoor', 'Trap lids open, falls to side track'],
       mud: ['Mud', 'A brown patch on a straight slows any marble that rolls through. Some slip past'] },
     joker: 'Joker swap!', stay: 'STAYING!', lucky: 'LUCKY SWAP!', unlucky: 'UNLUCKY SWAP!', wormhole: 'Wormhole!', trap: 'TRAP!', carousel: 'Carousel!', boomerang: 'BOOMERANG!', bowl: 'BOWL!', out: 'OUT!', ouch: 'OUCH!', attack: 'ATTACK!',
     boost: 'BOOST!', mud: 'MUD!', jump: 'JUMP!', hoop: 'HOOP!', hidden: 'HIDDEN!', tailwind: 'TAILWIND!', headwind: 'HEADWIND!', nudge: 'NUDGE!', photo: 'PHOTO FINISH!',
+    whirl: 'WHIRLPOOL!', letgo: 'LET GO!', jackpot: 'JACKPOT!', next: 'NEXT!', lost: 'LOST!', express: 'EXPRESS!', main: 'MAIN!', longway: 'LONG WAY!', gulp: 'GULP!', back: 'BACK!', shortcut: 'SHORTCUT!', spiral: 'SPIRAL!', roulette: 'ROULETTE',
     finished: '{a} finished {p} — {r}', time: '{n}s', seed: 'Track #{n}',
     splits: 'Splits', vsLast: '▲▼ vs last race', goal: 'Finish', runs: 'Race record', noRuns: 'No races yet', nP: '{n} players',
     link: 'Phone link', watching: 'Watching',
@@ -54,12 +57,15 @@ const I18N = {
       trap: ['함정 길', '커브 앞 주황 발판을 밟으면 바깥 레인으로 튕겨 나가 먼 길을 돌아감'], mist: ['안개 터널', '젖빛 유리 속에서는 누가 앞서는지 안 보임. 안에서는 구슬마다 다른 바람을 만남: 순풍은 밀어 주고 역풍은 붙잡음. 나올 때 순위가 바뀔 수도'],
       boomerang: ['부메랑', '부스트 발판과 가파른 낙하 끝 거대한 하프파이프: 구슬이 양쪽 벽을 한 번 또는 여러 번 오르내린 뒤 핀 사이로 빠져나감'],
       basin: ['보울', '모든 코스에 기본 1개, 누르면 하나 더. 부스터가 워터슬라이드 보울로 구슬을 날려 보냄: 말려 들어간 가장자리 아래를 빙글빙글 돌다가 가운데 배수구로 쏙'],
+      whirlpool: ['소용돌이', '거대한 보울: 물살이 모든 구슬을 벽을 따라 빙글빙글 돌림'], roulette: ['웜홀 룰렛', '아무도 피할 수 없는 깔때기. 도는 룰렛이 출구를 정함'],
+      fork: ['갈림길 신호', '커브 앞 신호가 급행·본선·우회를 번갈아 켬'],
       ramp: ['경사로', '직선 구간의 가파른 내리막: 구슬이 빨라짐'],
       jump: ['점프', '발판이 구슬을 틈 너머 넓은 착지대로 날려 보냄. 빛나는 링을 통과하면 부스트'], boost: ['부스트', '화살표 발판이 구슬을 앞으로 밀어 줌'],
-      narrow: ['좁은 터널', '구슬 1.5개 폭의 유리관: 몰려든 구슬이 비집고 들어가 한 줄로 지나감. 안에서는 추월 불가'],
+      narrow: ['좁은 나선', '유리관 세 개: 가운데 관은 곧게, 양옆 두 관은 가운데를 휘감아 먼 길로'], trapdoor: ['함정문', '함정 뚜껑이 열리면 옆길로 떨어짐'],
       mud: ['진흙', '직선 구간의 갈색 진흙: 지나가는 구슬이 느려짐. 비켜 가기도 함'] },
     joker: '조커 교환!', stay: '그대로!', lucky: 'Lucky!', unlucky: 'Unlucky!', wormhole: '웜홀!', trap: '함정!', carousel: '회전목마!', boomerang: '부메랑!', bowl: '보울!', out: '탈출!', ouch: '아야!', attack: '공격!',
     boost: '부스트!', mud: '진흙!', jump: '점프!', hoop: '링 통과!', hidden: '숨었다!', tailwind: '순풍!', headwind: '역풍!', nudge: '영차!', photo: '사진 판정!',
+    whirl: '소용돌이!', letgo: '풀려났다!', jackpot: '잭팟!', next: '넥스트!', lost: '로스트!', express: '급행!', main: '본선!', longway: '우회!', gulp: '꿀꺽!', back: '복귀!', shortcut: '지름길!', spiral: '빙글빙글!', roulette: '룰렛',
     finished: '{a} {p} 골인 — {r}', time: '{n}초', seed: '코스 #{n}',
     splits: '구간 순위', vsLast: '▲▼ 지난 판 대비', goal: '골', runs: '경주 기록', noRuns: '아직 기록이 없어요', nP: '{n}명',
     link: '폰 연결', watching: '관전 중',
@@ -82,12 +88,15 @@ const I18N = {
       trap: ['トラップルート', 'カーブ手前のオレンジの床を踏むと外側のレーンへ弾かれ、遠回りする'], mist: ['霧のトンネル', 'すりガラスの中は順位が見えない。中ではビー玉ごとに違う風が吹く：追い風は押し、向かい風は引き止める。出てくるときには順位が変わっているかも'],
       boomerang: ['ブーメラン', 'ブースト床と急な坂の先に巨大なハーフパイプ：ビー玉が両側の壁を一度か何度も往復し、ピンの間を抜けていく'],
       basin: ['ボウル', '全コースに標準で1つ、押すともう1つ。ブースターでウォータースライダーのボウルへ：内側に巻いたふちの下をぐるぐる回り、真ん中の排水口へストン'],
+      whirlpool: ['うず潮', '巨大なボウル：水流がビー玉を壁沿いにぐるぐる回す'], roulette: ['ワームホール・ルーレット', '誰も避けられない漏斗。回るルーレットが出口を決める'],
+      fork: ['分岐シグナル', 'カーブ手前の信号が急行・本線・遠回りを切り替える'],
       ramp: ['坂', '直線の急な下り坂：ビー玉が加速する'],
       jump: ['ジャンプ', 'ジャンプ台が隙間の向こうの広い着地台へ飛ばす。光るリングをくぐるとブースト'], boost: ['ブースト', '矢印の床がビー玉を前へ押し出す'],
-      narrow: ['細いトンネル', 'ビー玉1.5個分の幅しかないガラス管：押し合いながら入り、一列で通り抜ける。中では追い越し不可'],
+      narrow: ['細いらせん', 'ガラス管が3本：真ん中はまっすぐ、両側の2本は真ん中に巻きついて遠回り'], trapdoor: ['落とし戸', 'ふたが開くと脇道へ落ちる'],
       mud: ['泥', '直線の茶色い泥：通るビー玉が遅くなる。よけることも'] },
     joker: 'ジョーカー交換！', stay: 'そのまま！', lucky: 'Lucky!', unlucky: 'Unlucky!', wormhole: 'ワームホール！', trap: 'トラップ！', carousel: '回転木馬！', boomerang: 'ブーメラン！', bowl: 'ボウル！', out: 'アウト！', ouch: 'いてっ！', attack: 'アタック！',
     boost: 'ブースト！', mud: 'どろんこ！', jump: 'ジャンプ！', hoop: 'リング！', hidden: 'かくれた！', tailwind: '追い風！', headwind: '向かい風！', nudge: 'えいっ！', photo: '写真判定！',
+    whirl: 'うず潮！', letgo: 'はなれた！', jackpot: 'ジャックポット！', next: 'ネクスト！', lost: 'ロスト！', express: '急行！', main: '本線！', longway: '遠回り！', gulp: 'パクッ！', back: '復帰！', shortcut: '近道！', spiral: 'ぐるぐる！', roulette: 'ルーレット',
     finished: '{a}が{p}でゴール — {r}', time: '{n}秒', seed: 'コース #{n}',
     splits: '区間順位', vsLast: '▲▼ 前回比', goal: 'ゴール', runs: 'レース記録', noRuns: 'まだ記録がありません', nP: '{n}人',
     link: 'スマホ接続', watching: '観戦中',
@@ -338,7 +347,7 @@ document.querySelectorAll('[data-track]').forEach(b => b.onclick = () => { S.tra
 // ---------- track modifications: tiny icon toggles under the length ----------
 // a tap adds one more of that kind (each takes a slot) up to its max on this length; one more tap, or a tap with every
 // slot taken, clears it. Touch screens can't hover: the last pick's tooltip shows under the row instead
-const KCLS = { carousel: 'c', wormhole: 'w', trap: 't', mist: 'f', boomerang: 'b', basin: 'a', ramp: 'd', jump: 'd', boost: 'd', narrow: 'd', mud: 'u' }; // tooltip colours
+const KCLS = { carousel: 'c', wormhole: 'w', trap: 't', mist: 'f', boomerang: 'b', basin: 'a', whirlpool: 'a', roulette: 'w', fork: 't', ramp: 'd', jump: 'd', boost: 'd', narrow: 'd', trapdoor: 't', mud: 'u' }; // tooltip colours
 const markup = raw => raw.replace(/\[(\w):([^\]]*)\]/g, '<b class="k-$1">$2</b>'); // our own strings, so the swap is safe
 const modMax = k => MODS[k][Object.keys(TRACKS).indexOf(S.track)];
 const modName = k => (I18N[S.lang].modNames ?? I18N.en.modNames)[k];
@@ -460,10 +469,10 @@ function markCard(k, z) {
 // (0 = 1st), time: finish seconds or null (ranked by progress at the time cap), joker: took part in the trade }.
 // seed: the track code, shown as "Track #K3F9Q" under the list.
 let lastSum = null; // re-rendered on a language switch
+const jk = r => r.joker ? '<svg class="ic jk"><use href="#i-joker"/></svg>' : '';
 function openSummary(rows, seed) {
   lastSum = [rows, seed];
   const order = [...rows].sort((a, b) => slotRank(a.k) - slotRank(b.k) || a.place - b.place);
-  const jk = r => r.joker ? '<svg class="ic jk"><use href="#i-joker"/></svg>' : '';
   const tm = r => `<small class="tm">${t('rank', r.place + 1)}${r.time != null ? ' · ' + t('time', r.time.toFixed(2)) : ''}</small>`;
   $('#seedNote').textContent = seed ? t('seed', seed) : '';
   renderSplits(rows);
@@ -486,15 +495,15 @@ function openSummary(rows, seed) {
     return li;
   }));
 }
-// split table: every animal in finishing order, its place at each checkpoint and at the finish, each against the
-// animal's last race (▲ = higher up than last time, = the same)
+// split table: every animal in final order, its place at each checkpoint and the place it ends on (after a joker
+// trade, marked), each against the animal's last race (▲ = higher up than last time, = the same)
 function renderSplits(rows) {
   const cell = (p, was) => {
     const d = was - p, cmp = p < 0 || !(was >= 0) ? '' : `<em class="${d > 0 ? 'up' : d < 0 ? 'dn' : 'eq'}">${d ? (d > 0 ? '▲' : '▼') + Math.abs(d) : '='}</em>`;
     return `<td>${p >= 0 ? p + 1 : '–'}${cmp}</td>`;
   };
   $('#spTable').innerHTML = `<tr><th></th>${rows[0].cp.map((_, k) => `<th scope="col">${k + 1}</th>`).join('')}<th scope="col">${t('goal')}</th></tr>`
-    + [...rows].sort((a, b) => a.place - b.place).map(r => `<tr style="--c:${COLORS[r.z]}"><th scope="row">${nameZ(r.z)}</th>${[...r.cp, r.place].map((p, k) => cell(p, r.was?.[k])).join('')}</tr>`).join('');
+    + [...rows].sort((a, b) => a.k - b.k).map(r => `<tr style="--c:${COLORS[r.z]}"><th scope="row">${nameZ(r.z)}${jk(r)}</th>${[...r.cp, r.k].map((p, k) => cell(p, r.was?.[k])).join('')}</tr>`).join('');
 }
 function showSummary(rows) {
   $('#sumList').replaceChildren(...rows);
@@ -555,6 +564,7 @@ async function ensureRace() {
   rc = await m.createRace($('#cv3d'), {
     mini: $('#mini'),
     label: k => t(k),
+    modName: k => modName(k)[0], // a mod sign's word
     isBig: k => isBig(k),
     onEvent,
     onTick: ribbon,
@@ -563,7 +573,7 @@ async function ensureRace() {
       if (raceBtn.style.left !== l || raceBtn.style.top !== tp) Object.assign(raceBtn.style, { left: l, top: tp });
     },
     onLand: land,
-    onDone: () => settle(() => { logRun(); later(900, G.jokers.length ? joker : finish); }),
+    onDone: () => settle(() => later(900, G.jokers.length ? joker : finish)),
   });
   return rc;
 }
@@ -620,7 +630,7 @@ async function newRound(r) {
   G.def = makeTrack(G.seed, S.n, S.track, r.picks);
   G.cps = splitsOf(G.def); G.cp = G.cps.map(() => Array(S.n).fill(-1)); G.cpN = G.cps.map(() => 0); G.prev = runs[0];
   G.jokers = [...r.jokers]; G.jkE = [...r.jkE];
-  Object.assign(G, { gateOf: r.gateOf, host: null, at: [], landed: 0, follow: -1, photo: false, swapped: null, pegN: Array(S.n).fill(0), pegT: [], rank: range(S.n) });
+  Object.assign(G, { gateOf: r.gateOf, host: null, at: [], landed: 0, follow: -1, photo: false, swapped: null, pegN: Array(S.n).fill(0), pegT: [], rank: range(S.n), letN: 0 });
   setLanes(S.n);
   renderCards(G.jokers);
   const warm = rc.load(G.def, players()); // its shaders compile in the background
@@ -632,16 +642,15 @@ async function newRound(r) {
   later(Math.max(0, HYPE - (performance.now() - t0)), () => { hype(false); peek(); });
 }
 
-// PEEK: 3 s flyover from the start ring to the rack, with the countdown card
-const PEEK = 3;
+// PEEK: flyover from the start ring to the rack, slowing over each showcase mod and holding on each mod's neon sign
+// (3-14 s, the same on every phone: it comes from the course), with the countdown card
 function peek() {
   phase('peek');
-  const card = $('#peek'), bar = card.querySelector('i');
-  card.style.setProperty('--t', PEEK + 's');
+  const dur = rc.peek(), card = $('#peek'), bar = card.querySelector('i');
+  card.style.setProperty('--t', dur + 's');
   card.classList.remove('run'); void bar.offsetWidth; card.classList.add('run');
-  for (let k = 0; k <= PEEK; k++) later(k * 1000, () => { $('#peekN').textContent = PEEK - k; });
-  rc.peek(PEEK);
-  later(PEEK * 1000, seat);
+  for (let k = 0; k <= dur; k++) later(k * 1000, () => { $('#peekN').textContent = dur - k; });
+  later(dur * 1000, seat);
 }
 
 // READY: no choosing gates (the start wheel spins to a random angle anyway, so no gate is better): everyone is seated
@@ -762,6 +771,9 @@ function ribbon(order, sim) {
   for (let i = 0; i < S.n; i++) if (sim.place[i] < 0) { sum += sim.speed[i]; live++; }
   const eye = G.follow >= 0 ? G.follow : order[0];
   sfx.rollLevel(live ? Math.min(1, sum / 40 + 0.15) : 0, live ? sum / live / 14 : 0, !!sim.inMist[eye]);
+  let held = 0; // marbles a whirlpool's current holds: its water swells with them
+  for (let i = 0; i < S.n; i++) if (sim.hold[i]) held++;
+  sfx.water(held ? Math.min(1, 0.35 + held / 8) : 0);
   edges(sim);
   splits(sim);
   const now = performance.now();
@@ -806,7 +818,7 @@ function ribbon(order, sim) {
 // places k and k+1 decide different things (Winner / Penalty edge, 1st vs 2nd, the biggest share)
 const boundary = k => S.preset === 'rank' ? k === 0 : S.preset ? isBig(k) !== isBig(k + 1) : k === 0;
 
-// sim events -> sounds and camera cuts (the visuals are race.js's own). Peg notes: at most 10 a second, each
+// sim events -> sounds (the visuals and the camera are race.js's own). Peg notes: at most 10 a second, each
 // marble climbing its own Dorian ladder; the followed or leading marble always gets through
 function onEvent(e) {
   const pan = panOf(e.pos);
@@ -820,19 +832,33 @@ function onEvent(e) {
       break;
     }
     case 'bump': sfx.clack(pan, e.data.v); break;
-    case 'stun': sfx.bump(pan); rc.cut(e.i, 900); break;
-    case 'boost': sfx.boost(pan); break;
+    case 'stun': sfx.bump(pan); break;
+    case 'boost': if (e.data?.lid) sfx.lid(pan); sfx.boost(pan); break; // a lifting trapdoor lid pushed it on, or a pad
     case 'mudIn': sfx.mud(pan); break;
     case 'jump': sfx.jump(pan); break;
     case 'hoop': sfx.boost(pan); break; // through a jump's hoop
     case 'boomUp': sfx.boomerang(pan, e.data.n); break; // up one of a boomerang's walls (n: which swing)
-    case 'warpIn': sfx.warp(false, pan); buzz(14); rc.cut(e.i); break; // falling away into hole A
-    case 'warpOut': sfx.jump(pan); break; // popping out of hole B
-    case 'trapIn': sfx.trap(pan); buzz(20); rc.cut(e.i); break; // flicked onto the trap lane, the long way round
+    case 'warpIn': // falling away into hole A; into a roulette everyone does: the buzz only for the leader's or the followed
+      sfx.warp(false, pan);
+      if (!e.data.exit || e.i === G.follow || e.i === G.rank[0]) buzz(14);
+      break;
+    case 'warpOut': e.data.exit === 'jackpot' ? sfx.jackpot(pan) : e.data.exit === 'lost' ? sfx.lost(pan) : sfx.jump(pan); break; // popping out of hole B (a roulette's exit)
+    case 'trapIn': // flicked onto the trap lane, the long way round; down a trapdoor
+      e.data.door ? sfx.gulp(pan) : sfx.trap(pan);
+      buzz(20);
+      break;
     case 'trapOut': sfx.jump(pan); break; // flicked back onto the course
-    case 'rideIn': sfx.spin(e.i, pan); rc.cut(e.i); break;
-    case 'basinIn': if (!e.data.again) { sfx.spin(e.i, pan); rc.cut(e.i); } break; // dropping into a bowl (not back down off a bounce)
+    case 'fork': if (e.data.way === 2) { sfx.trap(pan); buzz(20); } else if (!e.data.way) sfx.express(pan); break; // LONG / EXPRESS (MAIN: no sound)
+    case 'signal': sfx.signal(e.data.way, pan); break; // a fork's signal changing (race.js, near the action)
+    case 'wheel': sfx.wheel(pan); break; // a roulette sector passing its pointer
+    case 'sign': sfx.sign(e.data.k, pan); break; // the flyover stopping on a mod's neon sign
+    case 'lid': sfx.lid(pan); break; // a trapdoor lid lifting near the camera
+    case 'letGo': sfx.letGo(G.letN++, pan); break; // a whirlpool lets one go: each a Dorian step higher
+    case 'rideIn': sfx.spin(e.i, pan); break;
+    case 'basinIn': if (!e.data.again) sfx.spin(e.i, pan); break; // dropping into a bowl (not back down off a bounce)
     case 'basinOut': if (e.data.drain) sfx.warp(false, pan); break; // down its drain
+    case 'coilIn': sfx.spiral(pan, e.i === G.follow || e.i === G.rank[0]); break; // the air takes it the long way round
+    case 'tubeIn': if (e.i === G.follow || e.i === G.rank[0]) sfx.shortcut(pan); break; // down a narrow helix's middle tube
     case 'mistIn': case 'mistOut': if (e.i === G.follow || e.i === G.rank[0]) sfx.mist(e.type === 'mistIn', pan); break;
   }
 }
@@ -905,6 +931,7 @@ function joker() {
     if (!stay) later(HOLD * 1000, () => rc.swap(j, e, FLY));
     later((HOLD + FLY) * 1000, () => {
       G.at[j] = b; G.at[e] = a; G.swapped = [...G.swapped || [], ...new Set([a, b])];
+      for (const x of pick) { const c = chips.children[G.at[x]]; c.style.order = x; c.querySelector('.pl').textContent = x + 1; } // the standings follow the trade
       $('#race').classList.remove('dim');
       range(S.n).forEach(c => rc.spot(c, false));
       for (const x of pick) {
@@ -935,6 +962,7 @@ function finish() {
   $('#jkToast').hidden = true;
   phase('done');
   sfx.fanfare();
+  logRun();
   showResults();
 }
 function showResults() {
@@ -945,7 +973,7 @@ function showResults() {
 function logRun() {
   const sim = G.host || rc.sim, w = sim.place.indexOf(0);
   runs.unshift({ no: (runs[0]?.no || 0) + 1, d: Date.now(), tr: S.track, n: S.n, w: sim.time[w] < sim.cap ? +sim.time[w].toFixed(2) : null,
-    p: Object.fromEntries(range(S.n).map(i => [ZOO[i], [...G.cp.map(r => r[i]), sim.place[i]]])) });
+    p: Object.fromEntries(range(S.n).map(i => [ZOO[i], [...G.cp.map(r => r[i]), G.at.indexOf(i)]])) }); // the place it ends on, after any joker trade
   runs.length = Math.min(runs.length, RUNS);
   try { localStorage.setItem(RKEY, JSON.stringify(runs)); } catch { /* private mode */ }
 }
@@ -1014,7 +1042,8 @@ function glyphCanvas(k) {
 }
 
 // ---------- race record ----------
-// one row per finished race, newest first: number, length, players, when, winning time, then the animals in finishing order
+// one row per finished race, newest first: number, length, players, when, winning time, then the animals in final order
+// (after any joker trade)
 const runsDlg = $('#runs');
 function renderRuns() {
   const when = d => new Date(d).toLocaleString(S.lang, { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });

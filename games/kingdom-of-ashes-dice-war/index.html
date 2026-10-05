@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head><script src="/perf.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Kingdom of Ashes - Dice War</title>
@@ -341,6 +341,7 @@
   <link rel="modulepreload" crossorigin href="./assets/RenderTargetSystem-Dv4I5kBU.js">
   <link rel="modulepreload" crossorigin href="./assets/BufferResource-B6oGLkY-.js">
   <link rel="modulepreload" crossorigin href="./assets/CanvasPool-uvdH0Iih.js">
+<script>/* offline play: games.arcadedeck.net/sw.js (shared, one cache per game) */if('serviceWorker'in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js',{scope:'./'}).then(()=>navigator.serviceWorker.ready).then(r=>r.active&&r.active.postMessage([location.origin+location.pathname,...performance.getEntriesByType('resource').map(e=>e.name)])).catch(()=>{})})</script>
 </head>
 <body>
     <!-- Loading screen (hidden after assets load) -->

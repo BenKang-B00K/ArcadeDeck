@@ -14,7 +14,7 @@ const I18N = {
     pWin: 'Winner', pRank: 'Rank', pRatio: 'Ratio', pTeam: 'Teams', pPen: 'Penalty', pBill: 'Bill', winners: 'Winners', teams: 'Teams', pens: 'Penalties', total: 'Total', frees: 'Pays 0', minPay: 'Min. {n} each', firsts: '1st places', zeros: '0% slots', any: 'Random', pClear: 'Clear', start: 'Start',
     player: animal(['Rabbit', 'Penguin', 'Tiger', 'Cat', 'Panda', 'Fox', 'Dog', 'Lion', 'Bear', 'Frog', 'Koala', 'Pig', 'Mouse', 'Monkey', 'Owl', 'Chick', 'Cow', 'Sheep', 'Raccoon', 'Hamster']), win: 'WIN!', lose: 'Pass', pen: 'Penalty', safe: 'Safe', team: 'Team {n}', rank: n => n + (['st', 'nd', 'rd'][n - 1] || 'th'),
     rand: 'Random', peek: 'Find the best spot!', pick: 'Pick your spot',
-    all: 'Result', again: 'New', reset: 'Reset', summary: 'Results', close: 'Close', replay: 'Replay',
+    all: 'Result', again: 'New', reset: 'Reset', summary: 'Results', close: 'Close', replay: 'Replay', ff: 'Fast forward',
     music: 'Music', bgm: 'BGM', fx: 'EFFECT', sfx: 'Sound effects', volume: 'Volume', lang: 'Language', more: 'Add player', less: 'Remove player',
     height: 'Height', hShort: 'Short', hMedium: 'Medium', hLong: 'Long',
     // tooltip markup: [m:..] rung multiplier, [s:..] straight, [d:..] diagonal, [w:..] wormhole, [c:..] carousel, [j:..] joker, [o:..] odds row (coloured in CSS)
@@ -29,7 +29,7 @@ const I18N = {
     pWin: '당첨', pRank: '순위', pRatio: '비율', pTeam: '팀', pPen: '벌칙', pBill: '정산', winners: '당첨 수', teams: '팀 수', pens: '벌칙 수', total: '총액', frees: '면제 수', minPay: '1인 최소 {n}', firsts: '1등 수', zeros: '0% 수', any: '랜덤', pClear: '비우기', start: '시작',
     player: animal(['토끼', '펭귄', '호랑이', '고양이', '판다', '여우', '강아지', '사자', '곰', '개구리', '코알라', '돼지', '생쥐', '원숭이', '부엉이', '병아리', '젖소', '양', '라쿤', '햄스터']), win: '당첨!', lose: '꽝', pen: '벌칙', safe: '통과', team: '{n}팀', rank: '{n}등',
     rand: '랜덤', peek: '최고의 자리를 찾으세요!', pick: '자리를 고르세요',
-    all: '결과', again: '새 판', reset: '리셋', summary: '결과', close: '닫기', replay: '다시',
+    all: '결과', again: '새 판', reset: '리셋', summary: '결과', close: '닫기', replay: '다시', ff: '빨리 감기',
     music: '음악', bgm: '배경음', fx: '효과음', sfx: '효과음', volume: '볼륨', lang: '언어', more: '참가자 추가', less: '참가자 삭제',
     height: '길이', hShort: '짧게', hMedium: '보통', hLong: '길게',
     tipShort: '짧게: 가로줄 적음 [m:0.8×]\n[s:직선] + [j:조커]', tipMedium: '보통: 가로줄 보통 [m:1.2×]\n[s:직선] + [d:대각선] + [w:웜홀] / [c:회전목마]',
@@ -43,7 +43,7 @@ const I18N = {
     pWin: '当たり', pRank: '順位', pRatio: '割合', pTeam: 'チーム', pPen: '罰ゲーム', pBill: '割り勘', winners: '当たり数', teams: 'チーム数', pens: '罰ゲーム数', total: '合計', frees: '免除数', minPay: '1人最低{n}', firsts: '1位数', zeros: '0%数', any: 'ランダム', pClear: 'クリア', start: 'スタート',
     player: animal(['ウサギ', 'ペンギン', 'トラ', 'ネコ', 'パンダ', 'キツネ', 'イヌ', 'ライオン', 'クマ', 'カエル', 'コアラ', 'ブタ', 'ネズミ', 'サル', 'フクロウ', 'ヒヨコ', 'ウシ', 'ヒツジ', 'アライグマ', 'ハムスター']), win: '当たり！', lose: 'はずれ', pen: '罰ゲーム', safe: 'セーフ', team: 'チーム{n}', rank: '{n}位',
     rand: 'ランダム', peek: 'ベストな場所を探そう！', pick: '場所を選んでね',
-    all: '結果', again: '新規', reset: 'リセット', summary: '結果', close: '閉じる', replay: 'もう一度',
+    all: '結果', again: '新規', reset: 'リセット', summary: '結果', close: '閉じる', replay: 'もう一度', ff: '早送り',
     music: '音楽', bgm: 'BGM', fx: '効果音', sfx: '効果音', volume: '音量', lang: '言語', more: 'プレイヤーを追加', less: 'プレイヤーを削除',
     height: '長さ', hShort: '短い', hMedium: '普通', hLong: '長い',
     tipShort: '短い: 横線少なめ [m:0.8×]\n[s:直線]＋[j:ジョーカー]', tipMedium: '普通: 横線ふつう [m:1.2×]\n[s:直線]＋[d:斜め]＋[w:ワームホール]／[c:回転木馬]',
@@ -932,11 +932,12 @@ function camStep(dt) {
 
 // loop runs only while something moves; idle board costs zero frames
 function frame(now) {
-  const dt = clamp((now - G.last) / 1000, 0, 0.05); // first frame after kick(): rAF's timestamp can predate G.last
+  const real = clamp((now - G.last) / 1000, 0, 0.05); // first frame after kick(): rAF's timestamp can predate G.last
   G.last = now;
   // smoothed frame time; held under ~26fps (not 30: iOS Low Power Mode locks to 30) -> fewer canvas pixels, 2x -> 1.5x -> 1x
-  G.ft = (G.ft ?? 1 / 60) + (dt - (G.ft ?? 1 / 60)) * 0.05;
+  G.ft = (G.ft ?? 1 / 60) + (real - (G.ft ?? 1 / 60)) * 0.05;
   if (G.ft > 1 / 26 && dprCap > 1 && DPR > 1) { dprCap = Math.max(1, DPR - 0.5); G.ft = 1 / 60; resize(); }
+  const dt = real * (G.ff ? 3 : 1); // x3 fast forward: runs, bumps, sparks and camera all on game time
   const camBusy = camStep(dt);
   paint();
   // zoomed (solo follow): same on-screen speed as unzoomed, so the trip lasts longer. Raise toward cam.zy to speed it back up
@@ -1323,6 +1324,7 @@ function update() {
   const all = G.done.size === G.n;
   const picking = !G.left && G.pick < G.n;
   $('#allBtn').hidden = G.shown || G.pick < G.n;
+  $('#ffBtn').hidden = G.pick < G.n || all;
   $('#randBtn').hidden = !picking || G.pick > 0; // only before P1 picks
   // a result can be climbed once spots are set and someone still unplayed lands there
   [...cards.children].forEach((c, e) => c.disabled = G.pick < G.n ||
@@ -1372,6 +1374,7 @@ function newGame({ ladder, joker, jkE }) {
   G.pick = 0;
   G.left = PEEK;
   G.ext = 0;
+  setFF(false);
   const bar = $('#peek');
   bar.style.setProperty('--t', PEEK + 's');
   bar.classList.remove('run');
@@ -1418,6 +1421,9 @@ function reveal() {
   update();
 }
 $('#allBtn').onclick = () => act({ t: 'all' });
+// x3 fast forward (frame() scales its game time); off again on every new board
+function setFF(on) { G.ff = on; $('#ffBtn').setAttribute('aria-pressed', on); }
+$('#ffBtn').onclick = () => act({ t: 'ff', on: !G.ff });
 
 // ---------- summary ----------
 function openSummary() {
@@ -1531,6 +1537,7 @@ const ACT = {
     let first = true;
     for (let i = 0; i < G.n; i++) if (!G.done.has(i) && !G.active.some(a => a.i === i)) { go(i, false, false, !first); first = false; }
   },
+  ff: ({ on }) => { setFF(on); sfx.ui(); },
 };
 const hosting = () => Coop.role === 'host' && Coop.live;
 function act(m) {
@@ -1551,7 +1558,7 @@ NET.sync = () => {
   queueMicrotask(() => { NET.queued = false; Coop.send({ t: 'S', ...shared() }); });
 };
 const snapshot = () => ({ t: 'sync', ...shared(), on: !play.hidden, g: play.hidden || !G.ladder ? null : {
-  ladder: G.ladder, joker: G.joker, jkE: G.jkE, order: G.order, pick: G.pick, left: G.left, at: G.at, shown: G.shown,
+  ladder: G.ladder, joker: G.joker, jkE: G.jkE, order: G.order, pick: G.pick, left: G.left, at: G.at, shown: G.shown, ff: G.ff,
   swapped: G.swapped, done: [...G.done], lit: [...G.lit], holeLit: [...G.holeLit], ringLit: [...G.ringLit],
   ends: G.traces.map(tr => tr.end), active: G.active.map(a => [a.i, a.up]),
 } });
@@ -1569,6 +1576,7 @@ function syncTo({ on, g }) {
   Object.assign(G, { order: g.order, pick: g.pick, at: g.at, shown: g.shown, swapped: g.swapped,
     done: new Set(g.done), lit: new Set(g.lit), holeLit: new Set(g.holeLit), ringLit: new Set(g.ringLit) });
   g.ends.forEach((e, i) => G.traces[i].end = e);
+  setFF(g.ff);
   renderLanes(); drawStatic(); drawTrail();
   if (!G.raf) paint();
   update();
@@ -1588,7 +1596,7 @@ function watch(on) {
     renderEntries();
   }
   document.body.classList.toggle('watching', on);
-  document.querySelectorAll('#setup .panel, #startBtn, #chips, #cards, #randBtn, #editBtn, #newBtn, #allBtn, #replayBtn').forEach(e => e.inert = on);
+  document.querySelectorAll('#setup .panel, #startBtn, #chips, #cards, #randBtn, #editBtn, #newBtn, #allBtn, #ffBtn, #replayBtn').forEach(e => e.inert = on);
 }
 const linkOpts = {
   game: 'ladder', watch: true, max: 15, lang: () => S.lang,

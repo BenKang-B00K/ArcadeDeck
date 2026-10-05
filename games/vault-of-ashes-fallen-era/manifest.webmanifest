@@ -2,12 +2,22 @@
   "name": "Vault of Ashes: Fallen Era",
   "short_name": "Vault of Ashes",
   "description": "Dark fantasy auto-battler roguelite. Drag, rotate, merge. Survive the Fallen Era.",
-  "start_url": "/",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
-  "orientation": "any",
   "icons": [
-    { "src": "./favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ]
 }

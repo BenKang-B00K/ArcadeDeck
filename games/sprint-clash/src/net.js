@@ -17,14 +17,20 @@ const load = () => loading ??= new Promise((res, rej) => {
   s.onerror = () => { loading = null; s.remove(); rej(); };
   document.head.appendChild(s);
 });
+// ICE: STUN plus Cloudflare TURN credentials from the games site's /turn Pages Function (functions/turn.js in the
+// ArcadeDeck repo); PeerJS's own default TURN no longer resolves. POST: the service worker caches GETs.
+const STUN = [{ urls: ['stun:stun.cloudflare.com:3478', 'stun:stun.l.google.com:19302'] }];
+const ice = () => fetch('/turn', { method: 'POST', signal: AbortSignal.timeout?.(4000) }).then(r => (r.ok ? r.json() : [])).catch(() => [])
+  .then(t => ({ config: { iceServers: STUN.concat(Array.isArray(t) ? t : []) } }));
 
 const valid = m => m && typeof m === 'object';
 
 export async function host(onCode, onPeers, onErr, cap = MAX_GUESTS) { // cap: room size minus the host
-  try { await load(); } catch { return onErr('load'); }
+  let cfg;
+  try { [, cfg] = await Promise.all([load(), ice()]); } catch { return onErr('load'); }
   close();
   const code = Array.from({ length: 4 }, () => ABC[Math.random() * ABC.length | 0]).join('');
-  const p = peer = new window.Peer(PREFIX + code);
+  const p = peer = new window.Peer(PREFIX + code, cfg);
   p.on('open', () => onCode(code));
   p.on('connection', c => {
     if (locked || guests.length >= cap) { c.on('open', () => c.close()); return; }
@@ -53,9 +59,10 @@ export async function host(onCode, onPeers, onErr, cap = MAX_GUESTS) { // cap: r
 }
 
 export async function join(code, onOpen, onErr) {
-  try { await load(); } catch { return onErr('load'); }
+  let cfg;
+  try { [, cfg] = await Promise.all([load(), ice()]); } catch { return onErr('load'); }
   close();
-  const p = peer = new window.Peer();
+  const p = peer = new window.Peer(cfg);
   const fail = type => { if (peer === p && !conn?.open) onErr(type); };
   p.on('open', () => {
     const c = conn = p.connect(PREFIX + code, { reliable: true });

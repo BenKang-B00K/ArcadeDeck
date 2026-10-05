@@ -5,7 +5,7 @@
 // a wide peg board heading toward the viewer (+z). The course then spirals down round a central tower like a stadium:
 // a front run along x, a 180° turn round the tower's end, a back run the other way, another turn, and so on. Every
 // turn turns the same way (h = +1 right, -1 left, seeded), so the laps stack straight down. At the bottom the finish
-// bends out toward the viewer. Gimmicks replace plain sides (pegs, ramp, jump, boost, narrow tube) and turns (carousel, mist tube).
+// bends out toward the viewer. Gimmicks replace plain sides (pegs, ramp, jump, boost, narrow helix) and turns (carousel, mist tube).
 //
 // The course is swept from frames sampled along its floor centre line. Each frame has a position, tangent t, right r
 // and up u (banked), arc length s and a cross-section: a rounded rectangle hw each side of the centre, H tall (the
@@ -17,11 +17,13 @@ export const MR = 0.46; // marble radius: a touch smaller than the unit the trac
 // tier -> stadium sides (at least: picks that don't fit add two), joker chance, modification slots
 export const TRACKS = { short: { sides: 3, joker: 0.6, slots: 3 }, medium: { sides: 5, joker: 0.6, slots: 5 }, long: { sides: 7, joker: 0.6, slots: 7 } };
 // modifications the player picks under the track length: the most of each kind per length [S, M, L]. Every pick takes
-// a slot (3 carousels on Long take 3 of its 7). Turns: carousel, wormhole, trap, mist, boomerang, basin; sides: ramp, jump,
-// boost, narrow; mud: one patch on a plain straight. Pegs aren't picked: every course seeds 2-4 side peg boards onto its free
-// sides (see build). Every course has one bowl (basin) for free, like the joker: no slot, picks add more (the max here
-// counts only those). ponytail: one mist tube at most (the sim and the view follow a single one)
-export const MODS = { carousel: [1, 2, 3], wormhole: [1, 2, 3], trap: [1, 2, 3], mist: [1, 1, 1], boomerang: [1, 2, 3], basin: [0, 1, 1], ramp: [1, 2, 3], jump: [1, 2, 2], boost: [1, 2, 3], narrow: [1, 2, 3], mud: [2, 3, 4] };
+// a slot (3 carousels on Long take 3 of its 7). Turns: carousel, wormhole, trap, mist, boomerang, basin, whirlpool,
+// roulette, fork; sides: ramp, jump, boost, narrow, trapdoor; mud: one patch on a plain straight. Pegs aren't picked: every
+// course seeds 2-4 side peg boards onto its free sides (see build). Every course has one bowl (basin) for free, like the
+// joker: no slot, picks add more (the max here counts only those). The key order is the buttons' order and the order
+// fitMods keeps picks in. ponytail: one mist tube at most (the sim and the view follow a single one)
+export const MODS = { carousel: [1, 2, 3], wormhole: [1, 2, 3], trap: [1, 2, 3], mist: [1, 1, 1], boomerang: [1, 2, 3], basin: [0, 1, 1],
+  whirlpool: [1, 1, 1], roulette: [1, 1, 2], fork: [1, 1, 2], ramp: [1, 2, 3], jump: [1, 2, 2], boost: [1, 2, 3], narrow: [1, 2, 3], trapdoor: [1, 1, 2], mud: [2, 3, 4] };
 export const DEFAULT_MODS = { short: { carousel: 1, trap: 1, mud: 1 }, medium: { boost: 1, wormhole: 1, trap: 1, mud: 1 },
   long: { wormhole: 1, carousel: 2, mist: 1, trap: 1, mud: 1 } };
 const TIER = { short: 0, medium: 1, long: 2 };
@@ -69,6 +71,26 @@ const HOLE_R = [1.2, 1.45]; // hole radius in R: a marble has to roll right over
 const TRAP_HW = 2 * R, TRAP_LEAD = 3; // trap lane half-width; how far its wide turn starts past the tower's end
 const TRAP_R = [1, 1.2], TRAP_SLOPE = 7.5; // trap pad radius in R (a little smaller than a wormhole's); lane slope, degrees
 const MUD_LEN = [2.2, 3.2], MUD_W = [0.4, 0.65]; // patch length; its share of the channel's width
+// the late shufflers (whirlpool, roulette, fork, trapdoor) are timed in seconds; V_REF turns a time into a length: a
+// marble's median speed through the late turns (measured with node test.mjs shuffle)
+export const V_REF = 11;
+// whirlpool: a bowl 1.35x as wide (drain radius in marble radii: a plain bowl's; narrower, marbles rattled round its
+// rim for seconds); each marble's current holds it high round the wall for its own hold (s, from the sim's RNG), pushing
+// it toward vCur round the drain (u/s², u/s) and out against the wall; once let go its swirl is damped (1/s) and it's
+// drawn in toward the drain (u/s²), so the big dish empties about as quickly as a plain bowl
+const WHIRL = { grow: 1.35, drain: 2, hold: [2, 5], spin: 9, vCur: 12, out: 2.5, drag: 1.5, pull: 6 };
+// wormhole roulette: s a JACKPOT gains on NEXT (its exit sits JACK_S * V_REF further on), the wheel's turn rate (rad/s),
+// its sectors (JACKPOT | NEXT | LOST, shares of a turn), a LOST marble's drift (s, against NEXT's WARP_TIME)
+const JACK_S = 1, ROULETTE = { omega: 2.4, sectors: [0.25, 0.5, 0.25], lost: 3 };
+// fork switch: s EXPRESS gains on MAIN; the signal's cycle (s) and its shares (EXPRESS | MAIN | LONG)
+const FORK = { exp: 1, period: 0.9, split: [0.3, 0.4, 0.3] };
+// trapdoor: pairs of lids zigzagging down the course, one on each half, each lid its own (seeded) clock: len along the
+// course, sep between a pair's two lids, gap of open floor between pairs; the cycle (s): warning blink, lift, open
+// (eats), shut; the side track starts drop under the floor and is sized so an eaten marble loses about s seconds (two
+// 0.45 s hops in and out, sim.js HOP_T, then the roll round)
+const DOOR = { pairs: 3, len: 1.2, sep: 0.3, gap: 1.2, run: 2, period: 4, warn: 0.8, lift: 0.3, open: 0.6, mid: 0.12, edge: 0.3, drop: 1.5, s: 1.5, hops: 0.9 };
+const doorAt = k => k * (DOOR.len + DOOR.sep) + (k >> 1) * DOOR.gap; // where lid k starts, past the first one's start
+const DOOR_FIELD = doorAt(2 * DOOR.pairs - 1) + DOOR.len; // from the first lid's start to the last one's end
 const DS = 0.35; // frame spacing on curves and transitions
 const CLEAR = 2 * R; // clearance between the boxes of modules that aren't neighbours
 const THICK = 0.3; // track shell thickness (boxes only)
@@ -251,10 +273,11 @@ function build(seed, n, tier, retry, picks, grow, planOnly) {
   let D = Math.max(WW + W / 2 + 2.2, W + 3.2);
   const slope = () => rnd(...SLOPE) * DEG;
   // what a side's special takes along it (pegs: widen, rows, funnel out)
-  const specLen = sp => ({ pegs: 1.5 + 0.8 + (PEG_ROWS - 1) * sidePegGap(W) * Math.sqrt(3) / 2 + 0.8 + 2.6, ramp: 6, jump: 8.9, boost: 6, narrow: narrowFunnel(W) + NARROW.len + NARROW.flare }[sp] || 0);
+  const specLen = sp => ({ pegs: 1.5 + 0.8 + (PEG_ROWS - 1) * sidePegGap(W) * Math.sqrt(3) / 2 + 0.8 + 2.6, ramp: 6, jump: 8.9, boost: 6, narrow: NARROW.fan + NARROW.comb + narrowLen + NARROW.drop + NARROW.merge + NARROW.flare,
+    trapdoor: 1 + DOOR_FIELD + DOOR.run + 1.5 }[sp] || 0);
   const T = { x: 0, y: 0, z: 0, a: Math.PI / 2, th: 0, b: 0, s: 0, flags: 0, mod: 0,
     hw: W, H: LID, wl: WALL, wr: WALL, rb: RC, rt: 0.1, chain: null, chains: [], line: [] };
-  const mods = [], pegs = [], boosts = [], jumps = [], holes = [], traps = [];
+  const mods = [], pegs = [], boosts = [], jumps = [], holes = [], traps = [], coils = [];
   const rings = [], booms = [], basins = [];
   let mist = null;
   const mod = (type, extra = {}) => {
@@ -265,6 +288,9 @@ function build(seed, n, tier, retry, picks, grow, planOnly) {
   };
   const end = m => { m.s1 = T.s; };
   const take = list => list.splice(Math.floor(plan() * list.length), 1)[0];
+  // the late shufflers take the latest turn that suits them, short of the last (a crowd jams the finish bend) unless
+  // that's all there is: a shuffle in the first half gets ironed out again
+  const latest = ok => ok.filter(j => j < sides - 2).at(-1) ?? ok.at(-1) ?? -1;
 
   // ---- plan: what each side carries and what each turn is, from the picks. Sides alternate front (even) / back (odd)
   // the half sides at both ends stay plain; wide specials (pegs, jump) keep off neighbouring sides, which face each
@@ -274,6 +300,11 @@ function build(seed, n, tier, retry, picks, grow, planOnly) {
   // the last, a big crowd crawling off the ring jammed in the finish bend; the first leaves a whole side to spread out
   // on); the side after a carousel stays plain (its S-bend back onto the column line eats into its length)
   const inner = [...turns.keys()].slice(1, -1);
+  for (let k = nOf('whirlpool'); k > 0; k--) { // first, on the latest inner turn (a bowl: the next side needs no S-bend)
+    const q = inner.length ? inner.pop() : turns.length > 1 && turns[0] === 'bowl' ? 0 : -1;
+    if (q < 0) return TIGHT;
+    turns[q] = 'whirlpool';
+  }
   for (let k = nOf('mist'); k > 0; k--) { if (!inner.length) return TIGHT; turns[take(inner)] = 'mist'; }
   for (let k = nOf('carousel'); k > 0; k--) {
     const q = inner.length ? take(inner) : turns.length > 1 && turns[0] === 'bowl' ? 0 : -1;
@@ -290,10 +321,19 @@ function build(seed, n, tier, retry, picks, grow, planOnly) {
   }
   for (let k = nOf('basin') + 1; k > 0; k--) { // the free bowl + picks; they pick their turn like carousels; the next side needs no S-bend
     const q = inner.length ? take(inner) : turns.length > 1 && turns[0] === 'bowl' ? 0 : -1;
-    if (q < 0) return TIGHT;
+    if (q < 0) { if (k === 1 && nOf('whirlpool')) break; return TIGHT; } // no turn left for the free one: the whirlpool is the course's bowl
     turns[q] = 'basin';
   }
-  const isWide = sp => sp === 'pegs' || sp === 'jump';
+  // wormhole roulettes on plain turns; the sides either side keep no special: the funnel spans the channel (after a peg
+  // board only a few units of straight are left for it) and the JACKPOT exit lands on plain straight
+  const rouAt = new Set();
+  for (let k = nOf('roulette'); k > 0; k--) {
+    const q = latest([...turns.keys()].filter(j => turns[j] === 'bowl' && !rouAt.has(j)));
+    if (q < 0) return TIGHT;
+    rouAt.add(q);
+    for (const j of [q, q + 1]) if (free.includes(j)) free.splice(free.indexOf(j), 1);
+  }
+  const isWide = sp => sp === 'pegs' || sp === 'jump' || sp === 'narrow'; // a narrow helix's coils reach 3.2 out
   const side = sp => {
     const apart = free.filter(k => !isWide(sp) || !isWide(special[k - 1]) && !isWide(special[k + 1])), ok = apart.length ? apart : free;
     if (!ok.length) return false;
@@ -303,14 +343,25 @@ function build(seed, n, tier, retry, picks, grow, planOnly) {
   };
   // the wide one first, it's the fussy one; then 2-4 peg boards on whatever sides are still free (never a lap more, so a
   // packed Short may get none; its own second peg board sits on the finish approach regardless).
-  // Two wide ones that have to face each other get a deeper stadium rather than another lap
+  // Two wide ones that have to face each other get a deeper stadium rather than another lap. Trapdoors before them all,
+  // on the latest free sides
+  for (let k = nOf('trapdoor'); k > 0; k--) { if (!free.length) return TIGHT; special[free.pop()] = 'trapdoor'; }
   for (const sp of ['jump', 'ramp', 'boost', 'narrow']) for (let k = nOf(sp); k > 0; k--) if (!side(sp)) return TIGHT;
   for (let k = 2 + Math.floor(plan() * 3); k > 0 && free.length; k--) side('pegs');
   if (special.some((sp, k) => isWide(sp) && isWide(special[k + 1]))) D = Math.max(D, 2 * WW + 2.2);
   // side length: seeded, but long enough for the longest special plus a 3.3 lead each side of it
   const L = Math.max(rnd(...SIDE[tier]), Math.max(0, ...special.map(specLen)) + 6.6);
   // a wormhole skips a plain turn: mouth A near the end of the side before it, B near the start of the side after
-  const holeTurns = [...turns.keys()].filter(k => turns[k] === 'bowl');
+  // a fork's long lane goes round like a trap route's (not the first turn: it runs under the start), so neither runs beside
+  // a trapdoor's side track; forks first, on the latest turns, then the wormholes and trap routes at random
+  const lane = j => j > 0 && turns[j] === 'bowl' && !rouAt.has(j) && special[j] !== 'trapdoor' && special[j + 1] !== 'trapdoor';
+  const forkAt = new Set();
+  for (let k = nOf('fork'); k > 0; k--) {
+    const q = latest([...turns.keys()].filter(j => lane(j) && !forkAt.has(j)));
+    if (q < 0) return TIGHT;
+    forkAt.add(q);
+  }
+  const holeTurns = [...turns.keys()].filter(k => turns[k] === 'bowl' && !rouAt.has(k) && !forkAt.has(k));
   const holeAt = new Set();
   for (let k = nOf('wormhole'); k > 0; k--) { if (!holeTurns.length) return TIGHT; holeAt.add(take(holeTurns)); }
 
@@ -318,7 +369,7 @@ function build(seed, n, tier, retry, picks, grow, planOnly) {
   const fan = startRing(n, W, plan);
   // a trap route goes the long way round a plain turn (not the first, it runs under the start; not a wormhole's),
   // each at the other end of the tower from the one before where it can
-  const trapTurns = [...turns.keys()].filter(k => k > 0 && turns[k] === 'bowl' && !holeAt.has(k)), trapAt = new Set();
+  const trapTurns = [...turns.keys()].filter(k => lane(k) && !holeAt.has(k) && !forkAt.has(k)), trapAt = new Set();
   for (let k = nOf('trap'), last = -1; k > 0; k--) {
     const other = trapTurns.filter(j => j % 2 !== last % 2), pool = other.length ? other : trapTurns;
     if (!pool.length) return TIGHT;
@@ -339,7 +390,7 @@ function build(seed, n, tier, retry, picks, grow, planOnly) {
   end(board);
 
   // ---- run-out toward the viewer, so the stadium's back column starts clear of the board, then the bend ----
-  const bendR = Math.max(3, hw + 1.8), out = mod('ramp');
+  const bendR = Math.max(3, hw + 1.8), out = mod('ramp', { runout: true }); // runout: not a picked ramp (no name sign)
   piece(T, Math.max(0, D + hw + 1.6 - bendR) + 1, { pitch: 12 * DEG });
   end(out);
   const bend = mod('bend');
@@ -358,25 +409,34 @@ function build(seed, n, tier, retry, picks, grow, planOnly) {
     const m1 = mod('straight'), first = k === 0; // the first side and turn drop steeper, to pass well under the run-out
     piece(T, sp ? Math.max(3, (left() - spLen) / 2) : left() * (k === sides - 1 ? 1 : 0.5), { pitch: first ? SLOPE[1] * DEG : slope() });
     end(m1);
-    if (holeAt.has(k - 1)) holes[holes.length - 1].b = { s: m1.s0 + Math.min(2.5, (m1.s1 - m1.s0) * 0.5), mod: m1.index };
-    if (trapAt.has(k - 1)) traps[traps.length - 1].b = { s: m1.s0 + Math.min(2.5, (m1.s1 - m1.s0) * 0.5), mod: m1.index };
+    if (holeAt.has(k - 1) || rouAt.has(k - 1)) holes[holes.length - 1].b = { s: m1.s0 + Math.min(2.5, (m1.s1 - m1.s0) * 0.5), mod: m1.index };
+    if (trapAt.has(k - 1) || forkAt.has(k - 1)) traps[traps.length - 1].b = { s: m1.s0 + Math.min(2.5, (m1.s1 - m1.s0) * 0.5), mod: m1.index };
+    // a roulette's JACKPOT exit: JACK_S on from NEXT along this (plain) side, clear of the next turn's mouth
+    const jack = () => { if (rouAt.has(k - 1)) { const w = holes.at(-1); w.jack = { s: w.b.s + Math.max(1.5, Math.min(JACK_S * V_REF, T.s - 4 - w.b.s)) }; } };
     if (sp === 'pegs') { const m = mod('pegs'); pegSide(T, W, rnd(...PEG_SLOPE) * DEG + crowd(W) * 3 * DEG, pegs, m.index, slope()); end(m); }
     if (sp === 'ramp') { const m = mod('ramp'); piece(T, 2, { pitch: rnd(12, 15) * DEG }); piece(T, 2); piece(T, 2, { pitch: slope() }); end(m); }
     if (sp === 'boost') { const m = mod('boost'); piece(T, 1.8); boosts.push({ s0: T.s, s1: T.s + 2.4, mod: m.index }); piece(T, 2.4); piece(T, 1.8); end(m); }
     if (sp === 'jump') { const m = mod('jump'); jump(T, W, jumps, m, rnd(-1, 1)); end(m); }
-    if (sp === 'narrow') { const m = mod('narrow'); narrowTube(T, W, slope()); end(m); }
-    if (k === sides - 1) break;
+    if (sp === 'narrow') { const m = mod('narrow'); narrowTube(T, W, slope(), m, pegs, coils); end(m); }
+    if (sp === 'trapdoor') { const m = mod('trapdoor'); traps.push(trapdoor(T, W, m, rng)); end(m); }
+    if (k === sides - 1) { jack(); break; }
     const m2 = mod('straight');
     piece(T, left(), { pitch: first ? SLOPE[1] * DEG : slope() });
     end(m2);
+    jack();
     if (holeAt.has(k)) holes.push({ a: { s: m2.s1 - Math.min(2.5, (m2.s1 - m2.s0) * 0.5), s0: m2.s0, mod: m2.index, side: rnd(-1, 1), r: rnd(...HOLE_R) * R } });
+    // a roulette's funnel spans the channel (over() catches within 0.7 of a mouth's radius: the whole width), dead centre
+    if (rouAt.has(k)) holes.push({ roulette: true, a: { s: m2.s1 - Math.min(Math.max(2.5, hw + 0.8), (m2.s1 - m2.s0) * 0.5), s0: m2.s0, mod: m2.index, side: 0, r: hw / 0.7 } });
     if (trapAt.has(k)) traps.push({ end: m2.s1, a: { s: m2.s1 - Math.min(2.5, (m2.s1 - m2.s0) * 0.5), mod: m2.index, side: rnd(-1, 1), r: rnd(...TRAP_R) * R } });
+    // a fork's paddle: crossing it anywhere across, the signal picks the way
+    if (forkAt.has(k)) traps.push({ end: m2.s1, a: { s: m2.s1 - Math.min(2.5, (m2.s1 - m2.s0) * 0.5), mod: m2.index, side: 0, r: hw }, fork: { phase: rng() * FORK.period } });
     // ---- the turn round the tower's end ----
     const dz = Math.abs(target(k + 1).z - T.z), kind = turns[k];
     if (kind === 'bowl') { const m = mod('bowl'), sl = (first ? 8.5 : BOWL_SLOPE) * DEG; bowl(T, h, dz, sl); end(m); }
     if (kind === 'mist') { const m = mod('mist'); mist = helix(T, h, dz / 2, W, m.index); end(m); }
     if (kind === 'carousel') { const m = mod('carousel'); rings.push(carousel(T, h, W, dz, rng, m.index)); end(m); }
     if (kind === 'basin') { const m = mod('basin'); basins.push(basin(T, h, W, dz, m.index, boosts)); end(m); }
+    if (kind === 'whirlpool') { const m = mod('whirlpool'); basins.push(basin(T, h, W, dz, m.index, boosts, true)); end(m); }
     if (kind === 'boomerang') { const m = mod('boomerang'); booms.push(boomerang(T, h, W, dz, m.index, boosts, pegs)); end(m); }
   }
 
@@ -397,10 +457,12 @@ function build(seed, n, tier, retry, picks, grow, planOnly) {
   end(fin);
 
   const wormholes = holes.filter(w => w.b).map((w, i) => wormhole(T, w, W, i));
-  const trapRoutes = traps.filter(tp => tp.b).map((tp, i) => trapRoute(T, tp, W, h, i, mod('trap')));
+  const trapRoutes = traps.filter(tp => tp.b).map((tp, i) => (tp.door ? doorLane : trapRoute)(T, tp, W, h, i, mod('trap')));
   // mud: a few patches on plain straights, one per straight, over part of the width (anywhere across), clear of the
-  // wormhole holes and trap pads. Data only: no collider, the sim slows a marble whose centre is over one
-  const near = [...wormholes.flatMap(w => [w.a.s, w.b.s]), ...trapRoutes.flatMap(tp => [tp.a.s, tp.b.s])];
+  // wormhole holes and trap pads (and a roulette's wide funnel, and its JACKPOT exit). Data only: no collider, the sim
+  // slows a marble whose centre is over one
+  const near = [...wormholes.flatMap(w => [[w.a.s, w.roulette ? hw + 1 : 1.5], [w.b.s, 1.5], ...w.roulette ? [[w.roulette.exits[0].b.s, 1.5]] : []]),
+    ...trapRoutes.flatMap(tp => [[tp.a.s, 1.5], [tp.b.s, 1.5]])];
   // room for at least the shortest patch, 0.6 clear of each end; a shorter straight takes a shorter patch
   const straights = mods.filter(m => m.type === 'straight' && m.s1 - m.s0 > MUD_LEN[0] + 1.2), lanes = [...straights], muds = [];
   for (let k = nOf('mud'), again = true; k > 0; k--) {
@@ -410,7 +472,7 @@ function build(seed, n, tier, retry, picks, grow, planOnly) {
     const spots = l => {
       const out = [];
       for (let x = m.s0 + 0.6 + l / 2; x <= m.s1 - 0.6 - l / 2; x += 0.2)
-        if (near.every(y => Math.abs(y - x) > l / 2 + 1.5) && muds.every(md => Math.abs(md.s - x) > (md.s1 - md.s0 + l) / 2 + 0.8)) out.push(x);
+        if (near.every(([y, c]) => Math.abs(y - x) > l / 2 + c) && muds.every(md => Math.abs(md.s - x) > (md.s1 - md.s0 + l) / 2 + 0.8)) out.push(x);
       return out;
     };
     let len = Math.min(rnd(...MUD_LEN), m.s1 - m.s0 - 1.2), ok = spots(len);
@@ -421,7 +483,7 @@ function build(seed, n, tier, retry, picks, grow, planOnly) {
     muds.push({ s0: s - len / 2, s1: s + len / 2, s, a, c: rnd(-1, 1) * (hw - RC - a), mod: m.index }); // a: half-width across, c: centre's offset (on the flat floor, clear of the corner fillets)
   }
   if (muds.length < nOf('mud')) return TIGHT; // not enough clear straight: a lap more has more
-  return pack({ seed, n, tier, retry, picks, grow, W, h, D, L, T, mods, pegs, boosts, jumps, wormholes, traps: trapRoutes, muds, rings, basins, booms, mist, fan, finish, stadium: { zFront, zBack, half: L / 2 } });
+  return pack({ seed, n, tier, retry, picks, grow, W, h, D, L, T, mods, pegs, boosts, jumps, wormholes, traps: trapRoutes, muds, rings, basins, booms, mist, coils, fan, finish, stadium: { zFront, zBack, half: L / 2 } });
 }
 
 // ---------- start ring ----------
@@ -508,19 +570,70 @@ function helix(T, h, r, W, mod) {
   return { s0, s1, mod, rho, r, h };
 }
 
-// narrow tube: the channel funnels down into a clear glass tube 1.5 marbles wide (two can't sit side by side, so no
-// overtaking inside: they go through single file, in the order they got in), then flares back out. A steeper pitch
-// keeps the queue moving; slippery marble-on-marble contact (sim.js) keeps a crowd from locking into an arch at the mouth
-const NARROW = { rho: 1.5 * MR, len: 5, flare: 2.4, pitch: 14 }; // rho: inner radius; lengths; degrees
-// the funnel tapers no faster than 1 in 3.2 each side (a steeper one let a 20-marble crowd wedge against its walls)
-const narrowFunnel = W => Math.max(4, 3.2 * (W / 2 - NARROW.rho));
-function narrowTube(T, W, out) {
-  const rho = NARROW.rho;
-  piece(T, narrowFunnel(W), { hw: rho, H: 2 * rho, rb: rho, rt: rho, wl: 2 * rho, wr: 2 * rho, pitch: NARROW.pitch * DEG });
-  T.flags = TUBE | GLASS;
-  piece(T, NARROW.len);
+// narrow helix: the channel fans out three openings wide and ends in a wall, the comb. Its middle opening is a clear glass
+// tube 1.5 marbles wide (two can't sit side by side: single file, no overtaking inside) running straight on. Its side
+// openings are the mouths of two glass coils wound round that tube as a double helix: half a turn apart (so they never
+// meet), 1.5 turns, out on the other side, 2.8x the way. A marble takes whichever opening it rolls into: a pin where the
+// fan starts splits the middle line, and a bumper on each strip between two openings flicks it into one. Over the top of
+// a turn a rolling marble would stall (it climbs 3.8), so the coils are air tubes: the sim carries a marble along one
+// (sim.js COIL_T) and they have no collider. All three empty into a wide chamber (the jump landing's: a back wall with a
+// window for the middle tube), then the channel narrows back.
+// rho: inner radius; gap: coil shell to tube shell; turns, eased in and out over ease of the winding (like a turn's RAMP);
+// lead: straight run each end of it; pin: a peg dead centre that far before the comb (where the fan starts): a lone
+// marble rolls down the middle, so without it the leader took the middle tube 58% of the time with 4 players; lengths;
+// degrees
+const NARROW = { rho: 1.5 * MR, gap: 0.2, turns: 1.5, ease: 0.12, lead: 0.6, fan: 1.5, comb: 1, pin: 2.4, drop: 0.3, merge: 2.2, flare: 2, out: 0.6, pitch: 14 };
+const COIL_R = 2 * (NARROW.rho + THICK) + NARROW.gap, COIL_P = 2 * COIL_R; // coil centre off the tube's axis; per turn
+export const COMB = COIL_R - NARROW.rho; // |across| past which a marble at the comb is a side mouth's (the strips: rho..COMB)
+// the winding: longer by the easing, so the coils still sit COIL_P / 2 apart where it's fastest (mid-coil)
+const narrowWind = NARROW.turns * COIL_P / (1 - NARROW.ease), narrowLen = 2 * NARROW.lead + narrowWind; // the middle tube
+function narrowTube(T, W, out, m, pegs, coils) {
+  const { rho, lead, turns } = NARROW, hm = COIL_R + rho + 0.1;
+  piece(T, NARROW.fan, { hw: hm, pitch: NARROW.pitch * DEG });
+  piece(T, NARROW.comb);
+  T.chain.capEnd = { below: 0, gapHw: rho, gapTop: 2 * rho }; // the comb: an end wall with the middle tube's window
+  const f = T.chain.f, o = f.length - FS, [p, t, r, u] = [0, 3, 6, 9].map(k => f.slice(o + k, o + k + 3)), sC = T.s;
+  const at = (x, y, d = 0) => p.map((v, k) => v + r[k] * x + u[k] * y + t[k] * d);
+  for (const sd of [-1, 1]) pegs.push({ p: at(sd * (rho + COMB) / 2, PEG_H / 2, -0.35), ax: u, r: BUMP_R, mod: m.index });
+  pegs.push({ p: at(0, PEG_H / 2, -NARROW.pin), ax: u, r: PEG_R, mod: m.index }); // the pin
+  Object.assign(T, { hw: rho, H: 2 * rho, rb: rho, rt: rho, wl: 2 * rho, wr: 2 * rho, flags: TUBE | GLASS });
+  newChain(T);
+  piece(T, narrowLen);
   T.flags = 0;
-  piece(T, NARROW.flare, { hw: W / 2, H: LID, rb: RC, rt: 0.1, wl: WALL, wr: WALL, pitch: out });
+  // the coils: frames written straight round the tube's axis (the turtle only yaws and pitches), the winding eased in and
+  // out like a turn's (yawAt); each frame's up points away from the axis. Arc length from 1e5 up, clear of the course's
+  const end = narrowLen + NARROW.out, wind = narrowWind;
+  for (const sd of [1, -1]) {
+    const fr = [], line = [], s0 = 1e5 + 1e3 * coils.length, N = Math.ceil(end / 0.1);
+    const cAt = x => {
+      const a = (sd > 0 ? 0 : Math.PI) + 2 * Math.PI * turns * yawAt(Math.min(1, Math.max(0, (x - lead) / wind)), NARROW.ease);
+      return [at(Math.cos(a) * COIL_R, rho + Math.sin(a) * COIL_R, x), [0, 1, 2].map(k => r[k] * Math.cos(a) + u[k] * Math.sin(a))];
+    };
+    let d = 0, last = null;
+    for (let j = 0; j <= N; j++) {
+      const x = end * j / N, [c, n] = cAt(x), [c1] = cAt(Math.min(end, x + 0.02)), [c0] = cAt(Math.max(0, x - 0.02));
+      const tg = c1.map((v, k) => v - c0[k]), tl = Math.hypot(...tg);
+      for (let k = 0; k < 3; k++) tg[k] /= tl;
+      const nt = n[0] * tg[0] + n[1] * tg[1] + n[2] * tg[2], up = n.map((v, k) => v - tg[k] * nt), ul = Math.hypot(...up);
+      for (let k = 0; k < 3; k++) up[k] /= ul;
+      const rt = [tg[1] * up[2] - tg[2] * up[1], tg[2] * up[0] - tg[0] * up[2], tg[0] * up[1] - tg[1] * up[0]]; // r = t x u (u = r x t)
+      if (last) d += Math.hypot(c[0] - last[0], c[1] - last[1], c[2] - last[2]);
+      last = c;
+      fr.push(...c.map((v, k) => v - up[k] * rho), ...tg, ...rt, ...up, s0 + d, rho, 2 * rho, 2 * rho, 2 * rho, rho, rho, TUBE | GLASS, m.index);
+      line.push(...c, d);
+    }
+    T.chains.push({ f: fr, capStart: null, capEnd: null, ghost: true, side: sd });
+    // in: the comb (s on the course, which side, its frame and size for the view); out: the coil's mouth in the chamber
+    // (the course's s there: the chamber's floor starts drop on)
+    coils.push({ mod: m.index, side: sd, len: d, line: new Float32Array(line), in: { s: sC, side: sd, p, t, r, u, hw: hm, H: LID, rho, cr: COIL_R },
+      out: { p: last, t, s: sC + narrowLen + NARROW.drop + NARROW.out } });
+  }
+  // the merge chamber, NARROW.drop under the tube: its back wall has the middle tube's window, the coils end inside it
+  T.y -= NARROW.drop; T.s += NARROW.drop;
+  Object.assign(T, { hw: wideHw(W), H: 3, rb: RC, rt: 0.1, wl: 1.6, wr: 1.6 });
+  newChain(T, { below: 0.05, gapHw: rho + 0.2, gapTop: NARROW.drop + 2 * rho + 0.2 });
+  piece(T, NARROW.merge);
+  piece(T, NARROW.flare, { hw: W / 2, H: LID, wl: WALL, wr: WALL, pitch: out });
 }
 
 // jump: the channel kicks up 15° off a lip and drops onto a landing twice as wide with a tall back wall and a lid.
@@ -670,9 +783,11 @@ export function boomGeo(bm) {
 // swirls round a lap or so rather than orbiting for good. Its centre line: the chute to the tangent point, then straight down
 // the drain's axis (a marble's height in the dish gives its progress, like the start ring), then the tube
 const BASIN = { depth: 0.8, cone: 10, funnel: 20, lip: 0.9, curl: 0.45, drop: 0.15, tube: 3 }; // funnel: degrees, the ring round the drain
-function basin(T, h, W, dz, mod, boosts) {
+// whirl: a whirlpool, a bigger dish (its chute ends the same way in from the rim) with a narrow drain, and a current
+function basin(T, h, W, dz, mod, boosts, whirl = false) {
   const aIn = T.a, f = [Math.cos(aIn), Math.sin(aIn)], inn = [-f[1] * h, f[0] * h], half = W / 2, x0 = T.x, z0 = T.z;
-  const R90 = Math.max(3, half + 1.8), rc = Math.max(3, 0.42 * dz), rB = rc + half + 0.8, rh = 2 * MR, rho = rh + 0.03;
+  const R90 = Math.max(3, half + 1.8), k = whirl ? WHIRL.grow : 1, rc0 = Math.max(3, 0.42 * dz), rB = (rc0 + half + 0.8) * k, rc = rc0 + rB - rB / k;
+  const rh = (whirl ? WHIRL.drain : 2) * MR, rho = rh + 0.03;
   piece(T, R90 * Math.PI / 2, { turn: h * Math.PI / 2, bank: h * 14 * DEG, H: BOWL_LID, rb: half - 0.02, pitch: 8 * DEG, wl: h > 0 ? BOWL_WALL : WALL, wr: h > 0 ? WALL : BOWL_WALL });
   piece(T, 1.2, { H: LID, rb: RC, wl: WALL, wr: WALL });
   // on to the next column (the tangent point) over a boost pad, so marbles fly in fast and swirl
@@ -712,7 +827,10 @@ function basin(T, h, W, dz, mod, boosts) {
   piece(T, BASIN.tube, { pitch: 18 * DEG, ease: BASIN.tube });
   T.flags = 0;
   piece(T, 2.4, { hw: half, H: LID, rb: RC, rt: 0.1, wl: WALL, wr: WALL, pitch: 8 * DEG });
-  return { c, rB, rh, rho, rim, top, curl: R, open, prof, cap, mod, line: [i0, i0 + 1] };
+  const out = { c, rB, rh, rho, rim, top, curl: R, open, prof, cap, mod, line: [i0, i0 + 1] };
+  // the current turns the way the chute pours in (dir: +1 anticlockwise seen from above, about +y)
+  if (whirl) out.whirl = { hold: WHIRL.hold, spin: WHIRL.spin, vCur: WHIRL.vCur, out: WHIRL.out, drag: WHIRL.drag, pull: WHIRL.pull, dir: h };
+  return out;
 }
 
 // S-bend: shift sideways by d (in z) while heading along x (dir = ±1): two opposite arcs, easing to a run's pitch
@@ -730,13 +848,29 @@ function sBend(T, d, dir, pitch) {
 // ---------- wormholes ----------
 // two holes in the floor, no tube: hole A (just over a marble wide, anywhere across) near the end of a side, hole B
 // mid-channel near the start of the side after the turn. A marble rolling right over A drops in and pops out of B
+// A roulette's mouth is a funnel across the whole channel, so every marble drops in, and a wheel of three sectors turns
+// round it: the sector under a marble's spot on the rim as it drops (sectorOf) picks its exit. JACKPOT pops out further
+// on, NEXT where a plain wormhole's B would be, LOST at NEXT too but only after drifting a while
 function wormhole(T, w, W, i) {
   const A = frameAt(T.chains, w.a.s), B = frameAt(T.chains, w.b.s);
   const ra = w.a.r, off = w.a.side * (W / 2 - ra); // side: -1 against the left wall .. 1 the right
   const pa = A.p.map((v, k) => v + A.r[k] * off);
-  return { a: { p: pa, r: ra, s: w.a.s, mod: w.a.mod, side: w.a.side, u: A.u }, b: { p: B.p, r: ra, s: w.b.s, mod: w.b.mod, t: B.t, u: B.u },
+  const out = { a: { p: pa, r: ra, s: w.a.s, mod: w.a.mod, side: w.a.side, u: A.u }, b: { p: B.p, r: w.roulette ? HOLE_R[0] * R : ra, s: w.b.s, mod: w.b.mod, t: B.t, u: B.u },
     time: WARP_TIME, color: i % 3 };
+  if (w.roulette) {
+    const J = frameAt(T.chains, w.jack.s), e2 = [A.u[1] * A.t[2] - A.u[2] * A.t[1], A.u[2] * A.t[0] - A.u[0] * A.t[2], A.u[0] * A.t[1] - A.u[1] * A.t[0]]; // u x t
+    out.roulette = { omega: ROULETTE.omega, sectors: ROULETTE.sectors, e1: A.t, e2, exits: [
+      { kind: 'jackpot', b: { p: J.p, r: out.b.r, s: w.jack.s, t: J.t, u: J.u }, time: WARP_TIME },
+      { kind: 'next', b: out.b, time: WARP_TIME }, { kind: 'lost', b: out.b, time: ROULETTE.lost }] };
+  }
+  return out;
 }
+// the roulette sector at wheel angle psi (radians; a marble's angle round the mouth in (e1, e2), plus omega x sim time)
+export const sectorOf = (rl, psi) => {
+  let x = ((psi / (2 * Math.PI)) % 1 + 1) % 1, k = 0;
+  while (k < rl.sectors.length - 1 && x >= rl.sectors[k]) x -= rl.sectors[k++];
+  return k;
+};
 // ---------- trap routes ----------
 // a pad on the floor (just over a marble wide, anywhere across, like a wormhole mouth) near the end of the side before
 // a plain turn: a marble rolling right over it is flicked over the outer wall onto a narrow lane alongside. The lane
@@ -764,14 +898,69 @@ function trapRoute(T, tp, W, h, i, m) {
   m.s1 = U.s;
   const lane = s => { const q = frameAt([U.chain], s); return { p: q.p, t: q.t, r: q.r, u: q.u }; };
   const pad = A.p.map((v, k) => v + A.r[k] * tp.a.side * (hw - tp.a.r));
-  return { a: { p: pad, r: tp.a.r, s: tp.a.s, mod: tp.a.mod, u: A.u, t: A.t }, b: { p: B.p, s: tp.b.s, mod: tp.b.mod, t: B.t, r: B.r, u: B.u },
+  const out = { a: { p: pad, r: tp.a.r, s: tp.a.s, mod: tp.a.mod, u: A.u, t: A.t }, b: { p: B.p, s: tp.b.s, mod: tp.b.mod, t: B.t, r: B.r, u: B.u },
     s0: m.s0, s1: m.s1, mod: m.index, line: U.line, in: lane(m.s0 + 1), out: lane(m.s1 - 1) };
+  // a fork: its signal, and the EXPRESS, a glass tube over the turn from a mouth above A to one above B, FORK.exp faster
+  // than rolling round (at V_REF)
+  if (tp.fork) out.fork = { period: FORK.period, split: FORK.split, phase: tp.fork.phase,
+    express: { a: A.p.map((v, k) => v + A.u[k] * EXP_H), b: B.p.map((v, k) => v + B.u[k] * EXP_H), land: B.p.map((v, k) => v + B.u[k] * MR),
+      time: Math.max(0.3, (tp.b.s - tp.a.s) / V_REF - FORK.exp) } };
+  return out;
+}
+// the express ride: the marble's centre at u (0..1) from where it left (x0): sucked up into the mouth over A, across in
+// the tube, down out of the mouth over B onto its floor
+const EXP_H = 2.4; // the tube's axis over the floor: its mouths clear the walls' lips and a marble rolling under
+export function expressAt(ex, u, x0, out) {
+  const [p, q, f] = u < 0.2 ? [x0, ex.a, smooth(u / 0.2)] : u < 0.85 ? [ex.a, ex.b, smooth((u - 0.2) / 0.65)] : [ex.b, ex.land, smooth((u - 0.85) / 0.15)];
+  for (let k = 0; k < 3; k++) out[k] = lerp(p[k], q[k], f);
+  if (u >= 0.2 && u < 0.85) out[1] += Math.sin(Math.PI * f) * 0.6; // a gentle arc across
+  return out;
+}
+
+// ---------- trapdoors ----------
+// lids zigzagging down a straight, left half then right half, a pair at a time, each with its own seeded clock (sim.js
+// doorClock). A lid is hinged on its downstream edge and lifts up and back toward the oncoming marbles, so its hole faces them like a cave's
+// mouth: a marble rolling into an open one drops through to a side track below the course's edge, rolls the long way
+// round on it and is flicked back in at B, just past the doors. A is where the doors start
+function trapdoor(T, W, m, rng) {
+  piece(T, 1);
+  const s0 = T.s, lids = [];
+  for (let k = 0; k < 2 * DOOR.pairs; k++) lids.push({ s: s0 + doorAt(k) + DOOR.len / 2, half: k & 1, phase: rng() * DOOR.period });
+  piece(T, DOOR_FIELD + DOOR.run);
+  const b = T.s;
+  piece(T, 1.5);
+  // a hole: len along the course, across from mid off the centre line to edge short of the wall, on its half (0 left)
+  return { a: { s: s0, mod: m.index }, b: { s: b, mod: m.index },
+    door: { lids, len: DOOR.len, hw: W / 2, mid: DOOR.mid, edge: DOOR.edge, period: DOOR.period, warn: DOOR.warn, lift: DOOR.lift, open: DOOR.open } };
+}
+// its side track: off the course's outer side, DOOR.drop under its floor, a run back upstream from beside the lid just
+// past halfway (so a marble eaten at any lid isn't carried far back), a tight U-turn outward and a run down to beside B, sized so
+// the trip costs about DOOR.s against rolling on (at V_REF). Its start cap is the cave mouth the eaten marbles come out of
+function doorLane(T, tp, W, h, i, m) {
+  const ms = tp.door.lids[DOOR.pairs].s, A = frameAt(T.chains, tp.a.s), M = frameAt(T.chains, ms), B = frameAt(T.chains, tp.b.s);
+  const hw = W / 2, c = hw + TRAP_HW + 2 * THICK + CLEAR + 1, r = TRAP_HW + 0.6;
+  const fl = Math.hypot(M.t[0], M.t[2]), f = [M.t[0] / fl, M.t[2] / fl], inw = [-f[1] * h, f[0] * h]; // heading; toward the tower
+  const ab = tp.b.s - ms, uLen = 2 * r / turnDisp(Math.PI, RAMP).side, x = Math.max(0.5, ((DOOR.s - DOOR.hops) * V_REF - uLen) / 2);
+  const th = TRAP_SLOPE * DEG, cos = Math.cos(th);
+  const U = { x: M.p[0] - inw[0] * c, y: M.p[1] - DOOR.drop, z: M.p[2] - inw[1] * c, a: Math.atan2(-f[1], -f[0]), th, b: 0, s: 1e4 * (i + 1), flags: TRAPF, mod: m.index,
+    hw: TRAP_HW, H: LID, wl: WALL, wr: WALL, rb: RC, rt: 0.1, chain: null, chains: T.chains, line: [] };
+  m.s0 = U.s;
+  newChain(U, 'full');
+  piece(U, x / cos);
+  piece(U, uLen / cos, { turn: h * Math.PI, bank: h * BOWL_BANK * DEG, H: BOWL_LID, rb: TRAP_HW - 0.02, wl: h > 0 ? BOWL_WALL : WALL, wr: h > 0 ? WALL : BOWL_WALL });
+  piece(U, 1.2 / cos, { H: LID, rb: RC, wl: WALL, wr: WALL });
+  piece(U, Math.max(0.5, x + ab - 1.2) / cos);
+  U.chain.capEnd = 'full';
+  m.s1 = U.s;
+  const lane = s => { const q = frameAt([U.chain], s); return { p: q.p, t: q.t, r: q.r, u: q.u }; };
+  return { a: { p: A.p, s: tp.a.s, mod: tp.a.mod, u: A.u, t: A.t }, b: { p: B.p, s: tp.b.s, mod: tp.b.mod, t: B.t, r: B.r, u: B.u },
+    s0: m.s0, s1: m.s1, mod: m.index, line: U.line, in: lane(m.s0 + 1), out: lane(m.s1 - 1), door: tp.door };
 }
 
 // marble centre at u (0..1) of a warp: sinks through A (first 30%), passes unseen under the track from A to B, rises
-// out of B (last 20%) to sit on its floor
-export function warpAt(w, u, out = [0, 0, 0]) {
-  const { a, b } = w;
+// out of B (last 20%) to sit on its floor. e: a roulette's exit (-1: w.b)
+export function warpAt(w, u, out = [0, 0, 0], e = -1) {
+  const a = w.a, b = e < 0 ? w.b : w.roulette.exits[e].b;
   if (u < 0.3) { const h = MR * (1 - 2 * u / 0.3); for (let k = 0; k < 3; k++) out[k] = a.p[k] + a.u[k] * h; return out; }
   if (u > 0.8) { const h = MR * (2 * (u - 0.8) / 0.2 - 1); for (let k = 0; k < 3; k++) out[k] = b.p[k] + b.u[k] * h; return out; }
   const f = smooth((u - 0.3) / 0.5);
@@ -784,7 +973,8 @@ export function warpAt(w, u, out = [0, 0, 0]) {
 const PLAIN = new Set(['straight', 'pegs', 'ramp', 'bend']);
 export function splitsOf(def) {
   const s0 = def.line[3], f = def.finish.s;
-  const busy = [...def.wormholes, ...(def.traps || [])].flatMap(w => [w.a.s, w.b.s]).map(b => [b - 1.5, b + 1.5]);
+  const busy = [...def.wormholes, ...(def.traps || [])].flatMap(w => [[w.a.s, w.roulette ? def.W / 2 + 1 : 1.5], [w.b.s, 1.5], ...w.roulette ? [[w.roulette.exits[0].b.s, 1.5]] : []])
+    .map(([b, c]) => [b - c, b + c]);
   const skip = [...def.mods.filter(m => !PLAIN.has(m.type)).map(m => [m.s0, m.s1 + 1]), ...busy, ...def.muds.map(md => [md.s0 - 0.6, md.s1 + 0.6])];
   return [0.25, 0.5, 0.75].map(q => {
     let s = s0 + (f - s0) * q, hit;
@@ -827,14 +1017,16 @@ function chainMesh(ch) {
     for (let c = 0; c < 3; c++) extra.push(f[o + c] + f[o + F.ux + c] * f[o + F.H] / 2);
     for (let j = 0; j < NP; j++) back ? idx.push(ci, base + (j + 1) % NP, base + j) : idx.push(ci, base + j, base + (j + 1) % NP);
   };
-  if (ch.capEnd) cap(k - 1, false);
-  if (ch.capStart === 'full') cap(0, true);
-  else if (ch.capStart) { // jump landing: a back wall with a window where the kicker comes in
-    const { below, gapHw, gapTop } = ch.capStart, o = 0, H = f[F.H], hw = f[F.hw];
+  // a wall with a window: the jump landing's back wall (the kicker comes in), a narrow helix's comb (the middle tube goes
+  // out); end = it closes the chain's end, facing back into it
+  const win = (i, { below, gapHw, gapTop }, end) => {
+    const o = i * FS, H = f[o + F.H], hw = f[o + F.hw];
     const pt = (x, y) => { const v = verts.length / 3 + extra.length / 3; for (let c = 0; c < 3; c++) extra.push(f[o + c] + f[o + F.rx + c] * x + f[o + F.ux + c] * y); return v; };
-    const rect = (x0, y0, x1, y1) => { if (x1 <= x0 || y1 <= y0) return; const a = pt(x0, y0), b = pt(x1, y0), c = pt(x1, y1), d = pt(x0, y1); idx.push(a, c, b, a, d, c); };
+    const rect = (x0, y0, x1, y1) => { if (x1 <= x0 || y1 <= y0) return; const a = pt(x0, y0), b = pt(x1, y0), c = pt(x1, y1), d = pt(x0, y1); end ? idx.push(a, b, c, a, c, d) : idx.push(a, c, b, a, d, c); };
     rect(-hw, 0, hw, below); rect(-hw, below, -gapHw, H); rect(gapHw, below, hw, H); rect(-gapHw, gapTop, gapHw, H);
-  }
+  };
+  if (ch.capEnd === 'full') cap(k - 1, false); else if (ch.capEnd) win(k - 1, ch.capEnd, true);
+  if (ch.capStart === 'full') cap(0, true); else if (ch.capStart) win(0, ch.capStart, false);
   const all = new Float32Array(verts.length + extra.length);
   all.set(verts); all.set(extra, verts.length);
   return { kind: 'trimesh', verts: all, idx: new Uint32Array(idx), part: 'chain' };
@@ -983,7 +1175,7 @@ function basinMeshes({ c, rim, open, prof, cap }) {
 // ---------- packaging + the overlap check ----------
 function pack(o) {
   const { T, mods } = o;
-  const chains = T.chains.map(ch => ({ f: new Float32Array(ch.f), capStart: ch.capStart, capEnd: ch.capEnd }));
+  const chains = T.chains.map(ch => ({ f: new Float32Array(ch.f), capStart: ch.capStart, capEnd: ch.capEnd, ghost: ch.ghost, side: ch.side })); // ghost: drawn, no collider; side: a coil's, for its colour
   // boxes: chains in chunks of ~2.5 of arc length, per module (plus the fan and the ring)
   const boxes = [];
   const grow = (b, x, y, z) => { b[0] = Math.min(b[0], x); b[1] = Math.min(b[1], y); b[2] = Math.min(b[2], z); b[3] = Math.max(b[3], x); b[4] = Math.max(b[4], y); b[5] = Math.max(b[5], z); };
@@ -1034,7 +1226,7 @@ function pack(o) {
   const bounds = boxes.reduce((u, b) => [Math.min(u[0], b[0]), Math.min(u[1], b[1]), Math.min(u[2], b[2]), Math.max(u[3], b[3]), Math.max(u[4], b[4]), Math.max(u[5], b[5])], [Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity]);
   const { y, at, floorAt, ...fanData } = fan; // functions stay behind: a TrackDef is plain data
   void y; void at; void floorAt;
-  const colliders = [...chains.map(chainMesh), ...fanMeshes(fan), ...o.basins.flatMap(basinMeshes)];
+  const colliders = [...chains.filter(ch => !ch.ghost).map(chainMesh), ...fanMeshes(fan), ...o.basins.flatMap(basinMeshes)];
   const rings = o.rings.map(rg => { const rm = ringMeshes(rg); colliders.push(rm.wall); return { ...rg, parts: rm.parts }; });
   for (const bm of o.booms) colliders.push(...boomMeshes(bm));
   return {
@@ -1044,6 +1236,6 @@ function pack(o) {
     pegs: o.pegs.map(p => ({ p: p.p, ax: p.ax, r: p.r, h: PEG_H, mod: p.mod })),
     fan: fanData,
     boosts: o.boosts, jumps: o.jumps, wormholes: o.wormholes, traps: o.traps, muds: o.muds,
-    rings, basins: o.basins, boomerangs: o.booms, mist: o.mist, finish: o.finish,
+    rings, basins: o.basins, boomerangs: o.booms, mist: o.mist, coils: o.coils, finish: o.finish,
   };
 }

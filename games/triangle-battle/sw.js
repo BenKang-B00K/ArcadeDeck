@@ -1,4 +1,4 @@
-const CACHE_NAME = 'triangle-battle-v6';
+const CACHE_NAME = 'triangle-battle-v8';
 const ASSETS = [
   './',
   './index.html',
@@ -16,15 +16,16 @@ self.addEventListener('install', (e) => {
   );
 });
 
-// Drop old caches — caches.match() searches every cache, so stale versions would win otherwise
+// Drop our old caches (caches.match() searches every cache, so stale versions would win). Every game shares this origin: never touch another game's.
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))))
+    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME && k.startsWith('triangle-battle-')).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', (e) => {
+  if (e.request.method !== 'GET' || new URL(e.request.url).origin !== location.origin) return;
   e.respondWith(
     caches.match(e.request).then((response) => response || fetch(e.request))
   );

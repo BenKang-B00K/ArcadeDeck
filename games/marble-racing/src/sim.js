@@ -6,7 +6,7 @@
 // Sensors (boost pads, wormhole mouths, the mist tube, the carousel, the finish line) are worked out from each
 // marble's progress along the course centre line and its position, not from sensor colliders.
 
-import { R, MR, TIER_TIME, warpAt, mulberry32, stallAt, spinXZ, boomGeo, BUMP_R } from './track.js';
+import { R, MR, TIER_TIME, warpAt, expressAt, sectorOf, mulberry32, stallAt, spinXZ, boomGeo, BUMP_R, COMB } from './track.js';
 
 // ---------- tuning (physics) ----------
 export const DT = 1 / 120;
@@ -38,18 +38,45 @@ const BUMP_V = 2.2; // closing speed that counts as a hit (clack, sparks)
 const STUN_V = 6; // closing speed of a real knock
 const STUN_CD = 4; // s before a marble can be stunned again
 // no stuns in the start hopper, on peg boards or in banked turns: a frozen marble there walls in the crowd behind it
-const NO_STUN = new Set(['hopper', 'pegs', 'bowl', 'bend', 'boomerang', 'basin']);
+// (nor over the trapdoors: frozen beside an opening hole it would be a sitting duck)
+const NO_STUN = new Set(['hopper', 'pegs', 'bowl', 'bend', 'boomerang', 'basin', 'whirlpool', 'trapdoor']);
 export const STUN_T = 0.4, ATK_T = 0.8; // s
 const ATK_ACC = 7; // u/s² pushed along the course while the buff lasts
+// catch-up tailwind: a marble behind the leader is pushed along the course, from nothing CHASE_G0 back to the full
+// CHASE CHASE_G1 further, x CHASE_LATE over the last quarter, so the field closes up for the finish (race position
+// only, never who the player is: every player keeps the same odds)
+const CHASE = 6, CHASE_G0 = 2, CHASE_G1 = 15, CHASE_LATE = 1.6; // u/s², units, units, factor
+const DRAFT = 4, DRAFT_D = 4; // slipstream: u/s² while tucked in up to DRAFT_D right behind another marble
 const CAP = 3; // time cap = CAP x the tier's median race time
 const HOP_T = 0.45, HOP_H = 2.2; // flick over the wall onto a trap lane (and back in): seconds, arc height
+const QUICK_T = 0.3; // s: a fork's spring flick onto its lane
+const DOOR_HOP = 0.15; // s: a trapdoor's fall to its side track, and its hop back in
 const MUD_DAMP = 4.5; // linear and angular damping on a mud patch (gravity down a 10° run balances it at about 1.35 u/s)
 const GUST = [-4, 7]; // u/s² along the course: each marble meets its own gust in the mist tube, from a headwind (-) to a tailwind (+)
 const HOOP_V = 5; // u/s added through a jump's hoop
-export const WAITING = 0, RACING = 1, WARP = 2, DONE = 3, TRAP = 4;
+const WHIRL_MAX = 6; // s past a whirlpool's longest hold before its marble is dropped down the drain (the bowl's net)
+const JACK_CALM = 0.5; // s a marble popping out of a roulette's JACKPOT can't be knocked dizzy (it lands on a crowd)
+const ROU_V = 8; // u/s every marble pops out of a roulette's exits at, whatever it dropped in at: JACKPOT's lead is a time
+// trapdoors: an open lid's angle (leaning back over its hole), how high over the floor a marble still drops in, the push
+// a marble riding a lifting lid gets (u/s along the course, up) and how long after it can't be eaten
+export const DOOR_A = 70 * Math.PI / 180;
+const DOOR_H = 1.4, LID_KICK = [3, 1.5], LID_GRACE = 0.4;
+const DROP_H = 1.2; // an eaten marble sinks this far through its hole before it heads on under the floor to the side track
+const DOOR_V = 11; // u/s, at least, it comes out of the cave mouth at (it fell) and is flicked back in at: the side track costs about the same at any speed in
+const FORK_V = 18; // u/s a fork's paddle flicks a LONG marble onto its lane at (a spring, not a nudge)
+// a narrow helix's coils: s from the comb to the mouth in the chamber, whatever the marble came in at (the middle tube
+// takes about 0.75 s, so a coil costs about 2 s: the long way round is a time)
+const COIL_T = 2.8;
+export const WAITING = 0, RACING = 1, WARP = 2, DONE = 3, TRAP = 4, COIL = 5;
 
 export const flapAngle = t => Math.PI / 2 * Math.min(1, Math.max(0, t / FLAP_T)) ** 2 * (3 - 2 * Math.min(1, Math.max(0, t / FLAP_T)));
 export const ringAngle = (ring, t) => ring.omega * t; // radians of φ (positions at angle φ move to φ + this)
+// a trapdoor lid's clock (s into its cycle) and its angle, from sim time only, so the view and the sim agree:
+// lifting for door.lift, open for door.open (it eats), then shut (blinking red over the last door.warn)
+export const doorClock = (door, lid, t) => (t + lid.phase) % door.period;
+export const doorAngle = (door, lid, t) => { const c = doorClock(door, lid, t); return c < door.lift ? DOOR_A * c / door.lift : c < door.lift + door.open ? DOOR_A : 0; };
+// a fork's signal at sim time t: 0 EXPRESS, 1 MAIN, 2 LONG
+export const forkWay = (f, t) => { const w = ((t + f.phase) % f.period) / f.period; return w < f.split[0] ? 0 : w < f.split[0] + f.split[1] ? 1 : 2; };
 
 // quaternion helpers ([x, y, z, w])
 const qYaw = b => [0, Math.sin(b / 2), 0, Math.cos(b / 2)];
@@ -134,7 +161,14 @@ export function createSim(RAPIER, def, gates) {
   const inMist = new Uint8Array(n), inMud = new Uint8Array(n), riding = new Uint8Array(n), // riding: carousel index + 1, 0 = none
     stuckT = new Float32Array(n), nudges = new Uint8Array(n);
   const nudgeAt = new Float32Array(n), used = new Uint32Array(n), bestProg = new Float32Array(n).fill(-1e9), bestAt = new Float32Array(n); // bit k: boost pad / jump / wormhole k already fired
-  const warp = new Int8Array(n).fill(-1), warpT0 = new Float32Array(n), warpV = new Float32Array(n);
+  const warp = new Int8Array(n).fill(-1), warpT0 = new Float32Array(n), warpV = new Float32Array(n), warpE = new Int8Array(n).fill(-1); // warpE: a roulette's exit (-1: none)
+  const hold = new Float32Array(n), hold0 = new Float32Array(n); // a whirlpool's current holds a marble until hold (0: free), since hold0
+  const lidAt = new Float32Array(n).fill(-9); // when a lifting trapdoor lid last pushed it on
+  // a narrow helix's coil a marble rides (-1: none), since when, how far along; when each coil last took one in
+  const coil = new Int8Array(n).fill(-1), coilT0 = new Float32Array(n), coilD = new Float32Array(n), coilIn = new Float32Array(def.coils.length).fill(-9);
+  // a whirlpool works like a lottery drum: each hold ends at a random moment counted from when the first marble got in,
+  // not from a marble's own arrival, so the order out has next to nothing to do with the order in
+  const drum = new Float32Array(def.basins.length).fill(-1);
   const trap = new Int8Array(n).fill(-1), trapPh = new Uint8Array(n), trapT0 = new Float32Array(n), trapV = new Float32Array(n), hop0 = new Float32Array(n * 3), hopX = new Float32Array(n);
   const stun = new Float32Array(n), atk = new Float32Array(n), stunAt = new Float32Array(n).fill(-99); // seconds left; when last stunned
   const rideAt = new Float32Array(n); // when the current carousel ride began
@@ -221,6 +255,8 @@ export function createSim(RAPIER, def, gates) {
     ringBodies.forEach((b, k) => b.setNextKinematicRotation(Q(qYaw(-ringAngle(rings[k], tn)))));
     world.step(queue);
     t = tn;
+    let lead = -Infinity; // the leader's progress, for the tailwind
+    for (let i = 0; i < n; i++) if (state[i] !== DONE) lead = Math.max(lead, prog[i]);
     queue.drainCollisionEvents((h1, h2, started) => {
       if (!started) return;
       const p = pegOf.get(h1) ?? pegOf.get(h2), i = marbleOf.get(h1) ?? marbleOf.get(h2);
@@ -241,6 +277,7 @@ export function createSim(RAPIER, def, gates) {
       if (state[i] === DONE) continue;
       if (state[i] === WARP) { warpStep(i); continue; }
       if (state[i] === TRAP) { trapStep(i); continue; }
+      if (state[i] === COIL) { coilStep(i); continue; }
       read(i);
       const o = i * 7, b = bodies[i];
       let vx = vel[i * 3], vy = vel[i * 3 + 1], vz = vel[i * 3 + 2], sp = Math.hypot(vx, vy, vz);
@@ -255,6 +292,18 @@ export function createSim(RAPIER, def, gates) {
         pointAt(prog[i], tmp);
         const a = ATK_ACC * DT;
         b.setLinvel(V(vx += tmp[3] * a, vy += tmp[4] * a, vz += tmp[5] * a), true);
+      }
+      if (stun[i] <= 0 && !riding[i] && inBasin[i] < 0) { // tailwind and slipstream (not frozen, in a carousel pocket or a bowl)
+        let acc = CHASE * Math.min(1, Math.max(0, (lead - prog[i] - CHASE_G0) / CHASE_G1)) * (prog[i] > 0.75 * def.finish.s ? CHASE_LATE : 1);
+        for (let j = 0; j < n; j++) { // right behind another one (not level with it on another lane)
+          const q = j * 7, dp = prog[j] - prog[i];
+          if (j !== i && state[j] === RACING && dp > 0.3 && dp < DRAFT_D && Math.hypot(xf[q] - xf[o], xf[q + 1] - xf[o + 1], xf[q + 2] - xf[o + 2]) < dp + 1.2) { acc += DRAFT; break; }
+        }
+        if (acc) {
+          pointAt(prog[i], tmp);
+          const a = acc * DT;
+          b.setLinvel(V(vx += tmp[3] * a, vy += tmp[4] * a, vz += tmp[5] * a), true);
+        }
       }
       // on the start ring only the hole's axis counts (the board runs underneath the ring's front)
       // ... and in a bowl only the drain's axis (its height in the dish)
@@ -285,11 +334,24 @@ export function createSim(RAPIER, def, gates) {
       if (prog[i] > bestProg[i] + 0.5) { bestProg[i] = prog[i]; bestAt[i] = t; }
       if (bk !== inBasin[i]) {
         if (inBasin[i] >= 0) ev('basinOut', i, { basin: inBasin[i], drain: xf[o + 1] < def.basins[inBasin[i]].c[1] }); // drain: down the hole (not a bounce off the top)
-        if (bk >= 0) { const again = t - basinAt0[i] < 1.5; ev('basinIn', i, { basin: bk, again }); if (!again) basinAt0[i] = t; } // again: back down after bouncing off the top
+        if (bk >= 0) { // again: back down after bouncing off the top. A whirlpool's current takes a fresh marble for its own hold
+          const again = t - basinAt0[i] < 1.5, wh = def.basins[bk].whirl;
+          if (!again) { basinAt0[i] = t; if (wh) { if (drum[bk] < 0) drum[bk] = t; hold0[i] = t; hold[i] = Math.max(t + wh.hold[0], drum[bk] + wh.hold[0] + (wh.hold[1] - wh.hold[0]) * rng()); } }
+          ev('basinIn', i, { basin: bk, again, whirl: !!wh });
+        }
         inBasin[i] = bk;
         b.setLinearDamping(bk >= 0 ? BASIN_DAMP : LIN_DAMP); b.setAngularDamping(bk >= 0 ? BASIN_DAMP : ANG_DAMP);
       }
-      if (bk >= 0 && t - basinAt0[i] > BASIN_MAX) { rescues++; basinAt0[i] = t; ev('rescue', i, { kind: 'teleport' }); place1(i, line[L(def.basins[bk].line[1] + 1) + 3] + 0.8, 3); continue; } // down the tube
+      if (bk >= 0 && t - basinAt0[i] > (def.basins[bk].whirl ? def.basins[bk].whirl.hold[1] + WHIRL_MAX : BASIN_MAX)) { rescues++; basinAt0[i] = t; ev('rescue', i, { kind: 'teleport' }); place1(i, line[L(def.basins[bk].line[1] + 1) + 3] + 0.8, 3); continue; } // down the tube
+      if (hold[i] && t >= hold[i]) { hold[i] = 0; ev('letGo', i, { basin: inBasin[i] }); } // its current lets go
+      const wh = bk >= 0 && def.basins[bk].whirl;
+      if (wh) { // held: carried round the wall toward the current's speed and pushed out against it, clear of the drain;
+        // let go: drawn in toward the drain, so the big dish empties about as quickly as a plain bowl
+        const dx = xf[o] - def.basins[bk].c[0], dz = xf[o + 2] - def.basins[bk].c[2], r = Math.hypot(dx, dz) || 1;
+        const ox = dx / r, oz = dz / r, tx = wh.dir * oz, tz = -wh.dir * ox; // out; round (dir x (up x out))
+        const v = b.linvel(), vt = v.x * tx + v.z * tz, a = (hold[i] ? wh.spin * (1 - vt / wh.vCur) : -wh.drag * vt) * DT, w = (hold[i] ? wh.out : -wh.pull) * DT;
+        b.setLinvel(V(v.x + tx * a + ox * w, v.y, v.z + tz * a + oz * w), true);
+      }
       // swinging in a boomerang's trough, or back up its drop, gains no progress either
       const bz = tk >= 0 ? tk : def.boomerangs.findIndex(bm => prog[i] > bm.sIn - 6 && prog[i] < bm.sIn);
       if (bz < 0) swingAt[i] = -1; else if (swingAt[i] < 0) swingAt[i] = t;
@@ -359,21 +421,49 @@ export function createSim(RAPIER, def, gates) {
         }
       }
       def.wormholes.forEach((w, k) => {
-        if (used[i] & (1 << (16 + k)) || Math.abs(prog[i] - w.a.s) > 2) return;
-        if (over(o, w.a)) { // rolling right over the middle of the hole: drops in
+        const rl = w.roulette;
+        if (state[i] !== RACING || used[i] & (1 << (16 + k)) || Math.abs(prog[i] - w.a.s) > (rl ? w.a.r : 2)) return;
+        if (over(o, w.a, rl ? 1.5 : MR + 0.2)) { // rolling right over the middle of the hole (a roulette's: anywhere, even hopping): drops in
           used[i] |= 1 << (16 + k);
-          state[i] = WARP; warp[i] = k; warpT0[i] = t; warpV[i] = Math.max(4, sp);
+          state[i] = WARP; warp[i] = k; warpT0[i] = t; warpV[i] = rl ? ROU_V : Math.max(4, sp);
+          // a roulette: the wheel's sector under the marble's spot round the mouth as it drops picks its exit
+          warpE[i] = rl ? sectorOf(rl, Math.atan2(dot3(o, w.a.p, rl.e2), dot3(o, w.a.p, rl.e1)) + rl.omega * t) : -1;
           calm(i);
           b.setEnabled(false);
-          ev('warpIn', i, { hole: k });
+          ev('warpIn', i, { hole: k, exit: rl?.exits[warpE[i]].kind });
         }
       });
       def.traps.forEach((tp, k) => {
-        if (state[i] !== RACING || used[i] & (1 << (24 + k)) || Math.abs(prog[i] - tp.a.s) > 2 || !over(o, tp.a)) return;
+        if (state[i] !== RACING || used[i] & (1 << (24 + k))) return;
+        if (tp.fork) { // crossing the paddle anywhere across: the signal at that moment picks the way
+          if (before >= tp.a.s || prog[i] < tp.a.s) return;
+          used[i] |= 1 << (24 + k);
+          const way = forkWay(tp.fork, t);
+          if (way !== 1) { calm(i); flick(i, k, way ? 0 : 3, way ? Math.max(sp, FORK_V) : sp); } // LONG: onto the lane; EXPRESS: up the glass tube
+          ev('fork', i, { trap: k, way });
+          return;
+        }
+        if (tp.door) { door(i, k, tp.door, sp); return; }
+        if (Math.abs(prog[i] - tp.a.s) > 2 || !over(o, tp.a)) return;
         used[i] |= 1 << (24 + k);
         calm(i);
         flick(i, k, 0, sp * 0.8);
         ev('trapIn', i, { trap: k });
+      });
+      // a narrow helix's comb: the outer third either side is a coil's mouth, the air takes a marble there (one at a time:
+      // it waits until the one before it is a marble clear in); the middle window is the tube, SHORTCUT!
+      def.coils.forEach((c, k) => {
+        if (state[i] !== RACING || prog[i] < c.in.s - 0.7 || prog[i] > c.in.s + 0.3) return;
+        pointAt(prog[i], tmp);
+        const lat = ((xf[o + 2] - tmp[2]) * tmp[3] - (xf[o] - tmp[0]) * tmp[5]) / (Math.hypot(tmp[3], tmp[5]) || 1);
+        if (lat * c.side < COMB) { if (c.side > 0 && Math.abs(lat) < COMB && before < c.in.s && prog[i] >= c.in.s) ev('tubeIn', i, { mod: c.mod }); return; }
+        if (t - coilIn[k] < (2 * MR + 0.1) * COIL_T / c.len) return;
+        coilIn[k] = t;
+        calm(i);
+        state[i] = COIL; coil[i] = k; coilT0[i] = t; coilD[i] = 0;
+        hop0[i * 3] = xf[o]; hop0[i * 3 + 1] = xf[o + 1]; hop0[i * 3 + 2] = xf[o + 2];
+        b.setEnabled(false);
+        ev('coilIn', i, { coil: k });
       });
       if (prog[i] >= def.finish.s) cross(i, before);
     }
@@ -394,14 +484,40 @@ export function createSim(RAPIER, def, gates) {
     return xf[o + 1] - tmp[1] < MR + 0.3 && u * u + v * v < 1;
   }
 
-  // marble at xf[o] rolling right over the middle of a floor mouth m ({ p, u, r }: a wormhole's hole A, a trap pad)
-  function over(o, m) {
+  // marble at xf[o] rolling right over the middle of a floor mouth m ({ p, u, r }: a wormhole's hole A, a trap pad), its
+  // centre under hi over the floor
+  function over(o, m, hi = MR + 0.2) {
     const dx = xf[o] - m.p[0], dy = xf[o + 1] - m.p[1], dz = xf[o + 2] - m.p[2];
     const up = dx * m.u[0] + dy * m.u[1] + dz * m.u[2], flat = Math.sqrt(Math.max(0, dx * dx + dy * dy + dz * dz - up * up));
-    return up < MR + 0.2 && flat < m.r * 0.7;
+    return up < hi && flat < m.r * 0.7;
+  }
+  const dot3 = (o, p, e) => (xf[o] - p[0]) * e[0] + (xf[o + 1] - p[1]) * e[1] + (xf[o + 2] - p[2]) * e[2];
+
+  // trapdoor k: a marble low over one of its holes (a lid's length along, between mid and edge across on the lid's half,
+  // each lid on its own clock; no two lids share a stretch of the course). While the lid lifts the marble sits on it and is tipped on over the hinge with a push; once it's open the
+  // marble drops through (onto the side track, the long way round); shut, nothing
+  function door(i, k, dr, sp) {
+    const o = i * 7, lid = dr.lids.find(l => Math.abs(prog[i] - l.s) < dr.len / 2);
+    if (!lid || t - lidAt[i] < LID_GRACE) return;
+    pointAt(prog[i], tmp);
+    const dx = xf[o] - tmp[0], dz = xf[o + 2] - tmp[2], lat = (dz * tmp[3] - dx * tmp[5]) / (Math.hypot(tmp[3], tmp[5]) || 1), al = Math.abs(lat);
+    if (al < dr.mid || al > dr.hw - dr.edge || (lat < 0 ? 0 : 1) !== lid.half || xf[o + 1] - tmp[1] > DOOR_H) return;
+    const c = doorClock(dr, lid, t), b = bodies[i];
+    if (c < dr.lift) { // riding the lid
+      lidAt[i] = t;
+      const v = b.linvel(), [f, up] = LID_KICK;
+      b.setLinvel(V(v.x + tmp[3] * f, v.y + tmp[4] * f + up, v.z + tmp[5] * f), true);
+      ev('boost', i, { lid: true });
+    } else if (c < dr.lift + dr.open) { // eaten
+      used[i] |= 1 << (24 + k);
+      calm(i);
+      flick(i, k, 0, Math.max(sp, DOOR_V));
+      ev('trapIn', i, { trap: k, door: true });
+    }
   }
 
-  // trap route k: a hop over the wall onto its lane (phase 0), the long way round on it (1), a hop back in at B (2)
+  // trap route k: a hop over the wall onto its lane (phase 0; a trapdoor's: a drop through the floor), the long way round
+  // on it (1), a hop back in at B (2); a fork's EXPRESS: the glass tube over the turn to B (3)
   function flick(i, k, ph, v) {
     const o = i * 7;
     state[i] = TRAP; trap[i] = k; trapPh[i] = ph; trapT0[i] = t; trapV[i] = Math.min(VMAX, Math.max(4, v));
@@ -410,14 +526,18 @@ export function createSim(RAPIER, def, gates) {
     hopX[i] = ph ? (rng() * 2 - 1) * (def.W / 2 - MR - 0.3) : 0;
     bodies[i].setEnabled(false);
   }
+  // how long marble i's hop takes (phase 0, 2 or 3)
+  const hopT = i => { const tp = def.traps[trap[i]]; return trapPh[i] === 3 ? tp.fork.express.time : tp.door ? DOOR_HOP : !trapPh[i] && tp.fork ? QUICK_T : HOP_T; };
   function trapStep(i) {
     const tp = def.traps[trap[i]], o = i * 7, b = bodies[i], ph = trapPh[i];
-    if (ph !== 1) { // a hop: from where it left to the far floor along an arc
-      const to = ph ? tp.b : tp.in, u = (t - trapT0[i]) / HOP_T, x = hopX[i];
-      prog[i] = ph ? tp.b.s : tp.a.s;
+    if (ph !== 1) { // a hop: from where it left to the far floor along an arc (a trapdoor's: down its hole, on under the floor)
+      const to = ph ? tp.b : tp.in, ex = ph === 3 && tp.fork.express, u = (t - trapT0[i]) / hopT(i), x = hopX[i];
+      prog[i] = ph === 0 ? tp.a.s : ph === 2 ? tp.b.s : tp.a.s + (tp.b.s - tp.a.s) * Math.min(1, u);
       if (u < 1) {
-        for (let k = 0; k < 3; k++) xf[o + k] = hop0[i * 3 + k] + (to.p[k] + to.r[k] * x + to.u[k] * MR - hop0[i * 3 + k]) * u;
-        xf[o + 1] += Math.sin(Math.PI * u) * HOP_H;
+        if (ex) { expressAt(ex, u, hop0.subarray(i * 3, i * 3 + 3), tmp); xf[o] = tmp[0]; xf[o + 1] = tmp[1]; xf[o + 2] = tmp[2]; return; }
+        const sink = tp.door && !ph ? Math.min(1, u / 0.3) : 0, v = tp.door && !ph ? Math.max(0, (u - 0.3) / 0.7) : u;
+        for (let k = 0; k < 3; k++) xf[o + k] = hop0[i * 3 + k] + (to.p[k] + to.r[k] * x + to.u[k] * MR - hop0[i * 3 + k]) * v;
+        xf[o + 1] += tp.door && !ph ? -DROP_H * sink * (1 - v) : Math.sin(Math.PI * u) * HOP_H;
         return;
       }
       const v = trapV[i], d = to.t, at = k => to.p[k] + to.r[k] * x + to.u[k] * (MR + 0.02);
@@ -428,7 +548,7 @@ export function createSim(RAPIER, def, gates) {
       read(i);
       if (!ph) { trapPh[i] = 1; trapT0[i] = t; return; }
       state[i] = RACING; seg[i] = segAt(tp.b.s); bestProg[i] = prog[i]; bestAt[i] = t; stuckT[i] = 0;
-      ev('trapOut', i, { trap: trap[i] });
+      ev('trapOut', i, { trap: trap[i], express: ph === 3 });
       trap[i] = -1;
       return;
     }
@@ -444,22 +564,61 @@ export function createSim(RAPIER, def, gates) {
       if (d2 < best) { best = d2; s = ln[j + 3]; }
     }
     prog[i] = tp.a.s + (tp.b.s - tp.a.s) * (s - tp.s0) / (tp.s1 - tp.s0);
-    if (s >= tp.s1 - 1.2 || t - trapT0[i] > 12) flick(i, trap[i], 2, sp); // at the lane's end (a net: 12 s on it)
+    if (s >= tp.s1 - 1.2 || t - trapT0[i] > 12) flick(i, trap[i], 2, tp.door ? Math.max(sp, DOOR_V) : sp); // at the lane's end (a net: 12 s on it)
   }
 
+  // riding a narrow helix's coil: carried along its line at a steady speed (sucked from where it was onto the line over the
+  // first 0.15 s), a marble behind the one ahead in it, rolling as it goes; its progress stands in for the middle tube's.
+  // At the mouth it's let out into the chamber, unless another marble still sits there: then it waits
+  function coilStep(i) {
+    const c = def.coils[coil[i]], o = i * 7, v = c.len / COIL_T, ln = c.line;
+    let d = Math.min(c.len, (t - coilT0[i]) * v);
+    for (let j = 0; j < n; j++) if (j !== i && coil[j] === coil[i] && coilT0[j] < coilT0[i]) d = Math.min(d, coilD[j] - 2 * MR - 0.05);
+    const dd = Math.max(0, d - coilD[i]);
+    d = coilD[i] += dd;
+    let lo = 0, hi = ln.length / 4 - 2;
+    while (lo < hi) { const m = (lo + hi + 1) >> 1; if (ln[m * 4 + 3] <= d) lo = m; else hi = m - 1; }
+    const a = lo * 4, q = Math.min(1, (d - ln[a + 3]) / Math.max(1e-6, ln[a + 7] - ln[a + 3])), f = Math.min(1, (t - coilT0[i]) / 0.15), w = f * f * (3 - 2 * f);
+    for (let k = 0; k < 3; k++) xf[o + k] = hop0[i * 3 + k] + (ln[a + k] + (ln[a + 4 + k] - ln[a + k]) * q - hop0[i * 3 + k]) * w;
+    // roll: turn the shell by dd / MR about up x the way it's going (the view's band shows it)
+    const dx = ln[a + 4] - ln[a], dz = ln[a + 6] - ln[a + 2], l = Math.hypot(dx, dz);
+    if (dd > 0 && l > 1e-6) {
+      const h = dd / MR / 2, sn = Math.sin(h), ax = dz / l * sn, az = -dx / l * sn, aw = Math.cos(h);
+      const [x, y, z, ww] = [xf[o + 3], xf[o + 4], xf[o + 5], xf[o + 6]];
+      xf[o + 3] = aw * x + ax * ww - az * y; xf[o + 4] = aw * y + az * x - ax * z; xf[o + 5] = aw * z + az * ww + ax * y; xf[o + 6] = aw * ww - ax * x - az * z;
+    }
+    prog[i] = c.in.s + (c.out.s - c.in.s) * d / c.len;
+    speed[i] = dd / DT;
+    if (d < c.len) return;
+    for (let j = 0; j < n; j++) if (state[j] === RACING && Math.hypot(xf[j * 7] - c.out.p[0], xf[j * 7 + 1] - c.out.p[1], xf[j * 7 + 2] - c.out.p[2]) < 2 * MR + 0.05) return;
+    const b = bodies[i], { p, t: e } = c.out;
+    b.setEnabled(true);
+    b.setTranslation(V(...p), true);
+    b.setRotation(Q([xf[o + 3], xf[o + 4], xf[o + 5], xf[o + 6]]), true);
+    b.setLinvel(V(e[0] * v, e[1] * v, e[2] * v), true);
+    b.setAngvel(V(0, 0, 0), true);
+    read(i);
+    state[i] = RACING; seg[i] = segAt(c.out.s); prog[i] = c.out.s; bestProg[i] = prog[i]; bestAt[i] = t; stuckT[i] = 0;
+    ev('coilOut', i, { coil: coil[i] });
+    coil[i] = -1;
+  }
+
+  // a warp's exit: the wormhole itself, or a roulette's exit e
+  const exitOf = (w, e) => e < 0 ? w : w.roulette.exits[e];
   function warpStep(i) {
-    const w = def.wormholes[warp[i]], u = (t - warpT0[i]) / w.time, o = i * 7;
-    if (u < 1) { warpAt(w, u, tmp); xf[o] = tmp[0]; xf[o + 1] = tmp[1]; xf[o + 2] = tmp[2]; return; }
+    const w = def.wormholes[warp[i]], x = exitOf(w, warpE[i]), u = (t - warpT0[i]) / x.time, o = i * 7;
+    if (u < 1) { warpAt(w, u, tmp, warpE[i]); xf[o] = tmp[0]; xf[o + 1] = tmp[1]; xf[o + 2] = tmp[2]; return; }
     const b = bodies[i], v = Math.min(VMAX, warpV[i]);
     state[i] = RACING;
     b.setEnabled(true);
-    const { p, t: d, u: up } = w.b;
+    const { p, t: d, u: up } = x.b;
     b.setTranslation(V(p[0] + up[0] * (MR + 0.02), p[1] + up[1] * (MR + 0.02), p[2] + up[2] * (MR + 0.02)), true);
     b.setLinvel(V(d[0] * v + up[0] * POP, d[1] * v + up[1] * POP, d[2] * v + up[2] * POP), true);
-    seg[i] = segAt(w.b.s); prog[i] = w.b.s;
+    seg[i] = segAt(x.b.s); prog[i] = x.b.s;
+    if (x.kind === 'jackpot') stunAt[i] = t - STUN_CD + JACK_CALM;
     read(i);
-    ev('warpOut', i, { hole: warp[i] });
-    warp[i] = -1;
+    ev('warpOut', i, { hole: warp[i], exit: x.kind });
+    warp[i] = -1; warpE[i] = -1;
   }
 
   function cross(i, before) {
@@ -513,10 +672,13 @@ export function createSim(RAPIER, def, gates) {
   }
 
   return {
-    n, def, xf, prev, prog, speed, state, place, time, inMist, inMud, riding, warp, cap, stun, atk, // stun / atk: seconds left
+    n, def, xf, prev, prog, speed, state, place, time, inMist, inMud, riding, warp, warpE, cap, stun, atk, // stun / atk: seconds left
+    hold, hold0, trap, trapPh, // a whirlpool's hold on each marble (until, since); the trap route a marble is on, and its phase
+    coil, // the narrow helix coil a marble rides (-1: none)
     get t() { return t; }, get finished() { return finished; }, get rescues() { return rescues; }, get done() { return finished >= n; },
     step, segAt, pointAt,
-    warpU: i => warp[i] >= 0 ? (t - warpT0[i]) / def.wormholes[warp[i]].time : -1,
+    warpU: i => warp[i] >= 0 ? (t - warpT0[i]) / exitOf(def.wormholes[warp[i]], warpE[i]).time : -1,
+    trapU: i => trap[i] >= 0 && trapPh[i] !== 1 ? (t - trapT0[i]) / hopT(i) : -1, // how far through a hop
     // floor straight below marble i (blob shadows): distance from its centre, or -1; the view's only world query
     floorBelow: i => { const o = i * 7, hit = world.castRay(new RAPIER.Ray(V(xf[o], xf[o + 1], xf[o + 2]), V(0, -1, 0)), 6, true, undefined, undefined, undefined, bodies[i]); return hit ? hit.timeOfImpact : -1; },
     dispose: () => { world.free(); queue.free(); },

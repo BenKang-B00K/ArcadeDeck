@@ -1,5 +1,5 @@
 // Offline shell: serve from cache, refresh cache in the background (stale-while-revalidate).
-const CACHE = 'ladder-v1.129.0';
+const CACHE = 'ladder-v1.130.0';
 const SHELL = ['./', 'index.html', 'style.css', 'game.js', 'ladder.js', 'audio.js', 'coop.js', 'manifest.webmanifest',
   'icons/icon.svg', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png'];
 
@@ -7,9 +7,10 @@ self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
+// Every game shares this origin's Cache Storage: purge only our own old caches, never another game's.
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys()
-    .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+    .then(keys => Promise.all(keys.filter(k => k !== CACHE && k.startsWith('ladder-')).map(k => caches.delete(k))))
     .then(() => self.clients.claim()));
 });
 

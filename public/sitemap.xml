@@ -3,7 +3,7 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://arcadedeck.net/</loc>
-    <lastmod>2026-10-02</lastmod>
+    <lastmod>2026-10-03</lastmod>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja" />
@@ -12,7 +12,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ja</loc>
-    <lastmod>2026-10-02</lastmod>
+    <lastmod>2026-10-03</lastmod>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja" />
@@ -21,7 +21,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ko</loc>
-    <lastmod>2026-10-02</lastmod>
+    <lastmod>2026-10-03</lastmod>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja" />
@@ -1082,6 +1082,60 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/marble-racing" />
   </url>
   <url>
+    <loc>https://arcadedeck.net/play/emotion-act</loc>
+    <lastmod>2026-10-03</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/emotion-act" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/emotion-act" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/emotion-act" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/emotion-act" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ja/play/emotion-act</loc>
+    <lastmod>2026-10-03</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/emotion-act" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/emotion-act" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/emotion-act" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/emotion-act" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ko/play/emotion-act</loc>
+    <lastmod>2026-10-03</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/emotion-act" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/emotion-act" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/emotion-act" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/emotion-act" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/play/animal-racing</loc>
+    <lastmod>2026-10-03</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/animal-racing" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/animal-racing" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/animal-racing" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/animal-racing" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ja/play/animal-racing</loc>
+    <lastmod>2026-10-03</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/animal-racing" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/animal-racing" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/animal-racing" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/animal-racing" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ko/play/animal-racing</loc>
+    <lastmod>2026-10-03</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/animal-racing" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/animal-racing" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/animal-racing" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/animal-racing" />
+  </url>
+  <url>
     <loc>https://arcadedeck.net/genre/action</loc>
     <lastmod>2026-09-27</lastmod>
     <priority>0.7</priority>
@@ -1215,6 +1269,33 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/local-co-op" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/genre/local-co-op" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/genre/local-co-op" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/genre/party</loc>
+    <lastmod>2026-10-03</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/party" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/party" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/genre/party" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/genre/party" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ja/genre/party</loc>
+    <lastmod>2026-10-03</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/party" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/party" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/genre/party" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/genre/party" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ko/genre/party</loc>
+    <lastmod>2026-10-03</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/party" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/party" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/genre/party" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/genre/party" />
   </url>
   <url>
     <loc>https://arcadedeck.net/genre/pvp</loc>
@@ -1380,12 +1461,12 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/blog</loc>
-    <lastmod>2026-10-02</lastmod>
+    <lastmod>2026-10-03</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://arcadedeck.net/patchnote</loc>
-    <lastmod>2026-10-02</lastmod>
+    <lastmod>2026-10-05</lastmod>
     <priority>0.6</priority>
   </url>
   <url>
@@ -1524,6 +1605,16 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://arcadedeck.net/blog/one-minute-auto-battle-launch-bank-or-push</loc>
+    <lastmod>2026-10-03</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/blog/tag/action</loc>
+    <lastmod>2026-10-03</lastmod>
+    <priority>0.5</priority>
+  </url>
+  <url>
     <loc>https://arcadedeck.net/blog/tag/arcade</loc>
     <lastmod>2026-09-15</lastmod>
     <priority>0.5</priority>
@@ -1560,7 +1651,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/tag/news</loc>
-    <lastmod>2026-10-02</lastmod>
+    <lastmod>2026-10-03</lastmod>
     <priority>0.5</priority>
   </url>
   <url>
@@ -1575,7 +1666,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/tag/roguelike</loc>
-    <lastmod>2026-09-01</lastmod>
+    <lastmod>2026-10-03</lastmod>
     <priority>0.5</priority>
   </url>
   <url>

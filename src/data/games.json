@@ -926,5 +926,51 @@
     "platform": "BOTH",
     "isOriginal": true,
     "badge": "NEW"
+  },
+  {
+    "id": "44",
+    "slug": "emotion-act",
+    "language": "EN/KO/JA",
+    "thumbnail": "images/emotion-act.webp",
+    "genres": [
+      "Party",
+      "Casual",
+      "Local Co-op"
+    ],
+    "players": [1, 27],
+    "gameUrl": "https://games.arcadedeck.net/emotion-act/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "platform": "BOTH",
+    "isOriginal": true,
+    "badge": "NEW"
+  },
+  {
+    "id": "45",
+    "slug": "animal-racing",
+    "language": "EN/KO/JA",
+    "thumbnail": "images/animal-racing.webp",
+    "genres": [
+      "Arcade",
+      "Party",
+      "Local Co-op"
+    ],
+    "players": [
+      1,
+      4
+    ],
+    "gameUrl": "https://games.arcadedeck.net/animal-racing/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "platform": "BOTH",
+    "isOriginal": true,
+    "badge": "NEW",
+    "scoreTiers": [
+      3,
+      10,
+      25,
+      50,
+      100
+    ]
   }
 ]

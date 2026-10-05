@@ -593,6 +593,9 @@ input[type=range]::-moz-range-thumb { width: 20px; height: 20px; border: 0; bord
 .actions { display: flex; gap: 8px; justify-content: center; align-items: center; padding: 10px 0 14px; flex: none; }
 .actions .btn { flex: 1; max-width: 200px; padding: 0 10px; }
 .actions .btn.ghost { flex: none; height: 40px; padding: 0 12px; font-size: 13px; gap: 5px; } /* Reset / New: secondary, sized to label */
+#ffBtn { color: #d6c8ff; background: rgba(155, 107, 255, .14); border-color: rgba(155, 107, 255, .5); }
+#ffBtn[aria-pressed="true"] { color: #fff; background: rgba(155, 107, 255, .38); border-color: #b98bff; }
+.actions #ffBtn[aria-pressed="true"] { transform: translateY(2px); box-shadow: inset 0 2px 4px rgba(0, 0, 0, .35), 0 1px 0 rgba(6, 3, 22, .6), 0 0 16px rgba(155, 107, 255, .55); }
 #editBtn { color: var(--cyan); background: rgba(79, 216, 255, .12); border-color: rgba(79, 216, 255, .45); }
 #newBtn { color: #ffb547; background: rgba(255, 181, 71, .12); border-color: rgba(255, 181, 71, .45); }
 #editBtn:hover { background: rgba(79, 216, 255, .2); }
@@ -674,6 +677,8 @@ dialog h2 { margin: 0 0 14px; text-align: center; font-size: 22px; font-weight: 
 @media (max-width: 420px) {
   .actions .btn { font-size: 13px; gap: 5px; }
   .actions .btn .ic { width: 17px; height: 17px; }
+  /* x3 shares the row with Result: Reset / New go icon-only to make room (label stays for screen readers, as .sr) */
+  .actions:has(#ffBtn:not([hidden])) :is(#editBtn, #newBtn) span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .chip, .res { margin: 0 2px; padding-inline: 2px; border-radius: 11px; }
   /* setup boxes a size down; inputs keep 16px text (iOS zoom), Height selector and the board are untouched */
   .setup-inner { gap: 12px; }
@@ -724,4 +729,4 @@ body .coop button.pri { background: linear-gradient(135deg, var(--pink) 0%, var(
 .watching #startBtn { filter: saturate(.35) brightness(.85); font-size: 15px; }
 .watching #startBtn > * { display: none; }
 .watching #startBtn::after { content: attr(data-watch); }
-.watching :is(#editBtn, #newBtn, #allBtn, #randBtn, #replayBtn) { display: none !important; }
+.watching :is(#editBtn, #newBtn, #allBtn, #ffBtn, #randBtn, #replayBtn) { display: none !important; }

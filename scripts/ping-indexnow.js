@@ -5,7 +5,7 @@
  *   node scripts/ping-indexnow.js              # ping all blog + tag URLs
  *   node scripts/ping-indexnow.js --posts-only # blog post URLs only
  *   node scripts/ping-indexnow.js --since=2026-04-01  # only items modified on/after date
- *   node scripts/ping-indexnow.js --all        # everything (games + blog + tags + static)
+ *   node scripts/ping-indexnow.js --all        # every URL in public/sitemap.xml (en/ja/ko games, genres, blog, static)
  *
  * IndexNow accepts up to 10,000 URLs per request. The key file lives at
  * https://arcadedeck.net/{KEY}.txt and must contain the same key string.
@@ -25,7 +25,6 @@ const flag = (name) => args.includes(name);
 const sinceArg = args.find((a) => a.startsWith('--since='));
 const since = sinceArg ? sinceArg.split('=')[1] : null;
 
-const games = JSON.parse(readFileSync('src/data/games.json', 'utf-8'));
 const posts = JSON.parse(readFileSync('src/data/posts.json', 'utf-8'));
 
 const tagSet = new Set();
@@ -38,18 +37,11 @@ const filteredPosts = since
 
 const postUrls = filteredPosts.map((p) => `https://${HOST}/blog/${p.slug}`);
 const tagUrls = tags.map((t) => `https://${HOST}/blog/tag/${t}`);
-const gameUrls = games
-  .filter((g) => g.status !== 'IN PRODUCTION')
-  .map((g) => `https://${HOST}/play/${g.slug}`);
-const staticUrls = [
-  `https://${HOST}/`,
-  `https://${HOST}/blog`,
-  `https://${HOST}/about`,
-];
 
 let urlList;
 if (flag('--all')) {
-  urlList = [...staticUrls, ...gameUrls, ...postUrls, ...tagUrls];
+  // The sitemap is the indexable set: every locale, noindex shells already left out. `npm run build` regenerates it.
+  urlList = [...readFileSync('public/sitemap.xml', 'utf-8').matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
 } else if (flag('--posts-only')) {
   urlList = postUrls;
 } else {

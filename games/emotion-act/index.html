@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko">
+<head><script src="/perf.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="description" content="감정 연기 카드게임 · Emotion acting party game · 感情演技カードゲーム">
+<meta name="theme-color" content="#271C33">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="감정 연기">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="preload" as="image" href="./banner.webp" fetchpriority="high">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&display=swap" media="print" onload="this.media='all'">
+<script src="./coop.js" defer></script>
+<title>감정 연기 · Boardgame Emotion</title>
+  <script type="module" crossorigin src="./assets/index-CAxJPOTx.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CcuqzXna.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10.5" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/><path d="M12 15v2.5"/></symbol>
+  <symbol id="i-rotate" viewBox="0 0 24 24"><rect x="3" y="7" width="10" height="14" rx="2"/><path d="M15 3.5a7 7 0 0 1 6 6.5"/><path d="M21 6.5V10h-3.5"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></symbol>
+  <symbol id="i-crown" viewBox="0 0 24 24"><path d="M3 8.5l4.6 4L12 5.5l4.4 7 4.6-4-1.8 10H4.8z"/><path d="M5 21h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><rect x="7.5" y="3" width="9" height="18" rx="2.2"/><path d="M11 17.5h2M4.6 8.6a5.5 5.5 0 0 0 0 6.8M19.4 8.6a5.5 5.5 0 0 1 0 6.8M1.9 6.2a9.5 9.5 0 0 0 0 11.6M22.1 6.2a9.5 9.5 0 0 1 0 11.6"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11H5v10h14V11h-1"/></symbol>
+  <symbol id="i-vol-0" viewBox="0 0 24 24"><path d="M3.5 9.5H7L11.5 5.5v13L7 14.5H3.5z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></symbol>
+  <symbol id="i-vol-1" viewBox="0 0 24 24"><path d="M3.5 9.5H7L11.5 5.5v13L7 14.5H3.5z"/><path d="M15.2 9a4.2 4.2 0 0 1 0 6"/></symbol>
+  <symbol id="i-vol-2" viewBox="0 0 24 24"><path d="M3.5 9.5H7L11.5 5.5v13L7 14.5H3.5z"/><path d="M15.2 9a4.2 4.2 0 0 1 0 6"/><path d="M18 6.3a8 8 0 0 1 0 11.4"/></symbol>
+</svg>
+
+<div id="app">
+  <header class="abar">
+    <span class="abar-l">
+      <button id="exitBtn" class="ibtn" type="button" data-t-aria="exit" hidden><svg class="ic"><use href="#i-x"/></svg></button>
+      <span id="roundLbl"></span>
+    </span>
+    <span class="abar-r">
+      <button id="linkBtn" class="ibtn" type="button" data-t-aria="link"><svg class="ic"><use href="#i-link"/></svg></button>
+      <button id="langBtn" class="lang" type="button" data-t-aria="language"><svg class="ic"><use href="#i-globe"/></svg><span id="langLbl">KO</span></button>
+      <button id="volBtn" class="ibtn" type="button" popovertarget="volPop" data-t-aria="volume"><svg class="ic"><use class="vol-ic" href="#i-vol-2"/></svg></button>
+    </span>
+  </header>
+  <main id="view"></main>
+</div>
+
+<div id="volPop" popover>
+  <button id="muteBtn" class="ibtn" type="button" aria-pressed="false" data-t-aria="mute"><svg class="ic"><use class="vol-ic" href="#i-vol-2"/></svg></button>
+  <input id="volRange" type="range" min="0" max="100" step="5" data-t-aria="volume">
+  <output id="volOut" for="volRange">70%</output>
+</div>
+
+<dialog id="quitDlg">
+  <form method="dialog">
+    <h2 data-t="quitQ"></h2>
+    <p data-t="quitBody"></p>
+    <div class="dbtns"><button class="pbtn ghost" value="quit" data-t="quit"></button><button class="pbtn primary" value="" autofocus data-t="keep"></button></div>
+  </form>
+</dialog>
+
+<dialog id="iosDlg">
+  <form method="dialog">
+    <svg class="ic ic-xl"><use href="#i-share"/></svg>
+    <h2 data-t="iosTitle"></h2>
+    <p data-t="iosBody"></p>
+    <div class="dbtns"><button class="pbtn primary" data-t="ok"></button></div>
+  </form>
+</dialog>
+
+<div id="flash"></div>
+</body>
+</html>

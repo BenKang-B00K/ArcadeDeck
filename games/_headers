@@ -1,2 +1,12 @@
 /:slug/assets/*
   Cache-Control: public, max-age=31536000, immutable
+
+# 40th Century: Void Survivor ships ~500 art files un-hashed under assets/ (its Vite public/assets),
+# so the year-long immutable rule above would pin old art after a redeploy. A day instead.
+/40th-century-void-survivor/assets/*
+  ! Cache-Control
+  Cache-Control: public, max-age=86400
+
+# Shared phone heat guard, a blocking script on every game page: a day in the HTTP cache, not a revalidation per load.
+/perf.js
+  Cache-Control: public, max-age=86400

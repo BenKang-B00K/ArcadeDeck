@@ -8,8 +8,9 @@
 // play never touches the network.
 //   reliable channel (send / sendTo): events, moves, full snapshots
 //   unreliable channel (fast): { ordered: false, maxRetransmits: 0 } for high-rate state; drops when backed up
-// ponytail: public broker + Google STUN, no TURN — same Wi-Fi or a phone hotspot works, strict-NAT
-// cellular pairs fail with errLink. Add a TURN server to the Peer config if cross-network play matters.
+// ICE: STUN plus Cloudflare TURN credentials from the games site's /turn Pages Function (functions/turn.js in the
+// ArcadeDeck repo), so phones with no direct path (cellular, client-isolated Wi-Fi) relay instead of failing.
+// PeerJS's own default TURN (*.turn.peerjs.com) no longer resolves. No /turn (local dev) → STUN only.
 //
 // Coop.open({
 //   game: 'omok',               // peer-id namespace; bump ('omok2') when the wire protocol changes
@@ -85,6 +86,10 @@
     s.onerror = () => { loading = null; s.remove(); rej(); };
     document.head.appendChild(s);
   });
+  const STUN = [{ urls: ['stun:stun.cloudflare.com:3478', 'stun:stun.l.google.com:19302'] }];
+  // POST, not GET: the games' service workers cache GETs and would replay expired credentials
+  const ice = () => fetch('/turn', { method: 'POST', signal: AbortSignal.timeout?.(4000) }).then(r => (r.ok ? r.json() : [])).catch(() => [])
+    .then(t => ({ config: { iceServers: STUN.concat(Array.isArray(t) ? t : []) } }));
 
   // ---------- connections ----------
   function wire(c) {
@@ -141,11 +146,12 @@
 
   function host() {
     view = 'opening'; render();
-    load().then(() => {
+    Promise.all([load(), ice()]).then(([, cfg]) => {
+      if (view !== 'opening') return; // cancelled while fetching
       close();
       view = 'opening';
       code = Array.from({ length: 4 }, () => ABC[Math.random() * ABC.length | 0]).join('');
-      const p = peer = new window.Peer(`arcadedeck-${o.game}-${code}`);
+      const p = peer = new window.Peer(`arcadedeck-${o.game}-${code}`, cfg);
       p.on('open', () => { if (peer === p && view === 'opening') { view = 'hosting'; render(); beat(); } }); // a reconnect opens again: no dialog mid-game
       // room server dropped (Wi-Fi blip, phone woke from sleep): re-register the same code so late joiners still find the room.
       // Not after a locked start (start() disconnects on purpose); while offline it retries every 2 s
@@ -174,10 +180,11 @@
     c = c.trim().toUpperCase();
     if (c.length !== 4 || view !== 'menu') return; // the input fires on the 4th char, Enter may follow
     view = 'connecting'; render();
-    load().then(() => {
+    Promise.all([load(), ice()]).then(([, cfg]) => {
+      if (view !== 'connecting') return; // cancelled while fetching
       close();
       view = 'connecting';
-      const p = peer = new window.Peer();
+      const p = peer = new window.Peer(cfg);
       const bail = k => { if (peer === p && !conn?.open) fail(k); };
       p.on('open', () => {
         const cn = p.connect(`arcadedeck-${o.game}-${c}`, { reliable: true });

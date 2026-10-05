@@ -1,5 +1,5 @@
 // Offline cache for Tank Battle. Bump CACHE on every release so clients refresh.
-const CACHE = 'tank-battle-v3.3.0';
+const CACHE = 'tank-battle-v3.3.1';
 const ASSETS = [
   './',
   './index.html',
@@ -15,10 +15,11 @@ self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
 });
 
+// Every game shares this origin's Cache Storage: purge only our own old caches, never another game's.
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE && k.startsWith('tank-battle-')).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });

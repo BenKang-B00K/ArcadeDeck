@@ -5,8 +5,9 @@ const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon.svg
   ...['scene', 'toon', 'particles', 'vfx', 'worker', 'landmark', 'levels', 'upgrades', 'state', 'sound', 'i18n'].map(f => `./src/${f}.js`)];
 
 self.addEventListener('install', e => { self.skipWaiting(); e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL))); });
+// Every game shares this origin's Cache Storage: purge only our own old caches, never another game's.
 self.addEventListener('activate', e => e.waitUntil(
-  caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())));
+  caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE && k.startsWith('bsc-')).map(k => caches.delete(k)))).then(() => self.clients.claim())));
 
 self.addEventListener('fetch', e => {
   const r = e.request; if (r.method !== 'GET') return;

@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-  <head>
+  <head><script src="/perf.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AshenKeys — a keyboard clicker forged in the dark</title>
@@ -12,6 +12,7 @@
     />
     <script type="module" crossorigin src="/ashen-keys/assets/index-BMXrpXW1.js"></script>
     <link rel="stylesheet" crossorigin href="/ashen-keys/assets/index-BiVuQO6a.css">
+    <script>/* offline play: games.arcadedeck.net/sw.js (shared, one cache per game) */if('serviceWorker'in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js',{scope:'./'}).then(()=>navigator.serviceWorker.ready).then(r=>r.active&&r.active.postMessage([location.origin+location.pathname,...performance.getEntriesByType('resource').map(e=>e.name)])).catch(()=>{})})</script>
   </head>
   <body>
     <div id="root"></div>

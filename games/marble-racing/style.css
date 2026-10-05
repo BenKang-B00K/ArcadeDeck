@@ -714,7 +714,7 @@ dialog h2 { margin: 0 0 14px; text-align: center; font-size: 22px; font-weight: 
   background: color-mix(in srgb, var(--c) 16%, transparent); border-left: 4px solid var(--c); animation: enter .4s both; animation-delay: calc(var(--i) * 60ms);
 }
 #sumList .ic { color: var(--muted); width: 18px; height: 18px; }
-#sumList .jk { width: 15px; height: 15px; margin-left: 4px; vertical-align: -2px; color: #ffb547; stroke-width: 1.6; }
+#sumList .jk, #spTable .jk { width: 15px; height: 15px; margin-left: 4px; vertical-align: -2px; color: #ffb547; stroke-width: 1.6; }
 #sumList span { font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #sumList span:last-child { text-align: right; }
 /* winners / 1st places / biggest share: gold-framed hero rows with a crown badge, gold result pill,
@@ -791,7 +791,7 @@ dialog h2 { margin: 0 0 14px; text-align: center; font-size: 22px; font-weight: 
   .presets.sub .pill.cur { min-width: 32px; padding: 0 8px; }
   .presets .total input { width: 6.5em; height: 30px; }
   .seg.mods { gap: 3px; }
-  .seg .pill.mod { width: 30px; height: 30px; border-radius: 9px; } /* all nine on one row at 360px */
+  .seg .pill.mod { width: 30px; height: 30px; border-radius: 9px; } /* 9 to a row at 360px: the 15 wrap 9 + 6 */
   .pill.mod .mi { width: 20px; height: 20px; }
   .zoo { gap: 6px; margin-top: 12px; }
   .zoo li { --w: calc((100% - 24px) / 5); padding: 7px 2px 6px; border-radius: 12px; font-size: 10.5px; }

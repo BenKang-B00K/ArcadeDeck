@@ -1,5 +1,5 @@
 // Offline shell: serve from cache, refresh cache in the background (stale-while-revalidate).
-const CACHE = 'racing-v1.10.0';
+const CACHE = 'racing-v1.11.1';
 const SHELL = ['./', 'index.html', 'style.css', 'src/game.js', 'src/audio.js', 'src/sim.js', 'src/tracks.js', 'src/world.js', 'src/input.js', 'src/animals.js', 'coop.js', 'manifest.webmanifest',
   'banners/toy-diorama.webp', 'banners/storybook.webp', 'banners/neon-arcade.webp', 'banners/festival.webp',
   'icons/icon.svg', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png',

@@ -51,8 +51,7 @@ export function init(cv) {
   scene.matrixWorldAutoUpdate = false; // updated once per frame in render(), not once per view
   const pm = new THREE.PMREMGenerator(renderer);
   pm.dispose();
-  scene.environment = envFor('room');
-  scene.environmentIntensity = 0.45;
+  scene.environmentIntensity = 0.45; // the environment itself comes with each track (envLight)
   resize();
   addEventListener('resize', resize);
   return renderer;
@@ -276,7 +275,7 @@ export function loadTrack(track, karts) {
   T = track;
   const th = T.def.theme, grp = new THREE.Group();
   scene.background = skyTex(th.sky);
-  scene.environment = envFor(th.env || 'room');
+  envLight(scene, grp, th.env || 'room', th.toon ? 0.5 : 1);
   scene.fog = new THREE.Fog(th.fog, th.fogNear, th.fogFar);
   const hemi = new THREE.HemisphereLight(th.hemi[0], th.hemi[1], th.hemi[2]);
   key = new THREE.DirectionalLight(th.key[0], th.key[1]);
@@ -636,8 +635,8 @@ const softTex = () => canvasTex(64, 64, (g, w) => {
 function stage(sky) {
   const s = new THREE.Scene();
   s.background = skyTex(sky);
-  s.environment = envFor('room');
   s.environmentIntensity = 0.6;
+  envLight(s, s, 'room');
   s.add(new THREE.HemisphereLight('#bfb4ff', '#1a0f3a', 1.2));
   const key = new THREE.DirectionalLight('#ffe2c4', 2.2); key.position.set(-3, 5, 4);
   const rim = new THREE.DirectionalLight('#4fd8ff', 1.2); rim.position.set(4, 3, -4);
@@ -1367,6 +1366,22 @@ dress.toy = (grp, density) => {
 };
 
 // ---------- per-theme environment maps (the reflections in glossy karts / roads) ----------
+// Phones below High get no environment map: its per-pixel cube-map lookups (two per lit pixel) were the dearest part of
+// the frame, 29-66 % of a phone-sized race on a software GPU. A light probe keeps the same soft fill for 9 numbers a pixel;
+// only the reflections go. The probes are each envFor() scene's 9 spherical-harmonic terms (r, g, b), made once with
+// three's LightProbeGenerator from a 32 px half-float cube render of it: regenerate them if envFor() changes
+const SH = {
+  room: [3.614, 3.614, 3.614, 1.563, 1.563, 1.563, 1.595, 1.595, 1.595, .219, .219, .219, .149, .149, .149, 1.034, 1.034, 1.034, 1.388, 1.388, 1.388, -.282, -.282, -.282, -.465, -.465, -.465],
+  space: [.155, .091, .214, .098, .075, .101, -.062, .003, .054, .077, -.004, -.083, .047, -.003, -.051, -.083, .004, .072, -.047, .047, -.037, 0, 0, 0, .112, -.016, .102],
+  day: [2.472, 2.981, 3.659, .172, .125, .074, .046, .003, -.046, 0, .061, .033, 0, .037, .02, .059, .004, -.059, -.095, -.035, -.047, 0, 0, 0, .203, .105, .095],
+  dusk: [.258, .184, .38, .145, .044, .01, .029, .008, .006, 0, -.021, -.015, 0, -.013, -.009, .038, .01, .008, -.073, -.075, -.012, 0, 0, 0, .17, .116, .021],
+};
+// k: share of the scene's environmentIntensity. Storybook's toon world never took the env map, so it gets half: the
+// karts keep their fill, the toon ground doesn't wash out
+function envLight(s, holder, kind, k = 1) {
+  if (touch && tier !== 'high') { s.environment = null; holder.add(new THREE.LightProbe(new THREE.SphericalHarmonics3().fromArray(SH[kind]), s.environmentIntensity * k)); }
+  else s.environment = envFor(kind);
+}
 const envCache = {};
 function envFor(kind) {
   if (envCache[kind]) return envCache[kind];

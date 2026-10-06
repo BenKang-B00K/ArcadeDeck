@@ -562,6 +562,17 @@ export function advance(R, dt, intents) {
   return n;
 }
 
+// frame cap for the render loops (game.js): true = this display refresh comes too soon after the loop's last drawn
+// frame, skip it. c: the loop's own clock { t }; fps 0 = uncapped. A 90/120 Hz phone otherwise drew every loop at the
+// display's rate: the same picture as at 60, twice the heat
+export function tooSoon(c, now, fps) {
+  if (!fps) return false;
+  const ms = 1000 / fps;
+  if (now - c.t < ms - 2) return true; // 2 ms slack: a 60 Hz display's own refreshes jitter around 16.7 ms
+  c.t = Math.max(c.t + ms, now - ms); // keeps the cadence even: at a 60 cap a 90 Hz phone draws 2 refreshes in 3
+  return false;
+}
+
 // finished racers by finish time first, then everyone else by progress
 const order = [], byPlace = (a, b) => a.finished !== b.finished ? (a.finished ? -1 : 1) : a.finished ? a.finishT - b.finishT : b.progress - a.progress;
 export function rank(R) {

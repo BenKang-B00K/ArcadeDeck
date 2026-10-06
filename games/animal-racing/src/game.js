@@ -2,7 +2,7 @@
 import * as sfx from './audio.js';
 import * as world from './world.js';
 import * as input from './input.js';
-import { buildTrack, newRace, newKart, advance, cpu, GP_ORDER, gpPoints, reverseGrid, billSplit, teamSplit, teamScores } from './sim.js';
+import { buildTrack, newRace, newKart, advance, tooSoon, cpu, GP_ORDER, gpPoints, reverseGrid, billSplit, teamSplit, teamScores } from './sim.js';
 import { TRACKS as TRACK_DEFS } from './tracks.js';
 
 const DEBUG = new URLSearchParams(location.search).has('debug');
@@ -27,7 +27,7 @@ const I18N = {
     laps: 'Laps', racers: 'Racers', rotate: 'Turn your device sideways to race', soon: 'This track is still being built!',
     lap: 'Lap', finalLap: 'FINAL LAP!', go: 'GO!', wrongWay: 'WRONG WAY', finish: 'FINISH!',
     bomb: 'Bomb', bubble: 'Bubble', dash: 'Lucky Dash', joker: 'Joker', lucky: 'LUCKY SWAP!', unlucky: 'UNLUCKY SWAP!',
-    ready: 'Ready!', reconnect: "Reconnect {n}'s controller", layout: 'Split screen', lAuto: 'Auto', lTb: 'Top / bottom', lSbs: 'Side by side', tilt: 'Tilt steering', standings: 'Standings',
+    ready: 'Ready!', reconnect: "Reconnect {n}'s controller", layout: 'Split screen', lAuto: 'Auto', lTb: 'Top / bottom', lSbs: 'Side by side', tilt: 'Tilt steering', saver: 'Battery saver', standings: 'Standings',
     pWin: 'Winner', pPen: 'Penalty', pRank: 'Rank', pTeam: 'Teams', pBill: 'Bill', winners: 'Winners', pens: 'Penalties', firsts: '1st places', total: 'Total', teams2: 'Two teams, everyone racing counts', billNote: 'Only players pay; last place pays the most',
     win: 'WIN!', lose: 'Pass', pen: 'Penalty', safe: 'Safe', team: 'Team {n}', summary: 'Results', close: 'Close', nextTrack: 'Next track', standings: 'Standings', champion: 'Grand Prix Champion!', pts: '{n} pts', raceOf: 'Race {n} of 4', newGp: 'New Grand Prix', less: 'Fewer', more: 'More',
     install: 'Install app', iosInstall: 'Install: tap Share, then Add to Home Screen',
@@ -57,7 +57,7 @@ const I18N = {
     laps: '랩 수', racers: '레이서 수', rotate: '기기를 가로로 돌려 주세요', soon: '아직 공사 중인 트랙이에요!',
     lap: '랩', finalLap: '마지막 랩!', go: '출발!', wrongWay: '역주행', finish: '골인!',
     bomb: '폭탄', bubble: '버블', dash: '행운 대시', joker: '조커', lucky: 'Lucky!', unlucky: 'Unlucky!',
-    ready: '준비 완료!', reconnect: '{n} 컨트롤러를 다시 연결해 주세요', layout: '화면 분할', lAuto: '자동', lTb: '위 / 아래', lSbs: '왼쪽 / 오른쪽', tilt: '기울여서 조종', standings: '순위',
+    ready: '준비 완료!', reconnect: '{n} 컨트롤러를 다시 연결해 주세요', layout: '화면 분할', lAuto: '자동', lTb: '위 / 아래', lSbs: '왼쪽 / 오른쪽', tilt: '기울여서 조종', saver: '배터리 절약', standings: '순위',
     pWin: '당첨', pPen: '벌칙', pRank: '순위', pTeam: '팀', pBill: '정산', winners: '당첨 수', pens: '벌칙 수', firsts: '1등 수', total: '총액', teams2: '두 팀으로 나눠 모든 레이서 점수 합산', billNote: '플레이어만 내요. 꼴찌가 가장 많이 내요',
     win: '당첨!', lose: '꽝', pen: '벌칙', safe: '통과', team: '{n}팀', summary: '결과', close: '닫기', nextTrack: '다음 트랙', standings: '종합 순위', champion: '그랑프리 우승!', pts: '{n}점', raceOf: '{n} / 4 레이스', newGp: '새 그랑프리', less: '줄이기', more: '늘리기',
     install: '앱 설치', iosInstall: '설치: 공유 버튼 → 홈 화면에 추가',
@@ -87,7 +87,7 @@ const I18N = {
     laps: '周回数', racers: 'レーサー数', rotate: '端末を横向きにしてね', soon: 'このコースはまだ工事中！',
     lap: 'ラップ', finalLap: 'ファイナルラップ！', go: 'GO！', wrongWay: '逆走中', finish: 'ゴール！',
     bomb: 'ボム', bubble: 'バブル', dash: 'ラッキーダッシュ', joker: 'ジョーカー', lucky: 'Lucky!', unlucky: 'Unlucky!',
-    ready: '準備OK！', reconnect: '{n}のコントローラーをつなぎ直してね', layout: '画面分割', lAuto: '自動', lTb: '上 / 下', lSbs: '左 / 右', tilt: '傾けて操作', standings: '順位',
+    ready: '準備OK！', reconnect: '{n}のコントローラーをつなぎ直してね', layout: '画面分割', lAuto: '自動', lTb: '上 / 下', lSbs: '左 / 右', tilt: '傾けて操作', saver: 'バッテリー節約', standings: '順位',
     pWin: '当たり', pPen: '罰ゲーム', pRank: '順位', pTeam: 'チーム', pBill: '割り勘', winners: '当たり数', pens: '罰ゲーム数', firsts: '1位数', total: '合計', teams2: '2チームに分かれて全員のポイントを合計', billNote: 'プレイヤーだけが払う。最下位がいちばん多く払う',
     win: '当たり！', lose: 'はずれ', pen: '罰ゲーム', safe: 'セーフ', team: 'チーム{n}', summary: '結果', close: '閉じる', nextTrack: '次のコース', standings: '総合順位', champion: 'グランプリ優勝！', pts: '{n}点', raceOf: '第{n}レース / 4', newGp: '新しいグランプリ', less: '減らす', more: '増やす',
     install: 'アプリをインストール', iosInstall: 'インストール: 共有 → ホーム画面に追加',
@@ -131,6 +131,7 @@ const S = {
   firsts: pick(saved.firsts, [1, 2, 3], 1), // Rank: how many share 1st
   cur: saved.cur, total: Number.isFinite(saved.total) && saved.total > 0 ? saved.total : 0, // Bill
   tilt: !!saved.tilt,
+  saver: !!saved.saver, // Battery saver: every loop capped at 30 fps
   wins: Number.isInteger(saved.wins) && saved.wins > 0 ? saved.wins : 0, // races won against CPUs, offline (ArcadeDeck score)
 };
 if (!S.lobby.length) S.lobby = [0];
@@ -147,6 +148,10 @@ const t = (k, n) => {
 };
 const range = n => Array.from({ length: n }, (_, i) => i);
 const $ = s => document.querySelector(s);
+// the open dialog, if any: a live list of the few <dialog>s, as the frame loops ask every frame (a 'dialog[open]'
+// selector scanned the whole page, every SVG symbol included, each time)
+const DLGS = document.getElementsByTagName('dialog');
+const openDlg = () => { for (const d of DLGS) if (d.open) return d; return null; };
 const el = (tag, cls, html) => Object.assign(document.createElement(tag), { className: cls || '', innerHTML: html || '' });
 const face = (k, i = 0) => `<svg class="ani" style="--i:${i}" aria-hidden="true"><use href="#a${k}"/></svg>`;
 // menu faces blink from one timer, three at a time (1 in 3 a double blink, like Ladder): each visible face blinks every
@@ -195,7 +200,7 @@ function show(id) {
 }
 function back() {
   if (!volPop.hidden) return togglePop(false);
-  const dlg = $('dialog[open]');
+  const dlg = openDlg();
   if (dlg) return dlg.id === 'pauseDlg' ? resume() : dlg.close();
   if (screen === 'race') return pause('P1');
   if (NET.role === 'guest') return Coop.open(linkOpts); // lobby / results: the link dialog has Leave
@@ -209,8 +214,14 @@ function guard() { if (!history.state?.guard) history.pushState({ guard: 1 }, ''
 if (history.state?.guard) history.back(); // reloaded on a guarded entry
 addEventListener('popstate', () => { if (screen === 'title') return; back(); if (screen !== 'title') guard(); });
 
+// ---------- frame caps (sim.js tooSoon): races 60 on touch, uncapped on computers; the 3D behind menus 30 on touch,
+// 60 on computers; Battery saver 30 everywhere ----------
+const raceFps = () => S.saver ? 30 : world.touch ? 60 : 0; // 0: uncapped
+const menuFps = () => S.saver || world.touch ? 30 : 60;
+
 // ---------- title: the live diorama behind the menu (a few CPU karts racing the Toy track, reduced resolution) ----------
 let demo = null, demoRaf = 0, demoLast = 0;
+const demoClk = { t: 0 };
 const ZOO = new URLSearchParams(location.search).has('zoo');
 function titleStage(on) {
   if (!on || ZOO || SHOT) { if (demoRaf) { cancelAnimationFrame(demoRaf); demoRaf = 0; world.setDprScale(1); } document.body.classList.remove('staged'); return; }
@@ -232,14 +243,15 @@ function titleStage(on) {
 function demoLoop(now) {
   if (screen !== 'title') { demoRaf = 0; world.setDprScale(1); return; }
   demoRaf = requestAnimationFrame(demoLoop);
+  if (tooSoon(demoClk, now, menuFps())) return;
   const raw = (now - demoLast) / 1000, dt = Math.min(0.1, raw);
   demoLast = now;
-  if (document.querySelector('dialog[open]') && !world.stale) return; // Settings open: hold the frame (its blurred backdrop stays still too)
+  if (openDlg() && !world.stale) return; // Settings open: hold the frame (its blurred backdrop stays still too)
   advance(demo, dt, []);
   demo.ev.length = 0;
   world.sync(demo, dt);
   world.render();
-  adapt(raw); // the tier settles here, so the first race already loads the right props and materials
+  adapt(raw, menuFps()); // the tier settles here, so the first race already loads the right props and materials
 }
 
 // ---------- install ----------
@@ -374,9 +386,11 @@ function drawLobby() {
   showPreview();
 }
 let lobbyRaf = 0, lobbyLast = 0;
+const lobbyClk = { t: 0 };
 function lobbyLoop(now) {
   if (screen !== 'lobby') { lobbyRaf = 0; return; }
   lobbyRaf = requestAnimationFrame(lobbyLoop);
+  if (tooSoon(lobbyClk, now, menuFps()) || (openDlg() && !world.stale)) return; // under a dialog: hold (its blurred backdrop re-blurs every frame the 3D moves)
   world.renderPreview(Math.min(0.1, (now - lobbyLast) / 1000));
   lobbyLast = now;
 }
@@ -464,7 +478,7 @@ $('#trackGo').onclick = () => { racePrep(); show('race'); };
 // ---------- race ----------
 const built = {}; // track tables, built once per session
 let worldReady = false;
-function ensureWorld() { if (!worldReady) { world.init($('#view3d')); world.setLayoutPref(S.layout); setTier(S.tier !== 'auto' ? S.tier : world.tier); worldReady = true; } }
+function ensureWorld() { if (!worldReady) { world.init($('#view3d')); world.setLayoutPref(S.layout); world.setTier(S.tier !== 'auto' ? S.tier : world.tier); worldReady = true; } }
 const intents = [input.newIntent(), input.newIntent(), input.newIntent(), input.newIntent()];
 let R = null, raf = 0, last = 0, paused = false, endTimer = 0, players = []; // players[p] = { dev, k }; kart index = p
 const shuffled = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -525,7 +539,6 @@ function startRace() {
     if (R.team && GP && !GP.team) { GP.team = {}; karts.forEach(k => { GP.team[k.animal] = R.team[k.i]; }); }
   }
   world.loadTrack(T, R.karts);
-  $('#race').classList.toggle('paper', !!def.theme.day);
   demo = null;
   views = players.map((_, p) => p).filter(p => !/^(net|remote)/.test(players[p].dev));
   if (!views.length) views = [0]; // a guest without a seat (lobby was full) watches P1
@@ -552,10 +565,13 @@ function stopLoop() {
 // the other keyboard cluster has no player: let this one use both (1P can drive with WASD or the arrows)
 const kbShare = dev => (dev === 'kb0' || dev === 'kb1') && !players.some(p => p.dev === (dev === 'kb0' ? 'kb1' : 'kb0'));
 const autoIn = { steer: 0, throttle: 0, brake: 0, drift: false };
+const raceClk = { t: 0 };
 function frame(now) {
   raf = requestAnimationFrame(frame);
+  if (tooSoon(raceClk, now, raceFps())) return;
   const raw = (now - last) / 1000, dt = Math.min(0.1, raw);
   last = now;
+  if (paused && !world.stale) return; // the last frame, HUD and minimap stay on screen: nothing to move, sync or redraw
   if (!paused) {
     for (let p = 0; p < players.length; p++) {
       const pl = players[p], o = intents[p], k = R.karts[p];
@@ -581,25 +597,25 @@ function frame(now) {
     while (pe.length && pe[0] <= sfx.now()) { pe.shift(); world.firework(); }
     if (S.music === 0 && Math.random() < dt / 7) world.firework();
   }
-  if (!paused || world.stale) world.render(); // paused: the last frame stays on screen, the GPU rests
-  updateHud();
-  if (!paused) adapt(raw);
+  world.render(); // paused: returned above unless a resize cleared the canvas
+  updateHud(now);
+  if (!paused) adapt(raw, raceFps());
   if (DEBUG) debugOverlay(now, dt);
 }
 // Auto quality: below ~40 fps for 2 s steps down one tier for the session (race and title backdrop). Phones that held
-// 30 fps never crossed the old ~26 fps line; a 30 fps-capped phone (battery saver) settles on Low, which saves power
+// 30 fps never crossed the old ~26 fps line; a 30 fps-capped phone (OS battery saver) settles on Low, which saves power.
+// A loop capped at 30 (touch menus, Battery saver) only counts as slow below ~24 fps, its cap's frames plus a margin
 let frameT = 1 / 60, slowT = 0;
-function adapt(dt) { // dt: the real frame time, before the loops cap it
+function adapt(dt, fps) { // dt: the real time between drawn frames, before the loops cap it; fps: the loop's cap (0: none)
   if (S.tier !== 'auto' || dt <= 0 || dt > 0.25 || document.hidden) return; // a hitch, or a hidden / covered window's throttled frames: says nothing about the device
   frameT += (dt - frameT) * 0.1;
-  slowT = frameT > 0.025 ? slowT + dt : 0;
+  slowT = frameT > Math.max(0.025, fps ? 1.25 / fps : 0) ? slowT + dt : 0;
   if (slowT > 2 && world.tier !== 'low') {
-    setTier(world.tier === 'high' ? 'medium' : 'low');
+    world.setTier(world.tier === 'high' ? 'medium' : 'low');
     slowT = 0; frameT = 1 / 60;
     if (DEBUG) console.log('quality ->', world.tier);
   }
 }
-function setTier(t) { world.setTier(t); document.body.dataset.tier = t; }
 // ?auto: P1 drives itself with the CPU driver, for checking tracks hands-free
 const AUTO = new URLSearchParams(location.search).has('auto');
 if (DEBUG) { window.__race = () => R; window.__fw = () => world.firework(); }
@@ -763,7 +779,7 @@ function toast(p, text, cls) {
   h.toast.textContent = text; h.toast.className = 'toast ' + cls; void h.toast.offsetWidth; h.toast.classList.add('on');
 }
 // minimap: the track drawn once to an offscreen canvas, face dots on top each frame
-let mapBase = null, mapXf = null;
+let mapBase = null, mapXf = null, mapT = 0; // mapT: last dot redraw, 0 = on the next frame (buildMinimap cleared it)
 function buildMinimap() {
   const c = mapCanvas, r = c.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
   c.width = Math.max(1, r.width * dpr | 0); c.height = Math.max(1, r.height * dpr | 0);
@@ -773,6 +789,7 @@ function buildMinimap() {
   const pad = 14 * dpr, sc = Math.min((c.width - 2 * pad) / (x1 - x0), (c.height - 2 * pad) / (z1 - z0));
   const ox = (c.width - (x1 - x0) * sc) / 2 - x0 * sc, oz = (c.height - (z1 - z0) * sc) / 2 - z0 * sc;
   mapXf = { sc, ox, oz, dpr, dot: Math.max(13, Math.min(c.width, c.height) / 9) };
+  mapT = 0;
   mapBase = document.createElement('canvas'); mapBase.width = c.width; mapBase.height = c.height;
   const g = mapBase.getContext('2d');
   g.lineJoin = g.lineCap = 'round';
@@ -816,7 +833,7 @@ function drawMinimap() {
     g.drawImage(faceCanvases[k.animal], x - s / 2, y - s / 2, s, s);
   }
 }
-function updateHud() {
+function updateHud(now) {
   for (let j = 0; j < hud.length; j++) {
     const h = hud[j], p = views[j], k = R.karts[p];
     const lap = `${Math.min(R.laps, Math.max(1, k.lap + 1))}/${R.laps}`;
@@ -841,7 +858,9 @@ function updateHud() {
       }
     }
   }
-  if (mapXf) drawMinimap();
+  // ~15 redraws a second: a dot crosses at most ~8 px a second on a phone's map (half a pixel per redraw), so 60 redraws
+  // (each one a fresh canvas for the compositor) looked the same
+  if (mapXf && now - mapT > 64) { mapT = now; drawMinimap(); }
   if (standEl) { // 3P: live standings in the free quadrant, rewritten only when the order changes
     let key = '';
     for (const k of byPlaceArr) key += k.i + ',';
@@ -921,9 +940,11 @@ const eyesOf = k => [...$('#a' + k).querySelectorAll('.e [fill="#2b2140"] circle
 const tears = k => eyesOf(k).map(([x, y]) => [0, 0.6].map(d => `<path class="tear" style="animation-delay:${0.3 + d + (x > 16) * 0.3}s" d="M${x} ${y + 1.4}q-1.3 1.9 0 2.8q1.3-.9 0-2.8z" fill="#8fd8ff" stroke="#2b6a9a" stroke-width=".4"/>`).join('')).join('');
 const pet = (animal, mood, i) => `<svg class="pet${mood.includes('win') ? ' win' : ''}${mood.includes('cry') ? ' cry' : ''}" style="--i:${i}" viewBox="-2 -9 36 43" aria-hidden="true"><use href="#a${animal}" width="32" height="32"/>${mood.includes('crown') ? '<use href="#x-crown"/>' : ''}${mood.includes('soot') ? '<use href="#x-soot"/>' : ''}${mood.includes('cry') ? tears(animal) : ''}</svg>`;
 let podRaf = 0, podLast = 0, countT = 0;
+const podClk = { t: 0 };
 function podLoop(now) {
   if (screen !== 'results') { podRaf = 0; return; }
   podRaf = requestAnimationFrame(podLoop);
+  if (tooSoon(podClk, now, menuFps()) || (openDlg() && !world.stale)) return; // Party Stakes summary open: hold, as in the lobby
   world.renderPodium(Math.min(0.1, (now - podLast) / 1000));
   podLast = now;
 }
@@ -982,7 +1003,7 @@ function showResults() {
       if (moving) { if (step % 2) sfx.spot(step % 7); } else clearInterval(countT);
     }, 70);
   }
-  if (stakes || teams) { fillSummary(humans, stakes, teams ? rows : null); setTimeout(() => { if (screen === 'results' && !$('dialog[open]')) $('#summary').showModal(); }, 2400); }
+  if (stakes || teams) { fillSummary(humans, stakes, teams ? rows : null); setTimeout(() => { if (screen === 'results' && !openDlg()) $('#summary').showModal(); }, 2400); }
 }
 // the Party Stakes summary: Ladder's result list (spotlight rows for winners, red for the penalty / biggest bill),
 // or one card per team with its score and member chips
@@ -1016,7 +1037,9 @@ document.addEventListener('visibilitychange', () => { if (document.hidden && scr
 function renderSettings() {
   document.querySelectorAll('[data-set]').forEach(g => g.querySelectorAll('[data-v]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v) === String(S[g.dataset.set]))));
   $('#tiltBtn').setAttribute('aria-pressed', S.tilt);
+  $('#saverBtn').setAttribute('aria-pressed', S.saver);
 }
+$('#saverBtn').onclick = () => { S.saver = !S.saver; save(); renderSettings(); };
 $('#tiltBtn').onclick = async () => { S.tilt = await input.enableTilt(!S.tilt); save(); renderSettings(); };
 // iOS only answers the motion permission inside a tap: retry on the first one (the tilt toggle itself handles its own)
 if (S.tilt) input.enableTilt(true).then(on => on || addEventListener('click', e => e.target.closest('#tiltBtn') || input.enableTilt(true), { once: true, capture: true }));
@@ -1026,7 +1049,7 @@ document.querySelectorAll('[data-set]').forEach(g => g.onclick = e => {
   const v = b.dataset.v;
   S[g.dataset.set] = isNaN(v) ? v : +v; save(); renderSettings();
   if (g.dataset.set === 'layout' && worldReady) world.setLayoutPref(S.layout);
-  if (g.dataset.set === 'tier' && worldReady) setTier(S.tier === 'auto' ? (world.touch ? 'medium' : 'high') : S.tier);
+  if (g.dataset.set === 'tier' && worldReady) world.setTier(S.tier === 'auto' ? (world.touch ? 'medium' : 'high') : S.tier);
 });
 $('#setClose').onclick = () => $('#setDlg').close();
 
@@ -1093,7 +1116,7 @@ document.addEventListener('click', e => { if (e.target.closest('button') && scre
 // arrows / D-pad / left stick move focus to the nearest control in that direction (rect centres), Enter / A presses,
 // Esc / Backspace / B goes back. ponytail: brute force over the visible controls, a few dozen at most
 const nav = { on: false };
-const scope = () => $('dialog[open]') || (!volPop.hidden ? $('#vol') : null);
+const scope = () => openDlg() || (!volPop.hidden ? $('#vol') : null);
 function focusables() {
   const roots = scope() ? [scope()] : [$('#' + screen), $('#bar')];
   return roots.flatMap(r => [...r.querySelectorAll('button:not(:disabled), input')])
@@ -1121,8 +1144,8 @@ function move(dx, dy) {
 }
 const DIRS = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
 addEventListener('keydown', e => {
-  if (screen === 'lobby' && NET.role !== 'guest' && !$('dialog[open]') && volPop.hidden) return; // lobbyInput() handles every key here (a guest's lobby is a plain menu)
-  if (screen === 'race' && !$('dialog[open]')) { if (e.key === 'Escape') { e.preventDefault(); pause('P1'); } return; } // preventDefault: the same Esc would cancel the fresh modal
+  if (screen === 'lobby' && NET.role !== 'guest' && !openDlg() && volPop.hidden) return; // lobbyInput() handles every key here (a guest's lobby is a plain menu)
+  if (screen === 'race' && !openDlg()) { if (e.key === 'Escape') { e.preventDefault(); pause('P1'); } return; } // preventDefault: the same Esc would cancel the fresh modal
   const d = DIRS[e.key];
   if (d) {
     if (document.activeElement?.type === 'range' && d[0]) { nav.on = true; return; } // sliders keep left/right
@@ -1150,7 +1173,7 @@ function tick(now) {
   requestAnimationFrame(tick);
   input.poll(now);
   if (input.anyPadButton()) unlock();
-  const modal = $('dialog[open]') || !volPop.hidden;
+  const modal = openDlg() || !volPop.hidden;
   if (screen === 'race' && !modal) { for (let p = 0; p < players.length; p++) if (players[p].dev.startsWith('pad') && input.edgesOf(players[p].dev).start) pause('P' + (p + 1)); }
   else if (screen === 'lobby' && !modal && NET.role !== 'guest') lobbyInput();
   else padMenu();

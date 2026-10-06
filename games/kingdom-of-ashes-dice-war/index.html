@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script src="/perf.js"></script>
+<head>
+    <script src="/perf.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Kingdom of Ashes - Dice War</title>
@@ -330,7 +331,8 @@
             letter-spacing: 0.04em;
         }
     </style>
-  <script type="module" crossorigin src="./assets/index-DXQWbwcp.js"></script>
+<script>/* offline play: games.arcadedeck.net/sw.js (shared, one cache per game) */if('serviceWorker'in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js',{scope:'./'}).then(()=>navigator.serviceWorker.ready).then(r=>r.active&&r.active.postMessage([location.origin+location.pathname,...performance.getEntriesByType('resource').map(e=>e.name)])).catch(()=>{})})</script>
+  <script type="module" crossorigin src="./assets/index-COMSBJaU.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/Geometry-MFRJ-jpk.js">
   <link rel="modulepreload" crossorigin href="./assets/GCManagedHash-jMfNVFVu.js">
   <link rel="modulepreload" crossorigin href="./assets/getTextureBatchBindGroup-BEt_pZuD.js">
@@ -341,7 +343,6 @@
   <link rel="modulepreload" crossorigin href="./assets/RenderTargetSystem-Dv4I5kBU.js">
   <link rel="modulepreload" crossorigin href="./assets/BufferResource-B6oGLkY-.js">
   <link rel="modulepreload" crossorigin href="./assets/CanvasPool-uvdH0Iih.js">
-<script>/* offline play: games.arcadedeck.net/sw.js (shared, one cache per game) */if('serviceWorker'in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js',{scope:'./'}).then(()=>navigator.serviceWorker.ready).then(r=>r.active&&r.active.postMessage([location.origin+location.pathname,...performance.getEntriesByType('resource').map(e=>e.name)])).catch(()=>{})})</script>
 </head>
 <body>
     <!-- Loading screen (hidden after assets load) -->
@@ -378,6 +379,6 @@
         <p class="rotate-sub" id="rotate-sub">This game is designed for landscape mode</p>
     </div>
 
-    <div id="app"></div>
+    <div id="app"></div>
 </body>
 </html>

@@ -1,5 +1,6 @@
 // coop.js — phone link (Host / Join) for ArcadeDeck local co-op games.
-// The same file ships in Ladder Game, Marble Racing, Tandem, Spirit Duel, Triangle Battle and Omok: change every copy together.
+// The same file ships in Ladder Game, Marble Racing, Tandem, Spirit Duel, Triangle Battle, Omok, Emotion Act and Animal Racing:
+// change every copy together.
 // Plain script, exposes window.Coop (works from classic scripts and ES modules alike).
 //
 // Star topology over WebRTC via PeerJS (same approach as Sprint Clash): the host holds one
@@ -87,8 +88,12 @@
     document.head.appendChild(s);
   });
   const STUN = [{ urls: ['stun:stun.cloudflare.com:3478', 'stun:stun.l.google.com:19302'] }];
-  // POST, not GET: the games' service workers cache GETs and would replay expired credentials
-  const ice = () => fetch('/turn', { method: 'POST', signal: AbortSignal.timeout?.(4000) }).then(r => (r.ok ? r.json() : [])).catch(() => [])
+  // POST, not GET: the games' service workers cache GETs and would replay expired credentials.
+  // Creds live a day (functions/turn.js): reuse them for an hour across code re-rolls and retries; a failure is not kept
+  let iceP = null;
+  const ice = () => iceP ??= fetch('/turn', { method: 'POST', signal: AbortSignal.timeout?.(4000) })
+    .then(r => (r.ok ? r.json() : Promise.reject()))
+    .then(t => { setTimeout(() => { iceP = null; }, 36e5); return t; }, () => { iceP = null; return []; })
     .then(t => ({ config: { iceServers: STUN.concat(Array.isArray(t) ? t : []) } }));
 
   // ---------- connections ----------
@@ -243,7 +248,8 @@
 .coop-chip i{width:8px;height:8px;border-radius:50%;background:#ff4d5e;box-shadow:0 0 8px #ff4d5e}
 .coop-chip svg{width:18px;height:18px}
 @media (max-height:420px){.coop-box{gap:8px;padding:14px 16px}.coop h2{font-size:1.05rem}.coop p{font-size:.85rem;line-height:1.4}.coop button,.coop input{min-height:44px}.coop-code{font-size:2.2rem}}
-@media (prefers-reduced-motion:reduce){.coop-spin{animation-duration:2.4s}}`;
+@media (prefers-reduced-motion:reduce){.coop-spin{animation-duration:2.4s}}
+@media (pointer:coarse){.coop{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(4,7,18,.88)}}`; // phones: a full-screen blur re-runs every frame the game draws behind it
   const EYE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
 
   function mount() {
@@ -317,7 +323,7 @@
     open(opts) {
       o = { max: 1, min: 1, ...opts };
       mount();
-      if (!peer && !conn) view = 'menu';
+      if (!peer && !conn) { view = 'menu'; load().catch(() => {}); ice(); } // warm up PeerJS + TURN while the dialog is read
       else if (view !== 'hosting' && view !== 'joined') view = conn ? 'joined' : 'hosting';
       render();
     },

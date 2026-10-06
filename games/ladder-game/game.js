@@ -146,11 +146,13 @@ const rollTeams = () => { S.teams = clamp(S.teams, 2, maxTeams()); S.teamOf = sh
 const reroll = () => ({ ratio: rollRatio, bill: rollBill, team: rollTeams }[S.preset] || (marks() ? rollWinners : () => {}))();
 // ponytail: whole amounts only, no cents
 const money = v => CUR[S.cur][0] + v.toLocaleString(S.lang);
-const presetVals = () => range(S.n).map(i => S.preset === 'win' ? t(S.winSlots.includes(i) ? 'win' : 'lose')
+// one slot's text: resultOf() reads a single slot, it used to build the whole row for it (n x n per board render)
+const presetVal = i => S.preset === 'win' ? t(S.winSlots.includes(i) ? 'win' : 'lose')
   : S.preset === 'pen' ? t(S.winSlots.includes(i) ? 'pen' : 'safe')
   : S.preset === 'rank' ? t('rank', place(i))
   : S.preset === 'team' ? t('team', String.fromCharCode(65 + S.teamOf[i]))
-  : S.preset === 'bill' ? money(S.bill[i]) : S.preset === 'ratio' ? S.ratio[i] + '%' : '');
+  : S.preset === 'bill' ? money(S.bill[i]) : S.preset === 'ratio' ? S.ratio[i] + '%' : '';
+const presetVals = () => range(S.n).map(presetVal);
 // players get the first n of all animals: reshuffled on every page load and Pick Order tap, never saved
 const ZOO = shuffle(range(COLORS.length));
 const pc = i => COLORS[ZOO[i]]; // player colour = their animal's colour
@@ -159,7 +161,7 @@ const animalName = i => t('player', ZOO[i] + 1);
 const blinkVars = () => `--bt:${(3 + Math.random() * 4).toFixed(2)}s;--bd:${(-Math.random() * 7).toFixed(2)}s${Math.random() < 0.33 ? ';--bk:blink2' : ''}`;
 const face = i => `<svg class="ani" style="${blinkVars()}" aria-hidden="true"><use href="#a${ZOO[i]}"/></svg>`;
 const nameOf = (i, short) => short ? face(i) : `${face(i)} ${animalName(i)}`; // HTML; short: fits 10 narrow lanes
-const resultOf = i => (S.preset ? presetVals()[i] : S.results[i]?.trim()) || '—';
+const resultOf = i => (S.preset ? presetVal(i) : S.results[i]?.trim()) || '—';
 // quick fill results show on the board as toy-like 3D glyphs (#g-* in index.html), the text kept for screen readers;
 // rank / team carry their number or letter on the glyph, ratio / bill keep the value as a caption
 const gly = (id, tint) => `<svg aria-hidden="true"${tint ? ` style="color:${tint}"` : ''}><use href="#g-${id}"/></svg>`;
@@ -341,15 +343,20 @@ let dprCap = 2;
 // camera: screen = board * (zx, zy) + (x, y). A solo run zooms in (more down the rails than across) and follows
 // its runner; eases back out when it lands. Folded into px, not a canvas scale, so animals and mouths stay round
 const cam = { zx: 1, zy: 1, x: 0, y: 0 };
+let view = 0; // bumped whenever px()'s mapping changes (resize, camera, new board): screen-space caches key on it
 
 const px = ([c, v]) => [(c + 0.5) * W / G.n * cam.zx + cam.x, (PAD + v * (H - 2 * PAD)) * cam.zy + cam.y];
 const pan = x => (x / W) * 1.6 - 0.8;
-const rgba = (h, a) => `rgba(${parseInt(h.slice(1, 3), 16)},${parseInt(h.slice(3, 5), 16)},${parseInt(h.slice(5, 7), 16)},${a})`;
+const RGB = {}; // hex -> "r,g,b", parsed once: rgba() runs for every halo / orb / spark gradient each frame
+const rgba = (h, a) => `rgba(${RGB[h] ??= [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)).join()},${a})`;
+// frame cap on phones: a 120Hz screen draws every other vsync (60fps), half the battery for the same look.
+// ponytail: a skip threshold, not a pacer: 90Hz screens stay at 90 (even pacing can't hit 60 there), desktops uncapped
+const MIN_FT = matchMedia('(pointer: coarse)').matches ? 10 : 0;
 
 function resize() {
   const r = wrap.getBoundingClientRect();
   if (!r.width || !r.height || !G.n) return;
-  W = r.width; H = r.height;
+  W = r.width; H = r.height; view++;
   const dpr = DPR = Math.min(dprCap, window.devicePixelRatio || 1);
   for (const c of [cv, stat, trail, cvTop]) {
     c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); // also clears
@@ -371,7 +378,7 @@ function drawTrail() {
 
 function paint() {
   cx.clearRect(0, 0, W, H);
-  ctop.clearRect(0, 0, W, H);
+  if (G.top) { ctop.clearRect(0, 0, W, H); G.top = false; } // carousel front layer: wiped only after a frame drew on it
   cx.drawImage(stat, 0, 0, W, H);
   cx.drawImage(trail, 0, 0, W, H);
 }
@@ -384,18 +391,14 @@ const hideAll = () => !G.shown && !G.left && G.pick < G.n; // while players pick
 const seen = v => G.shown || (!hideAll() && v > band()[0] && v < band()[1]);
 // eased widening: 7.5% after 1 s, 12.5% after 2 s, 15% after 3 s (p = elapsed / PEEK)
 const extAt = p => EXT * p * (1.75 - 0.75 * p);
+// the mist edge creeps ~30px/s: redrawing it (the costly part) ~15 times a second looks the same as every frame,
+// and a timer instead of rAF leaves the page asleep between steps
 function grow(t0) {
   if (!G.left) return;
-  const now = performance.now(), ext = extAt(Math.min(1, (now - t0) / (PEEK * 1000)));
-  // the mist edge creeps ~30px/s: redrawing it (the costly part) ~15 times a second looks the same as every frame
-  // and leaves slow phones most of each frame for everything else
-  if (!(now - G.grewAt < 66)) {
-    G.grewAt = now;
-    G.ext = ext;
-    drawStatic();
-    if (!G.raf) paint();
-  }
-  G.grow = requestAnimationFrame(() => grow(t0));
+  G.ext = extAt(Math.min(1, (performance.now() - t0) / (PEEK * 1000)));
+  drawStatic();
+  if (!G.raf) paint();
+  G.grow = setTimeout(grow, 66, t0);
 }
 
 // wormholes (two-way): a dim flowing line between the bottom mouth (vortex) and the top mouth (rays), arrows running both ways
@@ -406,21 +409,25 @@ const RAYS = range(8).map(k => {
 }).join('');
 // one colour per wormhole, shared by both its mouths, so connected mouths match and up to MAX_HOLES never look alike;
 // [bottom, top] stays a pair so the mouth / streak code reads either end
-const HOLE_COLORS = ['#c86bff', '#2fe3a0', '#ff5c93'];
-const holeColors = k => { const c = HOLE_COLORS[k % HOLE_COLORS.length]; return [c, c]; };
+const HOLE_COLORS = ['#c86bff', '#2fe3a0', '#ff5c93'].map(c => [c, c]); // pairs built once, read every frame
+const holeColors = k => HOLE_COLORS[k % HOLE_COLORS.length];
 const holeVars = k => `style="--hi:${holeColors(k)[0]};--ho:${holeColors(k)[1]}"`;
 const mixWhite = h => '#' + [1, 3, 5].map(i => Math.round((parseInt(h.slice(i, i + 2), 16) + 255) / 2).toString(16).padStart(2, '0')).join(''); // halfway to white, for labels
 // wormhole arrows: one leaves each mouth, they cross mid-line, bounce off the far mouth and come back.
 // rotate="auto" follows the path's own direction (In -> Out), so the arrow is mirrored on the legs that run Out -> In
 const BOUNCE = [['0;1;0', '1 1;-1 1'], ['1;0;1', '-1 1;1 1']];
 let holesFor = null; // ladder whose wormholes / carousel are in the SVG; built once per ladder so the CSS animations keep running
+let holesView = -1; // view their geometry was laid out for
 const CHEV = '<path class="chev" d="M-3-3.6 1.8 0-3 3.6">';
+// mist rule on an SVG group: clipped to the visible band until a path unveils it; the attribute is touched only on change
+const clip = (g, on) => { if (g.hasAttribute('clip-path') !== on) on ? g.setAttribute('clip-path', 'url(#holeClip)') : g.removeAttribute('clip-path'); };
 function drawHole() {
   const hs = G.ladder.holes, rs = G.ladder.rings;
   for (const s of [holeSvg, holeBack]) s.toggleAttribute('hidden', !hs.length && !rs.length); // SVG has no .hidden property
   if (!hs.length && !rs.length) return;
   if (holesFor !== G.ladder) {
     holesFor = G.ladder;
+    holesView = -1;
     // carousel: back half of the ring behind the ladder, front half + seats + chevrons riding round in front
     // wormhole line drawn as a glass tube: wide translucent body, dark core, the flow, a thin highlight
     $('#holeLines').innerHTML = hs.map((_, k) => `<g class="wh" ${holeVars(k)}>
@@ -441,6 +448,7 @@ function drawHole() {
     </g>`).join('') + rs.map((r, g) => `<g class="cr"><path id="cp${g}" class="cr-track"/><path class="cr-face"/><path class="cr-front"/><path class="cr-hi"/>
       ${range(4).map(k => `${CHEV}<animateMotion dur="5.6s" begin="${-k * 1.4}s" repeatCount="indefinite" rotate="auto"><mpath href="#cp${g}"/></animateMotion><animate attributeName="opacity" values="1;1;.3;.3;1" keyTimes="0;.44;.56;.94;1" dur="5.6s" begin="${-k * 1.4}s" repeatCount="indefinite"/><animateTransform attributeName="transform" type="scale" values="1;1;.55;.55;1" keyTimes="0;.44;.56;.94;1" dur="5.6s" begin="${-k * 1.4}s" repeatCount="indefinite"/></path>`).join('')}
       ${range(r.k).map(() => '<circle class="seat" r="3.6"/>').join('')}</g>`).join('');
+    if (reduceMotion.matches) for (const s of [holeSvg, holeBack]) { s.setCurrentTime(1.2); s.pauseAnimations(); } // arrows parked mid-line
   }
   const xy = p => px(p).map(v => v.toFixed(1)).join(',');
   // only the part inside the visible band shows, same mist rule as the rungs
@@ -448,20 +456,26 @@ function drawHole() {
   $('#holeBand').setAttribute('y', y0);
   $('#holeBand').setAttribute('height', Math.max(0, y1 - y0)); // board not measured yet (H < 2 PAD) flips the band
   const back = $('#holeLines').children, front = $('#holes').children;
+  // geometry follows px(): rewritten only when the view moved (resize, camera, new board), not on every mist / pick redraw
+  const moved = holesView !== view;
+  holesView = view;
   hs.forEach(({ a, b }, k) => {
+    // a wormhole a path dove into is unveiled whole; the rest stay clipped to the band
+    for (const g of [back[k], front[k]]) clip(g, !G.holeLit.has(k));
+    if (!moved) return;
     const [ax, ay] = px(a), [bx, by] = px(b), gr = back[k].querySelector('linearGradient');
     const d = 'M' + wave(a, b).map(xy).join('L');
     back[k].querySelectorAll('.line, [class^=tube]').forEach(p => p.setAttribute('d', d));
     Object.entries({ x1: ax, y1: ay, x2: bx, y2: by }).forEach(([n, v]) => gr.setAttribute(n, v.toFixed(1)));
     front[k].querySelector('.in').setAttribute('transform', `translate(${xy(a)})`);
     front[k].querySelector('.out').setAttribute('transform', `translate(${xy(b)})`);
-    // a wormhole a path dove into is unveiled whole; the rest stay clipped to the band
-    for (const g of [back[k], front[k]]) G.holeLit.has(k) ? g.removeAttribute('clip-path') : g.setAttribute('clip-path', 'url(#holeClip)');
   });
   rs.forEach((r, g) => {
+    const b = back[hs.length + g], f = front[hs.length + g];
+    for (const e of [b, f]) clip(e, !G.ringLit.has(g));
+    if (!moved) return;
     const { cx: c, rx } = ringBox(r), [mx, my] = px([c, r.y]), ax = rx * W / G.n * cam.zx, ay = RING_RY * (H - 2 * PAD) * cam.zy;
     const L = (mx - ax).toFixed(1), R = (mx + ax).toFixed(1), y = my.toFixed(1), arc = (sw, x) => `A${ax.toFixed(1)} ${ay.toFixed(1)} 0 0 ${sw} ${x} ${y}`;
-    const b = back[hs.length + g], f = front[hs.length + g];
     // the ring is a band T deep: outer face on the front half, inner face showing on the back half, a soft shadow below
     const T = ay * 0.4, yT = (my + T).toFixed(1), arcT = (sw, x) => `A${ax.toFixed(1)} ${ay.toFixed(1)} 0 0 ${sw} ${x} ${yT}`;
     b.querySelector('.cr-back').setAttribute('d', `M${L} ${y}${arc(1, R)}`); // over the top
@@ -473,9 +487,7 @@ function drawHole() {
     // chevrons run the riding direction: rightward along the front, back round the top
     f.querySelector('.cr-track').setAttribute('d', r.dir > 0 ? `M${L} ${y}${arc(0, R)}${arc(0, L)}` : `M${R} ${y}${arc(1, L)}${arc(1, R)}`);
     f.querySelectorAll('.seat').forEach((s, k) => s.setAttribute('transform', `translate(${xy(seat(r, r.c0 + k))})`));
-    for (const e of [b, f]) G.ringLit.has(g) ? e.removeAttribute('clip-path') : e.setAttribute('clip-path', 'url(#holeClip)');
   });
-  if (reduceMotion.matches) for (const s of [holeSvg, holeBack]) { s.setCurrentTime(1.2); s.pauseAnimations(); } // arrows parked mid-line
 }
 
 // ribbed frosted-glass texture for the mist, built once (drawStatic runs every frame while the camera moves)
@@ -486,6 +498,7 @@ const FROST = (() => {
   for (const o of [-16, 0, 16]) { g.beginPath(); g.moveTo(o, 16); g.lineTo(o + 16, 0); g.stroke(); }
   return c;
 })();
+let frostPat = null; // its pattern, made on first use
 // one hidden band between two rails: frosted glass with a bevelled rim, a sheen from the top-left and embossed "?"s.
 // fade = 0 thickens the fog downward (bottom band), 1 upward (top band / whole ladder)
 function mist(g, x0, y0, x1, y1, fade) {
@@ -510,7 +523,7 @@ function mist(g, x0, y0, x1, y1, fade) {
   gr.addColorStop(1 - fade, 'rgba(110,190,255,.28)');
   g.fillStyle = gr; g.fill(box);
   g.clip(box);
-  const pat = g.createPattern(FROST, 'repeat');
+  const pat = frostPat ??= g.createPattern(FROST, 'repeat');
   pat.setTransform?.(new DOMMatrix([1, 0, 0, 1, x0, y0])); // ribs ride with the box when the camera pans
   g.globalAlpha = 0.07; g.fillStyle = pat; g.fill(box);
   g.globalAlpha = 1;
@@ -523,21 +536,31 @@ function mist(g, x0, y0, x1, y1, fade) {
   rim.addColorStop(0, 'rgba(225,215,255,.42)'); rim.addColorStop(0.5, 'rgba(180,165,255,.14)'); rim.addColorStop(1, 'rgba(20,10,60,.4)');
   g.strokeStyle = rim; g.lineWidth = 1.2; g.stroke(box);
   // "?" every ~1.8 widths down a tall box, so some stay clear of the turn toast in the middle
-  const s = Math.min(30, w * 0.5, h * 0.5);
+  const s = Math.round(Math.min(30, w * 0.5, h * 0.5)), q = Math.ceil(s * 1.5);
   if (s < 8) return;
-  const k = Math.max(1, Math.floor(h / (w * 1.8))), cx0 = x0 + w / 2;
+  const k = Math.max(1, Math.floor(h / (w * 1.8))), cx0 = x0 + w / 2 - q / 2;
+  for (let j = 0; j < k; j++) // alternate glyphs dimmer: reads as a pattern, not a column
+    g.drawImage(qmark(s, q, k > 1 && j % 2 ? 0.6 : 1), cx0, y0 + h * (j + 0.5) / k - q / 2, q, q);
+}
+// embossed "?" of size s in a d x d bitmap, drawn once per size and then stamped: text plus a gradient per glyph was
+// the costly part of every mist redraw (each camera frame, 15 times a second in the peek). A few dozen tiny canvases at most
+const QMARKS = new Map();
+function qmark(s, d, a) {
+  const key = `${s}|${a}|${DPR}`;
+  let c = QMARKS.get(key);
+  if (c) return c;
+  QMARKS.set(key, c = el('canvas'));
+  c.width = c.height = Math.ceil(d * DPR);
+  const g = c.getContext('2d');
+  g.scale(DPR, DPR); g.translate(d / 2, d / 2);
   g.font = `900 ${s}px system-ui, sans-serif`;
   g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
-  for (let j = 0; j < k; j++) {
-    const y = y0 + h * (j + 0.5) / k, a = k > 1 && j % 2 ? 0.6 : 1; // alternate glyphs dimmer: reads as a pattern, not a column
-    g.save(); g.translate(cx0, y);
-    const q = g.createLinearGradient(0, -s / 2, 0, s / 2);
-    q.addColorStop(0, `rgba(255,255,255,${0.62 * a})`); q.addColorStop(1, `rgba(190,175,255,${0.3 * a})`);
-    g.lineWidth = s * 0.2; g.strokeStyle = `rgba(170,150,255,${0.1 * a})`; g.strokeText('?', 0, 0); // soft glow
-    g.fillStyle = `rgba(10,4,40,${0.45 * a})`; g.fillText('?', 1, 1.6); // engraved shadow
-    g.fillStyle = q; g.fillText('?', 0, 0);
-    g.restore();
-  }
+  const q = g.createLinearGradient(0, -s / 2, 0, s / 2);
+  q.addColorStop(0, `rgba(255,255,255,${0.62 * a})`); q.addColorStop(1, `rgba(190,175,255,${0.3 * a})`);
+  g.lineWidth = s * 0.2; g.strokeStyle = `rgba(170,150,255,${0.1 * a})`; g.strokeText('?', 0, 0); // soft glow
+  g.fillStyle = `rgba(10,4,40,${0.45 * a})`; g.fillText('?', 1, 1.6); // engraved shadow
+  g.fillStyle = q; g.fillText('?', 0, 0);
+  return c;
 }
 
 // gap c's mist lifts once every secret under it (rungs, wormholes, carousel) has been walked.
@@ -674,13 +697,16 @@ function sprite(z, hurt) {
   }
   return sprites[key] instanceof HTMLCanvasElement ? sprites[key] : null;
 }
-range(COLORS.length).forEach(z => { sprite(z); sprite(z, true); }); // decode up front so the first run already shows faces
+// decoded ahead so the first run already shows faces, in idle time after boot: the first run is seconds away
+// (splash, setup, the peek), so the splash and setup screen don't wait on 40 SVG decodes
+(window.requestIdleCallback || setTimeout)(() => range(COLORS.length).forEach(z => { sprite(z); sprite(z, true); }), { timeout: 1500 });
 const riderSize = () => clamp(W / G.n * 0.34, 24, 36) * Math.min(1.5, 1 + (cam.zx - 1) / 3); // grows a little with the camera zoom
 // sc / al: size and opacity (shrunk + see-through inside a wormhole, by depth on the carousel);
 // behind: slipped under everything already on the canvas (rails, trails), riding the carousel's back half;
 // lift 0..1: raised toward the viewer on the carousel's front half, a drop shadow under it
 function rider(x, y, color, img, now, jolt = 0, squash = 0, { sc = 1, al = 1, behind = false, lift = 0 } = {}) {
   const s = riderSize() * sc, c = lift ? ctop : cx; // front half of the carousel: over its front band
+  if (lift) G.top = true;
   c.save();
   c.globalAlpha = al;
   // soft glow in the player's colour so the face reads on the dark board; behind, it goes under the face instead of adding over it
@@ -883,24 +909,24 @@ function confetti() {
 
 function drawParts(dt) {
   if (G.parts.length > 500) G.parts.splice(0, G.parts.length - 500);
+  // drag per frame, hoisted out of the loop and scaled by dt: the same spray at 30, 60 or 120fps and in x3 fast forward
+  const dragF = 0.99 ** (dt * 60), dragS = 0.96 ** (dt * 60);
+  let n = 0, flake = null;
   cx.save();
   for (const p of G.parts) {
-    p.life += dt;
+    if ((p.life += dt) >= p.max) continue; // spent: dropped in place (no new array per frame), never drawn at alpha 0
     p.vy += (p.flake ? 60 : p.g ?? 380) * dt;
-    p.vx *= p.flake ? 0.99 : 0.96;
+    p.vx *= p.flake ? dragF : dragS;
     p.x += p.vx * dt; p.y += p.vy * dt;
-    cx.globalAlpha = Math.max(0, 1 - p.life / p.max);
+    cx.globalAlpha = 1 - p.life / p.max;
     cx.fillStyle = p.color;
-    if (p.flake) {
-      cx.globalCompositeOperation = 'source-over';
-      cx.fillRect(p.x - p.r, p.y - p.r / 2, p.r * 2 * Math.cos(p.life * p.spin), p.r);
-    } else {
-      cx.globalCompositeOperation = 'lighter';
-      cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, 7); cx.fill();
-    }
+    if (!!p.flake !== flake) { flake = !!p.flake; cx.globalCompositeOperation = flake ? 'source-over' : 'lighter'; }
+    if (flake) cx.fillRect(p.x - p.r, p.y - p.r / 2, p.r * 2 * Math.cos(p.life * p.spin), p.r);
+    else { cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, 7); cx.fill(); }
+    G.parts[n++] = p;
   }
+  G.parts.length = n;
   cx.restore();
-  G.parts = G.parts.filter(p => p.life < p.max);
 }
 
 // eases the camera toward the followed runner (or back to the whole board); true while still moving
@@ -913,6 +939,7 @@ function camStep(dt) {
   const busy = !!f || Math.abs(cam.zy - zy) > 0.002 || Math.abs(cam.x - x) + Math.abs(cam.y - y) > 0.5;
   if (!busy) Object.assign(cam, { zx, zy, x, y });
   if (o.zx === cam.zx && o.zy === cam.zy && o.x === cam.x && o.y === cam.y) return busy;
+  view++;
   // sparks and labels already on screen ride along with the board
   const mx = v => (v - o.x) / o.zx * cam.zx + cam.x, my = v => (v - o.y) / o.zy * cam.zy + cam.y;
   for (const p of G.parts) { p.x = mx(p.x); p.y = my(p.y); }
@@ -932,6 +959,8 @@ function camStep(dt) {
 
 // loop runs only while something moves; idle board costs zero frames
 function frame(now) {
+  if (now - G.drawn < MIN_FT) { G.raf = requestAnimationFrame(frame); return; } // phone frame cap; dt spans the skipped vsync
+  G.drawn = now;
   const real = clamp((now - G.last) / 1000, 0, 0.05); // first frame after kick(): rAF's timestamp can predate G.last
   G.last = now;
   // smoothed frame time; held under ~26fps (not 30: iOS Low Power Mode locks to 30) -> fewer canvas pixels, 2x -> 1.5x -> 1x
@@ -945,8 +974,12 @@ function frame(now) {
   let lit = false; // a crossed rung or the wormhole got unveiled this frame
   const riders = []; // drawn after every path glow, so no animal sits under another's trail
   for (const a of G.active) {
-    const P = a.tr.points.map(px), cum = [0];
-    for (let k = 1; k < P.length; k++) cum.push(cum[k - 1] + Math.hypot(P[k][0] - P[k - 1][0], P[k][1] - P[k - 1][1]));
+    if (a.view !== view) { // screen path + running lengths: rebuilt when the camera / size moves, not every frame
+      const P = a.P = a.tr.points.map(px), cum = a.cum = [0];
+      for (let k = 1; k < P.length; k++) cum.push(cum[k - 1] + Math.hypot(P[k][0] - P[k - 1][0], P[k][1] - P[k - 1][1]));
+      a.view = view;
+    }
+    const { P, cum } = a;
     // slow-mo inside a wormhole / carousel: brakes hard on the way in, eases back to full speed after
     // bumped: stands still, dazed, for the first BUMP_STUN of the bump, then eases back up to speed
     const s0 = a.tr.points[a.k], s1 = a.tr.points[a.k + 1], dy = s1 && Number.isInteger(s0[0]) && Math.abs(s1[0] - s0[0]) === 1 ? s1[1] - s0[1] : 0; // on a diagonal rung: up < 0 < down
@@ -1038,7 +1071,7 @@ function frame(now) {
   G.fx = G.fx.filter(f => f.t < f.dur);
   drawParts(dt);
   G.raf = G.active.length || G.parts.length || G.fx.length || camBusy ? requestAnimationFrame(frame) : 0;
-  if (!G.raf) document.body.classList.remove('busy');
+  if (!G.raf) { document.body.classList.remove('busy'); wake(); } // idle countdown runs from the end of the motion
 }
 
 // two animals meeting on the ladder bump each other: both recoil apart and wobble, then carry on along their own paths.
@@ -1048,7 +1081,7 @@ function bumps() {
   const s = riderSize(), R = G.active.filter(a => a.head && a.p < 1);
   for (const a of R) for (const b of R) {
     if (a.i >= b.i) continue;
-    const dx = a.head[0] - b.head[0], dy = a.head[1] - b.head[1], d = Math.hypot(dx, dy), key = a.i + ':' + b.i;
+    const dx = a.head[0] - b.head[0], dy = a.head[1] - b.head[1], d = Math.hypot(dx, dy), key = a.i * MAX + b.i; // number, no string per pair per frame
     if (d > s * 1.1) { G.touch.delete(key); continue; }
     if (d > s * 0.75 || G.touch.has(key)) continue;
     G.touch.add(key);
@@ -1070,15 +1103,34 @@ const liveFx = (k, on) => [$('#holeLines'), $('#holes')].forEach(s => s.children
 function kick() {
   if (G.raf) return;
   G.last = performance.now();
+  G.drawn = 0; // first frame never waits on the cap
   G.raf = requestAnimationFrame(frame);
   document.body.classList.add('busy'); // idle hops / blinks hold still while the board animates (style.css)
+  wake();
 }
+
+// a screen left alone (setup, a board waiting for picks, results): IDLE ms after the last touch, host message or run,
+// the looping decorations (background drift, hops, blinks, wormhole / carousel flow) pause (.idle in style.css) so the
+// phone stops redrawing a screen nobody is watching change; any touch or host action wakes them
+const IDLE = 30000;
+let idleT = 0;
+function wake() {
+  clearTimeout(idleT);
+  idleT = setTimeout(() => G.raf ? wake() : setIdle(true), IDLE);
+  setIdle(false);
+}
+function setIdle(on) {
+  if (document.body.classList.contains('idle') === on) return;
+  document.body.classList.toggle('idle', on);
+  if (!reduceMotion.matches) for (const s of [holeSvg, holeBack]) on ? s.pauseAnimations() : s.unpauseAnimations(); // SMIL arrows / chevrons
+}
+for (const e of ['pointerdown', 'keydown', 'wheel']) addEventListener(e, wake, { capture: true, passive: true });
 
 function stop() {
   G.timers.forEach(clearTimeout);
   G.timers = [];
   cancelAnimationFrame(G.raf);
-  cancelAnimationFrame(G.grow);
+  clearTimeout(G.grow);
   G.raf = 0;
   document.body.classList.remove('busy');
   G.active = [];
@@ -1088,6 +1140,7 @@ function stop() {
   G.fx = [];
   G.follow = null;
   Object.assign(cam, { zx: 1, zy: 1, x: 0, y: 0 });
+  view++;
   for (const l of [chips, cards]) l.style.transform = l.style.width = '';
   wrap.parentElement.classList.remove('cam');
   $('#jkToast').hidden = true;
@@ -1123,7 +1176,7 @@ function land(a) {
   G.done.add(a.i);
   G.at[e] = a.i;
   a.color = col(a.i); // an up-climb shows its true colour only on arrival
-  glow(tx, a.tr.points.map(px), Infinity, a.color);
+  glow(tx, a.P, Infinity, a.color); // landed this frame: a.P is current
   markChip(a.i);
   markCard(e);
   burst(x, y + (a.up ? 4 : -4), a.color, big ? 70 : 34, big ? 320 : 200);
@@ -1542,6 +1595,7 @@ const ACT = {
 const hosting = () => Coop.role === 'host' && Coop.live;
 function act(m) {
   if (NET.mine) return; // watching: only the host drives (the controls are inert as well)
+  wake();
   if (m.t === 'start' || m.t === 'new') Object.assign(m, roll(), shared());
   ACT[m.t](m);
   if (hosting()) Coop.send(m);
@@ -1570,7 +1624,7 @@ function syncTo({ on, g }) {
   newGame(g);
   if (!g.left) { // peek already over on the host
     G.timers.forEach(clearTimeout); G.timers = [];
-    cancelAnimationFrame(G.grow);
+    clearTimeout(G.grow);
     G.left = 0; G.ext = EXT;
   }
   Object.assign(G, { order: g.order, pick: g.pick, at: g.at, shown: g.shown, swapped: g.swapped,
@@ -1608,6 +1662,7 @@ const linkOpts = {
   onJoin(i) { if (Coop.live) Coop.sendTo(i, snapshot()); }, // joined mid-game
   onMsg(m) {
     if (!NET.mine) return; // not started yet: the host sends a snapshot on Continue
+    wake(); // watching phones get no touches: the host's moves keep them awake
     if (m.s) { Object.assign(S, m.s); ZOO.splice(0, ZOO.length, ...m.zoo); renderEntries(); }
     if (m.t === 'sync') syncTo(m);
     else ACT[m.t]?.(m);
@@ -1622,11 +1677,12 @@ document.querySelectorAll('.link-btn').forEach(b => b.onclick = () => { sfx.ui()
 const unlock = () => { sfx.init(); sfx.startMusic(); };
 addEventListener('pointerdown', unlock, true);
 addEventListener('keydown', unlock, true);
-document.addEventListener('visibilitychange', () => sfx.pause(document.hidden));
+document.addEventListener('visibilitychange', () => { sfx.pause(document.hidden); if (!document.hidden) wake(); });
 
 setVol('music', S.music);
 setVol('sfx', S.sfx);
 applyI18n();
+wake();
 
 // boot splash (index.html): up 1.4s at least so the banner registers, lifted once it has loaded (3s at most, from page
 // start); a tap skips it. A click, not pointerdown, so the tap can't fall through onto the Start button underneath

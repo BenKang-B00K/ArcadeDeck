@@ -2731,21 +2731,22 @@
     "30": {
       "title": "AshenKeys",
       "description": "A keyboard-driven incremental where every key you hit is a strike and typing a skill’s keyword casts it — you have no health and cannot die, but every foe regenerates, so the only way down the ladder is out-damaging the wall in front of you.",
-      "fullDescription": "\n      AshenKeys is a clicker played on the **whole keyboard**. Any printable key is a basic strike, and the three slots under the fight each show a keyword — type \"fire\" and Fireball lands, type \"frost\" and the foe freezes over. A cast spends its slot, which immediately redraws a new skill from the ten you equipped, so what you can cast next is never quite what you just cast.\n      There is **no health bar** on your side. You cannot die, and nothing here is trying to kill you. What every enemy does instead is regenerate, a fixed amount of HP every second, and that is the entire difficulty curve: if your **damage per second** sits under that **regeneration**, the bar refills faster than you empty it and the foe is simply unkillable until you come back stronger. The fight does not end in defeat — it stalls, and tells you so.\n      Landing hits close together builds a combo, and combo is the engine. It pushes crit chance and double-strike chance on every hit, ramps basic damage through **Momentum**, and scales skill hits on top of that, until both chances **cap past 100%** and strikes start landing three and four at a time. Let the window lapse and it all decays to zero. Four separate upgrade economies feed the same hot path: **Attack Mastery** from basic hits, per-skill star trees from skill XP, a passive taproot from drops, and Ash spent on ascension once you prestige.\n      **Forty-six skills across eight elements**, each with its own keyword, sprite and status — burn, chill, poison, curse, bleed, a shock that arcs and a smite that bursts. A hundred hand-painted foes climb from fodder to elites, and **every tenth level** is a boss you must engage by typing its name from the **incantation** on screen. The ladder does not end. Your progress saves in your browser.\n    ",
-      "controls": "Any Printable Key: Basic strike / Type a slot’s keyword (fire, frost, storm…): Cast that skill / Escape: Close an overlay, or leave a run for the menu / Mouse: Open Skill Mastery, Attack Mastery, Passives and Ascension from the left rail.",
-      "tips": "Build a deck before you fight — the run starts with the ten skill slots empty, and until you equip skills the three cast slots read \"not enough skills\" and every key is just a basic. Keep hitting: combo decays on idle, and the crit and double-strike bonuses it grants are worth more than any single upgrade early. When the health bar refills instead of dropping, that is the **regeneration wall**, not bad luck — spend points on damage or regen-shred rather than grinding a stalled foe. **Chill** cuts an enemy’s **regeneration** directly, so an ice skill in the deck is a soft answer to a wall you cannot yet out-damage. Spend Skill-Mastery behaviour points carefully: each skill can hold only two of the six, so **Lingering, Chaining or Surging** on the right skill defines a build. Boss levels open on an **incantation** — type the name you see to engage, and typos are counted.",
+      "fullDescription": "\n      AshenKeys is a clicker played on the **whole keyboard**. Any printable key is a basic strike, and the three cast slots under the fight each show a keyword from your **six-skill deck** — type \"fire\" and Fireball lands, type \"frost\" and Frostlance freezes the foe’s regeneration. A cast spends its slot, which redraws a random skill from the deck and goes on cooldown, so what you can cast next is never quite what you just cast.\n      There is **no health bar** on your side. You cannot die, and nothing here attacks you. What every enemy does instead is **regenerate** — a share of its max HP every second, more for elites and bosses, and more again past Level 20 — and that is the whole difficulty curve: if your **damage per second** sits under the stage’s regeneration, the bar refills faster than you empty it and the fight is flagged as stalled. No stage fields a lone foe, either: two guards flank the common, elite or boss in the middle and take every hit until they fall.\n      Landing hits close together builds a **combo**, and combo is the engine. It lifts crit and double-strike chance on every hit and keeps climbing past 100%, where strikes land three and four at a time, and it multiplies skill hits on top. Let it lapse for a second and a half and it falls back to zero. Three trees feed the same hot path: Attack Mastery from basic hits, a Skill Mastery tree per skill levelled by its own casts, and a Passive Tree grown from points that foes drop. From Level 11 you can ascend, trading the run for Ash that buys permanent ranks.\n      Gold goes to the **War Camp**. After every boss the Spoils screen opens the Forge — Blade, Focus, Censer and Sigil, gear for basics, skills, regen shred and crits — and the Camp, where five mercenaries can be hired and two fly a banner beside you, striking again, echoing casts or stretching your combo window. Mid-fight, the Satchel sells oilstone, iceflask, warpaint and elixir, and you use one by typing its name.\n      **Twenty-four skills across eight elements** bring burn, freeze, poison, curse, bleed, a shock that arcs, a smite and a neutral strike, with longer keywords unlocking as you beat the Level 20, 40 and 60 bosses. A hundred hand-painted foes from ten courts fill the **Monster Codex**, each with a line of lore; every elite and boss carries a name, and **every tenth level** is a boss you engage by typing that name. The ladder does not end. Your progress saves in your browser.\n    ",
+      "controls": "Any Printable Key: Basic strike / Type a slot’s keyword (fire, frost, storm…): Cast that skill / Type an item name (oilstone, iceflask, warpaint, elixir): Use a Satchel item / Type the boss’s name: Engage a boss / 1–4, F, Enter: On the Spoils screen, buy a Forge level, open the War Camp, move on / Right-Click: Equip or unequip a skill in Skill Mastery / Escape: Close an overlay, or leave a run for the menu / Mouse: Open the masteries, Ascension, Monster Codex and Satchel shop from the left rail.",
+      "tips": "Fill all six deck slots before you push — skills only cast from a full deck, so until then the cast slots read \"Not Enough Skills\" and every key is a basic; open Skill Mastery and **right-click** skills to equip them. Keep hitting: combo resets after about a second and a half without a basic, and the crit and double-strike chance it grants is worth more than any single upgrade early. When a bar refills instead of dropping, that is the **regeneration wall** — spend points or gold rather than grinding the stalled foe. **Freeze** cuts regeneration per stack, the Forge’s **Censer** shreds it for the rest of the run, and an **iceflask** stops it outright for six seconds. Put each skill’s eight points into two main upgrades rather than spreading them over three. Once a run stalls past Level 11, **ascend**: Ash pays five per level reached, and your deck, skill unlocks and Codex carry over.",
       "lore": "\n      The keep taught its scribes that language is a tool for pinning things down. Write a name correctly and the thing it names holds still long enough to be measured, filed and forgotten. That was the theory, and for a long stretch of quiet centuries it was also true.\n      What lives below the keep now learned the same lesson from the other side. **Names hold it still**. So the descent is made by **typing**: a word struck cleanly is a blade, and a word struck the wrong way is nothing at all — a keystroke spent on air while the thing in front of you knits itself back together.\n      Nothing down there can hurt the one holding the keys, which the scribes found reassuring until they understood what it meant. You are not in danger. You are simply not strong enough yet, and the dark can wait longer than you can.\n    ",
       "features": [
-        "Type Keywords To Cast — 46 Skills, 8 Elements",
+        "Type Keywords To Cast — 24 Skills, 8 Elements",
         "No Death: Enemy Regeneration Is The Difficulty",
-        "Combo Drives Crit, Double-Strike & Momentum",
-        "10-Card Deck Feeding 3 Redrawing Cast Slots",
-        "Four Upgrade Economies + Ascension Prestige",
-        "100 Hand-Painted Foes, A Boss Every 10 Levels",
-        "Infinite Procedural Level Curve",
+        "Combo Pushes Crit & Double-Strike Past 100%",
+        "6-Skill Deck Feeding 3 Redrawing Cast Slots",
+        "War Camp: Forge Gear, Satchel Items, Mercenaries",
+        "Attack, Skill & Passive Trees + Ascension Prestige",
+        "Monster Codex: 100 Hand-Painted Foes With Lore",
+        "Endless Ladder, A Named Boss Every 10 Levels",
         "PC Only — Keyboard Required"
       ],
-      "objectives": "Equip a deck, then push down an endless ladder of foes by mashing basics and typing skill keywords — the goal is to keep your **damage per second** above each enemy’s **regeneration** so it can actually die, spending the Attack, Skill, Passive and Ascension points you earn to break through the walls that stall you.",
+      "objectives": "Fill a six-skill deck, then push down an endless ladder of guarded foes by mashing basics and typing skill keywords — the goal is to keep your **damage per second** above each stage’s **regeneration** so it can actually die, spending Attack, Skill and Passive points, War Camp gold and Ascension Ash to break through the walls that stall you.",
       "controlsTable": [
         {
           "key": "Any Printable Key",
@@ -2756,8 +2757,20 @@
           "action": "Cast the skill whose keyword you just completed"
         },
         {
+          "key": "Type \"oilstone\", \"iceflask\"…",
+          "action": "Use that Satchel item (or tap its chip)"
+        },
+        {
           "key": "Boss Name",
-          "action": "Type the incantation shown on a boss intro to engage the fight"
+          "action": "Type the boss’s name to engage the fight"
+        },
+        {
+          "key": "1–4 / F / Enter",
+          "action": "Spoils screen: buy a Forge level / open the War Camp / go on to the next level"
+        },
+        {
+          "key": "Right-Click",
+          "action": "Equip or unequip a skill in Skill Mastery"
         },
         {
           "key": "Escape",
@@ -2765,17 +2778,17 @@
         },
         {
           "key": "Mouse",
-          "action": "Open Skill Mastery, Attack Mastery, Passives and Ascension from the left rail"
+          "action": "Open the masteries, Ascension, Monster Codex and Satchel shop from the left rail"
         }
       ],
       "faq": [
         {
           "q": "Why is nothing happening when I type a keyword?",
-          "a": "Your deck is probably empty. A fresh save equips no skills, so the three cast slots read \"not enough skills\" and every key falls through to a basic strike. Open Skill Mastery from the left rail, equip up to ten skills, and their keywords start appearing in the slots."
+          "a": "Your deck is not full yet. Skills only cast once all six deck slots hold a skill; until then the cast slots read \"Not Enough Skills\" and every key falls through to a basic strike. Open Skill Mastery from the left rail and right-click skills to equip them. Six-, seven- and eight-letter keywords also stay locked until you beat the Level 20, 40 and 60 bosses."
         },
         {
           "q": "The enemy health bar keeps refilling. What am I doing wrong?",
-          "a": "Nothing — that is the game’s only fail state. Every foe regenerates a fixed amount of health per second, and if your damage per second is below that number the bar wins. The readout under the fight shows your rolling DPS against the foe’s regeneration, so you can see exactly how far short you are. Spend points, chill the target, or come back after a few levels of upgrades."
+          "a": "Nothing — that is the game’s only fail state. Every foe regenerates a share of its max HP each second, and if your damage per second is below the stage’s total the bar wins and a STALLED warning appears next to your 20-second DPS readout. Spend points, freeze or shred the regeneration, throw an iceflask, or come back after a few more upgrades."
         },
         {
           "q": "Can I die?",
@@ -2783,15 +2796,23 @@
         },
         {
           "q": "What does combo actually do?",
-          "a": "Hits landed inside a short window stack a combo counter that raises crit chance and double-strike chance on every hit, ramps basic damage through Momentum, and multiplies skill hits separately. Pushed far enough, both chances cap over 100% and hits start landing three and four at a time. Stop hitting and the whole thing decays back to zero."
+          "a": "Hits landed close together stack a combo that raises crit chance and double-strike chance on every hit — about 80% at 150 combo and 99% at 500 — and keeps climbing past 100%, where hits land three and four at a time and crits hit harder. Combo also adds skill power, up to +200%. Stop basic-striking for about a second and a half and it resets; boss fights open with a short grace period."
         },
         {
           "q": "How does skill progression work?",
-          "a": "Every skill earns its own XP and its own levels, spent in a star-shaped tree per skill: power and cooldown leaves, plus six behaviour points — Double, Overflow, Chaining, Echoing, Surging and Lingering. A skill can hold at most two behaviours, which is what makes a deck a build rather than a list. Basic hits feed a separate Attack Mastery tree, drops feed a passive taproot, and prestiging converts a run into Ash for the ascension tree."
+          "a": "Every skill levels from its own casts. Each level adds skill power and, up to Level 8, one point for that skill’s tree: a free core plus three main upgrades drawn from effects such as Splash, Chain, Echo, Detonate and Execute, each with ranks II–IV. Eight points max out two of the three, so every skill is a choice. Basic hits level a separate Attack Mastery tree, foes drop points for the Passive Tree, and ascending turns a run into Ash for the Ascension tree."
+        },
+        {
+          "q": "What is the War Camp?",
+          "a": "Where your gold goes. On the Spoils screen after each boss you buy Forge levels (Blade, Focus, Censer, Sigil) and hire Camp mercenaries, two of whom act at once. Mid-fight, the anvil on the left rail sells Satchel items, which you use by typing their name. Everything gold buys resets when you ascend."
+        },
+        {
+          "q": "What do I keep when I ascend?",
+          "a": "Ascension unlocks at Level 11 and pays Ash, five per level reached (more with Ash Harvest). You keep your deck, Ash, Ascension ranks, skill unlocks, lifetime stats and the Monster Codex; your level, gold, War Camp and the Attack, Skill and Passive trees start over."
         },
         {
           "q": "Does it work on a phone?",
-          "a": "No. The entire game is typed — basics, casts and boss incantations all come from a physical keyboard, so there is nothing to tap. Play it on a PC."
+          "a": "Not really. Everything is typed — basics, casts, item names and boss names — so it is built for a physical keyboard. On touch devices such as Steam Deck or a touch laptop a ⌨ button raises the on-screen keyboard, but on a phone the screen is too cramped. Play it on a PC."
         }
       ],
       "featuredComments": [
@@ -2802,12 +2823,12 @@
         },
         {
           "name": "FrostbittenScribe",
-          "text": "Ice is underrated here. Chill cuts regeneration, so a frost skill is basically a lockpick for walls you cannot out-damage yet. Kept one in the deck all the way to the third boss.",
+          "text": "Ice is underrated here. Freeze cuts regeneration per stack, so a frost skill is basically a lockpick for walls you cannot out-damage yet. Kept one in the deck all the way to the third boss.",
           "badge": "Strategy"
         },
         {
           "name": "ComboDrifter",
-          "text": "The two-behaviours-per-skill cap is the best rule in it. Lingering plus Surging on one skill, chaining on another, and suddenly you have a deck instead of ten damage buttons.",
+          "text": "Eight points per skill and three main upgrades means one always gets left behind. Echo and Detonate on one skill, Chain on another, and suddenly six damage buttons are a deck.",
           "badge": "Veteran"
         },
         {

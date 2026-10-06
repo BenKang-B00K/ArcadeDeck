@@ -1,1732 +1,1541 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head><script src="/perf.js"></script>
-  <link rel="stylesheet" href="style.css">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="타이밍 셰프 - 타이밍을 맞춰 완벽한 요리를 완성하는 캐주얼 리듬 요리 게임">
-<meta name="theme-color" content="#d4562a">
-<meta property="og:title" content="타이밍 셰프 (Timing Chef)">
-<meta property="og:description" content="타이밍을 맞춰 완벽한 요리를 완성하세요. 1초의 차이가 명작과 실패를 가릅니다.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Timing Chef</title>
+<meta name="description" content="Timing Chef — tap on time to cook the perfect dish. 타이밍을 맞춰 완벽한 요리를 완성하는 캐주얼 요리 게임.">
+<meta name="theme-color" content="#2b2420">
+<meta property="og:title" content="Timing Chef (타이밍 셰프)">
+<meta property="og:description" content="Tap on time to cook the perfect dish. One second separates a masterpiece from a mess.">
 <meta property="og:type" content="website">
-<meta property="og:locale" content="ko_KR">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍳</text></svg>">
-<title>타이밍 셰프</title>
-
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Timing Chef">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Jua&family=M+PLUS+Rounded+1c:wght@700;800&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="style.css?v=3.0.0">
 <script>/* offline play: games.arcadedeck.net/sw.js (shared, one cache per game) */if('serviceWorker'in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js',{scope:'./'}).then(()=>navigator.serviceWorker.ready).then(r=>r.active&&r.active.postMessage([location.origin+location.pathname,...performance.getEntriesByType('resource').map(e=>e.name)])).catch(()=>{})})</script>
 </head>
 <body>
 
-<!-- ═══ TOAST ═══ -->
-<div class="toast" id="toast"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-vol-high" viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19.5 5.5a9 9 0 0 1 0 13"/></symbol>
+  <symbol id="i-vol-low" viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/></symbol>
+  <symbol id="i-vol-mute" viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9.5l5 5M22 9.5l-5 5"/></symbol>
+  <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-dice" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M8.5 8.5h.01M15.5 8.5h.01M12 12h.01M8.5 15.5h.01M15.5 15.5h.01" stroke-width="3"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-install" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></symbol>
+</svg>
 
-<!-- ═══ TITLE SCREEN ═══ -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- volume panel (shared by every volume button) -->
+<div class="vol-panel" id="vol-panel" hidden>
+  <div class="vp-row">
+    <label for="vol-music" data-i18n="music">Music</label>
+    <svg class="ico" aria-hidden="true"><use href="#i-music"/></svg>
+    <input type="range" id="vol-music" min="0" max="100" step="5" oninput="onVol('music',this.value)">
+    <output id="vol-music-out">60</output>
+  </div>
+  <div class="vp-row">
+    <label for="vol-sfx" data-i18n="sfx">Sound effects</label>
+    <svg class="ico" aria-hidden="true"><use href="#i-vol-high"/></svg>
+    <input type="range" id="vol-sfx" min="0" max="100" step="5" oninput="onVol('sfx',this.value)" onchange="sfxTap()">
+    <output id="vol-sfx-out">80</output>
+  </div>
+  <button class="vp-mute" id="vol-mute" type="button" aria-pressed="false" onclick="toggleMute()"><svg class="ico" aria-hidden="true"><use href="#i-vol-mute"/></svg><span data-i18n="mute">Mute</span></button>
+</div>
+
+<!-- ═══ TITLE ═══ -->
 <div id="title-screen" class="screen active">
-  <div class="title-bg-pattern"></div>
+  <div class="title-top">
+    <label class="lang-wrap"><svg class="ico" aria-hidden="true"><use href="#i-globe"/></svg><select class="lang-select" onchange="setLang(this.value)" data-i18n-aria="language" aria-label="Language"><option value="en">English</option><option value="ko">한국어</option><option value="ja">日本語</option></select></label>
+    <button class="icon-btn vol-btn" type="button" onclick="toggleVolPanel(event)" data-i18n-aria="volume" aria-label="Volume"><svg class="ico" aria-hidden="true"><use href="#i-vol-high"/></svg></button>
+  </div>
   <div class="title-hero">
-    <div class="title-tag">Timing Game</div>
-    <div class="title-main">Timing<br><em>Chef</em></div>
-    <div class="title-sub">타이밍을 맞춰 완벽한 요리를 완성하세요. <br>1초의 차이가 명작과 실패를 가릅니다.</div>
+    <svg class="hero-dial" viewBox="0 0 200 210" aria-hidden="true">
+      <rect x="86" y="2" width="28" height="24" rx="6" fill="#ffc83d"/>
+      <circle cx="100" cy="112" r="94" fill="#ffc83d"/>
+      <circle cx="100" cy="112" r="82" fill="#fff8ea"/>
+      <path d="M58.9 63A64 64 0 0 1 141.1 63" fill="none" stroke="#2b8a57" stroke-opacity=".3" stroke-width="14"/>
+      <path d="M80.2 51.1A64 64 0 0 1 119.8 51.1" fill="none" stroke="#e9a514" stroke-width="14"/>
+      <path d="M100 42V34M135 51.4L139 44.5M160.6 77L167.5 73M170 112H178M160.6 147L167.5 151M135 172.6L139 179.5M100 182V190M65 172.6L61 179.5M39.4 147L32.5 151M30 112H22M39.4 77L32.5 73M65 51.4L61 44.5" stroke="#2b2420" stroke-opacity=".4" stroke-width="4" stroke-linecap="round"/>
+      <g class="dial-needle"><path d="M100 112V56" stroke="#d63c27" stroke-width="7" stroke-linecap="round"/></g>
+      <circle cx="100" cy="112" r="11" fill="#d63c27"/><circle cx="100" cy="112" r="4" fill="#fff"/>
+    </svg>
+    <h1 class="title-main">Timing Chef</h1>
+    <p class="title-sub" data-i18n="tagline"></p>
   </div>
-  <div class="title-dish-row">
-    <div class="dish-preview-card"><span class="dpc-emoji">🍜</span><div class="dpc-name">라멘</div></div>
-    <div class="dish-preview-card"><span class="dpc-emoji">🥩</span><div class="dpc-name">스테이크</div></div>
-    <div class="dish-preview-card"><span class="dpc-emoji">🍣</span><div class="dpc-name">스시</div></div>
-    <div class="dish-preview-card"><span class="dpc-emoji">🥘</span><div class="dpc-name">파에야</div></div>
-    <div class="dish-preview-card"><span class="dpc-emoji">🦞</span><div class="dpc-name">랍스터</div></div>
-    <div class="dish-preview-card"><span class="dpc-emoji">🍮</span><div class="dpc-name">크렘브뤼레</div></div>
-    <div class="dish-preview-card"><span class="dpc-emoji">👑</span><div class="dpc-name">그랑피날레</div></div>
-  </div>
+  <div class="title-dish-row" id="title-dishes"></div>
   <div class="title-actions">
-    <button class="btn btn-primary" onclick="showScreen('hub-screen'); loadHub('stages')">🍳 요리 시작</button>
-    <button class="btn btn-secondary" onclick="showScreen('mode-screen')">모드 선택</button>
+    <button class="btn btn-primary" onclick="loadHub('stages')"><span aria-hidden="true">🍳</span><span data-i18n="startCooking"></span></button>
+    <button class="btn btn-secondary" onclick="showScreen('mode-screen')" data-i18n="modes"></button>
+    <button class="btn btn-secondary" id="install-btn" onclick="installApp()" hidden><svg class="ico" aria-hidden="true"><use href="#i-install"/></svg><span data-i18n="install"></span></button>
   </div>
 </div>
 
-<!-- ═══ MODE SCREEN ═══ -->
-<div id="mode-screen" class="screen">
-  <div style="width:100%;padding:1.5rem 1.25rem 1rem;border-bottom:1px solid var(--sand);">
-    <button class="btn-outline btn" style="width:auto;padding:0.5rem 1rem;font-size:0.8rem;margin-bottom:1rem" onclick="showScreen('title-screen')">← 뒤로</button>
-    <div class="mode-header">
-      <div class="mode-title">모드 선택</div>
-      <div class="mode-sub">어떻게 요리할까요?</div>
-    </div>
+<!-- ═══ MODES ═══ -->
+<div id="mode-screen" class="screen tiled">
+  <div class="mode-head">
+    <button class="icon-btn" type="button" onclick="showScreen('title-screen')" data-i18n-aria="back" aria-label="Back"><svg class="ico" aria-hidden="true"><use href="#i-back"/></svg></button>
+    <div><div class="mode-title" data-i18n="modes"></div><div class="mode-sub" data-i18n="modeSub"></div></div>
   </div>
-  <div style="padding:1.25rem;width:100%">
+  <div class="mode-body">
     <div class="mode-cards">
-      <div class="mode-card" onclick="showScreen('hub-screen');loadHub('stages')">
-        <span class="mc-emoji">📖</span>
-        <div class="mc-badge badge-new">추천</div>
-        <div class="mc-name">스테이지 모드</div>
-        <div class="mc-desc">60개의 엄선된 레시피를 6개 챕터로 클리어하세요. 별 3개를 모아 다음 챕터를 해금하세요.</div>
-      </div>
-      <div class="mode-card" onclick="startEndless()">
-        <span class="mc-emoji">♾️</span>
-        <div class="mc-badge badge-hard">도전</div>
-        <div class="mc-name">엔드리스 모드</div>
-        <div class="mc-desc">끝없이 쏟아지는 레시피를 얼마나 버틸 수 있을까요? 연속 콤보로 최고 기록에 도전하세요.</div>
-      </div>
-      <div class="mode-card" onclick="showMinigame()">
-        <span class="mc-emoji">🎪</span>
-        <div class="mc-name">식재료 수집 미니게임</div>
-        <div class="mc-desc">하늘에서 떨어지는 식재료를 받아내세요. 수집한 재료는 코인으로 교환됩니다.</div>
-      </div>
+      <button class="mode-card" onclick="loadHub('stages')">
+        <span class="mc-emoji" aria-hidden="true">📖</span>
+        <span class="mc-badge badge-new" data-i18n="recommended"></span>
+        <span class="mc-name" data-i18n="stageMode"></span>
+        <span class="mc-desc" id="mode-stage-desc"></span>
+      </button>
+      <button class="mode-card" onclick="startEndless()">
+        <span class="mc-emoji" aria-hidden="true">♾️</span>
+        <span class="mc-badge badge-hard" data-i18n="challenge"></span>
+        <span class="mc-name" data-i18n="endlessMode"></span>
+        <span class="mc-desc" data-i18n="endlessDesc"></span>
+      </button>
+      <button class="mode-card" onclick="showMinigame()">
+        <span class="mc-emoji" aria-hidden="true">🧺</span>
+        <span class="mc-name" data-i18n="minigame"></span>
+        <span class="mc-desc" data-i18n="minigameDesc"></span>
+      </button>
     </div>
   </div>
 </div>
 
-<!-- ═══ HUB SCREEN ═══ -->
-<div id="hub-screen" class="screen">
+<!-- ═══ HUB ═══ -->
+<div id="hub-screen" class="screen tiled">
   <div class="hub-topbar">
     <div>
-      <div class="hub-greeting">안녕하세요,</div>
-      <div class="hub-chef-name">셰프 🧑‍🍳</div>
+      <div class="hub-greeting" data-i18n="hello"></div>
+      <div class="hub-chef-name" data-i18n="chef"></div>
     </div>
-    <div style="display:flex;align-items:center;gap:0.75rem;">
-      <button class="snd-btn" id="snd-toggle" onclick="toggleSound()">🔊</button>
-      <div class="hub-currency">
-        <span class="hub-coin">🪙</span>
-        <span class="hub-coin-val" id="coin-display">0</span>
-      </div>
+    <div class="top-tools">
+      <label class="lang-wrap"><svg class="ico" aria-hidden="true"><use href="#i-globe"/></svg><select class="lang-select" onchange="setLang(this.value)" data-i18n-aria="language" aria-label="Language"><option value="en">EN</option><option value="ko">한</option><option value="ja">日</option></select></label>
+      <button class="icon-btn vol-btn" type="button" onclick="toggleVolPanel(event)" data-i18n-aria="volume" aria-label="Volume"><svg class="ico" aria-hidden="true"><use href="#i-vol-high"/></svg></button>
+      <div class="hub-currency"><span class="hub-coin" aria-hidden="true">🪙</span><span class="hub-coin-val" id="coin-display">0</span></div>
     </div>
   </div>
-  <div class="hub-tabs">
-    <button class="hub-tab active" onclick="loadHub('stages')" id="tab-stages">스테이지</button>
-    <button class="hub-tab" onclick="loadHub('endless')" id="tab-endless">엔드리스</button>
-    <button class="hub-tab" onclick="loadHub('upgrade')" id="tab-upgrade">업그레이드</button>
-    <button class="hub-tab" onclick="loadHub('codex')" id="tab-codex">요리 도감</button>
-    <button class="hub-tab" onclick="loadHub('codex_ing')" id="tab-codex-ing">식재료 도감</button>
+  <div class="hub-tabs" role="tablist">
+    <button class="hub-tab active" role="tab" onclick="loadHub('stages')" id="tab-stages" data-i18n="tabStages"></button>
+    <button class="hub-tab" role="tab" onclick="loadHub('endless')" id="tab-endless" data-i18n="tabEndless"></button>
+    <button class="hub-tab" role="tab" onclick="loadHub('upgrade')" id="tab-upgrade" data-i18n="tabUpgrade"></button>
+    <button class="hub-tab" role="tab" onclick="loadHub('codex')" id="tab-codex" data-i18n="tabCodex"></button>
+    <button class="hub-tab" role="tab" onclick="loadHub('codex_ing')" id="tab-codex_ing" data-i18n="tabIngs"></button>
   </div>
   <div class="hub-content" id="hub-content"></div>
 </div>
 
-<!-- ═══ 오늘 뭐 먹을까 FAB ═══ -->
-<button class="wfd-fab" id="wfd-fab" onclick="openWFD()" title="오늘 뭐 먹을까?">🍽️</button>
+<button class="wfd-fab" id="wfd-fab" onclick="openWFD()" data-i18n-aria="wfd" aria-label="What should I cook?" hidden>🍽️</button>
 
-<!-- ═══ 오늘 뭐 먹을까 MODAL ═══ -->
+<!-- ═══ WHAT SHOULD I COOK ═══ -->
 <div class="wfd-overlay" id="wfd-overlay">
-  <div class="wfd-sheet">
+  <div class="wfd-sheet" role="dialog" aria-modal="true" aria-labelledby="wfd-title">
     <div class="wfd-handle"></div>
     <div class="wfd-header">
-      <div class="wfd-title">오늘 뭐 먹을까? 🤔</div>
-      <button class="wfd-close" onclick="closeWFD()">✕</button>
+      <h2 class="wfd-title" id="wfd-title" data-i18n="wfd"></h2>
+      <button class="wfd-close" onclick="closeWFD()" data-i18n-aria="close" aria-label="Close"><svg class="ico" aria-hidden="true"><use href="#i-close"/></svg></button>
     </div>
-    <div class="wfd-sub">랜덤으로 3가지 요리를 추천해드려요. 하나를 골라보세요!</div>
-
-    <button class="wfd-spin-btn" id="wfd-spin-btn" onclick="spinWFD()">
-      🎲 &nbsp; 랜덤 추천 받기
-    </button>
-
-    <div class="wfd-cards" id="wfd-cards">
-      <!-- cards injected by JS -->
-    </div>
-
+    <p class="wfd-sub" data-i18n="wfdSub"></p>
+    <button class="btn btn-primary wfd-spin-btn" id="wfd-spin-btn" onclick="spinWFD()"><svg class="ico" aria-hidden="true"><use href="#i-dice"/></svg><span data-i18n="spin"></span></button>
+    <div class="wfd-cards" id="wfd-cards"></div>
     <div class="wfd-detail" id="wfd-detail">
       <div class="wfd-detail-top">
-        <span class="wfd-detail-emoji" id="wd-emoji">🍜</span>
-        <div class="wfd-detail-info">
-          <div class="wfd-detail-name" id="wd-name">요리명</div>
-          <div class="wfd-detail-desc" id="wd-desc">설명</div>
-          <div class="wfd-detail-meta" id="wd-meta"></div>
-        </div>
+        <span class="wfd-detail-emoji" id="wd-emoji"></span>
+        <div class="wfd-detail-info"><div class="wfd-detail-name" id="wd-name"></div><div class="wfd-detail-desc" id="wd-desc"></div><div class="wfd-detail-meta" id="wd-meta"></div></div>
       </div>
-      <div class="wfd-ing-title">🧂 주요 식재료</div>
+      <div class="wfd-ing-title" data-i18n="mainIngs"></div>
       <div class="wfd-ing-grid" id="wd-ings"></div>
-      <div class="wfd-steps-title">👨‍🍳 조리 단계</div>
+      <div class="wfd-steps-title" data-i18n="cookSteps"></div>
       <div class="wfd-steps-list" id="wd-steps"></div>
       <div class="wfd-action-row">
-        <button class="wfd-play-btn" id="wd-play-btn" onclick="playFromWFD()">이 요리 도전하기 →</button>
-        <button class="wfd-respin-btn" onclick="spinWFD()">🎲 다시</button>
+        <button class="btn btn-primary" id="wd-play-btn" onclick="playFromWFD()"></button>
+        <button class="btn btn-secondary" onclick="spinWFD()"><svg class="ico" aria-hidden="true"><use href="#i-dice"/></svg><span data-i18n="reroll"></span></button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══ GAME SCREEN ═══ -->
-<div id="game-screen" class="screen">
-  <!-- topbar -->
+<!-- ═══ GAME ═══ -->
+<div id="game-screen" class="screen tiled">
   <div class="game-topbar">
     <div class="topbar-left">
-      <div class="topbar-stage" id="g-stage-label">STAGE 1</div>
+      <div class="topbar-stage" id="g-stage-label"></div>
       <div class="topbar-score" id="g-score">0</div>
     </div>
     <div class="topbar-center">
-      <div class="topbar-dish-name" id="g-dish-name">요리 준비 중...</div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px;">
-        <div class="audio-pulse" id="audio-pulse" style="display:none">
-          <div class="ap-bar" style="height:40%"></div>
-          <div class="ap-bar" style="height:60%"></div>
-          <div class="ap-bar" style="height:100%"></div>
-          <div class="ap-bar" style="height:70%"></div>
-          <div class="ap-bar" style="height:40%"></div>
-        </div>
-      </div>
+      <div class="audio-pulse" id="audio-pulse" hidden><div class="ap-bar"></div><div class="ap-bar"></div><div class="ap-bar"></div><div class="ap-bar"></div><div class="ap-bar"></div></div>
     </div>
     <div class="topbar-right">
-      <div>
-        <div style="font-size:0.55rem;color:var(--muted);letter-spacing:0.1em;text-align:right;margin-bottom:3px;">목숨</div>
-        <div class="heart-row" id="g-hearts"></div>
-      </div>
+      <div><div class="lives-label" data-i18n="lives"></div><div class="heart-row" id="g-hearts"></div></div>
+      <button class="icon-btn light vol-btn" type="button" onclick="toggleVolPanel(event)" data-i18n-aria="volume" aria-label="Volume"><svg class="ico" aria-hidden="true"><use href="#i-vol-high"/></svg></button>
     </div>
   </div>
 
-  <!-- endless HUD -->
-  <div class="endless-hud" id="endless-hud" style="display:none">
-    <div><div class="endless-label">점수</div><div class="endless-val" id="el-score">0</div></div>
-    <div style="text-align:center"><div class="endless-label">콤보</div><div class="endless-val endless-streak" id="el-combo">×0</div></div>
-    <div style="text-align:right"><div class="endless-label">최고</div><div class="endless-val" id="el-best">0</div></div>
+  <div class="endless-hud" id="endless-hud" hidden>
+    <div><div class="endless-label" data-i18n="score"></div><div class="endless-val" id="el-score">0</div></div>
+    <div style="text-align:center"><div class="endless-label" data-i18n="combo"></div><div class="endless-val endless-streak" id="el-combo">×0</div></div>
+    <div style="text-align:right"><div class="endless-label" data-i18n="best"></div><div class="endless-val" id="el-best">0</div></div>
   </div>
 
   <div class="stage-progress" id="stage-progress"></div>
 
   <div class="cook-area" id="cook-area">
-    <div class="recipe-card" id="recipe-card">
-      <div class="rc-emoji" id="rc-emoji">🍳</div>
-      <div class="rc-info">
-        <div class="rc-name" id="rc-name">요리명</div>
-        <div class="rc-desc" id="rc-desc">레시피 설명</div>
-        <div class="rc-stars" id="rc-stars"></div>
-      </div>
+    <div class="recipe-card">
+      <div class="rc-emoji" id="rc-emoji"></div>
+      <div class="rc-info"><div class="rc-name" id="rc-name"></div><div class="rc-desc" id="rc-desc"></div><div class="rc-stars" id="rc-stars"></div></div>
     </div>
-    <div class="multitask-warning" id="multitask-warn">⚡ 멀티태스킹 구간! 두 단계가 동시에 진행됩니다</div>
+    <div class="multitask-warning" id="multitask-warn" data-i18n="multitask"></div>
     <div class="steps-container" id="steps-container"></div>
-    <button id="timing-btn" class="timing-btn">탭!</button>
   </div>
+  <button id="timing-btn" class="timing-btn" type="button" data-i18n="tap" hidden></button>
 
   <div class="game-bottom">
-      <button class="btn btn-outline" onclick="openQuitModal()" style="font-size:0.8rem;padding:0.75rem">← 나가기</button>
-    </div>
+    <button class="btn btn-outline btn-small" onclick="openQuitModal()"><svg class="ico" aria-hidden="true"><use href="#i-back"/></svg><span data-i18n="exit"></span></button>
+  </div>
 
-  <!-- ═══ QUIT MODAL ═══ -->
-  <div class="modal-overlay" id="quit-modal" style="display:none;">
-    <div class="modal-sheet">
-      <div class="modal-title">게임을 종료하시겠습니까?</div>
+  <div class="modal-overlay" id="quit-modal">
+    <div class="modal-sheet" role="dialog" aria-modal="true">
+      <div class="modal-title" data-i18n="quitQ"></div>
       <div class="modal-actions">
-        <button class="btn btn-primary" onclick="confirmQuit()">나가기</button>
-        <button class="btn btn-outline" onclick="closeQuitModal()">취소</button>
+        <button class="btn btn-outline" onclick="closeQuitModal()" data-i18n="cancel"></button>
+        <button class="btn btn-primary" onclick="confirmQuit()" data-i18n="exit"></button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ═══ RESULT OVERLAY ═══ -->
+<!-- ═══ RESULT ═══ -->
 <div class="result-overlay" id="result-overlay">
-  <div class="result-modal">
-    <div class="result-hero">
-      <span class="result-emoji" id="res-emoji">🏆</span>
-      <div class="result-verdict" id="res-verdict">완벽한 요리!</div>
+  <div class="result-modal" role="dialog" aria-modal="true" aria-labelledby="res-verdict">
+    <div class="result-hero" id="res-hero">
+      <span class="result-emoji" id="res-emoji"></span>
+      <div class="result-verdict" id="res-verdict"></div>
       <div class="result-dish" id="res-dish"></div>
-      <div class="result-stars" id="res-stars">
-        <span class="res-star" id="rs0">⭐</span>
-        <span class="res-star" id="rs1">⭐</span>
-        <span class="res-star" id="rs2">⭐</span>
-      </div>
+      <div class="result-stars" id="res-stars"><span class="res-star">⭐</span><span class="res-star">⭐</span><span class="res-star">⭐</span></div>
     </div>
     <div class="result-stats" id="res-stats"></div>
     <div class="result-actions">
-      <button class="btn btn-primary" id="res-next-btn" onclick="nextStage()">다음 스테이지 →</button>
-      <button class="btn btn-outline" onclick="retryStage()">다시 도전</button>
-      <button class="btn btn-outline" onclick="exitToHub()">메인으로</button>
+      <button class="btn btn-primary" id="res-next-btn" onclick="nextStage()" data-i18n="next"></button>
+      <button class="btn btn-outline" onclick="retryStage()" data-i18n="retry"></button>
+      <button class="btn btn-outline" onclick="exitToHub()" data-i18n="toMenu"></button>
     </div>
   </div>
 </div>
 
-<!-- ═══ CODEX DISH DETAIL OVERLAY ═══ -->
+<!-- ═══ DISH DETAIL ═══ -->
 <div class="wfd-overlay" id="codex-overlay">
-  <div class="wfd-sheet">
+  <div class="wfd-sheet" role="dialog" aria-modal="true" aria-labelledby="cd-title">
     <div class="wfd-handle"></div>
     <div class="wfd-header">
-      <div class="wfd-title" id="cd-title">요리 도감</div>
-      <button class="wfd-close" onclick="closeCodexDish()">✕</button>
+      <h2 class="wfd-title" id="cd-title"></h2>
+      <button class="wfd-close" onclick="closeCodexDish()" data-i18n-aria="close" aria-label="Close"><svg class="ico" aria-hidden="true"><use href="#i-close"/></svg></button>
     </div>
-    <div class="wfd-sub" id="cd-sub">레시피 상세 정보</div>
-
-    <div class="wfd-detail show" style="display:block">
+    <p class="wfd-sub" data-i18n="recipeSub"></p>
+    <div class="wfd-detail show">
       <div class="wfd-detail-top">
-        <span class="wfd-detail-emoji" id="cd-emoji">🍳</span>
-        <div class="wfd-detail-info">
-          <div class="wfd-detail-name" id="cd-name">요리명</div>
-          <div class="wfd-detail-desc" id="cd-desc">설명</div>
-          <div class="wfd-detail-meta" id="cd-meta"></div>
-        </div>
+        <span class="wfd-detail-emoji" id="cd-emoji"></span>
+        <div class="wfd-detail-info"><div class="wfd-detail-name" id="cd-name"></div><div class="wfd-detail-desc" id="cd-desc"></div><div class="wfd-detail-meta" id="cd-meta"></div></div>
       </div>
-      <div class="wfd-ing-title">🧂 주요 식재료</div>
+      <div class="wfd-ing-title" data-i18n="mainIngs"></div>
       <div class="wfd-ing-grid" id="cd-ings"></div>
-      <div class="wfd-steps-title">👨‍🍳 조리 단계</div>
+      <div class="wfd-steps-title" data-i18n="cookSteps"></div>
       <div class="wfd-steps-list" id="cd-steps"></div>
-      <div class="wfd-action-row">
-        <button class="wfd-play-btn" id="cd-play-btn" onclick="playFromCodex()">이 요리 도전하기 →</button>
-      </div>
+      <div class="wfd-action-row"><button class="btn btn-primary" id="cd-play-btn" onclick="playFromCodex()"></button></div>
     </div>
   </div>
 </div>
 
-<!-- ═══ INGREDIENT DETAIL OVERLAY ═══ -->
+<!-- ═══ INGREDIENT DETAIL ═══ -->
 <div class="wfd-overlay" id="ing-overlay">
-  <div class="wfd-sheet">
+  <div class="wfd-sheet" role="dialog" aria-modal="true" aria-labelledby="ing-title">
     <div class="wfd-handle"></div>
     <div class="wfd-header">
-      <div class="wfd-title" id="ing-title">식재료</div>
-      <button class="wfd-close" onclick="closeIngredient()">✕</button>
+      <h2 class="wfd-title" id="ing-title"></h2>
+      <button class="wfd-close" onclick="closeIngredient()" data-i18n-aria="close" aria-label="Close"><svg class="ico" aria-hidden="true"><use href="#i-close"/></svg></button>
     </div>
-    <div class="wfd-sub" id="ing-sub">이 재료를 사용하는 요리들</div>
-
-    <div class="wfd-detail show" style="display:block">
+    <p class="wfd-sub" data-i18n="ingSub"></p>
+    <div class="wfd-detail show">
       <div class="wfd-detail-top">
-        <span class="wfd-detail-emoji" id="ing-emoji">🧅</span>
-        <div class="wfd-detail-info">
-          <div class="wfd-detail-name" id="ing-name">재료명</div>
-          <div class="wfd-detail-desc" id="ing-desc">설명</div>
-        </div>
+        <span class="wfd-detail-emoji" id="ing-emoji"></span>
+        <div class="wfd-detail-info"><div class="wfd-detail-name" id="ing-name"></div><div class="wfd-detail-desc" id="ing-desc"></div></div>
       </div>
-      <div class="wfd-steps-title">🍽️ 관련 요리 <span id="ing-count" style="font-family:'DM Sans',sans-serif;font-size:0.65rem;color:var(--muted);font-weight:400"></span></div>
+      <div class="wfd-steps-title ing-related-title"><span data-i18n="related"></span><span class="ing-count" id="ing-count"></span></div>
       <div class="wfd-cards" id="ing-related"></div>
-      <div id="ing-empty" style="display:none;text-align:center;padding:1rem;font-size:0.78rem;color:var(--muted)">이 재료를 사용하는 요리가 없습니다.</div>
     </div>
   </div>
 </div>
 
-<!-- ═══ MINIGAME OVERLAY ═══ -->
+<!-- ═══ MINIGAME ═══ -->
 <div class="minigame-overlay" id="mg-overlay">
-  <div class="minigame-sheet">
+  <div class="minigame-sheet" role="dialog" aria-modal="true" aria-labelledby="mg-title">
     <div class="minigame-handle"></div>
-    <div class="mg-title">🎪 식재료 수집</div>
-    <div class="mg-desc">하늘에서 떨어지는 식재료를 탭해서 받아내세요! 30초 안에 최대한 많이 모으세요.</div>
+    <h2 class="mg-title" id="mg-title" data-i18n="minigame"></h2>
+    <p class="mg-desc" data-i18n="mgDesc"></p>
     <div class="mg-score-row">
-      <div><div class="mg-score-label">수집량</div><div class="mg-score-val" id="mg-score">0</div></div>
-      <div style="text-align:right"><div class="mg-score-label">보상</div><div class="mg-score-val" id="mg-reward" style="color:var(--gold)">+0 🪙</div></div>
+      <div><div class="mg-score-label" data-i18n="mgCollected"></div><div class="mg-score-val" id="mg-score">0</div></div>
+      <div style="text-align:right"><div class="mg-score-label" data-i18n="mgReward"></div><div class="mg-score-val mg-reward" id="mg-reward">+0 🪙</div></div>
     </div>
-    <div class="mg-timer-bar"><div class="mg-timer-fill" id="mg-timer-fill" style="width:100%"></div></div>
-    <div class="mg-basket" id="mg-basket">
-      <div class="mg-basket-icon" id="mg-basket-icon">🧺</div>
-    </div>
-    <div style="display:flex;gap:0.75rem;margin-top:0;">
-      <button class="btn btn-primary" id="mg-start-btn" onclick="startMinigame()">시작!</button>
-      <button class="btn btn-outline" onclick="closeMinigame()">닫기</button>
+    <div class="mg-timer-bar"><div class="mg-timer-fill" id="mg-timer-fill"></div></div>
+    <div class="mg-basket tiled" id="mg-basket"><div class="mg-basket-icon" id="mg-basket-icon">🧺</div></div>
+    <div class="mg-actions">
+      <button class="btn btn-primary" id="mg-start-btn" onclick="startMinigame()"></button>
+      <button class="btn btn-outline" onclick="closeMinigame()" data-i18n="close"></button>
     </div>
   </div>
 </div>
 
 <script>
+'use strict';
+const $ = id => document.getElementById(id);
+const VER = '3.0.0'; // bump with CHANGELOG + style.css?v= so cached css/json never mismatch this html
+const IS_TOUCH = matchMedia('(pointer:coarse)').matches;
+const FRAME_MS = IS_TOUCH ? 1000 / 60 : 0; // ponytail: 60fps cap on touch devices only; desktop draws every vsync
+
+function readJSON(k){
+  try{ const v = JSON.parse(localStorage.getItem(k) || '{}'); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; }
+  catch(e){ console.warn('Corrupted storage reset:', k, e); return {}; }
+}
+function writeJSON(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){ /* private mode / quota: play on without saving */ } }
+
 // ═══════════════════════════════════════════
-// AUDIO ENGINE
+// PREFERENCES (volume + language)
 // ═══════════════════════════════════════════
-let audioCtx=null, soundOn=true, bgmGain=null, bgmPlaying=false, bgmTimer=null;
-let bgmStep=0;
-const SCALE=[261.63,293.66,329.63,349.23,392,440,493.88,523.25,587.33,659.25];
+const prefs = Object.assign({ music:0.6, sfx:0.8, muted:false, lang:null }, readJSON('tc_prefs'));
+const clamp01 = v => Math.min(1, Math.max(0, +v || 0));
+prefs.music = clamp01(prefs.music); prefs.sfx = clamp01(prefs.sfx); prefs.muted = !!prefs.muted;
+const savePrefs = () => writeJSON('tc_prefs', prefs);
+
+// ═══════════════════════════════════════════
+// LOCALIZATION — UI strings inline [en, ko, ja]; dish/step/ingredient data in lang/*.json (lazy)
+// ═══════════════════════════════════════════
+const LANGS = ['en','ko','ja'];
+const UI = {
+  docTitle:     ['Timing Chef','타이밍 셰프','タイミングシェフ'],
+  tagline:      ['Tap on time to cook the perfect dish. One second separates a masterpiece from a mess.','타이밍을 맞춰 완벽한 요리를 완성하세요. 1초의 차이가 명작과 실패를 가릅니다.','タイミングを合わせて完璧な料理を仕上げよう。1秒の差が傑作と失敗を分けます。'],
+  startCooking: ['Start cooking','요리 시작','料理をはじめる'],
+  modes:        ['Game modes','모드 선택','モード選択'],
+  modeSub:      ['How do you want to cook?','어떻게 요리할까요?','どう料理する？'],
+  install:      ['Install app','앱 설치','アプリをインストール'],
+  iosInstall:   ['In Safari, tap Share → "Add to Home Screen"','Safari 공유 버튼 → "홈 화면에 추가"를 누르세요','Safariの共有ボタン →「ホーム画面に追加」をタップ'],
+  back:         ['Back','뒤로','戻る'],
+  close:        ['Close','닫기','閉じる'],
+  volume:       ['Volume','볼륨','音量'],
+  language:     ['Language','언어','言語'],
+  music:        ['Music','음악','音楽'],
+  sfx:          ['Sound effects','효과음','効果音'],
+  mute:         ['Mute','음소거','ミュート'],
+  stageMode:    ['Stage mode','스테이지 모드','ステージモード'],
+  stageModeDesc:['{n} recipes across {c} chapters. Clear dishes to unlock the next chapter.','{c}개 챕터, {n}개의 레시피. 요리를 클리어해 다음 챕터를 여세요.','全{c}章・{n}品のレシピ。料理をクリアして次の章を解放しよう。'],
+  recommended:  ['Start here','추천','おすすめ'],
+  endlessMode:  ['Endless mode','엔드리스 모드','エンドレスモード'],
+  endlessDesc:  ['How long can you keep up with nonstop orders? Chain combos to beat your best.','끝없이 이어지는 주문을 얼마나 버틸 수 있을까요? 콤보를 이어 최고 기록에 도전하세요.','途切れない注文にどこまで耐えられる？コンボをつないでベスト記録に挑戦。'],
+  endlessHubSub:['Orders keep coming until you run out of lives','목숨이 다할 때까지 주문이 이어집니다','ライフが尽きるまで注文は続きます'],
+  startEndless: ['Start shift','도전 시작','挑戦スタート'],
+  challenge:    ['Hard','도전','チャレンジ'],
+  minigame:     ['Ingredient catch','식재료 수집','食材キャッチ'],
+  minigameDesc: ['Tap falling ingredients to collect them for coins. Once a day!','떨어지는 식재료를 탭해 모으면 코인이 됩니다. 하루 한 번!','落ちてくる食材をタップして集めるとコインに。1日1回！'],
+  mgDesc:       ['Tap the falling ingredients! Catch as many as you can in 30 seconds.','떨어지는 식재료를 탭하세요! 30초 동안 최대한 많이 모으세요.','落ちてくる食材をタップ！30秒でできるだけ集めよう。'],
+  mgCollected:  ['Caught','수집량','収集数'],
+  mgReward:     ['Reward','보상','報酬'],
+  mgStart:      ['Start','시작','スタート'],
+  mgRunning:    ['Catching…','수집 중…','プレイ中…'],
+  mgTomorrow:   ['Come back tomorrow','내일 다시 도전!','また明日！'],
+  mgAlready:    ['Already played today','오늘은 이미 플레이했어요','今日はもうプレイしました'],
+  mgDone:       ['Done! +🪙{n}','수집 완료! +🪙{n}','収集完了！+🪙{n}'],
+  hello:        ['Welcome back,','안녕하세요,','おかえりなさい、'],
+  chef:         ['Chef 🧑‍🍳','셰프 🧑‍🍳','シェフ 🧑‍🍳'],
+  tabStages:    ['Stages','스테이지','ステージ'],
+  tabEndless:   ['Endless','엔드리스','エンドレス'],
+  tabUpgrade:   ['Upgrades','업그레이드','アップグレード'],
+  tabCodex:     ['Dishes','요리 도감','料理図鑑'],
+  tabIngs:      ['Ingredients','식재료 도감','食材図鑑'],
+  codexDishes:  ['Dish collection','요리 도감','料理図鑑'],
+  codexIngs:    ['Ingredient collection','식재료 도감','食材図鑑'],
+  wfd:          ['What should I cook?','오늘 뭐 먹을까?','今日なに作る？'],
+  wfdSub:       ['Three random picks. Choose one to see the recipe.','무작위로 세 가지 요리를 추천해요. 하나를 골라보세요.','ランダムに3品おすすめ。1つ選んでレシピを見よう。'],
+  spin:         ['Shuffle picks','추천 받기','おすすめを引く'],
+  reroll:       ['Again','다시','もう一度'],
+  mainIngs:     ['Key ingredients','주요 식재료','主な食材'],
+  cookSteps:    ['Cooking steps','조리 단계','調理ステップ'],
+  noIngs:       ['Ingredient list coming soon','재료 정보를 준비 중입니다','食材情報は準備中です'],
+  playDish:     ['Cook {name}','{name} 도전하기','{name}に挑戦'],
+  recipeOf:     ['{name} recipe','{name} 레시피','{name}のレシピ'],
+  recipeSub:    ['Ingredients and steps at a glance.','재료와 조리 단계를 확인하세요.','食材と調理ステップを確認しよう。'],
+  ingSub:       ['Dishes that use this ingredient','이 재료가 들어가는 요리','この食材を使う料理'],
+  related:      ['Related dishes','관련 요리','関連料理'],
+  relatedCount: ['({k} of {n})','(전체 {n}개 중 {k}개)','（全{n}品中{k}品）'],
+  noRelated:    ['No dishes use this ingredient yet.','이 재료를 사용하는 요리가 없습니다.','この食材を使う料理はまだありません。'],
+  lives:        ['Lives','목숨','ライフ'],
+  score:        ['Score','점수','スコア'],
+  combo:        ['Combo','콤보','コンボ'],
+  best:         ['Best','최고','ベスト'],
+  multitask:    ['⚡ Rush order! The needle moves faster','⚡ 바쁜 주문! 바늘이 더 빨라요','⚡ 急ぎの注文！針が速くなります'],
+  multitaskTag: ['⚡ Rush order','⚡ 바쁜 주문','⚡ 急ぎの注文'],
+  tap:          ['TAP!','탭!','タップ！'],
+  tapHint:      ['Tap when the needle hits <strong>PERFECT</strong>','바늘이 <strong>PERFECT</strong>에 닿는 순간 탭!','針が<strong>PERFECT</strong>に来た瞬間にタップ！'],
+  exit:         ['Quit','나가기','やめる'],
+  quitQ:        ['Quit this dish? Progress will be lost.','요리를 그만둘까요? 진행 상황은 사라집니다.','料理をやめますか？進行状況は失われます。'],
+  cancel:       ['Keep cooking','계속하기','続ける'],
+  verdict0:     ['Give it another go','다시 도전하세요','もう一度挑戦'],
+  verdict1:     ['Nicely done!','잘 했어요!','よくできました！'],
+  verdict2:     ['Great cooking!','훌륭해요!','すばらしい！'],
+  verdict3:     ['Perfect dish!','완벽한 요리!','完璧な料理！'],
+  failed:       ['Dish burned…','요리 실패…','料理失敗…'],
+  newBest:      ['New best!','신기록 달성!','新記録！'],
+  endlessOver:  ['Shift over','엔드리스 종료','エンドレス終了'],
+  dishesDone:   ['{n} dishes served','요리 {n}개 완성','{n}品完成'],
+  totalScore:   ['Score','총 점수','スコア'],
+  perfects:     ['Perfect hits','퍼펙트','パーフェクト'],
+  coinsEarned:  ['Coins earned','획득 코인','獲得コイン'],
+  endlessScore: ['Endless score','엔드리스 점수','エンドレススコア'],
+  bestCombo:    ['Best combo','최고 콤보','最高コンボ'],
+  bestRecord:   ['Personal best','최고 기록','ベスト記録'],
+  livesLeft:    ['Lives left','남은 목숨','残りライフ'],
+  next:         ['Next stage','다음 스테이지','次のステージ'],
+  retry:        ['Try again','다시 도전','もう一度'],
+  toMenu:       ['Back to menu','메인으로','メニューへ'],
+  chapterN:     ['Ch. {n}','챕터 {n}','第{n}章'],
+  ch1:['Kitchen Basics','기초 요리','基本の料理'], ch2:['Asian Kitchen','아시아 요리','アジア料理'],
+  ch3:['European Kitchen','유럽 요리','ヨーロッパ料理'], ch4:['Fine Dining','고급 요리','高級料理'],
+  ch5:['World Tour','세계 요리','世界の料理'], ch6:['Master Class','마스터','マスター'],
+  ch7:['Molecular Lab','분자요리 실험실','分子ガストロノミー'], ch8:['Dessert Master','디저트 마스터','デザートマスター'],
+  diff1:['Easy','초급','初級'], diff2:['Medium','중급','中級'], diff3:['Hard','고급','上級'],
+  specialTag:   ['Event','이벤트','イベント'],
+  lockedChapter:['Clear 5 dishes in the previous chapter to unlock','이전 챕터에서 요리 5개를 클리어하면 열려요','前の章で5品クリアすると解放'],
+  todaySpecial: ["Today's special",'오늘의 스페셜','本日のスペシャル'],
+  eventSub:     ['Double coins, today only','오늘 하루 코인 2배','今日だけコイン2倍'],
+  eventStart:   ["🎊 Today's special — double coins!",'🎊 오늘의 스페셜! 코인 2배!','🎊 本日のスペシャル！コイン2倍！'],
+  upgrade:      ['Upgrade','강화','強化'],
+  maxed:        ['Maxed','완료','完了'],
+  maxLv:        ['Already maxed out','이미 최대 레벨입니다','すでに最大レベルです'],
+  noCoins:      ['Not enough coins 🪙','코인이 부족합니다 🪙','コインが足りません 🪙'],
+  upgraded:     ['Upgraded! {e}','업그레이드 완료! {e}','アップグレード完了！{e}'],
+  newIng:       ['New ingredient! {e} {name}','새 재료 발견! {e} {name}','新しい食材！{e} {name}'],
+  endlessDish:  ['{e} served! +🪙{n} (combo ×{c})','{e} 완성! +🪙{n} (콤보 ×{c})','{e}完成！+🪙{n}（コンボ×{c}）'],
+  loading:      ['Loading…','불러오는 중…','読み込み中…'],
+  loadFail:     ["Couldn't load game data. Check your connection and reload.",'게임 데이터를 불러오지 못했습니다. 연결을 확인하고 새로고침하세요.','ゲームデータを読み込めませんでした。接続を確認して再読み込みしてください。'],
+  langFail:     ["Couldn't load that language. Check your connection.",'언어 데이터를 불러오지 못했습니다. 연결을 확인하세요.','言語データを読み込めませんでした。接続を確認してください。'],
+  stageFail:    ["Couldn't open that stage.",'스테이지를 열 수 없습니다.','ステージを開けませんでした。'],
+};
+function detectLang(){
+  for(const l of (navigator.languages || [navigator.language || 'en'])){
+    const p = String(l).slice(0,2).toLowerCase();
+    if(LANGS.includes(p)) return p;
+  }
+  return 'en';
+}
+let LANG = LANGS.includes(prefs.lang) ? prefs.lang : detectLang();
+let LI = LANGS.indexOf(LANG);
+let TR = null;            // data translations for LANG (null = Korean source data)
+const trCache = {};
+function t(k, v){
+  const e = UI[k]; let s = e ? (e[LI] ?? e[0]) : k;
+  return v ? s.replace(/\{(\w+)\}/g, (_, x) => v[x] ?? '') : s;
+}
+const dtr = (sec, key, i, fb) => { const e = TR && TR[sec] && TR[sec][key]; return e == null ? fb : (i == null ? e : e[i]); };
+const rName = r => dtr('recipes', r.id, 0, r.name),  rDesc = r => dtr('recipes', r.id, 1, r.desc);
+const cName = c => dtr('codex', c.id, 0, c.name),    cDesc = c => dtr('codex', c.id, 1, c.desc);
+const uName = u => dtr('upgrades', u.id, 0, u.name), uDesc = u => dtr('upgrades', u.id, 1, u.desc);
+const stepTxt = s => dtr('steps', s, null, s),       ingTxt = n => dtr('ings', n, null, n);
+
+async function loadLangData(l){
+  if(l === 'ko') return null;
+  if(trCache[l]) return trCache[l];
+  const res = await fetch('lang/' + l + '.json?v=' + VER);
+  if(!res.ok) throw new Error('lang ' + l + ' HTTP ' + res.status);
+  return (trCache[l] = await res.json());
+}
+function applyStaticI18n(){
+  document.documentElement.lang = LANG;
+  document.title = t('docTitle');
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => el.setAttribute('aria-label', t(el.dataset.i18nAria)));
+  document.querySelectorAll('.lang-select').forEach(s => { s.value = LANG; });
+  if(dataLoaded){
+    $('mode-stage-desc').textContent = t('stageModeDesc', { n:RECIPES.length, c:CH_COUNT });
+    renderTitleDishes();
+  }
+  resetMinigameButton();
+}
+async function setLang(l){
+  if(!LANGS.includes(l) || l === LANG) return;
+  try { TR = await loadLangData(l); }
+  catch(e){ console.warn(e); showToast(t('langFail')); document.querySelectorAll('.lang-select').forEach(s => { s.value = LANG; }); return; }
+  LANG = l; LI = LANGS.indexOf(l); prefs.lang = l; savePrefs();
+  applyStaticI18n();
+  if($('hub-screen').classList.contains('active')) loadHub(hubTab);
+}
+
+// ═══════════════════════════════════════════
+// AUDIO ENGINE — D Dorian, master/music/sfx buses, compressor + generated reverb
+// ═══════════════════════════════════════════
+const A = { ctx:null, master:null, music:null, sfx:null, verb:null, noise:null };
+const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+const DORIAN = [0,2,3,5,7,9,10];                                       // D E F G A B C
+const dor = d => 62 + 12 * Math.floor(d / 7) + DORIAN[((d % 7) + 7) % 7]; // degree 0 = D4
+const musicOn = () => !prefs.muted && prefs.music > 0;
+const sfxOn   = () => !prefs.muted && prefs.sfx > 0;
 
 function ac(){
-  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-  if(audioCtx.state==='suspended') audioCtx.resume();
-  return audioCtx;
-}
-function tone(f,t,d,v=0.15,wave='sine'){
-  if(!soundOn) return;
-  const ctx=ac(), o=ctx.createOscillator(), g=ctx.createGain();
-  o.connect(g);g.connect(ctx.destination);
-  o.type=wave;o.frequency.value=f;
-  g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(0.001,t+d);
-  o.start(t);o.stop(t+d+0.01);
-}
-function noise(d,v=0.1,freq=600){
-  if(!soundOn) return;
-  const ctx=ac(),buf=ctx.createBuffer(1,ctx.sampleRate*d,ctx.sampleRate),data=buf.getChannelData(0);
-  for(let i=0;i<data.length;i++) data[i]=Math.random()*2-1;
-  const src=ctx.createBufferSource(),filt=ctx.createBiquadFilter(),g=ctx.createGain();
-  src.buffer=buf;filt.type='bandpass';filt.frequency.value=freq;filt.Q.value=1;
-  src.connect(filt);filt.connect(g);g.connect(ctx.destination);
-  g.gain.setValueAtTime(v,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+d);
-  src.start();src.stop(ctx.currentTime+d+0.01);
-}
-
-function sfxPerfect(){ const t=ac().currentTime; tone(523,t,0.1,0.2); tone(659,t+0.07,0.1,0.18); tone(784,t+0.14,0.15,0.2); tone(1047,t+0.21,0.2,0.15); }
-function sfxGood()  { const t=ac().currentTime; tone(440,t,0.1,0.15); tone(554,t+0.07,0.12,0.13); }
-function sfxBad()   { tone(200,ac().currentTime,0.15,0.2,'sawtooth'); noise(0.12,0.1,300); }
-function sfxTap()   { tone(660,ac().currentTime,0.05,0.08); }
-function sfxCoin()  { const t=ac().currentTime; tone(880,t,0.07,0.12); tone(1108,t+0.06,0.08,0.1); }
-function sfxWin()   { const t=ac().currentTime; [523,659,784,1047,1319].forEach((f,i)=>tone(f,t+i*0.1,0.15,0.2)); }
-function sfxLose()  { const t=ac().currentTime; [400,350,300,250].forEach((f,i)=>tone(f,t+i*0.12,0.15,0.18,'sawtooth')); }
-function sfxUnlock(){ const t=ac().currentTime; [392,523,659,784].forEach((f,i)=>tone(f,t+i*0.08,0.12,0.15)); }
-function sfxEvent() { const t=ac().currentTime; [523,784,1047].forEach((f,i)=>{ tone(f,t+i*0.06,0.1,0.2); tone(f*1.5,t+i*0.06+0.03,0.08,0.1); }); }
-
-const BGM_ARP=[0,2,4,7,9,7,4,2,1,3,5,8,10,8,5,3];
-const BGM_BASS=[130.81,146.83,164.81,174.61];
-function scheduleBgm(){
-  if(!bgmPlaying||!soundOn) return;
-  const ctx=ac(), now=ctx.currentTime;
-  const ai=BGM_ARP[bgmStep%BGM_ARP.length];
-  const af=SCALE[ai%SCALE.length];
-  const beat=60/120;
-  // melody
-  tone(af*2,now,beat*0.6,0.035,'square');
-  // bass
-  if(bgmStep%2===0){ const bf=BGM_BASS[Math.floor(bgmStep/2)%BGM_BASS.length]; tone(bf,now,beat*1.4,0.06,'sawtooth'); }
-  // hihat
-  noise(0.03,0.025,8000+Math.random()*2000);
-  // kick
-  if(bgmStep%4===0){ const ko=ctx.createOscillator(),kg=ctx.createGain(); ko.connect(kg);kg.connect(ctx.destination); ko.type='sine'; ko.frequency.setValueAtTime(120,now); ko.frequency.exponentialRampToValueAtTime(40,now+0.08); kg.gain.setValueAtTime(0.25,now); kg.gain.exponentialRampToValueAtTime(0.001,now+0.12); ko.start(now);ko.stop(now+0.15); }
-  // snare
-  if(bgmStep%8===4) noise(0.06,0.07,1500);
-  bgmStep++;
-  bgmTimer=setTimeout(scheduleBgm,beat*1000);
-}
-function startBgm(){ if(bgmPlaying||!soundOn) return; bgmPlaying=true; bgmStep=0; scheduleBgm(); document.getElementById('audio-pulse').style.display='flex'; }
-function stopBgm() { bgmPlaying=false; if(bgmTimer) clearTimeout(bgmTimer); document.getElementById('audio-pulse').style.display='none'; }
-function toggleSound(){
-  soundOn=!soundOn;
-  document.getElementById('snd-toggle').textContent=soundOn?'🔊':'🔇';
-  if(!soundOn) stopBgm(); else if(gameState.running) startBgm();
-}
-
-// ═══════════════════════════════════════════
-// DATA
-// ═══════════════════════════════════════════
-
-
-
-// 외부 JSON 데이터 동적 로딩
-let RECIPES, RECIPE_INGREDIENTS, CODEX_INGREDIENTS, UPGRADES;
-let dataLoaded = false;
-
-async function loadGameData() {
-  const fetchJson = async (path) => {
-    const res = await fetch(path);
-    if (!res.ok) throw new Error(path + ' HTTP ' + res.status);
-    return res.json();
-  };
-  const [recipes, recipeIngredients, codexIngredients, upgrades] = await Promise.all([
-    fetchJson('recipes.json'),
-    fetchJson('recipe_ingredients.json'),
-    fetchJson('codex_ingredients.json'),
-    fetchJson('upgrades.json'),
-  ]);
-  RECIPES = recipes;
-  RECIPE_INGREDIENTS = recipeIngredients;
-  CODEX_INGREDIENTS = codexIngredients;
-  UPGRADES = upgrades;
-  dataLoaded = true;
-}
-
-function setTitleButtonsEnabled(on){
-  document.querySelectorAll('#title-screen .btn, #mode-screen .mode-card').forEach(el=>{
-    el.style.pointerEvents = on ? '' : 'none';
-    el.style.opacity = on ? '' : '0.5';
-  });
-  const fab = document.getElementById('wfd-fab');
-  if(fab) fab.style.display = on ? '' : 'none';
-}
-
-window.addEventListener('DOMContentLoaded', async () => {
-  setTitleButtonsEnabled(false);
-  try {
-    await loadGameData();
-    setCoinDisplay(save.coins);
-    setTitleButtonsEnabled(true);
-  } catch (err) {
-    console.error('Data load failed:', err);
-    const ts = document.getElementById('title-screen');
-    if (ts) {
-      const msg = document.createElement('div');
-      msg.style.cssText = 'padding:1rem;margin:1rem;background:#fee;color:#900;border-radius:8px;font-size:0.85rem;text-align:center';
-      msg.textContent = '게임 데이터 로딩에 실패했습니다. 페이지를 새로고침해 주세요.';
-      ts.appendChild(msg);
-    }
+  if(!A.ctx){
+    const C = window.AudioContext || window.webkitAudioContext;
+    if(!C) return null;
+    const ctx = A.ctx = new C({ latencyHint:'interactive' });
+    const comp = ctx.createDynamicsCompressor();
+    comp.threshold.value = -14; comp.knee.value = 10; comp.ratio.value = 4; comp.attack.value = 0.004; comp.release.value = 0.2;
+    A.master = ctx.createGain(); A.master.connect(comp); comp.connect(ctx.destination);
+    A.music = ctx.createGain(); A.music.connect(A.master);
+    A.sfx = ctx.createGain(); A.sfx.connect(A.master);
+    // reverb: decaying stereo noise impulse, generated once
+    const len = Math.floor(ctx.sampleRate * 2.2), ir = ctx.createBuffer(2, len, ctx.sampleRate);
+    for(let c = 0; c < 2; c++){ const d = ir.getChannelData(c); for(let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2); }
+    A.verb = ctx.createConvolver(); A.verb.buffer = ir;
+    const wet = ctx.createGain(); wet.gain.value = 0.28; A.verb.connect(wet); wet.connect(A.master);
+    // reverb sends ride their bus volume, so the sliders scale the tail too
+    A.music.send = ctx.createGain(); A.music.send.connect(A.verb);
+    A.sfx.send = ctx.createGain(); A.sfx.send.connect(A.verb);
+    // one shared 1s noise buffer for every hat/hit (was re-allocated + refilled on every call)
+    A.noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+    const nd = A.noise.getChannelData(0); for(let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+    A.master.gain.value = prefs.muted ? 0 : 1;
+    A.music.gain.value = A.music.send.gain.value = prefs.music * 0.55;
+    A.sfx.gain.value = A.sfx.send.gain.value = prefs.sfx;
   }
+  if(A.ctx.state === 'suspended' && !document.hidden) A.ctx.resume().catch(() => {});
+  return A.ctx;
+}
+function applyVolume(){
+  if(!A.ctx) return;
+  const now = A.ctx.currentTime;
+  A.master.gain.setTargetAtTime(prefs.muted ? 0 : 1, now, 0.03);
+  for(const [bus, v] of [[A.music, prefs.music * 0.55], [A.sfx, prefs.sfx]]){
+    bus.gain.setTargetAtTime(v, now, 0.03); bus.send.gain.setTargetAtTime(v, now, 0.03);
+  }
+}
+function route(node, pan, bus, wet){
+  let n = node;
+  if(pan && A.ctx.createStereoPanner){ const p = A.ctx.createStereoPanner(); p.pan.value = pan; n.connect(p); n = p; }
+  n.connect(bus);
+  if(wet){ const s = A.ctx.createGain(); s.gain.value = wet; n.connect(s); s.connect(bus.send); }
+}
+// subtractive voice: detuned osc pair → lowpass → AD(S)R, optional delayed vibrato
+function voice(m, t, dur, o){
+  const ctx = A.ctx, f = mtof(m);
+  const { type='triangle', vol=0.2, atk=0.01, rel=0.25, cut=4000, det=6, pan=0, bus=A.sfx, wet=0.25, vib=0 } = o;
+  const lp = ctx.createBiquadFilter(), g = ctx.createGain(), end = t + dur + rel * 1.6;
+  lp.type = 'lowpass'; lp.frequency.value = cut; lp.Q.value = 0.7;
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(vol, t + atk);
+  g.gain.setTargetAtTime(vol * 0.72, t + atk, dur * 0.35);
+  g.gain.setTargetAtTime(0, t + dur, rel / 4);
+  lp.connect(g); route(g, pan, bus, wet);
+  let lfoG = null;
+  if(vib){
+    const lfo = ctx.createOscillator(); lfoG = ctx.createGain();
+    lfo.frequency.value = 5.2;
+    lfoG.gain.setValueAtTime(0, t); lfoG.gain.linearRampToValueAtTime(f * (Math.pow(2, vib / 1200) - 1), t + Math.min(0.45, dur * 0.6));
+    lfo.connect(lfoG); lfo.start(t); lfo.stop(end);
+  }
+  for(const d of (det ? [-det, det] : [0])){
+    const os = ctx.createOscillator(); os.type = type; os.frequency.value = f; os.detune.value = d;
+    if(lfoG) lfoG.connect(os.frequency);
+    os.connect(lp); os.start(t); os.stop(end);
+  }
+}
+// FM bell: sine carrier, modulator at ratio, decaying index → glassy kitchen-timer ding
+function bell(m, t, o){
+  const ctx = A.ctx, f = mtof(m);
+  const { vol=0.15, dur=1, ratio=3.5, idx=2.2, pan=0, wet=0.35, bus=A.sfx } = o;
+  const car = ctx.createOscillator(), mod = ctx.createOscillator(), mg = ctx.createGain(), g = ctx.createGain();
+  car.frequency.value = f; mod.frequency.value = f * ratio;
+  mg.gain.setValueAtTime(f * idx, t); mg.gain.exponentialRampToValueAtTime(f * 0.05, t + dur * 0.6);
+  mod.connect(mg); mg.connect(car.frequency); car.connect(g);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0005, t + dur);
+  route(g, pan, bus, wet);
+  car.start(t); mod.start(t); car.stop(t + dur + 0.05); mod.stop(t + dur + 0.05);
+}
+function hiss(t, dur, o){
+  const ctx = A.ctx, { vol=0.1, freq=2000, q=1, type='bandpass', bus=A.sfx, pan=0, wet=0 } = o;
+  const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+  s.buffer = A.noise; f.type = type; f.frequency.value = freq; f.Q.value = q;
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0005, t + dur);
+  s.connect(f); f.connect(g); route(g, pan, bus, wet);
+  s.start(t, Math.random() * 0.5, dur + 0.02);
+}
+function kick(t, vol, bus){
+  const ctx = A.ctx, o = ctx.createOscillator(), g = ctx.createGain();
+  o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.12);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.32);
+  o.connect(g); g.connect(bus); o.start(t); o.stop(t + 0.35);
+}
+function sfx(fn){ if(!sfxOn()) return; const ctx = ac(); if(ctx) fn(ctx.currentTime + 0.005); }
+
+// every pitch below sits in D Dorian (D E F G A B C); B = the Dorian colour note
+const sfxTap     = () => sfx(t => { bell(dor(14), t, { vol:0.05, dur:0.16, ratio:2, idx:1, wet:0.05 }); hiss(t, 0.03, { vol:0.04, freq:4200 }); });
+const sfxPerfect = () => sfx(t => {
+  [7,9,11,13,15].forEach((d, i) => bell(dor(d), t + i * 0.045, { vol:0.13 - i * 0.012, dur:0.9 + i * 0.15, pan:-0.4 + i * 0.2, wet:0.4 }));
+  bell(dor(19), t + 0.24, { vol:0.05, dur:1.4, ratio:2, idx:1.2, wet:0.6 });
+});
+const sfxGood    = () => sfx(t => { bell(dor(4), t, { vol:0.12, dur:0.6, pan:-0.15 }); bell(dor(7), t + 0.07, { vol:0.12, dur:0.8, pan:0.15 }); });
+const sfxBad     = () => sfx(t => {
+  voice(dor(-7), t, 0.22, { type:'sawtooth', vol:0.2, cut:420, det:14, rel:0.18, wet:0.1 });
+  voice(dor(-6), t + 0.03, 0.2, { type:'sawtooth', vol:0.13, cut:380, det:10, rel:0.16, wet:0.1 });
+  hiss(t, 0.14, { vol:0.12, freq:260, q:0.8 });
+});
+const sfxCoin    = () => sfx(t => { bell(dor(11), t, { vol:0.09, dur:0.35, ratio:2 }); bell(dor(14), t + 0.06, { vol:0.09, dur:0.6, ratio:2, wet:0.3 }); });
+// "So What" quartal voicing E-A-D-G-B — the textbook Dorian chord
+const SO_WHAT = [64,69,74,79,83];
+const sfxUnlock  = () => sfx(t => SO_WHAT.forEach((m, i) => bell(m, t + i * 0.05, { vol:0.09, dur:1.1, pan:-0.3 + i * 0.15, wet:0.45 })));
+const sfxEvent   = () => sfx(t => {
+  SO_WHAT.forEach((m, i) => { bell(m, t + i * 0.04, { vol:0.1, dur:1.4, wet:0.5, pan:-0.3 + i * 0.15 }); voice(m - 12, t, 1.2, { type:'sawtooth', vol:0.04, atk:0.2, rel:0.8, cut:1200, det:9, wet:0.5 }); });
+  bell(dor(21), t + 0.3, { vol:0.05, dur:1.6, ratio:2, wet:0.7 });
+});
+// i → IV cadence (Dm7 → G): the Dorian signature move, landing on a ringing D
+const sfxWin     = () => sfx(t => {
+  [7,9,11,13].forEach((d, i) => bell(dor(d), t + i * 0.09, { vol:0.11, dur:0.9, pan:-0.3 + i * 0.2, wet:0.4 }));
+  [67,71,74].forEach(m => voice(m, t + 0.42, 0.9, { type:'triangle', vol:0.07, atk:0.05, rel:0.9, cut:2400, wet:0.5 }));
+  bell(dor(12), t + 0.42, { vol:0.08, dur:1, wet:0.5 });
+  bell(dor(14), t + 0.85, { vol:0.12, dur:1.8, wet:0.6 });
+});
+const sfxLose    = () => sfx(t => {
+  [4,3,2,1].forEach((d, i) => voice(dor(d), t + i * 0.17, 0.2, { type:'triangle', vol:0.12, cut:1400, det:5, rel:0.3, wet:0.35 }));
+  voice(dor(0), t + 0.68, 1.1, { type:'triangle', vol:0.13, cut:1100, det:7, rel:1, wet:0.5, vib:10 });
+  voice(dor(-7), t + 0.68, 1.1, { type:'sine', vol:0.12, cut:600, det:0, rel:1, wet:0.3 });
+});
+
+// ── BGM: 92 BPM, 8-bar Dorian vamp (Dm7 | G | Dm7 | G | Fmaj7 | Em7 | Am7 | G) under a 16-bar long-note melody
+const BEAT = 60 / 92, STEP = BEAT / 2;            // 8th-note grid
+const BARS = [ // [pad voicing, bass root]
+  [[57,60,62,65],38], [[55,59,62,64],43], [[57,60,62,65],38], [[55,59,62,64],43],
+  [[57,60,64,65],41], [[59,62,64,67],40], [[57,60,64,67],45], [[55,59,62,64],43],
+];
+const MELODY = [ // [midi, startBeat, beats] over 64 beats — mostly half/whole notes
+  [69,0,2],[72,2,1],[74,3,1], [71,4,3],[69,7,1], [65,8,2],[69,10,2], [67,12,4],
+  [76,16,2],[72,18,1],[69,19,1], [71,20,2],[67,22,2], [72,24,1.5],[74,25.5,.5],[76,26,2], [74,28,3],[71,31,1],
+  [74,32,2],[77,34,1],[76,35,1], [74,36,2],[71,38,2], [69,40,3],[72,43,1], [71,44,2],[67,46,2],
+  [69,48,2],[72,50,2], [71,52,2],[76,54,2], [72,56,2],[71,58,1],[69,59,1], [74,60,4],
+];
+const MEL_AT = new Map(MELODY.map(n => [n[1] * 2, n]));   // 8th-step → note (precomputed lookup)
+const bgm = { on:false, step:0, next:0, timer:0, out:null };
+
+function bgmStep(s, t){
+  const inBar = s & 7, [pad, root] = BARS[(s >> 3) & 7], m = MEL_AT.get(s & 127), M = bgm.out;
+  if(inBar === 0){
+    for(const p of pad) voice(p, t, BEAT * 4, { type:'sawtooth', vol:0.034, atk:0.6, rel:1.2, cut:900, det:9, bus:M, wet:0.5 });
+    voice(root, t, BEAT * 2.4, { type:'triangle', vol:0.24, atk:0.02, rel:0.25, cut:650, det:0, bus:M, wet:0.05 });
+  }
+  if(inBar === 5) voice(root + 7, t, BEAT * 1.3, { type:'triangle', vol:0.18, atk:0.02, rel:0.2, cut:650, det:0, bus:M, wet:0.05 });
+  if(m) voice(m[0], t, m[2] * BEAT * 0.95, { type:'triangle', vol:0.14, atk:0.05, rel:0.5, cut:2600, det:4, bus:M, wet:0.42, pan:0.1, vib:12 });
+  if(inBar & 1) bell(pad[(s >> 1) & 3] + 12, t, { vol:0.022, dur:0.4, ratio:2, idx:1, bus:M, wet:0.3, pan:-0.25 });
+  if(inBar === 0 || inBar === 4) kick(t, 0.42, M);
+  if(inBar === 2 || inBar === 6) hiss(t, 0.09, { vol:0.045, freq:1800, q:0.9, bus:M, wet:0.15 });
+  hiss(t, 0.035, { vol:inBar & 1 ? 0.016 : 0.028, freq:7500, type:'highpass', bus:M, pan:0.2 });
+}
+function bgmTick(){
+  if(!bgm.on) return;
+  const now = A.ctx.currentTime;
+  if(bgm.next < now - 0.1) bgm.next = now + 0.05;           // resumed after suspend: don't burst-play the backlog
+  while(bgm.next < now + 0.25){ bgmStep(bgm.step++, bgm.next); bgm.next += STEP; }
+  bgm.timer = setTimeout(bgmTick, 90);                      // lookahead scheduler: audio clock, not timer, sets the beat
+}
+function startBgm(){
+  if(bgm.on || !musicOn()) return;
+  const ctx = ac(); if(!ctx) return;
+  // fresh gain per run: stopping fades this run's queued notes and tails without touching the next run
+  const out = bgm.out = ctx.createGain(); out.connect(A.music);
+  out.send = ctx.createGain(); out.send.connect(A.music.send);
+  bgm.on = true; bgm.step = 0; bgm.next = ctx.currentTime + 0.08;
+  bgmTick();
+  $('audio-pulse').hidden = false;
+}
+function stopBgm(){
+  bgm.on = false; clearTimeout(bgm.timer); $('audio-pulse').hidden = true;
+  const out = bgm.out; bgm.out = null;
+  if(out){
+    const now = A.ctx.currentTime;
+    out.gain.setTargetAtTime(0, now, 0.08); out.send.gain.setTargetAtTime(0, now, 0.08);
+    setTimeout(() => { out.disconnect(); out.send.disconnect(); }, 1500);
+  }
+}
+function syncMusic(){
+  const playing = $('game-screen').classList.contains('active') && !$('result-overlay').classList.contains('show');
+  if(musicOn() && playing) startBgm(); else if(!musicOn()) stopBgm();
+}
+
+// iOS/Android: audio may only start inside a user activation (pointerup/keydown/touchend)
+['pointerup','keydown','touchend'].forEach(ev => addEventListener(ev, () => { if(!prefs.muted && (!A.ctx || A.ctx.state !== 'running')) ac(); }, { passive:true, capture:true }));
+document.addEventListener('visibilitychange', () => {
+  if(!A.ctx) return;
+  (document.hidden ? A.ctx.suspend() : prefs.muted ? Promise.resolve() : A.ctx.resume()).catch(() => {});
+});
+
+// ── volume UI
+function volIcon(){ return prefs.muted || (prefs.music === 0 && prefs.sfx === 0) ? '#i-vol-mute' : Math.max(prefs.music, prefs.sfx) < 0.5 ? '#i-vol-low' : '#i-vol-high'; }
+function syncVolUI(){
+  const icon = volIcon();
+  document.querySelectorAll('.vol-btn use').forEach(u => u.setAttribute('href', icon));
+  for(const k of ['music','sfx']){
+    const v = Math.round(prefs[k] * 100), el = $('vol-' + k);
+    el.value = v; el.style.setProperty('--p', v + '%'); $('vol-' + k + '-out').textContent = v;
+  }
+  $('vol-mute').setAttribute('aria-pressed', prefs.muted);
+}
+function toggleVolPanel(e){
+  if(e) e.stopPropagation();
+  const p = $('vol-panel'); p.hidden = !p.hidden;
+  if(!p.hidden) syncVolUI();
+}
+function onVol(kind, v){
+  prefs[kind] = clamp01(v / 100);
+  if(prefs[kind] > 0 && prefs.muted) prefs.muted = false;
+  savePrefs(); applyVolume(); syncVolUI(); syncMusic();
+}
+function toggleMute(){
+  prefs.muted = !prefs.muted; savePrefs();
+  if(!prefs.muted) ac();
+  applyVolume(); syncVolUI(); syncMusic();
+}
+document.addEventListener('pointerdown', e => {
+  const p = $('vol-panel');
+  if(!p.hidden && !p.contains(e.target) && !e.target.closest('.vol-btn')) p.hidden = true;
 });
 
 // ═══════════════════════════════════════════
-// STATE
+// DATA (fetched; indexes precomputed once)
 // ═══════════════════════════════════════════
-let save;
-try {
-  save = JSON.parse(localStorage.getItem('tc_save') || '{}');
-  if (typeof save !== 'object' || save === null || Array.isArray(save)) save = {};
-} catch (e) {
-  console.warn('Corrupted save reset:', e);
-  save = {};
-}
-function initSave(){
-  save = Object.assign({
-    coins:0, bestEndless:0,
-    stageStars:{}, // recipeId -> stars (0-3)
-    upgrades:{}, // upgradeId -> level
-    codexDishes:[], codexIngredients:[],
-    newCodex:[],
-    mgLastPlayed: '', // 미니게임 마지막 플레이 날짜
-  }, save);
-}
-initSave();
-function persist(){ localStorage.setItem('tc_save',JSON.stringify(save)); }
+let RECIPES, RECIPE_INGREDIENTS, CODEX_INGREDIENTS, UPGRADES;
+let dataLoaded = false, CH_COUNT = 0, BY_CH = {}, ID_IDX = new Map(), SPECIALS = [], CODEX_BY_EMOJI = new Map(), ING_INDEX = null;
 
-function getUpgradeLv(id){ return save.upgrades[id]||0; }
-function getUpgradeCost(id){
-  const u = UPGRADES.find(x => x.id === id);
-  const mult = u.costMult || 1.6;
-  return Math.floor(u.baseCost * Math.pow(mult, getUpgradeLv(id)));
+async function loadGameData(){
+  const get = async p => { const r = await fetch(p + '?v=' + VER); if(!r.ok) throw new Error(p + ' HTTP ' + r.status); return r.json(); };
+  const bootLang = LANG;
+  const [recipes, ri, ci, up, tr] = await Promise.all([
+    get('recipes.json'), get('recipe_ingredients.json'), get('codex_ingredients.json'), get('upgrades.json'),
+    loadLangData(bootLang).catch(e => { console.warn(e); showToast(t('langFail')); return null; }),
+  ]);
+  RECIPES = recipes; RECIPE_INGREDIENTS = ri; CODEX_INGREDIENTS = ci; UPGRADES = up;
+  if(LANG === bootLang) TR = tr;   // user may have switched language while data was loading
+  RECIPES.forEach((r, i) => {
+    r.idx = i; ID_IDX.set(r.id, i);
+    (BY_CH[r.chapter] || (BY_CH[r.chapter] = [])).push(r);
+    if(r.chapter > CH_COUNT) CH_COUNT = r.chapter;
+    if(r.special) SPECIALS.push(r);
+  });
+  CODEX_INGREDIENTS.forEach(c => CODEX_BY_EMOJI.set(c.emoji, c));
+  dataLoaded = true;
 }
+loadGameData().then(() => {
+  applyStaticI18n();
+  setCoinDisplay(save.coins);
+  if($('hub-screen').classList.contains('active')) loadHub(hubTab);
+}).catch(err => {
+  console.error('Data load failed:', err);
+  const msg = document.createElement('div');
+  msg.className = 'data-error'; msg.textContent = t('loadFail');
+  $('title-screen').appendChild(msg);
+});
 
-// timing helpers — smaller per-level buffs, more levels (see upgrades.json)
-function getZoneWidths(){
-  const zoneUp = getUpgradeLv('timing');
-  return { perfect: 0.12 + zoneUp*0.012, good: 0.22 + zoneUp*0.018 };
-}
-function getNeedleSpeed(){ return Math.max(0.003, 0.008 - getUpgradeLv('speed')*0.0005); }
-function getBaseLife(){ return 3 + getUpgradeLv('life'); }
-function getScoreMult(){ return 1 + getUpgradeLv('score')*0.10; }
-function getCoinMult(){  return 1 + getUpgradeLv('coin')*0.08; }
-function getComboStep(){ return 0.10 + getUpgradeLv('combo')*0.02; }
-function getReviveChance(){ return getUpgradeLv('revive')*0.05; }
-function getMinigameCoinPerItem(){ return 2 + getUpgradeLv('mgboost')*0.4; }
+// ═══════════════════════════════════════════
+// SAVE
+// ═══════════════════════════════════════════
+const save = Object.assign({
+  coins:0, bestEndless:0,
+  stageStars:{},      // recipeId -> stars (0-3)
+  upgrades:{},        // upgradeId -> level
+  codexDishes:[], codexIngredients:[],
+  mgLastPlayed:'',    // local YYYY-MM-DD
+}, readJSON('tc_save'));
+delete save.newCodex; // written but never read — dropped
+let saveVer = 0;      // bumps on every persist → hub views know when to redraw
+function persist(){ saveVer++; writeJSON('tc_save', save); }
+function today(){ const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,10); } // local date, not UTC
+
+const getUpgradeLv = id => save.upgrades[id] || 0;
+function getUpgradeCost(u){ return Math.floor(u.baseCost * Math.pow(u.costMult || 1.6, getUpgradeLv(u.id))); }
+const getZoneWidths = () => { const z = getUpgradeLv('timing'); return { perfect:0.12 + z * 0.012, good:0.22 + z * 0.018 }; };
+const getNeedleSpeed = () => Math.max(0.003, 0.008 - getUpgradeLv('speed') * 0.0005);   // per 60fps frame
+const getBaseLife    = () => 3 + getUpgradeLv('life');
+const getScoreMult   = () => 1 + getUpgradeLv('score') * 0.10;
+const getCoinMult    = () => 1 + getUpgradeLv('coin') * 0.08;
+const getComboStep   = () => 0.10 + getUpgradeLv('combo') * 0.02;
+const getReviveChance= () => getUpgradeLv('revive') * 0.05;
+const getMgCoinPerItem=() => 2 + getUpgradeLv('mgboost') * 0.4;
+const chapterCleared = ch => (BY_CH[ch] || []).reduce((n, r) => n + (save.stageStars[r.id] > 0), 0);
+const chapterUnlocked = ch => ch <= 1 || chapterCleared(ch - 1) >= 5;
 
 // ═══════════════════════════════════════════
 // GAME STATE
 // ═══════════════════════════════════════════
-let gameState = {
-  mode:'stage', // 'stage'|'endless'
-  running:false,
-  recipe:null,
-  stageIdx:0,
-  steps:[],
-  currentStep:0,
-  needlePos:0, needleDir:1,
-  stepResults:[],
-  perfects:0, goods:0, bads:0,
-  score:0, lives:3,
-  // endless
-  endlessScore:0, endlessCombo:0,
-  endlessDone:false,
-  endlessChain:0,
-  animId:null,
-  lastTime:0,
-  pendingTimers:[],
+const gameState = {
+  mode:'stage', running:false, recipe:null, stageIdx:0, bonus:1,
+  steps:[], currentStep:0, zones:null,
+  perfects:0, goods:0, bads:0, score:0, lives:3,
+  endlessScore:0, endlessCombo:0, bestCombo:0, endlessChain:0,
+  t0:0, speed:0, raf:0, nextDraw:0, timers:[],
 };
-
-function trackTimer(id){ gameState.pendingTimers.push(id); return id; }
-function clearPendingTimers(){
-  gameState.pendingTimers.forEach(id=>{ clearTimeout(id); });
-  gameState.pendingTimers = [];
+function later(fn, ms){ gameState.timers.push(setTimeout(fn, ms)); }
+function cancelPlay(){
+  const g = gameState;
+  g.running = false; cancelAnimationFrame(g.raf);
+  g.timers.forEach(clearTimeout); g.timers = [];
+  $('timing-btn').hidden = true;
 }
 
 // ═══════════════════════════════════════════
-// SCREEN NAV
+// SCREENS + NAV
 // ═══════════════════════════════════════════
 function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  // FAB only visible on hub + title screens
-  const fab = document.getElementById('wfd-fab');
-  if(fab){
-    const showFab = (id === 'hub-screen' || id === 'title-screen') && dataLoaded;
-    fab.style.display = showFab ? '' : 'none';
-  }
+  document.querySelectorAll('.screen.active').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+  document.body.classList.toggle('in-game', id === 'game-screen');
+  $('wfd-fab').hidden = !dataLoaded || id !== 'hub-screen';
+  $('vol-panel').hidden = true;
+  cancelLaunch();
+  if(id !== 'title-screen') armBackTrap();
+  else if(history.state && history.state.tc) history.back();   // drop the trap so one Back on the title leaves
 }
-
-// shared coin display updater with bump animation
 function setCoinDisplay(val){
-  const el = document.getElementById('coin-display');
-  if(!el) return;
-  const prev = parseInt(el.textContent, 10) || 0;
+  const el = $('coin-display');
+  if(el.textContent === String(val)) return;
   el.textContent = val;
-  if(val !== prev){
-    el.classList.remove('bump');
-    void el.offsetWidth;
-    el.classList.add('bump');
-  }
+  el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
 }
-
-// unified return-to-hub helper (replaces inline spaghetti)
 function exitToHub(){
-  closeResult();
-  stopBgm();
-  gameState.running=false;
-  clearPendingTimers();
-  Object.values(needleAnimIds).forEach(id=>cancelAnimationFrame(id));
-  needleAnimIds={};
-  gameState.mode='stage';
-  const eh=document.getElementById('endless-hud'); if(eh) eh.style.display='none';
-  const tb=document.getElementById('timing-btn'); if(tb){ tb.style.display='none'; tb.disabled=true; }
-  document.getElementById('game-screen').style.display='none';
-  document.getElementById('hub-screen').style.display='block';
-  showScreen('hub-screen');
-  setTimeout(()=>loadHub('stages'), 10);
+  closeResult(); cancelPlay(); stopBgm();
+  gameState.mode = 'stage';
+  loadHub(hubTab);
 }
 
 // ═══════════════════════════════════════════
-// HUB
+// HUB — each tab renders only when save/lang changed since its last render
 // ═══════════════════════════════════════════
+let hubTab = 'stages';
+const hubCache = {};
+const HUB_RENDER = { stages:renderStages, endless:renderEndlessHub, upgrade:renderUpgrades, codex:renderCodex, codex_ing:renderCodexIngredients };
 function loadHub(tab){
-  if(!dataLoaded){
-    showScreen('hub-screen');
-    document.getElementById('hub-content').innerHTML='<div style="padding:2rem;text-align:center;color:var(--muted)">데이터 로딩 중...</div>';
-    return;
-  }
+  hubTab = tab;
   showScreen('hub-screen');
-  document.querySelectorAll('.hub-tab').forEach(t=>t.classList.remove('active'));
-  const tabEl = document.getElementById('tab-'+tab);
-  if(tabEl){
-    tabEl.classList.add('active');
-    try { tabEl.scrollIntoView({inline:'center', block:'nearest', behavior:'smooth'}); } catch(e){}
-  }
-  // restore FAB on hub
-  const fab = document.getElementById('wfd-fab');
-  if(fab) fab.style.display = '';
-  setCoinDisplay(save.coins);
-  const c=document.getElementById('hub-content');
-
-  if(tab==='stages')  c.innerHTML=renderStages();
-  if(tab==='endless') c.innerHTML=renderEndlessHub();
-  if(tab==='upgrade') c.innerHTML=renderUpgrades();
-  if(tab==='codex')   c.innerHTML=renderCodex();
-  if(tab==='codex_ing') c.innerHTML=renderCodexIngredients();
-  // 식재료 도감 렌더링 함수
-  function renderCodexIngredients(){
-    let html = `<div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--dark);margin-bottom:0.75rem">식재료 도감 <span style="font-family:'DM Sans',sans-serif;font-size:0.7rem;color:var(--muted)">${save.codexIngredients.length}/${CODEX_INGREDIENTS.length}</span></div>`;
-    html += `<div class="codex-grid" style="margin-bottom:1.5rem">`;
-    if (CODEX_INGREDIENTS) {
-      CODEX_INGREDIENTS.forEach(ing => {
-        const unlocked = save.codexIngredients && save.codexIngredients.includes(ing.id);
-        const escId = String(ing.id).replace(/'/g, "\\'");
-        const clickAttr = unlocked
-          ? ` onclick="openIngredient('${escId}')" style="cursor:pointer" role="button" tabindex="0"`
-          : '';
-        html += `<div class="codex-item${unlocked ? '' : ' locked'}" title="${unlocked ? ing.desc : '???'}"${clickAttr}>
-          <div class="codex-emoji">${unlocked ? ing.emoji : '❓'}</div>
-          <div class="codex-name">${unlocked ? ing.name : '???'}</div>
-        </div>`;
-      });
-    }
-    html += `</div>`;
-    return html;
-  }
   stopBgm();
+  document.querySelectorAll('.hub-tab').forEach(b => { const on = b.id === 'tab-' + tab; b.classList.toggle('active', on); b.setAttribute('aria-selected', on); });
+  try{ $('tab-' + tab).scrollIntoView({ inline:'center', block:'nearest', behavior:'smooth' }); }catch(e){}
+  setCoinDisplay(save.coins);
+  const c = $('hub-content');
+  if(!dataLoaded){ c.innerHTML = `<div class="hub-loading">${t('loading')}</div>`; c.dataset.key = ''; return; }
+  const key = tab + '|' + saveVer + '|' + LANG;
+  if(c.dataset.key === key) return;                              // nothing changed → no redraw
+  let hit = hubCache[tab];
+  if(!hit || hit.key !== key) hit = hubCache[tab] = { key, html:HUB_RENDER[tab]() };
+  const sameTab = (c.dataset.key || '').startsWith(tab + '|');
+  c.innerHTML = hit.html; c.dataset.key = key;
+  if(!sameTab) c.scrollTop = 0;                                  // keep scroll position when e.g. buying an upgrade
 }
+
+const starRow = (n, cls) => [0,1,2].map(j => `<span class="${cls}${j < n ? ' lit' : ''}">★</span>`).join('');
+const pips = d => `<span class="pips d${d}" role="img" aria-label="${t('diff' + d)}"><i></i><i></i><i></i></span>`;
+function todaysSpecial(){ const day = Math.floor(Date.parse(today()) / 864e5); return SPECIALS[day % SPECIALS.length]; }
 
 function renderStages(){
-  const CHAPTERS = [
-    {num:1, name:'기초 요리',       tag:'챕터 1', unlockAfter:null},
-    {num:2, name:'아시아 요리',     tag:'챕터 2', unlockAfter:1},
-    {num:3, name:'유럽 요리',       tag:'챕터 3', unlockAfter:2},
-    {num:4, name:'고급 요리',       tag:'챕터 4', unlockAfter:3},
-    {num:5, name:'세계 요리',       tag:'챕터 5', unlockAfter:4},
-    {num:6, name:'마스터',          tag:'챕터 6', unlockAfter:5},
-    {num:7, name:'분자요리 실험실', tag:'챕터 7', unlockAfter:6},
-    {num:8, name:'디저트 마스터',   tag:'챕터 8', unlockAfter:7},
-  ];
-
-  // Event banner
-  let html=`<div class="event-banner" onclick="triggerEvent()">
-    <span class="eb-emoji">🎊</span>
-    <div class="eb-text"><div class="eb-title">특별 이벤트: 분자요리 도전</div><div class="eb-sub">오늘 하루만! 보상 2배 · 마스터 챕터 선공개</div></div>
-    <span class="eb-arrow">→</span>
-  </div>`;
-
-  CHAPTERS.forEach(ch => {
-    // check chapter unlock: previous chapter has at least 5 cleared recipes
-    const prevChRecipes = ch.unlockAfter ? RECIPES.filter(r=>r.chapter===ch.unlockAfter) : [];
-    const chapterLocked = ch.unlockAfter && prevChRecipes.filter(r=>save.stageStars[r.id]>0).length < 5;
-
-    const chRecipes = RECIPES.filter(r=>r.chapter===ch.num);
-    const cleared   = chRecipes.filter(r=>save.stageStars[r.id]>0).length;
-    const totalStars= chRecipes.reduce((s,r)=>s+(save.stageStars[r.id]||0),0);
-
-    html+=`<div class="stage-section-title">
-      ${ch.name} <span class="section-tag">${ch.tag}</span>
-      ${chapterLocked?'<span style="font-size:0.6rem;color:var(--muted);font-family:\'DM Sans\',sans-serif">🔒 이전 챕터 5개 클리어 필요</span>'
-        :`<span style="font-size:0.6rem;color:var(--muted);font-family:\'DM Sans\',sans-serif">${cleared}/${chRecipes.length} · ⭐${totalStars}</span>`}
-    </div>`;
-
-    if(chapterLocked){
-      html+=`<div style="background:#fff;border:1.5px solid var(--sand);border-radius:16px;padding:1.5rem;text-align:center;margin-bottom:1.5rem;opacity:0.6">
-        <div style="font-size:2rem;margin-bottom:0.5rem">🔒</div>
-        <div style="font-size:0.8rem;color:var(--muted)">이전 챕터에서 5개 이상의 요리를 클리어하세요</div>
-      </div>`;
-      return;
+  const ev = todaysSpecial();
+  let html = ev ? `<button class="event-banner" onclick="triggerEvent()">
+    <span class="eb-emoji" aria-hidden="true">${ev.emoji}</span>
+    <span class="eb-text"><span class="eb-kicker">${t('todaySpecial')}</span><span class="eb-title">${rName(ev)}</span><span class="eb-sub">${t('eventSub')}</span></span>
+    <span class="eb-chip">×2</span></button>` : '';
+  for(let ch = 1; ch <= CH_COUNT; ch++){
+    const list = BY_CH[ch] || [];
+    const open = chapterUnlocked(ch);
+    const stars = list.reduce((s, r) => s + (save.stageStars[r.id] || 0), 0);
+    html += `<section class="chapter"><h2 class="section-title">${t('ch' + ch)} <span class="section-tag">${t('chapterN', { n:ch })}</span>
+      <span class="section-meta">${open ? `${chapterCleared(ch)}/${list.length} · ★${stars}` : ''}</span></h2>`;
+    if(!open){
+      html += `<div class="chapter-locked"><svg class="ico" aria-hidden="true"><use href="#i-lock"/></svg>${t('lockedChapter')}</div></section>`;
+      continue;
     }
-
-    html+=`<div class="stage-grid" style="margin-bottom:1.5rem">`;
-    chRecipes.forEach(r => {
-      const globalIdx = RECIPES.indexOf(r);
-      const stars = save.stageStars[r.id]||0;
-      const starsHtml=[0,1,2].map(j=>`<span class="sc-star${j<stars?' lit':''}">${j<stars?'⭐':'☆'}</span>`).join('');
-      const diffEmoji='⚡'.repeat(r.diff);
-      const specialBadge = r.special ? `<span style="position:absolute;top:8px;left:8px;font-size:0.55rem;padding:2px 6px;border-radius:20px;background:rgba(212,86,42,0.12);color:var(--accent);font-weight:700">${r.special}</span>` : '';
-      html+=`<div class="stage-card" onclick="startStage(${globalIdx})">
-        ${specialBadge}
-        <div class="sc-emoji">${r.emoji}</div>
-        <div class="sc-name">${r.name}</div>
-        <div class="sc-stars">${starsHtml}</div>
-        <div style="font-size:0.6rem;color:var(--muted)">🪙${r.coin} · ${diffEmoji}</div>
-      </div>`;
-    });
-    html+=`</div>`;
-  });
-
+    html += '<div class="stage-grid">';
+    for(const r of list){
+      const st = save.stageStars[r.id] || 0;
+      html += `<button class="stage-card${st === 3 ? ' perfect' : st ? ' cleared' : ''}" onclick="startStage(${r.idx})">
+        ${r.special ? `<span class="sc-badge">${t('specialTag')}</span>` : ''}
+        <span class="sc-emoji" aria-hidden="true">${r.emoji}</span>
+        <span class="sc-name">${rName(r)}</span>
+        <span class="sc-stars">${starRow(st, 'sc-star')}</span>
+        <span class="sc-foot"><span>🪙 ${r.coin}</span>${pips(r.diff)}</span>
+      </button>`;
+    }
+    html += '</div></section>';
+  }
   return html;
 }
 
 function renderEndlessHub(){
-  return `<div style="text-align:center;padding:2rem 0">
-    <div style="font-size:4rem;margin-bottom:1rem">♾️</div>
-    <div style="font-family:'DM Serif Display',serif;font-size:1.4rem;color:var(--dark);margin-bottom:0.5rem">엔드리스 모드</div>
-    <div style="font-size:0.8rem;color:var(--muted);margin-bottom:0.5rem">끝없이 도전하는 무한 요리</div>
-    <div style="font-family:'DM Serif Display',serif;font-size:2rem;color:var(--gold);margin-bottom:0.25rem">${save.bestEndless}</div>
-    <div style="font-size:0.7rem;color:var(--muted);margin-bottom:2rem">최고 기록</div>
-    <button class="btn btn-primary" style="max-width:220px;margin:0 auto" onclick="startEndless()">도전 시작 →</button>
+  return `<div class="endless-panel">
+    <div class="big-emoji" aria-hidden="true">♾️</div>
+    <div class="ep-title">${t('endlessMode')}</div>
+    <div class="ep-sub">${t('endlessHubSub')}</div>
+    <div class="ep-best">${save.bestEndless}</div>
+    <div class="ep-best-label">${t('bestRecord')}</div>
+    <button class="btn btn-primary" onclick="startEndless()">${t('startEndless')}</button>
   </div>`;
 }
 
 function renderUpgrades(){
-  let html='<div class="upgrade-grid">';
-  UPGRADES.forEach(u=>{
-    const lv=getUpgradeLv(u.id);
-    const maxed=lv>=u.maxLv;
-    const cost=getUpgradeCost(u.id);
-    const canAfford = !maxed && save.coins >= cost;
-    const pct = Math.round(lv / u.maxLv * 100);
-    const dots = Array.from({length:u.maxLv}, (_,i)=>
-      `<span class="uc-dot${i<lv?' filled':''}"></span>`
-    ).join('');
-    html+=`<div class="upgrade-card${maxed?' is-maxed':''}">
-      <div class="uc-icon">${u.emoji}</div>
+  return '<div class="upgrade-grid">' + UPGRADES.map(u => {
+    const lv = getUpgradeLv(u.id), maxed = lv >= u.maxLv, cost = getUpgradeCost(u);
+    return `<div class="upgrade-card${maxed ? ' is-maxed' : ''}">
+      <div class="uc-icon" aria-hidden="true">${u.emoji}</div>
       <div class="uc-info">
-        <div class="uc-name">${u.name}</div>
-        <div class="uc-desc">${u.desc}</div>
-        <div class="uc-progress">
-          <div class="uc-dots">${dots}</div>
-          <div class="uc-level">${maxed?'MAX':'Lv '+lv+' / '+u.maxLv}</div>
-        </div>
-        <div class="uc-bar"><div class="uc-bar-fill" style="width:${pct}%"></div></div>
+        <div class="uc-name">${uName(u)}</div>
+        <div class="uc-desc">${uDesc(u)}</div>
+        <div class="uc-progress"><div class="uc-bar"><div class="uc-bar-fill" style="transform:scaleX(${lv / u.maxLv})"></div></div><span class="uc-level">${maxed ? 'MAX' : 'Lv ' + lv + '/' + u.maxLv}</span></div>
       </div>
-      <button class="uc-btn${maxed?' maxed':''}${!maxed&&!canAfford?' cant-afford':''}" onclick="${maxed?'':'buyUpgrade(\''+u.id+'\')'}" ${maxed||!canAfford?'disabled':''}>
-        ${maxed?'완료':'강화'}
-        ${maxed?'':'<span class="uc-cost">🪙'+cost+'</span>'}
+      <button class="uc-btn${maxed ? ' maxed' : save.coins >= cost ? '' : ' cant-afford'}" ${maxed ? 'disabled' : `onclick="buyUpgrade('${u.id}')"`}>
+        ${maxed ? t('maxed') : t('upgrade') + `<span class="uc-cost">🪙${cost}</span>`}
       </button>
     </div>`;
-  });
-  html+='</div>';
-  return html;
+  }).join('') + '</div>';
 }
 
 function buyUpgrade(id){
-  const lv=getUpgradeLv(id);
-  const u=UPGRADES.find(x=>x.id===id);
-  if(lv>=u.maxLv){ showToast('이미 최대 레벨입니다!'); return; }
-  const cost=getUpgradeCost(id);
-  if(save.coins<cost){ showToast('코인이 부족합니다! 🪙'); return; }
-  save.coins-=cost;
-  save.upgrades[id]=(save.upgrades[id]||0)+1;
+  const u = UPGRADES.find(x => x.id === id);
+  if(getUpgradeLv(id) >= u.maxLv){ showToast(t('maxLv')); return; }
+  const cost = getUpgradeCost(u);
+  if(save.coins < cost){ showToast(t('noCoins')); sfxBad(); return; }
+  save.coins -= cost;
+  save.upgrades[id] = getUpgradeLv(id) + 1;
   persist();
   sfxUnlock();
-  showToast('업그레이드 완료! '+u.emoji);
+  showToast(t('upgraded', { e:u.emoji }));
   loadHub('upgrade');
 }
 
-function renderCodex(){
-  let html = `<div style="font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--dark);margin-bottom:0.75rem">요리 도감 <span style="font-family:'DM Sans',sans-serif;font-size:0.7rem;color:var(--muted)">${save.codexDishes.length}/${RECIPES.length}</span></div>`;
-  html += `<div class="codex-grid" style="margin-bottom:1.5rem">`;
-  if (RECIPES) {
-    RECIPES.forEach(r => {
-      const unlocked = save.codexDishes && save.codexDishes.includes(r.id);
-      const escId = String(r.id).replace(/'/g, "\\'");
-      const clickAttr = unlocked
-        ? ` onclick="openCodexDish('${escId}')" style="cursor:pointer" role="button" tabindex="0"`
-        : '';
-      html += `<div class="codex-item${unlocked ? '' : ' locked'}" title="${unlocked ? r.desc : '???'}"${clickAttr}>
-        <div class="codex-emoji">${unlocked ? r.emoji : '❓'}</div>
-        <div class="codex-name">${unlocked ? r.name : '???'}</div>
-      </div>`;
-    });
-  }
-  html += `</div>`;
-  return html;
+function codexGrid(title, list, have, nameOf, open){
+  return `<h2 class="section-title">${title}<span class="section-meta">${list.reduce((n, x) => n + have.has(x.id), 0)}/${list.length}</span></h2><div class="codex-grid">` +
+    list.map(x => have.has(x.id)
+      ? `<button class="codex-item" onclick="${open}('${x.id}')"><span class="codex-emoji">${x.emoji}</span><span class="codex-name">${nameOf(x)}</span></button>`
+      : `<div class="codex-item locked" aria-hidden="true"><span class="codex-emoji">${x.emoji}</span><span class="codex-name">???</span></div>`
+    ).join('') + '</div>';
+}
+function renderCodex(){ return codexGrid(t('codexDishes'), RECIPES, new Set(save.codexDishes), rName, 'openCodexDish'); }
+function renderCodexIngredients(){ return codexGrid(t('codexIngs'), CODEX_INGREDIENTS, new Set(save.codexIngredients), cName, 'openIngredient'); }
+
+// ── recipe detail (shared by "what should I cook" and dish codex)
+function metaTags(r){
+  const st = save.stageStars[r.id] || 0;
+  return `<span class="wfd-meta-tag meta-diff${r.diff}">${t('diff' + r.diff)}</span>` +
+    `<span class="wfd-meta-tag meta-chapter">${t('chapterN', { n:r.chapter })} · ${t('ch' + r.chapter)}</span>` +
+    (r.multitask ? `<span class="wfd-meta-tag meta-diff2">${t('multitaskTag')}</span>` : '') +
+    (r.special ? `<span class="wfd-meta-tag meta-special">${t('specialTag')}</span>` : '') +
+    (st ? `<span class="wfd-meta-tag meta-cleared">${'★'.repeat(st)}</span>` : '') +
+    `<span class="wfd-meta-tag meta-chapter">🪙 ${r.coin}</span>`;
+}
+function fillDetail(p, r){
+  $(p + '-emoji').textContent = r.emoji;
+  $(p + '-name').textContent = rName(r);
+  $(p + '-desc').textContent = rDesc(r);
+  $(p + '-meta').innerHTML = metaTags(r);
+  const ings = RECIPE_INGREDIENTS[r.id] || [];
+  $(p + '-ings').innerHTML = ings.length
+    ? ings.map(i => `<div class="wfd-ing-item"><span class="wfd-ing-emoji">${i.e}</span><span class="wfd-ing-name">${ingTxt(i.n)}</span></div>`).join('')
+    : `<div class="empty-note">${t('noIngs')}</div>`;
+  $(p + '-steps').innerHTML = r.steps.map((s, i) => `<div class="wfd-step-row"><div class="wfd-step-num">${i + 1}</div><div class="wfd-step-name">${stepTxt(s)}</div></div>`).join('');
+  $(p + '-play-btn').textContent = r.emoji + ' ' + t('playDish', { name:rName(r) });
+}
+function pick(arr, k){ // partial Fisher–Yates: k unbiased picks without copying-and-sorting the whole list
+  const a = arr.slice(), n = Math.min(k, a.length);
+  for(let i = 0; i < n; i++){ const j = i + Math.floor(Math.random() * (a.length - i)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a.slice(0, n);
+}
+function miniCard(r, i, onclick){
+  const st = save.stageStars[r.id] || 0;
+  return `<button class="wfd-card flip-in" style="animation-delay:${i * 0.08}s" data-id="${r.id}" onclick="${onclick}">
+    ${r.special ? `<span class="wfd-card-lock">${t('specialTag')}</span>` : ''}
+    <span class="wfd-card-emoji">${r.emoji}</span>
+    <span class="wfd-card-name">${rName(r)}</span>
+    <span class="wfd-card-ch">${t('ch' + r.chapter)}</span>
+    <span class="wfd-card-diff">${pips(r.diff)}${st ? ' ' + '★'.repeat(st) : ''}</span>
+  </button>`;
 }
 
 let codexSelectedId = null;
 function openCodexDish(id){
-  const r = RECIPES.find(x => x.id === id);
-  if(!r) return;
+  const r = RECIPES[ID_IDX.get(id)]; if(!r) return;
   codexSelectedId = id;
-  const cleared = (save.stageStars[r.id]||0) > 0;
-  const stars = save.stageStars[r.id] || 0;
-
-  document.getElementById('cd-title').textContent = r.name + ' 레시피';
-  document.getElementById('cd-sub').textContent = '재료와 조리 단계를 확인하세요.';
-  document.getElementById('cd-emoji').textContent = r.emoji;
-  document.getElementById('cd-name').textContent  = r.name;
-  document.getElementById('cd-desc').textContent  = r.desc;
-
-  const meta = document.getElementById('cd-meta');
-  meta.innerHTML = '';
-  const mk = (cls, txt) => {
-    const s = document.createElement('span');
-    s.className = 'wfd-meta-tag ' + cls;
-    s.textContent = txt;
-    return s;
-  };
-  meta.appendChild(mk(DIFF_META_CLS[r.diff], '⚡'.repeat(r.diff) + ' ' + DIFF_LABELS[r.diff]));
-  meta.appendChild(mk('meta-chapter', '챕터 ' + r.chapter + ' · ' + CHAPTER_NAMES[r.chapter]));
-  if(r.multitask) meta.appendChild(mk('meta-diff2', '⚡ 멀티태스킹'));
-  if(r.special)   meta.appendChild(mk('meta-special', '🎊 ' + r.special));
-  if(stars > 0)   meta.appendChild(mk('meta-cleared', '⭐'.repeat(stars)));
-  meta.appendChild(mk('meta-chapter', '🪙 ' + r.coin));
-
-  const ings = (RECIPE_INGREDIENTS && RECIPE_INGREDIENTS[r.id]) || [];
-  const ingGrid = document.getElementById('cd-ings');
-  ingGrid.innerHTML = '';
-  if(ings.length > 0){
-    ings.forEach(ing => {
-      const item = document.createElement('div');
-      item.className = 'wfd-ing-item';
-      const e = document.createElement('span'); e.className='wfd-ing-emoji'; e.textContent = ing.e;
-      const n = document.createElement('span'); n.className='wfd-ing-name';  n.textContent = ing.n;
-      item.appendChild(e); item.appendChild(n);
-      ingGrid.appendChild(item);
-    });
-  } else {
-    const empty = document.createElement('div');
-    empty.style.cssText = 'grid-column:1/-1;font-size:0.72rem;color:var(--muted);padding:0.5rem 0';
-    empty.textContent = '재료 정보를 준비 중입니다';
-    ingGrid.appendChild(empty);
-  }
-
-  const stepsList = document.getElementById('cd-steps');
-  stepsList.innerHTML = '';
-  r.steps.forEach((s,i) => {
-    const row = document.createElement('div'); row.className = 'wfd-step-row';
-    const num = document.createElement('div'); num.className = 'wfd-step-num'; num.textContent = i+1;
-    const nm  = document.createElement('div'); nm.className  = 'wfd-step-name'; nm.textContent = s;
-    row.appendChild(num); row.appendChild(nm);
-    stepsList.appendChild(row);
-  });
-
-  const playBtn = document.getElementById('cd-play-btn');
-  playBtn.textContent = `${r.emoji} "${r.name}" 도전하기 →`;
-
-  document.getElementById('codex-overlay').classList.add('show');
+  $('cd-title').textContent = t('recipeOf', { name:rName(r) });
+  fillDetail('cd', r);
+  openOverlay('codex-overlay');
   sfxTap();
 }
-function closeCodexDish(){
-  document.getElementById('codex-overlay').classList.remove('show');
-}
+function closeCodexDish(){ $('codex-overlay').classList.remove('show'); }
 function playFromCodex(){
-  if(!codexSelectedId) return;
-  const idx = RECIPES.findIndex(x => x.id === codexSelectedId);
-  if(idx < 0) return;
+  const idx = ID_IDX.get(codexSelectedId); if(idx == null) return;
   closeCodexDish();
-  setTimeout(() => startStage(idx), 200);
+  launch(() => startStage(idx), 200);
 }
 
-// ═══════════════════════════════════════════
-// INGREDIENT DETAIL (식재료 도감)
-// ═══════════════════════════════════════════
-function findRecipesWithIngredient(ing){
-  if(!RECIPE_INGREDIENTS || !RECIPES) return [];
-  const matchedIds = [];
-  for(const rid in RECIPE_INGREDIENTS){
-    const list = RECIPE_INGREDIENTS[rid] || [];
-    const hit = list.some(it => it.n === ing.name || it.e === ing.emoji);
-    if(hit) matchedIds.push(rid);
+// ingredient → recipes index, built once on first use
+function recipesWithIng(ing){
+  if(!ING_INDEX){
+    ING_INDEX = new Map();
+    for(const r of RECIPES) for(const it of RECIPE_INGREDIENTS[r.id] || []) for(const k of [it.n, it.e]){
+      let s = ING_INDEX.get(k); if(!s) ING_INDEX.set(k, s = new Set()); s.add(r);
+    }
   }
-  return matchedIds
-    .map(id => RECIPES.find(r => r.id === id))
-    .filter(Boolean);
+  return [...new Set([...(ING_INDEX.get(ing.name) || []), ...(ING_INDEX.get(ing.emoji) || [])])];
 }
-
 function openIngredient(id){
-  const ing = CODEX_INGREDIENTS.find(x => x.id === id);
-  if(!ing) return;
-
-  document.getElementById('ing-title').textContent = ing.name + ' 정보';
-  document.getElementById('ing-emoji').textContent = ing.emoji;
-  document.getElementById('ing-name').textContent  = ing.name;
-  document.getElementById('ing-desc').textContent  = ing.desc;
-
-  const all = findRecipesWithIngredient(ing);
-  // shuffle + take 3
-  const picks = all.slice().sort(() => Math.random() - 0.5).slice(0, 3);
-
-  const countEl = document.getElementById('ing-count');
-  countEl.textContent = all.length > 0 ? `(전체 ${all.length}개 중 3개)` : '';
-
-  const container = document.getElementById('ing-related');
-  const empty = document.getElementById('ing-empty');
-  container.innerHTML = '';
-
-  if(picks.length === 0){
-    empty.style.display = 'block';
-  } else {
-    empty.style.display = 'none';
-    picks.forEach((r, i) => {
-      const cleared = (save.stageStars[r.id]||0) > 0;
-      const unlocked = save.codexDishes.includes(r.id);
-
-      const card = document.createElement('div');
-      card.className = 'wfd-card flip-in';
-      card.style.animationDelay = (i * 0.1) + 's';
-      card.style.cursor = 'pointer';
-      card.dataset.id = r.id;
-      card.onclick = () => {
-        closeIngredient();
-        if(unlocked) {
-          setTimeout(() => openCodexDish(r.id), 250);
-        } else {
-          setTimeout(() => startStage(RECIPES.indexOf(r)), 250);
-        }
-      };
-
-      const lock = r.special ? `<div class="wfd-card-lock">${r.special}</div>` : '';
-      const emoji = document.createElement('span');
-      emoji.className = 'wfd-card-emoji';
-      emoji.textContent = unlocked ? r.emoji : '❓';
-
-      const name = document.createElement('div');
-      name.className = 'wfd-card-name';
-      name.textContent = unlocked ? r.name : '???';
-
-      const ch = document.createElement('div');
-      ch.className = 'wfd-card-ch';
-      ch.textContent = `챕터 ${r.chapter} · ${CHAPTER_NAMES[r.chapter]}`;
-
-      const diff = document.createElement('div');
-      diff.className = 'wfd-card-diff';
-      diff.textContent = '⚡'.repeat(r.diff) + ' ' + DIFF_LABELS[r.diff] + (cleared ? ' · ✅' : '');
-
-      if(lock) card.innerHTML = lock;
-      card.appendChild(emoji);
-      card.appendChild(name);
-      card.appendChild(ch);
-      card.appendChild(diff);
-
-      container.appendChild(card);
-    });
-  }
-
-  document.getElementById('ing-overlay').classList.add('show');
+  const ing = CODEX_INGREDIENTS.find(x => x.id === id); if(!ing) return;
+  $('ing-title').textContent = cName(ing);
+  $('ing-emoji').textContent = ing.emoji;
+  $('ing-name').textContent = cName(ing);
+  $('ing-desc').textContent = cDesc(ing);
+  const all = recipesWithIng(ing), picks = pick(all, 3), have = new Set(save.codexDishes);
+  $('ing-count').textContent = all.length ? t('relatedCount', { n:all.length, k:picks.length }) : '';
+  $('ing-related').innerHTML = picks.length
+    ? picks.map((r, i) => miniCard(r, i, `ingToRecipe('${r.id}',${have.has(r.id)})`)).join('')
+    : `<div class="empty-note">${t('noRelated')}</div>`;
+  openOverlay('ing-overlay');
   sfxTap();
 }
-
-function closeIngredient(){
-  document.getElementById('ing-overlay').classList.remove('show');
+function ingToRecipe(id, known){
+  closeIngredient();
+  launch(() => known ? openCodexDish(id) : startStage(ID_IDX.get(id)), 250);
 }
+function closeIngredient(){ $('ing-overlay').classList.remove('show'); }
 
-function renderStageProgress(){
-  const el=document.getElementById('stage-progress');
-  el.innerHTML='';
-  gameState.steps.forEach((_,i)=>{
-    const d=document.createElement('div');
-    d.className='stage-dot'+(i<gameState.currentStep?' done':i===gameState.currentStep?' current':'');
-    d.id='prog-dot-'+i;
-    el.appendChild(d);
-  });
+// ═══════════════════════════════════════════
+// GAMEPLAY
+// ═══════════════════════════════════════════
+function renderHearts(){
+  const n = getBaseLife(), lives = gameState.lives;
+  let h = '';
+  for(let i = 0; i < n; i++) h += `<span class="heart${i >= lives ? ' empty' : ''}">❤️</span>`;
+  $('g-hearts').innerHTML = h;
 }
-
 function renderRecipeCard(){
-  const r=gameState.recipe;
-  document.getElementById('rc-emoji').textContent=r.emoji;
-  document.getElementById('rc-name').textContent=r.name;
-  document.getElementById('rc-desc').textContent=r.desc;
-  const stars=save.stageStars[r.id]||0;
-  document.getElementById('rc-stars').innerHTML=[0,1,2].map(i=>`<span class="rc-star">${i<stars?'⭐':'☆'}</span>`).join('');
+  const r = gameState.recipe;
+  $('rc-emoji').textContent = r.emoji;
+  $('rc-name').textContent = rName(r);
+  $('rc-desc').textContent = rDesc(r);
+  $('rc-stars').innerHTML = starRow(save.stageStars[r.id] || 0, 'sc-star');
+  $('multitask-warn').classList.toggle('show', !!r.multitask);
 }
-
 function renderSteps(){
-  const c=document.getElementById('steps-container');
-  c.innerHTML='';
-  const r=gameState.recipe;
-  // multitask warning
-  const mw=document.getElementById('multitask-warn');
-  mw.className='multitask-warning'+(r.multitask?' show':'');
-
-  gameState.steps.forEach((step,i)=>{
-    const div=document.createElement('div');
-    div.className='step-card locked';
-    div.id='step-card-'+i;
-
-    const header=document.createElement('div');
-    header.className='step-header';
-
-    const num=document.createElement('div');
-    num.className='step-num';
-    num.textContent=i+1;
-
-    const name=document.createElement('div');
-    name.className='step-name';
-    name.textContent=step.name;
-
-    const badge=document.createElement('div');
-    badge.className='step-result-badge';
-    badge.id='step-badge-'+i;
-
-    header.appendChild(num);header.appendChild(name);header.appendChild(badge);
-
-    // timing bar
-    const tb=document.createElement('div');
-    tb.className='step-timing-bar';
-    tb.id='step-timing-'+i;
-    tb.innerHTML=buildTimingBar(i);
-
-    div.appendChild(header);div.appendChild(tb);
-    c.appendChild(div);
+  const g = gameState, z = g.zones;
+  $('stage-progress').innerHTML = g.steps.map(() => '<div class="stage-dot"></div>').join('');
+  $('steps-container').innerHTML = g.steps.map((s, i) => {
+    const c = s.center = 0.3 + Math.random() * 0.4;
+    const pl = (c - z.perfect / 2) * 100, gl = (c - z.good / 2) * 100;
+    return `<div class="step-card locked" id="step-card-${i}">
+      <div class="step-header"><div class="step-num">${i + 1}</div><div class="step-name">${stepTxt(s.name)}</div><div class="step-result-badge"></div></div>
+      <div class="step-timing-bar">
+        <div class="timing-labels"><span class="tl-chip tl-perfect" style="left:${c * 100}%">PERFECT</span></div>
+        <div class="timing-track">
+          <div class="tt-ticks"></div>
+          <div class="zone-good" style="left:${gl}%;width:${z.good * 100}%"></div>
+          <div class="zone-perfect" style="left:${pl}%;width:${z.perfect * 100}%"><div class="zp-stripes"></div></div>
+          <div class="zone-perfect-center" style="left:${c * 100}%"></div>
+          <div class="needle-rail" style="transform:translate3d(10%,0,0)"><div class="timing-needle"><div class="tn-top"></div><div class="tn-bar"></div><div class="tn-bot"></div></div></div>
+        </div>
+        <div class="tap-instruction">${t('tapHint')}</div>
+      </div>
+    </div>`;
+  }).join('');
+  const dots = $('stage-progress').children;
+  g.steps.forEach((s, i) => {
+    s.card = $('step-card-' + i);
+    s.badge = s.card.querySelector('.step-result-badge');
+    s.track = s.card.querySelector('.timing-track');
+    s.rail = s.card.querySelector('.needle-rail');
+    s.dot = dots[i];
   });
 }
 
-function buildTimingBar(stepIdx){
-  const {perfect,good}=getZoneWidths();
-  const center=0.3+Math.random()*0.4;
-  const pl=(center-perfect/2)*100, pw=perfect*100;
-  const gl=(center-good/2)*100, gw=good*100;
+function startStage(idx, opt = {}){
+  if(!dataLoaded){ showToast(t('loading')); return; }
+  const r = RECIPES[idx];
+  if(!r){ showToast(t('stageFail')); return; }
+  cancelPlay();
+  const g = gameState;
+  g.mode = opt.endless ? 'endless' : 'stage';
+  g.stageIdx = idx; g.recipe = r; g.bonus = opt.bonus || 1;
+  g.steps = r.steps.map(name => ({ name, result:null }));
+  g.zones = getZoneWidths();                       // constant for the whole dish → computed once
+  g.currentStep = 0; g.score = 0; g.perfects = g.goods = g.bads = 0;
+  if(!opt.keepLives) g.lives = getBaseLife();
+  renderRecipeCard(); renderSteps(); renderHearts();
+  $('g-score').textContent = 0;
+  $('endless-hud').hidden = g.mode !== 'endless';
+  $('g-stage-label').textContent = g.mode === 'endless'
+    ? 'ENDLESS ×' + g.endlessChain
+    : t('chapterN', { n:r.chapter }) + ' · ' + t('ch' + r.chapter);
+  if(g.mode === 'endless') updateEndlessHud();
+  showScreen('game-screen');
+  $('cook-area').scrollTop = 0;
+  activateStep(0);
+  startBgm();
+}
 
-  // top chip labels positioned above zones
-  const ticks = [10,25,50,75,90].map(p =>
-    `<div class="tt-tick" style="left:${p}%"></div>`
-  ).join('');
-
-  return `<div class="timing-wrap">
-    <div class="timing-labels">
-      <span class="tl-chip tl-good"  style="left:${gl+gw/2}%">GOOD</span>
-      <span class="tl-chip tl-perfect" style="left:${pl+pw/2}%">PERFECT</span>
-    </div>
-    <div class="timing-track" id="track-${stepIdx}" data-center="${center}">
-      <div class="tt-ticks">${ticks}</div>
-      <div class="zone-good" style="left:${gl}%;width:${gw}%"></div>
-      <div class="zone-perfect" style="left:${pl}%;width:${pw}%">
-        <div class="zp-glow"></div>
-        <div class="zp-stripes"></div>
-      </div>
-      <div class="zone-perfect-center" style="left:${center*100}%"></div>
-      <div class="timing-needle" id="needle-${stepIdx}" style="left:15%">
-        <div class="tn-top"></div>
-        <div class="tn-bar"></div>
-        <div class="tn-bot"></div>
-        <div class="tn-halo"></div>
-      </div>
-    </div>
-    <div class="tap-instruction">▼ <strong>PERFECT 존</strong>에 바늘이 닿는 순간 탭!</div>
-  </div>`;
+// needle = closed-form triangle wave of time: frame-rate independent (120Hz phones no longer run 2× fast)
+// and judged at the exact input timestamp rather than the last painted frame.
+function needleSpeed(){
+  const g = gameState, ch = g.recipe.chapter || 1;
+  const perFrame = getNeedleSpeed() + Math.min(0.004, (ch - 1) * 0.0008) + (g.mode === 'endless' ? Math.min(0.004, g.endlessChain * 0.0003) : 0);
+  return perFrame * (g.recipe.multitask ? 1.15 : 1) * 0.06;   // 60fps-normalised → track units per ms
+}
+function needlePos(ts){
+  const s = Math.max(0, ts - gameState.t0) * gameState.speed % 1.6;
+  return 0.1 + (s <= 0.8 ? s : 1.6 - s);
+}
+const railX = pos => 'translate3d(' + (pos * 100).toFixed(2) + '%,0,0)';
+function drawNeedle(ts){
+  const g = gameState;
+  if(!g.running) return;
+  g.raf = requestAnimationFrame(drawNeedle);
+  if(ts < g.nextDraw - 1) return;                  // fps cap (mobile): skip vsyncs until the frame budget is spent
+  g.nextDraw = (ts - g.nextDraw > FRAME_MS ? ts : g.nextDraw) + FRAME_MS;
+  g.steps[g.currentStep].rail.style.transform = railX(needlePos(ts));
 }
 
 function activateStep(idx){
-    // 타이밍 버튼 활성화
-    const timingBtn = document.getElementById('timing-btn');
-    timingBtn.style.display = 'block';
-    timingBtn.disabled = false;
-    timingBtn.onclick = () => {
-      if (gameState.running && gameState.currentStep === idx) {
-        tapStep(idx);
-      }
-    };
-  if(idx>=gameState.steps.length) return finishCooking();
-
-  gameState.currentStep=idx;
-  gameState.running=true;
-
-  const card=document.getElementById('step-card-'+idx);
-  card.className='step-card active';
-  // auto-scroll active step into view (centered) so it never hides behind tap button
-  try { card.scrollIntoView({behavior:'smooth', block:'center'}); } catch(e){}
-
-  // update progress
-  document.querySelectorAll('.stage-dot').forEach((d,i)=>{
-    d.className='stage-dot'+(i<idx?' done':i===idx?' current':'');
-  });
-
-  // start needle animation
-  if(gameState.animId) cancelAnimationFrame(gameState.animId);
-  gameState.needlePos=0.1;
-  gameState.needleDir=1;
-  gameState.lastTime=0;
-  animateNeedle(idx);
-
-  // multitask: also animate adjacent step
-  if(gameState.recipe.multitask && idx>0 && idx<gameState.steps.length-1){
-    const prev=document.getElementById('step-card-'+(idx-1));
-    if(prev && prev.className.includes('done')){
-      // show multitask on next
-    }
-  }
+  const g = gameState;
+  if(idx > 0){ const p = g.steps[idx - 1]; p.card.className = 'step-card ' + (p.result === 'bad' ? 'failed' : 'done'); }
+  if(idx >= g.steps.length) return finishCooking();
+  g.currentStep = idx; g.running = true;
+  const s = g.steps[idx];
+  s.card.className = 'step-card active';
+  g.steps.forEach((x, i) => { x.dot.className = 'stage-dot' + (i < idx ? ' done' : i === idx ? ' current' : ''); });
+  try{ s.card.scrollIntoView({ behavior:'smooth', block:'center' }); }catch(e){}
+  g.speed = needleSpeed();
+  g.t0 = performance.now(); g.nextDraw = 0;
+  const btn = $('timing-btn'); btn.hidden = false; btn.disabled = false;
+  cancelAnimationFrame(g.raf);
+  g.raf = requestAnimationFrame(drawNeedle);
 }
 
-let needleAnimIds={};
-function animateNeedle(stepIdx){
-  // chapter-normalized difficulty so chapter 6 isn't unplayable
-  const chapter = (gameState.recipe && gameState.recipe.chapter) || 1;
-  const chapterBoost = Math.min(0.004, (chapter-1)*0.0008);
-  const endlessBoost = gameState.mode==='endless' ? Math.min(0.004, gameState.endlessChain*0.0003) : 0;
-  const speed = getNeedleSpeed() + chapterBoost + endlessBoost;
-  function loop(){
-    gameState.needlePos+=gameState.needleDir*speed;
-    if(gameState.needlePos>=0.9){ gameState.needlePos=0.9; gameState.needleDir=-1; }
-    if(gameState.needlePos<=0.1){ gameState.needlePos=0.1; gameState.needleDir=1; }
-    const needle=document.getElementById('needle-'+stepIdx);
-    if(needle) needle.style.left=(gameState.needlePos*100)+'%';
-    if(gameState.running && gameState.currentStep===stepIdx)
-      needleAnimIds[stepIdx]=requestAnimationFrame(loop);
-  }
-  needleAnimIds[stepIdx]=requestAnimationFrame(loop);
+function onTap(e){
+  if(e){ if(e.button > 0) return; e.preventDefault(); }
+  const g = gameState;
+  if(!g.running) return;
+  const now = performance.now();
+  const ts = e && e.timeStamp > 0 && e.timeStamp <= now && now - e.timeStamp < 250 ? e.timeStamp : now;
+  tapStep(g.currentStep, ts);
 }
+const buzz = p => { try{ navigator.vibrate && navigator.vibrate(p); }catch(e){} };
 
-function tapStep(stepIdx){
-    // 버튼 비활성화 및 숨김
-    const timingBtn = document.getElementById('timing-btn');
-    if (timingBtn) {
-      timingBtn.disabled = true;
-      timingBtn.style.display = 'none';
+function tapStep(idx, ts){
+  const g = gameState, s = g.steps[idx];
+  g.running = false; cancelAnimationFrame(g.raf);
+  $('timing-btn').disabled = true;
+  const pos = needlePos(ts);
+  s.rail.style.transform = railX(pos);             // freeze needle exactly where it was judged
+  const dist = Math.abs(pos - s.center), z = g.zones;
+  const fx = (s.track.getBoundingClientRect());
+  const fxX = fx.left + fx.width * pos, fxY = fx.top - 6;
+  let result, pts;
+  if(dist <= z.perfect / 2){
+    result = 'perfect'; pts = Math.round(100 * getScoreMult()); g.perfects++;
+    sfxPerfect(); buzz(12);
+    floatScore('PERFECT +' + pts, fxX, fxY, '#b07a10');
+    if(g.lives < getBaseLife() && Math.random() < getReviveChance()){
+      g.lives++; renderHearts(); sfxCoin();
+      floatScore('+1 ❤️', fxX, fxY - 28, '#d63c27');
     }
-  if(!gameState.running||gameState.currentStep!==stepIdx) return;
-  gameState.running=false;
-  sfxTap();
-  cancelAnimationFrame(needleAnimIds[stepIdx]);
-
-  const track=document.getElementById('track-'+stepIdx);
-  const center=parseFloat(track.dataset.center);
-  const {perfect,good}=getZoneWidths();
-  const pos=gameState.needlePos;
-  const dist=Math.abs(pos-center);
-
-  let result,pts,badgeClass,badgeText;
-  if(dist<=perfect/2){
-    result='perfect'; pts=100*getScoreMult(); badgeClass='badge-perfect'; badgeText='PERFECT ⭐';
-    gameState.perfects++; sfxPerfect();
-    spawnFloatScore('PERFECT +'+Math.round(pts), track, '#c8952a');
-    // 행운의 회복: chance to restore 1 life on PERFECT (capped at base)
-    if(gameState.lives < getBaseLife() && Math.random() < getReviveChance()){
-      gameState.lives++;
-      renderHearts();
-      sfxCoin();
-      spawnFloatScore('+1 ❤️', track, '#d4562a');
-    }
-  } else if(dist<=good/2){
-    result='good'; pts=50; badgeClass='badge-good'; badgeText='GOOD ✓';
-    gameState.goods++; sfxGood();
-    spawnFloatScore('GOOD +'+pts, track, '#3d7a5c');
+  } else if(dist <= z.good / 2){
+    result = 'good'; pts = 50; g.goods++;
+    sfxGood(); buzz(8);
+    floatScore('GOOD +' + pts, fxX, fxY, '#1f6a42');
   } else {
-    result='bad'; pts=0; badgeClass='badge-bad'; badgeText='MISS ✗';
-    gameState.bads++; sfxBad();
-    gameState.lives--;
-    renderHearts();
-    spawnFloatScore('MISS', track, '#d4562a');
-    if(gameState.lives<=0){ trackTimer(setTimeout(()=>endGame(false),600)); return; }
+    result = 'bad'; pts = 0; g.bads++;
+    sfxBad(); buzz([30, 40, 30]);
+    g.lives--; renderHearts();
+    floatScore('MISS', fxX, fxY, '#d63c27');
   }
+  s.result = result;
+  s.card.className = 'step-card active judged' + (result === 'bad' ? ' shake' : '');
+  s.badge.className = 'step-result-badge badge-' + result;
+  s.badge.textContent = result === 'perfect' ? 'PERFECT ★' : result === 'good' ? 'GOOD ✓' : 'MISS ✗';
+  const ring = document.createElement('span');
+  ring.className = 'hit-ring ' + result; ring.style.left = pos * 100 + '%';
+  ring.addEventListener('animationend', () => ring.remove());
+  s.track.appendChild(ring);
 
-  gameState.score+=Math.round(pts);
-  document.getElementById('g-score').textContent=gameState.score;
-  gameState.steps[stepIdx].result=result;
+  if(result === 'bad' && g.lives <= 0){ later(() => endGame(), 600); return; }
 
-  // endless: track combo + score
-  if(gameState.mode==='endless'){
-    if(result==='bad'){ gameState.endlessCombo=0; }
+  g.score += pts;
+  $('g-score').textContent = g.score;
+  if(g.mode === 'endless'){
+    if(result === 'bad') g.endlessCombo = 0;
     else {
-      gameState.endlessCombo++;
-      const comboMult = 1 + gameState.endlessCombo*getComboStep();
-      gameState.endlessScore += Math.round(pts * comboMult);
+      g.endlessCombo++;
+      if(g.endlessCombo > g.bestCombo) g.bestCombo = g.endlessCombo;
+      g.endlessScore += Math.round(pts * (1 + g.endlessCombo * getComboStep()));
     }
     updateEndlessHud();
   }
-
-  // update card
-  const card=document.getElementById('step-card-'+stepIdx);
-  card.className='step-card '+(result==='bad'?'failed':'done');
-  const badge=document.getElementById('step-badge-'+stepIdx);
-  badge.className='step-result-badge '+badgeClass;
-  badge.textContent=badgeText;
-
-  // collect codex ingredients randomly
-  maybCollectIngredient();
-
-  trackTimer(setTimeout(()=>{
-    if(gameState.lives>0) activateStep(stepIdx+1);
-  }, 500));
+  maybeCollectIngredient();
+  later(() => activateStep(idx + 1), 500);
 }
 
-function maybCollectIngredient(){
-  if(Math.random()<0.3){
-    const ing=CODEX_INGREDIENTS[Math.floor(Math.random()*CODEX_INGREDIENTS.length)];
-    if(!save.codexIngredients.includes(ing.id)){
-      save.codexIngredients.push(ing.id);
-      persist();
-      showToast('새 재료 발견! '+ing.emoji+' '+ing.name);
-    }
-  }
+function maybeCollectIngredient(){
+  if(Math.random() >= 0.3) return;
+  const ing = CODEX_INGREDIENTS[Math.floor(Math.random() * CODEX_INGREDIENTS.length)];
+  if(save.codexIngredients.includes(ing.id)) return;
+  save.codexIngredients.push(ing.id); persist();
+  showToast(t('newIng', { e:ing.emoji, name:cName(ing) }));
 }
 
 function finishCooking(){
-  const r=gameState.recipe;
-  const total=gameState.steps.length;
-  const pct=gameState.perfects/total;
-  let stars=pct>=0.9?3:pct>=0.6?2:gameState.bads<total?1:0;
+  const g = gameState, r = g.recipe, total = g.steps.length;
+  $('timing-btn').hidden = true;
+  const pct = g.perfects / total;
+  const stars = pct >= 0.9 ? 3 : pct >= 0.6 ? 2 : g.bads < total ? 1 : 0;
+  if(!save.codexDishes.includes(r.id)) save.codexDishes.push(r.id);
 
-  // codex unlock applies in both modes
-  if(!save.codexDishes.includes(r.id)){ save.codexDishes.push(r.id); save.newCodex.push(r.id); }
-
-  // endless: chain next random recipe, no star pollution
-  if(gameState.mode==='endless'){
-    gameState.endlessChain++;
-    // small coin reward per dish completed
-    const coinMult=getCoinMult();
-    const earned=Math.round(r.coin*Math.max(1,stars)*0.5*coinMult);
-    save.coins+=earned;
-    persist();
-    sfxGood();
-    showToast(r.emoji+' 완료! +🪙'+earned+' (콤보 ×'+gameState.endlessCombo+')');
-    trackTimer(setTimeout(()=>{
-      const nextIdx=Math.floor(Math.random()*RECIPES.length);
-      startStage(nextIdx);
-      document.getElementById('endless-hud').style.display='flex';
-      document.getElementById('g-stage-label').textContent='ENDLESS ×'+gameState.endlessChain;
-      updateEndlessHud();
-    }, 800));
+  if(g.mode === 'endless'){
+    g.endlessChain++;
+    const earned = Math.round(r.coin * Math.max(1, stars) * 0.5 * getCoinMult());
+    save.coins += earned; persist();
+    sfxCoin();
+    showToast(t('endlessDish', { e:r.emoji, n:earned, c:g.endlessCombo }));
+    let next; do{ next = Math.floor(Math.random() * RECIPES.length); }while(next === g.stageIdx && RECIPES.length > 1);
+    later(() => startStage(next, { endless:true, keepLives:true }), 800);
     return;
   }
 
-  // stage mode: persist stars + coins
   stopBgm();
-  const coinMult=getCoinMult();
-  const earned=Math.round(r.coin*stars*coinMult);
-  save.coins+=earned;
-  if(!save.stageStars[r.id]||save.stageStars[r.id]<stars) save.stageStars[r.id]=stars;
+  const earned = Math.round(r.coin * stars * getCoinMult() * g.bonus);
+  save.coins += earned;
+  if((save.stageStars[r.id] || 0) < stars) save.stageStars[r.id] = stars;
   persist();
-
-  if(stars>0) sfxWin(); else sfxLose();
-
-  const verdicts=['다시 도전하세요','잘 했어요!','훌륭해요!','완벽한 요리! 🏆'];
-  const emojis=['😓','😊','😄','🏆'];
+  stars > 0 ? sfxWin() : sfxLose();
+  const nextR = RECIPES[g.stageIdx + 1];
   showResult({
-    emoji: emojis[stars], verdict: verdicts[stars],
-    dish: r.name, stars,
+    emoji:['😓','😊','😄','🏆'][stars], verdict:t('verdict' + stars), dish:rName(r), stars, gold:stars === 3,
     stats:[
-      {label:'총 점수',val:gameState.score,cls:''},
-      {label:'퍼펙트',val:gameState.perfects+'/'+total,cls:'gold'},
-      {label:'획득 코인',val:'🪙 '+earned,cls:'green'},
+      { label:t('totalScore'), val:g.score },
+      { label:t('perfects'), val:g.perfects + '/' + total, cls:'gold' },
+      { label:t('coinsEarned'), val:'🪙 ' + earned + (g.bonus > 1 ? ' (×' + g.bonus + ')' : ''), cls:'green' },
     ],
-    nextAvail: gameState.stageIdx<RECIPES.length-1,
+    nextAvail:!!nextR && chapterUnlocked(nextR.chapter),
   });
 }
 
-function endGame(win){
-  stopBgm();
-  if(!win) sfxLose();
-
-  // endless: persist best score + show endless-flavored result
-  if(gameState.mode==='endless'){
-    const finalScore = gameState.endlessScore;
-    let newBest=false;
-    if(finalScore > (save.bestEndless||0)){
-      save.bestEndless = finalScore;
-      newBest=true;
-    }
+function endGame(){
+  const g = gameState;
+  stopBgm(); sfxLose();
+  $('timing-btn').hidden = true;
+  if(g.mode === 'endless'){
+    const finalScore = g.endlessScore, newBest = finalScore > (save.bestEndless || 0);
+    if(newBest) save.bestEndless = finalScore;
     persist();
     showResult({
-      emoji: newBest?'🏆':'💀',
-      verdict: newBest?'신기록 달성!':'엔드리스 종료',
-      dish: '×'+gameState.endlessChain+' 요리 완성',
-      stars: 0,
+      emoji:newBest ? '🏆' : '🍳', verdict:t(newBest ? 'newBest' : 'endlessOver'),
+      dish:t('dishesDone', { n:g.endlessChain }), stars:0, gold:newBest,
       stats:[
-        {label:'엔드리스 점수',val:finalScore,cls:'gold'},
-        {label:'최고 콤보',val:'×'+gameState.endlessCombo,cls:''},
-        {label:'최고 기록',val:save.bestEndless,cls:'green'},
+        { label:t('endlessScore'), val:finalScore, cls:'gold' },
+        { label:t('bestCombo'), val:'×' + g.bestCombo },
+        { label:t('bestRecord'), val:save.bestEndless, cls:'green' },
       ],
       nextAvail:false,
     });
     return;
   }
-
   showResult({
-    emoji:'💀', verdict:'요리 실패...',
-    dish:gameState.recipe.name, stars:0,
+    emoji:'💀', verdict:t('failed'), dish:rName(g.recipe), stars:0,
     stats:[
-      {label:'총 점수',val:gameState.score,cls:''},
-      {label:'퍼펙트',val:gameState.perfects,cls:'gold'},
-      {label:'남은 목숨',val:gameState.lives,cls:''},
+      { label:t('totalScore'), val:g.score },
+      { label:t('perfects'), val:g.perfects, cls:'gold' },
+      { label:t('livesLeft'), val:g.lives },
     ],
     nextAvail:false,
   });
 }
 
-// ═══════════════════════════════════════════
-// ENDLESS MODE
-// ═══════════════════════════════════════════
 function startEndless(){
-  if(!dataLoaded){ showToast('데이터 로딩 중...'); return; }
-  const idx=Math.floor(Math.random()*RECIPES.length);
-  gameState.mode='endless';
-  gameState.endlessScore=0;
-  gameState.endlessCombo=0;
-  gameState.endlessChain=0;
-  gameState.endlessDone=false;
-
-  startStage(idx); // reuse stage setup
-  document.getElementById('endless-hud').style.display='flex';
-  document.getElementById('g-stage-label').textContent='ENDLESS';
-  document.getElementById('el-best').textContent=save.bestEndless;
-  updateEndlessHud();
-  showScreen('game-screen');
+  if(!dataLoaded){ showToast(t('loading')); return; }
+  const g = gameState;
+  g.endlessScore = 0; g.endlessCombo = 0; g.bestCombo = 0; g.endlessChain = 0;
+  $('el-best').textContent = save.bestEndless;
+  startStage(Math.floor(Math.random() * RECIPES.length), { endless:true });
 }
-
 function updateEndlessHud(){
-  document.getElementById('el-score').textContent=gameState.endlessScore;
-  document.getElementById('el-combo').textContent='×'+gameState.endlessCombo;
+  $('el-score').textContent = gameState.endlessScore;
+  $('el-combo').textContent = '×' + gameState.endlessCombo;
 }
 
 // ═══════════════════════════════════════════
 // RESULT
 // ═══════════════════════════════════════════
-function showResult({emoji,verdict,dish,stars,stats,nextAvail}){
-  document.getElementById('res-emoji').textContent=emoji;
-  document.getElementById('res-verdict').textContent=verdict;
-  document.getElementById('res-dish').textContent=dish;
-  // stars
-  for(let i=0;i<3;i++){
-    const el=document.getElementById('rs'+i);
-    el.className='res-star'+(i<stars?' lit':'');
-    if(i<stars) el.style.animationDelay=(0.2+i*0.15)+'s';
-  }
-  // stats
-  document.getElementById('res-stats').innerHTML=stats.map(s=>`
-    <div class="res-stat">
-      <span class="res-stat-label">${s.label}</span>
-      <span class="res-stat-val ${s.cls}">${s.val}</span>
-    </div>`).join('');
+function showResult({ emoji, verdict, dish, stars, stats, nextAvail, gold }){
+  $('res-emoji').textContent = emoji;
+  $('res-verdict').textContent = verdict;
+  $('res-dish').textContent = dish;
+  $('res-hero').classList.toggle('gold', !!gold);
+  [...$('res-stars').children].forEach((el, i) => {
+    el.className = 'res-star' + (i < stars ? ' lit' : '');
+    el.style.animationDelay = (0.25 + i * 0.15) + 's';
+  });
+  $('res-stats').innerHTML = stats.map(s => `<div class="res-stat"><span class="res-stat-label">${s.label}</span><span class="res-stat-val ${s.cls || ''}">${s.val}</span></div>`).join('');
   setCoinDisplay(save.coins);
-  document.getElementById('res-next-btn').style.display=nextAvail?'block':'none';
-  document.getElementById('result-overlay').classList.add('show');
-  const tb=document.getElementById('timing-btn');
-  if(tb){ tb.style.display='none'; tb.disabled=true; }
-  // ArcadeDeck 연동: GAME_OVER, GAME_SCORE
+  $('res-next-btn').hidden = !nextAvail;
+  openOverlay('result-overlay');
   sendArcadeDeckScore('GAME_OVER');
   sendArcadeDeckScore('GAME_SCORE');
 }
-function closeResult(){ document.getElementById('result-overlay').classList.remove('show'); }
-function nextStage(){ closeResult(); startStage(gameState.stageIdx+1); }
-function retryStage(){ closeResult(); startStage(gameState.stageIdx); }
-function openQuitModal(){
-  document.getElementById('quit-modal').style.display = 'flex';
+function closeResult(){ $('result-overlay').classList.remove('show'); }
+function nextStage(){ closeResult(); startStage(gameState.stageIdx + 1); }
+function retryStage(){
+  closeResult();
+  if(gameState.mode === 'endless') startEndless();
+  else startStage(gameState.stageIdx, { bonus:gameState.bonus });
 }
-function closeQuitModal(){
-  document.getElementById('quit-modal').style.display = 'none';
-}
-function confirmQuit(){
-  closeQuitModal();
-  exitToHub();
-}
-
+function openQuitModal(){ openOverlay('quit-modal'); }
+function closeQuitModal(){ $('quit-modal').classList.remove('show'); }
+function confirmQuit(){ closeQuitModal(); exitToHub(); }
 
 // ═══════════════════════════════════════════
-// ArcadeDeck 연동 함수
+// ArcadeDeck 연동
 // ═══════════════════════════════════════════
-function sendArcadeDeckScore(eventType) {
-  // 별점 총합 계산 (Score)
+function sendArcadeDeckScore(eventType){
   let totalStars = 0;
-  if (save.stageStars) {
-    for (const k in save.stageStars) {
-      if (Object.prototype.hasOwnProperty.call(save.stageStars, k)) {
-        totalStars += save.stageStars[k];
-      }
-    }
-  }
-  // 해금된 요리 개수 (SubScore)
-  const unlockedDishes = Array.isArray(save.codexDishes) ? save.codexDishes.length : 0;
-  // ArcadeDeck 프로토콜에 맞춰 postMessage
+  for(const k in save.stageStars) totalStars += save.stageStars[k];
   // origin '*' required because ArcadeDeck host origin unknown at build time;
   // payload contains no secrets (only public game stats), so broadcast is safe.
-  if (window.parent && window.parent !== window) {
+  if(window.parent && window.parent !== window){
     window.parent.postMessage({
       type: eventType,
-      score: totalStars, // 별점 총합
-      subScore: unlockedDishes // 해금된 요리 개수
+      score: totalStars,                    // 별점 총합
+      subScore: save.codexDishes.length     // 해금된 요리 개수
     }, '*');
   }
 }
 
 // ═══════════════════════════════════════════
-// SPECIAL EVENT
+// TODAY'S SPECIAL — rotates daily through the event recipes, pays 2× coins
 // ═══════════════════════════════════════════
 function triggerEvent(){
+  const r = todaysSpecial(); if(!r || launchTimer) return;
   sfxEvent();
-  const el=document.createElement('div');
-  el.className='event-flash';
+  const el = document.createElement('div');
+  el.className = 'event-flash';
+  el.addEventListener('animationend', () => el.remove());
   document.body.appendChild(el);
-  setTimeout(()=>el.remove(),500);
-  showToast('🎊 이벤트 스테이지 시작! 보상 2배!');
-  // find sushi
-  const idx=RECIPES.findIndex(r=>r.id==='sushi');
-  setTimeout(()=>startStage(idx),600);
+  showToast(t('eventStart'));
+  launch(() => startStage(r.idx, { bonus:2 }), 600);
 }
 
 // ═══════════════════════════════════════════
 // MINI GAME
 // ═══════════════════════════════════════════
-let mgRunning=false, mgScore=0, mgTimeLeft=30, mgTimerId=null, mgSpawnId=null, mgToken=0;
-const MG_EMOJIS=['🧅','🧄','🍅','🥕','🥔','🍄','🫑','🌽','🥦','🍆','🥬','🥒','🥑','🥚','🥩','🍗','🐟','🦐','🍣','🦀','🧈','🧀','🍚','🍝','🌾','🍞','🫙','🍶','🌶️','🧂','🌿','🌱','🍂','🍋','🍫','🍯','🥥','🍷','🧴','🍬'];
+const MG = { run:false, score:0, left:30, tick:0, spawn:0, token:0, rect:null };
+const MG_EMOJIS = ['🧅','🧄','🍅','🥕','🥔','🍄','🫑','🌽','🥦','🍆','🥬','🥒','🥑','🥚','🥩','🍗','🐟','🦐','🍣','🦀','🧈','🧀','🍚','🍝','🌾','🍞','🫙','🍶','🌶️','🧂','🌿','🌱','🍂','🍋','🍫','🍯','🥥','🍷','🧴','🍬'];
+const mgBasket = $('mg-basket'), mgIcon = $('mg-basket-icon');
 
 function showMinigame(){
-  if(!dataLoaded){ showToast('데이터 로딩 중...'); return; }
-  document.getElementById('mg-overlay').classList.add('show');
+  if(!dataLoaded){ showToast(t('loading')); return; }
+  openOverlay('mg-overlay');
   resetMinigame();
 }
-function closeMinigame(){ document.getElementById('mg-overlay').classList.remove('show'); stopMinigame(); }
-
+function closeMinigame(){ $('mg-overlay').classList.remove('show'); stopMinigame(); }
+function mgHud(){
+  $('mg-score').textContent = MG.score;
+  $('mg-reward').textContent = '+' + Math.round(MG.score * getMgCoinPerItem()) + ' 🪙';
+}
+function resetMinigameButton(){
+  const b = $('mg-start-btn'), played = save.mgLastPlayed === today();
+  b.textContent = t(MG.run ? 'mgRunning' : played ? 'mgTomorrow' : 'mgStart');
+  b.disabled = MG.run || played;
+}
 function resetMinigame(){
-  mgRunning=false; mgScore=0; mgTimeLeft=30;
-  document.getElementById('mg-score').textContent='0';
-  document.getElementById('mg-reward').textContent='+0 🪙';
-  document.getElementById('mg-timer-fill').style.width='100%';
-  // 하루 1회 제한 체크
-  const today = new Date().toISOString().slice(0,10);
-  if(save.mgLastPlayed === today){
-    document.getElementById('mg-start-btn').textContent='내일 다시 도전!';
-    document.getElementById('mg-start-btn').onclick=null;
-    document.getElementById('mg-start-btn').disabled=true;
-  }else{
-    document.getElementById('mg-start-btn').textContent='시작!';
-    document.getElementById('mg-start-btn').onclick=startMinigame;
-    document.getElementById('mg-start-btn').disabled=false;
-  }
-  const basket=document.getElementById('mg-basket');
-  basket.innerHTML='<div class="mg-basket-icon" id="mg-basket-icon">🧺</div>';
+  stopMinigame();
+  MG.score = 0; MG.left = 30; mgHud();
+  $('mg-timer-fill').style.transform = 'scaleX(1)';
+  resetMinigameButton();
 }
-
 function startMinigame(){
-  // 하루 1회 제한
-  const today = new Date().toISOString().slice(0,10);
-  if(save.mgLastPlayed === today){
-    showToast('오늘은 이미 플레이했습니다!');
-    return;
-  }
-  if(mgRunning) return;
-  mgRunning=true; mgScore=0; mgTimeLeft=30;
-  const myToken = ++mgToken;
-  document.getElementById('mg-start-btn').textContent='진행 중...';
-  document.getElementById('mg-start-btn').onclick=null;
-  // basket follows touch
-  const basket=document.getElementById('mg-basket');
-  basket.ontouchstart=basket.ontouchmove=function(e){
-    e.preventDefault();
-    const r=basket.getBoundingClientRect();
-    const x=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
-    const pct=Math.max(10,Math.min(90,x/r.width*100));
-    document.getElementById('mg-basket-icon').style.left=pct+'%';
-    document.getElementById('mg-basket-icon').style.transform='translateX(-50%)';
-  };
-
-  // spawn ingredients
-  function spawnIng(){
-    if(!mgRunning || myToken!==mgToken) return;
-    const basket=document.getElementById('mg-basket');
-    const r=basket.getBoundingClientRect();
-    const emoji=MG_EMOJIS[Math.floor(Math.random()*MG_EMOJIS.length)];
-    const el=document.createElement('div');
-    el.className='mg-ingredient';
-    el.textContent=emoji;
-    el.style.left=Math.random()*80+10+'%';
-    el.style.animationDuration=(1.5+Math.random()*1.5)+'s';
-    el.onclick=function(){
-      if(!mgRunning) return;
-      mgScore++;
-      sfxCoin();
-      document.getElementById('mg-score').textContent=mgScore;
-      document.getElementById('mg-reward').textContent='+'+Math.round(mgScore*getMinigameCoinPerItem())+' 🪙';
-      el.remove();
-      // check codex
-      const ing=CODEX_INGREDIENTS.find(x=>x.emoji===emoji);
-      if(ing&&!save.codexIngredients.includes(ing.id)){
-        save.codexIngredients.push(ing.id); persist();
-      }
-    };
-    basket.appendChild(el);
-    setTimeout(()=>el.remove(),3000);
-    if(mgRunning && myToken===mgToken) mgSpawnId=setTimeout(spawnIng, 600+Math.random()*400);
-  }
-  spawnIng();
-
-  // timer
-  mgTimerId=setInterval(()=>{
-    mgTimeLeft--;
-    document.getElementById('mg-timer-fill').style.width=(mgTimeLeft/30*100)+'%';
-    if(mgTimeLeft<=0) finishMinigame();
-  },1000);
+  if(MG.run) return;
+  if(save.mgLastPlayed === today()){ showToast(t('mgAlready')); return; }
+  MG.run = true; MG.score = 0; MG.left = 30; mgHud();
+  resetMinigameButton();
+  const tok = ++MG.token;
+  spawnIng(tok);
+  MG.tick = setInterval(() => {
+    MG.left--;
+    $('mg-timer-fill').style.transform = 'scaleX(' + MG.left / 30 + ')';
+    if(MG.left <= 0) finishMinigame();
+  }, 1000);
 }
-
+function spawnIng(tok){
+  if(!MG.run || tok !== MG.token) return;
+  const el = document.createElement('div');
+  el.className = 'mg-ingredient';
+  el.textContent = MG_EMOJIS[Math.floor(Math.random() * MG_EMOJIS.length)];
+  el.style.left = (10 + Math.random() * 80) + '%';
+  el.style.animationDuration = (1.5 + Math.random() * 1.5) + 's';
+  el.addEventListener('animationend', () => el.remove());
+  mgBasket.appendChild(el);
+  MG.spawn = setTimeout(() => spawnIng(tok), 600 + Math.random() * 400);
+}
+function mgMove(e){
+  const r = MG.rect || (MG.rect = mgBasket.getBoundingClientRect());
+  const x = Math.max(-0.4, Math.min(0.4, (e.clientX - r.left) / r.width - 0.5)) * r.width;
+  mgIcon.style.transform = `translateX(calc(-50% + ${x.toFixed(1)}px))`;
+}
+// pointerdown (not click): fires immediately on touch and isn't swallowed by the basket's drag handling
+mgBasket.addEventListener('pointerdown', e => {
+  MG.rect = mgBasket.getBoundingClientRect();
+  mgMove(e);
+  const el = e.target.closest('.mg-ingredient');
+  if(!el || !MG.run) return;
+  MG.score++; sfxCoin(); mgHud();
+  const pop = document.createElement('span');
+  pop.className = 'mg-pop'; pop.textContent = '+1';
+  pop.style.left = (e.clientX - MG.rect.left) + 'px'; pop.style.top = (e.clientY - MG.rect.top - 20) + 'px';
+  pop.addEventListener('animationend', () => pop.remove());
+  mgBasket.appendChild(pop);
+  el.remove();
+  const ing = CODEX_BY_EMOJI.get(el.textContent);
+  if(ing && !save.codexIngredients.includes(ing.id)){ save.codexIngredients.push(ing.id); persist(); }
+});
+mgBasket.addEventListener('pointermove', mgMove);
 function stopMinigame(){
-  mgRunning=false;
-  mgToken++;
-  if(mgTimerId){ clearInterval(mgTimerId); mgTimerId=null; }
-  if(mgSpawnId){ clearTimeout(mgSpawnId); mgSpawnId=null; }
-  const basket=document.getElementById('mg-basket');
-  if(basket) basket.querySelectorAll('.mg-ingredient').forEach(el=>el.remove());
+  MG.run = false; MG.token++; MG.rect = null;
+  clearInterval(MG.tick); clearTimeout(MG.spawn);
+  mgBasket.querySelectorAll('.mg-ingredient,.mg-pop').forEach(el => el.remove());
 }
-
 function finishMinigame(){
   stopMinigame();
-  const earned=Math.round(mgScore*getMinigameCoinPerItem());
-  save.coins+=earned;
-  // 오늘 날짜 저장
-  save.mgLastPlayed = new Date().toISOString().slice(0,10);
+  const earned = Math.round(MG.score * getMgCoinPerItem());
+  save.coins += earned;
+  save.mgLastPlayed = today();
   persist();
   setCoinDisplay(save.coins);
-  document.getElementById('mg-start-btn').textContent='내일 다시 도전!';
-  document.getElementById('mg-start-btn').onclick=null;
-  document.getElementById('mg-start-btn').disabled=true;
+  resetMinigameButton();
   sfxWin();
-  showToast('수집 완료! 🪙'+earned+' 획득!');
+  showToast(t('mgDone', { n:earned }));
 }
 
 // ═══════════════════════════════════════════
 // UI HELPERS
 // ═══════════════════════════════════════════
+let toastTimer = 0;
 function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2200);
+  const el = $('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
 }
-
-function spawnFloatScore(text, refEl, color){
-  const rect=refEl.getBoundingClientRect();
-  const el=document.createElement('div');
-  el.className='float-score';
-  el.textContent=text;
-  el.style.color=color;
-  el.style.left=(rect.left+rect.width/2)+'px';
-  el.style.top=(rect.top-10)+'px';
+function floatScore(text, x, y, color){
+  const el = document.createElement('div');
+  el.className = 'float-score'; el.textContent = text; el.style.color = color;
+  el.style.left = x + 'px'; el.style.top = y + 'px';
+  el.addEventListener('animationend', () => el.remove());
   document.body.appendChild(el);
-  setTimeout(()=>el.remove(),900);
 }
+function openOverlay(id){ cancelLaunch(); $(id).classList.add('show'); armBackTrap(); }
+let launchTimer = 0;   // delayed "start this dish" after a sheet closes; one at a time, cancelled by navigation
+function launch(fn, ms){ clearTimeout(launchTimer); launchTimer = setTimeout(() => { launchTimer = 0; fn(); }, ms); }
+function cancelLaunch(){ clearTimeout(launchTimer); launchTimer = 0; }
 
-function showCodexDetail(id,type){
-  if(type==='dish'){
-    const r=RECIPES.find(x=>x.id===id);
-    if(r) showToast(r.emoji+' '+r.name+': '+r.desc);
-  }
+const TITLE_DISHES = ['ramen','steak','sushi','paella','creme_brulee','grand_final'];
+function renderTitleDishes(){
+  $('title-dishes').innerHTML = TITLE_DISHES.map(id => RECIPES[ID_IDX.get(id)]).filter(Boolean)
+    .map(r => `<div class="dish-preview-card"><span class="dpc-emoji" aria-hidden="true">${r.emoji}</span><span class="dpc-name">${rName(r)}</span></div>`).join('');
 }
 
 // ═══════════════════════════════════════════
-// 오늘 뭐 먹을까 (What's For Dinner)
+// WHAT SHOULD I COOK
 // ═══════════════════════════════════════════
-const CHAPTER_NAMES = {1:'기초',2:'아시아',3:'유럽',4:'고급',5:'세계',6:'마스터',7:'분자요리',8:'디저트'};
-const DIFF_LABELS    = {1:'초급',2:'중급',3:'고급'};
-const DIFF_META_CLS  = {1:'meta-diff1',2:'meta-diff2',3:'meta-diff3'};
-
-let wfdPicks = [];        // current 3 picks
-let wfdSelected = null;   // currently selected recipe id
-
-function openWFD(){
-  document.getElementById('wfd-overlay').classList.add('show');
-  // auto-spin on first open if no picks yet
-  if(wfdPicks.length===0) spinWFD();
-}
-function closeWFD(){
-  document.getElementById('wfd-overlay').classList.remove('show');
-}
-
+let wfdPicks = [], wfdSelected = null;
+function openWFD(){ openOverlay('wfd-overlay'); if(!wfdPicks.length) spinWFD(); }
+function closeWFD(){ $('wfd-overlay').classList.remove('show'); }
 function spinWFD(){
-  const btn = document.getElementById('wfd-spin-btn');
-  btn.classList.remove('spinning');
-  void btn.offsetWidth;
-  btn.classList.add('spinning');
-
-  // pick 3 unique random recipes from ALL recipes
-  const pool = [...RECIPES];
-  wfdPicks = [];
-  while(wfdPicks.length < 3 && pool.length > 0){
-    const idx = Math.floor(Math.random() * pool.length);
-    wfdPicks.push(pool.splice(idx, 1)[0]);
-  }
-  wfdSelected = null;
-
-  // hide detail
-  const detail = document.getElementById('wfd-detail');
-  detail.classList.remove('show');
-  detail.style.display = 'none';
-
-  renderWFDCards();
+  const btn = $('wfd-spin-btn');
+  btn.classList.remove('spinning'); void btn.offsetWidth; btn.classList.add('spinning');
+  wfdPicks = pick(RECIPES, 3); wfdSelected = null;
+  $('wfd-detail').classList.remove('show');
+  $('wfd-cards').innerHTML = wfdPicks.map((r, i) => miniCard(r, i, `selectWFD('${r.id}')`)).join('');
   sfxTap();
 }
-
-function renderWFDCards(){
-  const container = document.getElementById('wfd-cards');
-  container.innerHTML = '';
-  wfdPicks.forEach((r, i) => {
-    const cleared = (save.stageStars[r.id]||0) > 0;
-    const globalIdx = RECIPES.indexOf(r);
-
-    const card = document.createElement('div');
-    card.className = 'wfd-card flip-in';
-    card.style.animationDelay = (i * 0.1) + 's';
-    card.dataset.id = r.id;
-    card.onclick = () => selectWFD(r.id);
-
-    card.innerHTML = `
-      ${r.special ? `<div class="wfd-card-lock">${r.special}</div>` : ''}
-      <span class="wfd-card-emoji">${r.emoji}</span>
-      <div class="wfd-card-name">${r.name}</div>
-      <div class="wfd-card-ch">챕터 ${r.chapter} · ${CHAPTER_NAMES[r.chapter]}</div>
-      <div class="wfd-card-diff">${'⚡'.repeat(r.diff)} ${DIFF_LABELS[r.diff]}
-        ${cleared ? ' · ✅' : ''}
-      </div>
-    `;
-    container.appendChild(card);
-  });
-}
-
 function selectWFD(id){
   wfdSelected = id;
-  const r = RECIPES.find(x => x.id === id);
-
-  // update card selection styles
-  document.querySelectorAll('.wfd-card').forEach(c => {
-    if(c.dataset.id === id){
-      c.className = 'wfd-card selected';
-    } else {
-      c.className = 'wfd-card unselected';
-    }
-  });
-
+  document.querySelectorAll('#wfd-cards .wfd-card').forEach(c => { c.className = 'wfd-card ' + (c.dataset.id === id ? 'selected' : 'unselected'); });
   sfxGood();
-  renderWFDDetail(r);
+  fillDetail('wd', RECIPES[ID_IDX.get(id)]);
+  $('wfd-detail').classList.add('show');
 }
-
-function renderWFDDetail(r){
-  const detail = document.getElementById('wfd-detail');
-  detail.style.display = 'block';
-  // force reflow for animation
-  void detail.offsetWidth;
-  detail.classList.add('show');
-
-  document.getElementById('wd-emoji').textContent = r.emoji;
-  document.getElementById('wd-name').textContent  = r.name;
-  document.getElementById('wd-desc').textContent  = r.desc;
-
-  // meta tags
-  const cleared = (save.stageStars[r.id]||0) > 0;
-  const meta = document.getElementById('wd-meta');
-  meta.innerHTML = `
-    <span class="wfd-meta-tag ${DIFF_META_CLS[r.diff]}">${'⚡'.repeat(r.diff)} ${DIFF_LABELS[r.diff]}</span>
-    <span class="wfd-meta-tag meta-chapter">챕터 ${r.chapter} · ${CHAPTER_NAMES[r.chapter]}</span>
-    ${r.multitask ? '<span class="wfd-meta-tag meta-diff2">⚡ 멀티태스킹</span>' : ''}
-    ${r.special ? `<span class="wfd-meta-tag meta-special">🎊 ${r.special}</span>` : ''}
-    ${cleared ? '<span class="wfd-meta-tag meta-cleared">✅ 클리어</span>' : ''}
-    <span class="wfd-meta-tag meta-chapter">🪙 ${r.coin}</span>
-  `;
-
-  // ingredients
-  const ings = RECIPE_INGREDIENTS[r.id] || [];
-  const ingGrid = document.getElementById('wd-ings');
-  if(ings.length > 0){
-    ingGrid.innerHTML = ings.map(ing => `
-      <div class="wfd-ing-item">
-        <span class="wfd-ing-emoji">${ing.e}</span>
-        <span class="wfd-ing-name">${ing.n}</span>
-      </div>
-    `).join('');
-  } else {
-    ingGrid.innerHTML = '<div style="grid-column:1/-1;font-size:0.72rem;color:var(--muted);padding:0.5rem 0">재료 정보를 준비 중입니다</div>';
-  }
-
-  // steps
-  const stepsList = document.getElementById('wd-steps');
-  stepsList.innerHTML = r.steps.map((s,i) => `
-    <div class="wfd-step-row">
-      <div class="wfd-step-num">${i+1}</div>
-      <div class="wfd-step-name">${s}</div>
-    </div>
-  `).join('');
-
-  // play btn label
-  const playBtn = document.getElementById('wd-play-btn');
-  const globalIdx = RECIPES.indexOf(r);
-  playBtn.textContent = `${r.emoji} "${r.name}" 도전하기 →`;
-}
-
 function playFromWFD(){
-  if(!wfdSelected) return;
-  const r = RECIPES.find(x => x.id === wfdSelected);
-  const idx = RECIPES.indexOf(r);
+  const idx = ID_IDX.get(wfdSelected); if(idx == null) return;
   closeWFD();
-  setTimeout(() => startStage(idx), 200);
+  launch(() => startStage(idx), 200);
 }
 
+// ═══════════════════════════════════════════
+// INSTALLABLE APP
+// ═══════════════════════════════════════════
+let installEvt = null;
+const IN_FRAME = window.top !== window;
+const STANDALONE = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; if(!IN_FRAME) $('install-btn').hidden = false; });
+addEventListener('appinstalled', () => { installEvt = null; $('install-btn').hidden = true; });
+if(IS_IOS && !STANDALONE && !IN_FRAME) $('install-btn').hidden = false;
+function installApp(){
+  if(!installEvt){ showToast(t('iosInstall')); return; }
+  installEvt.prompt();
+  installEvt.userChoice.finally(() => { installEvt = null; $('install-btn').hidden = true; });
+}
 
 // ═══════════════════════════════════════════
-// ─── INIT ───
-// 남은 목숨(하트) 표시 함수 복구
-function renderHearts() {
-  const el = document.getElementById('g-hearts');
-  if (!el) return;
-  el.innerHTML = '';
-  for (let i = 0; i < getBaseLife(); i++) {
-    const s = document.createElement('span');
-    s.className = 'heart' + (i >= gameState.lives ? ' empty' : '');
-    s.textContent = '❤️';
-    el.appendChild(s);
+// INPUT: tap button, keyboard, Android back, ESC, backdrop
+// ═══════════════════════════════════════════
+const tapBtn = $('timing-btn');
+tapBtn.addEventListener('pointerdown', e => { tapBtn.classList.add('pressed'); onTap(e); });
+['pointerup','pointercancel','pointerleave'].forEach(ev => tapBtn.addEventListener(ev, () => tapBtn.classList.remove('pressed')));
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){ handleBack(); return; }
+  if((e.code === 'Space' || e.key === 'Enter') && !e.target.closest('button:not(#timing-btn),input,select') && $('game-screen').classList.contains('active') && !$('quit-modal').classList.contains('show') && !$('result-overlay').classList.contains('show')){
+    e.preventDefault();
+    if(!e.repeat) onTap(null);
   }
-}
-// 스테이지 시작 함수 복구
-function startStage(idx) {
-  if (!dataLoaded) { showToast('데이터 로딩 중...'); return; }
-  if (!RECIPES || idx < 0 || idx >= RECIPES.length) {
-    showToast('스테이지 정보를 불러올 수 없습니다.');
-    return;
-  }
-  // cancel any leftover timers/anim from prior session
-  clearPendingTimers();
-  Object.values(needleAnimIds).forEach(id=>cancelAnimationFrame(id));
-  needleAnimIds={};
-  // 게임 상태 초기화
-  gameState.stageIdx = idx;
-  gameState.recipe = RECIPES[idx];
-  gameState.steps = gameState.recipe.steps.map((s, i) => ({
-    name: s,
-    result: null
-  }));
-  gameState.currentStep = 0;
-  gameState.score = 0;
-  gameState.lives = getBaseLife();
-  gameState.perfects = 0;
-  gameState.goods = 0;
-  gameState.bads = 0;
-  gameState.running = false;
-  // UI 세팅
-  renderRecipeCard();
-  renderStageProgress();
-  renderSteps();
-  renderHearts && renderHearts();
-  document.getElementById('g-score').textContent = 0;
-  document.getElementById('g-stage-label').textContent = gameState.recipe.name;
-  document.getElementById('game-screen').style.display = 'block';
-  document.getElementById('hub-screen').style.display = 'none';
-  // hide FAB during gameplay so it doesn't overlap cook area
-  const fab = document.getElementById('wfd-fab');
-  if(fab) fab.style.display = 'none';
-  // 첫 스텝 활성화
-  activateStep(0);
-  // 배경음
-  if (soundOn) startBgm();
-}
-// ═══════════════════════════════════════════
-// UX HYGIENE: backdrop dismiss + ESC key
-// ═══════════════════════════════════════════
-function wireBackdropDismiss(overlayId, closeFn){
-  const el = document.getElementById(overlayId);
-  if(!el) return;
-  el.addEventListener('click', (e) => {
-    // only dismiss if click hit overlay itself, not inner sheet
-    if(e.target === el) closeFn();
-  });
-}
-wireBackdropDismiss('wfd-overlay',   closeWFD);
-wireBackdropDismiss('codex-overlay', closeCodexDish);
-wireBackdropDismiss('ing-overlay',   closeIngredient);
-wireBackdropDismiss('quit-modal',    closeQuitModal);
-wireBackdropDismiss('mg-overlay',    closeMinigame);
-
-document.addEventListener('keydown', (e) => {
-  if(e.key !== 'Escape') return;
-  if(document.getElementById('wfd-overlay').classList.contains('show'))   { closeWFD(); return; }
-  if(document.getElementById('codex-overlay').classList.contains('show')) { closeCodexDish(); return; }
-  if(document.getElementById('ing-overlay').classList.contains('show'))   { closeIngredient(); return; }
-  if(document.getElementById('quit-modal').style.display === 'flex')      { closeQuitModal(); return; }
-  if(document.getElementById('mg-overlay').classList.contains('show'))    { closeMinigame(); return; }
-  if(document.getElementById('result-overlay').classList.contains('show')){ exitToHub(); return; }
 });
+// one dummy history entry so the Android/browser back button closes sheets / leaves the game instead of the app
+function armBackTrap(){ if(!history.state || !history.state.tc) history.pushState({ tc:1 }, ''); }
+addEventListener('popstate', () => { if(handleBack()) armBackTrap(); });
+function handleBack(){
+  const shown = id => $(id).classList.contains('show');
+  if(!$('vol-panel').hidden){ $('vol-panel').hidden = true; return true; }
+  if(shown('wfd-overlay')){ closeWFD(); return true; }
+  if(shown('codex-overlay')){ closeCodexDish(); return true; }
+  if(shown('ing-overlay')){ closeIngredient(); return true; }
+  if(shown('mg-overlay')){ closeMinigame(); return true; }
+  if(shown('quit-modal')){ closeQuitModal(); return true; }
+  if(shown('result-overlay')){ exitToHub(); return true; }
+  if($('game-screen').classList.contains('active')){ openQuitModal(); return true; }
+  if(!$('title-screen').classList.contains('active')){ showScreen('title-screen'); return false; }
+  return false;
+}
+[['wfd-overlay',closeWFD],['codex-overlay',closeCodexDish],['ing-overlay',closeIngredient],['quit-modal',closeQuitModal],['mg-overlay',closeMinigame]]
+  .forEach(([id, fn]) => $(id).addEventListener('click', e => { if(e.target === e.currentTarget) fn(); }));
+
+// idle menus: pause decorative CSS animation after 8s without input (gameplay excluded via body.in-game)
+let idleTimer = 0;
+function poke(){ document.body.classList.remove('idle'); clearTimeout(idleTimer); idleTimer = setTimeout(() => document.body.classList.add('idle'), 8000); }
+['pointerdown','keydown','wheel'].forEach(ev => addEventListener(ev, poke, { passive:true }));
+poke();
+
+applyStaticI18n();
+syncVolUI();
 </script>
 </body>
 </html>

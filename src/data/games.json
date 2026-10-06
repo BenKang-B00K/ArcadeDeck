@@ -198,7 +198,7 @@
   {
     "id": "13",
     "slug": "timing-chef",
-    "language": "KO",
+    "language": "EN/KO/JA",
     "thumbnail": "images/timing-chef.webp",
     "genres": [
       "Arcade",
@@ -210,7 +210,7 @@
     "platform": "BOTH",
     "isOriginal": true,
     "badge": "UPDATE",
-    "lastUpdated": "2026-05-16",
+    "lastUpdated": "2026-10-05",
     "scoreTiers": [
       10,
       30,

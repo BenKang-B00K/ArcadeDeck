@@ -130,7 +130,7 @@ function updateSlotsVfx() {
                 sp.alpha = 0;
                 continue;
             }
-            m.phase += 0.0065;
+            m.phase += 0.0065 * (window.dt || 1);
             const ph = (m.phase + mi * 0.33) % 1;
             const ox = Math.sin(t * 0.8 + mi * 2.1 + i * 0.4) * 14;
             sp.x = slot.lx + ox;

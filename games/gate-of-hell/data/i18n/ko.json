@@ -110,7 +110,8 @@
       "badge_existing": "EXISTING",
       "badge_upgrade": "UPGRADE",
       "badge_reroll": "REROLL",
-      "relics_cost_fmt": "일반 {n} · 최상위 {s} SF"
+      "relics_cost_fmt": "일반 {n} · 최상위 {s} SF",
+      "tap_again": "한 번 더 터치"
     },
     "info_panel": {
       "default_title": "GATE OF HELL",
@@ -374,8 +375,11 @@
       "fontsize_small": "작게",
       "fontsize_medium": "보통",
       "fontsize_large": "크게",
-      "volume_label": "효과음 크기",
-      "volume_desc": "효과음 재생 음량을 조절합니다."
+      "music_label": "배경음악",
+      "music_desc": "도리안 선법으로 연주되는 배경음악입니다.",
+      "fps_label": "프레임 제한",
+      "fps_desc": "30 FPS는 배터리 소모와 발열을 줄입니다.",
+      "audio_quick_aria": "소리 켜기/끄기"
     },
     "quit": {
       "header": "[운명의 거부]",
@@ -449,6 +453,10 @@
       "madness_popup": "광기 발현!",
       "madness_log_on": "악마의 뿔: 광기 발현 — 데미지 보너스 ×2",
       "madness_log_off": "악마의 뿔: 광기 해제"
+    },
+    "meta": {
+      "title": "Gate of Hell : 악령들의 귀환",
+      "rotate": "세로 화면으로 돌려주세요"
     }
   },
   "shrine_role": {

@@ -460,8 +460,8 @@ function _releaseUnitRecord(type, record) {
             if (sprite.parent) sprite.parent.removeChild(sprite);
         _getUnitState(type).pool.push(sprite);
     }
-    if (shadow)     { shadow.clear();    shadow.visible=false;    if (shadow.parent)    shadow.parent.removeChild(shadow);    _unitShadowPool.push(shadow); }
-    if (cooldown)   { cooldown.clear();  cooldown.visible=false;  if (cooldown.parent)  cooldown.parent.removeChild(cooldown);_unitCooldownPool.push(cooldown); }
+    if (shadow)     { shadow.clear();    shadow._k = null; shadow.visible=false;    if (shadow.parent)    shadow.parent.removeChild(shadow);    _unitShadowPool.push(shadow); }
+    if (cooldown)   { cooldown.clear();  cooldown._k = null; cooldown.visible=false;  if (cooldown.parent)  cooldown.parent.removeChild(cooldown);_unitCooldownPool.push(cooldown); }
     if (selection)  { selection.clear(); selection.visible=false; if (selection.parent) selection.parent.removeChild(selection);_unitSelectionPool.push(selection); }
     if (auraGfx)    { auraGfx.clear();   auraGfx.visible=false;   if (auraGfx.parent)   auraGfx.parent.removeChild(auraGfx);   _unitAuraGfxPool.push(auraGfx); }
     if (auraSprite) { auraSprite.visible=false; if (auraSprite.parent) auraSprite.parent.removeChild(auraSprite); _unitAuraSpritePool.push(auraSprite); }
@@ -594,9 +594,14 @@ function renderPixiUnit(tower) {
     // Shadow
     if (!record.shadow) record.shadow = _acquireUnitShadow();
     const sh = record.shadow;
-    sh.clear();
-    sh.ellipse(lx, footY, tower.isShrine ? 24 : 26, tower.isShrine ? 10 : 10);
-    sh.fill({ color: 0x000000, alpha: 0.3 });
+    // Static geometry: rebuild only when the unit moves (drag/swap), not per frame.
+    const shKey = lx + ',' + footY + (tower.isShrine ? 's' : 'u');
+    if (sh._k !== shKey) {
+        sh._k = shKey;
+        sh.clear();
+        sh.ellipse(lx, footY, tower.isShrine ? 24 : 26, 10);
+        sh.fill({ color: 0x000000, alpha: 0.3 });
+    }
 
     // ── Selection range + ritual rings (worldLayer, below sprite) ───────
     const selectedTower = (typeof getSelectedTower === 'function') ? getSelectedTower() : null;
@@ -708,29 +713,29 @@ function renderPixiUnit(tower) {
     }
 
     // Cooldown indicator: vivid cyan hex outline; alpha fades as attack recharges.
+    // Hex geometry is static per slot — built once, then only .alpha animates.
     if (!record.cooldown) record.cooldown = _acquireUnitCooldown();
     const cdg = record.cooldown;
-    cdg.clear();
-    if (_elapsed < _cd) {
-        const remaining = 1 - cdReady;
+    const oy = ly + UNIT_COOLDOWN_Y_OFFSET;
+    const cdKey = lx + ',' + oy;
+    if (cdg._k !== cdKey) {
+        cdg._k = cdKey;
+        cdg.clear();
         const hw = 51, hh = 69;
-        const oy = ly + UNIT_COOLDOWN_Y_OFFSET;
-        cdg.moveTo(lx + hw, oy);
-        for (let i = 1; i < 6; i++) {
-            const ang = (i * 60) * Math.PI / 180;
-            cdg.lineTo(lx + hw * Math.cos(ang), oy + hh * Math.sin(ang));
-        }
-        cdg.closePath();
-        cdg.stroke({ color: 0x00E5FF, alpha: 0.95 * remaining, width: 2.5 });
-
-        cdg.moveTo(lx + hw, oy);
-        for (let i = 1; i < 6; i++) {
-            const ang = (i * 60) * Math.PI / 180;
-            cdg.lineTo(lx + hw * Math.cos(ang), oy + hh * Math.sin(ang));
-        }
-        cdg.closePath();
-        cdg.stroke({ color: 0xFFFFFF, alpha: 0.6 * remaining, width: 1 });
+        const hex = () => {
+            cdg.moveTo(lx + hw, oy);
+            for (let i = 1; i < 6; i++) {
+                const ang = (i * 60) * Math.PI / 180;
+                cdg.lineTo(lx + hw * Math.cos(ang), oy + hh * Math.sin(ang));
+            }
+            cdg.closePath();
+        };
+        hex(); cdg.stroke({ color: 0x00E5FF, alpha: 0.95, width: 2.5 });
+        hex(); cdg.stroke({ color: 0xFFFFFF, alpha: 0.6, width: 1 });
     }
+    const cdActive = _elapsed < _cd;
+    cdg.visible = cdActive;
+    if (cdActive) cdg.alpha = 1 - cdReady;
 
     return true;
 }

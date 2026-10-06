@@ -129,27 +129,6 @@ function recordUnlock(type, isEnemy = false) {
 
         saveGameData();
 
-        // Ally encounter messages (modals) are now disabled for all units as requested.
-        /*
-        if (!isTutorialEnabled) return;
-
-        const data = unitTypes.find(u => u.type === type);
-        if (data && type !== 'apprentice') {
-            const modal = document.getElementById('unlock-modal');
-            const content = document.getElementById('unlock-content');
-            if (modal && content) {
-                content.className = 'unlock-content'; // Holy theme
-                content.innerHTML = `
-                    <div class="unlock-title holy">DIVINE REVELATION</div>
-                    <div id="unlock-icon">${data.icon}</div>
-                    <div id="unlock-name">${data.name}</div>
-                    <div id="unlock-desc">${data.desc}</div>
-                    <div class="unlock-hint">(클릭하여 계속)</div>
-                `;
-                modal.style.display = 'flex';
-                window.isPaused = true;
-            }
-        }
-        */
+        // Ally encounter modals were retired; the collections NEW badge is the only cue.
     }
 }

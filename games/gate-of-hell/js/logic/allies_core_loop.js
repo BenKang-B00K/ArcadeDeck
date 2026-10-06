@@ -20,21 +20,28 @@ function updateTowers(nowTime) {
     else if (peRatio >= 0.5) globalSpeedPenalty = 0.1; 
     else if (peRatio >= 0.3) globalSpeedPenalty = 0.05; 
 
-    const globalRelicCd = typeof getRelicBonus === 'function' ? getRelicBonus('cooldown') : 0;
-    const globalEquipCd = typeof getEquipBonus === 'function' ? getEquipBonus('cooldown') : 0;
-    const globalRelicRange = typeof getRelicBonus === 'function' ? getRelicBonus('range') : 0;
-    const globalEquipAuraRange = typeof getEquipBonus === 'function' ? getEquipBonus('aura_range') : 0;
-    const globalEquipDmg = typeof getEquipBonus === 'function' ? getEquipBonus('damage') : 0;
+    // CSE: resolve the bonus lookups once per frame, not per tower.
+    const relicB = (typeof getRelicBonus === 'function') ? getRelicBonus : () => 0;
+    const equipB = (typeof getEquipBonus === 'function') ? getEquipBonus : () => 0;
+    const globalRelicCd = relicB('cooldown');
+    const globalEquipCd = equipB('cooldown');
+    const globalRelicRange = relicB('range');
+    const globalEquipAuraRange = equipB('aura_range');
+    const globalEquipDmg = equipB('damage');
+    // Hoisted: these were folded into every tower's bonus every frame.
+    const baseSpeedBonus = globalRelicCd + globalEquipCd - globalSpeedPenalty;
+    const baseRangeBonus = globalRelicRange + globalEquipAuraRange;
+    const gargoyle = (typeof getGargoyleForm === 'function') ? getGargoyleForm().debuffs : null;
 
     // Relic: abyssal_fragment — periodic +100% attack speed surge.
     const surgeActive = (typeof isAbyssalSurgeActive === 'function') && isAbyssalSurgeActive();
     const surgeBonus = surgeActive ? 1.0 : 0;
 
     // Relic: soul_link — % damage per adjacent occupied slot. Distance-based.
-    const adjacencyPerNeighbor = (typeof getRelicBonus === 'function') ? getRelicBonus('adjacency_damage') : 0;
+    const adjacencyPerNeighbor = relicB('adjacency_damage');
     const ADJACENCY_RADIUS_SQ = 10000; // 100²
     
-    const relicAuraBonus = (typeof getRelicBonus === 'function' ? getRelicBonus('aura_range') : 0) + globalEquipAuraRange;
+    const relicAuraBonus = relicB('aura_range') + globalEquipAuraRange;
     const baseAuraRadius = 65 + relicAuraBonus;
     const baseAuraRadiusSq = baseAuraRadius * baseAuraRadius;
 
@@ -60,17 +67,20 @@ function updateTowers(nowTime) {
         }
     }
 
-    window.towers.forEach(t => {
+    const towers = window.towers;
+    const enemies = window.enemies;
+    for (let ti = 0; ti < towers.length; ti++) {
+        const t = towers[ti];
         // 1. Calculate Base Bonuses from Relics, Equipment, and Shrines
-        t.speedBonus = globalRelicCd + globalEquipCd + (t.shrineSpeedBonus || 0) - globalSpeedPenalty + surgeBonus;
-        t.rangeBonus = globalRelicRange + globalEquipAuraRange + (t.shrineRangeBonus || 0);
+        t.speedBonus = baseSpeedBonus + (t.shrineSpeedBonus || 0) + surgeBonus;
+        t.rangeBonus = baseRangeBonus + (t.shrineRangeBonus || 0);
         t.damageBonus = globalEquipDmg + (t.shrineDmgBonus || 0);
 
         // Relic: soul_link — count nearby allied towers, scale damage bonus.
         if (adjacencyPerNeighbor > 0) {
             let neighbors = 0;
-            for (let i = 0; i < window.towers.length; i++) {
-                const o = window.towers[i];
+            for (let i = 0; i < towers.length; i++) {
+                const o = towers[i];
                 if (o === t) continue;
                 const dx = o.lx - t.lx, dy = o.ly - t.ly;
                 if ((dx * dx + dy * dy) <= ADJACENCY_RADIUS_SQ) neighbors++;
@@ -78,8 +88,13 @@ function updateTowers(nowTime) {
             if (neighbors > 0) t.damageBonus += adjacencyPerNeighbor * neighbors;
         }
 
-        // 2b. Gargoyle Curse Penalties (Stage-based, escalating)
-        if (typeof applyGargoyleCurse === 'function') applyGargoyleCurse(t);
+        // 2b. Gargoyle Curse Penalties (Stage-based, escalating) — inlined
+        // applyGargoyleCurse(); its form lookup is hoisted above the loop.
+        if (gargoyle && !t.isShrine) {
+            t.speedBonus  += gargoyle.speed;   // negative → slower
+            t.rangeBonus  += gargoyle.range;   // negative → shorter range
+            t.damageBonus += gargoyle.damage;  // negative → less damage
+        }
 // 3. Enemy Aura Penalties (Local - e.g., Frost Outcast)
 if (frostOutcasts.length > 0) {
     for (let i = 0; i < frostOutcasts.length; i++) {
@@ -112,10 +127,10 @@ if (frostOutcasts.length > 0) {
         if (t.isStunned && nowTime > (t.stunEndTime || 0)) t.isStunned = false;
         
         // Disable attacks for towers currently being dragged in the UI
-        if (window.isMovingUnit && window.draggedUnit === t) return;
-        
+        if (window.isMovingUnit && window.draggedUnit === t) continue;
+
         // Prevent action if tower cannot attack
-        if (t.isShrine || t.data.type === 'void_gatekeeper' || t.isFeared || t.isFrozenTomb || t.isStunned) return;
+        if (t.isShrine || t.data.type === 'void_gatekeeper' || t.isFeared || t.isFrozenTomb || t.isStunned) continue;
         
         let sm = 1.0 + (t.speedBonus || 0);
         let cd = t.cooldown / sm;
@@ -138,8 +153,8 @@ if (frostOutcasts.length > 0) {
             // Find new target if no valid persistent target
             if (!target) {
                 let highestY = -Infinity;
-                for (let i = 0; i < window.enemies.length; i++) {
-                    const e = window.enemies[i];
+                for (let i = 0; i < enemies.length; i++) {
+                    const e = enemies[i];
                     if (e.hp <= 0 || e.isStealthed || e.invincible) continue;
                     const dx = e._lx - t.lx;
                     const dy = e.y - t.ly;
@@ -159,7 +174,7 @@ if (frostOutcasts.length > 0) {
                 t.lastShot = nowTime;
             }
         }
-    });
+    }
 }
 
 /**
@@ -167,17 +182,19 @@ if (frostOutcasts.length > 0) {
  */
 function updateSummons(nowTime) {
     if (typeof window.friendlySkeletons === 'undefined') return;
-    
-    [...window.friendlySkeletons, ...window.friendlyGhosts].forEach((summon) => {
+    _tickSummonList(window.friendlySkeletons, 20, nowTime);
+    _tickSummonList(window.friendlyGhosts, 40, nowTime);
+}
+
+function _tickSummonList(list, baseDmg, nowTime) {
+    const dt = window.dt || 1;
+    for (let si = list.length - 1; si >= 0; si--) {
+        const summon = list[si];
         // Move towards the top of the screen (enemy spawn)
-        summon.y -= summon.speed || 1.0;
-        
+        summon.y -= (summon.speed || 1.0) * dt;
+
         // Despawn if they reach the top
-        if (summon.y < -50) {
-            if (window.friendlySkeletons.includes(summon)) window.friendlySkeletons.splice(window.friendlySkeletons.indexOf(summon), 1);
-            else window.friendlyGhosts.splice(window.friendlyGhosts.indexOf(summon), 1);
-            return;
-        }
+        if (summon.y < -50) { list.splice(si, 1); continue; }
         
         // Melee attack logic
         if (nowTime - (summon.lastAttack || 0) > 1000) {
@@ -197,14 +214,13 @@ function updateSummons(nowTime) {
             }
             
             if (target) {
-                const baseDmg = window.friendlySkeletons.includes(summon) ? 20 : 40;
                 const summonBonus = (typeof getRelicBonus === 'function') ? getRelicBonus('summon_damage') : 0;
                 const demonPactBonus = (typeof getDemonPactDmgBonus === 'function') ? getDemonPactDmgBonus() : 0;
                 if (typeof applyDamage === 'function') applyDamage(target, baseDmg * (1.0 + summonBonus + demonPactBonus), null);
                 summon.lastAttack = nowTime;
             }
         }
-    });
+    }
 }
 
 // Global Exports

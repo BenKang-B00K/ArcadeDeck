@@ -110,7 +110,8 @@
       "badge_existing": "已拥有",
       "badge_upgrade": "强化",
       "badge_reroll": "重洗",
-      "relics_cost_fmt": "普通 {n} · 顶级 {s} SF"
+      "relics_cost_fmt": "普通 {n} · 顶级 {s} SF",
+      "tap_again": "再点一次"
     },
     "info_panel": {
       "default_title": "GATE OF HELL",
@@ -374,8 +375,11 @@
       "fontsize_small": "小",
       "fontsize_medium": "中",
       "fontsize_large": "大",
-      "volume_label": "音效音量",
-      "volume_desc": "调整音效的播放音量。"
+      "music_label": "背景音乐",
+      "music_desc": "以多利亚调式演奏的背景音乐。",
+      "fps_label": "帧率上限",
+      "fps_desc": "30 FPS 可降低耗电与发热。",
+      "audio_quick_aria": "声音开/关"
     },
     "quit": {
       "header": "[命运的拒绝]",
@@ -449,6 +453,10 @@
       "madness_popup": "疯狂发作！",
       "madness_log_on": "恶魔之角: 疯狂发作 — 伤害倍率 ×2",
       "madness_log_off": "恶魔之角: 疯狂解除"
+    },
+    "meta": {
+      "title": "Gate of Hell : 恶灵们的回归",
+      "rotate": "请将设备竖屏使用"
     }
   },
   "shrine_role": {

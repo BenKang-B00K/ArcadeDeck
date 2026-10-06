@@ -16,6 +16,9 @@ function _initHud() {
         stageBannerTitle: document.getElementById('sb-title'),
         enemiesLeft:  document.getElementById('enemies-left'),
         rsFill:       document.getElementById('rs-gauge-fill'),
+        peBar:        document.querySelector('.gauge-bar.pe'),
+        topPanel:     document.getElementById('top-panel'),
+        banner:       document.getElementById('stage-banner'),
     };
     _applyStageBannerTitle();
     if (window.EventBus && typeof window.EventBus.on === 'function') {
@@ -31,6 +34,15 @@ function _applyStageBannerTitle() {
 }
 
 /* ─── Gauge updates ─────────────────────────────────────────────────────── */
+// Money/PE change on nearly every kill. Touch the DOM only when the rendered
+// value differs — each write otherwise invalidates style/layout for nothing.
+function _setText(el, v) { if (el && el._v !== v) { el._v = v; el.textContent = v; } }
+function _setStyle(el, prop, v) {
+    if (!el) return;
+    const k = '_s_' + prop;
+    if (el[k] !== v) { el[k] = v; el.style[prop] = v; }
+}
+
 function updateGauges() {
     _initHud();
     const { moneyDisplay, peDisplay, peFill, seFill, peStatus, peIcon, cursePeFill } = _hud;
@@ -47,40 +59,37 @@ function updateGauges() {
         window.lastPortalEnergy = currentPE;
     }
 
-    if (moneyDisplay) moneyDisplay.innerText = `${currentMoney} / ${window.maxMoney}`;
-    if (peDisplay) peDisplay.innerText = `${currentPE} / ${window.maxPortalEnergy}`;
-
-    if (peFill) peFill.style.width = `${Math.min((window.portalEnergy / window.maxPortalEnergy) * 100, 100)}%`;
-    if (seFill) seFill.style.width = `${Math.min((window.money / window.maxMoney) * 100, 100)}%`;
+    _setText(moneyDisplay, `${currentMoney} / ${window.maxMoney}`);
+    _setText(peDisplay, `${currentPE} / ${window.maxPortalEnergy}`);
 
     const peRatio = window.portalEnergy / window.maxPortalEnergy;
     const pePct   = Math.floor(peRatio * 100);
+    // 0.1% steps: finer than a gauge pixel, coarse enough to skip no-op writes.
+    _setStyle(peFill, 'width', `${Math.min(Math.round(peRatio * 1000) / 10, 100)}%`);
+    _setStyle(seFill, 'width', `${Math.min(Math.round((window.money / window.maxMoney) * 1000) / 10, 100)}%`);
+
+    const lvl = peRatio >= 0.75 ? 3 : peRatio >= 0.5 ? 2 : peRatio >= 0.3 ? 1 : 0;
     if (cursePeFill) {
-        cursePeFill.style.width = `${Math.min(pePct, 100)}%`;
-        cursePeFill.style.background = peRatio >= 0.75 ? '#ff2222' : peRatio >= 0.5 ? '#ff4500' : peRatio >= 0.3 ? '#ffa500' : '#44dd88';
+        _setStyle(cursePeFill, 'width', `${Math.min(pePct, 100)}%`);
+        _setStyle(cursePeFill, 'background', ['#44dd88', '#ffa500', '#ff4500', '#ff2222'][lvl]);
     }
-    if (peIcon) {
-        const level = peRatio >= 0.75 ? '3' : peRatio >= 0.5 ? '2' : peRatio >= 0.3 ? '1' : '0';
-        peIcon.setAttribute('data-level', level);
-    }
+    if (peIcon && peIcon._lvl !== lvl) { peIcon._lvl = lvl; peIcon.setAttribute('data-level', String(lvl)); }
     if (peStatus) {
         const _T = window.t || ((k, f) => f);
         // Short form only: the full "심연의 저주 N단계 (pct%)" string (~85px) overflowed the
         // 56px widget and covered the shrine slot beside it. Full name lives in the tooltip.
-        const lvl = peRatio >= 0.75 ? 3 : peRatio >= 0.5 ? 2 : peRatio >= 0.3 ? 1 : 0;
-        peStatus.textContent = lvl ? `Lv.${lvl} ${pePct}%` : _T('ui.hud.cursed_status', '잠든 저주');
-        peStatus.setAttribute('data-level', String(lvl));
+        _setText(peStatus, lvl ? `Lv.${lvl} ${pePct}%` : _T('ui.hud.cursed_status', '잠든 저주'));
+        if (peStatus._lvl !== lvl) { peStatus._lvl = lvl; peStatus.setAttribute('data-level', String(lvl)); }
     }
-    const peBar = document.querySelector('.gauge-bar.pe');
-    if (peBar) peBar.classList.toggle('danger', peRatio >= 0.75);
+    if (_hud.peBar) _hud.peBar.classList.toggle('danger', lvl === 3);
+    if (_hud.topPanel) _hud.topPanel.classList.toggle('pe-danger', lvl === 3);
 }
 
 function updateStageInfo() {
     _initHud();
     const { stageBannerDepth, enemiesLeft: enemiesLeftLabel, rsFill } = _hud;
-    if (stageBannerDepth) stageBannerDepth.innerText = window.stage;
-    const banner = document.getElementById('stage-banner');
-    if (banner) banner.classList.toggle('boss', window.stage % 10 === 0);
+    _setText(stageBannerDepth, String(window.stage));
+    if (_hud.banner) _hud.banner.classList.toggle('boss', window.stage % 10 === 0);
 
     if (enemiesLeftLabel) {
         const killed = window.stageKilledCount || 0;
@@ -91,9 +100,8 @@ function updateStageInfo() {
             if (typeof spawnGaugePop === 'function') spawnGaugePop('rs-label', remaining - window.lastEnemiesLeft);
         }
         window.lastEnemiesLeft = remaining;
-        enemiesLeftLabel.innerText = `${remaining} / ${total}`;
-        const progress = Math.min(100, (remaining / total) * 100);
-        if (rsFill) rsFill.style.width = `${progress}%`;
+        _setText(enemiesLeftLabel, `${remaining} / ${total}`);
+        _setStyle(rsFill, 'width', `${Math.min(100, Math.round((remaining / total) * 1000) / 10)}%`);
     }
 }
 
@@ -143,7 +151,7 @@ function initHUD() {
         EventBus.on(GAME_EVENTS.ENEMIES_COUNT_CHANGED, () => { if (typeof updateStageInfo === 'function') updateStageInfo(); });
         EventBus.on(GAME_EVENTS.FROZEN_OVERLAY, (show) => {
             const fo = document.getElementById('frozen-overlay');
-            if (fo) fo.style.opacity = show ? 1 : 0;
+            if (fo) { fo.style.opacity = show ? 1 : 0; fo.classList.toggle('active', !!show); }
         });
         EventBus.on(GAME_EVENTS.RELIC_NOTIF, ({ show } = {}) => {
             const n = document.getElementById('relics-notif');

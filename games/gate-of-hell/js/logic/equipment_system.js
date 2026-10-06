@@ -306,6 +306,7 @@ function addEquipment(slot, tier, value) {
     owned.tier  = tier;
     owned.value = value;
     _syncBonuses(slot, tier);
+    _eqBonusMemo.clear(); // drops land mid-frame (enemy death inside the tick)
 
     if (window.EventBus) EventBus.emit(GAME_EVENTS.EQUIP_NOTIF, { show: true });
     if (!window.unseenItems) window.unseenItems = new Set();
@@ -323,7 +324,22 @@ function addEquipment(slot, tier, value) {
 /**
  * Total bonus for a stat across all owned slots. Uses rolled value when present.
  */
+const _eqBonusMemo = new Map();
+let _eqBonusFrame = -1;
 function getEquipBonus(statName) {
+    // ponytail: memo lives only inside one game-loop frame. UI handlers that
+    // mutate equipment run between frames and always recompute, so there are
+    // no invalidation hooks to keep in sync.
+    if (!window._frameOpen) return _computeEquipBonus(statName);
+    if (_eqBonusFrame !== window._frameNo) { _eqBonusMemo.clear(); _eqBonusFrame = window._frameNo; }
+    let total = _eqBonusMemo.get(statName);
+    if (total !== undefined) return total;
+    total = _computeEquipBonus(statName);
+    _eqBonusMemo.set(statName, total);
+    return total;
+}
+
+function _computeEquipBonus(statName) {
     let total = 0;
     if (typeof equipmentSlots === 'undefined') return 0;
 

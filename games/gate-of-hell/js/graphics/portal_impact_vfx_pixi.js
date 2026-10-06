@@ -234,8 +234,9 @@ function updatePortalImpactVfx() {
         w.vx += (dx / dist) * pull * dt;
         w.vy += (dy / dist) * pull * dt;
         // Drag
-        w.vx *= 0.96;
-        w.vy *= 0.96;
+        const drag = Math.pow(0.96, dt);
+        w.vx *= drag;
+        w.vy *= drag;
         w.x += w.vx * dt;
         w.y += w.vy * dt;
 

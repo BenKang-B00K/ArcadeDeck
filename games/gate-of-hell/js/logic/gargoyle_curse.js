@@ -60,9 +60,19 @@ const GARGOYLE_FORMS = [
     }
 ];
 
-/** Returns the gargoyle form data matching the current stage, with translated name/desc. */
+/** Returns the gargoyle form data matching the current stage, with translated name/desc.
+ *  Hot path (per tower per frame) — memoized on stage + language. Treat as read-only. */
+let _gfCache = null, _gfStage = -1, _gfLang = null;
 function getGargoyleForm() {
     const stage = window.stage || 1;
+    const lang = window.I18n ? I18n.getLang() : '';
+    if (_gfCache && stage === _gfStage && lang === _gfLang) return _gfCache;
+    _gfStage = stage; _gfLang = lang;
+    _gfCache = _buildGargoyleForm(stage);
+    return _gfCache;
+}
+
+function _buildGargoyleForm(stage) {
     let base = GARGOYLE_FORMS[0];
     for (let i = GARGOYLE_FORMS.length - 1; i >= 0; i--) {
         if (stage >= GARGOYLE_FORMS[i].minStage) { base = GARGOYLE_FORMS[i]; break; }

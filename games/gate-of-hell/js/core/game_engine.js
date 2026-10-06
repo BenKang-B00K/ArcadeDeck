@@ -88,10 +88,43 @@ function runGameTick(nowTime) {
     if (typeof updateSummons === 'function') updateSummons(nowTime);
 }
 
+/* ─── Frame pacing ──────────────────────────────────────────────────────────
+ * Desktop caps at 60 (a 144Hz monitor would otherwise do 2.4x the work for
+ * nothing). Phones default to 30 for battery/thermals; the player can pick 60
+ * in Settings. Paused/modal/game-over: the scene sits under a 95%-black blurred
+ * overlay, so 10 fps is invisible. Title screen: opaque, canvas hidden — 2 fps
+ * just keeps lazy texture bakes warm for the first real frame.
+ * Logic is dt-scaled, so the cap changes smoothness, never game speed. */
+const IS_TOUCH_DEVICE = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+let _fpsCap = parseInt(localStorage.getItem('goh_fps'), 10) || (IS_TOUCH_DEVICE ? 30 : 60);
+
+function setFpsCap(fps) {
+    _fpsCap = (fps === 30) ? 30 : 60;
+    localStorage.setItem('goh_fps', String(_fpsCap));
+}
+
+function _frameIntervalMs() {
+    if (!window.gameStarted) return 500;
+    if (window.isPaused) return 100;
+    return 1000 / _fpsCap;
+}
+
+let _lastTickTs = -Infinity;
+
 /**
- * Main game loop. Renders every frame; delegates logic to active Scene.
+ * Main game loop. Renders at the paced rate; delegates logic to active Scene.
  */
-function gameLoop() {
+function gameLoop(ts) {
+    requestAnimationFrame(gameLoop);
+    if (ts === undefined) ts = performance.now();
+    const interval = _frameIntervalMs();
+    const elapsed = ts - _lastTickTs;
+    if (elapsed < interval - 1) return; // 1ms slack for rAF timestamp jitter
+    // Carry the remainder so a 60 cap on a 144Hz panel averages 60, not 48.
+    _lastTickTs = (elapsed >= interval && elapsed < interval * 2) ? ts - (elapsed % interval) : ts;
+    window._frameNo = (window._frameNo || 0) + 1;
+    window._frameOpen = true; // per-frame memos (getEquipBonus) valid until frame end
+
     // Normalized delta-time: 1.0 at 60fps, capped at 4x to bound post-pause spikes.
     const now = Date.now();
     const last = window._lastFrameNow || now;
@@ -107,15 +140,14 @@ function gameLoop() {
         // Legacy fallback if SceneManager not yet loaded.
         runGameTick(now);
     }
-
-    requestAnimationFrame(gameLoop);
+    window._frameOpen = false;
 }
 
 /**
  * Updates status effects and stealth for enemies. (Context-aware logic)
  */
 function updateStatusEffects(nowTime) {
-    const _cachedSeers = window.towers.filter(t => t.data.type === 'seer');
+    let _cachedSeers = null; // built on first betrayer_blade only
     const seerRangeSq = 14400; // 120 squared
     
     for (let i = 0; i < window.enemies.length; i++) {
@@ -129,7 +161,8 @@ function updateStatusEffects(nowTime) {
             const cycle = (nowTime % 3000); 
             let shouldBeStealthed = (cycle < 1000);
             const ex = (e.x / 100) * LOGICAL_WIDTH;
-            
+            if (!_cachedSeers) _cachedSeers = window.towers.filter(t => t.data.type === 'seer');
+
             let revealed = false;
             for (let j = 0; j < _cachedSeers.length; j++) {
                 const s = _cachedSeers[j];
@@ -181,4 +214,7 @@ function updateGameTimer() {
 window.resetGameState = resetGameState;
 window.runGameTick = runGameTick;
 window.gameLoop = gameLoop;
+window.setFpsCap = setFpsCap;
+window.getFpsCap = () => _fpsCap;
+window.IS_TOUCH_DEVICE = IS_TOUCH_DEVICE;
 window.updateGameTimer = updateGameTimer;

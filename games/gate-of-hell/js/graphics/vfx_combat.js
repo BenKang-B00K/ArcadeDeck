@@ -46,6 +46,7 @@ function _ensureCombatGfx() {
 
     // Promotion bursts on holyLayer with golden GlowFilter
     _burstGfx = new PIXI.Graphics();
+    _burstGfx.blendMode = 'add'; // holy burst: additive (GlowFilter is unavailable)
     const burstGlow = (typeof createGlowFilter === 'function')
         ? createGlowFilter(0xFFD700, 2.5, 0, 18) : null;
     if (burstGlow) _burstGfx.filters = [burstGlow];
@@ -247,7 +248,9 @@ function drawPromotionBursts() {
         const alpha   = pb.life;
         const r1      = (1.0 - alpha) * 150;
         const r2      = (1.0 - alpha) * 80;
-        // Expanding rings
+        // Expanding rings — a wide faint stroke underneath fakes the bloom.
+        _burstGfx.circle(pb.x, pb.y, r1)
+                 .stroke({ width: 12, color: col, alpha: alpha * 0.18 });
         _burstGfx.circle(pb.x, pb.y, r1)
                  .stroke({ width: 3, color: col, alpha });
         _burstGfx.circle(pb.x, pb.y, r2)
@@ -376,7 +379,9 @@ function drawBanishEffects() {
     _banishGfx.clear();
     Pools.banishEffects.active.forEach(function(be) {
         const expandR = (1.0 - be.life) * 100;
-        // Outer purple ring
+        // Outer purple ring over a wide faint halo (faked glow)
+        _banishGfx.circle(be.x, be.y, expandR)
+                  .stroke({ width: 12, color: 0x9C27B0, alpha: be.life * 0.2 });
         _banishGfx.circle(be.x, be.y, expandR)
                   .stroke({ width: 4, color: 0x6A1B9A, alpha: be.life });
         // Mid blood-red ring
@@ -409,9 +414,10 @@ function spawnSummonCircle(lx, ly) {
 function updateSummonCircles() {
     if (!window.Pools || !Pools.summonCircles) return;
     const active = Pools.summonCircles.active;
+    const d = window.dt || 1;
     for (let i = active.length - 1; i >= 0; i--) {
-        active[i].life -= 0.025 * (window.dt || 1); // Faster duration
-        active[i].rot  += 0.05;
+        active[i].life -= 0.025 * d; // Faster duration
+        active[i].rot  += 0.05 * d;
         if (active[i].life <= 0) Pools.summonCircles.releaseAt(i);
     }
 }

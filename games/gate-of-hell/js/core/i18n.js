@@ -59,7 +59,9 @@ window.I18n = (function () {
 
     async function _init() {
         const saved = localStorage.getItem(STORAGE_KEY);
-        const lang = SUPPORTED.includes(saved) ? saved : DEFAULT_LANG;
+        // First visit: index.html's boot script picked a language from navigator.languages.
+        const lang = SUPPORTED.includes(saved) ? saved
+            : SUPPORTED.includes(window.__bootLang) ? window.__bootLang : DEFAULT_LANG;
         fallbackMap = await _fetchLang(DEFAULT_LANG);
         if (lang === DEFAULT_LANG) {
             currentMap = fallbackMap;
@@ -68,6 +70,7 @@ window.I18n = (function () {
         }
         currentLang = lang;
         document.documentElement.setAttribute('lang', lang === 'sch' ? 'zh-Hans' : lang);
+        document.title = t('ui.meta.title', document.title);
         if (window.EventBus && typeof window.EventBus.emit === 'function') {
             window.EventBus.emit('i18n:ready', { lang });
         }

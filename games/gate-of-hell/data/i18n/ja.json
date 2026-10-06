@@ -110,7 +110,8 @@
       "badge_existing": "所持済",
       "badge_upgrade": "強化",
       "badge_reroll": "再啓示",
-      "relics_cost_fmt": "一般 {n} · 最上位 {s} SF"
+      "relics_cost_fmt": "一般 {n} · 最上位 {s} SF",
+      "tap_again": "もう一度タップ"
     },
     "info_panel": {
       "default_title": "GATE OF HELL",
@@ -374,8 +375,11 @@
       "fontsize_small": "小",
       "fontsize_medium": "中",
       "fontsize_large": "大",
-      "volume_label": "効果音の音量",
-      "volume_desc": "効果音の再生音量を調整します。"
+      "music_label": "BGM",
+      "music_desc": "ドリア旋法で奏でられる背景音楽です。",
+      "fps_label": "フレームレート",
+      "fps_desc": "30 FPSはバッテリー消費と発熱を抑えます。",
+      "audio_quick_aria": "サウンドのオン/オフ"
     },
     "quit": {
       "header": "[運命の拒絶]",
@@ -449,6 +453,10 @@
       "madness_popup": "狂気発現！",
       "madness_log_on": "悪魔の角: 狂気発現 — ダメージボーナス ×2",
       "madness_log_off": "悪魔の角: 狂気解除"
+    },
+    "meta": {
+      "title": "Gate of Hell : 悪霊たちの帰還",
+      "rotate": "端末を縦向きにしてください"
     }
   },
   "shrine_role": {

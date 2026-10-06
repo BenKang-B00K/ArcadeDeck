@@ -22,8 +22,12 @@
 }
 
 #loading-gate-icon {
-    font-size: calc(clamp(44px, 14.8vw, 80px) * var(--fs));
-    margin-bottom: 20px;
+    /* Was sized by font-size for an emoji; the inline SVG is 100% wide, so it
+       rendered 400px and white. Size the box, color via currentColor. */
+    width: calc(clamp(44px, 14.8vw, 80px) * var(--fs));
+    aspect-ratio: 1;
+    margin: 0 auto 20px;
+    color: #ff4500;
     filter: drop-shadow(0 0 20px #ff4500);
     animation: loadingPulse 2s infinite ease-in-out;
 }
@@ -95,7 +99,9 @@
         url('../images/bg/gate-of-hell-bg.webp');
     background-position: center center;
     background-repeat: no-repeat;
-    background-size: cover, contain;
+    /* cover, not contain: the 3:2 art letterboxed to a thin strip on portrait phones. */
+    background-size: cover, cover;
+    image-rendering: pixelated;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -108,7 +114,21 @@
     max-width: 600px;
     text-align: center;
     animation: fadeInScale 1.2s ease-out;
+    position: relative;
+    isolation: isolate;
 }
+/* Hellfire flicker behind the title. Opacity-only (compositor) — the old
+   version animated filter on the gradient text and repainted every frame. */
+#start-content::before {
+    content: "";
+    position: absolute;
+    inset: -12% -10% 30%;
+    z-index: -1;
+    background: radial-gradient(ellipse 55% 45% at 50% 42%, rgba(255, 110, 0, 0.42), rgba(200, 16, 46, 0.18) 55%, transparent 75%);
+    pointer-events: none;
+    animation: hellFireGlow 4s infinite ease-in-out;
+}
+.start-title span { font-size: 0.5em; letter-spacing: 0.3em; }
 
 .start-title {
     font-family: 'Cinzel', serif;
@@ -122,20 +142,18 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     -webkit-text-stroke: 0.6px rgba(0, 0, 0, 0.55);
-    filter: drop-shadow(0 0 10px rgba(255, 69, 0, 0.5));
+    filter: drop-shadow(0 0 12px rgba(255, 69, 0, 0.65));
     position: relative;
-    animation: hellFire 4s infinite ease-in-out;
     line-height: 1.1;
 }
 
-@keyframes hellFire {
-    0%   { filter: drop-shadow(0 0 10px #ff4500) brightness(1) contrast(1); }
-    12%  { filter: brightness(3) contrast(2) drop-shadow(0 0 40px #fff); }
-    14%  { filter: brightness(2) contrast(1.5) drop-shadow(0 0 20px #ff4500); }
-    50%  { filter: drop-shadow(0 0 25px #ffcc00) brightness(1.15) contrast(1.1); }
-    95%  { filter: brightness(3) contrast(2) drop-shadow(0 0 40px #fff); }
-    97%  { filter: brightness(2) contrast(1.5) drop-shadow(0 0 20px #ff4500); }
-    100% { filter: drop-shadow(0 0 10px #ff4500) brightness(1) contrast(1); }
+@keyframes hellFireGlow {
+    0%, 100% { opacity: 0.55; }
+    12%      { opacity: 1; }
+    14%      { opacity: 0.7; }
+    50%      { opacity: 0.85; }
+    95%      { opacity: 1; }
+    97%      { opacity: 0.7; }
 }
 
 .start-subtitle {
@@ -289,9 +307,12 @@
 
 .overlay-base {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.95);
+    /* No backdrop blur: under 95% black it was invisible yet cost a full-screen
+       pass per frame on phones. The vignette keeps a hint of the board. */
+    background: radial-gradient(ellipse at center, rgba(14, 4, 8, 0.86), rgba(0, 0, 0, 0.96) 70%);
     display: flex; justify-content: center; align-items: center;
-    backdrop-filter: blur(15px);
+    padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+    overscroll-behavior: contain;
     animation: overlayFadeIn 0.2s ease-out forwards;
     z-index: 2000;
 }
@@ -304,7 +325,7 @@
 .modal-content-base {
     background: linear-gradient(145deg, #1a1a1a, #050505);
     border: 3px solid #ffd700;
-    border-radius: 20px;
+    border-radius: var(--panel-radius);
     padding: 20px;
     text-align: center;
     width: 90%;
@@ -333,7 +354,7 @@
 #sacrifice-content {
     width: 90%; max-width: 350px; padding: 20px; text-align: center; position: relative;
     background: linear-gradient(145deg, #1a0000, #0a0a0a);
-    border: 3px solid #800; border-radius: 20px 20px 8px 8px;
+    border: 3px solid #800; border-radius: var(--panel-radius);
     box-shadow: 0 0 40px rgba(139, 0, 0, 0.4), inset 0 0 20px rgba(0, 0, 0, 0.8);
 }
 #sacrifice-content::before {
@@ -356,7 +377,7 @@
 /* Quit + Pause share the sacrifice box recipe (styling was lost in the CSS split). */
 #quit-content, #pause-content {
     width: 90%; max-width: 350px; padding: 20px; text-align: center; position: relative;
-    border: 3px solid; border-radius: 20px 20px 8px 8px;
+    border: 3px solid; border-radius: var(--panel-radius);
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(0, 0, 0, 0.8);
     animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
@@ -391,7 +412,7 @@
     overflow: hidden;
     padding: 15px;
     background: linear-gradient(145deg, #1a1a1a, #050505);
-    border: 3px solid #ffd700; border-radius: 20px 20px 10px 10px;
+    border: 3px solid #ffd700; border-radius: var(--panel-radius);
     display: flex; flex-direction: column; gap: 10px;
     box-shadow: 0 0 60px rgba(255,215,0,0.2), inset 0 0 30px rgba(0,0,0,0.8);
     position: relative; border-top: 5px solid #ffd700;
@@ -403,7 +424,7 @@
     content: "CHRONICLES OF DESTINY";
     position: absolute; top: -28px; left: 50%; transform: translateX(-50%);
     background: #ffd700; color: #000; padding: 4px 20px;
-    border-radius: 8px 8px 0 0;
+    border-radius: var(--panel-radius) var(--panel-radius) 0 0;
     font-family: 'Cinzel', serif; font-size: calc(clamp(9px, 1.5cqw, 12px) * var(--fs));
     font-weight: 900; letter-spacing: 2px; white-space: nowrap;
 }
@@ -1306,7 +1327,9 @@
 /* ═══════════════════════════════════════════════════
    MISC
    ═══════════════════════════════════════════════════ */
-.info-default-text {
+/* Scoped to the modal info panes — unscoped, this (later) file beat the
+   in-game tablet's own .info-default-text rule in components.css. */
+:is(#col-info-pane, #relic-info-pane, #equip-info-pane) .info-default-text {
     font-family: 'Cinzel', serif;
     font-size: calc(clamp(10px, 1.8cqw, 12px) * var(--fs)); font-weight: 900;
     opacity: 0.5; letter-spacing: 1px;
@@ -1314,7 +1337,7 @@
     display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%;
 }
 /* "Touch a slot" hint under the watermark; text comes from data-hint (i18n). */
-.info-default-text[data-hint]::after {
+:is(#col-info-pane, #relic-info-pane, #equip-info-pane) .info-default-text[data-hint]::after {
     content: attr(data-hint);
     margin-top: 14px;
     font-family: inherit;
@@ -1335,7 +1358,7 @@
     max-height: 95vh;
     padding: 15px;
     background: linear-gradient(145deg, #1a0a05, #000000);
-    border: 3px solid #ff4500; border-radius: 20px 20px 10px 10px;
+    border: 3px solid #ff4500; border-radius: var(--panel-radius);
     display: flex; flex-direction: column; gap: 10px;
     position: relative; border-top: 6px solid #ff4500;
     box-shadow: 0 0 60px rgba(255,69,0,0.18), inset 0 0 30px rgba(0,0,0,0.8);
@@ -1346,7 +1369,7 @@
 #relics-content::before {
     content: "RELIC VAULT";
     position: absolute; top: -28px; left: 50%; transform: translateX(-50%);
-    background: #ff4500; color: #000; padding: 4px 20px; border-radius: 8px 8px 0 0;
+    background: #ff4500; color: #000; padding: 4px 20px; border-radius: var(--panel-radius) var(--panel-radius) 0 0;
     font-family: 'Cinzel', serif; font-size: calc(11px * var(--fs)); font-weight: 900; letter-spacing: 2px; white-space: nowrap;
 }
 #relics-header {
@@ -1721,7 +1744,7 @@
     max-height: 95vh;
     padding: 15px;
     background: linear-gradient(145deg, #030d1a, #000000);
-    border: 3px solid #00e5ff; border-radius: 20px 20px 10px 10px;
+    border: 3px solid #00e5ff; border-radius: var(--panel-radius);
     display: flex; flex-direction: column; gap: 10px;
     position: relative; border-top: 5px solid #00e5ff;
     box-shadow: 0 0 60px rgba(0,229,255,0.18), inset 0 0 30px rgba(0,0,0,0.8);
@@ -1732,7 +1755,7 @@
 #equip-content::before {
     content: "SACRED ARMORY";
     position: absolute; top: -28px; left: 50%; transform: translateX(-50%);
-    background: #00e5ff; color: #000; padding: 4px 20px; border-radius: 8px 8px 0 0;
+    background: #00e5ff; color: #000; padding: 4px 20px; border-radius: var(--panel-radius) var(--panel-radius) 0 0;
     font-family: 'Cinzel', serif; font-size: calc(11px * var(--fs)); font-weight: 900; letter-spacing: 2px; white-space: nowrap;
 }
 #equip-header {
@@ -2265,11 +2288,10 @@
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0, 0, 0, 0.95);
     z-index: 2600; display: flex; justify-content: center; align-items: center;
-    backdrop-filter: blur(10px);
 }
 #unlock-content {
     background: linear-gradient(145deg, #1a1a1a, #050505);
-    border: 3px solid #ffd700; border-radius: 30px 30px 10px 10px;
+    border: 3px solid #ffd700; border-radius: var(--panel-radius);
     padding: clamp(12px, 3.7vw, 20px); text-align: center; width: 90%; max-width: 350px; min-height: 200px;
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.9), inset 0 0 20px rgba(255, 215, 0, 0.1);
     position: relative; animation: modalPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -2292,11 +2314,13 @@
     z-index: 3000; display: flex; justify-content: center; align-items: center;
 }
 #game-over-content { text-align: center; padding: clamp(12px, 3.7vw, 20px); width: 95%; max-width: 400px; }
-#game-over-title { color: #ff0000; font-size: calc(clamp(18px, 5.2vw, 28px) * var(--fs)); text-align: center; margin-bottom: clamp(8px, 2.8vw, 15px); text-shadow: 0 0 20px #f00; }
+#game-over-title { color: #ff1a1a; font-family: 'Cinzel', 'Noto Serif KR', serif; font-size: calc(clamp(22px, 7vw, 40px) * var(--fs)); letter-spacing: 3px; text-align: center; margin-bottom: clamp(8px, 2.8vw, 15px); text-shadow: 0 0 18px rgba(255, 0, 0, 0.7), 0 2px 0 #300; animation: goSlam 0.8s cubic-bezier(0.2, 1.4, 0.4, 1) both; }
+@keyframes goSlam { from { opacity: 0; transform: scale(1.6); } }
+#game-over-content > :not(#game-over-title) { animation: fadeIn 0.6s 0.5s both; }
 #game-over-msg { color: #dfdfdf; font-size: calc(clamp(9px, 2.04vw, 11px) * var(--fs)); line-height: 1.5; font-style: italic; margin-bottom: clamp(10px, 3.7vw, 20px); padding: 0 clamp(10px, 3.7vw, 20px); text-shadow: 0 0 8px rgba(255, 255, 255, 0.2), 2px 2px 4px #000; letter-spacing: 0.5px; }
 #final-stats { background: rgba(139, 0, 0, 0.1); border-top: 1px solid rgba(255, 0, 0, 0.2); border-bottom: 1px solid rgba(255, 0, 0, 0.2); padding: clamp(6px, 1.85vw, 10px); margin-bottom: clamp(10px, 3.7vw, 20px); color: #ffd700; font-family: 'Cinzel', serif; font-size: calc(clamp(10px, 2.6vw, 14px) * var(--fs)); font-weight: bold; letter-spacing: 1.5px; text-shadow: 0 0 8px rgba(255, 215, 0, 0.4); }
 #final-stage { color: #fff; font-size: calc(clamp(13px, 3.3vw, 18px) * var(--fs)); text-shadow: 0 0 10px #ff0000; margin-left: 8px; }
-#retry-btn { background: linear-gradient(to bottom, #4a0000, #1a0000); color: #ff3333; border: 1px solid #8b0000; padding: clamp(7px, 1.85vw, 10px) clamp(15px, 4.6vw, 25px); font-family: 'Cinzel', serif; font-size: calc(clamp(10px, 2.4vw, 13px) * var(--fs)); font-weight: bold; letter-spacing: 1.5px; cursor: pointer; text-transform: uppercase; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 15px rgba(139, 0, 0, 0.3); position: relative; overflow: hidden; }
+#retry-btn { background: linear-gradient(to bottom, #4a0000, #1a0000); color: #fff; border: 1px solid #ff1744; padding: clamp(7px, 1.85vw, 10px) clamp(15px, 4.6vw, 25px); font-family: 'Cinzel', serif; font-size: calc(clamp(10px, 2.4vw, 13px) * var(--fs)); font-weight: bold; letter-spacing: 1.5px; cursor: pointer; text-transform: uppercase; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 15px rgba(139, 0, 0, 0.3); position: relative; overflow: hidden; }
 #retry-btn:hover { color: #fff; background: #8b0000; border-color: #ff0000; box-shadow: 0 0 25px rgba(255, 0, 0, 0.5), inset 0 0 8px rgba(255, 255, 255, 0.2); transform: scale(1.05); }
 
 /* === modals_pause_settings.css === */
@@ -2313,7 +2337,7 @@
 #settings-content {
     background: linear-gradient(145deg, #1a1a1a, #050505);
     border: 3px solid #ffd700;
-    border-radius: 20px;
+    border-radius: var(--panel-radius);
     padding: clamp(12px, 3.7vw, 20px);
     text-align: center;
     width: 90%;
@@ -2350,45 +2374,86 @@
 .settings-label { color: #eee; font-size: calc(clamp(10px, 2.4vw, 13px) * var(--fs)); font-weight: bold; margin-bottom: 2px; }
 .settings-desc { color: #888; font-size: calc(clamp(8px, 1.85vw, 10px) * var(--fs)); font-style: italic; }
 
-/* ─── SFX volume slider (settings modal) ────────────────────────────────── */
-.sfx-volume-ctrl { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-#sfx-volume-val {
+/* ─── Volume controls (settings modal) — SVG icon + slider, no % text ──── */
+.vol-ctrl { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.vol-icon-btn {
+    width: 34px; height: 34px;
+    padding: 6px;
+    display: grid; place-items: center;
     color: #ffd700;
-    font-size: calc(clamp(8px, 1.85vw, 10px) * var(--fs));
-    font-weight: bold;
-    min-width: 34px;
-    text-align: right;
+    background: rgba(255, 215, 0, 0.06);
+    border: 1px solid rgba(255, 215, 0, 0.35);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
+.vol-icon-btn:hover { background: rgba(255, 215, 0, 0.16); }
+.vol-icon-btn[aria-pressed="true"] { color: #777; border-color: rgba(255, 255, 255, 0.15); }
+.vol-icon-btn svg { width: 100%; height: 100%; display: block; }
+
+/* Track is drawn by the pseudo-elements; the input itself is a tall,
+   transparent hit area so the thumb is grabbable on a phone. */
 .sfx-range {
     -webkit-appearance: none;
     appearance: none;
-    width: clamp(70px, 20vw, 110px);
-    height: 4px;
-    background: #333;
-    border: 1px solid rgba(255, 215, 0, 0.25);
-    border-radius: 2px;
+    width: clamp(80px, 22vw, 120px);
+    height: 28px;
+    background: transparent;
     outline: none;
     cursor: pointer;
+}
+.sfx-range::-webkit-slider-runnable-track {
+    height: 6px;
+    background: linear-gradient(#1a1a1a, #2c2c2c);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 1px;
+}
+.sfx-range::-moz-range-track {
+    height: 6px;
+    background: linear-gradient(#1a1a1a, #2c2c2c);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 1px;
 }
 .sfx-range::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 10px;
-    height: 14px;
-    background: #ffd700;
+    width: 14px;
+    height: 22px;
+    margin-top: -9px;
+    background: linear-gradient(#ffe766, #c99a00);
     border: 1px solid #000;
     box-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
     cursor: pointer;
 }
 .sfx-range::-moz-range-thumb {
-    width: 10px;
-    height: 14px;
-    background: #ffd700;
+    width: 14px;
+    height: 22px;
+    background: linear-gradient(#ffe766, #c99a00);
     border: 1px solid #000;
     border-radius: 0;
     box-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
     cursor: pointer;
 }
+.sfx-range:focus-visible::-webkit-slider-thumb { outline: 2px solid #fff; }
+
+/* Quick mute — top-right of the title screen and the battlefield. */
+.audio-quick-btn {
+    position: absolute;
+    top: calc(6px + env(safe-area-inset-top, 0px));
+    right: 6px;
+    z-index: 210;
+    width: 36px; height: 36px;
+    padding: 7px;
+    color: #f5e7c4;
+    background: rgba(10, 5, 3, 0.62);
+    border: 1px solid rgba(255, 215, 0, 0.38);
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255, 215, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.55);
+}
+.audio-quick-btn svg { width: 100%; height: 100%; display: block; }
+.audio-quick-btn[aria-pressed="true"] { color: #ff5252; border-color: rgba(255, 82, 82, 0.5); }
+#top-panel .audio-quick-btn { top: 6px; width: 30px; height: 30px; padding: 6px; }
 
 /* ─── Title-screen language switcher (start screen only) ────────────────── */
 .lang-switcher-title {
@@ -2504,7 +2569,7 @@
 #tutorial-content {
     background: linear-gradient(145deg, #1a1a1a, #050505);
     border: 3px solid #00e5ff;
-    border-radius: 20px;
+    border-radius: var(--panel-radius);
     padding: 20px;
     width: 95%;
     max-width: 400px;
@@ -2547,3 +2612,24 @@
 }
 #tutorial-footer { margin-top: 10px; }
 
+
+/* === Mobile fit + shared interaction states ============================ */
+/* Inventory windows: dvh tracks the visible area (toolbars showing); the
+   36px reserve keeps the floating label above each window on screen. */
+#collections-content, #relics-content, #equip-content {
+    height: min(900px, 92dvh);
+    max-height: calc(100% - 36px);
+}
+/* The collections label (::before at top:-28px) was clipped by overflow:hidden;
+   its panes scroll on their own (min-height: 0). */
+#collections-content { overflow: visible; }
+
+/* Finger-sized close buttons (were ~32x22). */
+#close-collections, #close-relics, #close-equip {
+    min-width: 44px; min-height: 44px;
+    display: inline-flex; align-items: center; justify-content: center;
+}
+
+button:not(:disabled):active { scale: 0.96; filter: brightness(1.15); }
+button:focus-visible, .tower-card:focus-visible { outline: 2px solid #ffd700; outline-offset: 2px; }
+.col-tab-btn:hover, .modal-close-btn:hover { color: #fff; background: rgba(255, 215, 0, 0.08); }

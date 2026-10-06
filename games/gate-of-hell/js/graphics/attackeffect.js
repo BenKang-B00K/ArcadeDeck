@@ -112,8 +112,9 @@ function _ensureRingGfx() {
 }
 
 function updateImpactRings() {
+    const d = window.dt || 1;
     for (let i = _rings.length - 1; i >= 0; i--) {
-        _rings[i].life -= 0.10;
+        _rings[i].life -= 0.10 * d;
         if (_rings[i].life <= 0) _rings.splice(i, 1);
     }
 }

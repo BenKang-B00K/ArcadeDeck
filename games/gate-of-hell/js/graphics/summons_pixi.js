@@ -23,7 +23,7 @@ if (window.EventBus && window.GAME_EVENTS) {
 
 const SUMMON_STYLE_SKEL = {
     fontFamily: 'Cinzel, serif',
-    fontSize: 11, fontWeight: 'bold',
+    fontSize: 20, fontWeight: 'bold', // 11 rendered ~4 CSS px on phones
     fill: 0xDDDDDD,
     stroke: { color: 0x000000, width: 2, join: 'round' },
     dropShadow: { color: 0xDDDDDD, blur: 5, alpha: 0.8, distance: 0 },
@@ -31,7 +31,7 @@ const SUMMON_STYLE_SKEL = {
 };
 const SUMMON_STYLE_GHOST = {
     fontFamily: 'Cinzel, serif',
-    fontSize: 11, fontWeight: 'bold',
+    fontSize: 20, fontWeight: 'bold',
     fill: 0x00E5FF,
     stroke: { color: 0x000000, width: 2, join: 'round' },
     dropShadow: { color: 0x00E5FF, blur: 5, alpha: 0.8, distance: 0 },
@@ -110,14 +110,14 @@ function _renderOne(s, kind, W) {
     record.text.y = ly;
 
     const hr = Math.max(0, (s.hp || 100) / (s.maxHp || 100));
-    const bw = 30;
+    const bw = 40;
     const bx = lx - bw / 2;
-    const by = ly - 15;
+    const by = ly - 18; // clears the 20px label
     const color = kind === 'skeleton' ? 0xDDDDDD : 0x00E5FF;
     const hp = record.hpBar;
     hp.clear();
-    hp.rect(bx, by, bw, 2).fill({ color: 0x000000, alpha: 0.6 });
-    if (hr > 0) hp.rect(bx, by, bw * hr, 2).fill({ color, alpha: 1 });
+    hp.rect(bx, by, bw, 3).fill({ color: 0x000000, alpha: 0.6 });
+    if (hr > 0) hp.rect(bx, by, bw * hr, 3).fill({ color, alpha: 1 });
 }
 
 window.renderPixiSummons    = renderPixiSummons;

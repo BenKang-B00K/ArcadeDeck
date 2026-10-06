@@ -96,8 +96,9 @@ function spawnLightPillar(lx, ly) {
 }
 
 function updateLightPillars() {
+    const d = window.dt || 1;
     for (let i = lightPillars.length - 1; i >= 0; i--) {
-        lightPillars[i].life -= lightPillars[i].decay;
+        lightPillars[i].life -= lightPillars[i].decay * d;
         if (lightPillars[i].life <= 0) lightPillars.splice(i, 1);
     }
 }

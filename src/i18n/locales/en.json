@@ -270,7 +270,7 @@
   },
   "games": {
     "1": {
-      "title": "Gate of Hell: Rise of Demons v3.0",
+      "title": "Gate of Hell: Rise of Demons v4.0",
       "description": "An intense action survival game where you must hold back the tides of hell.",
       "fullDescription": "\n      A demonic portal has torn open beneath the city, and the spirits climbing out of it erode reality with every step they take. You command the exorcists who hold the line: summon them into **28 deployment slots** across two lanes, promote them through **four tiers**, and keep **Portal Erosion** below 100% while the Depth counter drives you further into the abyss.\n      Every kill pays out **Soul Energy**, the currency behind everything you do. Summon an exorcist, promote one into a stronger class, change a unit's job entirely, or spend it on shrines whose auras buff every ally standing near them. Equipment drops across six tiers fill **18 gear slots**, relics stack permanent bonuses run after run, and the bestiary rewards you for cataloguing what you kill.\n      **Version 3.0** is the largest content pass since launch: eight new shrines bring the roster to 21, equipment gains tier 5 and 6, a full sound-effect layer ships with volume and mute controls, the interface gains font-size options, and every demon sprite in the game has been redrawn. Above it all the **Gargoyle** wakes as your Depth grows, stacking global debuffs on attack speed, range, damage, and Soul Energy income until only a clean, concentrated defensive line survives.\n    ",
       "controls": "Mouse Click: Attack and select upgrades / Drag: Place defensive structures",

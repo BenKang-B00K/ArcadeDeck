@@ -113,9 +113,12 @@
     z-index: 150; /* Above Canvas, below top HUD */
     pointer-events: none;
     opacity: 0;
-    transition: opacity 1s ease;
+    visibility: hidden;   /* drops the full-screen blend layer once faded out */
+    transition: opacity 1s ease, visibility 1s;
     mix-blend-mode: screen;
 }
+#frozen-overlay.active { visibility: visible; }
+#frozen-overlay:not(.active)::after { animation-play-state: paused; }
 
 #frozen-overlay::after {
     content: "";

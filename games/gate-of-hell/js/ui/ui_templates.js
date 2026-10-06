@@ -169,8 +169,6 @@ window.UITemplates.settings = () => {
     const T = window.t || ((k, f) => f);
     const gearIcon = window.SvgIcons ? window.SvgIcons.get('gear') : '';
     const refreshIcon = window.SvgIcons ? window.SvgIcons.get('refresh') : '';
-    const savedVol = parseFloat(localStorage.getItem('goh_sfx_volume'));
-    const volPct = Math.round((isNaN(savedVol) ? 0.6 : savedVol) * 100);
     return `
     <div id="settings-modal" class="overlay-base" style="display: none;">
         <div id="settings-content">
@@ -188,22 +186,31 @@ window.UITemplates.settings = () => {
                 </div>
                 <div class="settings-item">
                     <div class="settings-info">
-                        <span class="settings-label">${T('ui.settings.sfx_label', '효과음')}</span>
-                        <span class="settings-desc">${T('ui.settings.sfx_desc', '전투 및 인터페이스 효과음을 재생합니다.')}</span>
+                        <span class="settings-label">${T('ui.settings.music_label', '배경음악')}</span>
+                        <span class="settings-desc">${T('ui.settings.music_desc', '도리안 선법으로 연주되는 배경음악입니다.')}</span>
                     </div>
-                    <label class="switch">
-                        <input type="checkbox" id="sfx-toggle" ${(localStorage.getItem('goh_sfx_enabled') !== 'false') ? 'checked' : ''}>
-                        <span class="slider round"></span>
-                    </label>
+                    <div class="vol-ctrl">
+                        <button type="button" class="vol-icon-btn" id="music-mute-btn" aria-label="${T('ui.settings.music_label', '배경음악')}"></button>
+                        <input type="range" id="music-volume" class="sfx-range" min="0" max="100" step="5" aria-label="${T('ui.settings.music_label', '배경음악')}">
+                    </div>
                 </div>
                 <div class="settings-item">
                     <div class="settings-info">
-                        <span class="settings-label">${T('ui.settings.volume_label', '효과음 크기')}</span>
-                        <span class="settings-desc">${T('ui.settings.volume_desc', '효과음 재생 음량을 조절합니다.')}</span>
+                        <span class="settings-label">${T('ui.settings.sfx_label', '효과음')}</span>
+                        <span class="settings-desc">${T('ui.settings.sfx_desc', '전투 및 인터페이스 효과음을 재생합니다.')}</span>
                     </div>
-                    <div class="sfx-volume-ctrl">
-                        <input type="range" id="sfx-volume" class="sfx-range" min="0" max="100" step="5" value="${volPct}">
-                        <span id="sfx-volume-val">${volPct}%</span>
+                    <div class="vol-ctrl">
+                        <button type="button" class="vol-icon-btn" id="sfx-mute-btn" aria-label="${T('ui.settings.sfx_label', '효과음')}"></button>
+                        <input type="range" id="sfx-volume" class="sfx-range" min="0" max="100" step="5" aria-label="${T('ui.settings.sfx_label', '효과음')}">
+                    </div>
+                </div>
+                <div class="settings-item">
+                    <div class="settings-info">
+                        <span class="settings-label">${T('ui.settings.fps_label', '프레임 제한')}</span>
+                        <span class="settings-desc">${T('ui.settings.fps_desc', '30 FPS는 배터리 소모와 발열을 줄입니다.')}</span>
+                    </div>
+                    <div class="lang-switcher" id="fps-switcher">
+                        ${[30, 60].map(f => `<button class="lang-btn" data-fps-set="${f}">${f}</button>`).join('')}
                     </div>
                 </div>
                 <div class="settings-item">

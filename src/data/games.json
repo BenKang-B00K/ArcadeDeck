@@ -2,7 +2,7 @@
   {
     "id": "1",
     "slug": "gate-of-hell",
-    "language": "KO",
+    "language": "EN/KO/JA",
     "thumbnail": "images/gate-of-hell.webp",
     "pageBg": "images/gate-of-hell-bg.webp",
     "genres": [
@@ -16,7 +16,7 @@
     "platform": "BOTH",
     "isOriginal": true,
     "badge": "UPDATE",
-    "lastUpdated": "2026-09-10",
+    "lastUpdated": "2026-10-05",
     "scoreTiers": [
       10,
       25,

@@ -110,7 +110,8 @@
       "badge_existing": "OWNED",
       "badge_upgrade": "UPGRADE",
       "badge_reroll": "REROLL",
-      "relics_cost_fmt": "Normal {n} · Supreme {s} SF"
+      "relics_cost_fmt": "Normal {n} · Supreme {s} SF",
+      "tap_again": "Tap again"
     },
     "info_panel": {
       "default_title": "GATE OF HELL",
@@ -374,8 +375,11 @@
       "fontsize_small": "SMALL",
       "fontsize_medium": "MEDIUM",
       "fontsize_large": "LARGE",
-      "volume_label": "Sound Effect Volume",
-      "volume_desc": "Adjusts the playback volume of sound effects."
+      "music_label": "Music",
+      "music_desc": "Background score played in the Dorian mode.",
+      "fps_label": "Frame Rate",
+      "fps_desc": "30 FPS saves battery and reduces heat.",
+      "audio_quick_aria": "Sound on/off"
     },
     "quit": {
       "header": "[Rejection of Fate]",
@@ -449,6 +453,10 @@
       "madness_popup": "Madness Triggered!",
       "madness_log_on": "Demon Horn: Madness Triggered — Damage Bonus ×2",
       "madness_log_off": "Demon Horn: Madness Released"
+    },
+    "meta": {
+      "title": "Gate of Hell : Return of Evil Spirits",
+      "rotate": "Please rotate your device to portrait"
     }
   },
   "shrine_role": {

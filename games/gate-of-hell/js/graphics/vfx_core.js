@@ -16,6 +16,7 @@ if (window.EventBus && window.GAME_EVENTS) {
         _sePool.length = 0;
         _idTextPool.length = 0;
         _idImgPool.length = 0;
+        _idGlowPool.length = 0;
     });
 }
 function _ensureParticleGfx() {
@@ -208,8 +209,22 @@ function updateFloatingTexts() {
 // drawFloatingTexts is now a no-op — handled in updateFloatingTexts
 function drawFloatingTexts() {}
 
-// ── Soul Essences (emoji sprites) ─────────────────────────────────────────────
+// ── Soul Essences (additive pixel sparkles) ──────────────────────────────────
 const _sePool = [];
+// One shared 4-point pixel star (was an Arial '*' PIXI.Text per kill).
+// Survives pixiReset: resetPixiScene keeps textures.
+let _seTex = null;
+function _soulTex() {
+    if (_seTex) return _seTex;
+    const g = new PIXI.Graphics()
+        .rect(-2, -9, 4, 18).rect(-9, -2, 18, 4).fill(0xFFE066)
+        .rect(-4, -4, 8, 8).fill(0xFFF4C2)
+        .rect(-2, -2, 4, 4).fill(0xFFFFFF);
+    _seTex = pixiApp.renderer.generateTexture(g);
+    _seTex.source.scaleMode = 'nearest';
+    g.destroy();
+    return _seTex;
+}
 
 function spawnSoulEssence(lx, ly) {
     if (!window.Pools) return;
@@ -226,9 +241,11 @@ function spawnSoulEssence(lx, ly) {
     s.rotSpeed   = (Math.random() - 0.5) * 0.2;
     s._pSprite   = null;
     if (window.vfxLayer) {
-        const sp = _sePool.pop() || new PIXI.Text('*', {
-            fontFamily: 'Arial', fontSize: 24, fill: 0xFFE066, fontWeight: 'bold',
-        });
+        let sp = _sePool.pop();
+        if (!sp) {
+            sp = new PIXI.Sprite(_soulTex());
+            sp.blendMode = 'add'; // holy light: lighter composite
+        }
         sp.anchor.set(0.5, 0.5);
         sp.x   = lx; sp.y = ly;
         s._pSprite = sp;
@@ -239,12 +256,13 @@ function spawnSoulEssence(lx, ly) {
 function updateSoulEssences() {
     if (!window.Pools) return;
     const active = Pools.soulEssences.active;
+    const d = window.dt || 1;
     for (let i = active.length - 1; i >= 0; i--) {
         const s = active[i];
-        s.x += s.vx; s.y += s.vy;
-        s.vy += s.gravity;
-        s.life -= s.decay;
-        s.rotation += s.rotSpeed;
+        s.x += s.vx * d; s.y += s.vy * d;
+        s.vy += s.gravity * d;
+        s.life -= s.decay * d;
+        s.rotation += s.rotSpeed * d;
         if (s._pSprite) {
             s._pSprite.x        = s.x;
             s._pSprite.y        = s.y;
@@ -269,6 +287,25 @@ function drawSoulEssences() {}
 // ── Item Drops (emoji text OR image sprite) ──────────────────────────────────
 const _idTextPool = [];
 const _idImgPool  = [];
+const _idGlowPool = [];
+
+// Rarity halo behind each drop: one shared soft radial texture, tinted per drop
+// (cyan = equipment, orange = relic). Survives pixiReset like the soul sparkle.
+let _idGlowTex = null;
+function _dropGlowTex() {
+    if (_idGlowTex) return _idGlowTex;
+    const c = document.createElement('canvas');
+    c.width = c.height = 64;
+    const g = c.getContext('2d');
+    const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grad.addColorStop(0, 'rgba(255,255,255,1)');
+    grad.addColorStop(0.35, 'rgba(255,255,255,0.55)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, 64, 64);
+    _idGlowTex = PIXI.Texture.from(c);
+    return _idGlowTex;
+}
 
 function spawnItemDrop(lx, ly, icon, shadowColor = '#ffd700') {
     if (!window.Pools) return;
@@ -283,9 +320,23 @@ function spawnItemDrop(lx, ly, icon, shadowColor = '#ffd700') {
     d.rotation  = 0;
     d.rotSpeed  = (Math.random() - 0.5) * 0.15;
     d.icon      = icon;
+    d.shadowColor = shadowColor;
     d._pSprite  = null;
+    d._glow     = null;
     d._isImg    = false;
     if (window.vfxLayer) {
+        let glow = _idGlowPool.pop();
+        if (!glow) {
+            glow = new PIXI.Sprite(_dropGlowTex());
+            glow.anchor.set(0.5, 0.5);
+            glow.blendMode = 'add'; // magic loot: lighter composite
+        }
+        glow.tint = (typeof cssColorToHex === 'function') ? cssColorToHex(shadowColor) : 0xFFD700;
+        glow.width = glow.height = 72;
+        glow.x = lx; glow.y = ly;
+        d._glow = glow;
+        vfxLayer.addChild(glow); // added before the item sprite → sits behind it
+
         const isImg = typeof icon === 'string' && (icon.includes('/') || icon.endsWith('.webp') || icon.endsWith('.png'));
         let sp;
         if (isImg) {
@@ -312,23 +363,35 @@ function spawnItemDrop(lx, ly, icon, shadowColor = '#ffd700') {
 function updateItemDrops() {
     if (!window.Pools) return;
     const active = Pools.itemDrops.active;
+    const k = window.dt || 1;
     for (let i = active.length - 1; i >= 0; i--) {
         const d = active[i];
-        d.x += d.vx; d.y += d.vy;
-        d.vy += d.gravity;
-        d.life -= d.decay;
-        d.rotation += d.rotSpeed;
+        d.x += d.vx * k; d.y += d.vy * k;
+        d.vy += d.gravity * k;
+        d.life -= d.decay * k;
+        d.rotation += d.rotSpeed * k;
         if (d._pSprite) {
             d._pSprite.x        = d.x;
             d._pSprite.y        = d.y;
             d._pSprite.rotation = d.rotation;
             d._pSprite.alpha    = Math.min(1.0, d.life * 2);
         }
+        if (d._glow) {
+            d._glow.x = d.x;
+            d._glow.y = d.y;
+            // Shimmer ~1.5 Hz (life drains ~0.65/s), fading out with the drop.
+            d._glow.alpha = Math.min(1.0, d.life * 2) * (0.55 + 0.2 * Math.sin(d.life * 14));
+        }
         if (d.life <= 0) {
             if (d._pSprite) {
                 vfxLayer.removeChild(d._pSprite);
                 (d._isImg ? _idImgPool : _idTextPool).push(d._pSprite);
                 d._pSprite = null;
+            }
+            if (d._glow) {
+                vfxLayer.removeChild(d._glow);
+                _idGlowPool.push(d._glow);
+                d._glow = null;
             }
             Pools.itemDrops.releaseAt(i);
         }

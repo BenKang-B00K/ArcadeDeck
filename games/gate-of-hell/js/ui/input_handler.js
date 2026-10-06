@@ -59,10 +59,7 @@ function _installUxHygiene(canvas) {
 
     // Block text-selection drag started from canvas (desktop).
     canvas.addEventListener('selectstart', (e) => e.preventDefault());
-
-    // Suppress long-press callout on iOS Safari for canvas/game-container.
-    const container = document.getElementById('game-container');
-    if (container) container.style.webkitTouchCallout = 'none';
+    // iOS long-press callout + tap flash: body CSS (-webkit-touch-callout / tap-highlight).
 }
 
 function initInputHandlers() {
@@ -82,23 +79,25 @@ function initInputHandlers() {
     window.addEventListener('mouseup', (e) => { if (!_afterTouch()) handleMouseUp(e); });
     canvas.addEventListener('mouseleave', () => { hoveredTower = null; });
 
-    // Touch Listeners (Mobile Support)
+    // Touch Listeners (Mobile Support). `touch-action: none` on #top-panel
+    // (base.css) already stops scroll / pull-to-refresh / pinch, so these stay
+    // passive. Touch events keep targeting the element the touch began on,
+    // so canvas-level move/end listeners still follow a drag off the canvas.
     canvas.addEventListener('touchstart', (e) => {
         _lastTouchTs = Date.now();
+        if (e.touches.length > 1) return; // second finger: ignore, keep the drag
         handleMouseDown(e);
-        // Note: Don't preventDefault here to allow clicking buttons,
-        // but we will prevent it during drag in handleMouseMove.
-    }, { passive: false });
-
-    window.addEventListener('touchmove', (e) => {
-        if (isDragging && e.cancelable) e.preventDefault(); // Prevent scrolling while dragging
-        handleMouseMove(e);
-    }, { passive: false });
-
-    window.addEventListener('touchend', (e) => {
+    }, { passive: true });
+    canvas.addEventListener('touchmove', handleMouseMove, { passive: true });
+    canvas.addEventListener('touchend', (e) => {
         _lastTouchTs = Date.now();
-        handleMouseUp(e);
-    }, { passive: false });
+        if (e.touches.length === 0) handleMouseUp(e); // drop only when the last finger lifts
+    }, { passive: true });
+    // OS stole the touch (notification shade, call, system gesture): snap back.
+    canvas.addEventListener('touchcancel', () => {
+        _lastTouchTs = Date.now();
+        _resetDragState();
+    }, { passive: true });
 
     // Sacred Tablet selection is sticky now, so it needs an explicit "click
     // away". Empty-board clicks are handled in handleMouseDown; this covers the
@@ -123,7 +122,10 @@ function getLogicalCoords(e) {
     const rect = canvas.getBoundingClientRect();
     
     let clientX, clientY;
-    if (e.touches && e.touches.length > 0) {
+    if (e.type === 'touchend' && e.changedTouches && e.changedTouches.length > 0) {
+        clientX = e.changedTouches[0].clientX; // the finger that lifted, not one still down
+        clientY = e.changedTouches[0].clientY;
+    } else if (e.touches && e.touches.length > 0) {
         clientX = e.touches[0].clientX;
         clientY = e.touches[0].clientY;
     } else if (e.changedTouches && e.changedTouches.length > 0) {
@@ -145,23 +147,18 @@ function handleMouseDown(e) {
     lastMouseDownTime = Date.now();
     const L_W = window.LOGICAL_WIDTH || 1080;
 
-    // 1. Check if unit clicked (Threshold scaled for 128x128 unit area, radius ~64-70)
-    let clickedTower = null;
-    let minD = 1600; // 40^2
-    if (window.towers) {
-        window.towers.forEach(t => {
-            const dx = t.lx - x;
-            const dy = t.ly - y;
-            const distSq = dx * dx + dy * dy;
-            if (distSq < minD) {
-                minD = distSq;
-                clickedTower = t;
-            }
-        });
-    }
+    // Fingers need bigger hit circles than a cursor: on a 390px phone the
+    // mouse radii (40 / 30 logical px) are ~28 / 21 CSS px. Slots sit 114 apart,
+    // so a 57 radius can't reach a neighbour's unit.
+    const isTouch = e.type && e.type.startsWith('touch');
+
+    // 1. Check if unit clicked
+    let minD = isTouch ? 3249 : 1600; // 57^2 : 40^2
+    let clickedTower = _findNearestTower(x, y, minD);
+    if (clickedTower) minD = (clickedTower.lx - x) ** 2 + (clickedTower.ly - y) ** 2;
 
     let clickedEnemy = null;
-    let minED = 900; // 30^2
+    let minED = isTouch ? 2025 : 900; // 45^2 : 30^2
     if (window.enemies) {
         window.enemies.forEach(en => {
             const ex = (en.x / 100) * L_W;
@@ -175,6 +172,8 @@ function handleMouseDown(e) {
         });
     }
     
+    // Both in reach (enemy walking past a slot): the closer one wins.
+    if (clickedEnemy && clickedTower && minD < minED) clickedEnemy = null;
     if (clickedEnemy) {
         if (typeof showEnemyInfo === 'function') showEnemyInfo(clickedEnemy);
         return;

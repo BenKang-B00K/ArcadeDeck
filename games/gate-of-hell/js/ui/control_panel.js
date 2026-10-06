@@ -13,9 +13,11 @@ function updateSummonButtonState() {
     const finalTowerCost = Math.max(5, Math.floor(window.towerCost - equipReduction - reduction));
     const finalShrineCost = Math.max(10, Math.floor((window.shrineCost || 100) - equipReduction - reduction));
 
-    if (tcd) tcd.innerText = `${finalTowerCost} SE`;
-    if (sscd) sscd.innerText = `${finalShrineCost} SE`;
-    if (pscd) pscd.innerText = `${PURGE_COST} SE`;
+    // Runs on every money change (each kill) — write only what differs.
+    const setText = (el, s) => { if (el && el.textContent !== s) el.textContent = s; };
+    setText(tcd, `${finalTowerCost} SE`);
+    setText(sscd, `${finalShrineCost} SE`);
+    setText(pscd, `${PURGE_COST} SE`);
 
     const currentMoney = window.money || 0;
 
@@ -25,8 +27,9 @@ function updateSummonButtonState() {
         const canAfford = currentMoney >= cost;
         if (btn) btn.classList.toggle('disabled', !canAfford);
         if (warn) {
-            warn.style.display = canAfford ? 'none' : 'block';
-            warn.textContent = seShort;
+            const d = canAfford ? 'none' : 'block';
+            if (warn.style.display !== d) warn.style.display = d;
+            setText(warn, seShort);
         }
     };
 
@@ -53,7 +56,7 @@ function updateSummonButtonState() {
 
 function flashResourceError(type) {
     if (type === 'se') {
-        const cards = ['shrine-card', 'purge-card'];
+        const cards = ['tower-card', 'shrine-card', 'purge-card'];
         cards.forEach(id => {
             const card = document.getElementById(id);
             if (card && card.classList.contains('disabled')) {
@@ -80,6 +83,21 @@ function initControlPanel() {
     }
     window._controlPanelInitialized = true;
     const T = window.t || ((k, f) => f);
+
+    // Touch has no hover preview, and Purge (800 SE) / Pact (instant boss) are
+    // irreversible: the first tap arms the card (the emulated mouseenter shows
+    // its info on the tablet), a second tap within 2.5s fires it.
+    const armTap = (card, fire) => () => {
+        if (window.IS_TOUCH_DEVICE && !card.classList.contains('armed')) {
+            card.classList.add('armed');
+            card.dataset.confirm = T('ui.controls.tap_again', '한 번 더 터치');
+            clearTimeout(card._armT);
+            card._armT = setTimeout(() => card.classList.remove('armed'), 2500);
+            return;
+        }
+        card.classList.remove('armed');
+        fire();
+    };
 
     // 1. Summon Unit Card
     const towerCard = document.getElementById('tower-card');
@@ -127,7 +145,7 @@ function initControlPanel() {
                 `);
             }
         });
-        purgeCard.onclick = () => { if (typeof purgePortal === 'function') purgePortal(); };
+        purgeCard.onclick = armTap(purgeCard, () => { if (typeof purgePortal === 'function') purgePortal(); });
     }
 
     // 4. Utility Systems (Relics, Equipment, Collections)
@@ -201,9 +219,7 @@ function initControlPanel() {
                 `);
             }
         });
-        pactCard.onclick = () => {
-            if (typeof summonPactBoss === 'function') summonPactBoss();
-        };
+        pactCard.onclick = armTap(pactCard, () => { if (typeof summonPactBoss === 'function') summonPactBoss(); });
     }
 
     // 6. Settings card (click handler lives in overlays.js initPauseAndSettings)

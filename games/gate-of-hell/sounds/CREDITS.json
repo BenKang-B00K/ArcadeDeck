@@ -108,12 +108,6 @@
     "url": "https://cdn.pixabay.com/audio/2022/03/10/audio_4fda89d45f.mp3"
   },
   {
-    "key": "promote",
-    "pixabay_id": 326133,
-    "title": "Level Up 05",
-    "url": "https://cdn.pixabay.com/audio/2025/04/11/audio_3933ad0008.mp3"
-  },
-  {
     "key": "sacrifice",
     "pixabay_id": 47176,
     "title": "PuffOfSmoke",
@@ -124,17 +118,5 @@
     "pixabay_id": 43196,
     "title": "UI click",
     "url": "https://cdn.pixabay.com/audio/2022/03/10/audio_1f6d9a0355.mp3"
-  },
-  {
-    "key": "reward",
-    "pixabay_id": 540190,
-    "title": "Coin Collect (3)",
-    "url": "https://cdn.pixabay.com/audio/2026/05/24/audio_98942bdcaa.mp3"
-  },
-  {
-    "key": "relic",
-    "pixabay_id": 289722,
-    "title": "Unlock stinger",
-    "url": "https://cdn.pixabay.com/audio/2025/01/19/audio_3e4b9172c4.mp3"
   }
 ]

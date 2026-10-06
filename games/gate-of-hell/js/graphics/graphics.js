@@ -15,6 +15,7 @@ ctx.imageSmoothingEnabled = false;
 if (window.EventBus && window.GAME_EVENTS) {
     EventBus.on(GAME_EVENTS.PIXI_RESET, () => {
         _haloGfx = null;
+        _haloKey = '';
         if (ctx && _legacyCanvas) ctx.clearRect(0, 0, _legacyCanvas.width, _legacyCanvas.height);
     });
 }
@@ -48,8 +49,9 @@ function renderGraphics() {
 
     if (typeof lavaPhase       === 'undefined') window.lavaPhase       = 0;
     if (typeof globalAnimTimer === 'undefined') window.globalAnimTimer = 0;
-    window.lavaPhase       += 0.02;
-    window.globalAnimTimer += 0.06;
+    const _dt = window.dt || 1;
+    window.lavaPhase       += 0.02 * _dt;
+    window.globalAnimTimer += 0.06 * _dt;
 
     // ── Logical Updates (state, not drawing) ─────────────────────────────────
     if (typeof updateParticles        === 'function') updateParticles();
@@ -125,14 +127,19 @@ function renderGraphics() {
 }
 
 let _haloGfx = null;
+let _haloKey = '';
 function drawSelectionHalo() {
     if (!window.overlayLayer) return;
     if (!_haloGfx) {
         _haloGfx = new PIXI.Graphics();
         overlayLayer.addChild(_haloGfx);
     }
-    _haloGfx.clear();
     const selected = (typeof getSelectedTower === 'function') ? getSelectedTower() : null;
+    // Static ring — rebuild only when the selection or its position changes.
+    const key = selected ? selected.lx + ',' + selected.ly : '';
+    if (key === _haloKey) return;
+    _haloKey = key;
+    _haloGfx.clear();
     if (!selected) return;
 
     // Dashed circle

@@ -31,6 +31,10 @@
     --color-warning-red:  #ff1744;
     --color-tier-orange:  #ff9f0a;
 
+    /* Window shell corners (every modal). Small and crisp: big rounded
+       corners read as "web app" against the pixel art. */
+    --panel-radius: 6px;
+
     /* UI font scale. Every `font-size` in the app is `calc(<value> * var(--fs))`,
        so this one knob drives SMALL/MEDIUM/LARGE. LARGE (1) = original sizes. */
     --fs: 0.9;
@@ -43,6 +47,9 @@
     box-sizing: border-box;
 }
 
+/* No pull-to-refresh / rubber-band bounce under a drag. */
+html, body { overscroll-behavior: none; }
+
 canvas {
     display: block;
     max-width: 100%;
@@ -53,7 +60,11 @@ body {
     /* Inheritance root for any element with no font-size of its own — without
        this they stay pinned at the UA default 16px and ignore --fs. */
     font-size: calc(16px * var(--fs));
-    background-color: #111;
+    font-family: 'Noto Sans KR', 'Noto Sans JP', system-ui, sans-serif;
+    background-color: #070506;
+    background-image: radial-gradient(ellipse at 50% 40%, #1c0f12 0%, #070506 60%, #000 100%);
+    min-height: 100vh;
+    min-height: 100dvh;
     color: white;
     display: flex;
     flex-direction: column;
@@ -64,7 +75,13 @@ body {
     -ms-user-select: none;
     user-select: none;
     touch-action: manipulation;
+    -webkit-touch-callout: none;              /* iOS long-press "Save Image" menu */
+    -webkit-tap-highlight-color: transparent; /* grey flash on every tap */
 }
+:lang(ja) body { font-family: 'Noto Sans JP', 'Noto Sans KR', system-ui, sans-serif; }
+:lang(zh-Hans) body { font-family: 'Noto Sans SC', 'Noto Sans KR', system-ui, sans-serif; }
+/* Form controls don't inherit font-family by default (they fell back to Arial). */
+button, input, select { font-family: inherit; }
 
 /* Mobile: hide browser status/notification bar (standalone PWA mode) */
 @media screen and (max-width: 768px) {
@@ -104,8 +121,8 @@ body {
 }
 
 @keyframes notifPulse {
-    from { transform: scale(1); box-shadow: 0 0 5px #ff0000; }
-    to { transform: scale(1.2); box-shadow: 0 0 15px #ff4500; }
+    from { transform: scale(1); }
+    to { transform: scale(1.2); }
 }
 
 /* === base_utils.css === */
@@ -159,9 +176,23 @@ img, .enemy, .tower-card, .relic-slot, .equip-slot {
     box-sizing: border-box;
 }
 
+/* Mobile: 100vh is the height with toolbars HIDDEN, so the bottom card row was
+   cut off while they show. dvh tracks the visible area; the safe-area padding
+   on <body> (standalone PWA) is subtracted too. @supports-gated: a var() that
+   fails at computed time would drop to `auto`, not to the vh fallback above. */
+@supports (height: 100dvh) {
+    #game-container {
+        --avail-h: calc(100dvh - 10px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+        width: min(calc(100vw - 10px), calc(var(--avail-h) * 9 / 16));
+        max-height: var(--avail-h);
+    }
+}
+
 #top-panel {
     position: relative;
     width: 100%;
+    /* Board drags own the gesture: no scroll, pinch or pull-to-refresh. */
+    touch-action: none;
     flex: 75; /* 75% height */
     background: #050505;
     overflow: hidden;
@@ -308,3 +339,39 @@ img, .enemy, .tower-card, .relic-slot, .equip-slot {
     image-rendering: crisp-edges;
 }
 
+
+/* Battlefield vignette; turns blood-red while PE >= 75% (hud.js toggles .pe-danger). */
+#top-panel::after {
+    content: "";
+    position: absolute; inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    background: radial-gradient(ellipse 80% 70% at 50% 45%, transparent 60%, rgba(0, 0, 0, 0.4));
+}
+#top-panel.pe-danger::after {
+    background: radial-gradient(ellipse 80% 70% at 50% 45%, transparent 55%, rgba(170, 0, 20, 0.45));
+    animation: hintPulse 0.9s infinite alternate;
+}
+
+/* Phone held sideways: the 9:16 board shrinks to ~200px wide — ask for portrait.
+   Text comes from i18n (overlays.js sets body[data-rotate]). */
+@media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
+    body::after {
+        content: attr(data-rotate);
+        position: fixed; inset: 0;
+        z-index: 9999;
+        display: flex; align-items: center; justify-content: center;
+        padding: 24px; text-align: center;
+        background: #000; color: #ffd700;
+        font-family: 'Cinzel', 'Noto Serif KR', serif;
+        font-size: 18px; letter-spacing: 2px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

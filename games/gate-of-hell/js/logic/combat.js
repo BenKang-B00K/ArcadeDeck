@@ -18,15 +18,18 @@ function createDamageText(target, amount, isCrit) {
     if (!target) return;
     const lx = (target.x / 100) * LOGICAL_WIDTH + (Math.random() - 0.5) * 24; // jitter so stacked hits don't overlap
     const ly = target.y - 10;
-    const color = isCrit ? '#ff4500' : '#fff';
-    // Bigger numbers → bigger text (18px at <10 dmg, ~28px at 10k)
+    // Holy-gold crits read against red/purple enemies; orange-red blended in.
+    const color = isCrit ? '#ffd23f' : '#fff';
+    // The 1080-wide board shows at ~0.36x on a phone, so 18px was ~6 CSS px.
+    // Bigger numbers → bigger text (24px at <10 dmg, ~36px at 10k).
     const mag  = Math.max(0, Math.log10(Math.max(1, amount)) - 1);
-    const size = Math.round((isCrit ? 26 : 18) + mag * 3);
+    const size = Math.round((isCrit ? 34 : 24) + mag * 4);
 
     if (typeof spawnFloatingText === 'function') {
-        spawnFloatingText(Math.round(amount), lx, ly, color, size, { punch: isCrit ? 1.5 : 1.0 });
+        spawnFloatingText(Math.round(amount), lx, ly, color, size, { punch: isCrit ? 1.25 : 1.0 });
         if (isCrit) {
-            spawnFloatingText("CRITICAL", lx, ly - 25, "#ff0000", 14, { punch: 1.3 });
+            // Sits above the number's full height so the pop-in can't overlap it.
+            spawnFloatingText("CRITICAL", lx, ly - size - 4, "#fff4c2", 20, { punch: 1.2 });
         }
     }
 }

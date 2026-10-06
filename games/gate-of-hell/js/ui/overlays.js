@@ -240,7 +240,7 @@ function initLangSwitcher() {
 /* Walk DOM, swap text of every [data-i18n="key"] element with t(key).
  * For HTML content use [data-i18n-html]. Re-renders modal grids that have
  * a render function exposed (collections, relics, equipment). */
-function refreshI18nDOM(root) {
+function applyI18nAttrs(root) {
     const scope = root || document;
     scope.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
@@ -259,6 +259,10 @@ function refreshI18nDOM(root) {
             if (attr && key && window.t) el.setAttribute(attr, window.t(key, el.getAttribute(attr)));
         });
     });
+}
+
+function refreshI18nDOM(root) {
+    applyI18nAttrs(root);
     if (typeof renderGhostGrid === 'function')    try { renderGhostGrid('all'); } catch (e) {}
     if (typeof renderShrineGrid === 'function')   try { renderShrineGrid('all'); } catch (e) {}
     if (typeof renderExorcistGrid === 'function') try { renderExorcistGrid(); } catch (e) {}
@@ -302,6 +306,10 @@ function _showGameOverOverlay(stageReached) {
 function initOverlayManager() {
     if (window._overlayManagerInitialized) return;
     window._overlayManagerInitialized = true;
+
+    // Static index.html text marked data-i18n / data-i18n-attr (i18n is loaded by now).
+    applyI18nAttrs(document);
+    if (document.body) document.body.dataset.rotate = window.t ? t('ui.meta.rotate', '세로 화면으로 돌려주세요') : '';
 
     // 0. Inject Dynamic UI Templates
     const overlayContainer = document.getElementById('overlay-container');
@@ -373,6 +381,26 @@ function initOverlayManager() {
         const ri = document.getElementById('range-indicator'); if (ri) ri.remove();
         const ai = document.getElementById('aura-indicator'); if (ai) ai.remove();
     });
+
+    // Phone call / app switch / screen lock: pause instead of resuming live
+    // (spawn timers run on the wall clock, so a wave would land on return).
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden && window.SceneManager && SceneManager.is(SCENES.GAME)) SceneManager.push(SCENES.PAUSE);
+    });
+
+    // Android back button / gesture: close the top menu, or open Settings,
+    // instead of leaving the game. Chrome ignores history entries pushed without
+    // a user gesture, so the guard entry is re-armed from a tap.
+    if (window.IS_TOUCH_DEVICE) {
+        window.addEventListener('pointerup', () => {
+            if (window.gameStarted && !(history.state && history.state.goh)) history.pushState({ goh: 1 }, '');
+        }, { passive: true });
+        window.addEventListener('popstate', () => {
+            if (!window.SceneManager || !SceneManager.has(SCENES.GAME)) return;
+            if (SceneManager.is(SCENES.MODAL) || SceneManager.is(SCENES.PAUSE)) SceneManager.pop();
+            else SceneManager.push(SCENES.MODAL, { id: 'settings-modal' });
+        });
+    }
 
     document.addEventListener('mousedown', (e) => {
         if (!e.target.closest('.tower-card') && !e.target.closest('.job-btn') &&

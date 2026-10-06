@@ -51,6 +51,14 @@
 
         chart: '<path d="M3 3h2v16h16v2H3zm4 10h3v6H7zm5-6h3v12h-3zm5 3h3v9h-3z"/>',
 
+        // ── Audio (level shown by wave bars, never by text) ──────────────
+        vol_1: '<path d="M2 9h4l5-5h2v16h-2l-5-5H2zm13 1h2v4h-2z"/>',
+        vol_2: '<path d="M2 9h4l5-5h2v16h-2l-5-5H2zm13 1h2v4h-2zm3-3h2v10h-2z"/>',
+        vol_3: '<path d="M2 9h4l5-5h2v16h-2l-5-5H2zm13 1h2v4h-2zm3-3h2v10h-2zm3-3h2v16h-2z"/>',
+        vol_mute: '<path d="M2 9h4l5-5h2v16h-2l-5-5H2z"/><path d="M16 9l6 6m0-6l-6 6" fill="none" stroke="currentColor" stroke-width="2.4"/>',
+        music: '<path d="M8 4l13-2v14.5a3 3 0 11-2-2.8V6.3l-9 1.4v10.8a3 3 0 11-2-2.8z"/>',
+        music_off: '<path d="M8 4l13-2v14.5a3 3 0 11-2-2.8V6.3l-9 1.4v10.8a3 3 0 11-2-2.8z" opacity=".45"/><path d="M3 3l18 18" fill="none" stroke="currentColor" stroke-width="2.4"/>',
+
         // ── Generic placeholders for entity icons (data fallback) ────────
         ally_placeholder: '<path d="M12 3a4 4 0 100 8 4 4 0 000-8zm-6 18a6 6 0 0112 0z"/>',
         enemy_placeholder: '<path d="M4 6l4-2 4 2 4-2 4 2v6a8 8 0 01-16 0zm5 4v2h2v-2zm6 0v2h2v-2z"/>',

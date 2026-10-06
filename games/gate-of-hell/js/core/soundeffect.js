@@ -1,14 +1,20 @@
-/* soundeffect.js — SFX playback (Web Audio API).
+/* soundeffect.js — Audio engine: mixer buses, sample SFX, volume/mute state.
  *
- * Files live in `sounds/<key>.mp3` (Pixabay Content License, see sounds/CREDITS.json).
- * Context is created on the first user gesture (autoplay policy), then every
- * clip is fetched + decoded once into `buffers`.
+ * Graph (built on the first user gesture — autoplay policy):
+ *
+ *   samples ──────────────────────► sfxFader ─┐
+ *   music.js cues ─► cueBus ─┬────► sfxFader  │
+ *                            └─► cueVerb ─┐   ├─► limiter ─► masterOut ─► out
+ *   music.js score ─► musicFader ─┬───────┼───┘
+ *                                 └─► musicVerb ─► reverb ─► limiter
+ *
+ * Samples live in `sounds/<key>.mp3` (Pixabay Content License, see
+ * sounds/CREDITS.json); each is fetched + decoded once. Tonal cues (stage
+ * clear, relic, promotion, game over) are synthesized in D Dorian by
+ * music.js so they always sit in key with the score.
  *
  * Call sites use `playSFX(key)` / `sfxAttack(unitType)`; both are no-ops until
- * buffers land, so they are safe to call from load-order-earlier files.
- *
- * Attack sounds are bucketed by projectile `kind` (window.PROJ_DESIGN), not per
- * unit — 84 units collapse to 9 clips.
+ * the context exists, so they are safe from load-order-earlier files.
  */
 
 /* ─── Registry ──────────────────────────────────────────────────────────── */
@@ -32,11 +38,16 @@ const SFX_CFG = {
     portal_hit: [0.45, 120],
     gameover:   [0.70, 500],
     summon:     [0.45,  80],
-    promote:    [0.50,  80],
     sacrifice:  [0.45,  80],
-    ui_click:   [0.30,  60],
-    reward:     [0.45, 200],
-    relic:      [0.55, 200]
+    ui_click:   [0.30,  60]
+};
+
+// Synthesized Dorian cues (music.js). Same [volume, throttleMs] shape.
+// Levels measured against the samples: relic ≈ boss_spawn loudness, others below.
+const CUE_CFG = {
+    reward:  [0.22, 400],
+    relic:   [0.28, 300],
+    promote: [0.22, 150]
 };
 
 // Projectile kind → attack clip. Unlisted kinds fall back to atk_magic.
@@ -53,29 +64,83 @@ const KIND_SFX = {
 
 const SFX_PATH = 'sounds/';
 const MAX_VOICES = 14;
+const CUE_VERB_LEVEL = 0.55;   // cue reverb send, scaled by the SFX fader
+const MUSIC_VERB_LEVEL = 0.45; // score reverb send (post-fader)
 
 /* ─── State ─────────────────────────────────────────────────────────────── */
 let audioCtx = null;
-let masterGain = null;
+const bus = {};               // sfxFader, musicFader, cueBus, cueVerb, reverb, masterOut
 const soundBuffers = {};
 const lastPlayed = {};
 let liveVoices = 0;
 
-let sfxEnabled = (localStorage.getItem('goh_sfx_enabled') !== 'false');
-const _savedVol = parseFloat(localStorage.getItem('goh_sfx_volume'));
-let globalVolume = isNaN(_savedVol) ? 0.6 : Math.max(0, Math.min(1, _savedVol));
+function _readVol(key, def) {
+    const v = parseFloat(localStorage.getItem(key));
+    return isNaN(v) ? def : Math.max(0, Math.min(1, v));
+}
+const audioPrefs = {
+    sfxOn:    localStorage.getItem('goh_sfx_enabled') !== 'false',
+    sfxVol:   _readVol('goh_sfx_volume', 0.6),
+    musicOn:  localStorage.getItem('goh_music_enabled') !== 'false',
+    musicVol: _readVol('goh_music_volume', 0.35),
+    muted:    localStorage.getItem('goh_audio_muted') === 'true'
+};
 
 /* ─── Init & loading ────────────────────────────────────────────────────── */
+// Dark stone-hall impulse: low-passed noise with an exponential tail.
+function _makeImpulse(ctx, seconds, decay) {
+    const len = Math.floor(ctx.sampleRate * seconds);
+    const buf = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+        const d = buf.getChannelData(ch);
+        let lp = 0;
+        for (let i = 0; i < len; i++) {
+            lp += 0.35 * ((Math.random() * 2 - 1) - lp);
+            d[i] = lp * Math.pow(1 - i / len, decay);
+        }
+    }
+    return buf;
+}
+
 function initAudioContext() {
     if (audioCtx) return audioCtx;
     const Ctx = window.AudioContext || window.webkitAudioContext;
     if (!Ctx) return null;
 
     audioCtx = new Ctx();
-    masterGain = audioCtx.createGain();
-    masterGain.gain.value = sfxEnabled ? globalVolume : 0;
-    masterGain.connect(audioCtx.destination);
+    const c = audioCtx;
+    const gain = (v) => { const g = c.createGain(); g.gain.value = v; return g; };
+
+    bus.masterOut = gain(audioPrefs.muted ? 0 : 1);
+    bus.masterOut.connect(c.destination);
+
+    // Gentle brick-wall: 14 sample voices + score + cues never clip.
+    const lim = c.createDynamicsCompressor();
+    lim.threshold.value = -6; lim.knee.value = 4; lim.ratio.value = 12;
+    lim.attack.value = 0.002; lim.release.value = 0.2;
+    lim.connect(bus.masterOut);
+
+    bus.reverb = c.createConvolver();
+    bus.reverb.buffer = _makeImpulse(c, 2.8, 2.6);
+    bus.reverb.connect(lim);
+
+    bus.sfxFader = gain(0);
+    bus.sfxFader.connect(lim);
+    bus.cueBus = gain(1);
+    bus.cueBus.connect(bus.sfxFader);
+    bus.cueVerb = gain(0);
+    bus.cueBus.connect(bus.cueVerb);
+    bus.cueVerb.connect(bus.reverb);
+
+    bus.musicFader = gain(0);
+    bus.musicFader.connect(lim);
+    const musicVerb = gain(MUSIC_VERB_LEVEL);
+    bus.musicFader.connect(musicVerb);
+    musicVerb.connect(bus.reverb);
+
+    _applyFaders(true);
     loadAllSounds();
+    if (window.EventBus) EventBus.emit('audio:ready');
     return audioCtx;
 }
 
@@ -88,7 +153,9 @@ async function loadSound(name, url) {
     try {
         const res = await fetch(url);
         if (!res.ok) return;
-        soundBuffers[name] = await audioCtx.decodeAudioData(await res.arrayBuffer());
+        const data = await res.arrayBuffer();
+        // Callback form: older iOS Safari has no promise-returning decodeAudioData.
+        soundBuffers[name] = await new Promise((ok, fail) => audioCtx.decodeAudioData(data, ok, fail));
     } catch (e) {
         // ponytail: a missing/undecodable clip just stays silent — no retry, no fallback chain.
         if (typeof GameLogger !== 'undefined') GameLogger.warn('SFX load failed: ' + name);
@@ -96,31 +163,40 @@ async function loadSound(name, url) {
 }
 
 /* ─── Playback ──────────────────────────────────────────────────────────── */
+function _throttled(key, ms) {
+    const now = performance.now();
+    if (now - (lastPlayed[key] || 0) < ms) return true;
+    lastPlayed[key] = now;
+    return false;
+}
+
 /**
  * Play a sound effect by key. Silently ignored before the audio context exists,
- * while muted, when the key is throttled, or when the voice cap is hit.
- * @param {string} key   - SFX_CFG key.
+ * while SFX are off, when the key is throttled, or when the voice cap is hit.
+ * @param {string} key   - SFX_CFG or CUE_CFG key.
  * @param {number} scale - Optional volume multiplier (default 1).
  */
 function playSFX(key, scale = 1) {
-    if (!audioCtx || !sfxEnabled) return;
+    if (!audioCtx || !audioPrefs.sfxOn || audioPrefs.muted) return;
+
+    const cue = CUE_CFG[key];
+    if (cue) {
+        if (_throttled(key, cue[1])) return;
+        if (window.GameMusic) GameMusic.cue(key, cue[0] * scale);
+        return;
+    }
+
     const buf = soundBuffers[key];
-    if (!buf) return;
-
+    if (!buf || liveVoices >= MAX_VOICES) return;
     const cfg = SFX_CFG[key] || [0.3, 80];
-    const now = performance.now();
-    if (now - (lastPlayed[key] || 0) < cfg[1]) return;
-    if (liveVoices >= MAX_VOICES) return;
-    lastPlayed[key] = now;
-
-    if (audioCtx.state === 'suspended') audioCtx.resume();
+    if (_throttled(key, cfg[1])) return;
 
     const src = audioCtx.createBufferSource();
     src.buffer = buf;
-    const gain = audioCtx.createGain();
-    gain.gain.value = cfg[0] * scale;
-    src.connect(gain);
-    gain.connect(masterGain);
+    const g = audioCtx.createGain();
+    g.gain.value = cfg[0] * scale;
+    src.connect(g);
+    g.connect(bus.sfxFader);
     liveVoices++;
     src.onended = () => { liveVoices--; };
     src.start();
@@ -135,36 +211,55 @@ function sfxAttack(unitType) {
 }
 
 /* ─── Volume / mute ─────────────────────────────────────────────────────── */
+// Click-free fader moves (a hard .value write zippers on a playing voice).
+function _applyFaders(instant) {
+    if (!audioCtx) return;
+    const t = audioCtx.currentTime;
+    const set = (node, v) => instant ? (node.gain.value = v) : node.gain.setTargetAtTime(v, t, 0.04);
+    const sfx = audioPrefs.sfxOn ? audioPrefs.sfxVol : 0;
+    set(bus.sfxFader, sfx);
+    set(bus.cueVerb, sfx * CUE_VERB_LEVEL);
+    set(bus.musicFader, audioPrefs.musicOn ? audioPrefs.musicVol : 0);
+    set(bus.masterOut, audioPrefs.muted ? 0 : 1);
+}
+
+function _changed() {
+    _applyFaders(false);
+    if (window.EventBus) EventBus.emit('audio:changed', getAudioPrefs());
+}
+
 function setSfxEnabled(on) {
-    sfxEnabled = !!on;
-    localStorage.setItem('goh_sfx_enabled', sfxEnabled);
-    if (masterGain) masterGain.gain.value = sfxEnabled ? globalVolume : 0;
-    if (sfxEnabled) initAudioContext();
+    audioPrefs.sfxOn = !!on;
+    localStorage.setItem('goh_sfx_enabled', audioPrefs.sfxOn);
+    _changed();
 }
-
-function setMasterVolume(v) {
-    globalVolume = Math.max(0, Math.min(1, v));
-    localStorage.setItem('goh_sfx_volume', globalVolume);
-    if (masterGain && sfxEnabled) masterGain.gain.value = globalVolume;
-    const out = document.getElementById('sfx-volume-val');
-    if (out) out.textContent = Math.round(globalVolume * 100) + '%';
+function setSfxVolume(v) {
+    audioPrefs.sfxVol = Math.max(0, Math.min(1, v));
+    localStorage.setItem('goh_sfx_volume', audioPrefs.sfxVol);
+    _changed();
 }
-
-/** Push current state into the settings-modal controls (markup is injected late). */
-function syncSfxControls() {
-    const box = document.getElementById('sfx-toggle');
-    if (box) box.checked = sfxEnabled;
-    const range = document.getElementById('sfx-volume');
-    if (range) range.value = Math.round(globalVolume * 100);
-    const out = document.getElementById('sfx-volume-val');
-    if (out) out.textContent = Math.round(globalVolume * 100) + '%';
+function setMusicEnabled(on) {
+    audioPrefs.musicOn = !!on;
+    localStorage.setItem('goh_music_enabled', audioPrefs.musicOn);
+    _changed();
 }
+function setMusicVolume(v) {
+    audioPrefs.musicVol = Math.max(0, Math.min(1, v));
+    localStorage.setItem('goh_music_volume', audioPrefs.musicVol);
+    _changed();
+}
+function setAudioMuted(m) {
+    audioPrefs.muted = !!m;
+    localStorage.setItem('goh_audio_muted', audioPrefs.muted);
+    _changed();
+}
+function getAudioPrefs() { return Object.assign({}, audioPrefs); }
 
 /* ─── Event hooks ───────────────────────────────────────────────────────── */
 if (window.EventBus && window.GAME_EVENTS) {
     EventBus.on(GAME_EVENTS.ENEMY_REACHED_PORTAL, () => playSFX('portal_hit'));
-    EventBus.on(GAME_EVENTS.RELIC_NOTIF, () => playSFX('relic'));
-    EventBus.on(GAME_EVENTS.EQUIP_NOTIF, () => playSFX('relic'));
+    EventBus.on(GAME_EVENTS.RELIC_NOTIF, ({ show } = {}) => { if (show) playSFX('relic'); });
+    EventBus.on(GAME_EVENTS.EQUIP_NOTIF, ({ show } = {}) => { if (show) playSFX('relic'); });
     EventBus.on(GAME_EVENTS.STAGE_CHANGED, (s) => { if (s > 1) playSFX('reward'); });
 }
 
@@ -173,36 +268,38 @@ document.addEventListener('click', (e) => {
     if (e.target.closest && e.target.closest('button, .tower-card, .lang-tb')) playSFX('ui_click');
 }, true);
 
-// Settings modal toggle (markup lives in ui_templates.js). Modal HTML is injected
-// at runtime, so bind on first open via delegation rather than a direct lookup.
-document.addEventListener('change', (e) => {
-    if (!e.target) return;
-    if (e.target.id === 'sfx-toggle') setSfxEnabled(e.target.checked);
-    if (e.target.id === 'sfx-volume') playSFX('ui_click'); // audible preview on release
-});
-document.addEventListener('input', (e) => {
-    if (e.target && e.target.id === 'sfx-volume') setMasterVolume(e.target.value / 100);
-});
-document.addEventListener('DOMContentLoaded', syncSfxControls);
-
-// Unlock audio on the first user gesture (browser autoplay policy).
-['pointerdown', 'keydown'].forEach(evt => {
+// Unlock on a gesture that grants user activation. Chrome only counts
+// pointerup/touchend (not touch pointerdown); iOS needs resume() inside the
+// gesture again after an interruption (call, Siri, app switch) — so listeners
+// stay attached and the check is one property read once running.
+['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'].forEach(evt => {
     window.addEventListener(evt, () => {
-        initAudioContext();
-        syncSfxControls();
-    }, { once: true });
+        if (document.hidden) return;
+        if (!initAudioContext() || audioCtx.state === 'running') return;
+        audioCtx.resume().catch(() => {});
+    }, { capture: true, passive: true });
+});
+
+// Backgrounded tab / locked phone: stop the score and release the audio device.
+document.addEventListener('visibilitychange', () => {
+    if (!audioCtx) return;
+    if (document.hidden) audioCtx.suspend().catch(() => {});
+    else audioCtx.resume().catch(() => {});
 });
 
 /* ─── Exports ───────────────────────────────────────────────────────────── */
+window.GameAudio = {
+    ctx: () => audioCtx,
+    bus,
+    prefs: getAudioPrefs,
+    setSfxEnabled, setSfxVolume, setMusicEnabled, setMusicVolume, setAudioMuted
+};
 window.playSFX = playSFX;
 window.sfxAttack = sfxAttack;
-window.setSfxEnabled = setSfxEnabled;
-window.setMasterVolume = setMasterVolume;
-window.isSfxEnabled = () => sfxEnabled;
+window.isSfxEnabled = () => audioPrefs.sfxOn;
 window.sfxStatus = () => ({
     state: audioCtx ? audioCtx.state : 'none',
-    volume: globalVolume,
-    gain: masterGain ? masterGain.gain.value : null,
+    prefs: getAudioPrefs(),
     loaded: Object.keys(soundBuffers).length,
     missing: Object.keys(SFX_CFG).filter(k => !soundBuffers[k]),
     voices: liveVoices

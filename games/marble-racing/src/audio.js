@@ -325,8 +325,9 @@ function pulse(duty) {
   return (waves[duty] = ctx.createPeriodicWave(re, im));
 }
 
-function chip(m, t, dur, { wave = 0.5, peak, pan = 0, send = 0.1, vib = false, delay = false }) {
-  const o = out('music', pan, send), g = ctx.createGain(), osc = ctx.createOscillator(), end = t + dur;
+// o: the voice's output for this bar (scheduleBar), shared by its notes
+function chip(o, m, t, dur, { wave = 0.5, peak, vib = false, delay = false }) {
+  const g = ctx.createGain(), osc = ctx.createOscillator(), end = t + dur;
   wave === 'triangle' ? (osc.type = 'triangle') : osc.setPeriodicWave(pulse(wave));
   osc.frequency.value = mtof(m);
   g.gain.setValueAtTime(0, t);
@@ -346,23 +347,23 @@ function chip(m, t, dur, { wave = 0.5, peak, pan = 0, send = 0.1, vib = false, d
   osc.start(t); osc.stop(end + 0.1);
 }
 
-function hit(t, { freq, q = 0.8, type = 'bandpass', peak, decay, pan = 0 }) {
+function hit(o, t, { freq, q = 0.8, type = 'bandpass', peak, decay }) {
   const src = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
   src.buffer = noise;
   f.type = type; f.frequency.value = freq; f.Q.value = q;
   g.gain.setValueAtTime(peak, t);
   g.gain.exponentialRampToValueAtTime(0.0001, t + decay);
-  src.connect(f).connect(g).connect(out('music', pan, 0.05));
+  src.connect(f).connect(g).connect(o);
   src.start(t, Math.random() * 0.5); src.stop(t + decay + 0.02);
 }
 
-function kick(t, v = 1) {
+function kick(o, t, v = 1) {
   const osc = ctx.createOscillator(), g = ctx.createGain();
   osc.frequency.setValueAtTime(170, t);
   osc.frequency.exponentialRampToValueAtTime(42, t + 0.12);
   g.gain.setValueAtTime(0.32 * v, t);
   g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
-  osc.connect(g).connect(out('music', 0, 0));
+  osc.connect(g).connect(o);
   osc.start(t); osc.stop(t + 0.25);
 }
 
@@ -371,16 +372,18 @@ function scheduleBar(t) {
   bar++;
   const at = b => t + (S.swing && b % 1 === 0.5 ? b + 1 / 6 : b) * B; // swing pushes off-beat 8ths to the triplet
   const [root, tones] = S.prog[i], d = S.drum ?? 1;
+  // each voice's place in the mix: pan, reverb send
+  const arpO = out('music', -0.4, 0.06), lowO = out('music', 0, 0), leadO = out('music', 0.15, 0.18), snareO = out('music', 0, 0.05), hatO = out('music', 0.3, 0.05);
   for (const [b, j, oct, len] of S.arp) {
-    chip(tones[j % tones.length] + 12 * (oct + alt), at(b), len * B, { wave: S.arpWave ?? 0.25, peak: S.arpPeak ?? 0.02, pan: -0.4, send: 0.06 });
+    chip(arpO, tones[j % tones.length] + 12 * (oct + alt), at(b), len * B, { wave: S.arpWave ?? 0.25, peak: S.arpPeak ?? 0.02 });
   }
-  for (const [b, semi, len] of S.bass) chip(root + semi, at(b), len * B, { wave: 'triangle', peak: 0.15, send: 0 });
+  for (const [b, semi, len] of S.bass) chip(lowO, root + semi, at(b), len * B, { wave: 'triangle', peak: 0.15 });
   for (const [m, b, len] of S.hook[i]) {
-    chip(m, at(b), len * B * 0.92, { wave: S.lead[alt], peak: S.leadPeak ?? 0.038, pan: 0.15, send: 0.18, vib: len >= 1.5, delay: true });
+    chip(leadO, m, at(b), len * B * 0.92, { wave: S.lead[alt], peak: S.leadPeak ?? 0.038, vib: len >= 1.5, delay: true });
   }
-  for (const b of i % 4 === 3 ? [...S.kick, ...S.fill ?? []] : S.kick) kick(at(b), d); // fill into each phrase
-  for (const b of S.snare ?? []) hit(at(b), { freq: 1800, peak: 0.13 * d, decay: 0.13 });
-  for (const b of S.hat) hit(at(b), { freq: 7500, type: 'highpass', peak: (b === S.open ? 0.05 : 0.03) * d, decay: b === S.open ? 0.14 : 0.035, pan: 0.3 });
+  for (const b of i % 4 === 3 ? [...S.kick, ...S.fill ?? []] : S.kick) kick(lowO, at(b), d); // fill into each phrase
+  for (const b of S.snare ?? []) hit(snareO, at(b), { freq: 1800, peak: 0.13 * d, decay: 0.13 });
+  for (const b of S.hat) hit(hatO, at(b), { freq: 7500, type: 'highpass', peak: (b === S.open ? 0.05 : 0.03) * d, decay: b === S.open ? 0.14 : 0.035 });
 }
 
 function tick() {
@@ -403,6 +406,14 @@ export function startMusic() {
 // ---------- sfx ----------
 
 const live = () => ctx && ctx.state === 'running' && level.sfx > 0.001;
+// at most max a second: q holds the last second's start times (a crowd sets a sound off together)
+const limit = (q, max) => {
+  const t = ctx.currentTime;
+  while (q.length && t - q[0] >= 1) q.shift();
+  if (q.length >= max) return false;
+  q.push(t);
+  return true;
+};
 
 export function ui() {
   if (!live()) return;
@@ -461,13 +472,10 @@ export function shuffle() {
 
 // wormhole: filtered-noise swoosh + shimmering Dorian run, rising when lifted, falling when dropped; at most 6 a second
 // (a whole field drops into a roulette, a crowd drains out of a bowl)
-let warpT = [];
+const warpT = [];
 export function warp(up, pan) {
-  if (!live()) return;
+  if (!live() || !limit(warpT, 6)) return;
   const t = ctx.currentTime, dur = 0.7;
-  warpT = warpT.filter(x => t - x < 1);
-  if (warpT.length >= 6) return;
-  warpT.push(t);
   const src = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain();
   src.buffer = noise;
   bp.type = 'bandpass'; bp.Q.value = 6;
@@ -600,13 +608,10 @@ export function rollLevel(level, speed, muffled) {
 }
 
 // glass marble on glass marble: a high, very short bell tick (degrees 7-11), louder for a harder knock; at most 15 a second
-let clackT = [];
+const clackT = [];
 export function clack(pan, v) {
-  if (!live()) return;
+  if (!live() || !limit(clackT, 15)) return;
   const now = ctx.currentTime;
-  clackT = clackT.filter(x => now - x < 1);
-  if (clackT.length >= 15) return;
-  clackT.push(now);
   const d = 7 + Math.floor(Math.random() * 5);
   strike('sfx', mtof(deg(d, 74)), now, { partials: BELL, decay: 0.12, peak: Math.min(0.12, 0.02 + v * 0.012), pan, send: 0.15 });
 }
@@ -614,9 +619,9 @@ export function clack(pan, v) {
 // boost pad: a quick pulse-wave run up degrees 0 -> 7 in a quarter second
 export function boost(pan) {
   if (!live()) return;
-  const t = ctx.currentTime;
+  const t = ctx.currentTime, o = out('sfx', pan, 0.2);
   for (let k = 0; k < 8; k++) {
-    const o = out('sfx', pan, 0.2), g = ctx.createGain(), osc = ctx.createOscillator(), s = t + k * 0.031;
+    const g = ctx.createGain(), osc = ctx.createOscillator(), s = t + k * 0.031;
     osc.setPeriodicWave(pulse(0.25)); osc.frequency.value = mtof(deg(k, 74));
     g.gain.setValueAtTime(0, s); g.gain.linearRampToValueAtTime(0.05, s + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, s + 0.09);
     osc.connect(g).connect(o); osc.start(s); osc.stop(s + 0.1);
@@ -637,13 +642,10 @@ export function jump(pan) {
 
 // boomerang: a slide whistle up the wall (D up the octave), a hang with a bell at the top, and the slide back down;
 // each later swing (n) starts a Dorian step higher and a little softer; at most 4 a second (a crowd hits the wall together)
-let boomT = [];
+const boomT = [];
 export function boomerang(pan, n = 1) {
-  if (!live()) return;
+  if (!live() || !limit(boomT, 4)) return;
   const t = ctx.currentTime;
-  boomT = boomT.filter(x => t - x < 1);
-  if (boomT.length >= 4) return;
-  boomT.push(t);
   const k = Math.min(n, 7) - 1, v = n > 1 ? 0.06 : 0.09, o = out('sfx', pan, 0.3), g = ctx.createGain(), osc = ctx.createOscillator(), lo = mtof(deg(k, 62)), hi = mtof(deg(k + 7, 62));
   osc.type = 'sine';
   osc.frequency.setValueAtTime(lo, t);
@@ -658,9 +660,9 @@ export function boomerang(pan, n = 1) {
 // trap pad: a falling "wah-wah-waah" (A, F, then a D that sags) on a soft triangle, as a marble is flicked off the course
 export function trap(pan) {
   if (!live()) return;
-  const t = ctx.currentTime;
+  const t = ctx.currentTime, o = out('sfx', pan, 0.25);
   [4, 2, 0].forEach((d, k) => {
-    const s = t + k * 0.14, last = k === 2, f = mtof(deg(d, 62)), o = out('sfx', pan, 0.25), g = ctx.createGain(), osc = ctx.createOscillator();
+    const s = t + k * 0.14, last = k === 2, f = mtof(deg(d, 62)), g = ctx.createGain(), osc = ctx.createOscillator();
     osc.type = 'triangle';
     osc.frequency.setValueAtTime(f, s);
     if (last) osc.frequency.exponentialRampToValueAtTime(f * 0.94, s + 0.42);
@@ -670,13 +672,10 @@ export function trap(pan) {
 }
 
 // mud: a wet plop, a sine sinking A3 -> D2 under a short low squelch of noise; at most 6 a second
-let mudT = [];
+const mudT = [];
 export function mud(pan) {
-  if (!live()) return;
+  if (!live() || !limit(mudT, 6)) return;
   const t = ctx.currentTime;
-  mudT = mudT.filter(x => t - x < 1);
-  if (mudT.length >= 6) return;
-  mudT.push(t);
   const o = out('sfx', pan, 0.1), g = ctx.createGain(), osc = ctx.createOscillator();
   osc.type = 'sine';
   osc.frequency.setValueAtTime(mtof(deg(4, 50)), t); osc.frequency.exponentialRampToValueAtTime(mtof(deg(0, 38)), t + 0.14);
@@ -822,13 +821,10 @@ export function gulp(pan) {
 }
 
 // a trapdoor lid lifting: a short creak (a band of noise rising) and a wooden clack; at most 6 a second
-let lidT = [];
+const lidT = [];
 export function lid(pan) {
-  if (!live()) return;
+  if (!live() || !limit(lidT, 6)) return;
   const t = ctx.currentTime;
-  lidT = lidT.filter(x => t - x < 1);
-  if (lidT.length >= 6) return;
-  lidT.push(t);
   whoosh(t, 380, 950, 0.13, 0.05, pan, 9, 0.15);
   strike('sfx', mtof(deg(2, 62)), t + 0.12, { partials: MARIMBA, decay: 0.14, peak: 0.09, pan, send: 0.2 });
 }

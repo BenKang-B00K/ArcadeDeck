@@ -114,8 +114,10 @@ button:disabled { cursor: default; }
   background: linear-gradient(135deg, var(--pink), var(--violet)); box-shadow: 0 4px 18px rgba(255, 93, 143, .45); }
 .logo span { background: linear-gradient(90deg, #fff 0%, #ffd1e2 45%, #c9f3ff 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .tools { display: flex; gap: 8px; align-items: center; }
-.start-row { display: flex; gap: 8px; align-items: center; }
-.start-row .btn.big { flex: 1; min-width: 0; }
+/* phone width with every tool showing (install, phone link): Start takes its own row instead of squeezing to its icon */
+.start-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.start-row .btn.big { flex: 1 1 140px; min-width: 0; }
+.start-row .tools { margin-inline: auto; }
 .start-row .icon-btn { height: 58px; border-radius: 18px; }
 .start-row .icon-btn:not(.lang) { width: 58px; }
 .start-row .pop { top: auto; bottom: calc(100% + 8px); }
@@ -380,6 +382,23 @@ input[type=range]::-moz-range-thumb { width: 20px; height: 20px; border: 0; bord
   clip-path: polygon(0 0, 100% 50%, 0 100%); transform: rotate(var(--a, 0deg)) translateX(25px);
 }
 #edge .ani { display: block; width: 26px; height: 26px; margin: 4px; filter: drop-shadow(0 1px 1px rgba(20, 13, 51, .35)); }
+/* a word off a badge: what its marble just ran into, floating up beside the face on the side facing the middle (game.js tag()) */
+#edge b {
+  position: absolute; left: 100%; top: 50%; margin-left: 7px; pointer-events: none; white-space: nowrap;
+  font-size: 13px; font-weight: 900; font-style: normal; letter-spacing: .02em; line-height: 1;
+  text-shadow: 0 0 3px rgba(10, 6, 30, .95), 0 1px 2px rgba(10, 6, 30, .9);
+  animation: tag 1.5s ease-out forwards;
+}
+#edge b.l { left: auto; right: 100%; margin: 0 7px 0 0; }
+#edge i:has(b) { z-index: 1; } /* over the badges stacked next to it */
+@keyframes tag {
+  0% { opacity: 0; transform: translateY(-50%) scale(.6); }
+  12% { opacity: 1; transform: translateY(-50%) scale(1.08); }
+  20% { transform: translateY(-50%); }
+  75% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(calc(-50% - 14px)); }
+}
+@keyframes tagFade { 0%, 75% { opacity: 1; transform: translateY(-50%); } 100% { opacity: 0; transform: translateY(-50%); } }
 /* HUD: ribbon on top, middle cards, result strip, actions. Taps on empty HUD fall through to the canvas (gate tap,
    tap-empty-space to stop following); only the chips, cards and buttons catch them */
 .hud {
@@ -392,10 +411,10 @@ input[type=range]::-moz-range-thumb { width: 20px; height: 20px; border: 0; bord
 /* lanes: one cell per marble, at most 10 to a row (--cols set by game.js); 11-20 marbles wrap to a second row */
 .lane { display: grid; grid-template-columns: repeat(var(--cols, var(--n, 4)), minmax(0, 1fr)); row-gap: 6px; flex: none; }
 #cards { margin-top: 6px; }
-/* minimap: top-left under the ribbon; race.js drawMini() draws the course and a dot per marble */
+/* minimap: a strip under the ribbon, start to finish; race.js drawMini() draws the course line, its side lanes and mod glyphs, and a dot per marble */
 #mini {
-  position: absolute; left: 0; top: 8px; width: 132px; height: 132px; border-radius: 14px; pointer-events: none;
-  background: rgba(18, 13, 51, .62); border: 1px solid var(--line); box-shadow: 0 6px 16px rgba(0, 0, 0, .3);
+  position: absolute; left: 0; top: 8px; width: 100%; height: 34px; border-radius: 12px; pointer-events: none;
+  background: rgba(18, 13, 51, .82); border: 1px solid var(--line); box-shadow: 0 6px 16px rgba(0, 0, 0, .3);
 }
 .shake { animation: shake .45s cubic-bezier(.3, 1.6, .5, 1); }
 @keyframes shake { 30% { opacity: .5; } }
@@ -572,21 +591,21 @@ input[type=range]::-moz-range-thumb { width: 20px; height: 20px; border: 0; bord
 }
 
 .res {
-  height: 58px; padding: 4px; display: flex; flex-direction: column; justify-content: center;
+  height: 44px; padding: 3px; display: flex; flex-direction: column; justify-content: center;
   background: var(--glass); border: 1px solid var(--line); box-shadow: var(--lip); transition: background .4s, border-color .4s, box-shadow .4s, transform .08s;
 }
-.res b { font-size: clamp(11px, 2.9vw, 16px); font-weight: 900; overflow: hidden; text-overflow: ellipsis; }
+.res b { font-size: clamp(10px, 2.6vw, 14px); font-weight: 900; overflow: hidden; text-overflow: ellipsis; }
 /* quick fill glyph (board cards + setup cards): number / letter sits on it (em), ratio / bill value as a caption under a smaller glyph (i) */
 .gl { position: relative; display: grid; justify-items: center; line-height: 1; }
 .gl svg { max-width: 100%; height: auto; aspect-ratio: 1; filter: drop-shadow(0 2px 1.5px rgba(10, 6, 30, .55)); }
 .gl em { position: absolute; left: 50%; transform: translate(-50%, -50%); font-style: normal; font-weight: 900; font-size: clamp(9px, 2.6vw, 13px); color: #fff; -webkit-text-stroke: 1.5px #000; paint-order: stroke fill; text-shadow: 0 1px 2px rgba(10, 6, 30, .8); }
 .gl i { font-style: normal; font-weight: 900; font-size: clamp(10px, 2.6vw, 13px); max-width: 100%; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
-.res .gl svg { width: clamp(22px, 8vw, 34px); }
-.res .gl:has(i) svg { width: clamp(18px, 6vw, 24px); }
+.res .gl svg { width: clamp(18px, 6vw, 26px); }
+.res .gl:has(i) svg { width: clamp(14px, 4.5vw, 18px); }
 /* landed (quick fill): the card shows only the dressed animal, the result glyph steps aside */
 .res.on b.gl { display: none; }
 .res small:has(.pet) { display: block; overflow: visible; }
-.res .pet { display: block; margin: 0 auto; width: clamp(30px, 10vw, 46px); max-width: 100%; height: auto; aspect-ratio: 1; overflow: visible; filter: drop-shadow(0 2px 1.5px rgba(10, 6, 30, .5)); }
+.res .pet { display: block; margin: 0 auto; width: clamp(26px, 8vw, 34px); max-width: 100%; height: auto; aspect-ratio: 1; overflow: visible; filter: drop-shadow(0 2px 1.5px rgba(10, 6, 30, .5)); }
 /* penalty: bomb drops on the animal, fizzes, blows up; the animal jolts and keeps the soot */
 .pet.boom g, .pet.boom > use { transform-box: fill-box; transform-origin: center; }
 .pet .bomb { animation: bomb 1.3s both; }
@@ -614,9 +633,10 @@ input[type=range]::-moz-range-thumb { width: 20px; height: 20px; border: 0; bord
 .res.gauge .gl svg { display: none; }
 .res.gauge .gl i { font-size: clamp(10px, 2.9vw, 17px); text-shadow: 0 1px 2px rgba(10, 6, 30, .7); }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.res small { font-size: 11px; font-weight: 700; min-height: 14px; opacity: 0; transition: opacity .3s; overflow: hidden; text-overflow: ellipsis; }
+.res small { font-size: 10px; font-weight: 700; min-height: 12px; opacity: 0; transition: opacity .3s; overflow: hidden; text-overflow: ellipsis; }
 .res.on { border-color: var(--c); background: color-mix(in srgb, var(--c) 26%, rgba(10, 8, 30, .6)); box-shadow: 0 0 14px color-mix(in srgb, var(--c) 30%, transparent), var(--lip); animation: land .6s ease-out; }
 .res.on small { opacity: .95; }
+.res small:empty { display: none; } /* no caption yet: the glyph alone gets the card */
 .res.big.on { box-shadow: 0 0 0 2px #fff, 0 0 18px color-mix(in srgb, var(--c) 70%, transparent), var(--lip); }
 @media (hover: hover) { .res:not(:disabled):hover { border-color: rgba(255, 255, 255, .45); } }
 .res.run { box-shadow: 0 0 0 3px #fff, 0 0 12px color-mix(in srgb, var(--c, #c8c0ff) 70%, transparent), var(--lip); }
@@ -693,10 +713,10 @@ input[type=range]::-moz-range-thumb { width: 20px; height: 20px; border: 0; bord
 #ffBtn[aria-pressed="true"] { color: #fff; background: rgba(155, 107, 255, .38); border-color: #b98bff; }
 .actions #ffBtn[aria-pressed="true"] { transform: translateY(2px); box-shadow: inset 0 2px 4px rgba(0, 0, 0, .35), 0 1px 0 rgba(6, 3, 22, .6), 0 0 16px rgba(155, 107, 255, .55); }
 /* 11-20 marbles: lanes wrap to two rows, so the result cards drop to the compact height */
-#race.rows2 .res { height: 46px; }
-#race.rows2 .res .gl svg { width: clamp(18px, 6vw, 26px); }
+#race.rows2 .res { height: 38px; }
+#race.rows2 .res .gl svg { width: clamp(16px, 5vw, 22px); }
 #race.rows2 .res small:not(:has(.pet)) { display: none; }
-#race.rows2 .res .pet { width: clamp(28px, 8vw, 36px); }
+#race.rows2 .res .pet { width: clamp(24px, 7vw, 30px); }
 #race.rows2 .chip { height: 40px; }
 
 /* ---------- summary dialog ---------- */
@@ -809,26 +829,26 @@ dialog h2 { margin: 0 0 14px; text-align: center; font-size: 22px; font-weight: 
   #race.rows2 .chip { height: 34px; border-radius: 9px; }
   #race.rows2 .chip .ani { width: 22px; }
   .chip .pl { min-width: 15px; height: 15px; font-size: 9.5px; left: -2px; top: -4px; }
-  #mini { width: 96px; height: 96px; border-radius: 12px; }
 }
 @media (max-height: 520px) {
-  #mini { width: 84px; height: 84px; top: 4px; border-radius: 11px; }
+  #mini { top: 4px; }
   .icon-btn { width: 40px; height: 40px; }
   .actions { padding: 6px 0 8px; }
   .btn { height: 42px; }
-  .res { height: 46px; }
+  .res { height: 38px; }
   .res small { display: none; }
-  .res .pet { width: 36px; } /* card is 46px here; the dressed animal still shows */
+  .res .pet { width: 30px; } /* card is 38px here; the dressed animal still shows */
   .chip { height: 40px; }
   /* landscape phones: actions 42px, both lanes slim so the track keeps the middle */
   .hud { padding-top: calc(var(--safe-t) + 6px); }
   .actions .btn, .actions .btn.ghost { height: 42px; }
   #race.rows2 .chip { height: 32px; }
-  #race.rows2 .res { height: 40px; }
+  #race.rows2 .res { height: 34px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .peek.run i { animation-duration: var(--t, 3s) !important; } /* countdown is information, keep it */
+  #edge b { animation: tagFade 1.5s linear forwards !important; } /* so is a badge's word: held still, then faded */
 }
 
 /* race actions: Race! breathes once every gate is taken; the joker's cinematic beat dims the 3D view (the HUD stays bright) */
@@ -848,6 +868,15 @@ dialog h2 { margin: 0 0 14px; text-align: center; font-size: 22px; font-weight: 
 }
 .chip .cp.up { background: #10a35b; }
 .chip .cp.dn { background: #d61f45; }
+/* chip caption: where its marble is now (the mod or side route it's in, see where()); the face moves up to make room.
+   ponytail: long names ellipsize on 10-across phone chips, add short names to modNames if that reads badly */
+.chip .at {
+  position: absolute; left: 50%; bottom: 2px; translate: -50% 0; max-width: calc(100% - 4px); padding: 0 5px; z-index: 1;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 8.5px; font-weight: 900; line-height: 10px;
+  color: #fff; background: rgba(20, 13, 51, .72); border-radius: 5px; pointer-events: none;
+}
+.chip .at:empty { display: none; }
+.chip.on { padding-bottom: 10px; }
 /* summary: places at each checkpoint and the finish, against the last race */
 #splits { margin-top: 14px; }
 #splits summary { display: flex; align-items: baseline; gap: 8px; cursor: pointer; font-weight: 900; }
@@ -897,3 +926,9 @@ body .coop button.pri { background: linear-gradient(135deg, var(--pink) 0%, var(
 .watching #startBtn > * { display: none; }
 .watching #startBtn::after { content: attr(data-watch); }
 .watching :is(#editBtn, #newBtn, #raceBtn, #ffBtn, #replayBtn) { display: none !important; }
+/* a screen left alone (game.js puts .still on <body> 8 s after the last touch, key or scroll, outside a running round:
+   the setup, waiting for Race!, the results): the idle loops hold still, so an untouched menu stops redrawing at the
+   screen's full rate. Race! keeps breathing (it is the call to act); any input brings the rest back */
+.still :is(.zoo, .chip, .res) .ani, .still .res .pet, .still .pet .tear, .still .bg i, .still .link-btn::after,
+.still #sumList li.big, .still #sumList li.big::after { animation-play-state: paused; }
+.still :is(.zoo, .chip, .res) .ani, .still .res .pet { --blink: none; }

@@ -127,6 +127,8 @@ export function createSim(RAPIER, def, gates) {
       .setRestitution(p.r === BUMP_R ? BUMP_REST : PEG_REST).setRestitutionCombineRule(RAPIER.CoefficientCombineRule.Max).setFriction(0.1).setActiveEvents(RAPIER.ActiveEvents.COLLISION_EVENTS);
     pegOf.set(world.createCollider(d, fixed).handle, k);
   });
+  // moguls on the finish run-in: balls sunk into the floor, only their low caps showing; plain track to roll over
+  for (const m of def.moguls) world.createCollider(track(RAPIER.ColliderDesc.ball(m.r).setTranslation(...m.p)), fixed);
 
   // gate flaps: one kinematic body per stall, hinged on the floor, swinging in toward the mouth on GO
   const flaps = def.fan.stalls.map((s, g) => {

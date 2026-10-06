@@ -11,7 +11,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { mergeGeometries, toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
 import RAPIER from 'rapier';
 import { R, MR, FS, F, TUBE, TRAPF, GLASS, frameAt, stallAt, boomGeo, splitsOf, expressAt, sectorOf as sectorAt } from './track.js';
-import { createSim, centreLine, DT, flapAngle, ringAngle, doorClock, doorAngle, forkWay, DOOR_A, WARP, DONE, TRAP as TRAPPED } from './sim.js';
+import { createSim, centreLine, DT, flapAngle, ringAngle, doorClock, doorAngle, forkWay, DOOR_A, WARP, DONE, COIL, TRAP as TRAPPED } from './sim.js';
 
 export const ready = RAPIER.init();
 
@@ -37,6 +37,10 @@ const TIERS = ['high', 'medium', 'low'];
 const HALF_POS = 0.25, HALF_LOOK = 0.15; // camera springs, half-lives (s)
 const LEAD_GAP = 2; // the auto camera rides the 1st marble; a new leader takes it once ahead by this much (near-ties don't flick it)
 const SNAP = 8; // the view's target jumps further than this (a warp, a far cut, the finish): cut, don't fly
+// the last moments' shot: takes over once the leader is this far short of the final bend; from in front of the finish
+// line, looking back up the course, it frames the front-runners (up to LAST_N within LAST_PACK of the leader's
+// progress) at least LAST_R round, LAST_UP lower than the race rig (~25°): it looks through the arch, under its banner
+const LAST_IN = 10, LAST_N = 3, LAST_PACK = 3, LAST_R = 4.5, LAST_UP = -0.3, LAST_LEAN = 0.75;
 const SIGN_KICK = new Set(['boost', 'jump', 'boomUp', 'warpIn', 'trapIn', 'fork', 'rideIn', 'basinIn', 'mudIn', 'mistIn', 'tubeIn', 'coilIn']); // sim events that flare a mod's sign
 const SHOW = new Set(['pegs', 'jump', 'narrow', 'trapdoor', 'mist', 'carousel', 'basin', 'whirlpool', 'boomerang']); // the camera eases out over these
 const ZOOM_HALF = 0.6, ZOOM_MAX = 11; // that ease (half-life, s) and the widest it frames (radius)
@@ -46,7 +50,7 @@ const SPIN_T = 2.7, SPIN_TURNS = 2; // the start wheel's spin during the countdo
 
 const v3 = () => new THREE.Vector3();
 const col = h => new THREE.Color(h);
-const MUD_C = col(MUDDY), ICE_C = col(ICE), HOT_C = col(HOT), DRY_C = col('#b07a48'); // parsed once, used every frame
+const MUD_C = col(MUDDY), ICE_C = col(ICE), HOT_C = col(HOT), DRY_C = col('#b07a48'), PEARL_C = col(PEARL), FW_C = FW.map(col), BLACK = col('#000'); // parsed once, used every frame
 const mixWhite = (h, f = 0.5) => col(h).lerp(col('#ffffff'), f);
 const smooth = x => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x);
 const damp = (half, dt) => 1 - Math.pow(2, -dt / half); // critically damped-ish spring step for a half-life
@@ -174,10 +178,10 @@ function particleSystem(count, map) {
 // ---------- the race ----------
 export async function createRace(cv, hooks = {}) {
   await ready;
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)'), touch = matchMedia('(pointer: coarse)').matches;
   // quality: remembered per device; High on desktop, Medium on touch screens; steps down, never up (LADDER rule)
   let tier = (() => { try { return localStorage.getItem(QKEY); } catch { return null; } })();
-  if (!TIERS.includes(tier)) tier = matchMedia('(pointer: coarse)').matches ? 'medium' : 'high';
+  if (!TIERS.includes(tier)) tier = touch ? 'medium' : 'high';
   let dprCap = 2;
 
   // no MSAA on the canvas: the scene renders into the composer's target, so the canvas only ever got one full-screen
@@ -378,9 +382,9 @@ export async function createRace(cv, hooks = {}) {
   const pillars = [...Array(5)].map(() => { const m = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.9, 1, 24, 1, true).translate(0, 0.5, 0), new THREE.MeshBasicMaterial({ map: pillarTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, toneMapped: false })); m.visible = false; m.userData = { t: 0 }; scene.add(m); return m; });
 
   // ---------- per-race state ----------
-  const S = { def: null, sim: null, players: [], gates: [], mode: 'idle', track: null, acc: 0, ff: false, slow: 1, raf: 0, last: 0, t: 0, follow: -1, focus: -1,
-    peek: null, feat: null, flap: 0, rings: [], holes: [], traps: [], signs: [], basins: [], hoops: [], pegFlash: null, rack: null, hops: [], trail: null, blink: null, hurt: null, stun: null, atk: null, mistOn: null,
-    first: -1, ft: 1 / 60, ftWait: 0, shake: 0, photo: 0, ended: false, idleUntil: 0, shown: true };
+  const S = { def: null, sim: null, players: [], mode: 'idle', track: null, acc: 0, ff: false, raf: 0, last: 0, follow: -1, focus: -1,
+    peek: null, feat: null, rings: [], holes: [], traps: [], signs: [], basins: [], hoops: [], pegFlash: null, rack: null, hops: [], trail: null, blink: null,
+    lab: {}, fxUntil: 0, ft: 1 / 60, ftWait: 0, shake: 0, photo: 0, ended: false, idleUntil: 0, shown: true };
   const cam = { pos: new THREE.Vector3(30, 30, 60), look: new THREE.Vector3(0, -10, 10), wantPos: new THREE.Vector3(), wantLook: new THREE.Vector3() };
   const zoom = { k: 0, c: new THREE.Vector3(), r: 0, up: 0, zones: [] }; // easing out over a showcase mod: amount 0..1, its frame
   const tmpV = v3(), tmpV2 = v3(), tmpQ = new THREE.Quaternion(), tmpM = new THREE.Matrix4(), tmpS = new THREE.Vector3(1, 1, 1), tmpC = new THREE.Color();
@@ -388,7 +392,11 @@ export async function createRace(cv, hooks = {}) {
 
   // ---------- track building ----------
   function build(def) {
-    disposeTrack();
+    // the old course leaves the scene now, but is disposed only once the new one is compiled or drawn (S.old, see the
+    // loop): its shaders are mostly the new one's too, and freed first they were compiled all over again every course
+    disposeTrack(S.old);
+    S.old = S.track;
+    if (S.track) scene.remove(S.track);
     const G = new THREE.Group(), geos = { track: [], rim: [], post: [], tower: [], gold: [], glass: [], tint: [], frost: [], peg: null };
     S.track = G;
     scene.add(G);
@@ -435,18 +443,18 @@ export async function createRace(cv, hooks = {}) {
       const m = new THREE.Mesh(new THREE.SphereGeometry(MR * 1.15, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshPhysicalMaterial({ color: '#ffffff', transparent: true, opacity: 0.35, roughness: 0.1, clearcoat: 1, emissive: '#ffffff', emissiveIntensity: 0.25, depthWrite: false }));
       m.position.set(s.pos[0], s.pos[1] - MR, s.pos[2]);
       wheel.add(m);
-      const n = new THREE.Sprite(new THREE.SpriteMaterial({ map: labelTex(String(g + 1), '#ffffff').t, sizeAttenuation: true, depthWrite: false, transparent: true }));
-      n.scale.set(0.55 * labelTex(String(g + 1), '#fff').aspect, 0.55, 1); n.position.set(s.pos[0], s.pos[1] + 0.95, s.pos[2]);
+      const lt = labelTex(String(g + 1), '#ffffff'), n = new THREE.Sprite(new THREE.SpriteMaterial({ map: lt.t, sizeAttenuation: true, depthWrite: false, transparent: true }));
+      n.scale.set(0.55 * lt.aspect, 0.55, 1); n.position.set(s.pos[0], s.pos[1] + 0.95, s.pos[2]);
       wheel.add(n); m.userData.num = n;
       return m;
     });
     // pegs: instanced pearls; they flash in the colour of whoever hits them
     const pegGeo = new THREE.CylinderGeometry(def.pegs[0]?.r ?? 0.125, def.pegs[0]?.r ?? 0.125, def.pegs[0]?.h ?? 1.2, 12);
     const pegs = new THREE.InstancedMesh(pegGeo, M.peg, def.pegs.length);
-    def.pegs.forEach((p, k) => { const sr = p.r / def.pegs[0].r; tmpQ.setFromUnitVectors(tmpV.set(0, 1, 0), tmpV2.set(...p.ax)); tmpM.compose(tmpV.set(...p.p), tmpQ, tmpS.set(sr, 1, sr)); pegs.setMatrixAt(k, tmpM); pegs.setColorAt(k, col(PEARL)); });
+    def.pegs.forEach((p, k) => { const sr = p.r / def.pegs[0].r; tmpQ.setFromUnitVectors(tmpV.set(0, 1, 0), tmpV2.set(...p.ax)); tmpM.compose(tmpV.set(...p.p), tmpQ, tmpS.set(sr, 1, sr)); pegs.setMatrixAt(k, tmpM); pegs.setColorAt(k, PEARL_C); });
     pegs.castShadow = tier === 'high';
     G.add(pegs);
-    S.pegs = pegs; S.pegFlash = new Float32Array(def.pegs.length); S.pegCol = def.pegs.map(() => col(PEARL));
+    S.pegs = pegs; S.pegFlash = new Float32Array(def.pegs.length); S.pegCol = def.pegs.map(() => PEARL_C.clone());
     // carousel, wormholes, boost pads, mist marks, finish arch + rack
     const walls = def.colliders.filter(c => c.part === 'ringWall'); // one per carousel, in order
     S.rings = def.rings.map((rg, k) => carouselMesh(rg, G, geos, walls[k]));
@@ -494,11 +502,12 @@ export async function createRace(cv, hooks = {}) {
   }
   const meshGeo = c => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(c.verts.slice(), 3)); g.setIndex(new THREE.BufferAttribute(c.idx.slice(), 1)); const ng = toCreasedNormals(g, CREASE); g.dispose(); return ng; };
   const tintGeo = (g, h) => { const c = col(h), n = g.attributes.position.count, a = new Float32Array(n * 3); for (let i = 0; i < n; i++) a.set([c.r, c.g, c.b], i * 3); g.setAttribute('color', new THREE.BufferAttribute(a, 3)); };
-  function disposeTrack() {
-    if (!S.track) return;
-    S.track.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material && !Object.values(M).includes(o.material)) [].concat(o.material).forEach(m => { m.map?.dispose?.(); m.dispose(); }); });
-    scene.remove(S.track);
-    S.track = null;
+  function disposeTrack(g) {
+    if (!g) return;
+    // kept: the tier's materials and what every course shares (the soft dot also lights the halos). Disposed with the
+    // course, they were uploaded again for the next one, and the carousel hooks' shader compiled again
+    const keep = new Set([...Object.values(M), candy, candy.map, soft, pitTex, wellTex, padTex, hazardTex, caveTex, mudTex, chevTex, ...[...labelCache.values()].map(l => l.t)]);
+    g.traverse(o => { o.geometry?.dispose(); for (const m of [].concat(o.material ?? [])) if (!keep.has(m)) { if (!keep.has(m.map)) m.map?.dispose(); m.dispose(); } });
   }
 
   // the visible cross-section: the floor and walls of the collider profile, cut at each wall's visible height; 2M-1
@@ -656,6 +665,7 @@ export async function createRace(cv, hooks = {}) {
     grp.add(floor);
     const hub = new THREE.Mesh(new THREE.CylinderGeometry(rg.rIn, rg.rIn, 1.05, 48), M.gold); hub.position.y = 0.5; grp.add(hub);
     const ruby = new THREE.MeshStandardMaterial({ color: '#ff2d55', emissive: '#ff2d55', emissiveIntensity: 0.5, metalness: 0.3, roughness: 0.15, flatShading: true });
+    const seatMat = new THREE.MeshStandardMaterial({ color: '#ffd27a', metalness: 0.8, roughness: 0.2, emissive: '#ffb547', emissiveIntensity: 0.2 }), seatGeo = new THREE.SphereGeometry(0.22, 16, 10);
     const sg = Math.sign(rg.omega) || 1, hooks = rg.parts.filter(q => q.part === 'hook');
     for (let k = 0; k < rg.seats; k++) {
       const a = 2 * Math.PI * k / rg.seats, r = (rg.rIn + rg.rOut) / 2;
@@ -670,14 +680,14 @@ export async function createRace(cv, hooks = {}) {
       const rail = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, hz * 2 + 0.1, 10).rotateX(Math.PI / 2), M.gold); rail.position.y = hy; h.add(rail);
       const gem = new THREE.Mesh(new THREE.OctahedronGeometry(0.14), ruby); gem.position.set(0, hy + 0.15, sg * hz); h.add(gem);
       grp.add(h);
-      const seat = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 10), new THREE.MeshStandardMaterial({ color: '#ffd27a', metalness: 0.8, roughness: 0.2, emissive: '#ffb547', emissiveIntensity: 0.2 }));
-      seat.position.set(Math.cos(a) * rg.rOut, rg.divH - (rg.rOut - rg.rIn) * tilt, Math.sin(a) * rg.rOut); seat.userData.seat = true;
+      const seat = new THREE.Mesh(seatGeo, seatMat);
+      seat.position.set(Math.cos(a) * rg.rOut, rg.divH - (rg.rOut - rg.rIn) * tilt, Math.sin(a) * rg.rOut);
       grp.add(seat);
     }
     G.add(grp);
     // static outer wall: a translucent band with gold lips, open at the entry (skirt) and exit
     geos.glass.push(meshGeo(wall));
-    return { grp, rg, live: 0, kick: 0, ruby };
+    return { grp, rg, live: 0, kick: 0, ruby, seatMat };
   }
   // boomerang: the pan's floor and quarter-pipe wall in the module's pastel, striped every half unit up the wall (a height
   // gauge for how far each marble climbs), glass side and near walls, neon along each side's outline and the wall's top,
@@ -1046,10 +1056,10 @@ export async function createRace(cv, hooks = {}) {
     m.receiveShadow = true;
     G.add(m);
   }
+  const chevTex = (() => { const cc = canvas(64, 64), g = cc.getContext('2d'); g.strokeStyle = '#fff'; g.lineWidth = 9; g.lineJoin = 'round'; g.beginPath(); g.moveTo(12, 52); g.lineTo(32, 18); g.lineTo(52, 52); g.stroke(); return tex(cc); })();
   function boostMesh(def, bp, G) {
-    const chev = (() => { const cc = canvas(64, 64), g = cc.getContext('2d'); g.strokeStyle = '#fff'; g.lineWidth = 9; g.lineJoin = 'round'; g.beginPath(); g.moveTo(12, 52); g.lineTo(32, 18); g.lineTo(52, 52); g.stroke(); return tex(cc); })();
     for (let s = bp.s0 + 0.4; s < bp.s1; s += 0.8) {
-      const fr = frameAt(def.chains, s), m = new THREE.Mesh(new THREE.PlaneGeometry(def.W * 0.7, 0.7), new THREE.MeshBasicMaterial({ map: chev, color: new THREE.Color(0.4, 1.4, 1), transparent: true, depthWrite: false, toneMapped: false, blending: THREE.AdditiveBlending }));
+      const fr = frameAt(def.chains, s), m = new THREE.Mesh(new THREE.PlaneGeometry(def.W * 0.7, 0.7), new THREE.MeshBasicMaterial({ map: chevTex, color: new THREE.Color(0.4, 1.4, 1), transparent: true, depthWrite: false, toneMapped: false, blending: THREE.AdditiveBlending }));
       m.position.set(...fr.p).addScaledVector(tmpV.set(...fr.u), 0.03);
       tmpM.makeBasis(tmpV.set(...fr.r), tmpV2.set(...fr.t).negate(), v3().set(...fr.u)); // plane: x across, y backwards along the run (arrow points forward)
       m.quaternion.setFromRotationMatrix(tmpM);
@@ -1069,7 +1079,7 @@ export async function createRace(cv, hooks = {}) {
     return { hp, o, ring, disc, base, hit: new THREE.Color(), flash: 0 };
   }
   function finishMesh(def, G, geos) {
-    const fr = frameAt(def.chains, def.finish.s), hw = def.W / 2 + 0.6, up = tmpV.set(...fr.u), r = tmpV2.set(...fr.r);
+    const fr = frameAt(def.chains, def.finish.s), hw = def.W / 2 + 0.6, r = tmpV2.set(...fr.r);
     for (const sgn of [-1, 1]) geos.gold.push(new THREE.CylinderGeometry(0.16, 0.2, 3.4, 16).translate(fr.p[0] + r.x * hw * sgn, fr.p[1] + 1.7, fr.p[2] + r.z * hw * sgn));
     const chk = (() => { const cc = canvas(128, 32), g = cc.getContext('2d'); for (let x = 0; x < 16; x++) for (let y = 0; y < 4; y++) { g.fillStyle = (x + y) % 2 ? '#ffffff' : '#1a1040'; g.fillRect(x * 8, y * 8, 8, 8); } return tex(cc); })();
     const band = new THREE.Mesh(new THREE.BoxGeometry(hw * 2, 0.5, 0.12), new THREE.MeshStandardMaterial({ map: chk, emissive: '#ffffff', emissiveMap: chk, emissiveIntensity: 0.3, roughness: 0.4 }));
@@ -1078,7 +1088,15 @@ export async function createRace(cv, hooks = {}) {
     const line = new THREE.Mesh(new THREE.PlaneGeometry(def.W, 0.25).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: chk, toneMapped: false }));
     line.position.set(fr.p[0], fr.p[1] + 0.02, fr.p[2]); line.rotation.y = band.rotation.y; G.add(line);
     S.arch = { p: new THREE.Vector3(...fr.p), t: new THREE.Vector3(...fr.t), band };
-    void up;
+    // the moguls on the run-in: each its ball's cap above the floor, the module's colour at the foot to snow on top (even
+    // light head-on flattened a plain tint into a decal)
+    for (const m of def.moguls) {
+      const g = new THREE.SphereGeometry(m.r, 32, 6, 0, Math.PI * 2, 0, Math.acos(1 - m.h / m.r)), pos = g.attributes.position;
+      const c = new Float32Array(pos.count * 3), foot = col(PASTEL[m.mod % 3]), snow = col('#ffffff');
+      for (let i = 0; i < pos.count; i++) tmpC.copy(foot).lerp(snow, 0.85 * Math.max(0, (pos.getY(i) - m.r + m.h) / m.h) ** 1.5).toArray(c, i * 3); // max: the rim rounds a hair under 0, and a negative ** 1.5 is NaN (black)
+      g.setAttribute('color', new THREE.BufferAttribute(c, 3));
+      geos.track.push(g.applyQuaternion(tmpQ.setFromUnitVectors(tmpV.set(0, 1, 0), tmpV2.set(...m.u))).translate(...m.p));
+    }
   }
   // split checkpoint k: a glowing mint line across the floor, its number floating over the middle
   function splitMesh(def, s, k, G) {
@@ -1097,7 +1115,6 @@ export async function createRace(cv, hooks = {}) {
     const n = def.n, rows = n > 10 ? 2 : 1, per = Math.ceil(n / rows), spacing = 1.7, rad = Math.max(6, per * spacing / 2.2);
     const center = new THREE.Vector3(...fr.p).addScaledVector(t, 9 + rad);
     const cups = [];
-    const pedMat = PASTEL.map(c => new THREE.MeshStandardMaterial({ color: c, roughness: 0.35 }));
     const dotTex = (() => { const cc = canvas(128, 16), g = cc.getContext('2d'); g.fillStyle = '#2a1f5c'; g.fillRect(0, 0, 128, 16); for (let x = 8; x < 128; x += 16) { g.fillStyle = '#fff6c4'; g.beginPath(); g.arc(x, 8, 3, 0, 7); g.fill(); } const tt = tex(cc); tt.wrapS = THREE.RepeatWrapping; tt.repeat.set(3, 1); return tt; })();
     const ledMat = new THREE.MeshBasicMaterial({ map: dotTex, color: new THREE.Color(1.6, 1.4, 1.1), toneMapped: false });
     for (let k = 0; k < n; k++) {
@@ -1106,7 +1123,8 @@ export async function createRace(cv, hooks = {}) {
       const p = center.clone().addScaledVector(t, -Math.cos(ang) * rad + row * 2.2).addScaledVector(side, Math.sin(ang) * rad);
       p.y = S.floorY + 0.6 + row * 1.3;
       const g = new THREE.Group(); g.position.copy(p); g.lookAt(p.x - t.x, p.y, p.z - t.z);
-      const ped = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.8, 1.2 + row * 1.3, 32), pedMat[k % 3]); ped.position.y = -0.6 - row * 0.65; g.add(ped);
+      // its own material, so a landing or the joker's spotlight lights this pedestal only (one shared per colour lit every third cup, or none)
+      const ped = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.8, 1.2 + row * 1.3, 32), new THREE.MeshStandardMaterial({ color: PASTEL[k % 3], roughness: 0.35 })); ped.position.y = -0.6 - row * 0.65; g.add(ped);
       const led = new THREE.Mesh(new THREE.CylinderGeometry(0.805, 0.805, 0.16, 32, 1, true), ledMat); led.position.y = -0.18; g.add(led);
       const dome = new THREE.Mesh(new THREE.SphereGeometry(0.66, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), M.glass); dome.renderOrder = 4; g.add(dome);
       const glyph = new THREE.Sprite(new THREE.SpriteMaterial({ transparent: true, depthWrite: false })); glyph.scale.setScalar(0.7); glyph.position.y = 0.42; glyph.visible = false; g.add(glyph);
@@ -1169,7 +1187,8 @@ export async function createRace(cv, hooks = {}) {
         const g = S.gateOf?.[i] ?? -1;
         if (g < 0) { x = 0; y = -999; z = 0; } else { const s = stallAt(S.def.fan, g, S.spinNow).pos; x = s[0]; y = s[1]; z = s[2]; }
       }
-      marblePos.set([x, y, z], i * 3); marbleQuat.set([qx, qy, qz, qw], i * 4);
+      marblePos[i * 3] = x; marblePos[i * 3 + 1] = y; marblePos[i * 3 + 2] = z;
+      marbleQuat[i * 4] = qx; marbleQuat[i * 4 + 1] = qy; marbleQuat[i * 4 + 2] = qz; marbleQuat[i * 4 + 3] = qw;
     }
   }
   // how far marble i is through its fall down a trapdoor (0..1), or -1
@@ -1304,10 +1323,15 @@ export async function createRace(cv, hooks = {}) {
   }
 
   // ---------- effects ----------
-  function spark(x, y, z, vx, vy, vz, color, life, size, g = -12) {
+  const sparkC = new Map(); // spark colours, parsed once: a burst used to parse its colour string for every spark
+  // amb: an ambient spark (a wormhole's pull), which leaves a still view throttled; any other keeps full rate while it flies
+  function spark(x, y, z, vx, vy, vz, color, life, size, g = -12, amb = false) {
     const k = P.next; P.next = (P.next + 1) % P.max;
-    P.x.set([x, y, z], k * 3); P.v.set([vx, vy, vz], k * 3);
-    tmpC.set(color); P.c.set([tmpC.r, tmpC.g, tmpC.b, 1], k * 4);
+    if (!amb) S.fxUntil = Math.max(S.fxUntil, performance.now() + life * 1000);
+    let c = sparkC.get(color);
+    if (!c) sparkC.set(color, c = col(color));
+    P.x[k * 3] = x; P.x[k * 3 + 1] = y; P.x[k * 3 + 2] = z; P.v[k * 3] = vx; P.v[k * 3 + 1] = vy; P.v[k * 3 + 2] = vz;
+    P.c[k * 4] = c.r; P.c[k * 4 + 1] = c.g; P.c[k * 4 + 2] = c.b; P.c[k * 4 + 3] = 1;
     P.life[k] = 0; P.max_[k] = life; P.size[k] = size; P.g[k] = g;
   }
   const rnd = () => Math.random() - 0.5;
@@ -1326,12 +1350,23 @@ export async function createRace(cv, hooks = {}) {
     const px = c * h.e1.x + s * h.e2.x, py = c * h.e1.y + s * h.e2.y, pz = c * h.e1.z + s * h.e2.z; // out from the axis
     const tx = -s * h.e1.x + c * h.e2.x, ty = -s * h.e1.y + c * h.e2.y, tz = -s * h.e1.z + c * h.e2.z; // round it
     spark(a.p[0] + px * rho + h.up.x * 0.08, a.p[1] + py * rho + h.up.y * 0.08, a.p[2] + pz * rho + h.up.z * 0.08,
-      -px * 4 + tx * 2, -py * 4 + ty * 2, -pz * 4 + tz * 2, Math.random() < 0.3 ? '#ffffff' : h.c, 0.32, 0.05 + Math.random() * 0.03, 0);
+      -px * 4 + tx * 2, -py * 4 + ty * 2, -pz * 4 + tz * 2, Math.random() < 0.3 ? '#ffffff' : h.c, 0.32, 0.05 + Math.random() * 0.03, 0, true);
   }
   function pillar(p, color, h) { const m = pillars.find(s => !s.visible) || pillars[0]; Object.assign(m.userData, { t: 0, h }); m.position.set(p.x, p.y - 0.3, p.z); m.material.color.set(color).multiplyScalar(0.9); m.visible = true; }
   // small: the tiny OUCH! / ATTACK! pair; dy: shift on screen in label heights (+ up), so a pair stacks, not overlaps
-  function label(p, text, color, small = false, dy = 0) {
+  // labels a crowd sets off together (a pile-up, a pack into a bowl): one per gap s of sim time per kind. Sim time
+  // starts at 0 every race, so the table is reset with each course (stale stamps hid the first ones of the next race)
+  function every(k, gap, t) {
+    if (t - (S.lab[k] ?? -9) <= gap) return false;
+    S.lab[k] = t;
+    return true;
+  }
+  // a marble's event label: the 3D sprite (show: false when a crowd just had one), and always the word to game.js for
+  // that marble's edge badge (S.who: the marble it's about)
+  function label(p, text, color, small = false, dy = 0, show = true) {
     if (!text) return;
+    hooks.onTag?.(S.who, text, color);
+    if (!show) return;
     const s = labels.find(l => !l.visible) || labels.reduce((a, b) => a.userData.born < b.userData.born ? a : b);
     const { t, aspect } = labelTex(text, color);
     s.material.map = t; // swapping maps keeps the shader
@@ -1383,12 +1418,13 @@ export async function createRace(cv, hooks = {}) {
   }
 
   // ---------- sim events -> visuals (the audio and HUD hear them through hooks.onEvent) ----------
-  const pName = i => S.players[i];
   function onSimEvent(e) {
-    const p = e.pos, c = pName(e.i)?.color || '#fff', lab = hooks.label || (k => k);
+    const p = e.pos, c = S.players[e.i]?.color || '#fff', lab = hooks.label || (k => k);
+    S.who = e.i;
     if (SIGN_KICK.has(e.type)) { // the nearest mod sign (within 10) flares as a marble goes through
       let best = null, bd = 100;
-      for (const sn of S.signs) { const q = sn.at.distanceToSquared(tmpV.set(...p)); if (q < bd) { bd = q; best = sn; } }
+      tmpV.fromArray(p);
+      for (const sn of S.signs) { const q = sn.at.distanceToSquared(tmpV); if (q < bd) { bd = q; best = sn; } }
       if (best) best.kick = 1;
     }
     switch (e.type) {
@@ -1407,10 +1443,10 @@ export async function createRace(cv, hooks = {}) {
         shock([(p[0] + b[o]) / 2, (p[1] + b[o + 1]) / 2, (p[2] + b[o + 2]) / 2], '#fff3c4', 1.2, 0.3);
         burst(p, ICE, 12, 2.5); burst([b[o], b[o + 1], b[o + 2]], HOT, 10, 3);
         // tiny labels, at most a pair every 0.3 s (a crowd at the drop hole would otherwise fill the screen)
-        if (e.t - (S.stunAt ?? -9) > 0.3 && !S.sim.inMist[e.i]) {
-          S.stunAt = e.t;
-          label(p, lab('ouch'), '#ffd27a', true, 0.6);
-          label([b[o], b[o + 1], b[o + 2]], lab('attack'), '#ff8a5c', true, -0.6);
+        if (!S.sim.inMist[e.i]) {
+          const ok = every('stun', 0.3, e.t);
+          label(p, lab('ouch'), '#ffd27a', true, 0.6, ok);
+          S.who = e.j; label([b[o], b[o + 1], b[o + 2]], lab('attack'), '#ff8a5c', true, -0.6, ok);
         }
         break;
       }
@@ -1424,17 +1460,17 @@ export async function createRace(cv, hooks = {}) {
       case 'boomUp': // up one of a boomerang's walls: a spray off it; BOOMERANG! the first time, then which swing (×2, ×3...);
         // labels at most every 0.35 s (a crowd hits the wall together)
         spray(p, [0, 1, 0], c, 8, 4);
-        if (e.t - (S.boomAt ?? -9) > 0.35) { S.boomAt = e.t; e.data.n > 1 ? label(p, '×' + e.data.n, '#ff9de6', true) : label(p, lab('boomerang'), '#ff9de6'); }
+        { const ok = every('boom', 0.35, e.t); e.data.n > 1 ? label(p, '×' + e.data.n, '#ff9de6', true, 0, ok) : label(p, lab('boomerang'), '#ff9de6', false, 0, ok); }
         break;
       case 'warpIn': {
         const h = S.holes[e.data.hole]; h.live++;
         { const d = tmpV.set(p[0] - h.w.a.p[0], p[1] - h.w.a.p[1], p[2] - h.w.a.p[2]), u = d.dot(h.e1), v = d.dot(h.e2); // where it went in, round the axis
           (S.warpIn ||= [])[e.i] = [Math.min(Math.hypot(u, v), h.w.a.r * 0.7), Math.atan2(v, u)]; }
         if (!h.rl) { label(p, lab('wormhole'), mixWhite(h.c).getStyle()); implode(h.w.a.p, c, h.c); shock(h.w.a.p, h.c, 2.2, 0.5, true); break; }
-        // a roulette: the sector it dropped in on, at most a label every 0.3 s (the whole field drops in)
+        // a roulette: the sector it dropped in on, at most a label every 0.3 s (the whole field drops in); a JACKPOT always
         const x = ['jackpot', 'next', 'lost'].indexOf(e.data.exit);
         burst(p, RW[x], 8, 3);
-        if (e.t - (S.rouAt ?? -9) > 0.3 || x === 0) { S.rouAt = e.t; label(p, lab(e.data.exit), mixWhite(RW[x], 0.25).getStyle(), x !== 0); }
+        label(p, lab(e.data.exit), mixWhite(RW[x], 0.25).getStyle(), x !== 0, 0, every('rou', x ? 0.3 : -1, e.t));
         break;
       }
       case 'trapIn': {
@@ -1452,7 +1488,7 @@ export async function createRace(cv, hooks = {}) {
         const tr = S.traps[e.data.trap], w = e.data.way; tr.flash = 1;
         if (w === 2) { tr.out.kick = 0.6; shock(p, TRAP, 2, 0.45, true); burst(p, TRAP, 16, 5); }
         if (w === 0) spray(p, tr.tp.a.u, FW[0], 14, 5);
-        if (w !== 1 || e.t - (S.mainAt ?? -9) > 0.5) { if (w === 1) S.mainAt = e.t; label(p, lab(['express', 'main', 'longway'][w]), w === 1 ? '#e8e4ff' : mixWhite(FW[w], 0.2).getStyle(), w === 1); }
+        label(p, lab(['express', 'main', 'longway'][w]), w === 1 ? '#e8e4ff' : mixWhite(FW[w], 0.2).getStyle(), w === 1, 0, w !== 1 || every('main', 0.5, e.t));
         break;
       }
       case 'warpOut': {
@@ -1468,12 +1504,12 @@ export async function createRace(cv, hooks = {}) {
         S.basins[e.data.basin].live++;
         if (e.data.again) break;
         spray(p, [0, 1, 0], '#bff3ff', 10, 4);
-        if (e.t - (S.basinAt ?? -9) > 0.4) { S.basinAt = e.t; label(p, lab(e.data.whirl ? 'whirl' : 'bowl'), '#7fe3ff'); }
+        label(p, lab(e.data.whirl ? 'whirl' : 'bowl'), '#7fe3ff', false, 0, every('basin', 0.4, e.t));
         break;
       }
       case 'letGo': // a whirlpool's current lets go: a splash off it
         spray(p, [0, 1, 0], '#e6fbff', 8, 3.5);
-        if (e.t - (S.letAt ?? -9) > 0.35) { S.letAt = e.t; label(p, lab('letgo'), '#bff3ff', true); }
+        label(p, lab('letgo'), '#bff3ff', true, 0, every('let', 0.35, e.t));
         break;
       case 'basinOut': { // down the drain: a ripple round the hole
         const b = S.basins[e.data.basin]; b.live = Math.max(0, b.live - 1);
@@ -1482,15 +1518,15 @@ export async function createRace(cv, hooks = {}) {
       }
       case 'mudIn': // a splash; the label at most every 0.4 s (a pack ploughing through would fill the screen)
         burst(p, '#c8925a', 8, 2); shock([p[0], p[1] - MR + 0.05, p[2]], '#c8925a', 1.3, 0.45, true); // and a ripple across the mud
-        if (e.t - (S.mudAt ?? -9) > 0.4) { S.mudAt = e.t; label(p, lab('mud'), '#e0b07a', true); }
+        label(p, lab('mud'), '#e0b07a', true, 0, every('mud', 0.4, e.t));
         break;
       case 'mistIn': label(p, lab('hidden'), '#cfe8ff'); break;
       case 'tubeIn': // into a narrow helix's middle tube; the label at most every 0.4 s (a queue goes in)
-        if (e.t - (S.tubeAt ?? -9) > 0.4) { S.tubeAt = e.t; label(p, lab('shortcut'), '#7cf0c5'); }
+        label(p, lab('shortcut'), '#7cf0c5', false, 0, every('tube', 0.4, e.t));
         break;
       case 'coilIn': // the air takes it into a coil: a puff off the mouth; the label at most every 0.4 s (a crowd pours in)
         spray(p, [0, 0.6, 0], mixWhite(coilC(S.def.coils[e.data.coil].side), 0.5).getStyle(), 8, 3);
-        if (e.t - (S.coilAt ?? -9) > 0.4) { S.coilAt = e.t; label(p, lab('spiral'), coilC(S.def.coils[e.data.coil].side)); }
+        label(p, lab('spiral'), coilC(S.def.coils[e.data.coil].side), false, 0, every('coil', 0.4, e.t));
         break;
       case 'coilOut': burst(p, mixWhite(coilC(S.def.coils[e.data.coil].side), 0.5).getStyle(), 8, 2.5); break; // out of a coil's mouth into the chamber
       case 'mistOut': e.data.gust >= 0 ? label(p, lab('tailwind'), '#9ff7ff') : label(p, lab('headwind'), '#b8c4ff'); break; // which gust it met in there
@@ -1499,7 +1535,6 @@ export async function createRace(cv, hooks = {}) {
       case 'finish': {
         const k = e.data.place, cup = S.rack.cups[k];
         S.hops.push({ i: e.i, k, t: 0, a: new THREE.Vector3(...p), b: cup.p.clone() });
-        if (S.first < 0) S.first = e.i;
         break;
       }
     }
@@ -1507,7 +1542,7 @@ export async function createRace(cv, hooks = {}) {
   }
   function landHop(h) {
     const cup = S.rack.cups[h.k], big = hooks.isBig?.(h.k), color = S.players[h.i].color;
-    S.cupOf[h.i] = h.k; cup.slam = 1; cup.flash = 1; cup.color = color;
+    S.cupOf[h.i] = h.k; cup.slam = 1; cup.flash = 1; cup.color = col(color);
     shock([cup.p.x, cup.p.y - 0.3, cup.p.z], color, big ? 2.6 : 1.7, 0.6, true);
     pillar(cup.p, color, big ? 9 : 5.5);
     burst([cup.p.x, cup.p.y, cup.p.z], color, big ? 60 : 30, big ? 7 : 4.5);
@@ -1530,6 +1565,9 @@ export async function createRace(cv, hooks = {}) {
     if (out.lengthSq() < 1e-4) out.set(0, 0, 1);
     return out.normalize();
   }
+  // the last moments' side of the course: the inside of the final bend. Its outer wall is the tall one, and on the side
+  // the camera used to take whatever the course's hand, it hid the run-in on half the courses
+  const lastSide = () => tmpV2.set(-S.rack.t.z, 0, S.rack.t.x).multiplyScalar(-S.def.h);
   const fitDist = r => { const vf = camera.fov * Math.PI / 360, hf = Math.atan(Math.tan(vf) * camera.aspect); return r / Math.sin(Math.min(vf, hf)); };
   // in the race, a target that leaps (a warp, a far cut, the finish shot) is a cut: no swoop across the stadium
   const jumped = look => (S.mode === 'race' || S.mode === 'done') && look.distanceToSquared(cam.look) > SNAP * SNAP;
@@ -1537,6 +1575,7 @@ export async function createRace(cv, hooks = {}) {
     const sim = S.sim, def = S.def;
     if (!def) return;
     const want = cam.wantPos, look = cam.wantLook;
+    let cutR = S.mode === 'race' || S.mode === 'peek' ? 2.6 : 0;
     if (S.mode === 'peek' && S.peek) {
       // flyover: along the centre line from the start fan to the rack, offset up and outward so the track reads; its
       // timetable (peek()) crawls over each showcase mod, and the camera closes in on it like the race camera does
@@ -1553,7 +1592,7 @@ export async function createRace(cv, hooks = {}) {
         rig(look, tan, 15 + (Math.min(zoom.r, ZOOM_MAX) + 2 - 15) * zoom.k, dt, want, zoom.up * zoom.k);
       }
       // each mod's neon sign: the timetable holds on it (peek()); it pops (sparks, a flare) and the camera dollies in
-      // from where it is, a little above, until the board fills the view, then swings back onto the flyover
+      // gently from where it is, a little above, until the board sits well in view, then drifts back onto the flyover
       const f = S.signs.find(x => Math.abs(x.s - s) < 1);
       if (f && f !== S.feat) { // and a chime, a step higher for each sign along the course (game.js)
         const q = f.sign.position.toArray();
@@ -1563,10 +1602,11 @@ export async function createRace(cv, hooks = {}) {
       S.feat = f;
       const g = S.signs.reduce((a, x) => x.k > (a?.k ?? 0.02) ? x : a, null); // the most featured: the one easing out too
       if (g && !reduce.matches) {
-        const p = g.sign.position, d = Math.max(2, fitDist(g.w * 1.3 * 1.1)); // the board, grown, at ~90% of the narrower side
+        // the board, grown, at ~60% of the narrower side; eased in and out (S-curve), so the dolly drifts rather than lunges
+        const p = g.sign.position, d = Math.max(2, fitDist(g.w * 1.12 * 1.5)), e = smooth(g.k);
         tmpV.subVectors(cam.pos, p).setY(0).normalize();
-        want.lerp(tmpS.copy(p).addScaledVector(tmpV, d * 0.97).add(tmpV.set(0, d * 0.26, 0)), g.k);
-        look.lerp(p, g.k);
+        want.lerp(tmpS.copy(p).addScaledVector(tmpV, d * 0.97).add(tmpV.set(0, d * 0.26, 0)), e);
+        look.lerp(p, e);
       }
     } else if (S.mode === 'ready' || S.mode === 'countdown') {
       // the start fan head-on, all gates across the screen
@@ -1577,19 +1617,31 @@ export async function createRace(cv, hooks = {}) {
       look.set(0, cy - 1.2, 0.6);
       want.set(0, cy + d * 0.72, d * 0.72);
     } else if (S.mode === 'race' || S.mode === 'done') {
-      // auto: the 1st marble, one at a time (no cutaways); follow: the tapped one, tighter; finish: side view of the
-      // line, then the rack
+      // auto: the 1st marble, one at a time (no cutaways); follow: the tapped one, tighter; the last moments (the leader
+      // into the final bend): the line head-on, the front-runners rolling toward it, then the rack
       const order = S.order || [], live = order.filter(i => sim.state[i] !== DONE);
       if (!live.includes(S.focus) || sim.prog[live[0]] - sim.prog[S.focus] > LEAD_GAP) S.focus = live[0] ?? -1;
       const focus = S.follow >= 0 && sim.state[S.follow] !== DONE ? S.follow : S.focus;
-      const finishing = sim.finished > 0 || (live.length && sim.prog[live[0]] > def.finish.s * 0.85);
-      if (finishing || focus < 0) {
-        const a = S.arch, r = S.rack;
-        const mid = tmpV.copy(a.p).lerp(r.center, sim.finished > 0 ? 0.55 : 0.25);
-        const side = tmpV2.set(-r.t.z, 0, r.t.x);
+      const finishing = sim.finished > 0 || (live.length && sim.prog[live[0]] > S.lastS);
+      if (finishing && !sim.finished && live.length) {
+        cutR = 1.2; // the line head-on, low: a wide window would carve a hole in the run-out floor in front of it
+        // the last moments: the front-runners fighting it out, watched from in front of the line as they come at it,
+        // the frame leaning toward the line and widening to keep it in as they near it
+        let n = 0;
+        look.set(0, 0, 0);
+        for (const i of live) {
+          if (n === LAST_N || sim.prog[live[0]] - sim.prog[i] > LAST_PACK) break;
+          look.x += marblePos[i * 3]; look.y += marblePos[i * 3 + 1]; look.z += marblePos[i * 3 + 2]; n++;
+        }
+        look.divideScalar(n);
+        const toLine = tmpV.subVectors(S.arch.p, look), rad = Math.min(ZOOM_MAX, Math.max(LAST_R, toLine.length() * 0.4 + 1.5));
+        look.addScaledVector(toLine, LAST_LEAN);
+        look.y += 0.6; // over the floor: a target down on it had the see-through window's tapered end clip a ring out of it
+        rig(look, tmpV.set(0, 0, 0), rad, dt, want, LAST_UP, S.rack.t); // no chase blend: from the front on any screen
+      } else if (finishing || focus < 0) { // the first one home: the rack fills up
+        const a = S.arch, r = S.rack, mid = tmpV.copy(a.p).lerp(r.center, 0.55);
         look.copy(mid).add(tmpS.set(0, 1, 0));
-        want.copy(mid).addScaledVector(side, 15).addScaledVector(r.t, sim.finished > 0 ? 9 : 3).add(tmpS.set(0, 8, 0));
-        if (live.length && sim.finished === 0) { const o = live[0] * 7; look.lerp(tmpV2.set(sim.xf[o], sim.xf[o + 1], sim.xf[o + 2]), 0.5); }
+        want.copy(mid).addScaledVector(lastSide(), 15).addScaledVector(r.t, 9).add(tmpS.set(0, 8, 0));
       } else {
         const p = tmpV.set(marblePos[focus * 3], marblePos[focus * 3 + 1], marblePos[focus * 3 + 2]);
         sim.pointAt(sim.prog[focus] + 3 * R + 1, pt);
@@ -1603,7 +1655,7 @@ export async function createRace(cv, hooks = {}) {
         rig(look, tan, rad + Math.max(0, Math.min(zoom.r, ZOOM_MAX) - rad) * zoom.k, dt, want, zoom.up * zoom.k);
       }
     } else { overview(want, look); }
-    if (S.photo > 0 && !reduce.matches) { const a = S.arch; want.copy(a.p).addScaledVector(tmpV.set(-a.t.z, 0, a.t.x), 7).add(tmpS.set(0, 2.2, 0)); look.copy(a.p).add(tmpS.set(0, 0.6, 0)); }
+    if (S.photo > 0 && !reduce.matches) { const a = S.arch; want.copy(a.p).addScaledVector(lastSide(), 7).add(tmpS.set(0, 2.2, 0)); look.copy(a.p).add(tmpS.set(0, 0.6, 0)); }
     const slow = reduce.matches ? 0.5 : 1;
     if (jumped(look)) { cam.pos.copy(want); cam.look.copy(look); }
     cam.pos.lerp(want, damp(HALF_POS / slow * (S.mode === 'peek' ? 0.4 : 1), dt));
@@ -1614,7 +1666,7 @@ export async function createRace(cv, hooks = {}) {
     // cut a window through whatever stands between the camera and the action (the run above in the spiral, the tower,
     // posts); off for the start ring and the overview, where nothing is in the way
     cut.cam.value.copy(camera.position); cut.tgt.value.copy(cam.look);
-    cut.r.value += ((S.mode === 'race' || S.mode === 'peek' ? 2.6 : 0) - cut.r.value) * damp(0.25, dt);
+    cut.r.value += (cutR - cut.r.value) * damp(0.25, dt);
     // the shadow camera follows the action, snapped to texels so it doesn't shimmer
     if (tier === 'high') {
       const step = 30 / 1024;
@@ -1633,9 +1685,10 @@ export async function createRace(cv, hooks = {}) {
     else if (zn) { zoom.c.lerp(zn.c, f); zoom.r += (zn.r - zoom.r) * f; zoom.up += (zn.up - zoom.up) * f; }
     zoom.k += ((zn ? 1 : 0) - zoom.k) * f;
   }
-  function rig(look, tan, rad, dt, want, up = 0) {
+  // side: the side to watch from (default: outward from the tower)
+  function rig(look, tan, rad, dt, want, up = 0, side = null) {
     const w = Math.min(1, Math.max(0, (1.3 - camera.aspect) / 0.75)); // 0 landscape .. 1 portrait
-    outward(look, rigTmp).multiplyScalar(1 - 0.7 * w).addScaledVector(tan, -(0.3 + 0.9 * w)).normalize();
+    (side ? rigTmp.copy(side) : outward(look, rigTmp)).multiplyScalar(1 - 0.7 * w).addScaledVector(tan, -(0.3 + 0.9 * w)).normalize();
     jumped(look) ? rigDir.copy(rigTmp) : rigDir.lerp(rigTmp, damp(0.5, dt)).normalize();
     const vf = camera.fov * Math.PI / 360, hf = Math.atan(Math.tan(vf) * camera.aspect);
     const d = Math.max(rad / Math.sin(w > 0.5 ? vf * 0.9 : Math.min(vf, hf)), 6.5);
@@ -1663,48 +1716,78 @@ export async function createRace(cv, hooks = {}) {
   }
   let sim0 = null; // the current track's centre line, for the flyover (no physics world: building one cost ~0.5 s on a phone)
 
-  // ---------- minimap: the course as the overview camera sees it, flattened (so laps stack apart), a dot per marble ----------
-  const MINI_Z = 0.7, MINI_Y = 0.45; // map-down per unit toward the viewer (+z) and per unit of drop
+  // ---------- minimap: the course as one line, start to finish, its mods in their sign colours with their glyphs, side
+  // lanes branching off it (a trap's, a fork's long way under, its express arcing over, a trapdoor's, a helix's coils, a
+  // wormhole's jump arcing over: a roulette's to each of its exits), a dot per marble at its progress, on the lane it's on ----------
+  const MINI_D = 9, MINI_G = 14; // a lane's offset from the line; a glyph's size (CSS px)
+  // y of a lane (dy off the line y0, x from xa to xb) at x: ramps off the line and back over r at each end
+  // (an express or a wormhole arcs over instead: the quadratic's height at x; its arc is the dash pattern)
+  const laneY = (ln, x, y0) => { const u = (x - ln.xa) / (ln.xb - ln.xa); return ln.arc ? y0 - 4 * MINI_D * u * (1 - u) : y0 + ln.dy * Math.min(1, Math.max(0, Math.min(x - ln.xa, ln.xb - x) / ln.r)); };
   function drawMini() {
     const cv = hooks.mini, [cw, ch] = S.miniCss || [0, 0]; // its CSS size, from the ResizeObserver below
     if (!cw || !S.def) return;
     const dpr = Math.min(2, devicePixelRatio || 1), w = Math.round(cw * dpr), h = Math.round(ch * dpr), g = cv.getContext('2d');
     let m = S.mini;
-    if (!m || m.w !== w || m.h !== h) { // the course outline: once per track and size
+    if (!m || m.w !== w || m.h !== h) { // the line: once per track and size
       cv.width = w; cv.height = h;
-      const def = S.def, pr = (x, y, z) => [x, z * MINI_Z - y * MINI_Y];
-      const lines = def.chains.map(ch => ({ trap: ch.f[F.flags] & TRAPF, p: Array.from({ length: ch.f.length / FS }, (_, i) => pr(ch.f[i * FS], ch.f[i * FS + 1], ch.f[i * FS + 2])) }));
-      const ovals = [...def.rings.map(r => [...pr(...r.c), r.rMid]), ...def.basins.map(b => [...pr(...b.c), b.rB]), [...pr(0, def.fan.yS, 0), def.fan.rMid]]; // carousels, bowls, start ring
-      const pans = def.boomerangs.map(bm => bm.poly.map(q => pr(...q))); // boomerang pans: their outline
-      const all = [...lines.flatMap(l => l.p), ...pans.flat(), ...ovals.flatMap(([x, y, r]) => [[x - r, y - r * MINI_Z], [x + r, y + r * MINI_Z]]), ...(S.rack?.cups || []).map(c => pr(c.p.x, c.p.y, c.p.z))];
-      const xs = all.map(p => p[0]), ys = all.map(p => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
-      const pad = 7 * dpr, k = Math.min((w - 2 * pad) / (x1 - x0), (h - 2 * pad) / (y1 - y0)), ox = (w - k * (x0 + x1)) / 2, oy = (h - k * (y0 + y1)) / 2;
-      const track = new Path2D(), trap = new Path2D();
-      for (const l of lines) l.p.forEach(([x, y], i) => (l.trap ? trap : track)[i ? 'lineTo' : 'moveTo'](ox + x * k, oy + y * k));
-      for (const [x, y, r] of ovals) { track.moveTo(ox + (x + r) * k, oy + y * k); track.ellipse(ox + x * k, oy + y * k, r * k, r * MINI_Z * k, 0, 0, 2 * Math.PI); }
-      for (const q of pans) { q.forEach(([x, y], i) => track[i ? 'lineTo' : 'moveTo'](ox + x * k, oy + y * k)); track.closePath(); }
-      // the outline is stroked once and becomes the canvas's CSS background: stroked every frame (thousands of round
-      // joins) it cost 6-50 ms a frame on a phone, and even copying it in with drawImage cost ~5 ms at 4x CPU
-      const bg = canvas(w, h), bgc = bg.getContext('2d', { willReadFrequently: true }); // a CPU canvas: toDataURL skips a GPU readback (~150 ms)
-      bgc.lineCap = bgc.lineJoin = 'round'; bgc.lineWidth = 2.5 * dpr;
-      bgc.strokeStyle = 'rgba(207, 198, 255, .65)'; bgc.stroke(track);
-      bgc.strokeStyle = TRAP; bgc.stroke(trap);
-      bgc.setLineDash([3 * dpr, 3 * dpr]); bgc.strokeStyle = FW[0]; // a fork's express: a dashed mint line across the turn
-      for (const tp of def.traps) if (tp.fork) { const [x0, y0] = pr(...tp.fork.express.a), [x1, y1] = pr(...tp.fork.express.b); bgc.beginPath(); bgc.moveTo(ox + x0 * k, oy + y0 * k); bgc.lineTo(ox + x1 * k, oy + y1 * k); bgc.stroke(); }
-      bgc.setLineDash([]);
-      Object.assign(cv.style, { backgroundImage: `url(${bg.toDataURL()})`, backgroundSize: '100% 100%' });
-      m = S.mini = { w, h, k, ox, oy };
+      const def = S.def, s0 = def.line[3], s1 = def.finish.s, y0 = ch / 2, x0 = ch / 2, x1 = cw - ch / 2, X = s => x0 + (Math.min(s1, Math.max(s0, s)) - s0) * (x1 - x0) / (s1 - s0);
+      const lane = (a, b, dy, c, arc) => { const xa = X(a), xb = X(b); return { xa, xb, dy, c, arc, r: Math.min(4, (xb - xa) / 4) || 1 }; };
+      const traps = def.traps.map(tp => [lane(tp.a.s, tp.b.s, MINI_D, tp.door ? NAMEC.trapdoor : TRAP), tp.fork && lane(tp.a.s, tp.b.s, -MINI_D, FW[0], '3 3')]);
+      const coils = def.coils.map(c => lane(c.in.s, c.out.s, c.side * MINI_D, coilC(c.side)));
+      const holes = def.wormholes.map(w => (w.roulette ? w.roulette.exits : [w]).map(e => lane(w.a.s, e.b.s, -MINI_D, e.kind === 'jackpot' ? GOLD : '#c86bff', '.1 4'))); // dotted: the wormhole's violet, JACKPOT's gold
+      const segs = [...def.mods.filter(md => NAMEC[md.type]).map(md => [md.s0, md.s1, NAMEC[md.type]]), ...def.muds.map(md => [md.s0, md.s1, NAMEC.mud])].filter(([a, b]) => b > s0 && a < s1);
+      const marks = [...def.mods.filter(md => md.s0 < s1).map(md => [md.type, (md.s0 + md.s1) / 2]), ...def.wormholes.map(w => [w.roulette ? 'roulette' : 'wormhole', w.a.s]),
+        ...def.traps.filter(tp => !tp.door).map(tp => [tp.fork ? 'fork' : 'trap', tp.a.s]), ...def.muds.map(md => ['mud', (md.s0 + md.s1) / 2])]; // a trapdoor is a mod on the course too
+      // the static layer is an SVG made the canvas's CSS background, so a frame only draws the dots (a stroked map every
+      // frame cost 6-50 ms on a phone). The glyphs are index.html's mod symbols (#m-*), copied in with the gradients they use
+      const f = n => n.toFixed(1), put = ln => `<path d="${ln.arc ? `M${f(ln.xa)} ${y0}Q${f((ln.xa + ln.xb) / 2)} ${y0 - 2 * MINI_D} ${f(ln.xb)} ${y0}`
+        : `M${f(ln.xa)} ${y0}L${f(ln.xa + ln.r)} ${y0 + ln.dy}L${f(ln.xb - ln.r)} ${y0 + ln.dy}L${f(ln.xb)} ${y0}`}" stroke="${ln.c}" stroke-width="2.5"${ln.arc ? ` stroke-dasharray="${ln.arc}"` : ''}/>`;
+      const sym = new Map(marks.map(([t]) => [t, document.getElementById('m-' + t)]).filter(([, el]) => el));
+      const grads = new Set([...sym.values()].flatMap(el => [...el.innerHTML.matchAll(/url\(#([\w-]+)\)/g)].map(r => r[1])));
+      let px = -Infinity; // glyphs left to right, one nudged along off the one before it rather than over it (close mods on a phone)
+      const spots = marks.filter(([t]) => sym.has(t)).map(([t, s]) => [t, X(s)]).sort((a, b) => a[1] - b[1]).map(([t, x]) => [t, px = Math.max(x, px + MINI_G - 1)]);
+      const q = 3, rows = Math.floor((ch - 4) / q);
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${cw}" height="${ch}" viewBox="0 0 ${cw} ${ch}">`
+        + `<defs>${[...grads].map(id => document.getElementById(id)?.outerHTML || '').join('')}</defs>`
+        + `<g fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".9">${[...traps.flat().filter(Boolean), ...coils, ...holes.flat()].map(put).join('')}</g>`
+        + `<g fill="none" stroke-linecap="round"><path d="M${x0} ${y0}H${f(x1)}" stroke="rgba(207, 198, 255, .3)" stroke-width="3"/>`
+        + segs.map(([a, b, c]) => `<path d="M${f(X(a))} ${y0}H${f(X(b))}" stroke="${c}" stroke-width="5"/>`).join('') + '</g>'
+        + Array.from({ length: rows * 2 }, (_, k) => `<rect x="${f(x1 - q + (k & 1) * q)}" y="${2 + (k >> 1) * q}" width="${q}" height="${q}" fill="${((k >> 1) + k) % 2 ? '#1a1440' : '#fff'}"/>`).join('') // the finish: a chequered line
+        + `<rect x="${x0 - 1}" y="${y0 - 5}" width="2" height="10" fill="rgba(255, 255, 255, .7)"/>` // the start: a tick
+        + spots.map(([t, x]) => `<circle cx="${f(x)}" cy="${y0}" r="${MINI_G / 2 + 1.5}" fill="rgba(18, 13, 51, .9)"/>`
+          + `<svg x="${f(x - MINI_G / 2)}" y="${y0 - MINI_G / 2}" width="${MINI_G}" height="${MINI_G}" viewBox="0 0 24 24">${sym.get(t).innerHTML}</svg>`).join('')
+        + '</svg>';
+      Object.assign(cv.style, { backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(svg)}")`, backgroundSize: '100% 100%' });
+      m = S.mini = { w, h, y0, x0, x1, s0, s1, traps, coils, holes };
     }
-    g.clearRect(0, 0, w, h);
-    // last place first, so the leader sits on top; the followed marble a size up with a white rim
-    const n = S.players.length, order = S.order || [...Array(n).keys()];
-    for (let j = n - 1; j >= 0; j--) {
-      const i = order[j], y = marblePos[i * 3 + 1];
-      if (y < -900) continue; // not in a stall yet
+    // the dots: the followed marble a size up with a white rim. A marble on a trap route, a fork's express or a helix's
+    // coil rides that lane, a warping one its wormhole's arc. Bunched ones on the same lane step up or down off it, so one doesn't hide another: lanes go
+    // to the followed marble first, then from the leader down; drawn last place first, so the leader and then the
+    // followed marble sit on top. Before the start, all at the start. Redrawn only once one has moved a whole pixel or
+    // changed lane, or the followed one changed
+    const sim = S.sim, n = S.players.length, ids = [...(S.order || Array(n).keys())], dots = [];
+    const fi = ids.indexOf(S.follow);
+    if (fi >= 0) ids.unshift(ids.splice(fi, 1)[0]);
+    let key = String(S.follow);
+    for (const i of ids) {
+      if (marblePos[i * 3 + 1] < -900) continue; // not in a stall yet
+      const t = !sim ? 0 : sim.place[i] >= 0 ? 1 : Math.min(1, Math.max(0, (sim.prog[i] - m.s0) / (m.s1 - m.s0)));
+      const st = sim?.state[i], ln = st === TRAPPED ? m.traps[sim.trap[i]][sim.trapPh[i] === 3 ? 1 : 0] : st === COIL ? m.coils[sim.coil[i]] : st === WARP ? m.holes[sim.warp[i]][Math.max(0, sim.warpE[i])] : null;
+      const x = st === WARP ? ln.xa + (ln.xb - ln.xa) * Math.min(1, Math.max(0, sim.warpU(i))) : m.x0 + t * (m.x1 - m.x0); // a warp's progress stays at A till it's out
+      const yb = Math.round(ln ? laneY(ln, x, m.y0) : m.y0), l = [0, -1, 1].find(y => !dots.some(d => d.yb === yb && d.l === y && Math.abs(d.x - x) < 8)) ?? 0;
+      dots.push({ i, x, yb, l });
+      key += `,${i}:${Math.round(x)}:${yb + l}`;
+    }
+    if (key === m.key) return;
+    m.key = key;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, cw, ch);
+    for (const { i, x, yb, l } of dots.reverse()) {
+      const me = i === S.follow;
       g.beginPath();
-      g.arc(m.ox + marblePos[i * 3] * m.k, m.oy + (marblePos[i * 3 + 2] * MINI_Z - y * MINI_Y) * m.k, (i === S.follow ? 4.5 : 3.5) * dpr, 0, 2 * Math.PI);
+      g.arc(x, yb + l * 4.5, me ? 6 : 4.5, 0, 2 * Math.PI);
       g.fillStyle = S.players[i].color; g.fill();
-      g.lineWidth = dpr; g.strokeStyle = i === S.follow ? '#fff' : 'rgba(8, 7, 32, .85)'; g.stroke();
+      g.lineWidth = me ? 2 : 1; g.strokeStyle = me ? '#fff' : 'rgba(8, 7, 32, .85)'; g.stroke();
     }
   }
 
@@ -1715,7 +1798,7 @@ export async function createRace(cv, hooks = {}) {
     const w = forkWay(tr.tp.fork, tt);
     if (w !== tr.way) { tr.way = w; tr.flash = Math.max(tr.flash, 0.5); if (racing && near(tr.tp.a.s, 20)) hooks.onEvent?.({ type: 'signal', pos: tr.tp.a.p, data: { way: w } }); }
     tr.flash = Math.max(0, tr.flash - dt * 3);
-    tr.lamps.forEach((m, k) => m.material.color.set(FW[k]).multiplyScalar(k === w ? 1.6 + 2 * tr.flash : 0.18));
+    tr.lamps.forEach((m, k) => m.material.color.copy(FW_C[k]).multiplyScalar(k === w ? 1.6 + 2 * tr.flash : 0.18));
     const want = w === 1 ? 0 : (w === 0 ? -1 : 1) * tr.inSide * Math.PI / 2; // the arrow: up (straight on), or toward its side
     tr.ang += (want - tr.ang) * damp(0.06, dt);
     tr.arrow.rotation.z = tr.ang;
@@ -1738,16 +1821,22 @@ export async function createRace(cv, hooks = {}) {
   // ---------- the loop: renders only while something moves ----------
   // S.shown: the canvas is on screen (the ResizeObserver below). Hidden behind the setup screen, the carousels and bowls
   // kept it drawing at full rate forever
-  function need() { if (!S.raf && S.shown && !document.hidden && !S.paused) { S.last = performance.now(); S.raf = requestAnimationFrame(loop); } }
+  // need(): something changed from outside (a new phase, a tap), so the next frame is drawn at full rate
+  function need() { S.calm = false; if (!S.raf && S.shown && !document.hidden && !S.paused) { S.last = performance.now(); S.raf = requestAnimationFrame(loop); } }
   function loop(now) {
-    // 90 Hz and faster screens (120 Hz phones, 144 Hz monitors) draw every other refresh: 60-80 fps, half the heat
-    if (now - S.last < 10) { S.raf = requestAnimationFrame(loop); return; }
+    // pacing: phones and tablets draw at most 60 fps (a 90 or 120 Hz screen every other refresh: a 60 Hz one's heat and
+    // battery), other screens every other refresh over 100 Hz (a 144 Hz monitor: 72 fps); a still view with only ambient
+    // motion left (waiting for Race!, the finished race: S.calm) at most 30. 2 ms under the step: rAF times jitter
+    if (now - S.last < (S.calm ? 1000 / 30 - 2 : touch ? 1000 / 60 - 2 : 10)) { S.raf = requestAnimationFrame(loop); return; }
     S.raf = 0;
     const dt = Math.min(0.1, (now - S.last) / 1000); S.last = now;
     S.frameN = (S.frameN || 0) + 1;
-    // adaptive quality: a smoothed frame time held above 1/26 s steps down (one way, remembered per device)
-    S.ft += (dt - S.ft) * FT_SMOOTH;
-    if ((S.ftWait += dt) > 2 && S.ft > FT_SLOW && S.mode !== 'idle') stepDown();
+    // adaptive quality: a smoothed frame time held above 1/26 s steps down (one way, remembered per device). Not over
+    // the throttled frames: those are slow on purpose
+    if (!S.calm) {
+      S.ft += (dt - S.ft) * FT_SMOOTH;
+      if ((S.ftWait += dt) > 2 && S.ft > FT_SLOW && S.mode !== 'idle') stepDown();
+    }
     const sim = S.sim;
     let moving = S.mode === 'peek' || S.mode === 'countdown' || S.mode === 'ready';
     if (sim && S.mode === 'race') {
@@ -1789,7 +1878,7 @@ export async function createRace(cv, hooks = {}) {
       ring.grp.rotation.y = -ringAngle(ring.rg, t);
       ring.kick = Math.max(0, ring.kick - dt);
       const glow = 0.15 + (ring.live ? 0.3 + 0.15 * Math.sin(now / 50) : 0) + ring.kick;
-      ring.grp.children.forEach(m => { if (m.userData.seat) m.material.emissiveIntensity = glow; });
+      ring.seatMat.emissiveIntensity = glow;
       ring.ruby.emissiveIntensity = 0.35 + glow * 1.6;
       moving = true;
     }
@@ -1840,10 +1929,10 @@ export async function createRace(cv, hooks = {}) {
     for (const sn of S.signs) {
       const sg = sn.sign, k0 = Math.abs(sn.at.x + sn.at.z); // each its own phase, so they don't bob in step
       sn.kick = Math.max(0, sn.kick - dt * 2.5);
-      sn.k += ((S.mode === 'peek' && S.feat === sn ? 1 : 0) - sn.k) * damp(0.1, dt); // featured by the flyover: grows, all lit, glowing
+      sn.k += ((S.mode === 'peek' && S.feat === sn ? 1 : 0) - sn.k) * damp(0.35, dt); // featured by the flyover: grows, all lit, glowing
       sg.position.copy(sn.at).addScaledVector(sn.up, reduce.matches ? 0 : Math.sin(now / 520 + k0) * 0.1);
       sg.lookAt(camera.position);
-      sg.scale.setScalar(1 + (reduce.matches ? 0 : 0.3 * smooth(sn.k)));
+      sg.scale.setScalar(1 + (reduce.matches ? 0 : 0.12 * smooth(sn.k)));
       const ph = Math.floor(now / (sn.k > 0.5 ? 70 : 140) + k0) % 3, fl = Math.max(sn.kick, sn.k * 0.6);
       sn.bulbs.forEach((m, k) => m.color.copy(sn.cols[k]).multiplyScalar(fl > 0 ? 1.6 + 2 * fl + (k === ph ? 1 : 0) * sn.k : reduce.matches || k === ph ? 2.2 : 0.35));
       if (sn.flick > 0) sn.flick -= dt; else if (!reduce.matches && sn.k < 0.1 && Math.random() < dt * 0.15) sn.flick = 0.2;
@@ -1854,7 +1943,7 @@ export async function createRace(cv, hooks = {}) {
     // peg flashes fade back to pearl
     if (S.pegs) {
       let dirty = false;
-      for (let k = 0; k < S.pegFlash.length; k++) if (S.pegFlash[k] > 0) { S.pegFlash[k] = Math.max(0, S.pegFlash[k] - dt); tmpC.set(PEARL).lerp(S.pegCol[k], S.pegFlash[k] / 0.25); S.pegs.setColorAt(k, tmpC); dirty = true; }
+      for (let k = 0; k < S.pegFlash.length; k++) if (S.pegFlash[k] > 0) { S.pegFlash[k] = Math.max(0, S.pegFlash[k] - dt); tmpC.copy(PEARL_C).lerp(S.pegCol[k], S.pegFlash[k] / 0.25); S.pegs.setColorAt(k, tmpC); dirty = true; }
       if (dirty) S.pegs.instanceColor.needsUpdate = true;
     }
     for (const h of S.hoops) if (h.flash > 0) { // a hoop's flash fades back to gold
@@ -1864,7 +1953,7 @@ export async function createRace(cv, hooks = {}) {
     if (S.rack) for (const c of S.rack.cups) {
       if (c.slam > 0) { c.slam = Math.max(0, c.slam - dt * 2.5); c.g.position.y = c.p.y - MR - 0.02 - Math.sin(c.slam * Math.PI) * 0.15; }
       if (c.flash > 0) { c.flash = Math.max(0, c.flash - dt * 1.5); }
-      c.ped.material.emissive?.set(c.color || '#000').multiplyScalar(c.flash * 0.8 + (c.spot ? 0.6 + 0.4 * Math.sin(now / 90) : 0));
+      c.ped.material.emissive.copy(c.color || BLACK).multiplyScalar(c.flash * 0.8 + (c.spot ? 0.6 + 0.4 * Math.sin(now / 90) : 0));
       if (c.joker) { c.joker.rotation.y += dt * 1.2; moving = true; }
     }
     for (const b of blobs) { const k = b.userData.k, t = now / 1000; b.position.set(Math.cos(t / (22 + k * 3) + k * 2) * 90, 40 + Math.sin(t / (25 + k * 2) + k) * 20 - k * 30, -140 + Math.sin(t / 28 + k * 4) * 40); }
@@ -1873,10 +1962,13 @@ export async function createRace(cv, hooks = {}) {
     drawMini();
     const alive = fxStep(dt);
     render();
+    if (S.old && !S.warm) { disposeTrack(S.old); S.old = null; } // the new course's shaders are in use now
     // the start ring's centre (world origin) on screen, for the Race! button that sits on it
     if (S.mode === 'ready') { tmpV.set(0, 0, 0).project(camera); hooks.onRing?.(tmpV.x, tmpV.y); }
-    moving ||= alive > 0 || S.hops.length > 0 || labels.some(l => l.visible) || shocks.some(s => s.visible) || pillars.some(s => s.visible) || camMoving() || S.idleUntil > now;
-    if (moving && S.shown && !S.paused && !document.hidden) S.raf = requestAnimationFrame(loop);
+    const busy = S.fxUntil > now || S.hops.length > 0 || labels.some(l => l.visible) || shocks.some(s => s.visible) || pillars.some(s => s.visible) || camMoving() || S.idleUntil > now;
+    // only ambient motion left (bowl water, the signs, a carousel) on a still view: throttled to 30 fps
+    S.calm = !busy && (S.mode === 'idle' || S.mode === 'ready' || S.mode === 'race' && !!sim?.done);
+    if ((moving || busy || alive > 0) && S.shown && !S.paused && !document.hidden) S.raf = requestAnimationFrame(loop);
   }
   const camMoving = () => cam.pos.distanceToSquared(cam.wantPos) > 1e-4 || cam.look.distanceToSquared(cam.wantLook) > 1e-4;
   function render() { if (!S.warm) composer ? composer.render() : renderer.render(scene, camera); }
@@ -1940,9 +2032,10 @@ export async function createRace(cv, hooks = {}) {
       S.def = d; def = d;
       sim0 = centreLine(d.line);
       S.sim?.dispose(); S.sim = null; S.pre?.sim.dispose(); S.pre = null;
-      S.mode = 'idle'; S.ended = false; S.first = -1; S.follow = S.focus = -1; S.order = null; S.photo = 0; S.stunAt = S.mudAt = S.rouAt = S.mainAt = S.letAt = -9; S.lidAt = 0;
+      S.mode = 'idle'; S.ended = false; S.follow = S.focus = -1; S.order = null; S.photo = 0; S.lab = {}; S.lidAt = 0;
       S.gateOf = players.map(() => -1);
       build(d); setMarbles(players); S.mini = null; zoom.zones = zonesOf(d); zoom.k = 0;
+      S.lastS = (d.mods.findLast(m => m.type === 'bend')?.s0 ?? d.finish.s * 0.85) - LAST_IN; // the final bend: the run-in's start
       S.frameN = 0; S.floorGap = new Float32Array(players.length);
       overview(cam.wantPos, cam.wantLook); cam.pos.copy(cam.wantPos); cam.look.copy(cam.wantLook);
       need();
@@ -2013,7 +2106,7 @@ export async function createRace(cv, hooks = {}) {
       }
       need();
     },
-    spot(k, on) { const c = S.rack.cups[k]; if (c) { c.spot = on; c.color = '#ffb547'; } need(); },
+    spot(k, on) { const c = S.rack.cups[k]; if (c) { c.spot = on; c.color = col('#ffb547'); } need(); },
     // the two marbles in cups j and e trade places on arcs (one high, one low)
     swap(j, e, dur) {
       const a = S.cupOf.indexOf(j), b = S.cupOf.indexOf(e);
@@ -2023,18 +2116,16 @@ export async function createRace(cv, hooks = {}) {
         const h = { i, k: to, t: 0, a: S.rack.cups[from].p.clone(), b: S.rack.cups[to].p.clone(), hi, dur, swap: true };
         S.hops.push(h);
       }
-      S.swapDur = dur; need();
+      need();
     },
-    cupFlash(k, color) { const c = S.rack.cups[k]; if (!c) return; c.flash = 1; c.color = color; shock([c.p.x, c.p.y, c.p.z], '#ffb547', 2.2, 0.6, true); burst([c.p.x, c.p.y, c.p.z], color, 36, 6); burst([c.p.x, c.p.y, c.p.z], '#ffd27a', 24, 5); need(); },
+    cupFlash(k, color) { const c = S.rack.cups[k]; if (!c) return; c.flash = 1; c.color = col(color); shock([c.p.x, c.p.y, c.p.z], '#ffb547', 2.2, 0.6, true); burst([c.p.x, c.p.y, c.p.z], color, 36, 6); burst([c.p.x, c.p.y, c.p.z], '#ffd27a', 24, 5); need(); },
     // stereo pan (-1..1) of a world position, from where it is on screen
     pan(p) { if (!p) return 0; tmpV.set(p[0] ?? p.x, p[1] ?? p.y, p[2] ?? p.z).project(camera); return Math.max(-1, Math.min(1, tmpV.x)) * 0.8; },
     // marble i in normalized device coords [x, y, behind the camera] (edge badges for marbles off screen)
     ndc(i) { tmpV.fromArray(marblePos, i * 3).project(camera); return [tmpV.x, tmpV.y, tmpV.z > 1]; },
     cupPos(k) { return S.rack?.cups[k]?.p; },
-    resize: sizeAll,
-    kick: need,
     pause(on) { S.paused = on; if (on) { cancelAnimationFrame(S.raf); S.raf = 0; } else need(); },
     stop() { S.sim?.dispose(); S.sim = null; S.pre?.sim.dispose(); S.pre = null; S.mode = 'idle'; },
-    dispose() { cancelAnimationFrame(S.raf); disposeTrack(); S.sim?.dispose(); S.pre?.sim.dispose(); renderer.dispose(); },
+    dispose() { cancelAnimationFrame(S.raf); disposeTrack(S.track); disposeTrack(S.old); S.sim?.dispose(); S.pre?.sim.dispose(); renderer.dispose(); },
   };
 }

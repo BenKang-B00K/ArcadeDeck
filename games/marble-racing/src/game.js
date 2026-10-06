@@ -114,7 +114,8 @@ const S = {
   n: clamp(+saved.n || 4, 2, MAX),
   track: saved.track in TRACKS ? saved.track : 'medium',
   mods: Object.fromEntries(Object.keys(TRACKS).map(k => [k, saved.mods?.[k] ? fitMods(k, saved.mods[k]) : { ...DEFAULT_MODS[k] }])), // picks per length
-  modRand: !!saved.modRand, // random mods every race instead of the picks
+  modRand: saved.v >= 2 ? !!saved.modRand : true, // random mods every race instead of the picks: the default (saves before v2 never chose it)
+  v: 2, // save format
   results: Array.isArray(saved.results) ? saved.results : [],
   preset: 'preset' in saved ? saved.preset : 'win', // 'win' | 'pen' | 'rank' | 'ratio' | 'bill' | 'team' | null (custom results)
   ratio: Array.isArray(saved.ratio) ? saved.ratio : [],
@@ -152,6 +153,7 @@ const t = (k, n) => {
   return typeof v === 'function' ? v(n) : v.replace(/\{(\w)\}/g, (_, x) => typeof n === 'object' ? n[x] : n);
 };
 const range = n => Array.from({ length: n }, (_, i) => i);
+const trackName = tr => t('h' + tr[0].toUpperCase() + tr.slice(1)); // 'medium' -> Medium / 보통 / 普通
 const shuffle = a => {
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -203,14 +205,15 @@ const resultOf = k => (S.preset ? presetVals()[k] : S.results[k]?.trim()) || '�
 // rank / team carry their number or letter on the glyph, ratio / bill keep the value as a caption
 const gly = (id, tint) => `<svg aria-hidden="true"${tint ? ` style="color:${tint}"` : ''}><use href="#g-${id}"/></svg>`;
 const MEDAL = ['#ffd54a', '#dfe3f5', '#e8955a']; // 1st-3rd, then plain purple
+// ratio: a pie disc filled to the share (32x32)
+const pie = k => `<circle cx="16" cy="16" r="11" fill="#5a4a96" stroke="#e6dcff" stroke-opacity=".5"/><circle cx="16" cy="16" r="5.5" fill="none" stroke="${isBig(k) ? '#ffd54a' : '#5dffb0'}" stroke-width="11" stroke-dasharray="${S.ratio[k] * .3456} 99" transform="rotate(-90 16 16)"/>`;
 const glyph = k => {
   const v = resultOf(k), p = S.preset, sr = `<span class="sr">${v}</span>`;
   if (marks()) return gly(isBig(k) ? p : p === 'win' ? 'pass' : 'safe') + sr;
   if (p === 'rank') return gly('rank', MEDAL[k] || '#b98bff') + `<em style="top:62%">${k + 1}</em>` + sr;
   if (p === 'team') return gly('team', COLORS[S.teamOf[k]]) + `<em style="top:50%">${String.fromCharCode(65 + S.teamOf[k])}</em>` + sr;
   if (p === 'bill') return gly('bill') + `<i>${v}</i>`;
-  // ratio: a pie disc filled to the share
-  return `<svg aria-hidden="true" viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="#5a4a96" stroke="#e6dcff" stroke-opacity=".5"/><circle cx="16" cy="16" r="5.5" fill="none" stroke="${isBig(k) ? '#ffd54a' : '#5dffb0'}" stroke-width="11" stroke-dasharray="${S.ratio[k] * .3456} 99" transform="rotate(-90 16 16)"/><circle cx="16" cy="16" r="11" fill="url(#gb)"/></svg><i>${v}</i>`;
+  return `<svg aria-hidden="true" viewBox="0 0 32 32">${pie(k)}<circle cx="16" cy="16" r="11" fill="url(#gb)"/></svg><i>${v}</i>`;
 };
 S.winners = clamp(S.winners, 1, S.n - 1);
 if (S.preset === 'team' && (S.teamOf.length !== S.n || Math.max(...S.teamOf) + 1 !== S.teams)) rollTeams();
@@ -513,10 +516,6 @@ function showSummary(rows) {
 }
 $('#closeBtn').onclick = () => { sfx.ui(); summary.close(); };
 summary.addEventListener('close', () => rc?.pause(false));
-summary.addEventListener('click', e => {
-  const r = summary.getBoundingClientRect();
-  if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) summary.close();
-});
 
 // ---------- race: the flow ----------
 // PEEK (flyover) -> READY (everyone seated at a random gate) -> COUNTDOWN (the start wheel spins) -> RACE -> (JOKER) -> SUMMARY.
@@ -556,7 +555,19 @@ const announce = msg => { $('#live').textContent = msg; };
 const buzz = p => { if (S.sfx) try { navigator.vibrate?.(p); } catch { /* not allowed in an iframe */ } }; // EFFECT at 0 = quiet: no buzz either
 const players = () => range(S.n).map(i => ({ z: ZOO[i], color: pc(i) }));
 const panOf = pos => rc?.pan(pos) ?? 0;
-const phase = p => { G.phase = p; document.body.classList.toggle('busy', p === 'race' || p === 'countdown'); updateHud(); wake(); };
+const phase = p => { G.phase = p; document.body.classList.toggle('busy', p === 'race' || p === 'countdown'); updateHud(); wake(); stir(); };
+// a screen left alone holds still: STILL ms after the last touch, key or scroll with no round running (the setup, waiting
+// for Race!, the results), body.still pauses the idle hops, blinks, background drift and summary glow (style.css), so an
+// untouched menu stops redrawing at the screen's full rate. Any input, or the next phase, wakes them
+const STILL = 8000;
+let stillT = 0;
+function stir() {
+  document.body.classList.remove('still');
+  clearTimeout(stillT);
+  stillT = setTimeout(() => { if (G.phase === 'idle' || G.phase === 'ready' || G.phase === 'done') document.body.classList.add('still'); }, STILL);
+}
+for (const ev of ['pointerdown', 'pointermove', 'keydown', 'wheel', 'scroll']) addEventListener(ev, stir, { capture: true, passive: true });
+stir();
 
 async function ensureRace() {
   if (rc) return rc;
@@ -567,6 +578,7 @@ async function ensureRace() {
     modName: k => modName(k)[0], // a mod sign's word
     isBig: k => isBig(k),
     onEvent,
+    onTag: tag,
     onTick: ribbon,
     onRing: (x, y) => { // NDC -> % of the HUD; written only while the camera is still settling
       const l = `${((x + 1) * 50).toFixed(1)}%`, tp = `${((1 - y) * 50).toFixed(1)}%`;
@@ -606,7 +618,7 @@ function hype(on) {
   const h = $('#hype');
   if (!on) { h.classList.add('out'); later(350, () => { h.hidden = true; }); return; }
   $('#hypeGo').dataset.t = t('ready');
-  $('#hypeInfo').textContent = `${t('h' + S.track[0].toUpperCase() + S.track.slice(1))} · ${t('nP', S.n)}`;
+  $('#hypeInfo').textContent = `${trackName(S.track)} · ${t('nP', S.n)}`;
   $('#hypeLine').innerHTML = range(S.n).map(i => `<i style="--c:${pc(i)};--i:${i}">${face(i)}</i>`).join('');
   h.classList.remove('out'); h.hidden = false;
   announce(t('ready'));
@@ -703,7 +715,7 @@ function buildRibbon() {
     const b = el('button', 'chip');
     b.type = 'button'; b.dataset.i = i;
     b.style.setProperty('--c', pc(i)); b.style.setProperty('--i', i);
-    b.innerHTML = `${face(i)}<span class="pl"></span><svg class="ic crown" aria-hidden="true"><use href="#i-crown"/></svg><i class="cp" aria-hidden="true"></i>`;
+    b.innerHTML = `${face(i)}<span class="pl"></span><svg class="ic crown" aria-hidden="true"><use href="#i-crown"/></svg><i class="cp" aria-hidden="true"></i><span class="at"></span>`;
     b.setAttribute('aria-label', t('follow', animalName(i)));
     b.onclick = () => follow(G.follow === i ? -1 : i);
     return b;
@@ -736,11 +748,23 @@ function edges(sim) {
       if (off) {
         const dx = px - cx, dy = py - cy, k = Math.min(1, (r - l) / 2 / Math.abs(dx), (bot - top) / 2 / Math.abs(dy));
         tf = `translate(${Math.round(cx + dx * k)}px,${Math.round(cy + dy * k)}px)|${Math.round(Math.atan2(dy, dx) * 180 / Math.PI)}deg`;
+        d.right = dx > 0;
       }
     }
-    if (d.hidden === off) d.hidden = !off;
+    if (d.hidden === off) { d.hidden = !off; if (!off) d.querySelector('b')?.remove(); } // a word mid-float doesn't come back with it
     if (off && d.tf !== tf) { d.tf = tf; const [p, a] = tf.split('|'); d.style.transform = p; d.style.setProperty('--a', a); }
   });
+}
+// a word off an edge badge: what its marble out of view just ran into (BOOST!, WORMHOLE!...), the same as its 3D label,
+// floating up beside the face on the side facing the middle. Not in the mist: the badge hides there (the tube's secret)
+function tag(i, text, color) {
+  const d = G.edge?.[i];
+  if (!d || d.hidden || G.phase !== 'race' || rc.sim?.inMist[i]) return;
+  d.querySelector('b')?.remove(); // the newest word replaces the last
+  const w = el('b', d.right ? 'l' : '');
+  w.textContent = text; w.style.color = color;
+  w.onanimationend = () => w.remove();
+  d.append(w);
 }
 function follow(i) {
   G.follow = i;
@@ -798,6 +822,8 @@ function ribbon(order, sim) {
     c.classList.toggle('fin', fin); c.classList.toggle('done', fin); c.classList.toggle('mist', mist && !fin);
     c.classList.toggle('lead', i === lead && !mist);
     if (pl.textContent !== txt) pl.textContent = txt;
+    const at = c.querySelector('.at'), here = fin ? '' : where(i, sim);
+    if (at.textContent !== here) { at.textContent = here; c.classList.toggle('on', !!here); }
   });
   // FLIP: each chip slides from where it was
   if (moved) rank.forEach((i, k) => {
@@ -814,6 +840,13 @@ function ribbon(order, sim) {
       G.photo = true; rc.photo(); sfx.photo(); announce(t('photo'));
     }
   }
+}
+// where marble i is now, for its chip's caption: the side route it's on (trap lane, fork, trapdoor), a wormhole, mud,
+// or the named mod round its progress. Plain track (straights, plain turns, peg boards, the run-out): ''
+function where(i, { def: d, prog, trap, warp, inMud }) {
+  const tp = d.traps[trap[i]], w = d.wormholes[warp[i]], m = d.mods.find(m => prog[i] >= m.s0 && prog[i] <= m.s1);
+  const k = tp ? (tp.fork ? 'fork' : tp.door ? 'trapdoor' : 'trap') : w ? (w.roulette ? 'roulette' : 'wormhole') : inMud[i] ? 'mud' : m?.runout ? '' : m?.type;
+  return modName(k)?.[0] ?? '';
 }
 // places k and k+1 decide different things (Winner / Penalty edge, 1st vs 2nd, the biggest share)
 const boundary = k => S.preset === 'rank' ? k === 0 : S.preset ? isBig(k) !== isBig(k + 1) : k === 0;
@@ -1025,8 +1058,7 @@ function glyphCanvas(k) {
   else if (p === 'bill') { id = 'bill'; cap = money(S.bill[k]); }
   else cap = S.ratio[k] + '%';
   const defs = ['#gb', '#gg', '#gl'].map(s => $(s).outerHTML).join('');
-  const body = id ? `<g style="color:${tint}">${$('#g-' + id).innerHTML}</g>`
-    : `<circle cx="16" cy="16" r="11" fill="#5a4a96" stroke="#e6dcff" stroke-opacity=".5"/><circle cx="16" cy="16" r="5.5" fill="none" stroke="${isBig(k) ? '#ffd54a' : '#5dffb0'}" stroke-width="11" stroke-dasharray="${S.ratio[k] * .3456} 99" transform="rotate(-90 16 16)"/>`;
+  const body = id ? `<g style="color:${tint}">${$('#g-' + id).innerHTML}</g>` : pie(k);
   return new Promise(res => {
     const img = new Image();
     img.onload = () => {
@@ -1049,13 +1081,13 @@ function renderRuns() {
   const when = d => new Date(d).toLocaleString(S.lang, { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   $('#runList').innerHTML = runs.length ? runs.map(r => {
     const order = Object.keys(r.p).map(Number).sort((a, b) => r.p[a][3] - r.p[b][3]);
-    return `<li><p><b>#${+r.no}</b> ${t('h' + r.tr[0].toUpperCase() + r.tr.slice(1))} · ${t('nP', +r.n)} · ${when(r.d)}${r.w != null ? ' · ' + t('time', (+r.w).toFixed(2)) : ''}</p>`
+    return `<li><p><b>#${+r.no}</b> ${trackName(r.tr)} · ${t('nP', +r.n)} · ${when(r.d)}${r.w != null ? ' · ' + t('time', (+r.w).toFixed(2)) : ''}</p>`
       + `<div>${order.map((z, k) => `<span style="--c:${COLORS[z]}" role="img" aria-label="${t('rank', k + 1)} ${t('player', z + 1)}" title="${t('player', z + 1)}">${faceZ(z)}<i>${k + 1}</i></span>`).join('')}</div></li>`;
   }).join('') : `<li class="none">${t('noRuns')}</li>`;
 }
 document.querySelectorAll('[data-runs]').forEach(b => b.onclick = () => { sfx.ui(); renderRuns(); runsDlg.showModal(); });
 $('#runsClose').onclick = () => { sfx.ui(); runsDlg.close(); };
-for (const d of [runsDlg, $('#iosInstall')]) d.addEventListener('click', e => { // a tap on the backdrop closes it
+for (const d of [summary, runsDlg, $('#iosInstall')]) d.addEventListener('click', e => { // a tap on the backdrop closes it
   const r = d.getBoundingClientRect();
   if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) d.close();
 });
@@ -1103,7 +1135,7 @@ function applyI18n() {
   document.querySelectorAll('[data-i18n-tip]').forEach(n => {
     const raw = t(n.dataset.i18nTip); // our own strings, so the markup -> HTML swap is safe
     n.setAttribute('aria-description', raw.replace(/\[\w:([^\]]*)\]/g, '$1'));
-    n.querySelector('.tip').innerHTML = raw.replace(/\[(\w):([^\]]*)\]/g, '<b class="k-$1">$2</b>');
+    n.querySelector('.tip').innerHTML = markup(raw);
   });
   $('#startBtn').dataset.watch = t('watching');
   renderEntries();

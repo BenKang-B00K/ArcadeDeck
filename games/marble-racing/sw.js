@@ -1,5 +1,5 @@
 // Offline shell: serve from cache, refresh cache in the background (stale-while-revalidate).
-const CACHE = 'marble-v2.43.14';
+const CACHE = 'marble-v2.52.17';
 const SHELL = ['./', 'index.html', 'style.css', 'coop.js', 'src/game.js', 'src/race.js', 'src/track.js', 'src/sim.js', 'src/audio.js', 'manifest.webmanifest',
   'icons/icon.svg', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png',
   'vendor/three.module.js', 'vendor/three.core.js', 'vendor/rapier.mjs',

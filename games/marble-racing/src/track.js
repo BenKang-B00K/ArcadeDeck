@@ -58,6 +58,10 @@ const PEG_ROWS = 10; // rows on every peg board
 const FIRST_RUNUP = 3.2;
 export const BUMP_R = 0.3; // half-pegs straddling the walls (sim.js makes them bouncier)
 const PEG_R = 0.25 * R;
+// moguls on the finish run-in, like a ski slope's: balls sunk into the floor, a low cap showing, each its own height in
+// MOG_H (MOG_B: the tallest one's foot), in staggered rows MOG_GAP apart (along, across: about, as fits the width)
+const MOG_R = 2.2 * R, MOG_H = [0.3 * R, 0.8 * R], MOG_B = Math.sqrt(MOG_H[1] * (2 * MOG_R - MOG_H[1])), MOG_ROWS = 4, MOG_GAP = [3.2 * R, 4 * R];
+const RUN_IN = 5 * DEG; // the run-in's slope: a little downhill (6° spread the pack: median margin 0.45 s -> 0.72 s)
 const PEG_H = 1.2;
 const SIDE = { short: [17, 18.5], medium: [17, 19.5], long: [17.5, 20.5] }; // stadium side length along x, seeded
 const STALL = 2.6 * R; // stall pitch along the start arc (2.4R inside + divider)
@@ -277,7 +281,7 @@ function build(seed, n, tier, retry, picks, grow, planOnly) {
     trapdoor: 1 + DOOR_FIELD + DOOR.run + 1.5 }[sp] || 0);
   const T = { x: 0, y: 0, z: 0, a: Math.PI / 2, th: 0, b: 0, s: 0, flags: 0, mod: 0,
     hw: W, H: LID, wl: WALL, wr: WALL, rb: RC, rt: 0.1, chain: null, chains: [], line: [] };
-  const mods = [], pegs = [], boosts = [], jumps = [], holes = [], traps = [], coils = [];
+  const mods = [], pegs = [], boosts = [], jumps = [], holes = [], traps = [], coils = [], moguls = [];
   const rings = [], booms = [], basins = [];
   let mist = null;
   const mod = (type, extra = {}) => {
@@ -448,9 +452,10 @@ function build(seed, n, tier, retry, picks, grow, planOnly) {
   end(fb);
   if (tier === 'short') { const m = mod('pegs'); pegSide(T, W, rnd(...PEG_SLOPE) * DEG, pegs, m.index, 4 * DEG); end(m); }
   const fin = mod('finish');
-  // flat: the walls ease away to nothing, so the side camera sees the winner cross (view only, the collider still closes)
-  piece(T, 1.5, { pitch: 3 * DEG, ease: 1.5, wl: 0, wr: 0 });
-  piece(T, 3.5);
+  // open: the walls ease away to nothing, so the side camera sees the winner cross (view only, the collider still closes)
+  piece(T, 1.5, { pitch: RUN_IN, ease: 1.5, wl: 0, wr: 0 });
+  mogulRows(T, moguls, fin.index, rnd);
+  piece(T, 8.5); // a long open run-in, gently downhill: the last fight for the line plays out in view (10 to the line)
   const finish = { s: T.s, p: [T.x, T.y, T.z], a: T.a };
   piece(T, 4.5, { pitch: 2 * DEG });
   T.chain.capEnd = 'full';
@@ -483,7 +488,7 @@ function build(seed, n, tier, retry, picks, grow, planOnly) {
     muds.push({ s0: s - len / 2, s1: s + len / 2, s, a, c: rnd(-1, 1) * (hw - RC - a), mod: m.index }); // a: half-width across, c: centre's offset (on the flat floor, clear of the corner fillets)
   }
   if (muds.length < nOf('mud')) return TIGHT; // not enough clear straight: a lap more has more
-  return pack({ seed, n, tier, retry, picks, grow, W, h, D, L, T, mods, pegs, boosts, jumps, wormholes, traps: trapRoutes, muds, rings, basins, booms, mist, coils, fan, finish, stadium: { zFront, zBack, half: L / 2 } });
+  return pack({ seed, n, tier, retry, picks, grow, W, h, D, L, T, mods, pegs, boosts, jumps, wormholes, traps: trapRoutes, muds, rings, basins, booms, mist, coils, moguls, fan, finish, stadium: { zFront, zBack, half: L / 2 } });
 }
 
 // ---------- start ring ----------
@@ -537,6 +542,22 @@ function pegRows(T, rows, half, pegs, mod, gap = PEG_GAP, d0 = 0.8) {
     if (row % 2) { at(d, -half, BUMP_R); at(d, half, BUMP_R); }
   }
   return d0 + (rows - 1) * dr + 0.8;
+}
+// moguls across the straight starting here (its first frame holds for its whole length): every marble hops a few on the
+// way to the line. The last row ends ~2 short of it, so the crossing itself is clean
+function mogulRows(T, moguls, mod, rnd) {
+  const f = T.chain.f, k0 = f.length - FS, [x, y, z, tx, ty, tz, rx, ry, rz, ux, uy, uz] = f.slice(k0, k0 + 12);
+  const xmax = T.hw - MOG_B - 0.1; // feet clear of the walls
+  // k across, edge to edge; every other row one fewer, in the gaps between (2-1-2-1 on the narrowest course)
+  const k = Math.max(2, Math.round(2 * xmax / MOG_GAP[1]) + 1), g = 2 * xmax / (k - 1);
+  for (let row = 0; row < MOG_ROWS; row++) {
+    const d = 1 + row * MOG_GAP[0], odd = row % 2;
+    for (let j = 0; j < k - odd; j++) {
+      const lx = (j - (k - 1 - odd) / 2) * g;
+      const h = rnd(...MOG_H), lu = h - MOG_R; // the ball's centre, under the floor
+      moguls.push({ p: [x + tx * d + rx * lx + ux * lu, y + ty * d + ry * lx + uy * lu, z + tz * d + rz * lx + uz * lu], u: [ux, uy, uz], r: MOG_R, h, mod });
+    }
+  }
 }
 function pegBoard(T, rows, pitch, half, pegs, mod) {
   piece(T, 1.2, { pitch, hw: half, ease: 1.2 });
@@ -660,14 +681,13 @@ function jump(T, W, jumps, m, side) {
 // roll out through the opening in the wall 120–240° on, onto a chute that swings back the other way; the next side
 // S-bends onto the column line. The whole ring sits beyond the end, clear of the column runs.
 function carousel(T, h, W, dz, rng, mod) {
-  const aIn = T.a, head = [Math.cos(aIn), Math.sin(aIn)], inside = [-Math.sin(aIn) * h, Math.cos(aIn) * h];
+  const aIn = T.a, inside = [-Math.sin(aIn) * h, Math.cos(aIn) * h];
   const half = W / 2, rMid = dz / 2, rIn = Math.max(1.3, rMid - half - 0.2), rOut = rMid + half + 0.2, rWall = rOut + 0.12;
   const tilt = RING.tilt, drop = 1;
   piece(T, rOut + 0.6, { pitch: 4 * DEG }); // on past the tower's end
   const pe = [T.x, T.y, T.z], c = [T.x + inside[0] * rMid, T.y - drop + (rMid - rIn) * Math.tan(tilt), T.z + inside[1] * rMid];
   const floorAt = r => c[1] - (r - rIn) * Math.tan(tilt); // the ring floor tilts down outward
   const phiE = Math.atan2(-inside[1], -inside[0]), dir = h, delta = (120 + rng() * 120) * DEG, phiX = phiE + dir * delta;
-  const ang = (x, z) => Math.atan2(z - c[2], x - c[0]);
   // entry opening: where the chute crosses the wall circle (a skirt below the chute floor keeps marbles in);
   // exit opening: the exit chute's mouth
   const aMax = Math.acos(Math.min(1, (rMid - half - 0.2) / rWall)) + 0.05;
@@ -676,7 +696,6 @@ function carousel(T, h, W, dz, rng, mod) {
   const hwE = half + 0.5, al = Math.asin(Math.min(0.9, hwE / rWall)), rE = rWall * Math.cos(al) - 0.02;
   const ex = [c[0] + Math.cos(phiX) * rE, floorAt(rOut) - 0.12, c[2] + Math.sin(phiX) * rE];
   open.push([phiX - al, phiX + al, null]);
-  void ang;
   // centre line: down from the chute end, round the mid radius, out to the exit chute
   const yR = floorAt(rMid), a0 = phiE + dir * 1.2 / rMid, steps = Math.ceil((delta - 1.2 / rMid) * rMid / DS), i0 = T.line.length / 4;
   T.line.push(c[0] + Math.cos(a0) * rMid, yR, c[2] + Math.sin(a0) * rMid, T.s += Math.hypot(1.2, pe[1] - yR));
@@ -693,7 +712,6 @@ function carousel(T, h, W, dz, rng, mod) {
   const len = Math.max(2, Math.abs(turn) * (half + 2.8) * 1.2);
   piece(T, len, { turn, bank: sg * 10 * DEG, hw: half, wl: WALL, wr: WALL, H: BOWL_LID, rb: half - 0.02 });
   piece(T, 1.2, { rb: RC, H: LID });
-  void head;
   // the rim keeps the same speed on a bigger ring (more players): 0.5 turns a second up to rMid 2.5, slower beyond
   return { c, rIn, rOut, rMid, rWall, wall: RING.wall, tilt, omega: dir * RING.omega * Math.min(1, 2.5 / rMid), seats: RING.seats, divH: RING.divH,
     phiE, phiX, dir, delta, open, pe, mod, h, line: [i0, i1] };
@@ -1233,7 +1251,7 @@ function pack(o) {
     seed: o.seed, n: o.n, tier: o.tier, retry: o.retry, picks: o.picks, grow: o.grow, W: o.W, h: o.h, D: o.D, L: o.L, R, stadium: o.stadium,
     length: o.finish.s, drop: bounds[4] - o.finish.p[1], bounds,
     chains, line, mods, colliders,
-    pegs: o.pegs.map(p => ({ p: p.p, ax: p.ax, r: p.r, h: PEG_H, mod: p.mod })),
+    pegs: o.pegs.map(p => ({ p: p.p, ax: p.ax, r: p.r, h: PEG_H, mod: p.mod })), moguls: o.moguls,
     fan: fanData,
     boosts: o.boosts, jumps: o.jumps, wormholes: o.wormholes, traps: o.traps, muds: o.muds,
     rings, basins: o.basins, boomerangs: o.booms, mist: o.mist, coils: o.coils, finish: o.finish,

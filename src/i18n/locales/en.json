@@ -1121,73 +1121,76 @@
     },
     "13": {
       "title": "Timing Chef",
-      "description": "Master the art of perfect timing in the kitchen!",
-      "fullDescription": "\n      Step into the shoes of an aspiring chef where precision is everything. In Timing Chef, your goal is to cook various dishes to perfection by hitting the **sweet spot**. \n      Manage multiple orders, watch your **heat levels**, and serve up culinary masterpieces to hungry customers. \n      As you progress, unlock new recipes and upgrade your kitchen equipment to handle the **dinner rush**. Can you earn the elusive **five-star rating** and become the ultimate Timing Chef?\n    ",
-      "controls": "Mouse/Touch: Click or tap to start and stop cooking actions.",
-      "tips": "Pay close attention to the **visual and audio cues**. Each ingredient has its own **'perfect' window**. Don't let the heat build up too much, or you'll **burn the dish**!",
-      "lore": "\n      In the high-stakes world of competitive cooking, a single second can be the difference between a **Michelin star** and a kitchen disaster. \n      The legendary 'Timing Chef' was said to be able to hear the exact moment a steak reached **medium-rare** from across the room. \n      Do you have the senses and the nerves to follow in their footsteps?\n    ",
+      "description": "A one-tap cooking timing game: stop the needle on PERFECT for every step of 104 dishes, from ramen to molecular gastronomy, earn up to three stars each and spend your coins on kitchen upgrades.",
+      "fullDescription": "\n      Timing Chef is a **one-tap cooking game** about hitting the moment. Every dish is three or four cooking steps (simmer the broth, boil the noodles, add the toppings), and each step is a bar with a needle sweeping back and forth across it. Tap when the needle is in the **PERFECT** zone for 100 points or in the wider GOOD zone for 50; anywhere else is a MISS that costs one of your three lives, and losing them all burns the dish.\n      Hit PERFECT on at least 90% of the steps for **three stars**, on 60% for two, and finish the dish for one. **104 recipes** fill **8 chapters**: Kitchen Basics, Asian Kitchen, European Kitchen, Fine Dining, World Tour, Master Class, Molecular Lab and Dessert Master. Clear 5 dishes in a chapter to open the next. The needle gets quicker chapter by chapter, and **rush orders** move it 15% faster again.\n      Stars pay out coins, and coins buy **8 kitchen upgrades**: a wider timing zone, a slower needle, extra lives, a score multiplier, more coins per clear, a stronger Endless combo, a chance to win back a lost life on PERFECT and more coins from the ingredient game. The **Today's special** changes every day and pays double coins, and once a day the 30-second **Ingredient catch** turns falling ingredients into coins.\n      **Endless mode** serves random dishes one after another with your lives carried over: every hit in a row builds a combo that multiplies your score, a MISS resets it, and the needle speeds up as the shift goes on. Along the way you fill a dish collection, with each recipe's ingredients and steps, and an 89-ingredient collection you discover while cooking; What should I cook? deals three random dishes when you can't decide.\n      A warm diner-kitchen look, D Dorian music with long, held melodies, a volume control with separate music and sound sliders, and English, Korean and Japanese. Built for one thumb in portrait on phones and tablets, and plays with a mouse or keyboard on desktop; installs as an app.\n    ",
+      "controls": "TAP! button (tap or click): Stop the needle · Space / Enter: Tap during a dish · Esc or Android back: Close a sheet, or open the quit dialog during a dish",
+      "tips": "The needle sweeps at a steady speed, so after a pass or two you can tap by rhythm instead of chasing it. Buy **Wider Timing Zone** and **Needle Speed** first: they make every chapter easier. Play the **Today's special** for double coins and the **Ingredient catch** once a day. In **Endless** a single MISS resets the combo, so a safe GOOD beats a risky PERFECT.",
+      "lore": "\n      In a busy diner kitchen the ticket rail never empties and the timer never stops. A broth simmered a second too long turns bitter; noodles pulled a second too soon stay hard.\n      You start on ramen and omelettes. Keep your timing and the tickets turn into Peking duck, beef Wellington, nitro ice cream and a mont blanc, and the whole kitchen learns your name.\n    ",
       "features": [
-        "Precision-based Rhythm Cooking Gameplay",
-        "Variety of Unlockable Recipes and Cuisines",
-        "Kitchen Upgrade System for Faster Cooking",
-        "Challenging 'Rush Hour' Mode",
-        "Aesthetic Pixel Art and Satisfying Sound Effects",
-        "Web & Mobile Friendly"
+        "One-Tap Timing Gameplay: Stop the Needle on PERFECT",
+        "104 Recipes Across 8 Chapters, From Ramen to Molecular Gastronomy",
+        "Up to Three Stars per Dish",
+        "Rush Orders With a Faster Needle",
+        "8 Kitchen Upgrades Bought With Coins",
+        "Endless Mode With Combo Scoring and a Personal Best",
+        "A Daily Today's Special With Double Coins",
+        "Ingredient Catch Minigame Once a Day",
+        "Dish and Ingredient Collections With Full Recipes",
+        "D Dorian Music and Effects With a Volume Control",
+        "Phone, Tablet and Desktop — Installable",
+        "English, Korean and Japanese"
       ],
-      "objectives": "Cook every dish to perfection by clicking at precisely the right moment, manage incoming orders without letting heat overflow, and earn a **five-star rating** by completing the **dinner rush** flawlessly.",
+      "objectives": "Cook each dish with as many PERFECT taps as you can: **three stars** for 90% PERFECT, two for 60%, one for finishing. Clear 5 dishes in a chapter to open the next and work toward three stars on all 104 recipes. Your ArcadeDeck score is your **total stars** across every dish, up to 312.",
       "controlsTable": [
         {
-          "key": "Mouse Click / Tap",
-          "action": "Start a cooking action"
+          "key": "TAP! button (tap / click)",
+          "action": "Stop the needle and judge the step: PERFECT, GOOD or MISS"
         },
         {
-          "key": "Mouse Click / Tap",
-          "action": "Stop cooking at the exact perfect window"
+          "key": "Space / Enter",
+          "action": "Tap during a dish"
+        },
+        {
+          "key": "Esc / Android back",
+          "action": "Close a sheet, or open the quit dialog during a dish"
+        },
+        {
+          "key": "Today's special banner",
+          "action": "Cook the day's dish for double coins"
+        },
+        {
+          "key": "Volume button",
+          "action": "Music and sound-effect sliders, Mute"
+        },
+        {
+          "key": "Language button",
+          "action": "Switch between English, Korean and Japanese"
         }
       ],
       "faq": [
         {
-          "q": "How do I cook a dish perfectly?",
-          "a": "Each ingredient has a visual and audio 'perfect' window — watch the heat indicator and listen for the cue, then click to stop cooking at that exact moment. Clicking too early or too late drops the dish quality."
+          "q": "How do stars work in Timing Chef?",
+          "a": "Each dish has three or four steps. Hit PERFECT on at least 90% of them for three stars, at least 60% for two, and finish the dish for one. Every MISS costs a life; run out and the dish burns with no stars. Your best result for each dish is kept."
         },
         {
-          "q": "What happens if heat builds up too much?",
-          "a": "Excess heat burns the dish, failing the order entirely. Monitor your heat gauge continuously and click to stop cooking before it enters the red zone — it is better to undercook slightly than to burn."
+          "q": "How do I unlock the next chapter?",
+          "a": "Clear 5 dishes in a chapter to open the next one. There are 8 chapters and 104 recipes, from Kitchen Basics to Molecular Lab and Dessert Master, and the needle gets a little faster in each."
         },
         {
-          "q": "How do I handle multiple orders at once?",
-          "a": "Prioritize orders with the shortest remaining time on their countdown. Quick-completing one dish frees your attention for the next, rather than juggling all simultaneously and risking multiple burns."
+          "q": "Which upgrades should I buy first?",
+          "a": "Wider Timing Zone and Needle Speed make every tap easier, and Extra Life lets you survive more misses. Coin Boost pays off over time; Combo Boost only helps in Endless, and Gather Boost only in the Ingredient catch."
         },
         {
-          "q": "What do kitchen upgrades do?",
-          "a": "Upgrades reduce cooking time, widen the 'perfect' window, or add capacity for additional simultaneous orders. Investing in wider perfect windows is the most forgiving upgrade for players still learning ingredient timings."
+          "q": "What is Endless mode?",
+          "a": "Random dishes one after another until you run out of lives, which carry over between dishes. Every hit in a row raises the combo that multiplies your score, a MISS resets it, and the needle speeds up as the shift goes on. Your best Endless score is saved."
         },
         {
-          "q": "What is Rush Hour mode?",
-          "a": "Rush Hour is a high-intensity mode that floods the kitchen with orders faster than normal play. It tests whether you can maintain precision timing under extreme time pressure — it's the ultimate challenge for five-star players."
-        }
-      ],
-      "featuredComments": [
-        {
-          "name": "PerfectWindow",
-          "text": "Listen before you look. The audio cue for the perfect window is slightly ahead of the visual indicator, which gives you a fraction of a second of extra reaction time once you train your ear to it.",
-          "badge": "Top Tip"
+          "q": "How do I earn more coins?",
+          "a": "Go for stars: coins scale with them. The Today's special pays double coins, and once a day the Ingredient catch gives coins for every falling ingredient you tap in 30 seconds. Coin Boost and Gather Boost raise each."
         },
         {
-          "name": "FiveStarRush",
-          "text": "Rush Hour mode is unforgiving in the best way. Normal play gives you time to think. Rush Hour takes that away and you find out very quickly which recipes you actually have memorized."
-        },
-        {
-          "name": "HeatPanic",
-          "text": "The heat gauge creeping into the red while you're mid-click on a second dish is a specific kind of stress I was not prepared for on my first run. Now I check heat before starting any new action."
-        },
-        {
-          "name": "MichelinDash",
-          "text": "Wider perfect window upgrades are absolutely the right call early. They're not glamorous but they let you build confidence and internalize ingredient timings before the margins get tight."
-        },
-        {
-          "name": "SizzleTimer",
-          "text": "Prioritize the countdown order, not the one that looks most urgent. Lowest remaining time wins every time even if another dish looks more done. Manage by timer, not by eye."
+          "q": "Does Timing Chef work on phones?",
+          "a": "Yes. It is built for one-thumb play in portrait on phones and tablets, and plays with a mouse or keyboard on desktop. The needle moves at the same speed on 60, 90 and 120 Hz screens, and a tap counts the moment your finger lands."
         }
       ],
       "scoreLabel": "Stars"

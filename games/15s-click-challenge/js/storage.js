@@ -61,7 +61,10 @@ export function loadTop5() {
 function saveTop5(rs) { safeSet(KEYS.top5, JSON.stringify(rs)); }
 export function addRecord(score, level) {
   const rs = loadTop5();
-  rs.push({ score, level, date: new Date().toISOString().slice(0, 10) });
+  // Local calendar date as YYYY-MM-DD (toISOString alone is UTC → KST rounds before 09:00 got yesterday).
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  rs.push({ score, level, date: d.toISOString().slice(0, 10) });
   rs.sort((a, b) => b.score - a.score || b.level - a.level);
   if (rs.length > 5) rs.length = 5;
   saveTop5(rs);

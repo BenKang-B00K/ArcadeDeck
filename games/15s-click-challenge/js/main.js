@@ -9,7 +9,7 @@ import {
 } from './storage.js';
 
 import {
-  initAudio, playSfx, startBgm, stopBgm, setMuted, unlockAudio,
+  initAudio, playSfx, startBgm, stopBgm, setMuted, unlockAudio, pauseAudio,
 } from './audio.js';
 
 import {
@@ -18,8 +18,12 @@ import {
 } from './achievements.js';
 
 import { svgIcon } from './icons.js';
+import { t, LANG, applyI18n } from './i18n.js';
 
 migrate();
+applyI18n();  // before the first resizeCanvas(): translated header/HUD text changes the height left for the canvas
+// Canvas can't read CSS vars → reuse the resolved body stack (incl. the per-language CJK fallbacks).
+const FONT = getComputedStyle(document.body).fontFamily;
 
 // --- DOM refs ---
 const canvas = document.getElementById('game');
@@ -54,16 +58,21 @@ initAchievementsUI(achievementToast);
 let CANVAS_W = 640;
 let CANVAS_H = 480;
 const gameWrap = canvas.parentElement;
+const container = document.querySelector('.container');
 
 function resizeCanvas() {
   // dpr capped at 2: dpr-3 phones would push ~2.2× the fill-rate for no visible gain.
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   const wrapW = gameWrap.clientWidth || 640;
   if (wrapW < 1) return;
-  const maxH = (window.innerHeight || 480) * 0.55;
-  const aspect = Math.max(0.5, Math.min(4 / 3, wrapW / maxH));
-  const w = Math.max(200, Math.round(wrapW));
-  const h = Math.max(150, Math.round(wrapW / aspect));
+  const vh = window.innerHeight || 480;
+  // Height left once header/HUD/padding are laid out, so the page never scrolls inside the
+  // portal frame (16:9 / 9:16 / 1:1). offsetHeight includes the canvas border, style.height doesn't.
+  const fitH = vh - (container.offsetHeight - canvas.offsetHeight) - (canvas.offsetHeight - canvas.clientHeight);
+  const w = Math.max(120, Math.round(wrapW - (canvas.offsetWidth - canvas.clientWidth)));
+  // 0.55·vh keeps the desktop look; 2·w caps very tall portrait fields.
+  // floor + 1px slack: offsetHeight is rounded, fractional layouts (DPR 1.25) would overflow by 1px.
+  const h = Math.max(120, Math.floor(Math.min(vh * 0.55, fitH - 1, w * 2)));
   // Assigning canvas.width clears + reallocs the backing store; skip no-op resizes
   // (mobile fires `resize` on URL-bar show/hide, often mid-round).
   if (w === CANVAS_W && h === CANVAS_H && canvas.width === w * dpr) return;
@@ -94,24 +103,32 @@ const MIN_HIT_RADIUS = 22;
 const MISS_PENALTY = 0.5;
 const FADE_START_S = 5;        // ball starts fading when this much round time is left
 const MIN_TARGET_ALPHA = 0.3;  // ball opacity at 0s
+const GRAVITY = 180;           // particle fall, px/s²
+const SNAP_K = 11.9;           // 1/s: trail fade + target scale settle (e^-k·dt)
+const SETTLE_K = 9.75;         // 1/s: float-text scale + screen-shake decay
+const SPARK_DAMPING = 0.0067;  // fraction of spark velocity kept per second
+
+const timeFmt = new Intl.NumberFormat(LANG, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+// Debug: ?fps=30 caps the update rate — gameplay must come out identical at any rate.
+const DEBUG_FPS = Number(new URLSearchParams(window.location.search).get('fps')) || 0;
 
 // --- State ---
+// All round timers below are seconds, advanced by the render loop's clamped dt: a hidden tab
+// stops rAF, so the round pauses instead of running out in the background.
 let score = 0;
 let misses = 0;
 let highscore = getHighscore();
 let level = getLevel();
 let timeLeft = START_SECONDS;
 let running = false;
-let autoMoveTimer = null;
-let countdownTimer = null;
-let _endAt = 0;
+let moveLeft = 0;      // s until the target auto-moves
+let countdownTimer = null;  // pre-round 3-2-1 UI only (not gameplay)
 let _lastTime = 0;
 
-// Clears all timers/intervals so a stale round can't fire after restart/teardown.
+// Clears the countdown so a stale one can't fire after restart/teardown.
 function clearAllTimers() {
-  if (autoMoveTimer != null) { clearTimeout(autoMoveTimer); autoMoveTimer = null; }
   if (countdownTimer != null) { clearInterval(countdownTimer); countdownTimer = null; }
-  if (comboTimerId != null) { clearTimeout(comboTimerId); comboTimerId = null; }
 }
 
 const target = {
@@ -135,19 +152,17 @@ let _punchAt = -1e9;
 let _punchScale = 1;
 const PUNCH_MS = 180;
 
-// Combo system: chained hits within COMBO_WINDOW_MS drive VFX intensity.
+// Combo system: chained hits within COMBO_WINDOW_S drive VFX intensity.
 let combo = 0;
-let comboTimerId = null;
-const COMBO_WINDOW_MS = 1500;
+let comboLeft = 0;  // s left in the combo window
+const COMBO_WINDOW_S = 1.5;
 function bumpCombo() {
   combo++;
-  clearTimeout(comboTimerId);
-  comboTimerId = setTimeout(() => { combo = 0; }, COMBO_WINDOW_MS);
+  comboLeft = COMBO_WINDOW_S;
 }
 function resetCombo() {
   combo = 0;
-  clearTimeout(comboTimerId);
-  comboTimerId = null;
+  comboLeft = 0;
 }
 function comboTier() { return Math.min(5, Math.floor(combo / 3)); } // 0..5
 function comboColor(tier) {
@@ -161,7 +176,7 @@ for (let i = 0; i < 30; i++) {
   bgStars.push({
     x: Math.random(), y: Math.random(),
     size: 0.5 + Math.random() * 1.5,
-    speed: 0.0002 + Math.random() * 0.0004,
+    speed: 0.012 + Math.random() * 0.024,  // canvas heights per second
     phase: Math.random() * Math.PI * 2,
     alpha: 0.15 + Math.random() * 0.25,
   });
@@ -281,16 +296,16 @@ function placeTarget() {
     }
   }
 
-  const interval = getMoveInterval();
   target.ringStart = target.r * 4;
   target.ringR = target.ringStart;
   target.ringLife = 0;
-  target.ringTTL = (interval / 1000) * 60;
+  target.ringTTL = getMoveInterval() / 1000;  // s
 
   rebuildTargetGradients();
 }
 
 // --- VFX spawners ---
+// Units: velocities/growth px/s, life/ttl/delay s.
 const BASE_PALETTE = ['#ff5e7a','#ffb86b','#9cfffa','#b58bff','#ffd6f0','#fff'];
 const HOT_PALETTE  = ['#ffd86b','#ffaa66','#fffbe5','#ff5e7a','#ffd6ea'];
 
@@ -299,14 +314,14 @@ function spawnParticles(x, y, count = 28, tier = 0) {
   const speedBoost = 1 + tier * 0.15;
   for (let i = 0; i < count; i++) {
     const a = Math.random() * Math.PI * 2;
-    const speed = (Math.random() * 5 + 1.5) * speedBoost;
+    const speed = (Math.random() * 300 + 90) * speedBoost;
     const big = Math.random() < 0.25;
     particles.push({
       x, y,
       vx: Math.cos(a) * speed * (big ? 0.6 : 1),
       vy: Math.sin(a) * speed * (big ? 0.6 : 1),
       life: 0,
-      ttl: big ? 50 + Math.random() * 30 : 28 + Math.random() * 32,
+      ttl: big ? 0.83 + Math.random() * 0.5 : 0.47 + Math.random() * 0.53,
       size: big ? 2.5 + Math.random() * 2.5 : 0.8 + Math.random() * 2.2,
       color: palette[Math.floor(Math.random() * palette.length)],
       star: Math.random() < (0.3 + tier * 0.05),
@@ -314,47 +329,47 @@ function spawnParticles(x, y, count = 28, tier = 0) {
   }
 }
 function spawnRipple(x, y, tier = 0) {
-  ripples.push({ x, y, r: 0, alpha: 0.8, color: '255,160,200', growth: 3.5 + tier * 0.6 });
-  ripples.push({ x, y, r: 0, alpha: 0.5, color: '150,200,255', delay: 4, growth: 3.0 + tier * 0.5 });
+  ripples.push({ x, y, r: 0, alpha: 0.8, color: '255,160,200', growth: 210 + tier * 36 });
+  ripples.push({ x, y, r: 0, alpha: 0.5, color: '150,200,255', delay: 0.067, growth: 180 + tier * 30 });
   if (tier >= 3) {
-    ripples.push({ x, y, r: 0, alpha: 0.7, color: '255,216,107', delay: 8, growth: 4.0 + tier * 0.5 });
+    ripples.push({ x, y, r: 0, alpha: 0.7, color: '255,216,107', delay: 0.133, growth: 240 + tier * 30 });
   }
 }
 function spawnFloat(x, y, text, color, scale = 1.6) {
   floats.push({
-    x, y, dy: -1.2 - Math.random() * 0.6, alpha: 1, text,
-    color: color || '#fff', life: 0, ttl: 55, scale,
+    x, y, vy: -72 - Math.random() * 36, alpha: 1, text,
+    color: color || '#fff', life: 0, ttl: 0.92, scale,
   });
 }
 function spawnGhost(x, y, r, alpha = 0.5) {
-  ghosts.push({ x, y, r, alpha, life: 0, ttl: 30 });
+  ghosts.push({ x, y, r, alpha, life: 0, ttl: 0.5 });
 }
 // Radial spark lines — short streaks flying outward; brighter at high combo.
 function spawnSparkLines(x, y, count = 8, tier = 0) {
   const color = tier >= 2 ? '#ffd86b' : '#ffffff';
   for (let i = 0; i < count; i++) {
     const angle = (i / count) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
-    const speed = 6 + Math.random() * 4 + tier * 2;
+    const speed = 360 + Math.random() * 240 + tier * 120;
     sparks.push({
       x, y,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
-      life: 0, ttl: 18 + tier * 2,
+      life: 0, ttl: 0.3 + tier * 0.033,
       color,
     });
   }
 }
 // Red ripple + cross-shaped debris on miss.
 function spawnMissBurst(x, y) {
-  ripples.push({ x, y, r: 0, alpha: 0.7, color: '255,80,90', growth: 4.0 });
+  ripples.push({ x, y, r: 0, alpha: 0.7, color: '255,80,90', growth: 240 });
   for (let i = 0; i < 12; i++) {
     const a = (i / 12) * Math.PI * 2;
-    const speed = 3 + Math.random() * 2;
+    const speed = 180 + Math.random() * 120;
     particles.push({
       x, y,
       vx: Math.cos(a) * speed,
       vy: Math.sin(a) * speed,
-      life: 0, ttl: 26 + Math.random() * 10,
+      life: 0, ttl: 0.43 + Math.random() * 0.17,
       size: 1.4 + Math.random() * 0.8,
       color: '#ff5e6e',
       star: false,
@@ -366,9 +381,9 @@ function spawnLevelUpBurst() {
   const cx = CANVAS_W / 2, cy = CANVAS_H / 2;
   spawnParticles(cx, cy, 60, 5);
   spawnSparkLines(cx, cy, 16, 4);
-  ripples.push({ x: cx, y: cy, r: 0, alpha: 1.0, color: '255,216,107', growth: 6 });
-  ripples.push({ x: cx, y: cy, r: 0, alpha: 0.7, color: '255,255,255', delay: 6, growth: 5 });
-  spawnFloat(cx, cy - 36, 'CLEARED!', '#ffd86b', 2.4);
+  ripples.push({ x: cx, y: cy, r: 0, alpha: 1.0, color: '255,216,107', growth: 360 });
+  ripples.push({ x: cx, y: cy, r: 0, alpha: 0.7, color: '255,255,255', delay: 0.1, growth: 300 });
+  spawnFloat(cx, cy - 36, t('cleared'), '#ffd86b', 2.4);
   playSfx('clear');
   shake = 14;
   cameraPunch(1.06);
@@ -395,13 +410,9 @@ function spawnHitEffects(x, y) {
   scheduleAutoMove();
 }
 
+// Counted down in updateAndDraw; firing there keeps moves on the same paused/clamped clock as the round.
 function scheduleAutoMove() {
-  clearTimeout(autoMoveTimer);
-  autoMoveTimer = setTimeout(() => {
-    if (!running) return;
-    placeTarget();
-    scheduleAutoMove();
-  }, getMoveInterval());
+  moveLeft = getMoveInterval() / 1000;
 }
 
 // --- HUD ---
@@ -419,7 +430,7 @@ const timeColor = (t) => `hsl(${Math.round(120 * t / START_SECONDS)} 100% 70%)`;
 function updateHUD() {
   if (levelEl.textContent != level) levelEl.textContent = level;
   if (score !== _prevScore) { scoreEl.textContent = score; animatePop(scoreEl); _prevScore = score; }
-  const tStr = timeLeft.toFixed(1);
+  const tStr = timeFmt.format(timeLeft);
   if (timeEl.textContent !== tStr) {
     timeEl.textContent = tStr;
     timeEl.style.color = timeColor(timeLeft);
@@ -447,14 +458,19 @@ function spawnConfetti(count = 48) {
   resultConfettiEl.replaceChildren(frag);
 }
 
+// → locale key of the rank; its message is `${key}Msg`.
 function computeLevel(s, required) {
-  if (s <= 0) return { title: 'No Hits',      msg: 'Give it another go — warm up and aim for a few hits!' };
+  if (s <= 0) return 'rankNone';
   const ratio = required > 0 ? s / required : 0;
-  if (ratio < 0.4)  return { title: 'Beginner',     msg: 'Not bad — practice will improve your speed and accuracy.' };
-  if (ratio < 0.7)  return { title: 'Skilled',      msg: 'Nice work — you have good aim!' };
-  if (ratio < 1.0)  return { title: 'Sharpshooter', msg: 'So close! Just a couple more clicks next round.' };
-  if (ratio < 1.5)  return { title: 'Legendary',    msg: 'Amazing — you dominated the 15 seconds!' };
-  return { title: 'Immortal', msg: 'Inhuman reflexes. Truly unstoppable.' };
+  if (ratio < 0.4) return 'rankBeginner';
+  if (ratio < 0.7) return 'rankSkilled';
+  if (ratio < 1.0) return 'rankSharp';
+  if (ratio < 1.5) return 'rankLegend';
+  return 'rankImmortal';
+}
+
+function setStartLabel() {
+  startBtn.textContent = level > 1 ? t('startLevel', level) : t('start');
 }
 
 function endGame() {
@@ -487,17 +503,17 @@ function endGame() {
   updateStats(score, misses, passed, playedLevel);
   checkAchievements(score, playedLevel, misses, finalTimeRemaining, passed);
 
-  const result = computeLevel(score, required);
+  const rank = computeLevel(score, required);
   resultOverlay.classList.toggle('cleared', passed);
-  resultEyebrowEl.textContent = passed ? `Level ${playedLevel} cleared · ${result.title}` : `Level ${playedLevel}`;
-  resultTitleEl.textContent = passed ? 'Congratulations!' : result.title;
-  resultMsgEl.textContent = result.msg;
-  resultScoreEl.textContent = `Clicks: ${score}/${required}  |  Next: Level ${level}`;
+  resultEyebrowEl.textContent = passed ? t('eyebrowCleared', playedLevel, t(rank)) : t('eyebrow', playedLevel);
+  resultTitleEl.textContent = passed ? t('congrats') : t(rank);
+  resultMsgEl.textContent = t(`${rank}Msg`);
+  resultScoreEl.textContent = t('resultScore', score, required, level);
   if (passed) spawnConfetti();
   resultOverlay.show();
   resultOverlay.addEventListener('close', () => {
     resultConfettiEl.replaceChildren();
-    startBtn.textContent = `Start Level ${level}`;
+    setStartLabel();
     startBtn.style.display = 'inline-block';
   }, { once: true });
   setTimeout(() => resultOverlay.close(), 2500);  // click-to-dismiss wired below
@@ -533,9 +549,7 @@ function startGame() {
   placeTarget();
   updateHUD();
   startBgm();
-
-  _endAt = performance.now() + START_SECONDS * 1000;  // clock ticks in updateAndDraw
-  scheduleAutoMove();
+  scheduleAutoMove();  // timeLeft / moveLeft tick down in updateAndDraw
 }
 
 // --- Input ---
@@ -567,12 +581,12 @@ function onCanvasClick(e) {
     placeTarget();
   } else {
     misses++;
-    _endAt -= MISS_PENALTY * 1000;
+    timeLeft = Math.max(0, timeLeft - MISS_PENALTY);  // 0 → round ends next frame
     playSfx('miss');
     const hadCombo = combo;
     resetCombo();
-    spawnFloat(pos.x, pos.y, `-${MISS_PENALTY}s`, '#ff5e6e');
-    if (hadCombo >= 3) spawnFloat(pos.x, pos.y - 20, 'COMBO LOST', '#ff8a96', 1.4);
+    spawnFloat(pos.x, pos.y, t('missPenalty', MISS_PENALTY), '#ff5e6e');
+    if (hadCombo >= 3) spawnFloat(pos.x, pos.y - 20, t('comboLost'), '#ff8a96', 1.4);
     spawnMissBurst(pos.x, pos.y);
     shake = hadCombo >= 3 ? 7 : 5;
   }
@@ -581,23 +595,33 @@ function onCanvasClick(e) {
 
 // --- Render loop ---
 function updateAndDraw(now) {
+  // _lastTime = 0 (round start / tab hidden) → this frame only re-syncs the clock: dt = 0 after a pause.
   if (!_lastTime) { _lastTime = now; requestAnimationFrame(updateAndDraw); return; }
+  if (DEBUG_FPS && now - _lastTime < 1000 / DEBUG_FPS - 1) { requestAnimationFrame(updateAndDraw); return; }
   const dt = Math.min((now - _lastTime) / 1000, 0.1);
   _lastTime = now;
-  const s = dt * 60;
+
+  // Trail fade + target scale settle share one exponential rate (1/s).
+  const snap = 1 - Math.exp(-SNAP_K * dt);
 
   ctx.globalCompositeOperation = 'source-over';
-  const trailAlpha = 1 - Math.pow(1 - 0.18, s);
+  const trailAlpha = snap;
   ctx.fillStyle = `rgba(6,8,18,${trailAlpha.toFixed(4)})`;
   ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
   _globalTime += dt;
 
-  // Round clock: deadline-based so frame drops never cost time.
+  // Gameplay clock: round time, combo window and auto-move all accumulate the same clamped dt.
   if (running) {
-    timeLeft = Math.max(0, (_endAt - now) / 1000);
+    timeLeft = Math.max(0, timeLeft - dt);
     canvas.classList.toggle('urgent', timeLeft <= 5 && timeLeft > 0);
-    if (timeLeft <= 0) endGame(); else updateHUD();
+    if (timeLeft <= 0) {
+      endGame();
+    } else {
+      if (comboLeft > 0 && (comboLeft -= dt) <= 0) combo = 0;
+      if ((moveLeft -= dt) <= 0) { placeTarget(); scheduleAutoMove(); }
+      updateHUD();
+    }
   }
   if (!running) {
     ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
@@ -617,7 +641,7 @@ function updateAndDraw(now) {
   ctx.globalCompositeOperation = 'lighter';
   const starBoost = 1 + Math.min(0.8, combo * 0.08);
   for (const star of bgStars) {
-    star.y -= star.speed * s * (1 + Math.min(0.5, combo * 0.05));
+    star.y -= star.speed * dt * (1 + Math.min(0.5, combo * 0.05));
     if (star.y < -0.02) star.y += 1.04;
     const twinkle = 0.5 + 0.5 * Math.sin(_globalTime * 3 + star.phase);
     ctx.globalAlpha = star.alpha * twinkle * starBoost;
@@ -632,14 +656,14 @@ function updateAndDraw(now) {
   // Ghosts
   for (let i = 0; i < ghosts.length; ) {
     const g = ghosts[i];
-    g.life += s;
-    g.alpha -= 0.025 * s;
+    g.life += dt;
+    g.alpha -= 1.5 * dt;
     if (g.alpha <= 0 || g.life > g.ttl) { ghosts[i] = ghosts[ghosts.length - 1]; ghosts.pop(); continue; }
     ctx.globalAlpha = g.alpha * 0.4;
     ctx.strokeStyle = 'rgba(255,160,200,0.6)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.arc(g.x, g.y, g.r * (1 + g.life * 0.02), 0, Math.PI * 2);
+    ctx.arc(g.x, g.y, g.r * (1 + g.life * 1.2), 0, Math.PI * 2);
     ctx.stroke();
     ctx.globalAlpha = 1;
     i++;
@@ -658,7 +682,7 @@ function updateAndDraw(now) {
 
   // Shrinking ring
   if (target.ringTTL > 0 && target.ringLife < target.ringTTL) {
-    target.ringLife += s;
+    target.ringLife += dt;
     const progress = Math.min(1, target.ringLife / target.ringTTL);
     target.ringR = target.ringStart + (target.r - target.ringStart) * progress;
     const ringAlpha = progress > 0.8 ? (1 - progress) * 5 : 0.6;
@@ -676,19 +700,19 @@ function updateAndDraw(now) {
   ctx.globalCompositeOperation = 'lighter';
   for (let i = 0; i < particles.length; ) {
     const p = particles[i];
-    p.x += p.vx * s;
-    p.y += p.vy * s;
-    p.vy += 0.05 * s;
-    p.life += s;
-    const t = 1 - p.life / p.ttl;
-    if (t <= 0) { particles[i] = particles[particles.length - 1]; particles.pop(); continue; }
-    ctx.globalAlpha = Math.pow(t, 1.1);
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.vy += GRAVITY * dt;
+    p.life += dt;
+    const lifeT = 1 - p.life / p.ttl;
+    if (lifeT <= 0) { particles[i] = particles[particles.length - 1]; particles.pop(); continue; }
+    ctx.globalAlpha = Math.pow(lifeT, 1.1);
     ctx.fillStyle = p.color;
-    const rad = Math.max(0.5, p.size * (0.5 + t * 0.5));
+    const rad = Math.max(0.5, p.size * (0.5 + lifeT * 0.5));
     if (p.star) {
       ctx.save();
       ctx.translate(p.x, p.y);
-      ctx.rotate(p.life * 0.1);
+      ctx.rotate(p.life * 6);  // rad/s
       ctx.beginPath();
       for (let j = 0; j < 8; j++) {
         const angle = (j / 8) * Math.PI * 2;
@@ -712,10 +736,10 @@ function updateAndDraw(now) {
   // Ripples (per-ripple growth rate so big rings expand faster)
   for (let i = 0; i < ripples.length; ) {
     const r = ripples[i];
-    if (r.delay && r.delay > 0) { r.delay -= s; i++; continue; }
-    const growth = (r.growth != null ? r.growth : 3.5) + score * 0.06;
-    r.r += growth * s;
-    r.alpha -= 0.022 * s;
+    if (r.delay && r.delay > 0) { r.delay -= dt; i++; continue; }
+    const growth = (r.growth != null ? r.growth : 210) + score * 3.6;
+    r.r += growth * dt;
+    r.alpha -= 1.32 * dt;
     if (r.alpha <= 0) { ripples[i] = ripples[ripples.length - 1]; ripples.pop(); continue; }
     ctx.strokeStyle = `rgba(${r.color || '255,160,200'},${r.alpha.toFixed(3)})`;
     ctx.lineWidth = r.color === '150,200,255' ? 1 : 2;
@@ -729,19 +753,20 @@ function updateAndDraw(now) {
   ctx.globalCompositeOperation = 'lighter';
   for (let i = 0; i < sparks.length; ) {
     const sp = sparks[i];
-    sp.life += s;
-    sp.x += sp.vx * s;
-    sp.y += sp.vy * s;
-    sp.vx *= Math.pow(0.92, s);
-    sp.vy *= Math.pow(0.92, s);
-    const t = 1 - sp.life / sp.ttl;
-    if (t <= 0) { sparks[i] = sparks[sparks.length - 1]; sparks.pop(); continue; }
-    ctx.globalAlpha = t;
+    sp.life += dt;
+    sp.x += sp.vx * dt;
+    sp.y += sp.vy * dt;
+    const keep = Math.pow(SPARK_DAMPING, dt);
+    sp.vx *= keep;
+    sp.vy *= keep;
+    const lifeT = 1 - sp.life / sp.ttl;
+    if (lifeT <= 0) { sparks[i] = sparks[sparks.length - 1]; sparks.pop(); continue; }
+    ctx.globalAlpha = lifeT;
     ctx.strokeStyle = sp.color;
     ctx.lineWidth = 1.8;
     ctx.beginPath();
     ctx.moveTo(sp.x, sp.y);
-    ctx.lineTo(sp.x - sp.vx * 0.6, sp.y - sp.vy * 0.6);
+    ctx.lineTo(sp.x - sp.vx * 0.01, sp.y - sp.vy * 0.01);  // tail = 10ms of travel
     ctx.stroke();
     i++;
   }
@@ -751,15 +776,15 @@ function updateAndDraw(now) {
   // Floats
   for (let i = 0; i < floats.length; ) {
     const f = floats[i];
-    f.y += f.dy * s;
-    f.alpha -= 0.022 * s;
-    f.life += s;
-    if (f.scale > 1) f.scale += (1 - f.scale) * (1 - Math.pow(0.85, s));
+    f.y += f.vy * dt;
+    f.alpha -= 1.32 * dt;
+    f.life += dt;
+    if (f.scale > 1) f.scale += (1 - f.scale) * (1 - Math.exp(-SETTLE_K * dt));
     if (f.alpha <= 0 || f.life > f.ttl) { floats[i] = floats[floats.length - 1]; floats.pop(); continue; }
     ctx.save();
     ctx.globalAlpha = Math.max(0, f.alpha);
     const fSize = Math.round(16 * (f.scale || 1));
-    ctx.font = `bold ${fSize}px system-ui, Arial`;
+    ctx.font = `bold ${fSize}px ${FONT}`;
     ctx.textAlign = 'center';
     ctx.fillStyle = 'rgba(0,0,0,0.4)';
     ctx.fillText(f.text, f.x + 1, f.y + 1);
@@ -770,12 +795,12 @@ function updateAndDraw(now) {
   }
 
   // Target
-  target.scale += (1 - target.scale) * (1 - Math.pow(1 - 0.18, s));
+  target.scale += (1 - target.scale) * snap;
 
   if (shake > 0) {
     shakeOx = (Math.random() * 2 - 1) * shake;
     shakeOy = (Math.random() * 2 - 1) * shake;
-    shake *= Math.pow(0.85, s);
+    shake *= Math.exp(-SETTLE_K * dt);
     if (shake < 0.4) { shake = 0; shakeOx = 0; shakeOy = 0; }
   }
 
@@ -835,7 +860,7 @@ function updateAndDraw(now) {
   const fs = Math.round(r * 1.05);
   const secs = Math.ceil(timeLeft);
   ctx.globalAlpha = textAlpha;
-  ctx.font = `900 ${fs}px system-ui, Arial, sans-serif`;
+  ctx.font = `900 ${fs}px ${FONT}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.lineJoin = 'round';
@@ -904,19 +929,18 @@ startBtn.addEventListener('click', () => {
   overlay.classList.add('active');
   startBtn.style.display = 'none';
   countdownEl.style.display = 'flex';
-  let t = 3;
+  let n = 3;
   const showDigit = (v) => { countdownEl.textContent = v; animatePop(countdownEl, 1.6); playSfx('tick'); };
-  showDigit(t);
+  showDigit(n);
   countdownTimer = setInterval(() => {
-    t--;
-    if (t > 0) { showDigit(t); return; }
+    n--;
+    if (n > 0) { showDigit(n); return; }
     clearInterval(countdownTimer);
     countdownTimer = null;
     overlay.classList.remove('active');  // before startGame: .countdown then inherits pointer-events:none
-    startBtn.textContent = 'Start';
     startGame();
     // "GO!" flashes over the live round. No timer: clearAllTimers()/re-entry guard stay unaffected.
-    countdownEl.textContent = 'GO!';
+    countdownEl.textContent = t('go');
     playSfx('go');
     countdownEl.animate(
       [{ transform: 'scale(1.6)', opacity: 1 }, { transform: 'scale(1)', opacity: 1, offset: 0.35 }, { opacity: 0 }],
@@ -925,9 +949,16 @@ startBtn.addEventListener('click', () => {
   }, 1000);
 });
 
+// Pause: rAF stops while hidden; zeroing the clock makes the first frame back a dt = 0 re-sync
+// instead of a clamped 0.1s jump. Audio is suspended for the same span.
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) _lastTime = 0;
+  pauseAudio(document.hidden);
+});
+
 // Initialize view
 resizeCanvas();
-if (level > 1) startBtn.textContent = `Start Level ${level}`;
+setStartLabel();
 highEl.textContent = highscore;
 updateHUD();
 requestAnimationFrame(updateAndDraw);

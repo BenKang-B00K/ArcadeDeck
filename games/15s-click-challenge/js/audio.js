@@ -129,6 +129,21 @@ export function setMuted(muted) {
   if (master) master.gain.value = muted ? 0 : 1;
 }
 
+// Hidden tab: suspend the whole graph (BGM + SFX tails) while the round is paused. Only resume a
+// context we suspended — resuming one that never got a user gesture just trips the autoplay policy.
+let suspendedByHide = false;
+export function pauseAudio(hidden) {
+  if (!ctx) return;
+  if (hidden) {
+    if (ctx.state !== 'running') return;
+    suspendedByHide = true;
+    ctx.suspend().catch((e) => console.warn('audio suspend failed', e));
+  } else if (suspendedByHide) {
+    suspendedByHide = false;
+    ctx.resume().catch((e) => console.warn('audio resume failed', e));
+  }
+}
+
 // Browsers keep the context suspended until a user gesture; call from a click handler.
 // `!== 'running'` also covers Safari's non-standard 'interrupted' (call / lock / app switch).
 export function unlockAudio() {

@@ -576,6 +576,7 @@
         "37 achievements with unlock toasts",
         "Top 5 records and lifetime stats saved on your device",
         "Fully synthesized SFX and ambient BGM — no audio downloads",
+        "Plays in English, Korean and Japanese",
         "Optimized for phones: capped render resolution, touch-safe input",
         "Works offline in any modern browser"
       ],
@@ -601,7 +602,7 @@
       "faq": [
         {
           "q": "How does a round start?",
-          "a": "Press Start. A 3-2-1 countdown plays, then the target appears and the 15-second clock runs. The clock is deadline-based, so frame drops never cost you time."
+          "a": "Press Start. A 3-2-1 countdown plays, then the target appears and the 15-second clock runs. The clock only runs while the game is on screen: switch tabs or apps and the round pauses until you come back."
         },
         {
           "q": "What do I need to clear a level?",

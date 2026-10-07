@@ -65,6 +65,7 @@
   {
     "id": "7",
     "slug": "15s-click-challenge",
+    "language": "EN/KO/JA",
     "thumbnail": "images/15s-click-challenge.webp",
     "genres": [
       "Arcade",
@@ -76,7 +77,7 @@
     "platform": "BOTH",
     "isOriginal": true,
     "badge": "UPDATE",
-    "lastUpdated": "2026-09-14",
+    "lastUpdated": "2026-10-06",
     "scoreTiers": [
       5,
       10,

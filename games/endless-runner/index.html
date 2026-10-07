@@ -36,7 +36,7 @@
       #coins {
         position: fixed; top: 14px; right: 16px; z-index: 1;
         padding: 6px 13px 6px 11px; border-radius: 999px;
-        font-family: system-ui, sans-serif; font-size: 15px; font-weight: 800; letter-spacing: .04em;
+        font-family: var(--font, system-ui, sans-serif); font-size: 15px; font-weight: 800; letter-spacing: .04em;
         font-variant-numeric: tabular-nums; color: #ffd85e;
         background: rgba(11,16,32,.55); border: 1px solid rgba(255,216,94,.28);
         backdrop-filter: blur(6px);
@@ -59,7 +59,7 @@
       /* Shield buy button: the one HUD control that is actually clickable. */
       #shieldBtn {
         position: fixed; top: 54px; right: 16px;
-        padding: 7px 14px; font-family: system-ui, sans-serif;
+        padding: 7px 14px; font-family: var(--font, system-ui, sans-serif);
         font-size: 13px; font-weight: 800; letter-spacing: .04em;
         color: #06121a; background: #7fe8ff; border: none; border-radius: 999px;
         cursor: pointer; touch-action: manipulation; user-select: none;
@@ -74,7 +74,7 @@
       #meter {
         position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom));
         transform: translateX(-50%);
-        text-align: center; font-family: system-ui, sans-serif;
+        text-align: center; font-family: var(--font, system-ui, sans-serif);
         pointer-events: none; user-select: none; white-space: nowrap;
       }
       #zoneTag {
@@ -116,7 +116,7 @@
       #zone {
         position: fixed; top: 17%; left: 0; right: 0;
         text-align: center; pointer-events: none; user-select: none;
-        font-family: system-ui, sans-serif; opacity: 0;
+        font-family: var(--font, system-ui, sans-serif); opacity: 0;
       }
       #zone.show { animation: zoneIn 2.6s ease-out forwards; }
       #zone .eyebrow {
@@ -150,16 +150,31 @@
         @keyframes zoneFade { 0%,100% { opacity: 0; } 10%,74% { opacity: 1; } }
       }
 
+      /* Over the wallet pill (z-index 1), so a resume click cannot buy anything. */
+      #paused {
+        position: fixed; inset: 0; z-index: 2; padding: 16px;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 10px; text-align: center; user-select: none; cursor: pointer;
+        font-family: var(--font, system-ui, sans-serif); color: #b9c9e6;
+        background: rgba(11,16,32,.6);
+      }
+      #paused b {
+        font-family: Unbounded, var(--font, system-ui, sans-serif); font-weight: 900;
+        font-size: clamp(26px, 6vw, 40px); letter-spacing: .08em; color: #eaf0ff;
+        text-shadow: 0 2px 12px rgba(0,0,0,.7);
+      }
+      #paused span { font-size: 15px; font-weight: 700; letter-spacing: .04em; }
+
       .overlay {
         position: fixed; inset: 0;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
         gap: 14px; text-align: center;
-        font-family: system-ui, sans-serif; color: #eaf0ff;
+        font-family: var(--font, system-ui, sans-serif); color: #eaf0ff;
         background: radial-gradient(ellipse at center, rgba(11,16,32,.55), rgba(11,16,32,.9));
         backdrop-filter: blur(2px);
       }
       .overlay h1 {
-        font-family: Unbounded, system-ui, sans-serif; font-weight: 900;
+        font-family: Unbounded, var(--font, system-ui, sans-serif); font-weight: 900;
         font-size: 44px; line-height: .95; letter-spacing: -.01em; color: #f4f6ff;
       }
       .overlay p { font-size: 16px; opacity: .85; max-width: 320px; line-height: 1.5; }
@@ -186,7 +201,7 @@
       #lang {
         position: absolute; top: 14px; left: 16px;
         padding: 6px 10px; border-radius: 999px;
-        font-family: system-ui, sans-serif; font-size: 13px; font-weight: 800; letter-spacing: .04em;
+        font-family: var(--font, system-ui, sans-serif); font-size: 13px; font-weight: 800; letter-spacing: .04em;
         color: #cfe0ff; background: rgba(11,16,32,.55); border: 1px solid rgba(140,180,255,.3);
         backdrop-filter: blur(6px); cursor: pointer;
       }
@@ -222,7 +237,7 @@
       /* Run result: the distance is the headline, best and haul ride beside it. */
       .final { display: flex; align-items: baseline; justify-content: center; gap: 18px; margin-top: 16px; }
       .final:empty { display: none; }
-      .final b { font-family: Unbounded, system-ui, sans-serif; font-weight: 800; font-size: 32px; color: #ffd85e; text-shadow: 0 2px 12px rgba(0,0,0,.7); }
+      .final b { font-family: Unbounded, var(--font, system-ui, sans-serif); font-weight: 800; font-size: 32px; color: #ffd85e; text-shadow: 0 2px 12px rgba(0,0,0,.7); }
       .final span { font-size: 13px; font-weight: 600; opacity: .72; letter-spacing: .03em; text-shadow: 0 2px 8px rgba(0,0,0,.8); }
       /* New-pin toast: this skin crossed a BADGE_TIERS mark this run. Empty =
          gone. Pops in a beat after the result, so it reads as a consequence. */
@@ -241,7 +256,7 @@
       #shop { display: contents; }
       #startBtn {
         margin-top: 4px; min-width: min(300px, 100%); padding: 16px 44px;
-        font-family: Unbounded, system-ui, sans-serif; font-weight: 800; font-size: 19px; letter-spacing: .08em;
+        font-family: Unbounded, var(--font, system-ui, sans-serif); font-weight: 800; font-size: 19px; letter-spacing: .08em;
         color: #0b1020; background: #f4f6ff;
         box-shadow: 0 0 0 1px rgba(255,255,255,.35), 0 10px 30px rgba(0,0,0,.45),
                     0 0 48px color-mix(in srgb, var(--zone-accent) 50%, transparent);
@@ -407,8 +422,8 @@
         .skin-tile:not(:disabled):hover, .skin-tile:not(:disabled):focus-visible { transform: none; }
       }
     </style>
-    <script type="module" crossorigin src="./assets/index-BMcjigss.js"></script>
     <script>/* offline play: games.arcadedeck.net/sw.js (shared, one cache per game) */if('serviceWorker'in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js',{scope:'./'}).then(()=>navigator.serviceWorker.ready).then(r=>r.active&&r.active.postMessage([location.origin+location.pathname,...performance.getEntriesByType('resource').map(e=>e.name)])).catch(()=>{})})</script>
+    <script type="module" crossorigin src="./assets/index-D7sYUMQj.js"></script>
   </head>
   <body>
     <div id="app"></div>
@@ -429,6 +444,11 @@
       <div class="eyebrow"></div>
       <div class="name"></div>
       <div class="rule"></div>
+    </div>
+    <!-- Auto-pause (main.js): any key, click or tap resumes. -->
+    <div id="paused" hidden>
+      <b data-i18n>PAUSED</b>
+      <span data-i18n>Tap or press any key to resume</span>
     </div>
 
     <!-- Menu and game-over share this: main.js swaps the words, the layout

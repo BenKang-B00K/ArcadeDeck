@@ -246,7 +246,7 @@
   {
     "id": "15",
     "slug": "kingdom-of-ashes-colosseum",
-    "language": "KO",
+    "language": "EN/KO/JA",
     "thumbnail": "images/kingdom-of-ashes-colosseum.webp",
     "genres": [
       "Strategy",
@@ -258,6 +258,7 @@
     "platform": "BOTH",
     "isOriginal": true,
     "badge": "UPDATE",
+    "lastUpdated": "2026-10-06",
     "scoreTiers": [
       600,
       2000,

@@ -1,1 +1,0 @@
-var e=``+new URL(`17-Bg-MDHkx.webp`,import.meta.url).href;export{e as default};

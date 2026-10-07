@@ -1,4 +1,4 @@
-import { GEMS, GEM_GAP } from './config.js';
+import { GEMS, GEM_ROUNDNESS } from './config.js';
 
 function scaleColor(hex, f) {
   const r = Math.min(255, ((hex >> 16) & 0xff) * f | 0);
@@ -63,11 +63,21 @@ const OUTLINES = [
   r => starPts(12, r, r * 0.54, -Math.PI / 12),
 ];
 
-export const gemOutline = level => OUTLINES[level - 1](GEMS[level - 1].r);
+// Each cut edge split into m segments (~48 points total) so it can bulge; facet lines stay on the corners
+const facetStep = level => Math.max(1, Math.round(48 / OUTLINES[level - 1](1).length));
 
-export function gemVerts(level) {
-  const k = 1 + GEM_GAP / GEMS[level - 1].r;
-  return gemOutline(level).map(([x, y]) => ({ x: x * k, y: y * k }));
+// Rounded outline: every point pulled GEM_ROUNDNESS of the way out to the physics circle
+export function gemOutline(level) {
+  const r = GEMS[level - 1].r, c = OUTLINES[level - 1](r), m = facetStep(level), out = [];
+  for (let i = 0; i < c.length; i++) {
+    const [ax, ay] = c[i], [bx, by] = c[(i + 1) % c.length];
+    for (let s = 0; s < m; s++) {
+      const x = ax + (bx - ax) * s / m, y = ay + (by - ay) * s / m, d = Math.hypot(x, y) || 1;
+      const k = 1 + (r - d) * GEM_ROUNDNESS / d;
+      out.push([x * k, y * k]);
+    }
+  }
+  return out;
 }
 
 function gfxPoly(gfx, pts) {
@@ -96,7 +106,7 @@ const lit = (col, nx, ny) => scaleColor(col, 0.95 + 0.45 * (nx * LX + ny * LY));
 
 // Cut-gem look shared by every shape: shaded crown facets between the outline and a
 // smaller "table" polygon, flat bright table with a lighter core, facet lines, bright rim, glassy shine.
-function drawGem(g, pts, r, col) {
+function drawGem(g, pts, r, col, m) {
   const n = pts.length;
   const inner = pts.map(([x, y]) => [x * 0.55, y * 0.55]);
   for (let i = 0; i < n; i++) {
@@ -109,7 +119,7 @@ function drawGem(g, pts, r, col) {
   // lower-right depth shadow over the table
   fill(g, inner.map(([x, y]) => [x + r * 0.05, y + r * 0.06]), 0x000000, 0.10);
   g.lineStyle(0.8, 0xffffff, 0.18);
-  for (let i = 0; i < n; i++) { g.moveTo(inner[i][0], inner[i][1]); g.lineTo(pts[i][0], pts[i][1]); }
+  for (let i = 0; i < n; i += m) { g.moveTo(inner[i][0], inner[i][1]); g.lineTo(pts[i][0], pts[i][1]); }
   g.lineStyle(1.2, 0xffffff, 0.22); gfxPoly(g, inner);
   g.lineStyle(1.5, scaleColor(col, 1.6), 0.9); gfxPoly(g, pts);
   g.lineStyle(0);
@@ -128,7 +138,7 @@ export function makeBallSprite(level) {
   c.glowRef = glowGfx;
 
   const g = new PIXI.Graphics();
-  drawGem(g, OUTLINES[level - 1](r), r, col);
+  drawGem(g, gemOutline(level), r, col, facetStep(level));
   if (level >= 7) {
     addStar(g, -r * 0.34, r * 0.28, r * 0.14, 0xffffff, 0.5);
     addStar(g,  r * 0.30, -r * 0.28, r * 0.13, hi, 0.6);

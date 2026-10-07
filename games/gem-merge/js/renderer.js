@@ -110,10 +110,10 @@ for (let dx = WT; dx < W - WT; dx += 10) {
 }
 layerBG.addChild(dangerGfx);
 
-const dangerTxt = new PIXI.Text('▲ DANGER', {
+export const dangerTxt = new PIXI.Text('', { // text set per language by ui.renderText
   fontFamily: 'Arial', fontSize: 9, fill: 0xff4757, alpha: 0.65,
 });
-dangerTxt.x = WT + 4; dangerTxt.y = DANGER_Y - dangerTxt.height - 3;
+dangerTxt.anchor.set(0, 1); dangerTxt.x = WT + 4; dangerTxt.y = DANGER_Y - 3;
 layerBG.addChild(dangerTxt);
 
 // ── Walls

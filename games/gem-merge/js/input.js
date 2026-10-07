@@ -4,8 +4,8 @@ import { app, layerGuide } from './renderer.js';
 import { createBall } from './balls.js';
 import { gemOutline } from './gems.js';
 import { spawnDropTrail } from './fx.js';
+import { now } from './physics.js';
 import { playDrop } from './audio.js';
-import { checkAchievements } from './achievements.js';
 
 export function drawGuide() {
   layerGuide.removeChildren();
@@ -54,16 +54,15 @@ function toCanvasX(clientX) {
 
 function dropBall() {
   if (S.gameOver) return;
-  const now = Date.now();
-  if (now - S.lastDrop < COOLDOWN) return;
-  S.lastDrop = now;
+  const tNow = now();
+  if (tNow - S.lastDrop < COOLDOWN) return;
+  S.lastDrop = tNow;
   
   const gem = GEMS[S.nextLevel - 1];
   playDrop(S.nextLevel);
   spawnDropTrail(createBall(clampX(S.mouseX), DROP_Y, S.nextLevel, S.nextAngle), gem.color, gem.r);
   S.nextLevel = 1;
   drawGuide();
-  checkAchievements();
 }
 
 // Pointer Events cover mouse, touch and pen alike; PIXI sets touch-action:none on the canvas so the

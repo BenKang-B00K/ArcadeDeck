@@ -5,7 +5,6 @@ export function toggleMute() {
   muted = !muted;
   const btn = document.getElementById('mute-btn');
   if (btn) {
-    btn.textContent = muted ? '🔇' : '🔊';
     btn.classList.toggle('muted', muted);
   }
 }

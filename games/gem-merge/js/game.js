@@ -1,6 +1,6 @@
 import { GEMS, DANGER_Y, COMBO_TIER_CAP } from './config.js';
-import { S } from './state.js';
-import { engine, Body, Events } from './physics.js';
+import { S, save } from './state.js';
+import { engine, Body, Events, now } from './physics.js';
 import { burst, spawnRing, spawnFlash, spawnScorePopup } from './fx.js';
 import { checkTier, registerCombo, triggerEdgeFlash, triggerScorePop, triggerLegendarySequence } from './celebration.js';
 import { createBall, removeBall } from './balls.js';
@@ -9,12 +9,12 @@ import { drawGuide } from './input.js';
 import { collectLegendaryGem } from './ui.js';
 import { playMerge, playLegendary } from './audio.js';
 import { checkAchievements } from './achievements.js';
+import { fmtNum } from './i18n.js';
 
 /* ── Merge collision listener */
 Events.on(engine, 'collisionStart', ({ pairs }) => {
   for (const pair of pairs) {
-    // compound (star) bodies report their parts; merge logic keys on the parent
-    const bodyA = pair.bodyA.parent, bodyB = pair.bodyB.parent;
+    const { bodyA, bodyB } = pair;
     const bA = S.ballMap.get(bodyA.id), bB = S.ballMap.get(bodyB.id);
     if (!bA || !bB || bA.level !== bB.level) continue;
     if (bA.level === 11) continue; // Lv11 gems live in the vault — cannot merge
@@ -40,7 +40,7 @@ Events.on(engine, 'afterUpdate', () => {
     burst(px, py, gem.color, level, 1 + 0.35 * Math.min(S.comboCount - 1, 4)); // combo → denser burst
     spawnRing(px, py, gem.color, gem.r);
     spawnFlash(px, py, Math.max(14, gem.r * 0.35));
-    if (level >= 7) S.screenShakes.push({ frames: 8, intensity: 2 + level * 0.4 });
+    if (level >= 7) S.screenShakes.push({ time: 0.13, intensity: 2 + level * 0.4 });
     removeBall(idA); removeBall(idB);
     if (legendary) playLegendary();
     else { playMerge(level); Body.setVelocity(createBall(px, py, level + 1), { x: 0, y: -1.5 }); }
@@ -58,18 +58,18 @@ Events.on(engine, 'afterUpdate', () => {
 
 function addScore(pts, color) {
   S.score += pts;
-  if (S.score > S.best) { S.best = S.score; localStorage.setItem('gmBest', S.best); }
-  document.getElementById('score').textContent = S.score.toLocaleString();
-  document.getElementById('best').textContent  = S.best.toLocaleString();
+  if (S.score > S.best) { S.best = S.score; save('best', S.best); }
+  document.getElementById('score').textContent = fmtNum(S.score);
+  document.getElementById('best').textContent  = fmtNum(S.best);
   triggerScorePop();
   triggerEdgeFlash(color);
   checkTier(S.score);
 }
 
 export function checkGameOver() {
-  const now = Date.now();
+  const tNow = now();
   for (const [, e] of S.ballMap) {
-    if (now - e.born < 1800) continue;
+    if (tNow - e.born < 1800) continue;
     const spd = Math.hypot(e.body.velocity.x, e.body.velocity.y);
     if (spd < 0.4 && e.body.bounds.min.y < DANGER_Y) {
       doGameOver(); return;
@@ -81,7 +81,7 @@ function doGameOver() {
   if (S.gameOver) return;
   S.gameOver = true;
   layerGuide.removeChildren(); S.guideContainer = null;
-  document.getElementById('final-score').textContent = S.score.toLocaleString();
+  document.getElementById('final-score').textContent = fmtNum(S.score);
   document.getElementById('overlay').classList.remove('hidden');
   if (window.parent) {
     // ArcadeDeck 통합 전송 규격
@@ -104,9 +104,9 @@ export function restart() {
   });
   S.particles.length = S.rings.length = S.flashes.length = S.popups.length = S.trails.length = 0;
   S.announcements.length = S.combos.length = S.screenShakes.length = 0;
-  S.fxTimers.forEach(clearTimeout); S.fxTimers.length = 0;
-  S.score = 0; S.gameOver = false; S.lastDrop = 0;
-  S.comboCount = 0; S.lastMergeTime = 0;
+  S.fxTimers.length = 0;
+  S.score = 0; S.gameOver = false; S.lastDrop = -Infinity;
+  S.comboCount = 0; S.lastMergeTime = -Infinity;
   S.currentTier = 0;
   document.body.className = '';
   bgOverlay.clear(); bgOverlay.alpha = 0;

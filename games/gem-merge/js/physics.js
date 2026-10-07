@@ -1,9 +1,20 @@
 import { W, H, WT, GRAVITY } from './config.js';
 
-const { Engine, World, Bodies, Body, Runner, Events } = Matter;
+const { Engine, World, Bodies, Body, Events } = Matter;
 export { World, Bodies, Body, Events };
 export const engine = Engine.create({ gravity: { x: 0, y: GRAVITY } });
-Runner.run(Runner.create({ fps: 60 }), engine);
+
+// Fixed 60 Hz step driven from the render loop (Matter 0.19's Runner clamps delta to >= 1000/fps
+// per rAF, so it ran 2x fast on 120 Hz screens). Returns 0..1 = how far render is into the next step.
+const STEP = 1000 / 60;
+let acc = 0;
+export function stepPhysics(ms) {
+  for (acc += ms; acc >= STEP; acc -= STEP) Engine.update(engine, STEP);
+  return acc / STEP;
+}
+
+// Simulated ms — the gameplay clock (stops with the loop, steps with physics)
+export const now = () => engine.timing.timestamp;
 
 const sWall = { isStatic: true, friction: 0.3, restitution: 0.15 };
 // Inner faces match the drawn field: x in [WT, W-WT], floor at H-WT. Thick bodies — polygon corners tunnel easier than circles.

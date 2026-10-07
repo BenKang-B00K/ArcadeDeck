@@ -19,12 +19,13 @@ export const GEMS = [
 ];
 
 export const TIERS = [
-  { min:    0, label: null,              cls: '',       overlay: 0x6c5ce7, overlayMax: 0.00  },
-  { min:   50, label: '✨ NICE!',        cls: 'tier-1', overlay: 0x9b59b6, overlayMax: 0.04  },
-  { min:  150, label: '🔥 HOT STREAK!', cls: 'tier-2', overlay: 0xfd79a8, overlayMax: 0.055 },
-  { min:  350, label: '⚡ ON FIRE!',    cls: 'tier-3', overlay: 0xff6348, overlayMax: 0.075 },
-  { min:  700, label: '💫 BLAZING!',    cls: 'tier-4', overlay: 0xffa502, overlayMax: 0.095 },
-  { min: 1200, label: '💎 LEGENDARY!',  cls: 'tier-5', overlay: 0xf9ca24, overlayMax: 0.13  },
+  // labels: i18n `tiers` (same index)
+  { min:    0, cls: '',       overlay: 0x6c5ce7, overlayMax: 0.00  },
+  { min:   50, cls: 'tier-1', overlay: 0x9b59b6, overlayMax: 0.04  },
+  { min:  150, cls: 'tier-2', overlay: 0xfd79a8, overlayMax: 0.055 },
+  { min:  350, cls: 'tier-3', overlay: 0xff6348, overlayMax: 0.075 },
+  { min:  700, cls: 'tier-4', overlay: 0xffa502, overlayMax: 0.095 },
+  { min: 1200, cls: 'tier-5', overlay: 0xf9ca24, overlayMax: 0.13  },
 ];
 
 export const COMBO_WINDOW = 1300;
@@ -34,5 +35,8 @@ export const hexStr = n => '#' + n.toString(16).padStart(6, '0');
 // Spawns are always Lv1; a combo of ×N upgrades the next spawn to Lv N (capped). Skill, not luck.
 export const COMBO_TIER_CAP = 4;
 
-// Physics outline is inflated by this many px so gems never visually touch
+// Physics body is a circle of r + GEM_GAP px (circles roll), so gems never visually touch
 export const GEM_GAP = 2.5;
+// Drawn outline pulled toward that circle: 0 = sharp cut shape, 1 = perfect circle.
+// Higher = rounder look + smaller visible gaps between touching gems; lower = more distinct shapes.
+export const GEM_ROUNDNESS = 0.75;

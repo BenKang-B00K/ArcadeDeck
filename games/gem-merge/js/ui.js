@@ -1,10 +1,11 @@
 import { GEMS, COMBO_TIER_CAP, hexStr } from './config.js';
 import { S, addGemCount } from './state.js';
-import { app, isMobile } from './renderer.js';
+import { app, isMobile, dangerTxt } from './renderer.js';
 import { makeBallSprite } from './gems.js';
 import { replayAnim } from './celebration.js';
-import { t, lang, setLang, LANGS, applyLang } from './i18n.js';
-import { ACH, isUnlocked, unlockedCount } from './achievements.js';
+import { t, comboLabel, fmtNum, withCJK, lang, setLang, LANGS, applyLang } from './i18n.js';
+import { ACHIEVEMENTS, achIcon, isUnlocked, unlockedCount } from './achievements.js';
+import { icon } from './icons.js';
 
 const range = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
 
@@ -22,26 +23,31 @@ function gemImg(level) {
 
 const gemEntry = lv => `
     <div class="gem-entry">${gemImg(lv)}<div class="gem-info">
-      <div class="gem-lv">Lv.${lv}</div><div class="gem-pts">+${GEMS[lv - 1].score}pt</div>
+      <div class="gem-lv">${t('lv', lv)}</div><div class="gem-pts">${t('pts', GEMS[lv - 1].score)}</div>
     </div></div>`;
 
 // Touch screens get drag/release wording instead of mouse/click
 const touch = matchMedia('(hover: none)').matches;
+const aimIcon = icon(touch ? 'touch' : 'mouse', '#a29bfe', 'how-icon');
 const howRows = () => `
     <div class="panel-title">${t('howto')}</div>
-    <div class="how-row"><span class="how-icon">${touch ? '👆' : '🖱'}</span><span>${t(touch ? 'how1t' : 'how1')}</span></div>
-    <div class="how-row"><span class="how-icon">${touch ? '👆' : '🖱'}</span><span>${t(touch ? 'how2t' : 'how2')}</span></div>
-    <div class="how-row"><span class="how-icon">💎</span><span>${t('how3')}</span></div>`;
+    <div class="how-row">${aimIcon}<span>${t(touch ? 'how1t' : 'how1')}</span></div>
+    <div class="how-row">${aimIcon}<span>${t(touch ? 'how2t' : 'how2')}</span></div>
+    <div class="how-row">${icon('gem', '#f9ca24', 'how-icon')}<span>${t('how3')}</span></div>`;
 const X_STYLE = 'font-size:11px;font-weight:bold;min-width:28px;text-align:center;';
 const comboRows = () => `
     <div class="panel-title">${t('combo')}</div>
-    <div class="how-row"><span class="how-icon">⚡</span><span>${t('combo1')}</span></div>
-    ${[['2', '#ffd93d', 'COMBO! → Lv.2'], ['3', '#ff6b6b', t('combo3')], ['4', '#ffa502', 'COMBO ×4!! → Lv.4 🔥'], ['5', '#fd79a8', 'COMBO ×5!!! ⚡']]
-      .map(([n, c, s]) => `<div class="how-row"><span style="${X_STYLE}color:${c};">×${n}</span><span>${s}</span></div>`).join('')}`;
+    <div class="how-row">${icon('bolt', '#ffd93d', 'how-icon')}<span>${t('combo1')}</span></div>
+    ${[[2, '#ffd93d'], [3, '#ff6b6b'], [4, '#ffa502'], [5, '#fd79a8']]
+      .map(([n, c]) => `<div class="how-row"><span style="${X_STYLE}color:${c};">×${n}</span><span>${comboLabel(n)}${
+        n <= COMBO_TIER_CAP ? ` → ${t('lv', n)}` : ''}${n === 3 ? `<br>${t('comboShake')}` : ''}</span></div>`).join('')}`;
 
 // Everything with text: static [data-i18n] plus the JS-built panels. Re-run on language change.
 export function renderText() {
   applyLang();
+  dangerTxt.text = t('danger'); dangerTxt.style.fontFamily = withCJK('Arial');
+  document.getElementById('score').textContent = fmtNum(S.score);
+  document.getElementById('best').textContent  = fmtNum(S.best);
   document.getElementById('panel-left').innerHTML = `
     <div class="panel-gem-deco" style="background:${hexStr(GEMS[2].color)}"></div>
     <div class="panel-title">${t('gems')}</div>
@@ -55,7 +61,6 @@ export function renderText() {
   document.getElementById('help-gems').innerHTML  = range(1, 11).map(gemEntry).join('');
   document.getElementById('help-how').innerHTML   = howRows().replaceAll('<br>', ' ');
   document.getElementById('help-combo').innerHTML = comboRows().replaceAll('<br>', ' ');
-  document.getElementById('ach-btn').textContent = `🏆${unlockedCount()}`;
   buildInventory();
 }
 
@@ -65,13 +70,15 @@ export function initUI() {
   document.getElementById('help-close').addEventListener('click', () => helpModal.classList.remove('open'));
   document.getElementById('help-modal-backdrop').addEventListener('click', () => helpModal.classList.remove('open'));
   document.getElementById('catalog-btn').addEventListener('click', openCatalog);
-  document.getElementById('ach-btn').addEventListener('click', openAchievements);
   // Any click inside the catalog closes it (user requested "어디를 클릭해도 꺼짐")
   document.getElementById('catalog-modal').addEventListener('click', e => e.currentTarget.classList.add('hidden'));
   document.getElementById('lang-btn').addEventListener('click', () => {
     setLang(LANGS[(LANGS.indexOf(lang) + 1) % LANGS.length]);
     renderText();
   });
+  document.getElementById('mute-btn').innerHTML    = icon('speaker');
+  document.getElementById('catalog-btn').innerHTML = icon('book');
+  document.querySelectorAll('.gem-icon').forEach(el => { el.innerHTML = icon('gem'); });
   renderText();
   buildFloatingGems();
   applyScale();
@@ -114,7 +121,7 @@ function applyScale() {
 function makeVaultGem(index) {
   const gem = document.createElement('div');
   gem.className = 'vault-gem';
-  gem.title = `${t('names')[10]} #${index + 1}`;
+  gem.title = t('vaultGem', t('names')[10], index + 1);
   return gem;
 }
 
@@ -136,42 +143,30 @@ export function collectLegendaryGem() {
   replayAnim(document.getElementById('legendary-vault'), 'vault-flash');
 }
 
-// Catalog and achievements share one modal box; content is rebuilt on every open
-function openModal(title, html) {
-  document.getElementById('catalog-title').textContent = title;
-  document.getElementById('catalog-list').innerHTML = html;
-  document.getElementById('catalog-modal').classList.remove('hidden');
-}
-
 // ── Catalog (도감): rebuilt from S.gemCounts on every open; never-owned gems show as silhouettes
 function openCatalog() {
   const names = t('names');
-  openModal(t('catalog'), GEMS.map((g, i) => {
+  document.getElementById('catalog-list').innerHTML = GEMS.map((g, i) => {
     const n = S.gemCounts[i];
     return `
     <div class="catalog-entry${n ? '' : ' locked'}">
       ${gemImg(i + 1)}
       <div class="catalog-info">
-        <div class="catalog-name">${n ? names[i] : '???'}</div>
-        <div class="catalog-sub">Lv.${i + 1} · +${g.score}pt</div>
+        <div class="catalog-name">${n ? names[i] : t('unknown')}</div>
+        <div class="catalog-sub">${t('lv', i + 1)} · ${t('pts', g.score)}</div>
       </div>
       <div class="catalog-stats">
-        <div><span class="catalog-k">${t('spawn')}</span><span class="catalog-v">${i === 0 ? t('base') : i < COMBO_TIER_CAP ? `COMBO ×${i + 1}` : '—'}</span></div>
-        <div><span class="catalog-k">${t('owned')}</span><span class="catalog-v">${n}</span></div>
+        <div><span class="catalog-k">${t('spawn')}</span><span class="catalog-v">${i === 0 ? t('base') : i < COMBO_TIER_CAP ? t('comboX', i + 1) : '—'}</span></div>
+        <div><span class="catalog-k">${t('owned')}</span><span class="catalog-v">${fmtNum(n)}</span></div>
       </div>
     </div>`;
-  }).join(''));
-}
-
-// ── Achievements: locked entries keep their title but grey out the icon
-function openAchievements() {
-  const text = t('ach');
-  openModal(`${t('achievements')} · ${unlockedCount()} / ${ACH.length}`, ACH.map(([id, icon]) => {
-    const [title, desc] = text[id];
-    return `
-    <div class="catalog-entry${isUnlocked(id) ? '' : ' locked'}">
-      <span class="ach-icon">${icon}</span>
-      <div class="catalog-info"><div class="catalog-name">${title}</div><div class="catalog-sub">${desc}</div></div>
-    </div>`;
-  }).join(''));
+  }).join('');
+  const ach = t('ach');
+  document.getElementById('ach-title').textContent = `${t('achievements')} ${unlockedCount()}/${ACHIEVEMENTS.length}`;
+  document.getElementById('ach-list').innerHTML = ACHIEVEMENTS.map(a => `
+    <div class="catalog-entry${isUnlocked(a[0]) ? '' : ' locked'}">
+      ${achIcon(a)}
+      <div class="catalog-info"><div class="catalog-name">${ach[a[0]][0]}</div><div class="catalog-sub">${ach[a[0]][1]}</div></div>
+    </div>`).join('');
+  document.getElementById('catalog-modal').classList.remove('hidden');
 }

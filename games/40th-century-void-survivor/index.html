@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head><script src="/perf.js"></script>
+  <head>
+    <script src="/perf.js"></script>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <link rel="manifest" href="./manifest.json" />
@@ -13,6 +14,8 @@
         overflow: hidden; 
         background: #000; 
         height: 100vh;
+        height: 100dvh;
+        overscroll-behavior: none;
         width: 100vw;
         touch-action: none;
         -webkit-tap-highlight-color: transparent;
@@ -47,12 +50,12 @@
         #app { display: none; }
       }
     </style>
-    <script type="module" crossorigin src="./assets/js/index-D_NqXmao.js"></script>
+    <script>/* offline play: games.arcadedeck.net/sw.js (shared, one cache per game) */if('serviceWorker'in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js',{scope:'./'}).then(()=>navigator.serviceWorker.ready).then(r=>r.active&&r.active.postMessage([location.origin+location.pathname,...performance.getEntriesByType('resource').map(e=>e.name)])).catch(()=>{})})</script>
+    <script type="module" crossorigin src="./assets/js/index-DvNxOWip.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/js/rolldown-runtime-C6DSFE5D.js">
     <link rel="modulepreload" crossorigin href="./assets/js/vendor-CeFe20HN.js">
     <link rel="modulepreload" crossorigin href="./assets/js/vendor-pixi-giY9gfwS.js">
     <link rel="modulepreload" crossorigin href="./assets/js/vendor-matter-v3VZ5dfQ.js">
-    <script>/* offline play: games.arcadedeck.net/sw.js (shared, one cache per game) */if('serviceWorker'in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js',{scope:'./'}).then(()=>navigator.serviceWorker.ready).then(r=>r.active&&r.active.postMessage([location.origin+location.pathname,...performance.getEntriesByType('resource').map(e=>e.name)])).catch(()=>{})})</script>
   </head>
   <body>
     <div id="rotate-notice">

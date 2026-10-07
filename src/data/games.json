@@ -113,7 +113,7 @@
   {
     "id": "9",
     "slug": "40th-century-void-survivor",
-    "language": "KO/EN",
+    "language": "EN/KO/JA",
     "thumbnail": "images/40th-century-void-survivor.webp",
     "genres": [
       "Survival",
@@ -126,6 +126,7 @@
     "platform": "BOTH",
     "isOriginal": true,
     "badge": "POPULAR",
+    "lastUpdated": "2026-10-05",
     "scoreTiers": [
       5,
       15,

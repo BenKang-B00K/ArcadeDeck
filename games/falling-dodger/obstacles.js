@@ -9,7 +9,7 @@ export function createObstacleSystem(env) {
   const {
     ctx, W, WALL_W, CFG, rng, sign,
     player,
-    getTimeMs, getScrollSpeed, getHMode,
+    getTimeMs, getScrollSpeed, getHMode, changerSign,
     shouldInjectChanger,
     onChangerInjected,
     onChangerCollected,
@@ -20,12 +20,43 @@ export function createObstacleSystem(env) {
   const playMinX = WALL_W;
   const playMaxX = W - WALL_W;
   const playW = playMaxX - playMinX;
-  const drawer = createObstacleDrawer({ ctx, W, getTimeMs, player });
+  const drawer = createObstacleDrawer({ ctx, W, getTimeMs, player, changerSign });
 
   // Module-internal state
   let obstacles = [];
   let groupSeq = 0;
   let passedGroups = new Set();
+
+  // Timer start so cycle position `atMs` lands when row y reaches the player: timed hazards are
+  // decided by what the player saw coming, not by spawn luck. ponytail: assumes constant scroll speed;
+  // scrollAccel drifts arrival a few % early, well inside every locked window.
+  function lockPhase(y, atMs, cycleMs) {
+    const arriveMs = (y - player.y) / getScrollSpeed() * 1000;
+    return ((atMs - arriveMs) % cycleMs + cycleMs) % cycleMs;
+  }
+
+  // Rows with a single way through (split bar gap, laser pocket, open door…) pick it within reach.
+  // `lane` = the last such row's safe x-span; its y scrolls with the obstacles. While it's still ahead,
+  // the player has to pass through it first, so the next opening is measured from there.
+  const REACT_S = 0.25;   // time to notice a new row before steering
+  let lane = null;
+  // → [a, b]: x-span reachable before row y arrives, from wherever the player can be
+  function reachSpan(y) {
+    const P = CFG.player, tA = P.maxVx / P.accel;
+    const prev = lane && lane.y > player.y ? lane : null;
+    const s = (y - (prev ? prev.y : player.y)) / getScrollSpeed() - REACT_S;
+    const r = s <= 0 ? 0 : s <= tA ? 0.5 * P.accel * s * s : P.maxVx * (s - tA / 2);
+    return prev ? [prev.hi - r, prev.lo + r] : [player.x - r, player.x + r];   // prev: from either end
+  }
+  // Random centre in [lo, hi] for an opening whose safe span is centre ± hw, reachable before row y.
+  // Only bites near top speed — at scrollStart the reach is wider than the lane.
+  function laneX(lo, hi, y, hw) {
+    const [a0, b0] = reachSpan(y);
+    const a = Math.max(lo, a0 - hw), b = Math.min(hi, b0 + hw);
+    const x = a <= b ? a + Math.random() * (b - a) : Math.max(lo, Math.min(hi, (a0 + b0) / 2));
+    lane = { lo: x - hw, hi: x + hw, y };
+    return x;
+  }
 
   // ─── SPAWN FUNCTIONS ─────────────────────────────────────────────────────────
 
@@ -37,7 +68,7 @@ export function createObstacleSystem(env) {
   }
   function spawnSplitBar(y, gid) {
     const c = CFG.kinds.splitBar;
-    const gx = c.marginMin + Math.random() * (W - 2 * c.marginMin - c.gap);
+    const gx = laneX(c.marginMin + c.gap / 2, W - c.marginMin - c.gap / 2, y + c.h / 2, c.gap / 2 - player.r) - c.gap / 2;
     obstacles.push({ kind: 'bar', gid, x: 0, y, w: gx, h: c.h, appear: 0 });
     obstacles.push({ kind: 'bar', gid, x: gx + c.gap, y, w: W - (gx + c.gap), h: c.h, appear: 0 });
     return c.h;
@@ -74,13 +105,21 @@ export function createObstacleSystem(env) {
   }
   function spawnLaser(y, gid) {
     const c = CFG.kinds.laser;
-    const side = Math.random() < 0.5 ? 'L' : 'R';
+    // safe pocket sits opposite the turret; flip the turret if its pocket is out of reach
+    const pocket = s => s === 'L' ? [playMaxX - c.pocketW + player.r, playMaxX - player.r]
+                                  : [playMinX + player.r, playMinX + c.pocketW - player.r];
+    const [a, b] = reachSpan(y + c.turretH / 2);
+    let side = Math.random() < 0.5 ? 'L' : 'R';
+    if (pocket(side)[0] > b || pocket(side)[1] < a) side = side === 'L' ? 'R' : 'L';
+    lane = { lo: pocket(side)[0], hi: pocket(side)[1], y: y + c.turretH / 2 };
     const tx = side === 'L' ? 0 : W - c.turretW;
+    // beam stops pocketW short of the far wall (the dodge) and always fires as it crosses the player
+    const beamEnd = side === 'L' ? playMaxX - c.pocketW : playMinX + c.pocketW;
     obstacles.push({
       kind: 'laser', gid,
       x: tx, y, w: c.turretW, h: c.turretH,
-      side,
-      phase: 'warn', t: Math.random() * 800,
+      side, beamEnd,
+      phase: 'warn', t: lockPhase(y + c.turretH / 2, c.warnMs + c.fireMs / 2, c.cycleMs),
       beamW: c.beamW,
       cycleMs: c.cycleMs, warnMs: c.warnMs, fireMs: c.fireMs,
       appear: 0
@@ -93,7 +132,7 @@ export function createObstacleSystem(env) {
     obstacles.push({
       kind: 'chaser', gid,
       x: sx, y, w: c.w, h: c.h,
-      vxLerp: c.vxLerp,
+      chaseRate: c.chaseRate,
       vxMax: c.vxMax,
       appear: 0
     });
@@ -118,7 +157,14 @@ export function createObstacleSystem(env) {
       { x: cX,          x2: cX + holeW,    blink: 'C' },
       { x: cX + holeW,  x2: W,             blink: null },
     ];
-    const startT = Math.random() * 1000;
+    // the door that's open when the row reaches the player opened 0.8 period earlier → readable at any speed
+    const [ra, rb] = reachSpan(y + c.h / 2), hw = holeW / 2 - player.r;
+    const mid = d => [aX, bX, cX][d] + holeW / 2;
+    const off = d => Math.max(0, ra - (mid(d) + hw), (mid(d) - hw) - rb);   // px short of reachable
+    let door = rngInt(0, 2);
+    if (off(door) > 0) door = [0, 1, 2].reduce((a, b) => off(b) < off(a) ? b : a);
+    lane = { lo: mid(door) - hw, hi: mid(door) + hw, y: y + c.h / 2 };
+    const startT = lockPhase(y + c.h / 2, (door + 0.8) * c.periodMs, 3 * c.periodMs);
     for (const s of segs) {
       const w = s.x2 - s.x;
       if (w <= 0) continue;
@@ -139,7 +185,7 @@ export function createObstacleSystem(env) {
     obstacles.push({
       kind: 'homing', gid,
       x: Math.random() * (W - c.size), y, w: c.size, h: c.size,
-      vy: c.vy, vxLerp: c.vxLerp,
+      vy: c.vy, chaseRate: c.chaseRate,
       vxMax: c.vxMax,
       appear: 0
     });
@@ -168,7 +214,7 @@ export function createObstacleSystem(env) {
   }
   function spawnShrinker(y, gid) {
     const c = CFG.kinds.shrinker;
-    const cx = c.marginMin + Math.random() * (W - 2 * c.marginMin);
+    const cx = laneX(c.marginMin, W - c.marginMin, y + c.h / 2, c.endGap / 2 - player.r);
     const common = { startGap: c.startGap, endGap: c.endGap, cx, age: 0, dur: c.dur, appear: 0 };
     obstacles.push({ kind: 'shrinker', gid, side: 'L', x: 0, y, w: cx - c.startGap / 2, h: c.h, ...common });
     obstacles.push({ kind: 'shrinker', gid, side: 'R', x: cx + c.startGap / 2, y, w: W - (cx + c.startGap / 2), h: c.h, ...common });
@@ -201,7 +247,7 @@ export function createObstacleSystem(env) {
     const spanMax = Math.max(0, W - 120 - c.count * c.step);
     const startX = 60 + Math.random() * spanMax;
     const phaseOff = Math.random() * Math.PI * 2;
-    const drift = sign() * 0.8;
+    const drift = sign() * 0.8;   // × driftScale = px/s
     for (let i = 0; i < c.count; i++) {
       const baseX = startX + i * c.step;
       obstacles.push({
@@ -267,7 +313,7 @@ export function createObstacleSystem(env) {
     const c = CFG.kinds.lightning;
     const gapW = c.gapW;
     const margin = c.marginMin;
-    const gapCx = margin + gapW / 2 + Math.random() * Math.max(0, W - 2 * margin - gapW);
+    const gapCx = laneX(margin + gapW / 2, W - margin - gapW / 2, y + c.h / 2, gapW / 2 - player.r);
     obstacles.push({
       kind: 'lightning', gid,
       x: 0, y, w: W, h: c.h,
@@ -343,7 +389,8 @@ export function createObstacleSystem(env) {
   function spawnWormTunnel(y, gid) {
     const c = CFG.kinds.wormTunnel;
     const amp = rng(c.ampMin, c.ampMax);
-    const freq = rng(c.freqMin, c.freqMax);
+    // freq is rad/px at scrollStart; scaled so the channel sways at the same rate per second at any speed
+    const freq = rng(c.freqMin, c.freqMax) * CFG.world.scrollStart / getScrollSpeed();
     obstacles.push({
       kind: 'wormTunnel', gid,
       x: 0, y, w: W, h: c.h,
@@ -400,9 +447,10 @@ export function createObstacleSystem(env) {
   function spawnSpikeCurtain(y, gid) {
     const c = CFG.kinds.spikeCurtain;
     const tipLen = W * c.tipReach;
+    const stepY = Math.max(c.stepY, getScrollSpeed() * c.stepSec);   // zig-zag gets stepSec at any speed
     for (let i = 0; i < c.count; i++) {
       const fromLeft = i % 2 === 0;
-      const sy = y + i * c.stepY;
+      const sy = y + i * stepY;
       const side = fromLeft ? 'L' : 'R';
       const baseX = fromLeft ? 0 : W;
       obstacles.push({
@@ -416,7 +464,7 @@ export function createObstacleSystem(env) {
         appear: 0
       });
     }
-    return c.count * c.stepY + c.tipW + 20;
+    return c.count * stepY + c.tipW + 20;
   }
   function spawnYoyo(y, gid) {
     const c = CFG.kinds.yoyo;
@@ -452,8 +500,8 @@ export function createObstacleSystem(env) {
   }
   function spawnScreenChanger(y, gid) {
     const gapW = 110;
-    const gapCx = playMinX + 110 + Math.random() * Math.max(0, playW - 220);
     const spikeSize = 40;
+    const gapCx = laneX(playMinX + 110, playMaxX - 110, y + spikeSize / 2, 40);   // ±40: clear of the gap's spikes
     const count = Math.max(1, Math.ceil(playW / spikeSize));
     const stepX = playW / count;
     for (let i = 0; i < count; i++) {
@@ -495,7 +543,17 @@ export function createObstacleSystem(env) {
 
   // ─── SPAWN DISPATCHER ────────────────────────────────────────────────────────
 
+  // Spawns one group at spawnY; returns how far below it the next group goes (group height + gap).
   function spawnObstacle(spawnY) {
+    const groupH = spawnGroup(spawnY);
+    const w = CFG.world;
+    const sp = getScrollSpeed();
+    // px gap shrinks as speed rises; minGapSec floors it in time so there's always room to cross the lane
+    const minGap = Math.max(w.gapMin, w.gapBase - sp * w.gapDecayPerSp, sp * w.minGapSec);
+    return groupH + minGap + rng(w.gapVarianceMin, w.gapVarianceMax);
+  }
+
+  function spawnGroup(spawnY) {
     // Ask main whether to inject the screen changer now
     if (shouldInjectChanger()) {
       onChangerInjected();
@@ -503,7 +561,7 @@ export function createObstacleSystem(env) {
     }
     const gid = ++groupSeq;
     const sp = getScrollSpeed();
-    const ramp = Math.min(1, (sp - CFG.world.scrollStart) / 5);
+    const ramp = Math.min(1, (sp - CFG.world.scrollStart) / 300);   // full ramp at +300 px/s
     const modeKey = getHMode() ? 'h' : 'v';
     // Filter spawn table by current orientation. Entries without `modes` are mode-neutral.
     const table = CFG.spawnTable.filter(t => !t.modes || t.modes.includes(modeKey));
@@ -577,11 +635,9 @@ export function createObstacleSystem(env) {
     if (o.kind === 'laser') {
       if (o.phase !== 'fire') return false;
       const beamY = o.y + o.h / 2 - o.beamW / 2;
-      if (o.side === 'R') {
-        return hitRect(p, 0, beamY, o.x, o.beamW);
-      }
-      const ex = o.x + o.w;
-      return hitRect(p, ex, beamY, W - ex, o.beamW);
+      return o.side === 'R'
+        ? hitRect(p, o.beamEnd, beamY, o.x - o.beamEnd, o.beamW)
+        : hitRect(p, o.x + o.w, beamY, o.beamEnd - o.x - o.w, o.beamW);
     }
     if (o.kind === 'rotor') {
       return hitRotRect(p, o.x + o.w / 2, o.y + o.h / 2, o.angle, -o.w / 2, o.w / 2, o.h / 2);
@@ -641,15 +697,16 @@ export function createObstacleSystem(env) {
     obstacles = [];
     groupSeq = 0;
     passedGroups = new Set();
+    lane = null;
   }
 
   function phaseOf(o) {
     const cyc = o.t % o.cycleMs;
     return cyc < o.warnMs ? 'warn' : (cyc < o.warnMs + o.fireMs ? 'fire' : 'idle');
   }
-  function chaseX(o, f) {
-    const step = (player.x - o.w / 2 - o.x) * (1 - Math.pow(1 - o.vxLerp, f));
-    const cap = o.vxMax * f;
+  function chaseX(o, sec) {
+    const step = (player.x - o.w / 2 - o.x) * (1 - Math.exp(-o.chaseRate * sec));
+    const cap = o.vxMax * sec;
     o.x += Math.max(-cap, Math.min(cap, step));
   }
   function bounceX(o) {
@@ -657,24 +714,26 @@ export function createObstacleSystem(env) {
     if (o.x + o.w > playMaxX) { o.x = playMaxX - o.w; o.vx = -Math.abs(o.vx); }
   }
 
-  function update(dt, f) {
-    const sp = getScrollSpeed();
-    const spStep = sp * f;
+  // dt in ms; speeds are per second, timers (o.t, *Ms) in ms
+  function update(dt) {
+    const sec = dt / 1000;
+    const spStep = getScrollSpeed() * sec;
 
+    if (lane) lane.y -= spStep;
     for (const o of obstacles) {
       o.y -= spStep;
       o.t = (o.t || 0) + dt;
-      if (o.appear < 1) o.appear = Math.min(1, o.appear + 0.08 * f);
+      if (o.appear < 1) o.appear = Math.min(1, o.appear + 4.8 * sec);
       switch (o.kind) {
-        case 'spike':    o.spin += 0.08 * f; break;
-        case 'bigSpike': o.spin += 0.05 * f; break;
-        case 'changer':  o.spin = (o.spin || 0) + 0.04 * f; break;
+        case 'spike':    o.spin += 4.8 * sec; break;
+        case 'bigSpike': o.spin += 3 * sec; break;
+        case 'changer':  o.spin = (o.spin || 0) + 2.4 * sec; break;
         case 'slider':
-          o.x += o.vx * f;
+          o.x += o.vx * sec;
           bounceX(o);
           break;
         case 'chaser':
-          chaseX(o, f);
+          chaseX(o, sec);
           o.x = Math.max(playMinX, Math.min(playMaxX - o.w, o.x));
           break;
         case 'laser':
@@ -689,11 +748,11 @@ export function createObstacleSystem(env) {
           break;
         }
         case 'homing':
-          o.y -= o.vy * f;
-          chaseX(o, f);
+          o.y -= o.vy * sec;
+          chaseX(o, sec);
           break;
         case 'rotor':
-          o.angle += o.vAng * f;
+          o.angle += o.vAng * sec;
           break;
         case 'shrinker': {
           o.age += dt;
@@ -708,31 +767,32 @@ export function createObstacleSystem(env) {
           break;
         }
         case 'saw':
-          o.spin += o.spinRate * f;
-          o.x += o.vx * f;
+          o.spin += o.spinRate * sec;
+          o.x += o.vx * sec;
           bounceX(o);
           break;
         case 'swarm': {
-          const ph = o.t * 0.005 + o.idx * 0.7 + o.phaseOff;
-          o.x = o.baseX + Math.sin(ph) * o.ampX + o.drift * (o.t * o.driftScale);
+          const ts = o.t / 1000;
+          const ph = ts * 5 + o.idx * 0.7 + o.phaseOff;
+          o.x = o.baseX + Math.sin(ph) * o.ampX + o.drift * o.driftScale * ts;
           o.x = Math.max(0, Math.min(W - o.w, o.x));
           break;
         }
         case 'spinner':
-          o.angle += o.vAng * f;
+          o.angle += o.vAng * sec;
           break;
         case 'gate': {
-          const c = o.cx0 + Math.sin(o.t * o.phaseSpeed + o.phase) * o.range;
+          const c = o.cx0 + Math.sin(o.t / 1000 * o.phaseSpeed + o.phase) * o.range;
           o.gateCenter = Math.max(o.gapW / 2 + 10, Math.min(W - o.gapW / 2 - 10, c));
           break;
         }
         case 'pendulum':
-          o.angle = o.swingAmp * Math.sin(o.t * o.swingSpeed + o.phase);
+          o.angle = o.swingAmp * Math.sin(o.t / 1000 * o.swingSpeed + o.phase);
           break;
         case 'bouncer':
-          o.x += o.vx * f;
-          o.y += o.vy * f;
-          o.spin += 0.05 * f;
+          o.x += o.vx * sec;
+          o.y += o.vy * sec;
+          o.spin += 3 * sec;
           bounceX(o);
           break;
         case 'crusher': {
@@ -756,8 +816,8 @@ export function createObstacleSystem(env) {
           break;
         }
         case 'portal':
-          o.ringSpin += 0.025 * f;
-          o.ballT = (o.ballT + o.ballSpeed * f) % (o.bX - o.aX);
+          o.ringSpin += 1.5 * sec;
+          o.ballT = (o.ballT + o.ballSpeed * sec) % (o.bX - o.aX);
           o.ballX = o.aX + o.ballT;
           o.ballY = o.y + o.ringR;
           break;
@@ -791,7 +851,7 @@ export function createObstacleSystem(env) {
           break;
         }
         case 'boomerang': {
-          o.spin += o.spinRate * f;
+          o.spin += o.spinRate * sec;
           const cyc = o.t % o.dur;
           const k = cyc / o.dur;
           const tri = k < 0.5 ? (k * 2) : (1 - (k - 0.5) * 2);
@@ -807,7 +867,7 @@ export function createObstacleSystem(env) {
           break;
         }
         case 'yoyo': {
-          o.spin += o.spinRate * f;
+          o.spin += o.spinRate * sec;
           const k = (1 - Math.cos(o.t / o.cycleMs * Math.PI * 2)) / 2;
           o.rope = o.minRope + (o.maxRope - o.minRope) * k;
           const dir = o.side === 'L' ? 1 : -1;
@@ -869,5 +929,8 @@ export function createObstacleSystem(env) {
     drawer.drawAll(obstacles);
   }
 
-  return { reset, spawn: spawnObstacle, update, draw };
+  // hitAt: first lethal obstacle touching circle p, for the headless check in tools/runnability.mjs
+  const hitAt = p => obstacles.find(o => o.kind !== 'changer' && hit(p, o));
+
+  return { reset, spawn: spawnObstacle, update, draw, hitAt };
 }

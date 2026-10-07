@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script src="/perf.js"></script>
+<head>
+<script src="/perf.js"></script>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
 <meta name="theme-color" content="#0e1230" />
 <title>Falling Dodger</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,13 +28,19 @@
     color: #e6e9ff;
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     overflow: hidden;
+    overscroll-behavior: none;
     user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
     -webkit-tap-highlight-color: transparent;
   }
+  button { touch-action: manipulation; }
   #wrap {
     position: relative;
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -47,8 +54,9 @@
       inset 0 0 80px rgba(0,0,0,0.55);
     border-radius: 14px;
     touch-action: none;
-    max-width: 96vw;
-    max-height: 96vh;
+    max-width: calc(96vw - env(safe-area-inset-left) - env(safe-area-inset-right));
+    max-height: calc(96vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: calc(96dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     display: block;
   }
   #hud {
@@ -97,6 +105,7 @@
     z-index: 2;
     transition: background 0.2s, transform 0.1s;
   }
+  #pauseBtn::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; }   /* 44 px tap target */
   #pauseBtn:hover { background: rgba(120, 90, 255, 0.3); }
   #pauseBtn:active { transform: scale(0.93); }
   #pauseBtn[hidden], #hud[hidden] { display: none; }
@@ -282,15 +291,52 @@
     </div>
   </div>
   <div id="hud" hidden>
-    <div class="pill"><span class="lbl" data-i18n="dist">DIST</span> <span class="num" id="score">0</span> m</div>
+    <div class="pill"><span class="lbl" data-i18n="dist">DIST</span> <span class="num" id="score">0</span> <span class="unit-m">m</span></div>
     <div class="pill"><span class="lbl" data-i18n="pass">PASS</span> <span class="num" id="passes">0</span></div>
-    <div class="pill"><span class="lbl" data-i18n="best">BEST</span> <span class="num" id="best">0</span> m</div>
+    <div class="pill"><span class="lbl" data-i18n="best">BEST</span> <span class="num" id="best">0</span> <span class="unit-m">m</span></div>
   </div>
   <button id="pauseBtn" hidden>II</button>
 </div>
 
 <script type="module">
 import { createObstacleSystem } from './obstacles.js';
+const STRINGS = {
+  en: {
+    dropIn: 'DROP IN', intro: 'Steer to dodge obstacles. The longer you fall, the faster it gets.',
+    steer: 'steer', pause: 'pause', touch: 'hold a side or drag to steer', again: 'DROP AGAIN',
+    dist: 'DIST', pass: 'PASS', best: 'BEST', pauseTitle: 'Pause (P)',
+    wiped: 'WIPED OUT', newBest: '★ NEW BEST', changer: 'SCREEN CHANGER', changerSign: 'SCREEN\nCHANGER', close: '+5 CLOSE',
+    paused: 'PAUSED', resume: 'press P or click II to resume',
+    loadFail: "Couldn't load game data", loadFailHint: 'Check your connection and reload. Running from a local folder? Serve it over HTTP (file:// is not supported):',
+  },
+  ko: {
+    dropIn: '낙하 개시', intro: '조작해서 장애물을 피하세요. 오래 떨어질수록 빨라집니다.',
+    steer: '조작', pause: '일시정지', touch: '화면 한쪽을 누르거나 드래그해 조작', again: '다시 낙하',
+    dist: '거리', pass: '통과', best: '최고', pauseTitle: '일시정지 (P)',
+    wiped: '게임 오버', newBest: '★ 신기록', changer: '화면 전환', changerSign: '화면\n전환', close: '+5 아슬아슬',
+    paused: '일시정지', resume: 'P 키 또는 II 버튼으로 재개',
+    loadFail: '게임 데이터를 불러오지 못했습니다', loadFailHint: '연결을 확인하고 새로고침하세요. 로컬 폴더에서 실행 중이라면 HTTP로 서빙하세요 (file://은 지원되지 않음):',
+  },
+  ja: {
+    dropIn: '落下開始', intro: '操作して障害物をよけよう。落ちるほど速くなる。',
+    steer: '操作', pause: 'ポーズ', touch: '画面の片側を押すかドラッグで操作', again: 'もう一度',
+    dist: '距離', pass: '通過', best: '最高', pauseTitle: 'ポーズ (P)',
+    wiped: 'ゲームオーバー', newBest: '★ 新記録', changer: '画面転換', changerSign: '画面\n転換', close: '+5 ギリギリ',
+    paused: 'ポーズ中', resume: 'Pキーか II ボタンで再開',
+    loadFail: 'ゲームデータを読み込めませんでした', loadFailHint: '接続を確認して再読み込みしてください。ローカルフォルダから開いている場合はHTTPで配信してください (file:// は非対応):',
+  },
+};
+// ?lang=ko overrides browser locale (for embedding hosts); unknown → en
+const LANG = (new URLSearchParams(location.search).get('lang') || navigator.language || 'en').slice(0, 2);
+const t = STRINGS[LANG] || STRINGS.en;
+document.documentElement.lang = t === STRINGS.en ? 'en' : LANG;
+document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t[el.dataset.i18n]; });
+document.getElementById('pauseBtn').title = t.pauseTitle;
+// numbers + "m" unit in the player's locale ("1,234 m")
+const NUM = new Intl.NumberFormat(document.documentElement.lang);
+const METERS = new Intl.NumberFormat(document.documentElement.lang, { style: 'unit', unit: 'meter' });
+const M_UNIT = METERS.formatToParts(0).find(p => p.type === 'unit').value;
+document.querySelectorAll('.unit-m').forEach(el => { el.textContent = M_UNIT; });
 let CFG;
 try {
   const r = await fetch('./obstacles.json', { cache: 'no-cache' });
@@ -301,47 +347,18 @@ try {
   const wrap = document.createElement('div');
   wrap.style.cssText = 'color:#fff;font-family:system-ui;padding:40px;max-width:640px;margin:40px auto;line-height:1.6';
   wrap.innerHTML = `
-      <h2 style="color:#ff8bd0">Config load failed</h2>
-      <p>This game requires a dev server. Opening <code>index.html</code> directly via <code>file://</code> is not supported.</p>
-      <p>Run one of:</p>
+      <h2 style="color:#ff8bd0"></h2>
+      <p></p>
       <pre style="background:#1a0d2e;padding:14px;border-radius:8px;border:1px solid #4a3878">python -m http.server 8000
-# or
 npx serve .</pre>
-      <p>Then open <code>http://localhost:8000</code>.</p>
       <p style="opacity:0.6;font-size:12px"></p>`;
-  wrap.lastElementChild.textContent = `Error: ${e.message}`;
+  const [h2, hint, , detail] = wrap.children;
+  h2.textContent = t.loadFail;
+  hint.textContent = t.loadFailHint;
+  detail.textContent = e.message;
   document.body.appendChild(wrap);
   throw e;
 }
-const STRINGS = {
-  en: {
-    dropIn: 'DROP IN', intro: 'Steer to dodge obstacles. The longer you fall, the faster it gets.',
-    steer: 'steer', pause: 'pause', touch: 'hold a side or drag to steer', again: 'DROP AGAIN',
-    dist: 'DIST', pass: 'PASS', best: 'BEST', pauseTitle: 'Pause (P)',
-    wiped: 'WIPED OUT', newBest: '★ NEW BEST', changer: 'SCREEN CHANGER', close: '+5 CLOSE',
-    paused: 'PAUSED', resume: 'press P or click II to resume',
-  },
-  ko: {
-    dropIn: '낙하 개시', intro: '조작해서 장애물을 피하세요. 오래 떨어질수록 빨라집니다.',
-    steer: '조작', pause: '일시정지', touch: '화면 한쪽을 누르거나 드래그해 조작', again: '다시 낙하',
-    dist: '거리', pass: '통과', best: '최고', pauseTitle: '일시정지 (P)',
-    wiped: '게임 오버', newBest: '★ 신기록', changer: '화면 전환', close: '+5 아슬아슬',
-    paused: '일시정지', resume: 'P 키 또는 II 버튼으로 재개',
-  },
-  ja: {
-    dropIn: '落下開始', intro: '操作して障害物をよけよう。落ちるほど速くなる。',
-    steer: '操作', pause: 'ポーズ', touch: '画面の片側を押すかドラッグで操作', again: 'もう一度',
-    dist: '距離', pass: '通過', best: '最高', pauseTitle: 'ポーズ (P)',
-    wiped: 'ゲームオーバー', newBest: '★ 新記録', changer: '画面転換', close: '+5 ギリギリ',
-    paused: 'ポーズ中', resume: 'Pキーか II ボタンで再開',
-  },
-};
-// ?lang=ko overrides browser locale (for embedding hosts); unknown → en
-const LANG = (new URLSearchParams(location.search).get('lang') || navigator.language || 'en').slice(0, 2);
-const t = STRINGS[LANG] || STRINGS.en;
-document.documentElement.lang = t === STRINGS.en ? 'en' : LANG;
-document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t[el.dataset.i18n]; });
-document.getElementById('pauseBtn').title = t.pauseTitle;
 
 const rng = (a, b) => a + Math.random() * (b - a);
 const sign = () => Math.random() < 0.5 ? -1 : 1;
@@ -363,7 +380,7 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
   const STORAGE_KEY = 'falling_dodger_best';
   let best = 0;
   try { best = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10); } catch {}
-  bestEl.textContent = best;
+  bestEl.textContent = NUM.format(best);
 
   const keys = { left: false, right: false };
   let dragDx = 0;        // world px queued by touch drag, consumed in update()
@@ -373,9 +390,9 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
     y: CFG.player.startY,
     r: CFG.player.radius,
     vx: 0,
-    speed: CFG.player.speed,
-    maxVx: CFG.player.maxVx,
-    friction: CFG.player.friction,
+    accel: CFG.player.accel,       // px/s²
+    maxVx: CFG.player.maxVx,       // px/s
+    drag: CFG.player.drag,         // 1/s, coasting decay
     trail: []
   };
 
@@ -398,6 +415,10 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
   let flash = 0;
   let timeMs = 0;
   let lastT = 0;
+  let deadMs = 0;
+  const GAME_OVER_DELAY_MS = 700;
+  // render interpolation: last step's player x + scroll, so draw() can sit between sim steps
+  let prevX = W / 2, scrollLag = 0;
   // Screen Changer / horizontal mode
   let changerTriggered = false;
   let transition = null; // { t, dur } during rotation animation
@@ -426,7 +447,7 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
       ambient.push({
         x: Math.random() * W,
         y: Math.random() * H,
-        v: 0.3 + Math.random() * 0.8,
+        v: 18 + Math.random() * 48,   // px/s on top of parallax scroll
         s: Math.random() * 1.4 + 0.4,
         a: 0.15 + Math.random() * 0.35
       });
@@ -454,6 +475,7 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
     shake = 0;
     flash = 0;
     timeMs = 0;
+    prevX = player.x; scrollLag = 0;
     changerTriggered = false;
     changerTriggerDist = 150 + Math.random() * 50;
     transition = null;
@@ -464,14 +486,14 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
     initAmbient();
   }
 
-  function spawnParticles(x, y, color, count, spread = 4) {
+  function spawnParticles(x, y, color, count, spread = 240) {   // spread: px/s
     for (let i = 0; i < count; i++) {
       const a = Math.random() * Math.PI * 2;
-      const s = Math.random() * spread + 1;
+      const s = Math.random() * spread + 60;
       particles.push({
         x, y,
         vx: Math.cos(a) * s,
-        vy: Math.sin(a) * s - 1,
+        vy: Math.sin(a) * s - 60,
         life: 1,
         color,
         size: 2 + Math.random() * 2
@@ -480,14 +502,14 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
   }
 
   function addFloat(x, y, text, color = '#ffe07a') {
-    floats.push({ x, y, text, color, life: 1, vy: -1.2 });
+    floats.push({ x, y, text, color, life: 1, vy: -72 });
   }
 
   function addShockwave(x, y, color = 'rgba(255, 200, 100, 0.8)') {
     shockwaves.push({ x, y, r: 8, color, life: 1 });
   }
 
-  const REF_FRAME_MS = 1000 / 60;
+  const STEP_MS = 1000 / 60;   // fixed sim step (loop); all rates are per second, so this only sets precision
 
   // static gradients — inputs never change, build once
   const VIGNETTE = ctx.createRadialGradient(W/2, H/2, H * 0.3, W/2, H/2, H * 0.75);
@@ -524,14 +546,15 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
     shake = Math.max(shake, 6);
     addShockwave(player.x, player.y, 'rgba(200, 140, 255, 0.9)');
     addShockwave(player.x, player.y, 'rgba(255, 200, 255, 0.6)');
-    spawnParticles(player.x, player.y, '#c084ff', 48, 6);
-    spawnParticles(player.x, player.y, '#fff', 18, 3);
+    spawnParticles(player.x, player.y, '#c084ff', 48, 360);
+    spawnParticles(player.x, player.y, '#fff', 18, 180);
   }
 
   const obstacleSys = createObstacleSystem({
     ctx, W, H, WALL_W, CFG, rng, sign,
     player,
     getTimeMs: () => timeMs,
+    changerSign: t.changerSign.split('\n'),
     getScrollSpeed: () => scrollSpeed,
     getHMode: () => hMode,
     shouldInjectChanger: () => !changerTriggered && distance >= changerTriggerDist,
@@ -547,52 +570,58 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
     },
     onPass: (gid, isClose) => {
       passCount++;
-      passesEl.textContent = passCount;
+      passesEl.textContent = NUM.format(passCount);
       if (isClose) {
         distance += 5;
         addFloat(player.x + 22, player.y - 6, t.close, '#9be8ff');
-        spawnParticles(player.x, player.y - 6, '#9be8ff', 10, 2);
+        spawnParticles(player.x, player.y - 6, '#9be8ff', 10, 120);
       } else {
         addFloat(player.x + 18, player.y - 6, '+1', '#ffffff');
       }
     },
   });
 
-  function updateFx(f) {
-    const trailDecay = 0.055 * f;
+  // sec = step in seconds; life values fade 1 → 0, rates below are per second
+  function updateFx(sec) {
+    const trailDecay = 3.3 * sec;
     player.trail.forEach(t => t.life -= trailDecay);
     player.trail = player.trail.filter(t => t.life > 0);
 
     for (const p of particles) {
-      p.vy += 0.2 * f;
-      p.x += p.vx * f;
-      p.y += p.vy * f;
-      p.life -= 0.02 * f;
+      p.vy += 720 * sec;   // gravity px/s²
+      p.x += p.vx * sec;
+      p.y += p.vy * sec;
+      p.life -= 1.2 * sec;
     }
     particles = particles.filter(p => p.life > 0);
 
     for (const sw of shockwaves) {
-      sw.r += 6 * f;
-      sw.life -= 0.04 * f;
+      sw.r += 360 * sec;
+      sw.life -= 2.4 * sec;
     }
     shockwaves = shockwaves.filter(sw => sw.life > 0);
 
     for (const ft of floats) {
-      ft.y += ft.vy * f;
-      ft.life -= 0.018 * f;
+      ft.y += ft.vy * sec;
+      ft.life -= 1.08 * sec;
     }
     floats = floats.filter(ft => ft.life > 0);
 
-    shake *= Math.pow(0.85, f);
-    flash *= Math.pow(0.88, f);
+    shake *= Math.exp(-9.7511 * sec);
+    flash *= Math.exp(-7.67 * sec);
   }
 
   function update(dt) {
-    timeMs += dt;
-    if (!running || paused) return;
-    const f = dt / REF_FRAME_MS;
-    updateFx(f);
-    if (dead) return;
+    timeMs += dt;   // loop() stops stepping while paused, so in-world anims freeze too
+    prevX = player.x; scrollLag = 0;
+    if (!running) return;
+    const sec = dt / 1000;
+    updateFx(sec);
+    if (dead) {
+      deadMs += dt;
+      if (deadMs >= GAME_OVER_DELAY_MS) showGameOver();
+      return;
+    }
 
     if (transition) {
       transition.t += dt;
@@ -614,11 +643,11 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
     }
 
     if (dragDx) { player.x += dragDx; player.vx = 0; dragDx = 0; }
-    if (keys.left)  player.vx -= player.speed * f;
-    if (keys.right) player.vx += player.speed * f;
-    if (!keys.left && !keys.right) player.vx *= Math.pow(player.friction, f);
+    if (keys.left)  player.vx -= player.accel * sec;
+    if (keys.right) player.vx += player.accel * sec;
+    if (!keys.left && !keys.right) player.vx *= Math.exp(-player.drag * sec);
     player.vx = Math.max(-player.maxVx, Math.min(player.maxVx, player.vx));
-    player.x += player.vx * f;
+    player.x += player.vx * sec;
     const xMin = WALL_W + player.r;
     const xMax = W - WALL_W - player.r;
     if (player.x <= xMin || player.x >= xMax) {
@@ -629,28 +658,29 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
     player.trail.push({ x: player.x, y: player.y, life: 1 });
     if (player.trail.length > 22) player.trail.shift();
 
-    scrollSpeed = Math.min(CFG.world.scrollMax, scrollSpeed + CFG.world.scrollAccel * f);
+    scrollSpeed = Math.min(CFG.world.scrollMax, scrollSpeed + CFG.world.scrollAccel * sec);
     const sp = scrollSpeed;
-    const spStep = sp * f;
-    distance += sp * 0.05 * f;
+    const spStep = sp * sec;
+    scrollLag = spStep;
+    distance += spStep * 0.05;   // 20 px = 1 m
     const score = Math.floor(distance);
-    if (score !== lastScore) { lastScore = score; scoreEl.textContent = score; }
+    if (score !== lastScore) { lastScore = score; scoreEl.textContent = NUM.format(score); }
 
     if (distance >= nextMilestone) {
-      addFloat(W / 2, player.y - 40, nextMilestone + ' m', '#a48bff');
+      addFloat(W / 2, player.y - 40, METERS.format(nextMilestone), '#a48bff');
       addShockwave(W / 2, player.y, 'rgba(164, 139, 255, 0.7)');
       flash = Math.max(flash, 0.18);
       nextMilestone += CFG.world.milestoneStep;
     }
 
     for (const s of stars) {
-      s.y -= sp * s.z * 0.6 * f;
-      s.tw += 0.05 * f;
+      s.y -= spStep * s.z * 0.6;
+      s.tw += 3 * sec;
       if (s.y < -2) { s.y = H + 2; s.x = Math.random() * W; }
     }
 
     for (const a of ambient) {
-      a.y -= (sp * 0.35 + a.v) * f;
+      a.y -= spStep * 0.35 + a.v * sec;
       if (a.y < -4) { a.y = H + 4; a.x = Math.random() * W; }
     }
 
@@ -658,35 +688,30 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
     const vxThresh = player.maxVx * 0.32;
     if (vxAbs > vxThresh) {
       const intensity = (vxAbs - vxThresh) / (player.maxVx - vxThresh);
-      if (Math.random() < intensity * 0.55 * f) {
+      if (Math.random() < intensity * 33 * sec) {   // up to 33 drops/s
         const sign = Math.sign(player.vx);
         slimeDrops.push({
           x: player.x - sign * (player.r * 0.55 + Math.random() * player.r * 0.35),
           y: player.y - player.r * 0.15 + Math.random() * player.r * 0.55,
-          vx: -sign * (0.6 + Math.random() * 1.5),
-          vy: -0.4 - Math.random() * 0.8,
+          vx: -sign * (36 + Math.random() * 90),
+          vy: -24 - Math.random() * 48,
           r: 1.6 + Math.random() * 2.2,
           life: 1
         });
       }
     }
     for (const d of slimeDrops) {
-      d.x += d.vx * f;
-      d.y -= (sp + d.vy) * f;
-      d.vx *= Math.pow(0.94, f);
-      d.vy *= Math.pow(0.92, f);
-      d.life -= 0.02 * f;
+      d.x += d.vx * sec;
+      d.y -= spStep + d.vy * sec;
+      d.vx *= Math.exp(-3.7125 * sec);
+      d.vy *= Math.exp(-5.0029 * sec);
+      d.life -= 1.2 * sec;
     }
     slimeDrops = slimeDrops.filter(d => d.life > 0 && d.y > -12);
 
     nextSpawnY -= spStep;
-    while (nextSpawnY <= H) {
-      const groupH = obstacleSys.spawn(nextSpawnY);
-      const minGap = Math.max(CFG.world.gapMin, CFG.world.gapBase - sp * CFG.world.gapDecayPerSp);
-      const variance = rng(CFG.world.gapVarianceMin, CFG.world.gapVarianceMax);
-      nextSpawnY += groupH + minGap + variance;
-    }
-    const collResult = obstacleSys.update(dt, f);
+    while (nextSpawnY <= H) nextSpawnY += obstacleSys.spawn(nextSpawnY);
+    const collResult = obstacleSys.update(dt);
     if (collResult.died) { die(); }
   }
 
@@ -697,53 +722,59 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
     flash = 1;
     addShockwave(player.x, player.y, 'rgba(255, 120, 180, 0.85)');
     addShockwave(player.x, player.y, 'rgba(255, 220, 120, 0.6)');
-    spawnParticles(player.x, player.y, '#ff7bbf', 48, 6);
-    spawnParticles(player.x, player.y, '#9be8ff', 24, 4);
+    spawnParticles(player.x, player.y, '#ff7bbf', 48, 360);
+    spawnParticles(player.x, player.y, '#9be8ff', 24, 240);
     if (Math.floor(distance) > best) {
       best = Math.floor(distance);
       try { localStorage.setItem(STORAGE_KEY, best); } catch {}
-      bestEl.textContent = best;
+      bestEl.textContent = NUM.format(best);
     }
-    setTimeout(() => {
-      running = false;
-      const score = Math.floor(distance);
-
-      // ArcadeDeck 통합 전송 규격
-      window.parent.postMessage({
-        type: 'GAME_OVER',
-        score: score,          // Total Distance
-        subScore: passCount    // Total Pass
-      }, '*');
-
-      const newBest = score >= best && score > 0;
-      overlay.classList.add('over');
-      title.textContent = t.wiped;
-      subtitle.innerHTML = `
-        ${newBest ? `<div class="badge">${t.newBest}</div>` : ''}
-        <div class="hero-stat"><span id="heroNum">0</span><span class="u">m</span></div>
-        <div class="sub-stats">
-          <span>${t.pass}<b>${passCount}</b></span>
-          <span>${t.best}<b>${best}m</b></span>
-        </div>
-      `;
-      // arcade tally: count distance up over ~900ms (ease-out cubic)
-      const heroNum = document.getElementById('heroNum');
-      const t0 = performance.now();
-      const instant = matchMedia('(prefers-reduced-motion: reduce)').matches;
-      (function tick(now) {
-        const k = instant ? 1 : Math.min(1, (now - t0) / 900);
-        heroNum.textContent = Math.round(score * (1 - Math.pow(1 - k, 3)));
-        if (k < 1) requestAnimationFrame(tick);
-      })(t0);
-      startBtn.textContent = t.again;
-      hudEl.hidden = true;
-      pauseBtn.hidden = true;
-      overlay.classList.remove('hidden');
-      startBtn.focus();
-    }, 700);
+    deadMs = 0;   // update() shows the game-over screen after GAME_OVER_DELAY_MS of sim time
   }
 
-  function draw() {
+  function showGameOver() {
+    running = false;
+    const score = Math.floor(distance);
+
+    // ArcadeDeck 통합 전송 규격
+    window.parent.postMessage({
+      type: 'GAME_OVER',
+      score: score,          // Total Distance
+      subScore: passCount    // Total Pass
+    }, '*');
+
+    const newBest = score >= best && score > 0;
+    overlay.classList.add('over');
+    title.textContent = t.wiped;
+    subtitle.innerHTML = `
+      ${newBest ? `<div class="badge">${t.newBest}</div>` : ''}
+      <div class="hero-stat"><span id="heroNum">0</span><span class="u">${M_UNIT}</span></div>
+      <div class="sub-stats">
+        <span>${t.pass}<b>${NUM.format(passCount)}</b></span>
+        <span>${t.best}<b>${METERS.format(best)}</b></span>
+      </div>
+    `;
+    // arcade tally: count distance up over ~900ms (ease-out cubic)
+    const heroNum = document.getElementById('heroNum');
+    const t0 = performance.now();
+    const instant = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    (function tick(now) {
+      const k = instant ? 1 : Math.min(1, (now - t0) / 900);
+      heroNum.textContent = NUM.format(Math.round(score * (1 - Math.pow(1 - k, 3))));
+      if (k < 1) requestAnimationFrame(tick);
+    })(t0);
+    startBtn.textContent = t.again;
+    hudEl.hidden = true;
+    pauseBtn.hidden = true;
+    overlay.classList.remove('hidden');
+    startBtn.focus();
+  }
+
+  function draw(alpha) {
+    const back = 1 - alpha;   // render sits this fraction of a step behind the latest sim state
+    const spK = (scrollSpeed - CFG.world.scrollStart) / (CFG.world.scrollMax - CFG.world.scrollStart);   // 0 → 1
+    // ponytail: only scroll, player x and the flip rotation are interpolated; lateral obstacle motion and
+    // particles still step at 60 Hz — store prev x/angle per obstacle if that judders on 120 Hz+ screens
     const cw = cvs.width, ch = cvs.height;
     // letterbox / clear (under any rotation)
     if (transition || hMode) {
@@ -755,7 +786,7 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
 
     let camAngle = 0, camScale = 1;
     if (transition) {
-      const k = Math.min(1, transition.t / transition.dur);
+      const k = Math.max(0, Math.min(1, (transition.t - back * STEP_MS) / transition.dur));
       const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
       camAngle = transition.fromAngle + (transition.toAngle - transition.fromAngle) * e;
       // scale lerps from 1 (current canvas fits current orientation) to fit-rotated value
@@ -785,20 +816,19 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
       const tw = 0.6 + Math.sin(s.tw) * 0.4;
       ctx.globalAlpha = s.z * tw;
       ctx.fillStyle = '#cfd2ff';
-      ctx.fillRect(s.x, s.y, s.s, s.s);
+      ctx.fillRect(s.x, s.y + back * scrollLag * s.z * 0.6, s.s, s.s);
     }
     ctx.globalAlpha = 1;
 
     for (const a of ambient) {
       ctx.globalAlpha = a.a;
       ctx.fillStyle = '#e2dfff';
-      ctx.fillRect(a.x, a.y, a.s, a.s * 3);
+      ctx.fillRect(a.x, a.y + back * scrollLag * 0.35, a.s, a.s * 3);
     }
     ctx.globalAlpha = 1;
 
-    const sp = scrollSpeed;
-    const lineCount = Math.min(14, 4 + Math.floor(sp));
-    ctx.strokeStyle = `rgba(150, 130, 255, ${0.06 + Math.min(0.18, sp * 0.015)})`;
+    const lineCount = Math.min(14, 10 + Math.floor(spK * 8));
+    ctx.strokeStyle = `rgba(150, 130, 255, ${0.06 + Math.min(0.18, 0.09 + spK * 0.12)})`;
     ctx.lineWidth = 1;
     for (let i = 0; i < lineCount; i++) {
       const x = (i * 71 + (distance * 5) % 71) % W;
@@ -808,7 +838,10 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
       ctx.stroke();
     }
 
+    ctx.save();
+    ctx.translate(0, back * scrollLag);
     obstacleSys.draw();
+    ctx.restore();
     ctx.globalAlpha = 1;
 
     ctx.drawImage(wallCvs, 0, 0);
@@ -854,8 +887,9 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
     ctx.globalAlpha = 1;
 
     if (!dead) {
-      const sp = scrollSpeed;
-      const fallBoost = Math.min(0.24, Math.max(0, (sp - CFG.world.scrollStart) * 0.014));
+      ctx.save();
+      ctx.translate(back * (prevX - player.x), 0);
+      const fallBoost = Math.min(0.24, Math.max(0, spK * 0.112));
       const r = player.r;
       const vxNorm = Math.max(-1, Math.min(1, player.vx / player.maxVx));
       const vxAbs = Math.abs(vxNorm);
@@ -1001,6 +1035,7 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
 
       ctx.restore();
       ctx.restore();
+      ctx.restore();
     }
 
     for (const p of particles) {
@@ -1120,12 +1155,14 @@ const sign = () => Math.random() < 0.5 ? -1 : 1;
   wallCvs.width = W; wallCvs.height = H;
   drawWalls(wallCvs.getContext('2d'));
 
+  let accMs = 0;
   function loop(t) {
     if (!lastT) lastT = t;
-    const dt = Math.min(50, t - lastT);
+    // clamp lag spikes → ≤3 steps/frame, no spiral of death; paused → no sim time, frame stays put
+    if (!paused) accMs += Math.min(50, t - lastT);
     lastT = t;
-    update(dt);
-    draw();
+    while (accMs >= STEP_MS) { update(STEP_MS); accMs -= STEP_MS; }
+    draw(accMs / STEP_MS);
     requestAnimationFrame(loop);
   }
 

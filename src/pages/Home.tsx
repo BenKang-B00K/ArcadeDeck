@@ -20,6 +20,10 @@ const PLAYABLE = deviceGames.filter(g => g.status !== 'IN PRODUCTION' && g.gameU
 const FEATURED = deviceGames.filter(g => g.featured);
 const COOP_GENRE = 'Local Co-op';
 const COOP = deviceGames.filter(g => g.genres.includes(COOP_GENRE)).sort((a, b) => parseInt(b.id) - parseInt(a.id));
+// UPDATE-badged games, newest lastUpdated first (ISO dates sort as strings); undated ones last.
+const UPDATED = deviceGames.filter(g => g.badge === 'UPDATE')
+  .sort((a, b) => (b.lastUpdated ?? '').localeCompare(a.lastUpdated ?? ''))
+  .slice(0, 8);
 
 // Hero banner rotates one step per page load (public/images/banner/banner-01..16).
 // Module scope so in-app navigation back to Home keeps the same art.
@@ -132,6 +136,7 @@ const Home: React.FC = () => {
   const showRecent = recent.length > 0 && unfiltered;
   const showFeatured = FEATURED.length > 0 && unfiltered;
   const showCoop = COOP.length > 0 && unfiltered;
+  const showUpdated = UPDATED.length > 0 && unfiltered;
 
   // Head meta / JSON-LD are baked by scripts/prerender-pages.js. The static
   // shell in index.html mirrors this <header> so the LCP element is stable.
@@ -219,6 +224,18 @@ const Home: React.FC = () => {
                 </h2>
                 <div className="game-grid">
                   {COOP.map(g => <GameCard key={g.id} game={g} onProductionClick={comingSoon} onGenreClick={pickGenre} />)}
+                </div>
+              </section>
+            )}
+
+            {showUpdated && (
+              <section className="recent-section">
+                <h2 className="section-title">
+                  {t('homeUpdatedTitle', 'Recently')} {t('homeUpdatedSpan', 'Updated')}
+                  <span className="section-count">{UPDATED.length}</span>
+                </h2>
+                <div className="game-grid">
+                  {UPDATED.map(g => <GameCard key={g.id} game={g} onProductionClick={comingSoon} onGenreClick={pickGenre} />)}
                 </div>
               </section>
             )}

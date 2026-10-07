@@ -115,6 +115,7 @@ const MyGames = () => {
           <h4>{title}</h4>
           <div className="mini-meta">
             <span className="genre-tag">{genreName(t, game.genres[0])}</span>
+            {game.badge === 'UPDATE' && <span className="game-badge badge-update">{game.badge}</span>}
             {pb > 0 && (
               <span className="mini-pb">
                 {getLocalizedString(game, 'scoreLabel', lang, overlay) || t('pbScore', 'Score')} <strong>{formatScore(pb)}</strong>

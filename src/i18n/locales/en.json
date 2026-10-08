@@ -3990,6 +3990,86 @@
         }
       ]
     },
+    "46": {
+      "title": "Climb Up!",
+      "description": "An Ice Climber–style pixel-art climber: smash through brick floors with a drill-hammer, stomp aliens and outclimb the rising goo through five zones to the summit of Mt. Tser Eve.",
+      "fullDescription": "\n      Climb Up! is a **16-bit pixel-art vertical climber** in the spirit of Ice Climber. Aliens have opened a portal at the foot of the mountains, and the goo pouring out of it keeps rising. Kira, a mountain-town survivor with a **drill-hammer**, has one way out: up — 100 floors through five zones to the summit of Mt. **Tser Eve**.\n      Jump into a brick from below to smash it, drop back down, then jump through the hole to the next floor. Cracked bricks crumble under your feet, steel bricks never break and leave you dazed, ice floors slide, and glowing **alien crystals** take three hits and drop a power-up: Rocket Boots, Mega Hammer, Shield Parka or Time Freeze. Break bricks one after another in a single jump for a **combo** multiplier, and rescue stranded villagers for +500 — but break the brick under one and it costs you 500.\n      Kira never attacks. Aliens go down only when you **stomp** them or break the brick they stand on. Every 20th floor is a boss arena: the Portal Guardian, the Ice Hydra, the Storm Mothership, the Crystal Golem and, at the summit, the Alien Queen. One second before a boss attack lands, its area glows red, and every boss leaves a weak moment to strike. Beat a mid-boss and a 30-second **bonus tower** follows.\n      Wind gusts on Storm Ridge, lightning that marks its column before it strikes, and darkness in the Crystal Caverns where only Kira's light shows the way. Three lives, a continue from the zone you reached, and your best score saved on this device. How high can you climb?\n    ",
+      "controls": "Keyboard: ← / → or A / D to move, Space, ↑, W, Z or Enter to jump, P or Esc to pause, X to continue after a game over, M sound, L language (title screen), F flash & shake. Gamepad: stick or D-pad to move, A jump, X continue, Start pause. Touch: ◀ ▶ buttons bottom left, JUMP bottom right, pause and sound buttons at the top; tap the screen to start.",
+      "scoreLabel": "Score",
+      "tips": "Jump straight into the brick above, land, then jump again through the hole — the hit stops your jump, and a one-brick hole is all you need. With **Rocket Boots** you can break a brick and climb through it in one airtime, and every brick you break before landing raises the **combo**. In boss fights, watch the red previews: the fill shows where and when the hit lands. Don't linger — the goo never falls more than one screen behind your best floor. If the effects bother you, turn **Flash & shake** off with F or by tapping it on the title or pause screen.",
+      "lore": "\n      In this world the high mountains are the only land there is, and the towns on their slopes lived in peace — until a single alien portal opened at the ground and the goo began to rise.\n      Kira picked up her drill-hammer and started climbing. Above the clouds stands Mt. Tser Eve, the highest point of all, and the alien mothership is already hanging over it.\n    ",
+      "features": [
+        "Ice Climber–Style Vertical Climber in 16-bit Pixel Art",
+        "100 Floors Through 5 Zones to the Summit of Mt. Tser Eve",
+        "5 Brick Types: Normal, Cracked, Steel, Ice and Alien Crystal",
+        "5 Bosses With Telegraphed Attacks and an Enraged Second Phase",
+        "Stomp-Only Combat Against 5 Kinds of Aliens",
+        "Power-Ups: Rocket Boots, Mega Hammer, Shield Parka and Time Freeze",
+        "Combo Multiplier, Survivor Rescues and Bonus Towers",
+        "Zone Hazards: Wind, Lightning and Darkness",
+        "Keyboard, Gamepad and Multi-Touch Controls",
+        "Flash & Shake Toggle for Comfortable Play",
+        "Phone, Tablet and Desktop — Plays Offline",
+        "English, Korean and Japanese"
+      ],
+      "objectives": "Climb 100 floors through five zones — Foothills, Frozen Cliffs, Storm Ridge, Crystal Caverns and Tser Eve Peak — and defeat the **Alien Queen** at the summit before the goo catches you. New floors, bricks, stomps, rescues, boss hits and bonus cargo all add to your score, and your best score is saved on this device.",
+      "controlsTable": [
+        {
+          "key": "← → · A D",
+          "action": "Move left and right"
+        },
+        {
+          "key": "Space · ↑ · Z",
+          "action": "Jump; W and Enter work too (also starts and restarts a run)"
+        },
+        {
+          "key": "P · Esc",
+          "action": "Pause and resume"
+        },
+        {
+          "key": "X",
+          "action": "After a game over: continue from the zone you reached (the score resets)"
+        },
+        {
+          "key": "M · L · F",
+          "action": "Sound on / off · language (title screen) · flash & shake on / off"
+        },
+        {
+          "key": "Gamepad",
+          "action": "Stick or D-pad to move, A jump, X continue, Start pause"
+        },
+        {
+          "key": "Touch",
+          "action": "◀ ▶ bottom left, JUMP bottom right, pause and sound at the top; tap the screen to start"
+        }
+      ],
+      "faq": [
+        {
+          "q": "What is Climb Up!?",
+          "a": "A 16-bit pixel-art vertical climber inspired by Ice Climber. You climb 100 floors of breakable brick through five zones while alien goo rises from below, with a boss at the top of every zone and the Alien Queen at the summit."
+        },
+        {
+          "q": "How do I get through a brick floor?",
+          "a": "Jump straight up into a brick to smash it. The hit stops your jump, so you drop back down; jump again to go through the hole. A one-brick hole is enough. Broken bricks grow back after 8 seconds, never inside you. Steel bricks don't break and leave you dazed for a moment — go around them."
+        },
+        {
+          "q": "How do I beat enemies and bosses?",
+          "a": "Kira never attacks. Stomp an alien from above, or break the brick it stands on from below; touching one from the side or jumping into it from below costs a life. Every boss has a weak moment: the Guardian is dizzy after its leap, a Hydra head rests on the floor after a dive, the Golem's arm gets stuck after a slam and the Queen lands to rest — stomp them then. The Storm Mothership is hit by jumping from the floor into its belly. One second before a boss attack lands, its area glows red."
+        },
+        {
+          "q": "What happens when the goo catches me?",
+          "a": "You lose one of your three lives, respawn on your best floor and the goo is pushed back down. After a game over you can start again from the bottom, or continue from the zone you reached with the score reset. The goo stops while a boss is alive, and Time Freeze stops it for 5 seconds."
+        },
+        {
+          "q": "How does scoring work?",
+          "a": "+10 for each new floor and each brick (+50 for a crystal), +100 per alien knocked out, +500 per rescued survivor (−500 if you break the brick under one), +200 per boss hit, 2,000 × the zone number for each boss, +200 per bonus cargo crate and +1,000 for reaching the bonus tower's top. Bricks broken in one jump are multiplied by the combo count. Your best score is saved on this device."
+        },
+        {
+          "q": "Can I turn off screen shake and flashes?",
+          "a": "Yes. Press F, or tap Flash & shake on the title or pause screen. The setting is saved for next time."
+        }
+      ]
+    },
     "_comment": "Per-game canonical English. Translators mirror this in {lang}.json."
   }
 }

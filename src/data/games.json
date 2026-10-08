@@ -977,5 +977,28 @@
       50,
       100
     ]
+  },
+  {
+    "id": "46",
+    "slug": "climb-up",
+    "language": "EN/KO/JA",
+    "thumbnail": "images/climb-up.webp",
+    "genres": [
+      "Arcade",
+      "Action"
+    ],
+    "gameUrl": "https://games.arcadedeck.net/climb-up/",
+    "aspectRatio": "9/16",
+    "status": "PLAYABLE",
+    "platform": "BOTH",
+    "isOriginal": true,
+    "badge": "NEW",
+    "scoreTiers": [
+      500,
+      3000,
+      10000,
+      30000,
+      45000
+    ]
   }
 ]

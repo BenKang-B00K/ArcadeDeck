@@ -1000,5 +1000,26 @@
       30000,
       45000
     ]
+  },
+  {
+    "id": "47",
+    "slug": "spin-board",
+    "language": "EN/KO/JA",
+    "thumbnail": "images/spin-board.webp",
+    "genres": [
+      "Party",
+      "Casual",
+      "Local Co-op"
+    ],
+    "players": [
+      1,
+      10
+    ],
+    "gameUrl": "https://games.arcadedeck.net/spin-board/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "platform": "BOTH",
+    "isOriginal": true,
+    "badge": "NEW"
   }
 ]

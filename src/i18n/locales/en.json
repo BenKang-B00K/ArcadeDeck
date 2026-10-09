@@ -4070,6 +4070,85 @@
         }
       ]
     },
+    "47": {
+      "title": "Spin Board",
+      "description": "A candy-coloured toy prize wheel (돌림판 / ルーレット) for your friends, numbers or any list. Flick it, watch the animals ride it round and let the pointer pick: one winner, a knockout down to the last one, or a result for everybody.",
+      "fullDescription": "\n      Spin Board is a **toy prize wheel** for deciding anything. Put **2 to 10 players** on it as cute animals, a range of numbers, your own **custom list** of up to 24 entries (each one, two or three times as big), or a **quick set**: Yes / No, a coin, a die or tonight's food.\n      Flick the wheel with your finger or tap SPIN. Glossy white pegs knock against a springy pointer that bends, snaps free and boings, so the last second crawls peg by peg. **Every spin is fair**: the result is rolled before the wheel even moves, and flick strength only changes how long the show lasts.\n      **Pick** chooses one, as often as you like, with a tally of every pick. **Knockout** throws the pick off the wheel each round until one is left, the winner or the loser, and a knocked-out animal can land on its tiny **comeback slot** to get back in. **Match** spins two rings the opposite way: animals inside, results hidden under mist outside, so everyone gets a Winner, Penalty, Rank, Team, Ratio or share of the Bill at once.\n      Turn up the **Spice** for specials: the wheel teetering on a peg, kicking back, or a gust carrying it on, and on Wild a Joker that swaps two results after the stop. Now and then a peg even snaps, and its section's odds drop to half, shown right away. Watch it live on every phone at the table with the phone link.\n    ",
+      "controls": "Flick / drag the wheel: Spin it (let go slowly and it springs back) · Tap SPIN or press Space / Enter: Spin · Tap a seat: Take it (Players boards) · Random: Seat everyone · Auto: Next knockout round by itself · ×3: Fast forward · New: Fresh board · Edit: Back to setup",
+      "tips": "**Flick harder** for a longer, wilder spin; it never changes the odds. On a Custom board tap the **×1 / ×2 / ×3** chip to make an entry bigger, and its share shows next to it. In Knockout keep **Comeback** on for upsets: the slivers left behind are small, but landing on one brings that player back. Splitting a bill? Use **Match** with **Bill** and everyone gets their exact share in one spin.",
+      "lore": "\n      Every fair has a wheel, and every wheel has its regulars. Here they are twenty animals from the Ladder Game crowd, riding the segments under a night sky full of stars, getting dizzy, hopping off to take the crown.\n      The wheel itself is old and well loved. Its pegs have been knocked a million times, and once in a while one gives up and snaps, which everyone agrees only makes it more exciting.\n    ",
+      "features": [
+        "Toy Prize Wheel (돌림판 / ルーレット) for 2–10 Players, Numbers or Any List",
+        "Phone Link: Host on One Phone, Everyone Else Watches Live on Their Own",
+        "Pick, Knockout With Comeback Slots, and Two-Ring Match",
+        "Players, Numbers, Custom Lists of Up to 24 Entries and Quick Sets",
+        "Real Peg-and-Pointer Physics, Fair by Design",
+        "Spice Specials: Teeter, Kickback, Gust and the Joker",
+        "Pegs That Snap Now and Then, Halving That Section's Odds",
+        "Match Results From Ladder Game's Quick Fill: Winner, Penalty, Rank, Teams, Ratio, Bill",
+        "20 Cute Animals Riding the Wheel",
+        "Game-Show Music That Builds Every Knockout Round",
+        "Phone, Tablet and Desktop — Installable, Plays Offline",
+        "English, Korean and Japanese"
+      ],
+      "objectives": "There is no score — the wheel decides. Set up a board, pick a mode and spin. Every spin is fair: the result is rolled before the wheel moves, so flick strength and the Spice specials only change the show, never the odds, and the Joker's swap partner is picked fairly too. Knockout runs until one is left; Match gives every player a result in one spin.",
+      "controlsTable": [
+        {
+          "key": "Flick / drag the wheel",
+          "action": "Spin it at your flick's speed; let go slowly and it springs back"
+        },
+        {
+          "key": "SPIN · Space · Enter",
+          "action": "Spin the wheel"
+        },
+        {
+          "key": "Click / Tap a seat",
+          "action": "Take it for the next player (Players boards, before the first spin)"
+        },
+        {
+          "key": "Random",
+          "action": "Seat every remaining player at random"
+        },
+        {
+          "key": "Auto",
+          "action": "Spin the next Knockout round by itself"
+        },
+        {
+          "key": "×3",
+          "action": "Fast forward"
+        },
+        {
+          "key": "New · Edit",
+          "action": "Make a fresh board · go back to setup"
+        }
+      ],
+      "faq": [
+        {
+          "q": "What is a spin board?",
+          "a": "A prize wheel, known as 돌림판 in Korea and ルーレット in Japan, for deciding anything: put players, numbers or your own list on it, spin, and the pointer picks one."
+        },
+        {
+          "q": "Is it really random?",
+          "a": "Yes. The result is rolled the moment you let go, weighted only by each segment's size, before the wheel moves. A harder flick just makes the spin longer, and specials like Teeter and Kickback change how the wheel arrives, never where. When a peg snaps, that section's odds drop to half and the new shares show right away."
+        },
+        {
+          "q": "How many players or entries can it take?",
+          "a": "Players boards seat 2 to 10 animals. Numbers boards take a range of 2 to 36 numbers, and Custom lists take up to 24 entries, each ×1, ×2 or ×3 in size."
+        },
+        {
+          "q": "What's the difference between Pick, Knockout and Match?",
+          "a": "Pick chooses one per spin and keeps a tally. Knockout removes the pick each round until one is left, the winner or the loser; with Comeback on, a knocked-out player who lands on their thin slot returns once. Match spins two rings in opposite directions so every player gets a result at once: Winner, Penalty, Rank, Teams, Ratio or a share of the Bill."
+        },
+        {
+          "q": "Can friends watch on their own phones?",
+          "a": "Yes. Tap the phone link button, choose Host and share the 4-letter code. Other phones join and watch every spin live, even mid-game, while the host spins."
+        },
+        {
+          "q": "Does it work on phones?",
+          "a": "Yes. It is built for touch, works in portrait and landscape, installs as an app and plays offline."
+        }
+      ]
+    },
     "_comment": "Per-game canonical English. Translators mirror this in {lang}.json."
   }
 }

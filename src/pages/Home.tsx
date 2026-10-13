@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { X, Shuffle, Edit3, Check, Info } from 'lucide-react';
+import { X, Shuffle, Edit3, Check, Info, Star, History, Users, Sparkles } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import GameCard from '../components/GameCard';
 import GameGrid from '../components/GameGrid';
@@ -194,14 +194,20 @@ const Home: React.FC = () => {
 
             {showFeatured && (
               <section className="recent-section">
-                <h2 className="section-title">{t('homeFeaturedTitle', 'Featured')} {t('homeFeaturedSpan', 'Game')}</h2>
+                <h2 className="section-title">
+                  <Star size={22} aria-hidden="true" />
+                  <span>{t('homeFeaturedTitle', 'Featured')} <span className="section-title-accent">{t('homeFeaturedSpan', 'Game')}</span></span>
+                </h2>
                 {FEATURED.map(g => <FeaturedCard key={g.id} game={g} />)}
               </section>
             )}
 
             {showRecent && (
               <section className="recent-section">
-                <h2 className="section-title">{t('homeRecentTitle', 'Jump')} {t('homeRecentSpan', 'Back In')}</h2>
+                <h2 className="section-title">
+                  <History size={22} aria-hidden="true" />
+                  <span>{t('homeRecentTitle', 'Jump')} <span className="section-title-accent">{t('homeRecentSpan', 'Back In')}</span></span>
+                </h2>
                 <div className="game-grid">
                   {recent.map(g => <GameCard key={g.id} game={g} onProductionClick={comingSoon} />)}
                 </div>
@@ -211,9 +217,10 @@ const Home: React.FC = () => {
             {showCoop && (
               <section className="recent-section">
                 <h2 className="section-title">
+                  <Users size={22} aria-hidden="true" />
                   {/* ponytail: CSS tooltip on hover/focus; tabIndex lets a tap open it on touch */}
                   <span className="coop-tip" tabIndex={0} aria-describedby="coop-tip">
-                    {t('homeCoopTitle', 'Local Co-op')} {t('gameGridGames', 'Games')}
+                    <span>{t('homeCoopTitle', 'Local Co-op')} <span className="section-title-accent">{t('gameGridGames', 'Games')}</span></span>
                     <Info size={16} aria-hidden="true" />
                     <span id="coop-tip" role="tooltip" className="coop-tip-box">
                       <span>{t('homeCoopTipPhone', 'Play on your phones, linked by Host / Join')}</span>
@@ -231,7 +238,8 @@ const Home: React.FC = () => {
             {showUpdated && (
               <section className="recent-section">
                 <h2 className="section-title">
-                  {t('homeUpdatedTitle', 'Recently')} {t('homeUpdatedSpan', 'Updated')}
+                  <Sparkles size={22} aria-hidden="true" />
+                  <span>{t('homeUpdatedTitle', 'Recently')} <span className="section-title-accent">{t('homeUpdatedSpan', 'Updated')}</span></span>
                   <span className="section-count">{UPDATED.length}</span>
                 </h2>
                 <div className="game-grid">

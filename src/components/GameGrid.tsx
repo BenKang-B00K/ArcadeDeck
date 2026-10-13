@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { deviceGames as games } from '../data/games';
 import GameCard from './GameCard';
+import { Gamepad2 } from 'lucide-react';
 import { useUiText, useLocale, getLocalizedString } from '../i18n';
 import { genreName } from '../utils/genres';
 import './GameGrid.css';
@@ -42,15 +43,14 @@ const GameGrid: React.FC<GameGridProps> = ({ selectedGenre = 'All', searchQuery 
     return filtered.sort((a, b) => parseInt(b.id) - parseInt(a.id));
   }, [selectedGenre, searchQuery, lang, overlay, excludeGenre]);
 
-  const title = selectedGenre !== 'All'
-    ? `${genreName(t, selectedGenre)} ${t('gameGridGames', 'Games')}`
-    : `${t('gameGridAll', 'All')} ${t('gameGridGames', 'Games')}`;
+  const lead = selectedGenre !== 'All' ? genreName(t, selectedGenre) : t('gameGridAll', 'All');
 
   return (
     <section className="game-grid-section">
       <div className="container">
         <h2 className="section-title">
-          {title}
+          <Gamepad2 size={22} aria-hidden="true" />
+          <span>{lead} <span className="section-title-accent">{t('gameGridGames', 'Games')}</span></span>
           <span className="section-count">{processedGames.length}</span>
         </h2>
 

@@ -50,6 +50,8 @@ Every user-visible change updates `CHANGELOG.md` in the same commit — do not w
 
 Bump rule (counters never reset, each bumps independently — see the Versioning block in `CHANGELOG.md`): new game → MAJOR; feature / UI change / existing game update → MINOR; tuning or bug fix → PATCH. Same-day changes of the same tier fold into the existing top line instead of adding a new one. Docs-only, tooling, and refactors with no visible effect skip the changelog.
 
+Release tags (since v49.40.15): the commit that carries a new top `CHANGELOG.md` version gets a lightweight tag of that version, `git tag vMAJOR.MINOR.PATCH`. A same-day fold into an unpushed version moves its tag to the new commit (`git tag -f`); once pushed, leave it. Push tags with the branch (`git push --follow-tags` only covers annotated tags, so `git push origin <tag>` or `--tags`).
+
 The format is load-bearing: `src/pages/PatchNote.tsx` imports `CHANGELOG.md?raw` and renders `/patchnote` from the regex `^- \*\*v(\d+)\.(\d+)\.(\d+)\*\* \((\d{4}-\d{2}-\d{2})\) — (.+)$` — bold version, ISO date in parens, an em dash (`—`, not `-`), one line per release. Items split on `; ` outside parentheses/brackets (so `(a; b)` stays one item); an item that opens with a catalogue game title and a `:` (`Skyfall v1.4: …`, `New game: X …: …`) heads a group and the items after it nest under it until the next such head — keep a game's sub-items contiguous and put site-wide items before the first game head. Backtick spans render as `<code>`. Tier colour is derived from which counter moved vs. the previous line. English game titles in the text auto-link to `/play/{slug}` (matched against `en.json` titles), so write titles as they appear in the catalogue. Keep line endings LF.
 
 ## Game reviews (mandatory)

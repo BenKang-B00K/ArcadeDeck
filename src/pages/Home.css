@@ -233,11 +233,41 @@
 /* ── Sections ── */
 .section-title {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 10px;
   font-size: var(--text-xl);
   margin-bottom: var(--space-4);
 }
+
+/* Home: centered title between hairlines that fade outward. Scoped so it also
+   beats MyGames.css's global .section-title once that chunk has loaded. */
+.home-page .section-title {
+  justify-content: center;
+  margin: 0 0 var(--space-6);
+  font-size: clamp(1.3rem, 1rem + 1.2vw, 1.75rem);
+  text-align: center;
+  word-break: keep-all; /* CJK: wrap at the space, never mid-word */
+}
+
+.home-page .section-title::before,
+.home-page .section-title::after {
+  content: '';
+  flex: 1 1 0;
+  max-width: 180px;
+  height: 2px;
+  border-radius: 1px;
+  background: linear-gradient(to left, var(--primary-color), transparent);
+  opacity: 0.55;
+}
+
+.home-page .section-title::before { margin-right: 6px; }
+.home-page .section-title::after { margin-left: 6px; transform: scaleX(-1); }
+
+.home-page .section-title > svg { flex-shrink: 0; color: var(--primary-color); }
+.section-title-accent { color: var(--primary-color); }
+
+[data-theme="light"] .home-page .section-title > svg,
+[data-theme="light"] .section-title-accent { color: var(--secondary-accent); }
 
 .recent-section {
   margin-bottom: var(--space-8);
@@ -257,8 +287,10 @@
 .coop-tip-box {
   position: absolute;
   top: calc(100% + 8px);
-  left: 0;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 20;
+  text-align: left;
   display: grid;
   gap: 4px;
   width: max-content;

@@ -15,8 +15,10 @@ export interface Game {
   aspectRatio?: string;
   status?: string;
   // Input support, audited against each game's build: 'PC' needs a keyboard or
-  // right-click, 'MOBILE' is touch-only, 'BOTH' works with taps and a mouse.
-  platform?: 'PC' | 'MOBILE' | 'BOTH';
+  // right-click, 'MOBILE' is touch-only, 'BOTH' works with taps and a mouse,
+  // 'PAD' plays on a gamepad or keyboard with no touch controls (listed on
+  // phones too: a linked Bluetooth pad plays it).
+  platform?: 'PC' | 'MOBILE' | 'BOTH' | 'PAD';
   isOriginal?: boolean;
   language?: string;
   badge?: string;
@@ -62,5 +64,5 @@ export const deviceGames: Game[] = games.filter(g =>
 export const GENRE_HUE: Record<string, number> = {
   'Tower Defense': 25, Survival: 0, Strategy: 210, Idle: 45, RPG: 280, Casual: 330,
   Arcade: 190, 'Local Co-op': 140, Action: 10, Roguelike: 300, PvP: 355, Tycoon: 60,
-  Simulation: 170, 'Auto Battler': 235, 'Loadout Grid-Auto-Battle': 235, 'Travel Planner': 95, Educational: 75, Party: 115,
+  Simulation: 170, 'Auto Battler': 235, 'Loadout Grid-Auto-Battle': 235, 'Travel Planner': 95, Educational: 75, Party: 115, Rhythm: 315,
 };

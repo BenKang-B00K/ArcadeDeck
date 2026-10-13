@@ -40,6 +40,8 @@ const GameHero: React.FC<Props> = ({ game, lang, overlay, onPlay }) => {
         {/* Hero height is fixed (16/9), so the notice takes the tagline's slot. */}
         {TOUCH_ONLY && game.platform === 'PC'
           ? <p className="mobile-badge pc-only">{uiT('playerPcOnlyNotice', 'Needs a keyboard or mouse — play this one on a PC.')}</p>
+          : TOUCH_ONLY && game.platform === 'PAD'
+          ? <p className="mobile-badge pc-only">{uiT('playerPadNotice', 'No touch controls — connect a gamepad, or play on a PC.')}</p>
           : <p className="hero-tagline">{description}</p>}
         <button
           type="button"

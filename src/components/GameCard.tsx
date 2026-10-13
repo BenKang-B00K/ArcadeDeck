@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Monitor, Smartphone, Gamepad2 } from 'lucide-react';
+import { Monitor, Smartphone, Gamepad2, Keyboard } from 'lucide-react';
 import { GENRE_HUE, type Game } from '../data/games';
 import { useLocale, getLocalizedString, useUiText } from '../i18n';
 import { genreName } from '../utils/genres';
@@ -70,6 +70,8 @@ const GameCard: React.FC<GameCardProps> = ({ game, onProductionClick, onGenreCli
     ? <span className="platform-badge"><Monitor size={12} aria-hidden="true" /> {t('gameCardPcOnly', 'PC Only')}</span>
     : game.platform === 'MOBILE'
     ? <span className="platform-badge"><Smartphone size={12} aria-hidden="true" /> {t('gameCardMobileOnly', 'Mobile Only')}</span>
+    : game.platform === 'PAD'
+    ? <span className="platform-badge"><Gamepad2 size={12} aria-hidden="true" /><Keyboard size={12} aria-hidden="true" /> {t('gameCardPadKeyboard', 'Gamepad / Keyboard')}</span>
     : <span className="platform-badge"><Monitor size={12} aria-hidden="true" /><Smartphone size={12} aria-hidden="true" /> {t('gameCardBoth', 'PC / Mobile')}</span>;
 
   const badgeClass =

@@ -39,6 +39,7 @@
     "gameCardPcOnly": "PC Only",
     "gameCardMobileOnly": "Mobile Only",
     "gameCardBoth": "PC / Mobile",
+    "gameCardPadKeyboard": "Gamepad / Keyboard",
     "gameCardOriginal": "Original",
     "gameGridAll": "All",
     "gameGridGames": "Games",
@@ -171,6 +172,7 @@
     "playerPlayNow": "Play Now",
     "playerSteam": "Full version on Steam",
     "playerPcOnlyNotice": "Needs a keyboard or mouse — play this one on a PC.",
+    "playerPadNotice": "No touch controls — connect a gamepad, or play on a PC.",
     "viewLong": "Long",
     "viewShort": "Short",
     "viewToggleAria": "Switch view mode",
@@ -232,6 +234,7 @@
     "genre_party": "Party",
     "genre_puzzle": "Puzzle",
     "genre_pvp": "PvP",
+    "genre_rhythm": "Rhythm",
     "genre_roguelike": "Roguelike",
     "genre_rpg": "RPG",
     "genre_simulation": "Simulation",
@@ -4146,6 +4149,94 @@
         {
           "q": "Does it work on phones?",
           "a": "Yes. It is built for touch, works in portrait and landscape, installs as an app and plays offline."
+        }
+      ]
+    },
+    "48": {
+      "title": "Unholy Tempo",
+      "description": "A pad-first rhythm duel: as the Demon Sovereign, strike on the beat to wound and parry on the beat to survive against 27 holy champions, each with their own song, across nine gates and three modes.",
+      "fullDescription": "\n      Unholy Tempo is a **rhythm duel** played on a gamepad or keyboard. The Holy Tide marches on the Underrealm in perfect lockstep, and the forbidden Rite of Crowning has woken you, the sealed **Demon Sovereign**, with one power the crusade never expected: you can hear their war-song. Every battle is a two-minute duel against one holy champion, fought entirely on the beat.\n      Two lanes scroll toward you. The **Attack lane** belongs to your thumbs: Claws, two-key Rends, held Channels, Incantation chains, Frenzy mashes and three-key Cataclysms on the D-pad and face buttons. The **Defend lane** belongs to your index fingers: parry each Smite on the shoulder it shows, Twin Guard the Sweeps, Brace through Judgment Beams and leave the Sanctified decoys alone. A Perfect parry ripostes, and every champion winds up one beat before a strike, so you can read them, not only the lane. Fill your **Wrath** and unleash a **Sovereign Art** on the chorus's Gate.\n      Your hits are the melody. Each song is drums, bass and pads, and the notes you play are its lead line, so a clean run sounds whole and a miss leaves a hole. The keys are remixed every run while hands and chord shapes stay the same, so you read the notes instead of memorising buttons.\n      Nine gates stand between you and Pontifex Aurelius IX, held by three orders: the Vanguard on **Easy**, the Iron Vow on **Normal** and the Choir Eternal on **Pro**. That makes **27 champions**, each with their own song, instrument, strike and signature Rite, over five difficulty levels from Novice to Inferno. Win, KO and Grade A earn the stars that open the next difficulty, stage and mode, and Sin Shards buy new looks for King Azrakel or Queen Lilivane in the Reliquary. Xbox, PlayStation and Switch button glyphs, full button remapping, a calibration test, and English, Korean and Japanese.\n    ",
+      "controls": "Gamepad (recommended): D-pad and face buttons play the Attack lane, bumpers and triggers the Defend lane, ↑ + Y on a Gate at full Wrath unleashes a Sovereign Art, Menu/Start pauses. Keyboard: WASD (or the arrow keys) = D-pad, I J K L = face buttons (I = Y, J = X, K = A, L = B), Q / O = bumpers, E / U = triggers, W + I = Sovereign Art, Esc pauses; Enter or Space confirms, Esc or Backspace goes back. Every game key can be remapped in Options → Controls. There are no touch controls: phones and tablets need a linked controller.",
+      "scoreLabel": "Stars",
+      "tips": "Thumbs play the Attack lane and index fingers hold the Defend lane, so an attack and a parry on the same beat never fight over a finger. Watch the champion: they wind up one beat before every Defend note and ring their instrument as the warning. A **Perfect** parry ripostes for damage and Wrath. If notes feel early or late, run **Calibrate** in Options; after two battles off in the same direction, the result screen offers a ±8 ms fix. Turn on the **Perfect Guide Ring** to see each lane's next Perfect close in. Short of stars? Two open the next difficulty: add a KO or a Grade A to the win.",
+      "lore": "\n      For a thousand years the seven clans of the Demon Alliance kept to the Underrealm. Then Pontifex Aurelius IX declared the Last Crusade, and the Holy Tide poured through the Seven Gates, endless, marching in lockstep to sacred war drums.\n      In desperation, Grand Hierophant Morvael broke a thousand-year seal and performed the forbidden Rite of Crowning. You wake on the throne with one gift: you hear the crusade's war-song. Whoever owns the rhythm owns the battlefield.\n    ",
+      "features": [
+        "Rhythm Duel: Strike on the Beat to Wound, Parry on the Beat to Survive",
+        "27 Holy Champions, Each With Their Own Song, Instrument and Signature Rite",
+        "9 Gates × 3 Modes × 5 Difficulty Levels, Novice to Inferno",
+        "Attack Lane for the Thumbs, Defend Lane for the Index Fingers",
+        "Claws, Rends, Channels, Incantations, Frenzies, Cataclysms and Sovereign Arts",
+        "Your Hits Play the Melody: Every Note Is Part of the Song",
+        "Keys Remixed Every Run, Same Rhythm and Chord Shapes",
+        "Play as King Azrakel or Queen Lilivane, 9 Looks Each in the Reliquary",
+        "Gamepad First, Full Keyboard Support and Button Remapping",
+        "Xbox, PlayStation and Switch Button Glyphs",
+        "Audio Calibration and Perfect Guide Ring",
+        "English, Korean and Japanese"
+      ],
+      "objectives": "Break all nine gates on the road to the **Pontifex** in each mode. Every duel ends **Annihilated** (the champion is KO'd), **Repelled** (you finish the song ahead on HP) or **Throne Breached** (you fall). Each difficulty holds three stars: **Win**, **KO** and **Grade A or better**. Two stars open the next difficulty, three on a stage open the next stage, and 54 stars in a mode open the next mode. Your ArcadeDeck best counts every star you hold, up to 243.",
+      "controlsTable": [
+        {
+          "key": "D-pad · W A S D",
+          "action": "Attack lane, left thumb (the arrow keys work too)"
+        },
+        {
+          "key": "Face buttons · I J K L",
+          "action": "Attack lane, right thumb (Y X A B = I J K L)"
+        },
+        {
+          "key": "LB RB · Q O",
+          "action": "Defend lane bumpers: parry a Smite on the shoulder it shows"
+        },
+        {
+          "key": "LT RT · E U",
+          "action": "Defend lane triggers; hold both to Brace a Judgment Beam"
+        },
+        {
+          "key": "↑ + Y · W + I",
+          "action": "Sovereign Art on a Gate at 100% Wrath"
+        },
+        {
+          "key": "Start · Esc",
+          "action": "Pause (Resume, Retry, Options, Quit to Stage Select)"
+        },
+        {
+          "key": "A · Enter / Space",
+          "action": "Confirm in menus; B · Esc / Backspace goes back"
+        },
+        {
+          "key": "LB RB · Q O (menus)",
+          "action": "Stage Select: change difficulty · Menu: change your Sovereign's look"
+        }
+      ],
+      "faq": [
+        {
+          "q": "What is Unholy Tempo?",
+          "a": "A rhythm duel game. You play the Demon Sovereign and fight 27 holy champions one-on-one, two minutes each, to their own songs. Attacks and parries are both timed button presses: hit on the beat to deal damage, parry on the beat to take none."
+        },
+        {
+          "q": "Do I need a gamepad?",
+          "a": "A gamepad is recommended and every chart is tested on one, but the keyboard is fully supported: WASD and I J K L mirror the D-pad and face buttons, Q / O and E / U the shoulders. Xbox, PlayStation and Switch controllers show their own button glyphs. There are no touch controls, so on a phone or tablet, link a Bluetooth controller first."
+        },
+        {
+          "q": "How do I unlock more stages, difficulties and modes?",
+          "a": "Each difficulty has three stars: win, KO the champion, and finish with Grade A or better. Two stars open the next difficulty of that stage, and three stars on a stage (counted over its difficulties) open the next stage. Normal opens at 54 stars in Easy and Pro at 54 stars in Normal, each with its own nine champions and songs."
+        },
+        {
+          "q": "What is a Sovereign Art?",
+          "a": "Perfects, Great hits, parries and Braces fill your Wrath. At 100%, play the Crown chord (↑ + Y, or W + I) on a Sovereign Gate note to start a two-bar Art chart. You can't be hurt while it plays, and your accuracy sets its damage: 15–25% of the champion's HP."
+        },
+        {
+          "q": "Why do the buttons change between runs?",
+          "a": "The keys are remixed every run so replays stay fresh. The rhythm, hands and chord shapes never change: each thumb's diamond turns or flips as a whole, and a hit still sounds the song's real note. Read each note's button, not a memorised pattern."
+        },
+        {
+          "q": "Notes feel early or late. What can I do?",
+          "a": "Open Options and run Calibrate, a short tap-along test that sets the audio offset for your device (Bluetooth pads and headphones add delay). You can also nudge the offset by hand, and after two battles off in the same direction the result screen offers a fix."
+        },
+        {
+          "q": "Is my progress saved?",
+          "a": "Yes. Stars, best scores, Sin Shards, looks and settings are saved in this browser on this device."
         }
       ]
     },

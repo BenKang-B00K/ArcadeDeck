@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script src="/perf.js"></script> <!-- ArcadeDeck's shared phone heat guard (DPR ≤ 2, rAF ≤ ~60/s); must run before any game code. 404 elsewhere: harmless -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Unholy Tempo</title> <!-- in the head, render-blocking: a CSS import from main.ts painted the raw markup first -->
+<script>document.documentElement.style.setProperty('--s', Math.min(innerWidth / 1920, innerHeight / 1080)); /* first paint at the right scale; main.ts fit() takes over */</script>
+<script>/* offline play: games.arcadedeck.net/sw.js (shared, one cache per game) */if('serviceWorker'in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js',{scope:'./'}).then(()=>navigator.serviceWorker.ready).then(r=>r.active&&r.active.postMessage([location.origin+location.pathname,...performance.getEntriesByType('resource').map(e=>e.name)])).catch(()=>{})})</script>
+  <script type="module" crossorigin src="./assets/index-C3PKg4if.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-D5Jto07K.css">
+</head>
+<body>
+<div id="stage" data-dev="pad">
+
+  <!-- LOADING -->
+  <section id="load" class="screen on" aria-label="Loading" data-t-aria="aria.load">
+    <div class="cover" id="loadArt"></div>
+    <div class="abs veil"></div>
+    <h1 class="logo"><span class="ornate" data-t="game.title"></span></h1>
+    <p class="abs sub" data-t="game.tagline"></p>
+    <div class="abs sigil" aria-hidden="true"><i class="halo"></i><i class="frames" id="sigil"></i></div>
+    <div class="abs loadbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="loadbar">
+      <div class="row"><span data-t="load.summoning"></span><b id="pct">0%</b></div>
+      <div class="track"><i></i></div>
+    </div>
+    <div class="abs press" aria-live="polite">
+      <div class="any"><b data-t="load.press"></b><small data-t="load.pressSub"></small></div>
+      <div class="pad-need"><b data-t="load.pad"></b><small data-t="load.padSub"></small></div>
+      <div class="sound"><b id="soundMsg"></b><small data-t="load.soundSub"></small></div>
+    </div>
+    <p class="abs tip" id="tip"><b></b><span></span></p>
+    <p class="abs ver" id="ver"></p>
+  </section>
+
+  <!-- PROLOGUE (first launch) -->
+  <section id="pro" class="screen" aria-label="Prologue" data-t-aria="aria.pro">
+    <div class="cover pimg" id="proA"></div>
+    <div class="cover pimg" id="proB"></div>
+    <div class="abs pshade"></div>
+    <p class="abs pcap" id="proCap" aria-live="polite"></p>
+    <div class="abs pdots" id="proDots"><i></i><i></i><i></i><i></i></div>
+    <div class="hints">
+      <span class="hint"><span class="pring" id="proRing"></span><span class="g" data-g="back"></span><span data-t="pro.skip"></span></span>
+      <button class="hint" data-act="ok"><span class="g" data-g="ok"></span><span data-t="pro.next"></span></button>
+    </div>
+  </section>
+
+  <!-- SOVEREIGN CHOICE (first launch) -->
+  <section id="pick" class="screen" aria-label="Choose your Sovereign" data-t-aria="aria.pick">
+    <div class="cover"></div>
+    <h2 class="abs caltitle" data-t="pick.title"></h2>
+    <p class="abs calhint" data-t="pick.desc"></p>
+    <button class="abs pk" data-sov="queen"><i></i><b data-t="chip.queen"></b></button>
+    <button class="abs pk" data-sov="king"><i></i><b data-t="chip.king"></b></button>
+    <div class="hints">
+      <span class="hint"><span class="g" data-g="left"></span><span class="g" data-g="right"></span><span data-t="hint.change"></span></span>
+      <button class="hint" data-act="ok"><span class="g" data-g="ok"></span><span data-t="hint.select"></span></button>
+    </div>
+  </section>
+
+  <!-- MENU -->
+  <section id="menu" class="screen" aria-label="Main menu" data-t-aria="aria.menu">
+    <div class="cover"></div>
+    <i class="abs horizon"></i>
+    <i class="abs fire" style="left:125px;top:505px"></i>
+    <i class="abs fire" style="left:1045px;top:488px"></i>
+    <i class="abs fire" style="left:1860px;top:478px"></i>
+    <i class="abs fire sm" style="left:370px;top:600px"></i>
+    <i class="abs fire sm" style="left:1175px;top:578px"></i>
+    <i class="abs fire sm" style="left:1715px;top:572px"></i>
+    <i class="abs shadow"></i>
+    <i class="abs" id="sovAura"></i>
+    <div class="abs" id="sov" role="img" aria-label="Queen Lilivane"></div>
+    <div class="abs embers" id="embers"></div>
+    <div class="abs mshade"></div>
+    <h1 class="logo"><span class="ornate" data-t="game.title"></span></h1>
+    <p class="abs tag" data-t="game.awakens"></p>
+    <nav class="abs mlist" id="mlist" aria-label="Main menu" data-t-aria="aria.menu"></nav>
+    <div class="abs mdesc" id="mdesc" aria-live="polite"></div>
+    <div class="abs spick">
+      <div class="srow" id="mCosRow" role="group">
+        <button class="sarr" data-act="lb"><span class="g" data-g="lb"></span><i>◂</i></button>
+        <b id="mCos"></b>
+        <button class="sarr" data-act="rb"><i>▸</i><span class="g" data-g="rb"></span></button>
+      </div>
+      <div class="srow" id="mSovRow" role="group">
+        <button class="sarr" data-act="lt"><span class="g" data-g="lt"></span><i>◂</i></button>
+        <b id="mSov"></b>
+        <button class="sarr" data-act="rt"><i>▸</i><span class="g" data-g="rt"></span></button>
+      </div>
+    </div>
+    <div class="abs prof">
+      <div class="chip who"><small data-t="chip.sovereign"></small><b id="mWho"></b></div>
+      <div class="chip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1 20 9 12 23 4 9Z" fill="#e0334a" stroke="#120a0c" stroke-width="1.5"/><path d="M12 1 15 9 12 23 9 9Z" fill="#ff8a7a" opacity=".55"/></svg><span class="shardsN"></span><small data-t="chip.shards"></small></div>
+      <div class="chip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3 6.6 7.2.8-5.4 4.9 1.5 7.1L12 17.8 5.7 21.4l1.5-7.1L1.8 9.4 9 8.6Z" fill="#f2c55c" stroke="#120a0c" stroke-width="1.2"/></svg><span class="starsN"></span></div>
+    </div>
+    <div class="hints">
+      <button class="hint" data-act="ok"><span class="g" data-g="ok"></span><span data-t="hint.select"></span></button>
+    </div>
+    <p class="abs ver"></p>
+  </section>
+
+  <!-- RELIQUARY -->
+  <section id="rel" class="screen" aria-label="Reliquary" data-t-aria="aria.rel">
+    <div class="cover"></div>
+    <i class="abs relglow"></i>
+    <i class="abs relshadow"></i>
+    <div class="abs" id="relSov" role="img"></div>
+    <h1 class="abs logo"><span class="ornate" data-t="rel.title"></span></h1>
+    <p class="abs relsub" data-t="rel.sub"></p>
+    <div class="abs relname"><b id="relName"></b><small id="relState"></small></div>
+    <div class="abs prof">
+      <div class="chip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1 20 9 12 23 4 9Z" fill="#e0334a" stroke="#120a0c" stroke-width="1.5"/><path d="M12 1 15 9 12 23 9 9Z" fill="#ff8a7a" opacity=".55"/></svg><span class="shardsN"></span><small data-t="chip.shards"></small></div>
+    </div>
+    <div class="abs relpanel">
+      <div id="relRows"></div>
+      <p class="relsoon" id="relSoon" data-t="rel.soon"></p>
+      <div class="relearn"><h3 data-t="rel.earn"></h3><p data-t="rel.earnRun"></p><div class="relrates" id="relRates"></div><p id="relMore"></p></div>
+    </div>
+    <div class="hints">
+      <button class="hint" data-act="ok" id="relOk"><span class="g" data-g="ok"></span><span id="relOkText"></span></button>
+      <button class="hint" data-act="back"><span class="g" data-g="back"></span><span data-t="hint.back"></span></button>
+    </div>
+  </section>
+
+  <!-- OPTIONS -->
+  <section id="opts" class="screen" aria-label="Options" data-t-aria="aria.opts">
+    <div class="cover"></div>
+    <div class="abs panel"><h2 data-t="opt.title"></h2><div id="olist"></div></div>
+    <div class="hints">
+      <span class="hint"><span class="g" data-g="left"></span><span class="g" data-g="right"></span><span data-t="hint.change"></span></span>
+      <button class="hint" data-act="ok"><span class="g" data-g="ok"></span><span data-t="hint.select"></span></button>
+      <button class="hint" data-act="back"><span class="g" data-g="back"></span><span data-t="hint.back"></span></button>
+    </div>
+  </section>
+
+  <!-- CONTROLS -->
+  <section id="ctrl" class="screen" aria-label="Controls" data-t-aria="aria.ctrl">
+    <div class="cover"></div>
+    <div class="abs panel cpanel"><h2 data-t="ctrl.title"></h2><div id="clist"></div><p class="cprompt" id="cPrompt" aria-live="polite"></p></div>
+    <div class="hints">
+      <span class="hint"><span class="g" data-g="left"></span><span class="g" data-g="right"></span><span data-t="hint.change"></span></span>
+      <button class="hint" data-act="x"><span class="g" data-g="x"></span><span data-t="hint.clear"></span></button>
+      <button class="hint" data-act="ok"><span class="g" data-g="ok"></span><span data-t="hint.rebind"></span></button>
+      <button class="hint" data-act="back"><span class="g" data-g="back"></span><span data-t="hint.back"></span></button>
+    </div>
+  </section>
+
+  <!-- CREDITS -->
+  <section id="cred" class="screen" aria-label="Credits" data-t-aria="aria.cred">
+    <div class="cover"></div>
+    <div class="abs panel credroll">
+      <h2 data-t="menu.credits"></h2>
+      <small data-t="cred.by"></small>
+      <b class="credby">ArcadeDeck</b>
+      <small data-t="cred.fonts"></small>
+      <p>Cinzel · Natanael Gama<br>Grenze Gotisch · Omnibus-Type<br>IBM Plex Sans, IBM Plex Mono · IBM<br>Noto Sans, Noto Serif KR / JP · Google<br><i>SIL Open Font License 1.1</i></p>
+      <p class="credthanks" data-t="cred.thanks"></p>
+    </div>
+    <div class="hints">
+      <button class="hint" data-act="back"><span class="g" data-g="back"></span><span data-t="hint.back"></span></button>
+    </div>
+  </section>
+
+  <!-- CALIBRATION -->
+  <section id="cal" class="screen" aria-label="Calibration" data-t-aria="aria.cal">
+    <div class="cover"></div>
+    <h2 class="abs caltitle" data-t="cal.title"></h2>
+    <p class="abs calhint" id="calHint"></p>
+    <div class="abs calring" id="calRing"><b id="calCount"></b></div>
+    <p class="abs calmsg" id="calMsg" aria-live="polite"></p>
+    <div class="hints">
+      <button class="hint" data-act="back"><span class="g" data-g="back"></span><span data-t="cal.skip"></span></button>
+    </div>
+  </section>
+
+  <!-- STAGE SELECT -->
+  <section id="sel" class="screen" aria-label="Stage select" data-t-aria="aria.sel">
+    <div class="abs cam" id="cam">
+      <div class="cover"></div>
+      <div class="abs tide"></div>
+      <div class="abs tide-edge"></div>
+      <div class="abs tide-lbl" data-t="sel.tide"></div>
+      <div id="nodes"></div>
+    </div>
+    <div class="abs sshade"></div>
+    <div class="abs stitle">
+      <button class="back" data-act="back" aria-label="Back" data-t-aria="aria.back"><svg viewBox="0 0 24 24" fill="none" stroke="#fff3d6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <div><h2 data-t="sel.title"></h2><p id="gates"></p></div>
+    </div>
+    <div class="abs prof">
+      <div class="chip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1 20 9 12 23 4 9Z" fill="#e0334a" stroke="#120a0c" stroke-width="1.5"/><path d="M12 1 15 9 12 23 9 9Z" fill="#ff8a7a" opacity=".55"/></svg><span class="shardsN"></span><small data-t="chip.shards"></small></div>
+      <div class="chip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3 6.6 7.2.8-5.4 4.9 1.5 7.1L12 17.8 5.7 21.4l1.5-7.1L1.8 9.4 9 8.6Z" fill="#f2c55c" stroke="#120a0c" stroke-width="1.2"/></svg><span class="starsN"></span></div>
+    </div>
+    <aside class="abs dossier" aria-live="polite">
+      <div class="ribbon"><b id="dNo"></b></div>
+      <div class="region" id="dRegion"></div>
+      <button class="por" id="dPor" data-act="y"><span class="bg" id="dBg"></span><img id="dImg" alt=""><span class="q">?</span>
+        <span class="zoom"><span class="g" data-g="y"></span></span></button>
+      <div class="cname"><small id="dTitle"></small><b id="dName"></b></div>
+      <div class="track"><svg viewBox="0 0 24 24" fill="#2b1a12" aria-hidden="true"><path d="M9 18.5a3 3 0 1 1-2-2.83V5l12-2v12.5a3 3 0 1 1-2-2.83V7.4L9 8.7Z"/></svg>
+        <span id="dTrack"></span><i id="dMeta"></i><span class="eq" id="eq"><span></span><span></span><span></span><span></span><em data-t="sel.preview"></em></span></div>
+      <div class="badges" id="dBadges"></div>
+      <div class="rule"></div>
+      <div class="diff">
+        <button class="gb" data-act="lb" aria-label="Easier" data-t-aria="aria.easier"><span class="g" data-g="lb"></span></button>
+        <div class="diff" id="dDiff"></div>
+        <button class="gb" data-act="rb" aria-label="Harder" data-t-aria="aria.harder"><span class="g" data-g="rb"></span></button>
+      </div>
+      <div class="split" style="grid-template-columns:1fr"><div class="cell" id="dRec"></div></div>
+      <button class="fight" data-act="ok" id="dFight"></button>
+    </aside>
+    <div class="abs legend" aria-hidden="true">
+      <span><img src="./assets/node-cleared-Bv5s-BfQ.webp" alt=""><span data-t="sel.broken"></span></span>
+      <span><img src="./assets/node-current-spnjDjEI.webp" alt=""><span data-t="sel.next"></span></span>
+      <span><img src="./assets/node-locked-BC-p04fX.webp" alt=""><span data-t="sel.sealed"></span></span>
+      <span><img src="./assets/node-throne-B3SBusDD.webp" alt=""><span data-t="sel.throne"></span></span>
+    </div>
+    <div class="hints">
+      <span class="hint"><span class="g" data-g="lb"></span><span class="g" data-g="rb"></span><span data-t="hint.difficulty"></span></span>
+      <button class="hint" data-act="y"><span class="g" data-g="y"></span><span data-t="hint.champion"></span></button>
+      <button class="hint" data-act="ok"><span class="g" data-g="ok"></span><span data-t="hint.fight"></span></button>
+      <button class="hint" data-act="back"><span class="g" data-g="back"></span><span data-t="hint.back"></span></button>
+    </div>
+    <!-- the focused gate's champion in big (Y / I or a click on the dossier portrait); any click, Y or B closes it -->
+    <div class="abs" id="champov" data-act="y">
+      <div class="cover" id="coBg"></div>
+      <img id="coImg" alt="">
+      <div class="abs cotext"><small id="coTitle"></small><b class="ornate" id="coName"></b><p id="coTaunt"></p></div>
+      <div class="hints"><button class="hint" data-act="back"><span class="g" data-g="back"></span><span data-t="hint.close"></span></button></div>
+    </div>
+  </section>
+
+  <!-- VS SPLASH -->
+  <section id="vs" class="screen" aria-label="Versus" data-t-aria="aria.vs">
+    <div class="vsside vsL"><div class="cover" id="vsBgL"></div><img id="vsSov" src="./assets/queen-DBu6-TPH.webp" alt=""></div>
+    <div class="vsside vsR"><div class="cover" id="vsBgR"></div><img id="vsImg" alt=""></div>
+    <div class="abs vsseam"></div>
+    <div class="abs vsname l"><small data-t="vs.sovereign"></small><b class="ornate" id="vsSovName"></b></div>
+    <div class="abs vsname r"><small id="vsTitle"></small><b class="ornate" id="vsName"></b></div>
+    <div class="abs vsmark"><span class="ornate">VS</span></div>
+    <p class="abs taunt" id="vsTaunt"></p>
+    <div class="abs loadbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="vsBar">
+      <div class="row"><span data-t="vs.loading"></span><b id="vsPct">0%</b></div>
+      <div class="track"><i></i></div>
+    </div>
+    <div class="abs grim" id="grim"><img src="./assets/chain-BXYscK1t.webp" alt=""><div><small data-t="vs.grimoire"></small><div id="grimBody"></div></div></div>
+  </section>
+
+  <!-- BATTLE -->
+  <section id="battle" class="screen" aria-label="Battle" data-t-aria="aria.battle">
+    <canvas id="cv"></canvas>
+    <div class="abs" id="pause">
+      <div class="abs pausebox"><h2 data-t="hud.paused"></h2><nav class="plist" id="plist"></nav></div>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="res" class="screen" aria-label="Result" data-t-aria="aria.res">
+    <div class="cover" id="resBg"></div>
+    <div class="rbody">
+      <div class="abs rshade"></div>
+      <i class="abs rq-shadow"></i>
+      <div class="abs" id="rQueen" role="img" aria-label="Queen Lilivane"></div>
+      <div class="abs rbanner" id="rBanner"><img id="rBannerImg" alt=""><div class="rseal" id="rSeal"><img src="./assets/seal-ftGV2Ug7.webp" alt=""><b id="rGrade"></b></div></div>
+      <div class="abs rhead"><small id="rSub"></small><b class="ornate" id="rOutcome"></b></div>
+      <div class="abs verdict"><span class="mv"><img src="./assets/morvael-Vm8HrF2c.webp" alt=""></span><div><small data-t="res.morvael"></small><p id="rVerdict"></p></div></div>
+      <aside class="abs rpanel" aria-live="polite">
+        <div class="rtop"><span class="k" id="rStage"></span><span class="sp"></span><span class="rtag" id="rDiff"></span></div>
+        <div><div class="k" data-t="res.score"></div><div class="rscore"><b id="rScore">0</b><span class="newbest" id="rBest" data-t="res.newBest"></span></div></div>
+        <div class="rstats">
+          <div><span class="k" data-t="res.accuracy"></span><b id="rAcc">0%</b></div>
+          <div><span class="k" data-t="res.maxCombo"></span><b id="rCombo">0</b></div>
+          <div><span class="k" data-t="res.endedAt"></span><b id="rTime"></b></div>
+        </div>
+        <ul class="judg" id="rJudg"></ul>
+        <div>
+          <div class="hist" id="rHist"></div>
+          <div class="haxis"><span class="k" data-t="res.early"></span><span class="k" data-t="res.late"></span></div>
+        </div>
+        <button class="offset" id="rOffset" data-act="x"><span class="g" data-g="x"></span><span id="rOffText"></span></button>
+        <div class="rrew">
+          <div class="shards"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1 20 9 12 23 4 9Z" fill="#e0334a" stroke="#120a0c" stroke-width="1.5"/><path d="M12 1 15 9 12 23 9 9Z" fill="#ff8a7a" opacity=".55"/></svg><span id="rShards">+0</span><small data-t="res.shards"></small></div>
+          <div class="rstars" id="rStars"></div>
+        </div>
+        <div class="unlocks" id="rUnlocks"></div>
+      </aside>
+      <div class="hints">
+        <button class="hint" data-act="y"><span class="g" data-g="y"></span><span data-t="hint.retry"></span></button>
+        <button class="hint def" data-act="ok"><span class="g" data-g="ok"></span><span data-t="hint.continue"></span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- touch-only device without a linked pad: the game waits here (GDD: no touch controls) -->
+  <div class="abs" id="padgate"><div><b data-t="load.pad"></b><small data-t="load.padSub"></small></div></div>
+  <div class="abs" id="fade"></div>
+  <div class="abs" id="wipe"></div>
+  <div class="abs" id="flash"></div>
+  <div class="abs" id="toast" role="status"></div>
+</div>
+<div id="rotate" data-t="rotate"></div>
+</body>
+</html>

@@ -43,7 +43,7 @@ const requiredStructural = ['id', 'slug', 'thumbnail', 'genres', 'gameUrl', 'sta
 const requiredEnText = ['title', 'description', 'fullDescription'];
 const validStatuses = ['PLAYABLE', 'IN PRODUCTION'];
 const validAspectRatios = ['16/9', '9/16', '4/3', '3/4', '1/1'];
-const validPlatforms = ['PC', 'MOBILE', 'BOTH'];
+const validPlatforms = ['PC', 'MOBILE', 'BOTH', 'PAD'];
 
 for (const g of games) {
   const label = g.slug || g.id || '(unknown)';

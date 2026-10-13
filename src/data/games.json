@@ -1021,5 +1021,28 @@
     "platform": "BOTH",
     "isOriginal": true,
     "badge": "NEW"
+  },
+  {
+    "id": "48",
+    "slug": "unholy-tempo",
+    "language": "EN/KO/JA",
+    "thumbnail": "images/unholy-tempo.webp",
+    "genres": [
+      "Rhythm",
+      "Action"
+    ],
+    "gameUrl": "https://games.arcadedeck.net/unholy-tempo/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "platform": "PAD",
+    "isOriginal": true,
+    "badge": "NEW",
+    "scoreTiers": [
+      3,
+      27,
+      81,
+      162,
+      243
+    ]
   }
 ]

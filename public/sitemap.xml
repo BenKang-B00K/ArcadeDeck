@@ -3,7 +3,7 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://arcadedeck.net/</loc>
-    <lastmod>2026-10-08</lastmod>
+    <lastmod>2026-10-13</lastmod>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja" />
@@ -12,7 +12,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ja</loc>
-    <lastmod>2026-10-08</lastmod>
+    <lastmod>2026-10-13</lastmod>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja" />
@@ -21,7 +21,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/ko</loc>
-    <lastmod>2026-10-08</lastmod>
+    <lastmod>2026-10-13</lastmod>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/" />
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja" />
@@ -1542,7 +1542,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/blog</loc>
-    <lastmod>2026-10-08</lastmod>
+    <lastmod>2026-10-13</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
@@ -1706,8 +1706,13 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://arcadedeck.net/blog/unholy-tempo-launch-strike-on-the-beat</loc>
+    <lastmod>2026-10-13</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://arcadedeck.net/blog/tag/action</loc>
-    <lastmod>2026-10-03</lastmod>
+    <lastmod>2026-10-13</lastmod>
     <priority>0.5</priority>
   </url>
   <url>
@@ -1747,7 +1752,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/tag/news</loc>
-    <lastmod>2026-10-08</lastmod>
+    <lastmod>2026-10-13</lastmod>
     <priority>0.5</priority>
   </url>
   <url>

@@ -420,6 +420,7 @@ for (const lang of SUPPORTED_LOCALES) {
         </nav>
         <h1 style="font-size:2rem;margin-bottom:8px;">${t.title}</h1>
         <p style="font-size:1.1rem;line-height:1.6;">${t.description}</p>
+        ${game.isOriginal ? `<p style="color:#9aa;line-height:1.6;">${ui('seoCreditLine', lang, 'An original game designed and built by ArcadeDeck, a solo developer making Godot and HTML5 games since 2025.')} <a href="${SITE}/about" style="color:#00d2ff;">${ui('seoCreditAbout', lang, 'About ArcadeDeck')}</a></p>` : ''}
 
         <h2 style="margin-top:32px;font-size:1.3rem;">${aboutH2}</h2>
         <div>${paras(t.fullDescription)}</div>
@@ -494,7 +495,7 @@ for (const genre of allGenres) {
 
     const pageUrl = fullUrl(lang, routePath);
     const titleTemplate = ui('seoGenrePageTitle', lang, '{genre} Games | Play Free on ArcadeDeck');
-    const descTemplate = ui('seoGenrePageDescription', lang, 'Play {count} {genre} games free on ArcadeDeck. Curated browser titles, straight in your browser. No downloads, no sign-up.');
+    const descTemplate = ui('seoGenrePageDescription', lang, 'Play {count} {genre} games free on ArcadeDeck. Original browser games made by ArcadeDeck, straight in your browser. No downloads, no sign-up.');
     const label = genreName(genre, lang);
     const title = titleTemplate.replace('{genre}', label).replace('{count}', String(inGenre.length));
     const desc = descTemplate.replace('{genre}', label).replace('{count}', String(inGenre.length));
@@ -872,19 +873,23 @@ const routeShells = {
   },
   about: {
     title: 'About | ArcadeDeck',
-    description: 'About ArcadeDeck — a curated home for original, free-to-play browser games. No downloads, no installs, no sign-up walls: pick a game, hit play, and you are in.',
+    description: 'ArcadeDeck is a one-person indie game studio: every free browser game on the site is designed, built and updated by a solo developer working in Godot and HTML5 since 2025.',
     canonical: `${SITE}/about`,
     extraLd: [breadcrumbLdFor('About', `${SITE}/about`)],
     noscript: `
       <div style="background:#171424;color:#eaeaf0;font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;">
         <h1>About ArcadeDeck</h1>
-        <p>ArcadeDeck is a curated home for original, free-to-play browser games. Every title in the catalogue is built specifically for the web — no downloads, no installs, no sign-up walls. Pick a game, hit play, and you are in within seconds.</p>
-        <h2>What We Stand For</h2>
-        <p>We believe casual browser games deserve the same craft and polish as their console and mobile counterparts. Each ArcadeDeck game is hand-selected for tight controls, fair difficulty curves, and replay value. You will find Action, RPG, Strategy, Idle, Roguelike, Tower Defense, Puzzle, and Casual genres represented, with new titles added regularly.</p>
+        <p>ArcadeDeck is a one-person indie game studio. Every game in the catalogue — ${playableGames.filter(g => g.kind !== 'app').length} of them today — is designed, programmed, tested and updated by one solo developer, who started making games in 2025 and works in Godot and HTML5. Nothing here is licensed, scraped or embedded from another portal: if a game is listed on ArcadeDeck, it was made for ArcadeDeck.</p>
+        <h2>How the Games Are Made</h2>
+        <p>Each game starts as a small prototype and ships only once it plays well in a browser tab, on a desktop and on a phone. Games are built either in Godot or directly in HTML5 with TypeScript, Canvas and WebGL, and they run without plugins or installs.</p>
+        <p>Launch is not the end. Balance patches, new modes, controller support and bug fixes keep coming after release, and every one is logged on the <a href="/patchnote">Patch Notes</a> page. Longer write-ups — launch posts, design notes and update breakdowns — go on the <a href="/blog">Blog</a>.</p>
+        <h2>What You Will Find</h2>
+        <p>Tower defense like <a href="/play/flux-tower-defense">Flux Tower Defense</a> and <a href="/play/mythic-defenders-heroes-returns">Mythic Defenders: Heroes Returns</a>; roguelikes and auto-battlers set in the shared Kingdom of Ashes world, starting with <a href="/play/kingdom-of-ashes-fallen-era">Kingdom of Ashes - Fallen Era</a>; arcade games such as <a href="/play/climb-up">Climb Up!</a> and <a href="/play/skyfall">Skyfall</a>; a logic-gate puzzle in <a href="/play/only-nand">Only NAND</a>; Gomoku with seven AI levels in <a href="/play/omok">OMOK</a>; and party games for a group around one screen, like <a href="/play/ladder-game">Ladder Game</a> and <a href="/play/trick-or-lose">Trick or Lose</a>.</p>
+        <p>Some titles — Kingdom of Ashes - Fallen Era, Shadow Runner and Flux Tower Defense — also have full versions on Steam. The browser editions stay free.</p>
         <h2>No Accounts, No Friction</h2>
-        <p>There is no sign-up, no email capture, and no paywall. Pick a nickname if you want to comment — everything else is stored locally in your browser and stays there.</p>
-        <h2>Built for Speed</h2>
-        <p>The site is a React 19 single-page app deployed on Firebase Hosting with aggressive code splitting, image optimisation, and pre-rendered HTML for every game page. Lighthouse performance scores are a first-class concern — we want you in the game, not staring at a loader.</p>
+        <p>No sign-up, no email capture, no paywall. Pick a nickname if you want to comment — everything else, including your personal bests, stays in your browser.</p>
+        <h2>Desktop and Mobile</h2>
+        <p>Games are checked at phone sizes for touch controls, layout and screen rotation. The few that need a keyboard or a gamepad are labelled on their page.</p>
         <h2>Contact</h2>
         <p>Questions, bug reports, partnership ideas, or game submissions: <a href="mailto:help@arcadedeck.net">help@arcadedeck.net</a>. Full contact options on the <a href="/contact">Contact page</a>.</p>
         <h2>Verified Profiles</h2>

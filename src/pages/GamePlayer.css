@@ -293,6 +293,34 @@
   text-transform: uppercase;
 }
 
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+}
+
+.hero-credit {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  opacity: 0.85;
+  white-space: nowrap;
+  text-decoration: none;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  border-bottom: 1px solid transparent;
+}
+
+.hero-credit:hover {
+  opacity: 1;
+  border-bottom-color: currentColor;
+}
+
+.hero-credit:focus-visible {
+  outline: 2px solid var(--secondary-accent);
+  outline-offset: 3px;
+}
+
 .hero-title {
   font-size: clamp(1.75rem, 5vw, 3rem);
   font-weight: 800;
@@ -372,7 +400,17 @@
 }
 
 @media (max-width: 640px) {
+  /* A fixed 16:9 box is ~175px tall on a phone — too short for chip + title +
+     tagline + button, so the top got clipped. Grow to fit; 16:9 stays the floor. */
+  .game-hero {
+    aspect-ratio: auto;
+    min-height: 56.25vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
   .hero-content {
+    position: relative;
     gap: 10px;
   }
   .hero-tagline {

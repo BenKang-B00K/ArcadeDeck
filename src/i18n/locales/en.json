@@ -244,7 +244,7 @@
     "genre_travel-planner": "Travel Planner",
     "genre_tycoon": "Tycoon",
     "seoGenrePageTitle": "{genre} Games | Play Free on ArcadeDeck",
-    "seoGenrePageDescription": "Play {count} {genre} games free on ArcadeDeck. Curated browser titles with personal bests and global leaderboards. No downloads, no sign-up — just hit play.",
+    "seoGenrePageDescription": "Play {count} {genre} games free on ArcadeDeck. Original browser games made by ArcadeDeck, with personal bests and global leaderboards. No downloads, no sign-up — just hit play.",
     "deckBestStreak": "best streak",
     "deckLevel": "Deck Level",
     "homeRankTitle": "Global rank",
@@ -269,7 +269,10 @@
     "tierBronze": "Bronze",
     "tierDiamond": "Diamond",
     "tierGold": "Gold",
-    "tierSilver": "Silver"
+    "tierSilver": "Silver",
+    "playerCreditOriginal": "ArcadeDeck original",
+    "seoCreditLine": "An original game designed and built by ArcadeDeck, a solo developer making Godot and HTML5 games since 2025.",
+    "seoCreditAbout": "About ArcadeDeck"
   },
   "games": {
     "1": {
@@ -476,7 +479,6 @@
       "fullDescription": "\n      GEM MERGE is a physics merge puzzle with **eleven distinct gem cuts**. Aim, drop, and let gravity do the rest: when two gems of the same level touch they fuse into the next cut, from the humble **Trilliant** up to the **Legendary gem**.\n      Speed is rewarded. Land another merge within **1.3 seconds** and the combo counter climbs, and each combo step upgrades your next gem, so a **x3 combo** hands you a **Lv.3** gem instead of a Lv.1. Skill, not luck, decides what falls next.\n      **Two Lv.10 gems** forge a Legendary gem. It triggers a cinematic, clears itself off the board, and is stored forever in your **Vault**. The **Gem Catalog** tracks every cut you have spawned and earned across all your runs.\n      Every merge has its own pop, combos play a rising melody, and the Legendary forge gets a fanfare. Play in English, Korean, or Japanese.\n    ",
       "controls": "Mouse: move to aim, click to drop. Touch: drag to aim, release to drop.",
       "tips": "Keep big gems low and small gems high. Merge fast: a second merge inside **1.3s** starts a combo, and **combo x2, x3, x4** upgrades your next gem to that level. A gem that settles above the **danger line** ends the run, so never let a stack idle near the top.",
-      "lore": "\n      The **Crystal Caves** hold treasures beyond imagination. Only those with the sharpest minds can master the art of gem resonance.\n      Long ago, the Great **Gem-Smiths** used these gems to power the floating cities of **Sky-Reach**. But when the cities fell, the knowledge was lost, and the gems scattered.\n      Now, you are the first seeker to find the **Alchemist's Vessel**, the only container capable of stabilizing the raw power of merged gems.\n      Each cut represents a stage of celestial evolution, from the simple **Trilliant** to the **Legendary gem** that the Gem-Smiths sealed away in their vaults.\n    ",
       "features": [
         "Eleven unique gem cuts, each with its own shape and color",
         "Real 2D physics: gems bounce, roll, and settle",
@@ -570,7 +572,6 @@
       "fullDescription": "\n      15s Click Challenge gives you exactly **15 seconds** per round. A glowing target jumps around the playfield — every hit is +1, every miss costs you half a second off the clock. Reach the level's **click quota** before the timer hits zero to clear it and move up a level.\n      The target does not wait for you. It relocates on its own every second at level 1 and gets **7% faster** every level, bottoming out at a jump every **0.3 seconds**. It also shrinks every five levels, and from level 11 on every jump crosses at least **40% of the playfield**.\n      Chain hits within **1.5 seconds** to build a combo. **Six combo tiers** ramp up the pitch of the hit sound, the particle bursts, the spark lines and the camera punch — one miss and the combo is gone.\n      Fail a round and you drop back to the last **checkpoint** (levels 1, 6, 11, 16...), so pushing deep is always a gamble. In the last 5 seconds the ball fades and the remaining seconds are drawn inside it.\n      Everything runs offline: all sound effects and the ambient loop are synthesized in the browser, and your Top 5 runs, lifetime stats and **37 achievements** are saved on your device.\n    ",
       "controls": "Mouse, touch or pen: tap the target. Any pointer counts, so two-thumb alternating taps work on phones. Toolbar: Records, How to Play, Sound toggle.",
       "tips": "Aim for the center — the hit area is slightly larger than the ball, so near-misses still count. Never spam: a miss costs **0.5s** and kills your combo, and at higher levels one wild tap can cost you the round. Watch the **shrinking ring** around the target; it shows when the next jump is coming. On phones, alternate **two thumbs** on either side of the screen. If a level keeps beating you, remember failing only drops you to the last **checkpoint**, not to level 1.",
-      "lore": "\n      In the digital arena, speed is everything. Can you join the ranks of the **Lightning Clickers**?\n      The myth of the \"**One-Thousand Clicker**\" has persisted since the early days of the internet. They say once you reach a certain speed, time itself begins to slow down.\n      This simulation was built by the \"**Latency Architects**\" to find the fastest biological inputs on the planet. Are you a mere mortal, or are your reflexes truly superhuman?\n    ",
       "features": [
         "15-second rounds with a moving target that speeds up every level",
         "Level quota system with checkpoints every 5 levels",
@@ -655,26 +656,37 @@
     },
     "8": {
       "title": "OMOK",
-      "description": "A masterpiece of strategy and intuition. Master the ancient art of Five-in-a-Row.",
-      "fullDescription": "\n      Experience the timeless elegance of Omok, the classic abstract strategy board game known worldwide as **Gomoku**. Simple to learn but offering infinite strategic depth, Omok challenges you to align **five stones in a row**—horizontally, vertically, or diagonally—before your opponent does.\n      Every move is a delicate balance between offense and defense. Will you build your own unstoppable sequence, or will you focus on anticipating and blocking your rival's every turn? \n      Whether you are a casual player looking for a quick mental workout or a strategy enthusiast seeking a true competitive challenge, Omok provides a pure, minimalist gaming experience that tests the limits of your foresight and tactical skill.\n      Play against a **sophisticated AI** calibrated to the styles of legendary masters. Every game is a lesson in patience and geometric vision.\n    ",
-      "controls": "Mouse Click: Place a stone on the board.",
-      "tips": "Control the center. Always look for \"**Open Threes**\" and plan at least two steps ahead of your opponent. If your opponent has an **open four**, the game is already over—prevent it before it happens!",
-      "lore": "\n      A game of **kings and scholars**. The black and white stones represent the harmony and conflict of the universe.\n      The origin of Omok is lost to time, but some say it was played by the gods to decide the boundaries of the stars. \n      The board itself is a **map of the soul**, where every stone represents a decision, and the lines represent the paths we choose to follow.\n      To win is not just to align **five stones**, but to demonstrate a superior understanding of the balance between creation and destruction.\n    ",
+      "description": "Gomoku on a full 19×19 board — line up five stones against seven AI levels, a friend on the same screen, or a friend on another phone.",
+      "fullDescription": "\n      Omok is the Korean name for **Gomoku**, the five-in-a-row game played with Go stones. This version uses a full **19×19 board**. Black moves first, and the first player to line up **five stones in a row** — across, down or diagonally — wins.\n      Moving first is a real advantage, so Black plays under **Renju-style forbidden moves**: a stone that makes a **double three (3-3)**, a **double four (4-4)** or an **overline** of six or more is not allowed. The board marks those points so you never lose a turn by accident, and you can hide the markers to practise spotting them yourself. White has no restrictions.\n      **Vs AI** has seven levels, Easy through Master. The two lowest levels play loose on purpose and leave blunders to punish; from **Hard** up the AI stops blundering and looks up to four moves ahead, and it thinks in a background worker so the board never freezes. **Auto** picks the level for you: Normal for your first five games, then higher as your win rate climbs, up to Master at 95%.\n      **2 Player** passes one screen back and forth, and **Phone link** puts each player on their own phone with a four-letter room code. Every finished game goes into **Game History** — the last 30 are kept — where you can replay it move by move, and you can save any game to a file and load it later.\n    ",
+      "controls": "Mouse: click an intersection to place a stone. Touch: press and hold the board to open a magnified preview, slide to the point you want, and release to place. Undo takes back your last move — 5 times per game on Easy, fewer on each harder level, none on Expert or Master, unlimited in 2 Player. Surrender ends the game; Rematch starts the next one.",
+      "tips": "Control the center. Always look for \"**Open Threes**\" and plan at least two steps ahead of your opponent. If your opponent has an **open four**, the game is already over—prevent it before it happens! Playing **White**, you may win with a 3-3 or 4-4 that Black is not allowed to make, so steer the fight toward shapes only you can finish.",
       "features": [
-        "Advanced AI with Multiple Difficulty Levels",
-        "Phone Link: Two Phones, Each Places Its Own Stones",
-        "Sleek and Responsive User Interface",
-        "Replay System to Analyze your Previous Games",
-        "Customizable Board Skins and Stone Styles",
-        "Local Co-op (Two-player Mode)",
-        "Leaderboard for Win Rates and Elo Rating",
-        "Web & Mobile Friendly"
+        "19×19 board with Renju-style forbidden moves for Black (3-3, 4-4, overline)",
+        "Seven AI levels, plus Auto, which matches the level to your win rate",
+        "2 Player on one screen, or Phone link across two phones",
+        "Game History: replay any of your last 30 games move by move",
+        "Save a game to a file and load it later",
+        "Undo, move numbers, forbidden-point markers, dark or light board",
+        "Win, loss and draw stats per difficulty, kept in your browser",
+        "Touch play: hold for a magnified preview, release to place"
       ],
       "objectives": "Align **five of your stones** in an unbroken row — horizontally, vertically, or diagonally — on the board before your opponent does, while simultaneously **blocking** their forming sequences.",
       "controlsTable": [
         {
-          "key": "Mouse Click",
-          "action": "Place a stone on the selected board intersection"
+          "key": "Click",
+          "action": "Place a stone on an intersection"
+        },
+        {
+          "key": "Touch: hold, slide, release",
+          "action": "Magnified preview, then place the stone"
+        },
+        {
+          "key": "Undo",
+          "action": "Take back your last move (limit depends on the AI level)"
+        },
+        {
+          "key": "Surrender",
+          "action": "Resign the current game"
         }
       ],
       "faq": [
@@ -683,20 +695,28 @@
           "a": "Place five of your stones in a continuous row in any direction — horizontal, vertical, or diagonal — before your opponent does. The first to achieve five-in-a-row wins the round."
         },
         {
+          "q": "Why can't I place a stone there as Black?",
+          "a": "That point is a forbidden move for Black: it would make a double three (two open threes at once), a double four, or a row of six or more. Forbidden points are marked on the board. The rule only binds Black, who already has the advantage of moving first; White may make any of these shapes."
+        },
+        {
           "q": "What is an 'Open Three'?",
           "a": "An Open Three is a sequence of three of your stones with both ends unblocked. It is a powerful formation because it threatens to become an Open Four, which is nearly impossible to stop. Building Open Threes while blocking your opponent's is a core mid-game strategy."
         },
         {
           "q": "What is an Open Four and why is it critical?",
-          "a": "An Open Four is four stones in a row with at least one open end. If your opponent has one, you must block it immediately — failing to do so on that very turn means they win the next move."
+          "a": "An Open Four is four stones in a row with both ends open. It cannot be stopped — block one end and the other end makes five — so it has to be prevented while it is still a three."
         },
         {
           "q": "Why is controlling the center important?",
           "a": "Stones placed near the center have more directions available to form rows of five. Corner and edge stones are restricted to fewer angles, making them easier for an opponent to preemptively block."
         },
         {
-          "q": "How advanced is the AI?",
-          "a": "The AI is calibrated to styles of legendary masters. It reads Open Threes and Open Fours accurately at higher difficulties. Playing against it at medium difficulty is an effective way to learn to recognize patterns before competing against humans."
+          "q": "How strong is the AI?",
+          "a": "Easy and Beginner make random moves and blunders on purpose, so new players can win. Normal and Advanced make fewer mistakes and read two to three moves ahead. Hard, Expert and Master never blunder and look four moves ahead, with Master weighing defence most heavily. Not sure where to start? Pick Auto."
+        },
+        {
+          "q": "Can I watch my old games again?",
+          "a": "Yes. Game History keeps your last 30 finished games; open one and step through it move by move. Save writes the current game to a file that you can Load later."
         }
       ],
       "featuredComments": [
@@ -1403,7 +1423,6 @@
       "fullDescription": "\n      Triangle Battle! is a local multiplayer board game for **2 to 6 players** sharing **one device** — phone, tablet or desktop. The board is a random scatter of pegs; players take turns tapping two pegs to draw a line between them. Close a triangle and it's yours: **+1 point and an extra turn**. Close one whose three sides are all your own color and it's worth **+2**. A triangle with a peg trapped inside doesn't count, and lines can never cross.\n      Every turn runs on a **10 or 20 second clock**. Let it expire and the next player is handed a **free random line** — so hesitation actively feeds your opponent. The game ends when no legal line remains; the most points wins.\n      A built-in **How to Play** guide opens on first launch, the HUD mirrors for face-to-face phone play, and the whole thing is a lightweight installable PWA with an EN / KO toggle.\n    ",
       "controls": "Tap or click a peg, then a second peg to draw a line between them. Tap the selected peg again to deselect. Drag empty space to pan the board; the minimap shows where you are. Hot-seat turns for 2-6 players on one device. Press ? for the in-game guide. No keyboard needed.",
       "tips": "Never leave a triangle **two sides of your color** open — the +2 bonus goes to whoever closes it, not whoever started it. Use the **extra turn** from a closed triangle to immediately close a second one. Don't stall on the clock: a timeout hands your opponent a free line. Fewer pegs (10) makes a sharper, faster game; 25 pegs turns it into a long war of blocking.",
-      "lore": "\n      In the neon-lit arenas of the **Grid**, geometric warriors compete for supremacy. The ancient **Triangle Protocol** demands that only those who can form the perfect shape will ascend.\n      Each match is a test of speed, strategy, and spatial mastery. The Grid remembers every triangle ever formed, and the greatest players are immortalized in its luminous halls.\n    ",
       "features": [
         "Hot-Seat 2-6 Players, One Device",
         "Phone Link: 2-6 Players, One Phone Each",

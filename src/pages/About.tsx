@@ -2,50 +2,56 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 import Navbar from '../components/Navbar';
+import { games } from '../data/games';
 import { useUiText } from '../i18n';
 import './Home.css'; // Reuse common styles
+
+const ABOUT_DESCRIPTION = 'ArcadeDeck is a one-person indie game studio: every free browser game on the site is designed, built and updated by a solo developer working in Godot and HTML5 since 2025.';
+const GAME_COUNT = games.filter(g => g.kind !== 'app').length;
+const linkStyle: React.CSSProperties = { color: '#00d2ff' };
+const play = (slug: string, title: string) => <Link to={`/play/${slug}`} style={linkStyle}>{title}</Link>;
 
 const About: React.FC = () => {
   const t = useUiText();
   React.useEffect(() => {
-    document.title = 'About ArcadeDeck | Our Mission & Vision';
+    document.title = 'About | ArcadeDeck';
   }, []);
   return (
     <div className="about-page" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <>
-        <meta name="description" content="Learn more about ArcadeDeck, the ultimate destination for free high-quality browser games. Our mission is to make gaming accessible to everyone, anywhere." />
-        <meta property="og:title" content="About ArcadeDeck | Our Mission & Vision" />
-        <meta property="og:description" content="Learn about the team behind ArcadeDeck and our goal to provide the best free online gaming experience." />
+        <meta name="description" content={ABOUT_DESCRIPTION} />
+        <meta property="og:title" content="About | ArcadeDeck" />
+        <meta property="og:description" content={ABOUT_DESCRIPTION} />
         <meta property="og:url" content="https://arcadedeck.net/about" />
       </>
       <Navbar />
       <main className="container" style={{ paddingTop: '120px', flex: 1, color: '#fff' }}>
         <h1 style={{ fontSize: '3rem', marginBottom: '2rem' }}>About <span style={{ color: '#00d2ff' }}>ArcadeDeck</span></h1>
         <div style={{ lineHeight: '1.8', fontSize: '1.1rem', maxWidth: '800px' }}>
-          <p>Welcome to ArcadeDeck, your destination for high-quality web-based gaming. We're a small team of independent game developers and web engineers building original browser games that anyone can play instantly, on any device, with zero friction.</p>
+          <p>ArcadeDeck is a one-person indie game studio. Every game in the catalogue — {GAME_COUNT} of them today — is designed, programmed, tested and updated by one solo developer, who started making games in 2025 and works in Godot and HTML5. Nothing here is licensed, scraped or embedded from another portal: if a game is listed on ArcadeDeck, it was made for ArcadeDeck.</p>
 
-          <h2 style={{ marginTop: '3rem', color: '#00d2ff' }}>Our Mission</h2>
-          <p>ArcadeDeck was built on a simple belief: great games should be free, instant, and available to everyone. No downloads, no sign-ups, no app store fees — just open a link and play. We design and develop original browser games spanning Tower Defense, Roguelike, RPG, Strategy, Puzzle, Casual, Arcade, and more.</p>
-          <p>Every game on ArcadeDeck is crafted with care — from deep strategic auto-battlers to quick casual experiences. We prioritize gameplay quality over catalog size, so every title we ship is polished, balanced, and worth your time.</p>
+          <h2 style={{ marginTop: '3rem', color: '#00d2ff' }}>How the Games Are Made</h2>
+          <p>Each game starts as a small prototype and ships only once it plays well in a browser tab, on a desktop and on a phone. Games are built either in Godot or directly in HTML5 with TypeScript, Canvas and WebGL, and they run without plugins or installs.</p>
+          <p>Launch is not the end. Balance patches, new modes, controller support and bug fixes keep coming after release, and every one is logged on the <Link to="/patchnote" style={linkStyle}>Patch Notes</Link> page. Longer write-ups — launch posts, design notes and update breakdowns — go on the <Link to="/blog" style={linkStyle}>Blog</Link>.</p>
 
-          <h2 style={{ marginTop: '3rem', color: '#00d2ff' }}>What Makes Us Different</h2>
-          <p><strong>Original Games:</strong> Most titles on ArcadeDeck are original creations, developed in-house. We don't just aggregate games from other sources — we build them from scratch with unique mechanics, art, and storylines.</p>
-          <p><strong>No Accounts, No Friction:</strong> No sign-up, no email capture, no paywall. Pick a nickname if you want to comment — everything else stays in your browser.</p>
-          <p><strong>Cross-Platform:</strong> Our games run on desktops, tablets, and phones. We optimize for touch controls and responsive layouts so you get the best experience regardless of device.</p>
-          <p><strong>3 Languages:</strong> ArcadeDeck is localized in English, Korean, and Japanese. Game titles, descriptions, controls, tips, and world lore are translated per locale, and every locale has its own URL path for SEO.</p>
+          <h2 style={{ marginTop: '3rem', color: '#00d2ff' }}>What You Will Find</h2>
+          <p>Tower defense like {play('flux-tower-defense', 'Flux Tower Defense')} and {play('mythic-defenders-heroes-returns', 'Mythic Defenders: Heroes Returns')}; roguelikes and auto-battlers set in the shared Kingdom of Ashes world, starting with {play('kingdom-of-ashes-fallen-era', 'Kingdom of Ashes - Fallen Era')}; arcade games such as {play('climb-up', 'Climb Up!')} and {play('skyfall', 'Skyfall')}; a logic-gate puzzle in {play('only-nand', 'Only NAND')}; Gomoku with seven AI levels in {play('omok', 'OMOK')}; and party games for a group around one screen, like {play('ladder-game', 'Ladder Game')} and {play('trick-or-lose', 'Trick or Lose')}.</p>
+          <p>Some titles — {play('kingdom-of-ashes-fallen-era', 'Kingdom of Ashes - Fallen Era')}, {play('shadow-runner', 'Shadow Runner')} and {play('flux-tower-defense', 'Flux Tower Defense')} — also have full versions on Steam. The browser editions stay free.</p>
 
-          <h2 style={{ marginTop: '3rem', color: '#00d2ff' }}>Our Technology</h2>
-          <p>ArcadeDeck is built with React 19, TypeScript, Firebase, and Vite. Games run entirely in the browser via HTML5 Canvas and WebGL — no plugins, no installs. The site is a Progressive Web App (PWA), so you can install it to your home screen for a native app-like experience and offline access to recently played titles.</p>
+          <h2 style={{ marginTop: '3rem', color: '#00d2ff' }}>No Accounts, No Friction</h2>
+          <p>No sign-up, no email capture, no paywall. Pick a nickname if you want to comment — everything else, including your personal bests, stays in your browser.</p>
 
-          <h2 style={{ marginTop: '3rem', color: '#00d2ff' }}>Our Growing Library</h2>
-          <p>We're constantly expanding the catalog. From the deck-building tower defense of <em>Mythic Defender: Heroes Returns</em> and the intense action of <em>Gate of Hell: Rise of Demons</em>, to the strategic depth of <em>Kingdom's Last Stand</em>, the quick thrills of <em>Fruit Frenzy</em>, and the brain-teasing puzzles of <em>Gem Merge</em> — there's something for every type of gamer.</p>
-          <p>New games ship regularly, and existing games receive balance patches, new content, and quality-of-life improvements based on player feedback.</p>
+          <h2 style={{ marginTop: '3rem', color: '#00d2ff' }}>Desktop and Mobile</h2>
+          <p>Games are checked at phone sizes for touch controls, layout and screen rotation. The few that need a keyboard or a gamepad are labelled on their page. The site is also a Progressive Web App, so you can add it to your home screen.</p>
+
+          <h2 style={{ marginTop: '3rem', color: '#00d2ff' }}>Three Languages</h2>
+          <p>ArcadeDeck is localized in English, Korean, and Japanese. Game titles, descriptions, controls and tips are translated per locale, and every locale has its own URL.</p>
 
           <h2 style={{ marginTop: '3rem', color: '#00d2ff' }}>Community</h2>
-          <p>We value our players' voices. Every game page has a comment section where you can share strategies, give feedback, or just say hello.</p>
+          <p>Every game page has a comment section for strategies, feedback and bug reports. Personal bests earn Deck XP, which ranks you on the global leaderboard.</p>
 
           <h2 style={{ marginTop: '3rem', color: '#00d2ff' }}>Support ArcadeDeck</h2>
-          <p>ArcadeDeck is independently developed and runs without paywalls or required sign-ups. If you enjoy the games and want to help keep the servers running, fund new game development, or just buy the team a coffee, you can support us on Ko-fi.</p>
+          <p>ArcadeDeck is independently developed and runs without paywalls or required sign-ups. If you enjoy the games and want to help keep the servers running, fund the next game, or just buy the developer a coffee, you can support ArcadeDeck on Ko-fi.</p>
           <p style={{ marginTop: '1.5rem' }}>
             <a
               href="https://ko-fi.com/developer_benjamink"
@@ -66,8 +72,8 @@ const About: React.FC = () => {
             </a>
           </p>
 
-          <h2 style={{ marginTop: '3rem', color: '#00d2ff' }}>Contact Us</h2>
-          <p>Have a question, suggestion, or business inquiry? We'd love to hear from you. Visit our <Link to="/contact" style={{ color: '#00d2ff' }}>Contact page</Link> to get in touch with the team.</p>
+          <h2 style={{ marginTop: '3rem', color: '#00d2ff' }}>Contact</h2>
+          <p>Questions, bug reports or business inquiries: email <a href="mailto:help@arcadedeck.net" style={linkStyle}>help@arcadedeck.net</a> or use the <Link to="/contact" style={linkStyle}>Contact page</Link>.</p>
 
           <h2 style={{ marginTop: '3rem', color: '#00d2ff' }}>Verified Profiles</h2>
           <p>ArcadeDeck is registered as a public knowledge entity on Wikidata. Verified external profiles:</p>
@@ -77,7 +83,7 @@ const About: React.FC = () => {
                 href="https://www.wikidata.org/wiki/Q141473972"
                 target="_blank"
                 rel="me noopener noreferrer"
-                style={{ color: '#00d2ff' }}
+                style={linkStyle}
               >
                 Wikidata: Q141473972
               </a>
@@ -87,7 +93,7 @@ const About: React.FC = () => {
                 href="https://arcadedeck.itch.io"
                 target="_blank"
                 rel="me noopener noreferrer"
-                style={{ color: '#00d2ff' }}
+                style={linkStyle}
               >
                 itch.io: arcadedeck.itch.io
               </a>
@@ -97,7 +103,7 @@ const About: React.FC = () => {
                 href="https://ko-fi.com/developer_benjamink"
                 target="_blank"
                 rel="me noopener noreferrer"
-                style={{ color: '#00d2ff' }}
+                style={linkStyle}
               >
                 Ko-fi: developer_benjamink
               </a>
@@ -107,7 +113,7 @@ const About: React.FC = () => {
                 href="https://www.moddb.com/company/arcadedeck"
                 target="_blank"
                 rel="me noopener noreferrer"
-                style={{ color: '#00d2ff' }}
+                style={linkStyle}
               >
                 ModDB: ArcadeDeck
               </a>

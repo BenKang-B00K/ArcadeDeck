@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Play } from 'lucide-react';
 import { TOUCH_ONLY, type Game } from '../../data/games';
 import { getLocalizedString, useUiText } from '../../i18n';
@@ -35,7 +36,12 @@ const GameHero: React.FC<Props> = ({ game, lang, overlay, onPlay }) => {
       />
       <div className="hero-overlay" />
       <div className="hero-content">
-        {game.genres[0] && <span className="hero-genre">{genreName(uiT, game.genres[0])}</span>}
+        <div className="hero-meta">
+          {game.genres[0] && <span className="hero-genre">{genreName(uiT, game.genres[0])}</span>}
+          {game.isOriginal && (
+            <Link to="/about" className="hero-credit">{uiT('playerCreditOriginal', 'ArcadeDeck original')}</Link>
+          )}
+        </div>
         <h2 className="hero-title">{title}</h2>
         {/* Hero height is fixed (16/9), so the notice takes the tagline's slot. */}
         {TOUCH_ONLY && game.platform === 'PC'

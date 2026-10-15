@@ -1044,5 +1044,26 @@
       162,
       243
     ]
+  },
+  {
+    "id": "49",
+    "slug": "trick-or-lose",
+    "language": "EN/KO/JA",
+    "thumbnail": "images/trick-or-lose.webp",
+    "genres": [
+      "Party",
+      "Casual",
+      "Local Co-op"
+    ],
+    "players": [
+      3,
+      12
+    ],
+    "gameUrl": "https://games.arcadedeck.net/trick-or-lose/",
+    "aspectRatio": "9/16",
+    "status": "PLAYABLE",
+    "platform": "BOTH",
+    "isOriginal": true,
+    "badge": "NEW"
   }
 ]

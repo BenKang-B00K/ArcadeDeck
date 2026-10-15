@@ -4240,6 +4240,81 @@
         }
       ]
     },
+    "49": {
+      "title": "Trick or Lose",
+      "description": "A word party game for 3–12 players: everyone gets the same secret word except the tricksters, whose word is only slightly different. Give one clue each, vote, and unmask them before they blend in.",
+      "fullDescription": "\n      Trick or Lose is a **word party game for 3 to 12 players** around one table. Everyone gets a **secret word**, but one or two **tricksters** get a word that is only slightly different, like Coffee and Tea, and nobody knows who they are, not even the tricksters themselves.\n      Go around the circle and give **one clue each** about your word, never the word itself. Too vague and you look suspicious; too exact and a trickster works out the crew's word. Then **vote**, in secret or out loud together. The most-voted player is unmasked, and a tie means nobody goes.\n      Catch **any trickster** and the crew wins. If the tricksters ever equal the crew in number, the tricksters win. With **165 word pairs in 18 topics**, from Food and Sea life to Fairy tales and Love, no pair repeats until its topic runs out.\n      Play on **one phone passed around the table**, or link phones: each player picks themselves on their own phone, sees only their own word and casts their own secret vote, while players without a phone keep using the host's. Switch between Korean, English and Japanese at any time, even mid-game, so mixed tables can play together.\n    ",
+      "controls": "Name + Enter / +: Add a player · −: Remove a player · Tap to see my word: Show your secret word · Hide & pass: Hand the device on · Tap a player card: Pick who you suspect · Link phones: Host or join with a 4-letter code · ?: How to play · 한 / EN / 日: Switch language · ✕ (tap twice): Back to the menu",
+      "tips": "Give clues that **fit both words of a likely pair**: you could be the trickster without knowing it. Listen for the clue that's **almost right**; it's often the trickster's. With 5 or more players try **2 tricksters**: the crew still wins by catching just one. Use the **Secret** vote with big groups so nobody just follows the loudest voice.",
+      "lore": "\n      Every Halloween night the crew gathers in costume, witch hats, cat ears and pumpkins, and passes the secret word around the circle.\n      Somewhere among them a horned trickster in a bandit mask clutches a glowing card with a slightly different word, running along the edge of the table with the crew in hot pursuit and hoping nobody notices.\n    ",
+      "features": [
+        "Word Party Game for 3–12 Players on One Device",
+        "1 or 2 Tricksters Who Don't Even Know It",
+        "165 Word Pairs in 18 Illustrated Topics",
+        "Phone Link: Each Player Sees Their Word and Votes on Their Own Phone",
+        "Secret Pass-the-Device Vote or Open Vote",
+        "Costumed Blob Crew Chasing a Masked Trickster",
+        "Switch Korean / English / Japanese Mid-Game",
+        "Phone, Tablet and Desktop — Plays Offline"
+      ],
+      "objectives": "There is no score. The crew wins by voting out any trickster; the tricksters win if they last until they equal the crew in number (with one trickster, when only 2 players are left). Each round everyone gives one clue in seating order, starting from a random player, then the table votes. A tie means nobody is out and the next round starts.",
+      "controlsTable": [
+        {
+          "key": "Name field · Enter / +",
+          "action": "Add a player (3–12, in seating order)"
+        },
+        {
+          "key": "−",
+          "action": "Remove a player"
+        },
+        {
+          "key": "Topic: Random · Choose",
+          "action": "Deal from every topic, or pick one from the illustrated list"
+        },
+        {
+          "key": "Tap to see my word",
+          "action": "Show your secret word, then Hide & pass the device on"
+        },
+        {
+          "key": "Tap a player card",
+          "action": "Pick who you suspect, then confirm your vote"
+        },
+        {
+          "key": "Link phones",
+          "action": "Host a room or join one with a 4-letter code"
+        },
+        {
+          "key": "? · 한 / EN / 日 · ✕",
+          "action": "How to play · switch language · quit (tap twice)"
+        }
+      ],
+      "faq": [
+        {
+          "q": "What is Trick or Lose?",
+          "a": "A social deduction word game for a group in one room. Everyone shares a secret word except the tricksters, whose word is slightly different, and the table tries to find them through clues and votes."
+        },
+        {
+          "q": "How many players can play?",
+          "a": "3 to 12. Tables of 3–4 get one trickster; from 5 players you can choose one or two."
+        },
+        {
+          "q": "Does the trickster know they are the trickster?",
+          "a": "No. Only the word is different, so a trickster has to work it out from the other clues, and then try to blend in without giving it away."
+        },
+        {
+          "q": "Can everyone use their own phone?",
+          "a": "Yes. Tap Link phones, host on one device and share the 4-letter code. The others join, pick their name, see only their own word and vote in secret on their own phone. Players without a phone keep using the host's device."
+        },
+        {
+          "q": "What's the difference between Secret and Open vote?",
+          "a": "Secret: the device goes from voter to voter (or votes come in from linked phones), and only the most- and fewest-voted players are shown. Open: everyone votes out loud together and the host taps the result."
+        },
+        {
+          "q": "Which languages does it support?",
+          "a": "Korean, English and Japanese. You can switch at any time, even mid-game, and each linked phone can use its own language."
+        }
+      ]
+    },
     "_comment": "Per-game canonical English. Translators mirror this in {lang}.json."
   }
 }

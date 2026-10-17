@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Puzzle Piece</title>
+  <g stroke="#171424" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path fill="#7C3AED" d="M10 25h14v-6a8 8 0 1 1 16 0v6h14v14h-6a8 8 0 1 0 0 16h6v1H10V42h6a8 8 0 1 0 0-16h-6Z"/><path fill="#00e5ff" stroke="none" d="M12 44h6c8 0 12-6 12-13V25h8v7c0 7 6 12 14 12v10H12Z"/>
+  </g>
+</svg>
+

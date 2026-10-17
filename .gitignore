@@ -39,3 +39,7 @@ scripts/.leaderboard-bots.json
 # Local scratch — screenshots and SEO notes, not versioned
 screenshots/
 docs/SEO-FIXES.md
+
+art-prompt.md
+output/
+art-previews/

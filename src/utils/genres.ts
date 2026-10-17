@@ -15,6 +15,18 @@ export function genreName(t: (key: string, fallback: string) => string, genre: s
   return t(`genre_${genreSlug(genre)}`, genre);
 }
 
+// Chip icons in public/images/genre/. Genres without an entry render a text-only chip.
+const GENRE_ICON: Record<string, string> = {
+  Action: 'sword', Arcade: 'rocket', Casual: 'fruit', Puzzle: 'puzzle-piece', Strategy: 'chess-knight',
+  Survival: 'zombie-hand', Roguelike: 'skull', Party: 'dice', PvP: 'crown', Educational: 'brain', 'Local Co-op': 'soccer-ball',
+  'Tower Defense': 'tower', Idle: 'hourglass', RPG: 'shield', Tycoon: 'coins', Simulation: 'gear',
+  'Auto Battler': 'auto-battler', 'Loadout Grid-Auto-Battle': 'auto-battler', 'Travel Planner': 'suitcase', Rhythm: 'music-note',
+};
+export function genreIcon(genre: string): string | null {
+  const n = GENRE_ICON[genre];
+  return n ? `${import.meta.env.BASE_URL}images/genre/${n}.svg` : null;
+}
+
 // Every distinct genre that appears on at least one playable game, alpha-sorted.
 export function listGenres(): string[] {
   const set = new Set<string>();

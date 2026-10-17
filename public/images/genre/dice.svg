@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Dice</title>
+  <g stroke="#171424" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <rect fill="#7C3AED" x="9" y="9" width="46" height="46" rx="10"/><path fill="#00e5ff" stroke="none" d="M17 16h8v8h-8Zm22 0h8v8h-8ZM17 40h8v8h-8Zm22 0h8v8h-8Z"/><circle fill="#F43F5E" stroke="none" cx="32" cy="32" r="4"/>
+  </g>
+</svg>
+

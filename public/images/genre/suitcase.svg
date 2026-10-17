@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Travel Planner</title>
+  <g stroke="#171424" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path fill="#00e5ff" d="M23 21v-9h18v9Z"/><rect fill="#7C3AED" x="9" y="21" width="46" height="34" rx="6"/><path fill="#00e5ff" d="M18 21h7v34h-7Z"/><path fill="#00e5ff" d="M53 27c0 8-11 19-11 19S31 35 31 27a11 11 0 0 1 22 0Z"/><circle fill="#F43F5E" cx="42" cy="27" r="4"/>
+  </g>
+</svg>
+

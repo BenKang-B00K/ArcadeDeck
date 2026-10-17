@@ -22,6 +22,15 @@
 }
 
 /* ── Empty state ── */
+.empty-art {
+  display: block;
+  width: 192px;
+  max-width: 60%;
+  height: 192px;
+  object-fit: contain;
+  margin: 0 auto var(--space-2);
+}
+
 .empty-state {
   grid-column: 1 / -1;
   display: flex;

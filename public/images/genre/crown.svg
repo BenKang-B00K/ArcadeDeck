@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Crown</title>
+  <g stroke="#171424" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path fill="#7C3AED" d="M14 47 8 18l15 10L32 9l9 19 15-10-6 29Z"/><path fill="#00e5ff" d="M14 47h36v9H14Z"/><path fill="#F43F5E" d="m32 29 5 7-5 7-5-7Z"/>
+  </g>
+</svg>
+

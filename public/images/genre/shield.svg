@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">RPG</title>
+  <g stroke="#171424" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path fill="#7C3AED" d="m32 8 22 8v16c0 12-10 19-22 25C20 51 10 44 10 32V16Z"/><path fill="#00e5ff" d="m32 19 4 9 10 1-8 7 3 10-9-5-9 5 3-10-8-7 10-1Z"/><path fill="#F43F5E" stroke="none" d="m32 27 3 6-3 3-3-3Z"/>
+  </g>
+</svg>
+

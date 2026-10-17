@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>ArcadeDeck Art Prompts</title>
+<style>
+  :root {
+    --bg: #171424; --elev: #1f1b32; --surface: #272240; --card: #221d36;
+    --fg: #eaeaf0; --muted: #9c98b8; --line: rgba(255, 255, 255, .09);
+    --cyan: #00e5ff; --violet: #7C3AED; --rose: #F43F5E;
+    --code: #120f20; --ok: #34d399; --okbg: rgba(52, 211, 153, .15); --new: #fbbf24; --newbg: rgba(251, 191, 36, .15);
+    --glow: 0 0 0 1px rgba(0, 229, 255, .5), 0 8px 28px rgba(124, 58, 237, .35);
+    --shadow: 0 6px 20px rgba(0, 0, 0, .35);
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #faf8fd; --elev: #fff; --surface: #ddd5ec; --card: #fff;
+      --fg: #1a1430; --muted: #6c668c; --line: rgba(26, 20, 48, .12);
+      --cyan: #0089a3; --code: #f1ecf9; --ok: #047857; --okbg: #d1fae5; --new: #92400e; --newbg: #fef3c7;
+      --glow: 0 0 0 1px rgba(124, 58, 237, .55), 0 8px 24px rgba(124, 58, 237, .2);
+      --shadow: 0 4px 14px rgba(40, 20, 80, .12);
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; color: var(--fg); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: radial-gradient(900px 420px at 15% -80px, rgba(124, 58, 237, .28), transparent 70%),
+                radial-gradient(700px 360px at 90% -60px, rgba(0, 229, 255, .16), transparent 70%), var(--bg);
+    background-repeat: no-repeat; min-height: 100vh;
+  }
+  main { max-width: 1120px; margin: 0 auto; padding: 36px 16px 72px; }
+  h1 {
+    font-size: clamp(1.8rem, 5vw, 2.6rem); line-height: 1.1; margin: 0 0 8px; letter-spacing: -.02em;
+    background: linear-gradient(90deg, var(--cyan), var(--violet) 60%, var(--rose)); -webkit-background-clip: text;
+    background-clip: text; color: transparent;
+  }
+  h2 { font-size: 1.1rem; margin: 44px 0 12px; display: flex; align-items: center; gap: 10px; letter-spacing: .02em; }
+  h2::before { content: ""; width: 4px; height: 1.1em; border-radius: 2px; background: linear-gradient(var(--cyan), var(--violet)); }
+  .muted { color: var(--muted); }
+  .lede { max-width: 70ch; }
+  code { background: var(--code); padding: 1px 6px; border-radius: 5px; font-size: .88em; color: var(--cyan); }
+  button { font: inherit; color: var(--fg); cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 0; }
+  .chip {
+    background: var(--elev); border: 1px solid var(--line); border-radius: 999px;
+    padding: 7px 16px; min-height: 40px; font-size: .9rem; touch-action: manipulation;
+    transition: border-color .15s, background .15s;
+  }
+  .chip:hover { border-color: var(--cyan); }
+  .chip[aria-pressed="true"] { background: linear-gradient(90deg, var(--violet), #5b21b6); border-color: transparent; color: #fff; }
+  .chip .n { opacity: .75; margin-left: 2px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow);
+    overflow: hidden; display: flex; flex-direction: column; transition: transform .18s, box-shadow .18s;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: var(--glow); }
+  .card[hidden] { display: none; }
+
+  .preview {
+    position: relative; display: block; width: 100%; padding: 0; border: 0; border-bottom: 1px solid var(--line);
+    background: repeating-conic-gradient(var(--code) 0 25%, var(--elev) 0 50%) 0 0 / 18px 18px;
+    height: 180px; overflow: hidden; cursor: zoom-in;
+  }
+  .preview:disabled { cursor: default; }
+  .preview img { width: 100%; height: 100%; object-fit: contain; display: block; transition: transform .3s; }
+  .preview:not(:disabled):hover img { transform: scale(1.04); }
+  .preview img.px { image-rendering: pixelated; }
+  .preview .empty {
+    position: absolute; inset: 0; display: grid; place-content: center; gap: 4px; text-align: center; padding: 0 12px;
+    color: var(--muted); font-size: .8rem;
+    background: radial-gradient(220px 120px at 50% 40%, rgba(124, 58, 237, .22), transparent 70%), var(--elev);
+  }
+  .preview .empty b { font-size: 1.6rem; opacity: .55; color: var(--cyan); }
+  .badge {
+    position: absolute; top: 10px; left: 10px; z-index: 1; font-size: .7rem; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; padding: 3px 10px 3px 8px; border-radius: 999px; backdrop-filter: blur(6px);
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .badge.generated { background: var(--okbg); color: var(--ok); border: 1px solid var(--ok); }
+  .badge.new { background: var(--newbg); color: var(--new); border: 1px solid var(--new); }
+  .badge.new::before { animation: pulse 1.8s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .3; } }
+
+  .info { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .info h3 { margin: 0; font-size: 1.02rem; }
+  .meta { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { font-size: .74rem; color: var(--muted); background: var(--elev); border: 1px solid var(--line); border-radius: 999px; padding: 1px 10px; }
+  details summary { cursor: pointer; font-size: .88rem; color: var(--cyan); list-style-position: inside; }
+  pre {
+    margin: 8px 0 0; padding: 12px; background: var(--code); border: 1px solid var(--line); border-radius: 10px;
+    white-space: pre-wrap; word-break: break-word; font: .8rem/1.55 ui-monospace, Consolas, monospace; max-height: 320px; overflow: auto;
+  }
+  .actions { margin-top: auto; padding-top: 4px; }
+  .copy {
+    width: 100%; background: var(--elev); border: 1px solid var(--line); border-radius: 10px;
+    padding: 9px 12px; min-height: 42px; font-size: .9rem; font-weight: 600; touch-action: manipulation;
+    transition: border-color .15s, background .15s;
+  }
+  .copy:hover { border-color: var(--cyan); background: var(--surface); }
+  .copy[data-ok] { border-color: var(--ok); color: var(--ok); }
+
+  .styles { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; box-shadow: var(--shadow); }
+  .panel h3 { margin: 0 0 4px; font-size: 1rem; }
+  .panel pre { max-height: none; }
+  .panel .copy { margin-top: 10px; }
+
+  .notes { margin-top: 44px; display: grid; gap: 10px; }
+  .notes details { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; }
+  .notes summary { color: var(--fg); font-weight: 600; }
+  .notes ul { margin: 10px 0 0; padding-left: 20px; }
+  .notes li { margin: 4px 0; }
+
+  dialog { border: 1px solid var(--line); border-radius: 16px; padding: 0; background: var(--card); max-width: 94vw; box-shadow: var(--glow); }
+  dialog::backdrop { background: rgba(8, 5, 20, .8); backdrop-filter: blur(4px); }
+  dialog img { display: block; max-width: 94vw; max-height: 84vh; }
+  dialog form { margin: 0; text-align: right; padding: 8px; }
+  dialog button { background: var(--elev); border: 1px solid var(--line); border-radius: 10px; padding: 6px 16px; min-height: 40px; }
+  .none { text-align: center; padding: 36px 0; }
+
+  @media (max-width: 480px) { .grid, .styles { grid-template-columns: 1fr; } }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .card, .chip, .copy, .preview img { transition: none; }
+    .card:hover { transform: none; }
+    .badge.new::before { animation: none; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>ArcadeDeck Art Prompts</h1>
+  <p class="muted lede">
+    Card = one prompt. <b>New</b> = prompt ready, no image yet. <b>Generated</b> = image found in
+    <code>public/images/</code> (mapped per card) or <code>art-previews/&lt;id&gt;.webp</code>. Drop the file in, reload, badge flips.
+    Prompts are collapsed; Copy adds the style block for you.
+  </p>
+
+  <div class="chips" role="group" aria-label="Filter">
+    <button type="button" class="chip" data-f="all" aria-pressed="true">All <span class="n"></span></button>
+    <button type="button" class="chip" data-f="new" aria-pressed="false">New <span class="n"></span></button>
+    <button type="button" class="chip" data-f="generated" aria-pressed="false">Generated <span class="n"></span></button>
+  </div>
+
+  <h2>Style blocks</h2>
+  <div class="styles" id="styles"></div>
+
+  <h2>Favicon set</h2>
+  <p class="muted">Current icon (<code>public/images/favicon.webp</code>): pixel-art arcade joystick on a purple rounded square. Too detailed for 16 px and not square (372×378).</p>
+  <div class="grid" id="g-fav"></div>
+
+  <h2>Site art</h2>
+  <p class="muted">Matches the site UI (<code>src/index.css</code>): midnight-violet <code>#171424</code>, cyan <code>#00e5ff</code>, violet <code>#7C3AED</code>, rose <code>#F43F5E</code>.</p>
+  <div class="grid" id="g-site"></div>
+
+  <h2>Mascot "Deck" — background poses</h2>
+  <p class="muted lede">One robot, 14 poses, <b>transparent background</b>, for use behind and beside page content. Every prompt starts with the same character lock, so generate them all in one session and attach your first approved image as a reference. Save as <code>art-previews/mascot-&lt;pose&gt;.png</code> (or <code>.webp</code>).</p>
+  <div class="grid" id="g-mascot"></div>
+  <p class="none muted" id="none" hidden>Nothing in this filter.</p>
+
+  <div class="notes">
+    <details>
+      <summary>Favicon post-processing</summary>
+      <ul>
+        <li>Export the master at 1024, then downscale (nearest-neighbor for crisp pixels, or Lanczos) to 512, 192, 180 (apple-touch). Use the tiny version (#2) for 16 and 32 px.</li>
+        <li>Deliver PNG for apple-touch (180×180, no transparency), <code>favicon.ico</code> (16 + 32 + 48) and <code>favicon-32.png</code>. Keep WebP for the manifest.</li>
+        <li>Replace <code>icon-192x192.webp</code>, <code>icon-512x512.webp</code> and the OG image in <code>public/images/</code>.</li>
+        <li>Wire up: <code>&lt;link&gt;</code> tags in <code>index.html</code>, the manifest <code>purpose: "maskable"</code> entry in <code>vite.config.ts</code>, and the <code>.ico</code>.</li>
+      </ul>
+    </details>
+    <details>
+      <summary>Mascot: transparent background + page use</summary>
+      <ul>
+        <li>Use a tool with real alpha output: GPT Image with <code>background: transparent</code>, Recraft, or Ideogram's transparent mode. Midjourney and Flux cannot, so generate on a flat <code>#00ff00</code> chroma-green backdrop and remove it with <code>rembg</code> or remove.bg, then inspect edges on a dark page and a light page.</li>
+        <li>Check for fringing: a halo of green or white around the silhouette means re-cut it. Keep the character's own glow inside the silhouette.</li>
+        <li>Export 1024 PNG as the master, ship WebP with alpha at 512 px (about 20 to 40 KB each, <code>-q 80 --alpha_q 90</code>), name it <code>mascot-&lt;pose&gt;.webp</code> in <code>public/images/mascot/</code>.</li>
+        <li>On pages: absolutely positioned, <code>pointer-events: none</code>, <code>aria-hidden</code> with <code>alt=""</code>, 8 to 15% opacity when behind text, full opacity only in corners and empty areas. Lazy-load and hide below 640 px.</li>
+        <li>Pose by page: wave = Home, play = game pages, cheer = My Games record, confused = search and 404, sleep = offline, peek-left and peek-bottom = page edges and footer, point = call to action, card = featured, think = tips, sad = error, fly = scroll-to-top, thumbs = success.</li>
+      </ul>
+    </details>
+    <details>
+      <summary>Workflow</summary>
+      <ul>
+        <li>Generate one image per prompt. Check hands, text and artifacts before shipping.</li>
+        <li>For consistency, use Midjourney <code>--sref &lt;first approved image&gt;</code> or an image reference in Ideogram / Flux.</li>
+        <li>Real gameplay screenshots and short clips come first (the AdSense "aggregator look" fix). Never use AI art as a gameplay screenshot.</li>
+        <li>Save PNGs outside <code>public/images/</code>, then run <code>scripts/optimize-images.cjs</code> (WebP, 640w q70, <code>-360</code> variant).</li>
+        <li>Every image gets <code>alt</code> (blog covers: <code>coverImageAlt</code>).</li>
+        <li>Check each tool's commercial-use terms. Disclose AI-generated art on <code>/about</code> or <code>/privacy</code>.</li>
+      </ul>
+    </details>
+  </div>
+</main>
+
+<dialog id="dlg"><form method="dialog"><button>Close</button></form><img alt=""></dialog>
+
+<script>
+  const FAV = `Pixel-art arcade joystick icon in a clean 32-bit retro style. Chunky, crisp, hand-placed pixels with no anti-aliasing and no blur. Bold 1-pixel dark outline (#0d0720) around every shape. Flat shading with exactly one highlight pixel-cluster per form and one darker shade for the shadow side. Soft neon rim glow shifting from magenta #ff2e93 to orange #ff8a3d on the upper-left edge only. Strict palette: deep purple #1a0b3b, red #e8334a, yellow #ffc933, blue #2f7bff, green #3ccf4e, plus the near-black outline. Single object, centered, orthogonal clarity, no text, no letters, no watermark, no signature, no UI frame.`;
+  const SITE = `Stylish modern neon-arcade illustration that matches the ArcadeDeck website UI: a dark midnight-violet base #171424 with elevated panel tones #1f1b32 and #272240, electric cyan #00e5ff as the main light color, violet #7C3AED as the secondary glow, and rose #F43F5E as the warm accent for focal points. Polished indie-game look, comparable to Steam capsule art and itch.io featured banners. Soft bloom on light sources, bold clean shapes, simplified forms, strong silhouettes, subtle film grain, smooth gradients between violet and cyan, high contrast with one clear focal point, readable when shrunk to 360 px wide. Calm background, detail concentrated around the subject, rounded friendly shapes that echo the site's rounded cards. No text, no letters, no logos, no watermark, no signature.`;
+  const NEG = `text, letters, watermark, signature, logo, extra fingers, extra limbs, deformed hands, blurry, low resolution, jpeg artifacts, low contrast, muddy colors, oversaturated, cluttered, busy background, photo, photorealistic, plastic 3d render, stock-photo look, cropped subject, off-center subject`;
+  const MASCOT = `CHARACTER LOCK (use this exact design in every pose): "Deck", the ArcadeDeck mascot, a small cute round robot. Big rounded dome helmet-head in soft lavender-violet #8b6cf0 with a darker violet #5b3fc4 shaded side, a wide glossy near-black visor face #0d0720 with two tall oval glowing cyan #00e5ff eyes (eyes can squash into happy arcs, sleepy lines or wide ovals to show emotion, never a mouth), a round ear-pod on each side of the head with a rose #F43F5E glowing ring, and a thin bendy antenna on top ending in a glowing rose #F43F5E ball. Small round plump body in the same lavender-violet with one glowing rose ring button on the chest. Short chunky tube arms and legs with dark navy #1f1b32 joints, small rounded dark-grey hands with 3 fingers, big round feet with a rose #F43F5E rim ring and dark soles. Head about 55% of the total height, cute chibi proportions, soft rounded shapes, polished 3D-toon look with clean cel shading, one soft cyan rim light on the left and a violet rim light on the right. Clean silhouette, no logos, no text, no letters, no numbers, no watermark.
+
+BACKGROUND: fully transparent background (real alpha channel, PNG or WebP). No floor, no ground plane, no reflection, no cast shadow, no backdrop gradient, no grid, no stars, no outer glow halo or bloom spilling outside the silhouette. Only the character and its handheld props, with a crisp clean edge that stays sharp on a dark #171424 page and on a light page.`;
+
+  const IMG_DIR = 'public/images/';
+  const PREVIEW_DIR = 'art-previews/'; // fallback for cards without img: <id>.webp then .png
+
+  const STYLE = { '[Shared style block]': FAV, '[Site style block]': SITE, '[Mascot block]': MASCOT };
+
+  // grid: fav | site. size is display only.
+  const CARDS = [
+    { id: 'fav-master', img: 'icon-512x512.webp', grid: 'fav', title: '1. Master icon', size: '1024×1024', tag: 'source for 192 / 512 / apple-touch',
+      p: `[Shared style block]
+
+SUBJECT: A classic arcade joystick seen from a slightly elevated isometric angle (about 30 degrees). A glossy yellow #ffc933 ball top with one bright highlight cluster, sitting on a short dark-grey shaft. The shaft rises from a chunky red #e8334a rectangular base plate with a darker red front face. On the base, to the right of the stick: one blue #2f7bff round button and one green #3ccf4e round button, each with a single highlight pixel and a dark underside.
+
+COMPOSITION: Square 1:1 canvas, plain square corners (no rounded-corner mask drawn). The joystick fills about 70% of the frame, centered, with a 15% safe margin on every side so circular and rounded masks never clip it. The ball top sits slightly above the vertical center.
+
+BACKGROUND: Full-bleed deep purple #1a0b3b with a subtle radial glow (magenta to transparent) behind the joystick. Optional: 6 to 10 tiny pixel stars in a lighter purple, very low contrast, none near the object edges.
+
+LIGHTING: Key light from the upper left, soft magenta-orange rim on the upper-left edges of the ball and base, faint cyan bounce on the lower right.
+
+TECHNICAL: Pixel-art, hard edges, no gradients inside shapes, no anti-aliasing, 1024×1024 export, must still read when downscaled to 192 px.` },
+
+    { id: 'fav-tiny', img: 'favicon-32.png', grid: 'fav', title: '2. Tiny favicon', size: '16 / 32 px', tag: 'uses its own style',
+      p: `Minimal pixel-art icon designed on a true 16×16 pixel grid, then shown scaled up with nearest-neighbor so every pixel is a crisp square.
+
+SUBJECT: Only a yellow #ffc933 joystick ball (about 6×6 pixels, one white-ish highlight pixel top-left) on a short stick (2 pixels wide, 3 pixels tall) above a flat red #e8334a base (12×3 pixels).
+
+STYLE: Bold 1-pixel near-black outline #0d0720 around the whole silhouette. Solid deep purple #1a0b3b square background, edge to edge, no rounded corners. Maximum 5 colors in total including the outline. No glow, no gradient, no buttons, no shadow, no fine detail, no text.
+
+COMPOSITION: Centered, 2 pixels of padding on each side. The shape must be recognizable as a joystick at actual 16 px size on a browser tab.` },
+
+    { id: 'fav-maskable', img: 'icon-maskable-512x512.webp', grid: 'fav', title: '3. Maskable icon', size: '512×512', tag: 'Android adaptive',
+      p: `[Shared style block]
+
+SUBJECT: The same isometric arcade joystick as the master icon: yellow #ffc933 ball top, dark-grey shaft, red #e8334a base with one blue #2f7bff and one green #3ccf4e button.
+
+COMPOSITION: Square 512×512. The entire joystick fits inside the central circle that is 60% of the canvas width (the Android maskable safe zone), centered. Nothing important outside that circle.
+
+BACKGROUND: Edge-to-edge solid deep purple #1a0b3b. The magenta radial glow behind the object extends smoothly to all four corners, so any crop shape (circle, squircle, rounded square, teardrop) looks intentional. No border, no outline around the canvas, no rounded corners, no transparent pixels.
+
+TECHNICAL: Pixel-art, hard edges, no anti-aliasing on the object. Keep the same proportions and colors as the master icon so the two read as the same brand.` },
+
+    { id: 'fav-mono', img: 'safari-pinned-tab.svg', grid: 'fav', title: '4. Monochrome mask', size: 'square', tag: 'Safari pinned tab',
+      p: `Flat single-color silhouette icon of an arcade joystick, vector style, for a Safari pinned-tab mask.
+
+SUBJECT: Round ball top, straight shaft, trapezoid base plate, and two round button shapes on the base cut out as negative-space holes.
+
+STYLE: Solid black #000000 fill only, on a fully transparent background. No gradients, no outline strokes, no shading, no highlights, no anti-aliased fringe colors, no text. Crisp geometric edges, consistent corner radii.
+
+COMPOSITION: Square canvas, shape centered and filling about 80% of the width, symmetric weight, readable at 16 px.
+
+OUTPUT: Clean SVG with a single path if the tool supports it.` },
+
+    { id: 'fav-og', img: 'arcadedeck-banner.webp', grid: 'fav', title: '5. OG / social image', size: '1200×630', tag: '1.91:1',
+      p: `[Shared style block]
+
+FORMAT: Wide banner, 1200×630 (1.91:1).
+
+LEFT THIRD: The pixel-art joystick icon (yellow ball, red base, blue and green buttons) at large size, strong magenta-orange rim glow, slightly overlapping a soft light bloom.
+
+RIGHT TWO THIRDS: Dark purple #1a0b3b night scene. Glowing neon arcade cabinet silhouettes in staggered rows, each with a different screen color (cyan, magenta, green, yellow) and soft light spilling onto a reflective floor. Slight depth haze so the cabinets fade into the background. Leave a large empty, low-detail area in the center-right for the text "ArcadeDeck" to be added in post (do not render any text).
+
+SAFE AREA: Keep every key element inside the central 1100×550 area so social platforms that crop edges never cut anything important.
+
+TECHNICAL: Pixel-art for the joystick, painterly-smooth neon for the cabinets is acceptable, but keep one consistent palette. No text, no letters, no watermark.` },
+
+    { id: 'site-hero', grid: 'site', title: '6. Hero banner', size: '1920×800', tag: 'crop to 1200×630 for OG',
+      p: `[Site style block]
+
+FORMAT: Ultra-wide panoramic banner, 1920×800 (about 12:5), with the important subject inside the central 1200×630 so it can also be cropped for social sharing.
+
+SCENE: A glowing retro arcade cabinet silhouette in the center-right, its screen emitting a cyan-violet beam upward. Around it, floating game characters caught mid-motion: a sword hero with a cape, a small spaceship with a thruster trail, a racing car drifting, tumbling puzzle blocks, a round cartoon fruit, a coin, and a heart. Scatter pixel sparkles and small neon particles. A glowing neon perspective grid floor fades into a dark purple horizon with soft distant cabinets.
+
+COMPOSITION: Clear focal point on the cabinet. Characters arranged in a gentle arc around it, varied in size for depth (large foreground, small background). Keep the left 35% of the canvas as a calm, dark, low-detail area for headline text and a search box.
+
+LIGHTING: Violet rim light from the left, cyan rim light from the right, subtle volumetric light rays from the cabinet screen, bloom on emissive parts only.
+
+TECHNICAL: Highly legible silhouettes, no text, no letters, no logos, nothing cropped at the edges except the floor grid. --ar 12:5` },
+
+    { id: 'site-thumb', grid: 'site', title: '7. Game thumbnail repaint', size: '16:9', tag: 'use a real gameplay frame as reference',
+      p: `[Site style block]
+
+USE: Attach a real gameplay screenshot as the image reference and keep its layout, characters and color mood. Repaint it into polished key art, do not invent new gameplay.
+
+SUBJECT: Key art for a {GENRE} browser game called "{TITLE}". Hero subject: {MAIN CHARACTER / OBJECT}, shown in dynamic mid-action (jumping, attacking, driving or building, whichever fits the genre), with a strong readable silhouette and one clear focal point in the upper-center third.
+
+COMPOSITION: 16:9, rule-of-thirds placement, foreground element with slight blur or overlap for depth, the main subject sharp, mid-ground action, background with simple shapes and atmospheric haze. Keep the bottom 20% calmer so a title can sit there.
+
+LIGHTING AND COLOR: Take the dominant colors from the gameplay reference, then add violet and cyan rim light from the site style so the thumbnail feels part of the ArcadeDeck set. One strong highlight color for the focal point.
+
+QUALITY BAR: Steam capsule art quality, readable at 360 px wide, no clutter, no text. --ar 16:9
+
+IDEOGRAM VARIANT (title baked in), append: bold chunky title text "{TITLE}" at the bottom center, thick dark outline, slight glow, same palette as the artwork, perfectly spelled.` },
+
+    { id: 'site-genre-icon', grid: 'site', title: '8. Genre chip icons', size: 'SVG', tag: 'Recraft, one per genre',
+      p: `Set of flat vector genre icons for small UI chips. Generate one icon per prompt, reusing this exact text so the whole set matches.
+
+SUBJECT: A single {sword | puzzle piece | rocket | skull | chess knight | zombie hand | soccer ball | fruit | crown | brain | dice | castle tower with a flag | hourglass | shield with a star | stack of three coins | gear cog | two small pawn robots facing each other | suitcase with a map pin | music note pair}, simplified to 3 or 4 shapes, front or side view, no perspective.
+
+GENRE MAP (done = shipped, new = still to generate; save each as public/images/genre/<file>.svg then add it to GENRE_ICON in src/utils/genres.ts):
+done: Action = sword, Arcade = rocket, Casual = fruit, Puzzle = puzzle-piece, Strategy = chess-knight, Survival = zombie-hand, Roguelike = skull, Party = dice, PvP = crown, Educational = brain, Local Co-op = soccer-ball.
+done: Tower Defense = castle tower with a flag (tower.svg), Idle = hourglass (hourglass.svg), RPG = shield with a star (shield.svg), Tycoon = stack of three coins (coins.svg), Simulation = gear cog (gear.svg), Auto Battler and Loadout Grid-Auto-Battle = two small pawn robots facing each other (auto-battler.svg), Travel Planner = suitcase with a map pin (suitcase.svg), Rhythm = music note pair (music-note.svg).
+
+STYLE: Flat vector, thick 4 px uniform outline in deep purple #171424, rounded line joins and corners, fills in only two colors: violet #7C3AED and cyan #00e5ff, with one small rose #F43F5E accent allowed. No gradients, no shadows, no textures, no text.
+
+COMPOSITION: 1:1 square canvas, transparent background, subject centered and filling about 75% of the width, even padding, identical visual weight across the set.
+
+OUTPUT: Clean SVG, minimal path count, must stay legible at 24 px.` },
+
+    { id: 'site-bg-tile', img: 'bg.webp', grid: 'site', title: '9. Background tile', size: 'tileable', tag: 'prefer CSS/SVG if close enough',
+      p: `Seamless tileable background pattern for a dark website, 1024×1024, edges that wrap perfectly in both directions.
+
+BASE: Flat deep purple #171424 with a very subtle darker vignette-free fill (no gradient that breaks tiling).
+
+DETAIL: Faint 1 px grid lines in slightly lighter purple (about 6 to 8% contrast), spaced at a regular 64 px interval. Tiny scattered stars and pixel dots in lavender and cyan at random positions, each 1 to 3 px, about 20 to 30 per tile, none aligned to the grid. Optionally a few very faint plus-shaped sparkle marks.
+
+CONTRAST: Very low overall. Body text in white or light lavender must remain fully readable on top without any overlay. No focal point, no large shapes, no glow blobs.
+
+TECHNICAL: No text, no logos, no visible seam, no gradient that changes from one edge to the opposite. Output WebP under 40 KB after optimization.` },
+
+    { id: 'site-empty', grid: 'site', title: '10. Empty and error states', size: '1:1', tag: '404, empty leaderboard, no comments',
+      p: `[Site style block]
+
+SUBJECT: A cute retro arcade mascot: a small round robot with a rounded-square visor face, two glowing cyan eyes on the visor, a tiny antenna with a rose #F43F5E tip, stubby arms and legs, a chunky body in purple-lavender with rose #F43F5E accents. Expressive, friendly, easy to recognize at 200 px.
+
+SCENE (pick one per image): {sitting on the floor looking confused next to an unplugged joystick with a loose cable | holding an empty golden trophy upside down | peeking out from behind a glowing "GAME OVER" style screen, with only the eyes and antenna visible | standing in front of a closed door with a small sign-shaped glow}.
+
+STYLE: Neon outline, thick clean shapes, soft cyan-violet rim light, a small contact shadow on the floor, simple dark purple background with faint grid lines.
+
+COMPOSITION: Square 1:1, mascot in the lower center at about 50% of the canvas height, generous empty space above and around it so UI text can sit nearby. Keep the same mascot design across every scene (same proportions, same colors).
+
+TECHNICAL: No text, no letters, no logos. --ar 1:1` },
+
+    { id: 'site-blog', img: 'blog/blog-default-cover.webp', grid: 'site', title: '11. Blog cover', size: '1600×900', tag: '16:9',
+      p: `[Site style block]
+
+SUBJECT: Editorial illustration for a game blog post about {TOPIC}. Scene: {SCENE, for example two cartoon characters racing glowing marbles down a long neon ramp with a cheering crowd of tiny pixel spectators}.
+
+COMPOSITION: 16:9, dynamic diagonal composition with a low or three-quarter camera angle. Main subject in the lower two thirds, strong foreground element for depth, clean background. Keep the top 25% calm and low-detail so a post title can sit there. Nothing important within 5% of the edges.
+
+LIGHTING AND COLOR: Violet and cyan rim lights, warm rose accent on the focal point, soft bloom on emissive parts, subtle motion streaks or particles to show action.
+
+STYLE: Flat-shaded illustration with clean vector-like shapes and light texture, consistent with the ArcadeDeck brand, not photorealistic.
+
+TECHNICAL: Export 1600×900. A 1200×630 center crop must also work as a social image. No text, no letters, no watermark. --ar 16:9` },
+    { id: 'mascot-wave', grid: 'mascot', title: '12. Wave hello', size: '1024×1024', tag: 'transparent · home, welcome',
+      p: `[Mascot block]
+
+POSE: Standing on both feet, body turned slightly three-quarter to the right, the right arm raised high and waving, left arm relaxed at the side. Head tilted a little toward the wave, eyes as two happy tall ovals, antenna bobbing back.
+USE: Welcome spots and page corners. The raised hand should be the highest point so the shape reads at 120 px.
+COMPOSITION: Full body, centered, 10% empty margin on every side. Square 1:1.` },
+
+    { id: 'mascot-play', grid: 'mascot', title: '13. Playing a game', size: '1024×1024', tag: 'transparent · game pages, play CTA',
+      p: `[Mascot block]
+
+POSE: Sitting cross-legged, holding a retro game controller with both hands, thumbs on the buttons, leaning forward slightly. Eyes focused, narrowed into two bright cyan ovals pointing at an off-screen game to the front-left. Tiny pixel sparkle particles (3 to 5) in cyan and rose near the controller.
+USE: Next to the Play button or a game description.
+COMPOSITION: Full body, centered, controller in the lower third, 10% margin. Square 1:1.` },
+
+    { id: 'mascot-cheer', grid: 'mascot', title: '14. Victory cheer', size: '1024×1024', tag: 'transparent · new record, level up',
+      p: `[Mascot block]
+
+POSE: Jumping with both arms thrown up, both feet off the ground, holding a small golden trophy #ffc933 above the head with both hands. Eyes as two joyful upward arcs (^ ^), antenna ball glowing brighter, legs bent. A few small confetti pieces (6 to 8) in cyan, rose, yellow and violet stay close to the body.
+USE: New personal best, rank up, mastery unlocked.
+COMPOSITION: Full body, centered, trophy near the top with a 8% margin. Square 1:1.` },
+
+    { id: 'mascot-confused', grid: 'mascot', title: '15. Confused', size: '1024×1024', tag: 'transparent · no results, 404',
+      p: `[Mascot block]
+
+POSE: Standing, one hand scratching the side of the head, the other arm hanging, head tilted 15 degrees, eyes as one big oval and one smaller oval, antenna bent into a curl. A small sweat drop on the helmet. No question mark or text.
+USE: Search with no results, missing page, loading failed.
+COMPOSITION: Full body, centered, 10% margin. Square 1:1.` },
+
+    { id: 'mascot-sleep', grid: 'mascot', title: '16. Sleeping', size: '1024×1024', tag: 'transparent · idle, offline, night',
+      p: `[Mascot block]
+
+POSE: Curled up sitting on its own rounded body, hugging the knees, head resting on the arms, eyes closed as two thin horizontal cyan lines, antenna ball dim and drooping, ear-pod rings dimmed. A soft sleepy breathing bubble from the visor edge. No "Z" letters.
+USE: Offline page, inactive states, calm background corners.
+COMPOSITION: Compact shape, centered, 12% margin. Square 1:1.` },
+
+    { id: 'mascot-run', grid: 'mascot', title: '17. Running', size: '1024×1024', tag: 'transparent · loading, quick action',
+      p: `[Mascot block]
+
+POSE: Running to the right in a dynamic mid-stride, one leg far forward and one back, arms pumping, body leaning forward, antenna streaming backward, eyes wide and determined. Three short cyan speed lines behind the character, kept thin and close to the body.
+USE: Loading states, "play now" energy, horizontal flow.
+COMPOSITION: Side view, full body, facing right, centered, 10% margin. Square 1:1.` },
+
+    { id: 'mascot-peek-left', grid: 'mascot', title: '18. Peeking from the left edge', size: '1024×1024', tag: 'transparent · page edges',
+      p: `[Mascot block]
+
+POSE: Only the top-right half of the character is visible, as if hiding behind the left edge of the canvas. The helmet and visor peek in from the left edge with both eyes looking right, one hand with 3 fingers gripping the edge. The rest of the body is cut off by the canvas edge. Antenna tilted toward the right.
+USE: Fixed to the left edge of a page or a card for a playful easter-egg feel.
+COMPOSITION: The character touches the very left edge of the canvas (it is cropped there on purpose), vertically centered. Square 1:1.` },
+
+    { id: 'mascot-peek-bottom', grid: 'mascot', title: '19. Peeking from below', size: '1024×1024', tag: 'transparent · footer, bottom edge',
+      p: `[Mascot block]
+
+POSE: Only the top of the helmet, the eyes, the antenna and two hands are visible, as if hiding behind the bottom edge of the canvas. Both small hands grip the edge, eyes looking up and to the side, curious. The rest of the body is cut off by the canvas edge.
+USE: Sits on top of the footer or at the bottom edge of a page.
+COMPOSITION: The character touches the very bottom edge of the canvas (cropped on purpose), horizontally centered. Square 1:1.` },
+
+    { id: 'mascot-point', grid: 'mascot', title: '20. Pointing', size: '1024×1024', tag: 'transparent · call to action',
+      p: `[Mascot block]
+
+POSE: Standing, body facing front, one arm stretched out pointing to the upper right with a single extended finger, the other hand on the hip, head turned toward the pointed direction, eyes as two confident ovals, antenna ball glowing bright rose.
+USE: Next to a button or a highlight such as "Featured game" or "Try this".
+COMPOSITION: Full body, centered, the pointing arm reaches within 8% of the right edge. Square 1:1.` },
+
+    { id: 'mascot-card', grid: 'mascot', title: '21. Holding a game card', size: '1024×1024', tag: 'transparent · featured, catalogue',
+      p: `[Mascot block]
+
+POSE: Standing proudly, holding a large glowing blank game card (a rounded rectangle with a cyan border, an empty dark center and a small rose corner gem) in front of the chest with both hands, like presenting it. Eyes as two happy ovals looking straight ahead. No text or image on the card.
+USE: Featured game, new releases, "My Games" collection.
+COMPOSITION: Full body, centered, card clearly readable at the center. Square 1:1.` },
+
+    { id: 'mascot-think', grid: 'mascot', title: '22. Thinking', size: '1024×1024', tag: 'transparent · tips, suggestions',
+      p: `[Mascot block]
+
+POSE: Sitting on the ground with one hand under the visor like a chin rest, the other arm across the body, head tilted up and to the side, eyes as two ovals looking up. A small dim lightbulb floats above the antenna (no text).
+USE: Tips, "what should I play" and recommendation sections.
+COMPOSITION: Compact full-body shape, centered, 10% margin. Square 1:1.` },
+
+    { id: 'mascot-sad', grid: 'mascot', title: '23. Game over', size: '1024×1024', tag: 'transparent · errors, defeat',
+      p: `[Mascot block]
+
+POSE: Sitting slumped with shoulders down, head lowered, arms hanging between the knees, eyes as two small half-closed ovals, antenna ball dim and bent downward, ear-pod rings dimmed. A single small rain-drop shape under one eye. Mood is cute and sad, never scary.
+USE: Errors, failed to load, connection lost, no save found.
+COMPOSITION: Compact full-body shape, centered, 12% margin. Square 1:1.` },
+
+    { id: 'mascot-fly', grid: 'mascot', title: '24. Flying', size: '1024×1024', tag: 'transparent · scroll-to-top, new content',
+      p: `[Mascot block]
+
+POSE: Flying diagonally up and to the right with small rocket boots on both feet, short cyan-rose flame trails coming from the boots (kept close to the feet), one arm stretched forward like a superhero, the other arm back, eyes wide and excited, antenna swept back.
+USE: Scroll-to-top, new content, level up.
+COMPOSITION: Full body at a 35 degree upward diagonal, centered, 10% margin. Square 1:1.` },
+
+    { id: 'mascot-thumbs', grid: 'mascot', title: '25. Thumbs up', size: '1024×1024', tag: 'transparent · success, saved',
+      p: `[Mascot block]
+
+POSE: Standing, body facing front, one arm stretched toward the viewer with a thumbs-up, the other hand on the hip, head slightly tilted, eyes as two happy arcs (^ ^), antenna ball glowing bright cyan-rose.
+USE: Success messages, saved, copied, sent, thank-you.
+COMPOSITION: Full body, centered, 10% margin. Square 1:1.` },
+  ];
+
+  const $ = (s, r = document) => r.querySelector(s);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; };
+
+  function copyBtn(getText) {
+    const b = el('button', 'copy', 'Copy prompt');
+    b.type = 'button';
+    b.onclick = async () => {
+      let t = getText();
+      for (const k in STYLE) t = t.replace(k, STYLE[k]);
+      try { await navigator.clipboard.writeText(t); b.textContent = 'Copied'; b.dataset.ok = ''; }
+      catch { b.textContent = 'Copy failed'; }
+      setTimeout(() => { b.textContent = 'Copy prompt'; delete b.dataset.ok; }, 1500);
+    };
+    return b;
+  }
+
+  // style panels
+  for (const [name, text, extra] of [
+    ['Favicon style block', FAV], ['Site style block', SITE], ['Mascot character lock + transparent background', MASCOT], ['Negative prompt (SDXL / Flux / Ideogram)', NEG],
+  ]) {
+    const p = el('div', 'panel');
+    p.append(el('h3', '', name));
+    p.append(el('pre', '', text));
+    const b = copyBtn(() => text); b.textContent = 'Copy';
+    p.append(b);
+    $('#styles').append(p);
+  }
+
+  const dlg = $('#dlg');
+  const cards = CARDS.map(c => {
+    const card = el('article', 'card');
+    const prev = el('button', 'preview');
+    prev.type = 'button';
+    prev.setAttribute('aria-label', `Preview of ${c.title}`);
+    const badge = el('span', 'badge new', 'New');
+    const empty = el('div', 'empty');
+    empty.append(el('b', '', '▢'), el('span', '', 'No image yet'), el('span', '', `art-previews/${c.id}.webp`));
+    prev.append(badge, empty);
+    prev.disabled = true;
+
+    const img = new Image();
+    img.alt = c.title;
+    const srcs = [...(c.img ? [IMG_DIR + c.img] : []), `${PREVIEW_DIR}${c.id}.webp`, `${PREVIEW_DIR}${c.id}.png`];
+    const tryNext = () => { const u = srcs.shift(); if (u) img.src = u; };
+    img.onerror = tryNext;
+    img.onload = () => {
+      if (img.naturalWidth && img.naturalWidth < 128) img.className = 'px';
+      empty.replaceWith(img);
+      badge.className = 'badge generated';
+      badge.textContent = 'Generated';
+      prev.disabled = false;
+      card.dataset.status = 'generated';
+      prev.onclick = () => { $('img', dlg).src = img.src; $('img', dlg).alt = c.title; dlg.showModal(); };
+      refresh();
+    };
+    tryNext();
+
+    const info = el('div', 'info');
+    info.append(el('h3', '', c.title));
+    const meta = el('div', 'meta');
+    meta.append(el('span', 'tag', c.size), el('span', 'tag', c.tag));
+    info.append(meta);
+    const d = el('details');
+    d.append(el('summary', '', 'Show prompt'), el('pre', '', c.p));
+    info.append(d);
+    const act = el('div', 'actions');
+    act.append(copyBtn(() => c.p));
+    info.append(act);
+
+    card.dataset.status = 'new';
+    card.append(prev, info);
+    $('#g-' + c.grid).append(card);
+    return card;
+  });
+
+  // filter + counts
+  let filter = 'all';
+  function refresh() {
+    const n = { all: cards.length, new: 0, generated: 0 };
+    cards.forEach(c => n[c.dataset.status]++);
+    document.querySelectorAll('.chip').forEach(ch => { $('.n', ch).textContent = `(${n[ch.dataset.f]})`; });
+    let shown = 0;
+    cards.forEach(c => { const v = filter === 'all' || c.dataset.status === filter; c.hidden = !v; if (v) shown++; });
+    $('#none').hidden = shown > 0;
+  }
+  document.querySelectorAll('.chip').forEach(ch => ch.onclick = () => {
+    filter = ch.dataset.f;
+    document.querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed', x === ch));
+    refresh();
+  });
+  refresh();
+</script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import { Rocket, Flame, Gamepad2, Trophy, Share2, Medal, Globe } from 'lucide-react';
+import { Flame, Gamepad2, Trophy, Share2, Medal, Globe } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { games } from '../data/games';
 import type { Game } from '../data/games';
@@ -13,6 +13,7 @@ import { fetchMyRank, fetchTop, playerId, syncLeaderboard } from '../utils/leade
 import type { LbRow } from '../utils/leaderboard';
 import { useUiText, useLocale, getLocalizedString } from '../i18n';
 import { genreName } from '../utils/genres';
+import EmptyArt from '../components/EmptyArt';
 import './MyGames.css';
 
 // ponytail: everything here is localStorage-only — no network, no loading state.
@@ -253,7 +254,7 @@ const MyGames = () => {
               <div className="my-games-list">{recentGames.map(g => renderCard(g))}</div>
             ) : (
               <div className="my-games-empty empty-state">
-                <Rocket size={40} aria-hidden="true" />
+                <EmptyArt pose="sleep" />
                 <h2>{t('myGamesEmptyTitle', 'Nothing played yet')}</h2>
                 <p>{t('myGamesEmptyDesc', 'Pick a game from the catalogue — it will show up here next time you visit.')}</p>
                 <Link to="/" className="empty-cta-btn">{t('myGamesBrowse', 'Browse games')}</Link>

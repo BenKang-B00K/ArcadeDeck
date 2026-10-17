@@ -7,6 +7,8 @@ import ErrorBoundary from './components/ErrorBoundary';
 import ScrollToTop from './components/ScrollToTop';
 import RouteTransition from './components/RouteTransition';
 import { ToastProvider } from './contexts/ToastContext';
+import RouteFallback from './components/RouteFallback';
+import MascotBg from './components/MascotBg';
 
 // Lazy-load all pages except Home so the initial bundle stays small.
 // Each page's JS (and its unique imports) loads only when first navigated to.
@@ -43,8 +45,9 @@ function App({ basename = '/' }: AppProps) {
       <ToastProvider>
         <div className="app-main-layout">
           <ScrollToTop />
+          <MascotBg />
           <ErrorBoundary>
-          <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+          <Suspense fallback={<RouteFallback />}>
             <RouteTransition>
               <Routes>
                 <Route path="/"             element={<Home />} />

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Soccer Ball</title>
+  <g stroke="#171424" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <circle fill="#00e5ff" cx="32" cy="32" r="24"/><path fill="#7C3AED" d="m32 21 11 8-4 13H25l-4-13Zm-4-13-6 9-12 5m26-14 6 9 12 5m1 18-11 1-6 13M9 40l11 1 6 13"/><path fill="none" d="m22 17 3 9m17-9-3 9m5 15-5-4m-19 4 5-4m7 5v14"/>
+  </g>
+</svg>
+

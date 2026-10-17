@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Zombie Hand</title>
+  <g stroke="#171424" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path fill="#7C3AED" d="M22 56V44l-8-12c-5-7 3-11 7-5l3 4V13c0-7 8-7 8 0v14V9c0-6 8-6 8 0v18V13c0-6 8-6 8 0v17-9c0-6 8-6 8 0v14c0 8-5 13-8 16v5Z"/><path fill="#00e5ff" stroke="none" d="M27 43h15v11H27Zm1-26h2v13h-2Zm8-4h2v17h-2Zm8 5h2v13h-2Z"/><path fill="none" stroke="#F43F5E" d="m29 38 12-4m-8-2 3 8"/>
+  </g>
+</svg>
+

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Tycoon</title>
+  <g stroke="#171424" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path fill="#7C3AED" d="M10 39v10c0 5 10 8 22 8s22-3 22-8V39Z"/><ellipse fill="#00e5ff" cx="32" cy="39" rx="22" ry="8"/><path fill="#7C3AED" d="M10 25v10c0 5 10 8 22 8s22-3 22-8V25Z"/><ellipse fill="#00e5ff" cx="32" cy="25" rx="22" ry="8"/><path fill="#7C3AED" d="M10 15v10c0 5 10 8 22 8s22-3 22-8V15Z"/><ellipse fill="#00e5ff" cx="32" cy="15" rx="22" ry="8"/><path fill="none" stroke="#F43F5E" d="M28 14h8"/>
+  </g>
+</svg>
+

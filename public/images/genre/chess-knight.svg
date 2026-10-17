@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Chess Knight</title>
+  <g stroke="#171424" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path fill="#7C3AED" d="M16 50c1-9 7-16 15-21l-12 3-8-8L29 9l15 3c11 12 12 26 5 38Z"/><path fill="#00e5ff" d="m25 14 4-7 4 8m-7 11-7 6-8-8 9-8"/><path fill="#F43F5E" stroke="none" d="M33 19h5v5h-5Z"/><path fill="#00e5ff" d="M13 50h40v7H13Z"/>
+  </g>
+</svg>
+

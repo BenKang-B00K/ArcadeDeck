@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Fruit</title>
+  <g stroke="#171424" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path fill="#7C3AED" d="M32 21C16 13 7 24 10 39c2 13 15 20 22 14 7 6 20-1 22-14 3-15-6-26-22-18Z"/><path fill="#00e5ff" d="M32 20C30 9 42 6 51 9c-1 10-10 15-19 11Z"/><path fill="none" d="m32 21-3-10"/><path fill="none" stroke="#F43F5E" d="M18 31c-3 7 1 13 5 15"/>
+  </g>
+</svg>
+

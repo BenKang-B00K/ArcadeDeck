@@ -1,0 +1,39 @@
+/* Decorative only. Lives in the empty side gutter next to the 1200px content column,
+   so it never overlaps text; below ~1480px there is no gutter, so it is hidden. */
+.mascot-bg {
+  display: none;
+  position: fixed;
+  right: max(8px, env(safe-area-inset-right));
+  bottom: 0;
+  z-index: var(--z-base);
+  width: min(320px, calc((100vw - 1200px) / 2 - 16px));
+  height: auto;
+  max-height: 34vh;
+  object-fit: contain;
+  object-position: bottom right;
+  opacity: 0.9;
+  pointer-events: none;
+  user-select: none;
+  animation: mascot-in 0.7s ease-out both, mascot-bob 7s ease-in-out 0.7s infinite;
+}
+
+@media (min-width: 1480px) {
+  .mascot-bg { display: block; }
+}
+
+@keyframes mascot-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 0.9; transform: none; }
+}
+
+@keyframes mascot-bob {
+  50% { transform: translateY(-8px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mascot-bg { animation: none; }
+}
+
+@media print {
+  .mascot-bg { display: none; }
+}

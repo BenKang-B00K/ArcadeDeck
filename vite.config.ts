@@ -30,7 +30,7 @@ export default defineConfig({
     preloadEntry(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['favicon.ico', 'images/favicon.webp', 'images/arcadedeck-banner.webp'],
+      includeAssets: ['favicon.ico', 'images/favicon.webp', 'images/favicon-32.png', 'images/apple-touch-icon.png', 'images/safari-pinned-tab.svg', 'images/arcadedeck-banner.webp'],
       // Note: prerender-pages.js writes locale + blog + tag shells AFTER vite
       // build, so they never enter the Workbox precache manifest. The current
       // precache stays lean (single index.html shell + hashed assets). If the
@@ -68,7 +68,7 @@ export default defineConfig({
             type: 'image/webp'
           },
           {
-            src: 'images/icon-512x512.webp',
+            src: 'images/icon-maskable-512x512.webp',
             sizes: '512x512',
             type: 'image/webp',
             purpose: 'maskable'

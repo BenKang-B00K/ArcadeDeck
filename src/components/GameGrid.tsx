@@ -4,6 +4,7 @@ import GameCard from './GameCard';
 import { Gamepad2 } from 'lucide-react';
 import { useUiText, useLocale, getLocalizedString } from '../i18n';
 import { genreName } from '../utils/genres';
+import EmptyArt from './EmptyArt';
 import './GameGrid.css';
 
 interface GameGridProps {
@@ -61,6 +62,7 @@ const GameGrid: React.FC<GameGridProps> = ({ selectedGenre = 'All', searchQuery 
             ))
           ) : (
             <div className="empty-state">
+              <EmptyArt />
               <h3>{t('gameGridNoResults', 'No results found')}</h3>
               <p>{t('gameGridNoResultsHint', 'Try a different keyword or genre.')}</p>
               {onGenreClick && (

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Sword</title>
+  <g stroke="#171424" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path fill="#00e5ff" d="M35 11h18v18L32 50 14 32Z"/><path fill="#7C3AED" d="m16 38-7 7 10 10 7-7m-15-17 22 22"/><path fill="none" d="m23 41 20-20"/><path fill="#F43F5E" d="m9 45 10 10-4 4L5 49Z"/>
+  </g>
+</svg>
+

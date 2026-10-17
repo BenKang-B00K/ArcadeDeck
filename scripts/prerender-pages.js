@@ -379,7 +379,9 @@ for (const lang of SUPPORTED_LOCALES) {
     <meta name="robots" content="${robotsValue}" />
     <meta name="theme-color" content="#050507" />
     ${adsenseMeta}
-    <link rel="icon" type="image/webp" href="/images/favicon.webp" />
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32.png" />
+    <link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#e8334a" />
     <link rel="manifest" href="${appPath}/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/play/${slug}/icon-192.webp" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -546,8 +548,10 @@ for (const genre of allGenres) {
     <meta name="robots" content="${inGenre.length <= 2 ? 'noindex, follow' : 'index, follow'}" />
     <meta name="theme-color" content="#050507" />
     ${adsenseMeta}
-    <link rel="icon" type="image/webp" href="/images/favicon.webp" />
-    <link rel="apple-touch-icon" href="/images/icon-192x192.webp" />
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32.png" />
+    <link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#e8334a" />
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
     <link rel="canonical" href="${pageUrl}" />
     ${hreflangBlock(routePath, null)}
     <link rel="alternate" type="application/rss+xml" title="ArcadeDeck Blog" href="${SITE}/rss.xml" />
@@ -732,7 +736,8 @@ ${noscriptItems}
   // Replace LCP shell hero text with translated version. Mirrors the <header>
   // Home.tsx renders so the static shell and the React tree share dimensions.
   const surprise = ui('homeRandomGame', lang, 'Surprise me');
-  const heroHtml = `<header class="home-hero"><div class="container home-hero-content"><h1>${heroTitle} <span>ArcadeDeck</span></h1><div class="home-hero-nick"></div><div class="home-hero-actions"><button type="button" class="home-hero-random" disabled>${surprise}</button></div></div></header>`;
+  const playNow = ui('gameCardPlayNow', lang, 'Play Now');
+  const heroHtml = `<header class="home-hero"><div class="container home-hero-content"><h1>${heroTitle} <span>ArcadeDeck</span></h1><div class="home-hero-nick"></div><div class="home-hero-actions"><button type="button" class="home-hero-random home-hero-play" disabled>${playNow}</button><button type="button" class="home-hero-random home-hero-alt" disabled>${surprise}</button></div></div></header>`;
 
   // Visible catalogue below the hero. Without it #root carried ~115 characters
   // of text and the whole catalogue existed only in <noscript> + JSON-LD.

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { X, Shuffle, Edit3, Check, Info, Star, History, Users, Sparkles } from 'lucide-react';
+import { X, Play, Shuffle, Edit3, Check, Info, Star, History, Users, Sparkles } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import GameCard from '../components/GameCard';
 import GameGrid from '../components/GameGrid';
@@ -10,7 +10,7 @@ import { games, deviceGames, GENRE_HUE, type Game } from '../data/games';
 import { useToast } from '../contexts/useToast';
 import { BANNED_WORDS, AD_SLOTS } from '../constants/gameConstants';
 import { useUiText, useLocale, getLocalizedString } from '../i18n';
-import { genreName } from '../utils/genres';
+import { genreName, genreIcon } from '../utils/genres';
 import { readNickname, saveNickname } from '../hooks/useNickname';
 import { deckStats, readCachedRank } from '../utils/pb';
 import './Home.css';
@@ -18,6 +18,7 @@ import './Home.css';
 const ALL_GENRES = ['All', ...new Set(deviceGames.flatMap(g => g.genres))];
 const PLAYABLE = deviceGames.filter(g => g.status !== 'IN PRODUCTION' && g.gameUrl);
 const FEATURED = deviceGames.filter(g => g.featured);
+const HERO_GAME = FEATURED[0] ?? PLAYABLE[0];
 const COOP_GENRE = 'Local Co-op';
 const COOP = deviceGames.filter(g => g.genres.includes(COOP_GENRE)).sort((a, b) => parseInt(b.id) - parseInt(a.id));
 // UPDATE-badged games, newest lastUpdated first (ISO dates sort as strings); undated ones last.
@@ -25,9 +26,9 @@ const UPDATED = deviceGames.filter(g => g.badge === 'UPDATE')
   .sort((a, b) => (b.lastUpdated ?? '').localeCompare(a.lastUpdated ?? ''))
   .slice(0, 8);
 
-// Hero banner rotates one step per page load (public/images/banner/banner-01..16).
+// Hero banner rotates one step per page load (public/images/banner/banner-01..17).
 // Module scope so in-app navigation back to Home keeps the same art.
-const BANNER_COUNT = 16;
+const BANNER_COUNT = 17;
 const BANNER = (() => {
   let n = Math.floor(Math.random() * BANNER_COUNT);
   try {
@@ -174,7 +175,13 @@ const Home: React.FC = () => {
             </div>
 
             <div className="home-hero-actions">
-              <button type="button" className="home-hero-random" onClick={surprise}>
+              {HERO_GAME && (
+                <Link to={`/play/${HERO_GAME.slug}`} className="home-hero-random home-hero-play">
+                  <Play size={16} aria-hidden="true" />
+                  {t('gameCardPlayNow', 'Play Now')}
+                </Link>
+              )}
+              <button type="button" className="home-hero-random home-hero-alt" onClick={surprise}>
                 <Shuffle size={16} aria-hidden="true" />
                 {t('homeRandomGame', 'Surprise me')}
               </button>
@@ -187,6 +194,7 @@ const Home: React.FC = () => {
             <nav className="genre-filters" aria-label={t('homeGenresAria', 'Game genres')}>
               {ALL_GENRES.map(g => (
                 <button key={g} type="button" className={g === genre ? 'active' : ''} aria-pressed={g === genre} style={{ '--h': GENRE_HUE[g] ?? 260 } as React.CSSProperties} onClick={() => setGenre(g)}>
+                  {genreIcon(g) && <img src={genreIcon(g)!} alt="" width={18} height={18} />}
                   {genreName(t, g)}
                 </button>
               ))}

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Auto Battler</title>
+  <g stroke="#171424" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path fill="#7C3AED" d="M10 33h15l3 17H7Zm29 0h15l3 17H36Z"/><rect fill="#7C3AED" x="7" y="12" width="22" height="23" rx="7"/><rect fill="#7C3AED" x="35" y="12" width="22" height="23" rx="7"/><path fill="#00e5ff" d="M13 20h10v8H13Zm28 0h10v8H41ZM7 50h22v6H7Zm28 0h22v6H35Z"/><path fill="#F43F5E" stroke="none" d="m32 35 4 5-4 5-4-5Z"/>
+  </g>
+</svg>
+

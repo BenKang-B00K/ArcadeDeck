@@ -47,6 +47,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
   const lastDocRef = useRef<QueryDocumentSnapshot<DocumentData> | null>(null);
   const lastSubmitRef = useRef<number>(0);
@@ -102,7 +103,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
     lastDocRef.current = null;
     setComments([]);
     setHasMore(false);
-    fetchComments(true);
+    setIsLoading(true);
+    fetchComments(true).finally(() => setIsLoading(false));
   }, [fetchComments]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -110,7 +112,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
     if (!newComment.trim() || isSubmitting) return;
     const now = Date.now();
     if (now - lastSubmitRef.current < SUBMIT_COOLDOWN_MS) {
-      setSubmitError(`Please wait ${Math.ceil((SUBMIT_COOLDOWN_MS - (now - lastSubmitRef.current)) / 1000)}s before posting again.`);
+      setSubmitError(t('commentErrWait', 'Please wait {n}s before posting again.').replace('{n}', String(Math.ceil((SUBMIT_COOLDOWN_MS - (now - lastSubmitRef.current)) / 1000))));
       setTimeout(() => setSubmitError(null), 3000);
       return;
     }
@@ -139,7 +141,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
     if (circuitOpen()) {
       setComments(prev => prev.filter(c => c.id !== tempId));
       setNewComment(sanitizedText);
-      setSubmitError("Comments temporarily unavailable. Please try again later.");
+      setSubmitError(t('commentErrQuota', 'Comments are temporarily unavailable. Please try again later.'));
       setTimeout(() => setSubmitError(null), 4000);
       setIsSubmitting(false);
       return;
@@ -157,8 +159,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
         setComments(prev => prev.filter(c => c.id !== tempId));
         setNewComment(sanitizedText);
         setSubmitError(w.quotaExhausted
-          ? "Comments temporarily unavailable. Please try again later."
-          : "Failed to post comment. Please try again.");
+          ? t('commentErrQuota', 'Comments are temporarily unavailable. Please try again later.')
+          : t('commentErrPost', 'Failed to post comment. Please try again.'));
         setTimeout(() => setSubmitError(null), 4000);
         return;
       }
@@ -171,7 +173,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
       // Rollback optimistic + restore input
       setComments(prev => prev.filter(c => c.id !== tempId));
       setNewComment(sanitizedText);
-      setSubmitError("Failed to post comment. Please try again.");
+      setSubmitError(t('commentErrPost', 'Failed to post comment. Please try again.'));
       setTimeout(() => setSubmitError(null), 4000);
     } finally {
       setIsSubmitting(false);
@@ -236,6 +238,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({ gameId, currentNickname
               </button>
             )}
           </>
+        ) : isLoading ? (
+          <p className="no-comments" role="status">{t('pageLoading', 'Loading...')}</p>
         ) : (
           <p className="no-comments">{t('commentEmpty', 'No comments yet. Be the first to share your thoughts!')}</p>
         )}

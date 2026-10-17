@@ -70,6 +70,15 @@
   transition: transform 0.2s var(--ease-spring), box-shadow 0.2s;
 }
 
+.home-hero-random { text-decoration: none; }
+
+/* Primary Play CTA stays filled; Surprise me is the quiet outline sibling. */
+.home-hero-alt {
+  background: transparent;
+  color: var(--primary-color);
+  box-shadow: inset 0 0 0 2px var(--primary-color);
+}
+
 .home-hero-random:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px var(--glow-color);
@@ -198,6 +207,9 @@
 }
 
 .genre-filters button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   flex-shrink: 0;
   padding: 8px 16px;
   border-radius: var(--radius-full);
@@ -208,6 +220,11 @@
   font-weight: 600;
   white-space: nowrap;
   transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.genre-filters button img {
+  display: block;
+  flex-shrink: 0;
 }
 
 [data-theme="light"] .genre-filters button {
@@ -443,6 +460,7 @@
 @media (max-width: 768px) {
   .home-hero { padding: var(--space-8) 0 var(--space-6); }
   .home-hero-random { flex: 1 1 auto; justify-content: center; }
+  .home-hero-play { flex-basis: 100%; }
   .genre-filters { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
   .genre-filters::-webkit-scrollbar { display: none; }
 }

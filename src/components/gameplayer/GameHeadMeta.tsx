@@ -52,7 +52,7 @@ const GameHeadMeta: React.FC<Props> = ({ game, lang, overlay }) => {
       return () => { link.href = restore; };
     };
     const undoManifest = swap('manifest', `${appPath}/manifest.webmanifest`, '/manifest.webmanifest');
-    const undoIcon = swap('apple-touch-icon', `/play/${game.slug}/icon-192.webp`, '/images/icon-192x192.webp');
+    const undoIcon = swap('apple-touch-icon', `/play/${game.slug}/icon-192.webp`, '/images/apple-touch-icon.png');
     return () => { undoManifest(); undoIcon(); };
   }, [game.slug, lang]);
 

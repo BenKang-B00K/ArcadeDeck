@@ -2,7 +2,7 @@
  * One-shot image optimizer. Two modes, same resize→encode→write loop.
  *
  *   node scripts/optimize-images.cjs         # public/images (game banners)
- *   node scripts/optimize-images.cjs --blog  # public/images/blog (hero/inline)
+ *   node scripts/optimize-images.cjs --blog  # public/images/blog (hero/inline; poster/mid/final -> 1600w + -800 + poster -og 1200x630)
  *
  * Game mode:
  *   Pass 1 — resize oversized banner WebPs to TARGET_WIDTH (640w q70).
@@ -66,9 +66,23 @@ async function encode(src, out, width) {
 
   if (BLOG) {
     for (const f of listWebp()) {
+      if (/-(og|800)\.webp$/.test(f)) continue; // derived below
       const p = path.join(DIR, f);
       const before = fs.statSync(p).size;
-      const after = await encode(p, p, f.includes('-inline') ? 1600 : 1200);
+      const art = /-(poster|mid|final)\.webp$/.test(f);
+      if (!art) continue; // legacy hero/inline already optimized; re-encoding is lossy
+      // Re-encoding is lossy: skip art whose -800 sibling is already newer than the source.
+      const v800 = p.replace(/\.webp$/, '-800.webp');
+      if (fs.existsSync(v800) && fs.statSync(v800).mtimeMs >= fs.statSync(p).mtimeMs) continue;
+      const after = await encode(p, p, art ? 1600 : 1200);
+      if (art) {
+        // 800w for srcset; poster also gets the 1200x630 social crop (og:image).
+        await encode(p, p.replace(/\.webp$/, '-800.webp'), 800);
+        if (/-poster\.webp$/.test(f)) {
+          const og = p.replace(/-poster\.webp$/, '-og.webp');
+          fs.writeFileSync(og, await sharp(p).resize(1200, 630, { fit: 'cover' }).webp({ quality: QUALITY, effort: 6 }).toBuffer());
+        }
+      }
       totalBefore += before;
       totalAfter += after;
       console.log(`${f}: ${kb(before)} -> ${kb(after)} (${((1 - after / before) * 100).toFixed(1)}% smaller)`);

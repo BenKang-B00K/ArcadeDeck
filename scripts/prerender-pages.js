@@ -1095,6 +1095,25 @@ ${relatedGames
   const postImageAlt =
     post.coverImageAlt ||
     (relatedGames.length ? `${(txt(relatedGames[0].id, 'en').title || '')} cover art` : `${post.title} — ArcadeDeck Blog`);
+  // Blog art: coverImage is the 1200x630 `-og` crop; the 16:9 `-poster` sits next to it. Both go to search/social.
+  const isOgCrop = /-og\.webp$/.test(post.coverImage || '');
+  const posterUrl = isOgCrop ? postImage.replace(/-og\.webp$/, '-poster.webp') : null;
+  const imageLd = isOgCrop
+    ? [
+        { '@type': 'ImageObject', url: posterUrl, width: 1600, height: 900, caption: postImageAlt },
+        { '@type': 'ImageObject', url: postImage, width: 1200, height: 630, caption: postImageAlt },
+      ]
+    : [postImage];
+  const ogSizeMeta = isOgCrop
+    ? `
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/webp" />`
+    : '';
+  const posterPreload = posterUrl && post.content.includes(posterUrl.slice(SITE.length))
+    ? `
+    <link rel="preload" as="image" href="${posterUrl}" imagesrcset="${posterUrl.replace('-poster.webp', '-poster-800.webp')} 800w, ${posterUrl} 1600w" imagesizes="(max-width: 800px) 100vw, 800px" fetchpriority="high" />`
+    : '';
   const articleSection = (post.tags && post.tags[0]) || 'News';
   const wordCount = wordCountOf(post.content);
   const readingMinutes = Math.max(1, Math.round(wordCount / 220));
@@ -1119,7 +1138,8 @@ ${relatedGames
     '@type': 'BlogPosting',
     headline: post.title,
     description: post.excerpt,
-    image: [postImage],
+    image: imageLd,
+    thumbnailUrl: postImage,
     datePublished: post.date,
     dateModified,
     author: { '@type': 'Organization', name: post.author, url: `${SITE}/about` },
@@ -1161,7 +1181,7 @@ ${relatedGames
   shell = shell.replace(/(<meta (?:name|property)="twitter:image" content=")[^"]*(")/, `$1${postImage}$2`);
   const articleTagMetas = post.tags.map((t) => `    <meta property="article:tag" content="${t}" />`).join('\n');
   const extraSocialMeta = `
-    <meta property="og:image:alt" content="${postImageAlt}" />
+    <meta property="og:image:alt" content="${postImageAlt}" />${ogSizeMeta}
     <meta name="twitter:image:alt" content="${postImageAlt}" />
     <meta name="twitter:label1" content="Reading time" />
     <meta name="twitter:data1" content="${readingMinutes} min" />
@@ -1179,7 +1199,7 @@ ${relatedGames
   );
   shell = shell.replace(
     '</head>',
-    `<script type="application/ld+json">${articleJsonLd}</script>\n    <script type="application/ld+json">${breadcrumbLd}</script>\n  </head>`,
+    `${posterPreload}<script type="application/ld+json">${articleJsonLd}</script>\n    <script type="application/ld+json">${breadcrumbLd}</script>\n  </head>`,
   );
 
   writeFileSync(`${dir}/index.html`, shell);

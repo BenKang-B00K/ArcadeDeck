@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://arcadedeck.net/</loc>
     <lastmod>2026-10-13</lastmod>
@@ -1596,146 +1597,252 @@
     <loc>https://arcadedeck.net/blog/welcome-to-the-arcadedeck-devlog</loc>
     <lastmod>2026-04-15</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/welcome-to-the-arcadedeck-devlog-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/welcome-to-the-arcadedeck-devlog-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/welcome-to-the-arcadedeck-devlog-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/mastering-gem-merge-five-move-saving-patterns</loc>
     <lastmod>2026-04-20</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/mastering-gem-merge-five-move-saving-patterns-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/mastering-gem-merge-five-move-saving-patterns-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/mastering-gem-merge-five-move-saving-patterns-inline.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/mastering-gem-merge-five-move-saving-patterns-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/triangle-battle-couch-tournament-guide</loc>
     <lastmod>2026-04-22</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/triangle-battle-couch-tournament-guide-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/triangle-battle-couch-tournament-guide-inline.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/triangle-battle-couch-tournament-guide-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/triangle-battle-couch-tournament-guide-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/hall-of-fame-march-2026-recap</loc>
     <lastmod>2026-04-01</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/hall-of-fame-march-2026-recap-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/hall-of-fame-march-2026-recap-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/hall-of-fame-march-2026-recap-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/galaxy-launch-idle-design-keeping-progression-meaningful</loc>
     <lastmod>2026-04-29</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/galaxy-launch-idle-design-keeping-progression-meaningful-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/galaxy-launch-idle-design-keeping-progression-meaningful-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/galaxy-launch-idle-design-keeping-progression-meaningful-inline.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/galaxy-launch-idle-design-keeping-progression-meaningful-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/polygon-invasion-td-launch-notes-opening-strategy</loc>
     <lastmod>2026-04-28</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/polygon-invasion-td-launch-notes-opening-strategy-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/polygon-invasion-td-launch-notes-opening-strategy-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/polygon-invasion-td-launch-notes-opening-strategy-inline.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/polygon-invasion-td-launch-notes-opening-strategy-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/designing-roguelikes-for-the-browser-run-length-and-meta-progression</loc>
     <lastmod>2026-04-30</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/designing-roguelikes-for-the-browser-run-length-and-meta-progression-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/designing-roguelikes-for-the-browser-run-length-and-meta-progression-inline.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/designing-roguelikes-for-the-browser-run-length-and-meta-progression-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/designing-roguelikes-for-the-browser-run-length-and-meta-progression-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/void-survivor-now-on-steam</loc>
     <lastmod>2026-05-05</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/void-survivor-now-on-steam-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/void-survivor-now-on-steam-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/void-survivor-now-on-steam-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/mythic-defenders-tower-defense-card-driven-design</loc>
     <lastmod>2026-05-09</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/mythic-defenders-tower-defense-card-driven-design-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/mythic-defenders-tower-defense-card-driven-design-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/mythic-defenders-tower-defense-card-driven-design-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/timing-chef-update-rush-hour-and-recipe-expansion</loc>
     <lastmod>2026-05-16</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/timing-chef-update-rush-hour-and-recipe-expansion-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/timing-chef.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/timing-chef-update-rush-hour-and-recipe-expansion-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/timing-chef-update-rush-hour-and-recipe-expansion-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/falling-dodger-launch-neon-freefall-arcade</loc>
     <lastmod>2026-05-17</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/falling-dodger-launch-neon-freefall-arcade-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/falling-dodger-launch-neon-freefall-arcade-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/falling-dodger-launch-hero.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/falling-dodger-launch-neon-freefall-arcade-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/gate-of-hell-rise-of-demons-v2-update</loc>
     <lastmod>2026-05-25</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/gate-of-hell-rise-of-demons-v2-update-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/gate-of-hell-rise-of-demons-v2-update-hero.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/gate-of-hell-rise-of-demons-v2-update-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/gate-of-hell-rise-of-demons-v2-update-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/flux-tower-defense-now-on-steam</loc>
     <lastmod>2026-05-25</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/flux-tower-defense-now-on-steam-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/flux-tower-defense-steam-launch-hero.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/flux-tower-defense-now-on-steam-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/flux-tower-defense-steam-launch-inline.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/flux-tower-defense-now-on-steam-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/neon-stack-launch-one-tap-tower-stacking</loc>
     <lastmod>2026-06-21</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/neon-stack-launch-one-tap-tower-stacking-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/neon-stack-launch-one-tap-tower-stacking-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/neon-stack.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/neon-stack-launch-one-tap-tower-stacking-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/kingdom-of-ashes-fallen-era-now-on-steam</loc>
     <lastmod>2026-06-21</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/kingdom-of-ashes-fallen-era-now-on-steam-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/kingdom-of-ashes-fallen-era-steam-launch-hero.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/kingdom-of-ashes-fallen-era-now-on-steam-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/kingdom-of-ashes-fallen-era-steam-launch-inline.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/kingdom-of-ashes-fallen-era-now-on-steam-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/ashen-keys-launch-typing-as-a-weapon</loc>
     <lastmod>2026-09-10</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/ashen-keys-launch-typing-as-a-weapon-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/ashen-keys-launch-typing-as-a-weapon-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/ashen-keys.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/ashen-keys-launch-typing-as-a-weapon-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/barrack-defense-launch-notes-a-defense-game-with-no-towers</loc>
     <lastmod>2026-08-20</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/barrack-defense-launch-notes-a-defense-game-with-no-towers-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/barrack-defense.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/barrack-defense-launch-notes-a-defense-game-with-no-towers-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/barrack-defense-launch-notes-a-defense-game-with-no-towers-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/shadow-runner-demo-and-steam-launch</loc>
     <lastmod>2026-09-01</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/shadow-runner-demo-and-steam-launch-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/shadow-runner.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/shadow-runner-demo-and-steam-launch-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/shadow-runner-demo-and-steam-launch-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/fruit-frenzy-v1-3-shoot-the-bombs</loc>
     <lastmod>2026-09-15</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/fruit-frenzy-v1-3-shoot-the-bombs-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/fruit-frenzy-v1-3-shoot-the-bombs-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/fruit-frenzy.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/fruit-frenzy-v1-3-shoot-the-bombs-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/personal-bests-and-mastery-badges</loc>
     <lastmod>2026-09-15</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/personal-bests-and-mastery-badges-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/personal-bests-and-mastery-badges-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/blog-default-cover.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/personal-bests-and-mastery-badges-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/flux-tower-defense-free-web-edition-waves-1-10</loc>
     <lastmod>2026-09-16</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/flux-tower-defense-free-web-edition-waves-1-10-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/flux-tower-defense-steam-launch-inline.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/flux-tower-defense-free-web-edition-waves-1-10-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/flux-tower-defense-free-web-edition-waves-1-10-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/mythic-defenders-v6-4-new-heroes-pause-continue-phones</loc>
     <lastmod>2026-09-27</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/mythic-defenders-v6-4-new-heroes-pause-continue-phones-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/mythic-defenders-v6-4-new-heroes-pause-continue-phones-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/mythic-defenders-v6-4-new-heroes-pause-continue-phones-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/trade-tycoon-launch-twelve-cities-five-eras</loc>
     <lastmod>2026-09-30</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/trade-tycoon-launch-twelve-cities-five-eras-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/trade-tycoon-launch-twelve-cities-five-eras-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/trade-tycoon-launch-twelve-cities-five-eras-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/phone-link-couch-games-on-your-own-phones</loc>
     <lastmod>2026-10-02</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/phone-link-couch-games-on-your-own-phones-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/phone-link-couch-games-on-your-own-phones-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/phone-link-couch-games-on-your-own-phones-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/one-minute-auto-battle-launch-bank-or-push</loc>
     <lastmod>2026-10-03</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/one-minute-auto-battle-launch-bank-or-push-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/one-minute-auto-battle-launch-bank-or-push-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/one-minute-auto-battle-launch-bank-or-push-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/animal-racing-launch-couch-kart-racer</loc>
     <lastmod>2026-10-05</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/animal-racing-launch-couch-kart-racer-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/animal-racing-launch-couch-kart-racer-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/animal-racing-launch-couch-kart-racer-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/emotion-act-acting-party-game-situation-cards</loc>
     <lastmod>2026-10-06</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/emotion-act-acting-party-game-situation-cards-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/emotion-act-acting-party-game-situation-cards-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/emotion-act-acting-party-game-situation-cards-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/ladder-game-marble-racing-party-decision-makers</loc>
     <lastmod>2026-10-08</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/ladder-game-marble-racing-party-decision-makers-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/ladder-game-marble-racing-party-decision-makers-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/ladder-game-marble-racing-party-decision-makers-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/unholy-tempo-launch-strike-on-the-beat</loc>
     <lastmod>2026-10-13</lastmod>
     <priority>0.6</priority>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/unholy-tempo-launch-strike-on-the-beat-poster.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/unholy-tempo-launch-strike-on-the-beat-mid.webp</image:loc></image:image>
+    <image:image><image:loc>https://arcadedeck.net/images/blog/unholy-tempo-launch-strike-on-the-beat-final.webp</image:loc></image:image>
   </url>
   <url>
     <loc>https://arcadedeck.net/blog/tag/action</loc>

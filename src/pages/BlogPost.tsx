@@ -114,6 +114,15 @@ const BlogPost: React.FC = () => {
     || (relatedGameForImage
       ? `${getLocalizedString(relatedGameForImage, 'title', 'en', null)} cover art`
       : `${post.title} — ArcadeDeck Blog`);
+  // Blog art: coverImage is the 1200x630 `-og` crop; the 16:9 `-poster` is the in-article head image.
+  const isOgCrop = /-og\.webp$/.test(post.coverImage || '');
+  const posterUrl = isOgCrop ? ogImage.replace(/-og\.webp$/, '-poster.webp') : null;
+  const imageLd = posterUrl
+    ? [
+        { '@type': 'ImageObject', url: posterUrl, width: 1600, height: 900, caption: ogImageAlt },
+        { '@type': 'ImageObject', url: ogImage, width: 1200, height: 630, caption: ogImageAlt },
+      ]
+    : [ogImage];
   const articleSection = post.tags[0] || 'News';
   const dateModified = post.dateModified || post.date;
   const jsonLd = {
@@ -121,7 +130,8 @@ const BlogPost: React.FC = () => {
     '@type': 'BlogPosting',
     headline: post.title,
     description: post.excerpt,
-    image: [ogImage],
+    image: imageLd,
+    thumbnailUrl: ogImage,
     datePublished: post.date,
     dateModified: post.date,
     author: {
@@ -166,6 +176,13 @@ const BlogPost: React.FC = () => {
         <meta property="og:description" content={post.excerpt} />
         <meta property="og:image" content={ogImage} />
         <meta property="og:image:alt" content={ogImageAlt} />
+        {isOgCrop && (
+          <>
+            <meta property="og:image:width" content="1200" />
+            <meta property="og:image:height" content="630" />
+            <meta property="og:image:type" content="image/webp" />
+          </>
+        )}
         <meta property="og:url" content={url} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={post.title} />

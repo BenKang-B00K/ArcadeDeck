@@ -66,7 +66,7 @@ function alternateBlock(routePath, langs) {
   return lines.join('\n');
 }
 
-function urlEntry(lang, routePath, priority, preferredLastmod, alternateLangs = null) {
+function urlEntry(lang, routePath, priority, preferredLastmod, alternateLangs = null, images = []) {
   const loc = url(lang, routePath);
   const lastmod = stableLastmod(loc, preferredLastmod);
   const alts = alternateLangs && alternateLangs.length
@@ -75,7 +75,8 @@ function urlEntry(lang, routePath, priority, preferredLastmod, alternateLangs = 
   return `  <url>
     <loc>${loc}</loc>
     <lastmod>${lastmod}</lastmod>
-    <priority>${priority}</priority>${alts}
+    <priority>${priority}</priority>${alts}${images.map(i => `
+    <image:image><image:loc>${i}</image:loc></image:image>`).join('')}
   </url>`;
 }
 
@@ -142,7 +143,9 @@ for (const r of englishOnlyRoutes) {
 }
 
 for (const p of posts) {
-  entries.push(urlEntry('en', `/blog/${p.slug}`, '0.6', p.date));
+  // Image sitemap: every /images/ file the post body shows (poster, mid, final, older inline art), de-duplicated.
+  const imgs = [...new Set([...p.content.matchAll(/<img[^>]+src="(\/images\/[^"]+)"/g)].map(m => SITE + encodeURI(m[1])))];
+  entries.push(urlEntry('en', `/blog/${p.slug}`, '0.6', p.date, null, imgs));
 }
 
 const tagMap = new Map();
@@ -164,7 +167,8 @@ for (const [tag, lastmod] of Array.from(tagMap.entries()).sort(([a], [b]) => a.l
 
 const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 ${entries.join('\n')}
 </urlset>
 `;

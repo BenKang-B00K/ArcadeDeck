@@ -164,6 +164,9 @@
   <h2>Mascot "Deck" — background poses</h2>
   <p class="muted lede">One robot, 14 poses, <b>transparent background</b>, for use behind and beside page content. Every prompt starts with the same character lock, so generate them all in one session and attach your first approved image as a reference. Save as <code>art-previews/mascot-&lt;pose&gt;.png</code> (or <code>.webp</code>).</p>
   <div class="grid" id="g-mascot"></div>
+  <h2>Blog art — poster, mid, final</h2>
+  <p class="muted lede">Three images per post (29 posts), 16:9. <b>Poster</b> = head image with the <b>ArcadeDeck</b> wordmark bottom-right (best in Ideogram / GPT Image; if the tool garbles the letters, generate without the wordmark and add it in post). <b>Mid</b> + <b>Final</b> = no text. Scenes live in <code>scripts/blog-art-data.js</code>. Save as <code>public/images/blog/&lt;slug&gt;-poster|mid|final.webp</code> (1600×900), then run <code>node scripts/optimize-images.cjs --blog</code> (1600w + 800w srcset + poster 1200×630 <code>-og</code> crop for og:image) and <code>node scripts/apply-blog-art.mjs</code> (inserts poster / mid / final with alt, srcset, width/height; poster = LCP, eager + fetchpriority high), then <code>npm run build</code> (og:image size tags, JSON-LD ImageObjects, image sitemap, RSS enclosure, poster preload).</p>
+  <div class="grid" id="g-blog"></div>
   <p class="none muted" id="none" hidden>Nothing in this filter.</p>
 
   <div class="notes">
@@ -202,6 +205,7 @@
 
 <dialog id="dlg"><form method="dialog"><button>Close</button></form><img alt=""></dialog>
 
+<script src="scripts/blog-art-data.js"></script>
 <script>
   const FAV = `Pixel-art arcade joystick icon in a clean 32-bit retro style. Chunky, crisp, hand-placed pixels with no anti-aliasing and no blur. Bold 1-pixel dark outline (#0d0720) around every shape. Flat shading with exactly one highlight pixel-cluster per form and one darker shade for the shadow side. Soft neon rim glow shifting from magenta #ff2e93 to orange #ff8a3d on the upper-left edge only. Strict palette: deep purple #1a0b3b, red #e8334a, yellow #ffc933, blue #2f7bff, green #3ccf4e, plus the near-black outline. Single object, centered, orthogonal clarity, no text, no letters, no watermark, no signature, no UI frame.`;
   const SITE = `Stylish modern neon-arcade illustration that matches the ArcadeDeck website UI: a dark midnight-violet base #171424 with elevated panel tones #1f1b32 and #272240, electric cyan #00e5ff as the main light color, violet #7C3AED as the secondary glow, and rose #F43F5E as the warm accent for focal points. Polished indie-game look, comparable to Steam capsule art and itch.io featured banners. Soft bloom on light sources, bold clean shapes, simplified forms, strong silhouettes, subtle film grain, smooth gradients between violet and cyan, high contrast with one clear focal point, readable when shrunk to 360 px wide. Calm background, detail concentrated around the subject, rounded friendly shapes that echo the site's rounded cards. No text, no letters, no logos, no watermark, no signature.`;
@@ -210,10 +214,30 @@
 
 BACKGROUND: fully transparent background (real alpha channel, PNG or WebP). No floor, no ground plane, no reflection, no cast shadow, no backdrop gradient, no grid, no stars, no outer glow halo or bloom spilling outside the silhouette. Only the character and its handheld props, with a crisp clean edge that stays sharp on a dark #171424 page and on a light page.`;
 
+  const BLOG = SITE.replace(/ No text, no letters.*$/, '') + ' Editorial blog illustration, polished indie-game key art, painterly-smooth neon with clean shapes, one clear focal point.';
+  const BLOG_KIND = {
+    p: ['poster', 'POSTER', `FORMAT: 16:9 wide poster, 1600×900. A 1200×630 center crop must also work as a social image.
+TEXT: Exactly one piece of text in the whole image: the word "ArcadeDeck" (one word, capital A and D, rest lowercase) as a clean neon wordmark in the bottom-right corner, white-cyan with a soft glow, about 18% of the image width, inside a 4% margin. Perfectly spelled. No other text, letters, numbers or logos anywhere.
+COMPOSITION: Strong focal point on the left two thirds, dynamic diagonal, depth with foreground overlap. Keep the bottom-right area calm and dark so the wordmark reads.`],
+    m: ['mid', 'MID-POST ARTWORK', `FORMAT: 16:9, 1600×900. Supports the middle of the article: it should explain the idea visually, not repeat the poster.
+COMPOSITION: Calmer than the poster, one clear subject, generous negative space. No text, no letters, no numbers, no logos, no watermark.`],
+    f: ['final', 'FINAL ARTWORK', `FORMAT: 16:9, 1600×900. Closes the article: payoff, calm, inviting mood that points toward playing.
+COMPOSITION: Warm focal glow, simple balanced layout, wide breathing room. No text, no letters, no numbers, no logos, no watermark.`],
+  };
+  const BLOG_CARDS = Object.entries(window.BLOG_ART).flatMap(([slug, k]) => Object.entries(BLOG_KIND).map(([key, [name, label, fmt]]) => ({
+    id: `blog-${slug}-${name}`, img: `blog/${slug}-${name}.webp`, grid: 'blog', title: `${slug} — ${name}`, size: '1600×900', tag: key === 'p' ? 'wordmark bottom-right' : 'no text',
+    p: `[Blog style block]
+
+${label} for the ArcadeDeck blog post "${slug.replace(/-/g, ' ')}".
+SCENE: ${k[key].s}
+
+${fmt} --ar 16:9`,
+  })));
+
   const IMG_DIR = 'public/images/';
   const PREVIEW_DIR = 'art-previews/'; // fallback for cards without img: <id>.webp then .png
 
-  const STYLE = { '[Shared style block]': FAV, '[Site style block]': SITE, '[Mascot block]': MASCOT };
+  const STYLE = { '[Shared style block]': FAV, '[Site style block]': SITE, '[Mascot block]': MASCOT, '[Blog style block]': BLOG };
 
   // grid: fav | site. size is display only.
   const CARDS = [
@@ -451,6 +475,7 @@ POSE: Standing, body facing front, one arm stretched toward the viewer with a th
 USE: Success messages, saved, copied, sent, thank-you.
 COMPOSITION: Full body, centered, 10% margin. Square 1:1.` },
   ];
+  CARDS.push(...BLOG_CARDS);
 
   const $ = (s, r = document) => r.querySelector(s);
   const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; };
@@ -470,7 +495,7 @@ COMPOSITION: Full body, centered, 10% margin. Square 1:1.` },
 
   // style panels
   for (const [name, text, extra] of [
-    ['Favicon style block', FAV], ['Site style block', SITE], ['Mascot character lock + transparent background', MASCOT], ['Negative prompt (SDXL / Flux / Ideogram)', NEG],
+    ['Favicon style block', FAV], ['Site style block', SITE], ['Mascot character lock + transparent background', MASCOT], ['Blog style block (text allowed only in posters)', BLOG], ['Negative prompt (SDXL / Flux / Ideogram)', NEG],
   ]) {
     const p = el('div', 'panel');
     p.append(el('h3', '', name));

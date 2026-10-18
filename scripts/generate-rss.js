@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, statSync } from 'fs';
 
 const games = JSON.parse(readFileSync('src/data/games.json', 'utf-8'));
 const posts = JSON.parse(readFileSync('src/data/posts.json', 'utf-8'))
@@ -26,9 +26,14 @@ const items = posts.map((p) => {
   const relatedGame = (p.relatedGames || [])
     .map((s) => games.find((g) => g.slug === s))
     .find((g) => g);
-  const enclosureUrl = relatedGame
-    ? `${SITE}/${encodeURI(relatedGame.thumbnail)}`
-    : DEFAULT_IMAGE;
+  // Blog art (-og crop) beats the game thumbnail; real byte length when the file is on disk.
+  const cover = p.coverImage && /-og\.webp$/.test(p.coverImage) ? p.coverImage : null;
+  const enclosureUrl = cover
+    ? `${SITE}/${encodeURI(cover)}`
+    : relatedGame
+      ? `${SITE}/${encodeURI(relatedGame.thumbnail)}`
+      : DEFAULT_IMAGE;
+  const enclosureLength = cover && existsSync(`public/${cover}`) ? statSync(`public/${cover}`).size : 0;
   const categories = (p.tags || [])
     .map((t) => `      <category>${xmlEscape(t)}</category>`)
     .join('\n');
@@ -42,7 +47,7 @@ const items = posts.map((p) => {
 ${categories}
       <description>${cdata(p.excerpt)}</description>
       <content:encoded>${cdata(p.content)}</content:encoded>
-      <enclosure url="${enclosureUrl}" type="image/webp" length="0" />
+      <enclosure url="${enclosureUrl}" type="image/webp" length="${enclosureLength}" />
       <media:content url="${enclosureUrl}" medium="image" type="image/webp" />
     </item>`;
 });

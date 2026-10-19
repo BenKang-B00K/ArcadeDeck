@@ -4338,6 +4338,78 @@
         }
       ]
     },
-    "_comment": "Per-game canonical English. Translators mirror this in {lang}.json."
+    "_comment": "Per-game canonical English. Translators mirror this in {lang}.json.",
+    "50": {
+      "title": "Dungeon Adventure",
+      "description": "A dungeon crawler built from short, different rooms. Pick your route on a branching map, beat each room's mini-game on the beat, and chart the Singing Deep one tier at a time.",
+      "fullDescription": "\n      Dungeon Adventure is a **dungeon crawler made of short, different rooms**. You are a guild cartographer charting a dungeon that hums under the hills, and everything in it moves to the same beat. Each tier is one hand-drawn map sheet; reach its exit and the next sheet opens.\n      **The route is the strategy.** Every fork trades HP against reward: Monster and Dodge rooms pay the most gold but cost health, Puzzle rooms are safe but pay less, and Rest rooms heal. HP is one pool for the whole tier and healing is scarce, so choose where to bleed.\n      **Every room is a different game.** Time your Strike, Guard, Spell and Mend on the beat in a fight, dodge, pick locks, remember phrases, juggle, aim, ink and more, with a Guardian waiting at the end of each full route. Win relics, bank gold, and spend it at camp on Max HP and a third slot.\n      Play with **keyboard, gamepad or touch**, one tier in about 6 to 10 minutes. Your run saves as you go and a closed tab picks up where you left it. How deep can you go?\n    ",
+      "controls": "D / F / J / K: Strike, Guard, Spell, Mend · W A S D or Arrows: Move · Space / Shift: Dash · Enter / Space: Confirm · Esc / P: Pause · Gamepad and touch buttons supported",
+      "scoreLabel": "Deepest tier",
+      "tips": "Fights are about **timing, not speed**: press on the beat for a Perfect. Check the map before every fork; a **Rest room** can be worth more than a gold-rich fight at low HP. The first defeat is a tip, the second offers **Assist mode** (wider timing windows, same rewards). Spend your first gold at camp on **Max HP**. Settings has a **timing calibration** if your hits feel early or late.",
+      "lore": "\n      Under the hills a dungeon hums, and everything in it moves to that beat: the guardians, the traps, even the dripping water. The guild sent a cartographer to chart it one sheet at a time.\n      Every sheet is a tier, every exit reached goes into the atlas, and the deepest sheet is the score. Nobody has found the bottom of the Singing Deep yet.\n    ",
+      "features": [
+        "Branching Tier Maps Where the Route Is the Strategy",
+        "27 Different Room Mini-Games: Fights, Dodge, Puzzles, Aim, Ink and More",
+        "Guardian Bosses With Multiple Phases at the End of Each Route",
+        "26 Relics and Camp Upgrades Between Runs",
+        "Keyboard, Gamepad and Touch Controls With Remapping",
+        "Assist Mode, Timing Calibration, Reduce Motion and Screen Shake Options",
+        "English, Korean and Japanese",
+        "Saves Automatically — Plays Offline on Phone, Tablet and Desktop"
+      ],
+      "objectives": "Reach the exit of each tier to open the next, and chart as deep as you can. Your ArcadeDeck best is the **deepest tier** you have reached. Defeat a tier's **Guardian** to master it and win a relic. Gold banked at camp buys permanent upgrades.",
+      "controlsTable": [
+        {
+          "key": "D · F · J · K",
+          "action": "Strike · Guard · Spell · Mend, pressed on the beat in fights"
+        },
+        {
+          "key": "W A S D · Arrow keys",
+          "action": "Move and pick a route on the map"
+        },
+        {
+          "key": "Space · Shift",
+          "action": "Dash"
+        },
+        {
+          "key": "Enter · Space",
+          "action": "Confirm"
+        },
+        {
+          "key": "Esc · P",
+          "action": "Pause (shows the seed)"
+        },
+        {
+          "key": "Gamepad",
+          "action": "Full support; button hints match your pad (Xbox, PlayStation, Nintendo)"
+        },
+        {
+          "key": "Touch",
+          "action": "On-screen buttons and drags in every room"
+        }
+      ],
+      "faq": [
+        {
+          "q": "What is Dungeon Adventure?",
+          "a": "A dungeon crawler of short, different rooms. You pick a route through a branching map and clear each room with its own mini-game: timed fights, dodging, puzzles, aiming and more. Reaching a tier's exit opens the next one."
+        },
+        {
+          "q": "How long is a run?",
+          "a": "About 6 to 10 minutes per tier. Progress saves automatically, so you can stop any time and pick up later."
+        },
+        {
+          "q": "Is it too hard to start?",
+          "a": "The first tier uses a fixed, gentle map and teaches as you go. After a second defeat the game offers Assist mode, which widens timing windows and slows threats without changing rewards."
+        },
+        {
+          "q": "Can I play with a gamepad or on a phone?",
+          "a": "Yes. Keyboard, gamepad and touch all work in every room, and keys can be remapped in Settings."
+        },
+        {
+          "q": "Does it work offline?",
+          "a": "Yes. After the first load the game keeps a copy and opens without a connection."
+        }
+      ]
+    }
   }
 }

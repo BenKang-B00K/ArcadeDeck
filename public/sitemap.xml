@@ -1245,6 +1245,33 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/trick-or-lose" />
   </url>
   <url>
+    <loc>https://arcadedeck.net/play/dungeon-adventure</loc>
+    <lastmod>2026-10-19</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/dungeon-adventure" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/dungeon-adventure" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/dungeon-adventure" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/dungeon-adventure" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ja/play/dungeon-adventure</loc>
+    <lastmod>2026-10-19</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/dungeon-adventure" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/dungeon-adventure" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/dungeon-adventure" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/dungeon-adventure" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ko/play/dungeon-adventure</loc>
+    <lastmod>2026-10-19</lastmod>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/play/dungeon-adventure" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/play/dungeon-adventure" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/play/dungeon-adventure" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/play/dungeon-adventure" />
+  </url>
+  <url>
     <loc>https://arcadedeck.net/genre/action</loc>
     <lastmod>2026-10-06</lastmod>
     <priority>0.7</priority>
@@ -1405,6 +1432,33 @@
     <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/party" />
     <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/genre/party" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/genre/party" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/genre/puzzle</loc>
+    <lastmod>2026-10-19</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/puzzle" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/puzzle" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/genre/puzzle" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/genre/puzzle" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ja/genre/puzzle</loc>
+    <lastmod>2026-10-19</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/puzzle" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/puzzle" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/genre/puzzle" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/genre/puzzle" />
+  </url>
+  <url>
+    <loc>https://arcadedeck.net/ko/genre/puzzle</loc>
+    <lastmod>2026-10-19</lastmod>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://arcadedeck.net/genre/puzzle" />
+    <xhtml:link rel="alternate" hreflang="ja" href="https://arcadedeck.net/ja/genre/puzzle" />
+    <xhtml:link rel="alternate" hreflang="ko" href="https://arcadedeck.net/ko/genre/puzzle" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://arcadedeck.net/genre/puzzle" />
   </url>
   <url>
     <loc>https://arcadedeck.net/genre/pvp</loc>
@@ -1575,7 +1629,7 @@
   </url>
   <url>
     <loc>https://arcadedeck.net/patchnote</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-10-19</lastmod>
     <priority>0.6</priority>
   </url>
   <url>

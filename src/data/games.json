@@ -1065,5 +1065,29 @@
     "platform": "BOTH",
     "isOriginal": true,
     "badge": "NEW"
+  },
+  {
+    "id": "50",
+    "slug": "dungeon-adventure",
+    "language": "EN/KO/JA",
+    "thumbnail": "images/dungeon-adventure.webp",
+    "genres": [
+      "Roguelike",
+      "Action",
+      "Puzzle"
+    ],
+    "gameUrl": "https://games.arcadedeck.net/dungeon-adventure/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "platform": "BOTH",
+    "isOriginal": true,
+    "badge": "NEW",
+    "scoreTiers": [
+      1,
+      3,
+      6,
+      10,
+      15
+    ]
   }
 ]

@@ -41,7 +41,8 @@ for (const g of games) {
 const names = [...seen].filter(([, n]) => n === 1).map(([k]) => k).sort((a, b) => b.length - a.length);
 const toPattern = (k: string) =>
   k.split(/\s+/).map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + 's?').join('\\s*');
-const GAME_RE = names.length ? new RegExp(`\\b(?:${names.map(toPattern).join('|')})\\b`, 'gi') : null;
+// (?!\w) closes a title, not \b: a title may end in "?" ("Are You Trickster?"), and \b never matches after it
+const GAME_RE = names.length ? new RegExp(`\\b(?:${names.map(toPattern).join('|')})(?!\\w)`, 'gi') : null;
 const exact = names.map((k) => [k, new RegExp(`^${toPattern(k)}$`, 'i')] as const);
 
 const linkGames = (text: string): React.ReactNode[] => {
@@ -84,7 +85,7 @@ const splitItems = (s: string): string[] => {
 // "New game: Flux Tower Defense … : …") heads a group; the items after it
 // nest under it until the next head. Items before the first head stay flat.
 interface Item { text: string; head: boolean; sub: string[] }
-const HEAD_RE = names.length ? new RegExp(`^(?:new game: )?(?:${names.map(toPattern).join('|')})\\b[^:]*:`, 'i') : null;
+const HEAD_RE = names.length ? new RegExp(`^(?:new game: )?(?:${names.map(toPattern).join('|')})(?!\\w)[^:]*:`, 'i') : null;
 const group = (items: string[]): Item[] => {
   const out: Item[] = [];
   for (const text of items) {

@@ -1,0 +1,527 @@
+{
+ "1": {
+  "group": "push",
+  "en": {
+   "name": "Nudge",
+   "text": "Choose another player's token. It moves 1 step forward."
+  },
+  "ko": {
+   "name": "톡",
+   "text": "다른 플레이어의 말 하나를 앞으로 1칸 이동시킵니다."
+  },
+  "ja": {
+   "name": "ちょん",
+   "text": "他のプレイヤーのコマを1つ選び、1マス前に進めます。"
+  }
+ },
+ "2": {
+  "group": "push",
+  "en": {
+   "name": "Shove",
+   "text": "Choose another player's token. It moves 2 steps forward."
+  },
+  "ko": {
+   "name": "쿡",
+   "text": "다른 플레이어의 말 하나를 앞으로 2칸 이동시킵니다."
+  },
+  "ja": {
+   "name": "どん",
+   "text": "他のプレイヤーのコマを1つ選び、2マス前に進めます。"
+  }
+ },
+ "3": {
+  "group": "push",
+  "en": {
+   "name": "Push",
+   "text": "Choose another player's token. It moves 3 steps forward."
+  },
+  "ko": {
+   "name": "쑥",
+   "text": "다른 플레이어의 말 하나를 앞으로 3칸 이동시킵니다."
+  },
+  "ja": {
+   "name": "ぐいっ",
+   "text": "他のプレイヤーのコマを1つ選び、3マス前に進めます。"
+  }
+ },
+ "4": {
+  "group": "push",
+  "en": {
+   "name": "Heave",
+   "text": "Choose another player's token. It moves 4 steps forward."
+  },
+  "ko": {
+   "name": "퍽",
+   "text": "다른 플레이어의 말 하나를 앞으로 4칸 이동시킵니다."
+  },
+  "ja": {
+   "name": "ぐぐっ",
+   "text": "他のプレイヤーのコマを1つ選び、4マス前に進めます。"
+  }
+ },
+ "5": {
+  "group": "push",
+  "en": {
+   "name": "Launch",
+   "text": "Choose another player's token. It moves 5 steps forward."
+  },
+  "ko": {
+   "name": "쾅",
+   "text": "다른 플레이어의 말 하나를 앞으로 5칸 이동시킵니다."
+  },
+  "ja": {
+   "name": "ロケット",
+   "text": "他のプレイヤーのコマを1つ選び、5マス前に進めます。"
+  }
+ },
+ "6": {
+  "group": "pull",
+  "en": {
+   "name": "Tug",
+   "text": "Choose another player's token. It moves 2 steps backward (stops at Start)."
+  },
+  "ko": {
+   "name": "끌어당기기",
+   "text": "다른 플레이어의 말 하나를 뒤로 2칸 이동시킵니다. 시작 칸에서 멈춥니다."
+  },
+  "ja": {
+   "name": "ひっぱる",
+   "text": "他のプレイヤーのコマを1つ選び、2マス戻します。スタートで止まります。"
+  }
+ },
+ "7": {
+  "group": "pull",
+  "en": {
+   "name": "Haul",
+   "text": "Choose another player's token. It moves 4 steps backward (stops at Start)."
+  },
+  "ko": {
+   "name": "질질 끌기",
+   "text": "다른 플레이어의 말 하나를 뒤로 4칸 이동시킵니다. 시작 칸에서 멈춥니다."
+  },
+  "ja": {
+   "name": "ずるずる",
+   "text": "他のプレイヤーのコマを1つ選び、4マス戻します。スタートで止まります。"
+  }
+ },
+ "8": {
+  "group": "pull",
+  "en": {
+   "name": "Go Home",
+   "text": "Choose another player's token. It goes to Start. No item is granted."
+  },
+  "ko": {
+   "name": "집으로!",
+   "text": "다른 플레이어의 말 하나를 시작 칸으로 보냅니다. 아이템은 받지 못합니다."
+  },
+  "ja": {
+   "name": "おうちへ!",
+   "text": "他のプレイヤーのコマを1つ選び、スタートへ送ります。アイテムは手に入りません。"
+  }
+ },
+ "9": {
+  "group": "self",
+  "en": {
+   "name": "Skip Ahead",
+   "text": "One of your tokens moves 3 steps forward."
+  },
+  "ko": {
+   "name": "성큼성큼",
+   "text": "내 말 하나를 앞으로 3칸 이동시킵니다."
+  },
+  "ja": {
+   "name": "スキップ",
+   "text": "自分のコマを1つ、3マス前に進めます。"
+  }
+ },
+ "10": {
+  "group": "self",
+  "en": {
+   "name": "Big Leap",
+   "text": "One of your tokens moves 5 steps forward."
+  },
+  "ko": {
+   "name": "대도약",
+   "text": "내 말 하나를 앞으로 5칸 이동시킵니다."
+  },
+  "ja": {
+   "name": "大ジャンプ",
+   "text": "自分のコマを1つ、5マス前に進めます。"
+  }
+ },
+ "11": {
+  "group": "self",
+  "en": {
+   "name": "Swap Seats",
+   "text": "Swap places between one of your tokens and another player's token on the path."
+  },
+  "ko": {
+   "name": "자리 바꾸기",
+   "text": "내 말 하나와 다른 플레이어의 말 하나(길 위)의 자리를 서로 바꿉니다."
+  },
+  "ja": {
+   "name": "席替え",
+   "text": "自分のコマ1つと、道の上にある他のプレイヤーのコマ1つの場所を入れ替えます。"
+  }
+ },
+ "12": {
+  "group": "board",
+  "en": {
+   "name": "Wake Up",
+   "text": "Choose an Empty tile and a type (Question, Yes/No or Adverb). It becomes a tile of that type."
+  },
+  "ko": {
+   "name": "깨어나라!",
+   "text": "빈 칸 하나와 만들 종류(질문, 예/아니요, 부사)를 고릅니다. 그 칸이 해당 종류의 칸이 됩니다."
+  },
+  "ja": {
+   "name": "めざめよ!",
+   "text": "空きマスと種類(質問・はい/いいえ・副詞)を選びます。そのマスが選んだ種類になります。"
+  }
+ },
+ "13": {
+  "group": "board",
+  "en": {
+   "name": "Hush",
+   "text": "Choose a Question, Yes/No or Adverb tile. It becomes an Empty tile."
+  },
+  "ko": {
+   "name": "쉿!",
+   "text": "질문 칸, 예/아니요 칸, 부사 칸 중 하나를 고릅니다. 그 칸이 빈 칸이 됩니다."
+  },
+  "ja": {
+   "name": "しーっ!",
+   "text": "質問・はい/いいえ・副詞のマスを1つ選びます。そのマスが空きマスになります。"
+  }
+ },
+ "14": {
+  "group": "board",
+  "en": {
+   "name": "Trade Places",
+   "text": "Choose one Empty tile and one card tile (Question, Yes/No or Adverb). They swap types."
+  },
+  "ko": {
+   "name": "자리 맞교환",
+   "text": "빈 칸 하나와 카드 칸(질문, 예/아니요, 부사) 하나를 고릅니다. 두 칸의 종류가 서로 바뀝니다."
+  },
+  "ja": {
+   "name": "トレード",
+   "text": "空きマス1つとカードマス1つを選びます。2つのマスの種類が入れ替わります。"
+  }
+ },
+ "15": {
+  "group": "board",
+  "en": {
+   "name": "Treasure Map",
+   "text": "Choose an Empty tile. It becomes a Treasure tile."
+  },
+  "ko": {
+   "name": "보물 지도",
+   "text": "빈 칸 하나를 고릅니다. 그 칸이 보물 칸이 됩니다."
+  },
+  "ja": {
+   "name": "宝の地図",
+   "text": "空きマスを1つ選びます。そのマスが宝マスになります。"
+  }
+ },
+ "16": {
+  "group": "board",
+  "en": {
+   "name": "Switch Points",
+   "text": "Choose a Fork. Its Even and Odd directions swap."
+  },
+  "ko": {
+   "name": "길 바꾸기",
+   "text": "갈림길 하나를 고릅니다. 짝수 방향과 홀수 방향이 서로 바뀝니다."
+  },
+  "ja": {
+   "name": "ポイント切替",
+   "text": "分かれ道を1つ選びます。偶数と奇数の向きが入れ替わります。"
+  }
+ },
+ "17": {
+  "group": "board",
+  "en": {
+   "name": "Roadblock",
+   "text": "Choose a shortcut. Until your next turn it acts as an Empty tile."
+  },
+  "ko": {
+   "name": "길 막기",
+   "text": "지름길 하나를 고릅니다. 내 다음 차례까지 그 지름길은 빈 칸처럼 작동합니다."
+  },
+  "ja": {
+   "name": "通行止め",
+   "text": "近道を1つ選びます。次の自分の番まで、その近道は空きマスとして扱われます。"
+  }
+ },
+ "18": {
+  "group": "item",
+  "en": {
+   "name": "Mirror Gift",
+   "text": "Take a MIRROR item. If you hold another item, choose Swap or Keep."
+  },
+  "ko": {
+   "name": "거울 선물",
+   "text": "거울 아이템을 받습니다. 다른 아이템이 있으면 바꿀지 유지할지 고릅니다."
+  },
+  "ja": {
+   "name": "ミラーの贈り物",
+   "text": "ミラーを受け取ります。別のアイテムを持っているなら、交換か維持を選びます。"
+  }
+ },
+ "19": {
+  "group": "item",
+  "en": {
+   "name": "Goal Mover Gift",
+   "text": "Take a MOVE GOAL item. If you hold another item, choose Swap or Keep."
+  },
+  "ko": {
+   "name": "목표 이동 선물",
+   "text": "목표 이동 아이템을 받습니다. 다른 아이템이 있으면 바꿀지 유지할지 고릅니다."
+  },
+  "ja": {
+   "name": "ゴール移動の贈り物",
+   "text": "ゴール移動を受け取ります。別のアイテムを持っているなら、交換か維持を選びます。"
+  }
+ },
+ "20": {
+  "group": "item",
+  "en": {
+   "name": "Lucky Draw",
+   "text": "Roll a random item (50 / 50). Swap / Keep rules apply."
+  },
+  "ko": {
+   "name": "행운의 뽑기",
+   "text": "아이템을 무작위로 뽑습니다(50:50). 바꾸기/유지 규칙을 따릅니다."
+  },
+  "ja": {
+   "name": "ラッキードロー",
+   "text": "アイテムをランダムに1つ引きます(50:50)。交換/維持のルールに従います。"
+  }
+ },
+ "21": {
+  "group": "item",
+  "en": {
+   "name": "Pickpocket",
+   "text": "Take another player's item. If you hold one, you give yours in exchange."
+  },
+  "ko": {
+   "name": "소매치기",
+   "text": "다른 플레이어의 아이템을 가져옵니다. 내 아이템이 있다면 대신 건네줍니다."
+  },
+  "ja": {
+   "name": "スリ",
+   "text": "他のプレイヤーのアイテムを奪います。自分も持っているなら、代わりに渡します。"
+  }
+ },
+ "22": {
+  "group": "item",
+  "en": {
+   "name": "Item Swap",
+   "text": "Swap items with another player (either may hold none)."
+  },
+  "ko": {
+   "name": "아이템 교환",
+   "text": "다른 플레이어와 아이템을 서로 바꿉니다. 아이템이 없어도 됩니다."
+  },
+  "ja": {
+   "name": "アイテム交換",
+   "text": "他のプレイヤーとアイテムを交換します。どちらも持っていなくてもかまいません。"
+  }
+ },
+ "23": {
+  "group": "item",
+  "en": {
+   "name": "Item Burn",
+   "text": "Choose another player. They discard their item."
+  },
+  "ko": {
+   "name": "아이템 태우기",
+   "text": "다른 플레이어를 고릅니다. 그 플레이어는 아이템을 버립니다."
+  },
+  "ja": {
+   "name": "アイテム焼却",
+   "text": "他のプレイヤーを1人選びます。そのプレイヤーはアイテムを捨てます。"
+  }
+ },
+ "24": {
+  "group": "tempo",
+  "en": {
+   "name": "Lucky Charm",
+   "text": "Your tokens cannot be caught until your next turn."
+  },
+  "ko": {
+   "name": "행운의 부적",
+   "text": "내 다음 차례까지 내 말은 잡히지 않습니다."
+  },
+  "ja": {
+   "name": "幸運のお守り",
+   "text": "次の自分の番まで、自分のコマはつかまりません。"
+  }
+ },
+ "25": {
+  "group": "tempo",
+  "en": {
+   "name": "Second Wind",
+   "text": "Take an extra turn right after this one."
+  },
+  "ko": {
+   "name": "한 번 더",
+   "text": "이번 차례 직후에 한 번 더 차례를 가집니다(주사위는 그대로 공정합니다)."
+  },
+  "ja": {
+   "name": "もう一回",
+   "text": "この番の直後に、もう一度番が回ってきます。"
+  }
+ },
+ "26": {
+  "group": "tempo",
+  "en": {
+   "name": "Freeze",
+   "text": "Choose another player. They skip their next turn."
+  },
+  "ko": {
+   "name": "얼음!",
+   "text": "다른 플레이어를 고릅니다. 그 플레이어는 다음 차례를 건너뜁니다."
+  },
+  "ja": {
+   "name": "フリーズ!",
+   "text": "他のプレイヤーを1人選びます。そのプレイヤーは次の番を休みます。"
+  }
+ },
+ "27": {
+  "group": "tempo",
+  "en": {
+   "name": "Pick & Play",
+   "text": "Draw 2 more Treasure cards. Use one, discard the other."
+  },
+  "ko": {
+   "name": "골라 쓰기",
+   "text": "보물 카드를 2장 더 뽑아 하나는 사용하고 하나는 버립니다."
+  },
+  "ja": {
+   "name": "選んで使う",
+   "text": "宝カードをさらに2枚引き、1枚を使って、もう1枚を捨てます。"
+  }
+ },
+ "28": {
+  "group": "social",
+  "en": {
+   "name": "Spotlight",
+   "text": "Choose another player. They answer a Question card out loud; no penalty, no retry."
+  },
+  "ko": {
+   "name": "스포트라이트",
+   "text": "다른 플레이어를 고릅니다. 그 플레이어는 질문 카드 한 장에 소리 내어 답합니다. 벌칙도, 재도전도 없습니다."
+  },
+  "ja": {
+   "name": "スポットライト",
+   "text": "他のプレイヤーを1人選びます。そのプレイヤーは質問カードに声に出して答えます。ペナルティも再挑戦もありません。"
+  }
+ },
+ "29": {
+  "group": "social",
+  "en": {
+   "name": "Applause",
+   "text": "Draw a Yes/No card. Everyone else guesses your answer, then you answer. Move 1 step forward per correct guess."
+  },
+  "ko": {
+   "name": "박수 갈채",
+   "text": "예/아니요 카드를 한 장 뽑습니다. 다른 모든 플레이어가 나의 대답을 맞혀 본 뒤, 내가 답합니다. 맞힌 플레이어 한 명당 앞으로 1칸 이동합니다."
+  },
+  "ja": {
+   "name": "拍手喝采",
+   "text": "はい/いいえカードを1枚引きます。他の全員があなたの答えを当て、そのあとあなたが答えます。当たった人数だけ1マスずつ前へ進みます。"
+  }
+ },
+ "30": {
+  "group": "meta",
+  "en": {
+   "name": "Encore",
+   "text": "Copy the top card of the Treasure discard pile and use it. If the pile is empty, draw again."
+  },
+  "ko": {
+   "name": "앙코르",
+   "text": "보물 버린 더미의 맨 위 카드를 똑같이 사용합니다. 더미가 비었으면 한 장 더 뽑습니다."
+  },
+  "ja": {
+   "name": "アンコール",
+   "text": "宝の捨て札の一番上のカードをそのまま使います。捨て札がなければもう1枚引きます。"
+  }
+ },
+ "31": {
+  "group": "link",
+  "en": {
+   "name": "Tag Team",
+   "text": "Choose one of your tokens and one opposing token on the path. Until your next turn, when either one moves forward or back, the other moves the same number of steps (if it can)."
+  },
+  "ko": {
+   "name": "짝꿍",
+   "text": "내 말 하나와 길 위의 다른 플레이어 말 하나를 고릅니다. 내 다음 차례까지 한쪽이 앞이나 뒤로 움직이면 다른 쪽도 같은 칸 수만큼 따라 움직입니다(움직일 수 있다면)."
+  },
+  "ja": {
+   "name": "タッグ",
+   "text": "自分のコマ1つと、道の上にある他のプレイヤーのコマ1つを選びます。次の自分の番まで、どちらかが前や後ろに動くと、もう一方も同じマス数だけ動きます(動けるなら)。"
+  }
+ },
+ "32": {
+  "group": "time",
+  "en": {
+   "name": "Rewind",
+   "text": "Every token not on a GOAL goes back to where it stood at the start of your previous turn (a token caught since comes back too). Nothing happens on your first turn."
+  },
+  "ko": {
+   "name": "되감기",
+   "text": "목표 칸에 있지 않은 모든 말이 내 이전 차례가 시작될 때의 자리로 돌아갑니다(그사이 잡힌 말도 돌아옵니다). 내 첫 차례에는 아무 일도 일어나지 않습니다."
+  },
+  "ja": {
+   "name": "巻き戻し",
+   "text": "ゴールにいるコマ以外の全員が、あなたの前の番の始まりにいた場所へ戻ります(その間につかまったコマも戻ります)。最初の番では何も起こりません。"
+  }
+ },
+ "33": {
+  "group": "hazard",
+  "en": {
+   "name": "Hot Potato",
+   "text": "Put a fuse on any token on the path. A token that lands on the carrier takes the fuse. After 3 turns of the carrier's owner, it blows and the carrier goes back home. A token on a GOAL is safe."
+  },
+  "ko": {
+   "name": "뜨거운 감자",
+   "text": "길 위의 말 하나에 도화선을 붙입니다. 그 말 위에 멈춘 말이 도화선을 넘겨받습니다. 주인의 차례가 3번 시작되면 터져서 그 말은 집으로 돌아갑니다. 목표 칸에 들어간 말은 안전합니다."
+  },
+  "ja": {
+   "name": "ホットポテト",
+   "text": "道の上のコマ1つに導火線をつけます。そのコマの上に止まったコマが導火線を引き継ぎます。持ち主の番が3回始まると爆発して、そのコマは家へ戻ります。ゴールに着いたコマは安全です。"
+  }
+ },
+ "34": {
+  "group": "tempo",
+  "en": {
+   "name": "Call Your Shot",
+   "text": "At the start of your next turn, before you roll, call a number from 1 to 6 (or play it Safe). Roll it and you move that number +4. Miss and you move only 1 step. Safe: no bet."
+  },
+  "ko": {
+   "name": "콜 샷",
+   "text": "다음 내 차례가 시작될 때, 주사위를 굴리기 전에 1~6 중 숫자를 부릅니다(또는 안전). 그 숫자가 나오면 나온 눈에 +4칸을 더 이동하고, 틀리면 1칸만 이동합니다. 안전: 내기를 하지 않습니다."
+  },
+  "ja": {
+   "name": "予言ショット",
+   "text": "次の自分の番の最初、ダイスを振る前に、1〜6の数字を宣言します(または安全)。その目が出れば出た目+4マス進み、外れると1マスだけ進みます。安全: 賭けません。"
+  }
+ },
+ "35": {
+  "group": "board",
+  "en": {
+   "name": "Tripwire",
+   "text": "Choose an Empty tile. Until your next turn, any token that reaches it stops there and answers a Question. Fail and it goes back 2 steps."
+  },
+  "ko": {
+   "name": "함정 줄",
+   "text": "빈 칸 하나를 고릅니다. 내 다음 차례까지 그 칸에 닿는 말은 거기서 멈추고 질문에 답해야 합니다. 틀리면 2칸 뒤로 물러납니다."
+  },
+  "ja": {
+   "name": "仕掛け糸",
+   "text": "空きマスを1つ選びます。次の自分の番まで、そのマスに届いたコマはそこで止まり、質問に答えます。外れると2マス戻ります。"
+  }
+ }
+}

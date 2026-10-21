@@ -4410,6 +4410,80 @@
           "a": "Yes. After the first load the game keeps a copy and opens without a connection."
         }
       ]
+    },
+    "51": {
+      "title": "Who Are You?",
+      "description": "A get-to-know-you party board game for 2–6 players: roll, move your tokens and answer the Question, Yes/No or Adverb card you land on. Friends judge the answer; get all your tokens into a GOAL.",
+      "fullDescription": "\n      Who Are You? is a **party board game for 2 to 6 players** about getting to know each other. Roll the die, move one of your tokens along the path and answer the card on the tile you land on: a **Question** to answer out loud, a **Yes / No** card with a detail to explain, or an **Adverb** to describe one of your habits with. The others tap Good or Try again. A Question gets one retry; miss it twice and your token goes back.\n      Get all your tokens onto a GOAL to finish. Four boards play differently: **Ice Breaking** has one GOAL and no catching, **Infinite** is a figure-eight with four GOALs, and on Boomerang and Crossroads every player has their own gate and GOAL. Land on another player's token to send it back and roll again, and draw from **35 Treasure cards** that push, pull, swap, freeze or set a Hot Potato fuse.\n      Pick a card pack: Classic for everyday party prompts, **Icebreaker** for new teams and first meetings, or Deep for close friends, all in English, Korean and Japanese. Play on **one device passed around the table**, or **link phones**: each player rolls, picks a token and answers on their own phone while the board plays on the host's screen. The game saves at the start of every turn.\n    ",
+      "controls": "Roll / Space: Roll the die · 1–6: Enter a real die's roll · Tap a token or its marker (← → + Enter): Move that token · Good / Try again: Judge the answer · Tap the card: Continue · Play on phones: Host or join with a 4-letter code · ☰ / Esc: Pause · ?: Fold the rule plaque",
+      "tips": "Read the **1–6 markers** before you roll: they show where each token would land and which roll catches someone. A token waiting on its **gate needs a 6**, so keep another token moving instead of waiting. On Infinite, hold on to a **Mirror**: it bounces the next catch back. New group? Start with **Ice Breaking** and the **Icebreaker** pack.",
+      "features": [
+        "Party Board Game for 2–6 Players",
+        "Question, Yes/No and Adverb Cards in 3 Packs",
+        "Four Boards: Ice Breaking, Infinite, Boomerang, Crossroads",
+        "35 Treasure Cards: Push, Pull, Swap, Freeze, Hot Potato",
+        "Phone Link: Each Player Rolls and Answers on Their Own Phone",
+        "Virtual 3D Die or Your Own Real Die",
+        "English, Korean and Japanese, Six Fonts incl. OpenDyslexic",
+        "Saves Every Turn — Phone, Tablet and Desktop"
+      ],
+      "objectives": "There is no score. Each turn you roll, move one token and answer the card you land on. The game ends when every player but the last has all their tokens on GOAL tiles; the recap shows the finishing order and a few fun facts, like who caught the most tokens.",
+      "controlsTable": [
+        {
+          "key": "Roll · Space",
+          "action": "Roll the virtual die"
+        },
+        {
+          "key": "1–6",
+          "action": "Real die mode: tap the number you rolled"
+        },
+        {
+          "key": "Tap a token or its marker · ← → + Enter",
+          "action": "Move that token"
+        },
+        {
+          "key": "Good · Try again",
+          "action": "Judge the answer on the Card Stage"
+        },
+        {
+          "key": "Tap the card",
+          "action": "Continue; a Treasure card plays its effect"
+        },
+        {
+          "key": "Play on phones",
+          "action": "Host a room or join one with a 4-letter code"
+        },
+        {
+          "key": "☰ · Esc · ?",
+          "action": "Pause · fold the rule plaque"
+        }
+      ],
+      "faq": [
+        {
+          "q": "What is Who Are You?",
+          "a": "A party board game for 2–6 players who want to learn something new about each other. You move tokens around a board and answer the Question, Yes/No or Adverb card on the tile you land on."
+        },
+        {
+          "q": "Can everyone use their own phone?",
+          "a": "Yes. Tap Play on phones on the host device, choose Host and share the 4-letter code. The others join, pick their name, and roll, move and answer on their own phone; the board, cards and turns stay in step with the host's screen. Players without a phone keep playing on the host's device."
+        },
+        {
+          "q": "Do I need a real die?",
+          "a": "No. The virtual 3D die is fair. In Real die mode you roll your own die and tap the number."
+        },
+        {
+          "q": "Which card pack should we pick?",
+          "a": "Classic for everyday party prompts, Icebreaker for new teams and first meetings (work-safe), and Deep for close friends (more reflective, still all-ages)."
+        },
+        {
+          "q": "Does it save?",
+          "a": "Yes. It saves at the start of every turn, and Continue on the title screen picks up where you left off."
+        },
+        {
+          "q": "Which languages does it support?",
+          "a": "English, Korean and Japanese, including every card."
+        }
+      ]
     }
   }
 }

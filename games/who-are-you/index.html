@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script src="/perf.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#1a0d38">
+<title>Who Are You?</title>
+<link rel="icon" type="image/webp" href="art/tokens/round-blue-3q.webp">
+<!-- phone link (Host / Join), shared with the other ArcadeDeck co-op games -->
+<script src="./coop.js" defer></script>
+<script>/* offline play: games.arcadedeck.net/sw.js (shared, one cache per game) */if('serviceWorker'in navigator&&location.protocol.startsWith('http'))addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js',{scope:'./'}).then(()=>navigator.serviceWorker.ready).then(r=>r.active&&r.active.postMessage([location.origin+location.pathname,...performance.getEntriesByType('resource').map(e=>e.name)])).catch(()=>{})})</script>
+  <script type="module" crossorigin src="./assets/index-B4rU2Hut.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-Bz4eG-eI.css">
+</head>
+<body>
+<div id="app"></div>
+</body>
+</html>

@@ -1089,5 +1089,23 @@
       10,
       15
     ]
+  },
+  {
+    "id": "51",
+    "slug": "who-are-you",
+    "language": "EN/KO/JA",
+    "thumbnail": "images/who-are-you.webp",
+    "genres": [
+      "Party",
+      "Casual",
+      "Local Co-op"
+    ],
+    "players": [2, 6],
+    "gameUrl": "https://games.arcadedeck.net/who-are-you/",
+    "aspectRatio": "16/9",
+    "status": "PLAYABLE",
+    "platform": "BOTH",
+    "isOriginal": true,
+    "badge": "NEW"
   }
 ]
